@@ -1,0 +1,29 @@
+@import "../../assets/styles/axis-style-override";
+
+.drawer-closed {
+  .control-panel {
+    width: 0;
+    min-width: 0px;
+  }
+}
+
+.control-panel {
+  flex-direction:column;
+  display: flex;
+  flex: 1 auto;
+  order: 1;
+  overflow-y: scroll;
+  min-width: 400px;
+  border-right: 0.5px solid #D0D8DB;
+  .card-title {
+    padding: 2px;
+  }
+  //slider settings
+  @extend %axis-override;
+}
+
+@media only screen and (max-width: 800px) {
+  .control-panel {
+    max-width: 370px;
+  }
+}

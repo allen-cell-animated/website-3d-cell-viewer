@@ -1,0 +1,49 @@
+%axis-override {
+    //slider settings
+    .noUi-handle,
+    .noUi-horizontal .noUi-handle {
+        box-shadow: none;
+        box-sizing: border-box;
+        position: absolute;
+        cursor: pointer;
+        pointer-events: inherit;
+        top: 0px;
+        left: 4.94876%;
+        z-index: 1;
+        margin: 1px 0px 0px;
+        width: 12px;
+        height: 12px;
+        background-color: rgb(11, 154, 171);
+        background-clip: padding-box;
+        border: 0px solid transparent;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: background 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, border-color 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, width 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, height 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+        overflow: visible;
+        outline: none;
+    }
+
+    .noUi-horizontal {
+        height: 2px;
+    }
+
+    .axis-slider .noUi-horizontal {
+        height: 4px;
+    }
+
+    .noUi-target {
+        border: none;
+    }
+
+    .axis-slider .noUi-handle:before,
+    .noUi-handle:before,
+    .noUi-handle:after,
+    [disabled].axis-slider .noUi-handle:after,
+    .noUi-handle:after,
+    .axis-slider .noUi-handle:after,
+    .noUi-handle:after,
+    .noUi-handle:before {
+        display: none;
+        content: none;
+    }
+}
