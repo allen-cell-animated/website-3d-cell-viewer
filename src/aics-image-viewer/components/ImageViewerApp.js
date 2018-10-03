@@ -14,9 +14,10 @@ import UtilsService from '../shared/utils/utilsService';
 import { ViewMode } from '../shared/enums/viewModeEnum';
 import {
   CELL_ID_QUERY,
+  CELL_LINE_QUERY,
   FOV_ID_QUERY,
+  IMAGE_NAME_QUERY,
   LEGACY_IMAGE_ID_QUERY,
-  O_KEY_CODE,
   LEGACY_DOWNLOAD_SERVER,
   DOWNLOAD_SERVER,
   LEGACY_IMAGE_SERVER,
@@ -115,13 +116,8 @@ export default class ImageViewerApp extends React.Component {
   handleOpenImageResponse(resp, queryType, imageDirectory) {
     if (resp.data.status === OK_STATUS) {
 
-      const queryInputType = queryType;
-      this.updateURLSearchParams(imageDirectory, queryInputType);
-
       this.setState({
         currentlyLoadedImagePath: imageDirectory,
-        queryInput: imageDirectory,
-        queryInputType: queryInputType,
         queryErrorMessage: null,
         sendingQueryRequest: false,
         cachingInProgress: false
@@ -175,7 +171,7 @@ export default class ImageViewerApp extends React.Component {
     const toLoad = BASE_URL + imageDirectory + '_atlas.json';
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
-    HttpClient.getJSON(toLoad, {absolute:true})
+    HttpClient.getJSON(toLoad, {absolute:true, mode:'cors'})
       .then(resp => {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
@@ -473,7 +469,26 @@ export default class ImageViewerApp extends React.Component {
   }
 
   setQueryInput(input, type) {
-    this.openImage(input, type);
+    this.setState({
+      queryInput: input,
+      queryInputType: type
+    });
+    let name = input;
+    if (type === FOV_ID_QUERY) {
+      name = input.cellLine + '/' + input.cellLine + '_' + input.fovId;
+    }
+    else if (type === CELL_ID_QUERY) {
+      name = input.cellLine + '/' + input.cellLine + '_' + input.fovId + '_' + input.cellId;
+    }
+    else if (type === IMAGE_NAME_QUERY) {
+      // TODO: decompose the name into cellLine, fovId, and cellId ?
+
+      // prepend cell line subdir.  
+      // if it isn't the substring before the first underscore, then the name is not valid at all.
+      const cellLine = input.substr(0, input.indexOf('_'));
+      name = cellLine + '/' + name;
+    }
+    this.openImage(name, type);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -496,14 +511,20 @@ export default class ImageViewerApp extends React.Component {
       this.setQueryInput(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
     }
     else {
-      const cellIdToShow = UtilsService.getParameterByName(CELL_ID_QUERY);
-      if (cellIdToShow) {
-        this.setQueryInput(cellIdToShow, CELL_ID_QUERY);
+      const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
+      if (imageIdToShow) {
+        this.setQueryInput(imageIdToShow, IMAGE_NAME_QUERY);
       }
       else {
-        const fovIdToShow = UtilsService.getParameterByName(FOV_ID_QUERY);
-        if (fovIdToShow) {
-          this.setQueryInput(fovIdToShow, FOV_ID_QUERY);
+        // cellid and cellline and fovid
+        const cellId = UtilsService.getParameterByName(CELL_ID_QUERY);
+        const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
+        const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
+        if (cellId && fovId && cellLine) {
+          this.setQueryInput({cellId, fovId, cellLine}, CELL_ID_QUERY);
+        }
+        else if (fovId && cellLine) {
+          this.setQueryInput({fovId, cellLine}, FOV_ID_QUERY);
         }
       }
     }

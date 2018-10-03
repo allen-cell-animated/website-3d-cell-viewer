@@ -4,8 +4,8 @@ export const
   CELL_ID_QUERY = 'cellId',
   FOV_ID_QUERY = 'fovId',
   CELL_LINE_QUERY = 'cellLine',
+  IMAGE_NAME_QUERY = 'name',
   LEGACY_IMAGE_ID_QUERY = 'legacyName_1_2',
-  O_KEY_CODE = 79,
 
   // View modes
   YZ_MODE = 'YZ',
@@ -19,6 +19,5 @@ export const
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/2017_03_08_Struct_First_Pass_Seg/',
 
-  DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.3.0/Cell-Viewer_Data/',
-  IMAGE_SERVER = 'http://downloads.allencell.org/1.3.0/Cell-Viewer_Thumbnails/';
-
+  DOWNLOAD_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
+  IMAGE_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Thumbnails/';
