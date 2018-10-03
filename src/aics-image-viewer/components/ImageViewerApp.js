@@ -469,10 +469,6 @@ export default class ImageViewerApp extends React.Component {
   }
 
   setQueryInput(input, type) {
-    this.setState({
-      queryInput: input,
-      queryInputType: type
-    });
     let name = input;
     if (type === FOV_ID_QUERY) {
       name = input.cellLine + '/' + input.cellLine + '_' + input.fovId;
@@ -481,13 +477,32 @@ export default class ImageViewerApp extends React.Component {
       name = input.cellLine + '/' + input.cellLine + '_' + input.fovId + '_' + input.cellId;
     }
     else if (type === IMAGE_NAME_QUERY) {
-      // TODO: decompose the name into cellLine, fovId, and cellId ?
-
-      // prepend cell line subdir.  
-      // if it isn't the substring before the first underscore, then the name is not valid at all.
-      const cellLine = input.substr(0, input.indexOf('_'));
-      name = cellLine + '/' + name;
+      // decompose the name into cellLine, fovId, and cellId ?
+      const components = input.split("_");
+      let cellLine = "";
+      let fovId = "";
+      let cellId = "";
+      if (components.length >= 2) {
+        cellLine = components[0];
+        fovId = components[1];
+        name = cellLine + '/' + cellLine + '_' + fovId;
+        type = FOV_ID_QUERY;
+        if (components.length > 2) {
+          cellId = components[2];
+          name = cellLine + '/' + cellLine + '_' + fovId + '_' + cellId;
+          type = CELL_ID_QUERY;
+        }
+      }
+      input = {
+        cellLine,
+        fovId,
+        cellId
+      };
     }
+    this.setState({
+      queryInput: input,
+      queryInputType: type
+    });
     this.openImage(name, type);
   }
 
