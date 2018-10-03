@@ -8,7 +8,9 @@
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore --ext .jsx --ext .js ./",
     "build-iv": "webpack --config webpack.config.js",
     "build-static": "webpack --config webpack.static.js",
-    "start": "npm run build-iv && node ./server.js -p 9020"
+    "start": "npm run build-iv && node ./server.js -p 9020",
+    "predeploy": "npm run build-static",
+    "deploy": "gh-pages -d imageviewer -o github"
   },
   "author": "Daniel Toloudis",
   "license": "ISC",
@@ -58,6 +60,7 @@
     "eslint-plugin-react": "^7.4.0",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^0.11.2",
+    "gh-pages": "^2.0.0",
     "html-webpack-plugin": "^2.30.1",
     "node-sass": "^4.9.2",
     "polymer-webpack-loader": "^2.0.0",
