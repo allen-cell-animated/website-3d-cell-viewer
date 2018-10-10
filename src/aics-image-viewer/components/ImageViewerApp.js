@@ -20,8 +20,6 @@ import {
   FOV_ID_QUERY,
   IMAGE_NAME_QUERY,
   LEGACY_IMAGE_ID_QUERY,
-  LEGACY_DOWNLOAD_SERVER,
-  DOWNLOAD_SERVER,
   LEGACY_IMAGE_SERVER,
   IMAGE_SERVER,
   OBSERVED_CHANNEL_KEY,
@@ -44,6 +42,50 @@ const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
 
 export default class ImageViewerApp extends React.Component {
+
+  static setInitialChannelState(channelNames, channelColors) {
+    return channelNames.map((channel, index) => {
+      return {
+        name: channel || "Channel " + index,
+        channelEnabled: index === 0,
+        volumeEnabled: true,
+        isosurfaceEnabled: false,
+        isovalue: 0.5,
+        opacity: 1.0,
+        color: channelColors[index].slice(),
+        dataReady: false
+      };
+    });
+  }
+
+  static createChannelGrouping(channels) {
+
+    if (channels) {
+      const grouping = channels.reduce((acc, channel, index) => {
+        if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
+          if (!acc[OBSERVED_CHANNEL_KEY]) {
+            acc[OBSERVED_CHANNEL_KEY] = [];
+          }
+          acc[OBSERVED_CHANNEL_KEY].push(index);
+
+        } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
+          if (!acc[SEGMENATION_CHANNEL_KEY]) {
+            acc[SEGMENATION_CHANNEL_KEY] = [];
+          }
+          acc[SEGMENATION_CHANNEL_KEY].push(index);
+        } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
+          if (!acc[CONTOUR_CHANNEL_KEY]) {
+            acc[CONTOUR_CHANNEL_KEY] = [];
+          }
+          acc[CONTOUR_CHANNEL_KEY].push(index);
+        }
+        return acc;
+      }, {});
+      return grouping;
+    }
+    return {};
+  }
+
   constructor(props) {
     super(props);
 
@@ -166,34 +208,6 @@ export default class ImageViewerApp extends React.Component {
     this.stopPollingForImage();
   }
 
-  static createChannelGrouping(channels) {
-
-    if (channels) {
-      const grouping = channels.reduce((acc, channel, index) => {
-        if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
-          if (!acc[OBSERVED_CHANNEL_KEY]) {
-            acc[OBSERVED_CHANNEL_KEY] = [];
-          }
-          acc[OBSERVED_CHANNEL_KEY].push(index);
-
-        } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
-          if (!acc[SEGMENATION_CHANNEL_KEY]) {
-            acc[SEGMENATION_CHANNEL_KEY] = [];
-          }
-          acc[SEGMENATION_CHANNEL_KEY].push(index);
-        } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
-          if (!acc[CONTOUR_CHANNEL_KEY]) {
-            acc[CONTOUR_CHANNEL_KEY] = [];
-          }
-          acc[CONTOUR_CHANNEL_KEY].push(index);
-        }
-        return acc;
-      }, {});
-      return grouping;
-    }
-    return {};
-  }
-
   openImage(imageDirectory, queryType) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
@@ -211,21 +225,6 @@ export default class ImageViewerApp extends React.Component {
         return this.handleOpenImageResponse(resp, 0, imageDirectory);
       })
       .catch(resp => this.handleOpenImageException(resp));
-  }
-
-  static setInitialChannelState(channelNames, channelColors) {
-    return channelNames.map((channel, index) => {
-      return {
-        name: channel || "Channel " + index,
-        channelEnabled: index === 0,
-        volumeEnabled: false,
-        isosurfaceEnabled: true,
-        isovalue: 0.5,
-        opacity: 1.0,
-        color: channelColors[index].slice(),
-        dataReady: false
-      };
-    });
   }
 
   loadFromJson(obj, title, locationHeader) {
@@ -535,6 +534,33 @@ export default class ImageViewerApp extends React.Component {
     this.openImage(name, type);
   }
 
+  toggleVolumeEnabledAndFuse(index, enabledOrNot) {
+    const { image } = this.state;
+    image.setVolumeChannelEnabled(index, enabledOrNot);
+    image.fuse();
+  }
+
+  updateImageChannelsFromAppState() {
+    const { channels, image } = this.state;
+    if (image) {
+      channels.forEach((channel, index) => {
+        const volenabled = channel.channelEnabled && channel.volumeEnabled;
+        const isoenabled = channel.channelEnabled && channel.isosurfaceEnabled;
+        this.toggleVolumeEnabledAndFuse(index, volenabled);
+        if (image.hasIsosurface(index)) {
+          if (!isoenabled) {
+            image.destroyIsosurface(index);
+          }
+        }
+        else {
+          if (isoenabled) {
+            image.createIsosurface(index, channel.isovalue, channel.opacity);
+          }
+        }
+      });
+    }
+  }
+
   componentWillUpdate(nextProps, nextState) {
     const channelsChanged = this.state.channels !== nextState.channels;
     const imageChanged = this.state.image !== nextState.image;
@@ -572,6 +598,10 @@ export default class ImageViewerApp extends React.Component {
         }
       }
     }
+  }
+
+  componentDidUpdate() {
+    this.updateImageChannelsFromAppState();
   }
 
   toggleControlPanel() {
