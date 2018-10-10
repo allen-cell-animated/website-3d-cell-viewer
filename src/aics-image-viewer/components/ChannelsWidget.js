@@ -18,6 +18,8 @@ import {
 
 import ChannelsWidgetRow from './ChannelsWidgetRow';
 
+import { channelGroupTitles } from '../shared/enums/channelGroups';
+
 const SEGMENTATION_CHANNELS = ['SEG_STRUCT', 'CON_Memb', 'CON_DNA'];
 const OBSERVED_CHANNELS = ['CMDRP', 'EGFP', 'H3342'];
 const PRESET_COLORS_1 = [
@@ -143,10 +145,9 @@ export default class ChannelsWidget extends React.Component {
 
   getRows() {
     const { channelGroupedByType, channels} = this.props;
-    console.log(formatChannelName)
     return map(channelGroupedByType, (channelArray, key) => {
       return (<div key={`${key}`} style={STYLES.wrapper}>
-        <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={key}/>
+        <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={channelGroupTitles[key] || key}/>
           {channelArray.map((actualIndex, index) => {
             let channel = channels[actualIndex];
             return (

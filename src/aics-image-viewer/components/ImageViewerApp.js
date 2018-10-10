@@ -23,7 +23,10 @@ import {
   LEGACY_DOWNLOAD_SERVER,
   DOWNLOAD_SERVER,
   LEGACY_IMAGE_SERVER,
-  IMAGE_SERVER
+  IMAGE_SERVER,
+  OBSERVED_CHANNEL_KEY,
+  SEGMENATION_CHANNEL_KEY,
+  CONTOUR_CHANNEL_KEY
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -167,22 +170,22 @@ export default class ImageViewerApp extends React.Component {
 
     if (channels) {
       const grouping = channels.reduce((acc, channel, index) => {
-        if (includes(channelGroupingMap.observed, channel)) {
-          if (!acc.observed) {
-            acc.observed = [];
+        if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
+          if (!acc[OBSERVED_CHANNEL_KEY]) {
+            acc[OBSERVED_CHANNEL_KEY] = [];
           }
-          acc.observed.push(index);
+          acc[OBSERVED_CHANNEL_KEY].push(index);
 
-        } else if (includes(channelGroupingMap.segmentation, channel)) {
-          if (!acc.segmentation) {
-            acc.segmentation = [];
+        } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
+          if (!acc[SEGMENATION_CHANNEL_KEY]) {
+            acc[SEGMENATION_CHANNEL_KEY] = [];
           }
-          acc.segmentation.push(index);
-        } else if (includes(channelGroupingMap.contour, channel)) {
-          if (!acc.contour) {
-            acc.contour = [];
+          acc[SEGMENATION_CHANNEL_KEY].push(index);
+        } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
+          if (!acc[CONTOUR_CHANNEL_KEY]) {
+            acc[CONTOUR_CHANNEL_KEY] = [];
           }
-          acc.contour.push(index);
+          acc[CONTOUR_CHANNEL_KEY].push(index);
         }
         return acc;
       }, {});
