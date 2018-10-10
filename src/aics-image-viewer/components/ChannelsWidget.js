@@ -10,6 +10,8 @@ import {
 } from 'material-ui';
 
 import UtilsService from '../shared/utils/utilsService';
+import formatChannelName from '../shared/utils/formatChannelNames';
+
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../shared/constants';
@@ -141,6 +143,7 @@ export default class ChannelsWidget extends React.Component {
 
   getRows() {
     const { channelGroupedByType, channels} = this.props;
+    console.log(formatChannelName)
     return map(channelGroupedByType, (channelArray, key) => {
       return (<div key={`${key}`} style={STYLES.wrapper}>
         <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={key}/>
@@ -151,7 +154,7 @@ export default class ChannelsWidget extends React.Component {
                                     image={this.props.image}
                                     index={actualIndex}
                                     channelDataReady={channel.dataReady}
-                                    name={channel.name}
+                                    name={formatChannelName(channel.name)}
                                     checked={channel.channelEnabled}
                                     onChange={this.makeOnCheckHandler(actualIndex)}
                                     onColorChange={this.props.onColorChange}
