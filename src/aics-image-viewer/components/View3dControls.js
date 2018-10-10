@@ -49,20 +49,6 @@ export default class View3dControls extends React.Component {
     this.props.image.setChannelAsMask(i);
   }
 
-  createMaskSelect() {
-    const names = this.props.imageChannelNames.reduce((acc, val) => acc.concat(val.channelNames), []);
-
-    return (
-      <div style={STYLES.controlRow}>
-        <div style={STYLES.controlName}>mask Channel</div>
-        <DropdownMenu initialLabel={'Choose Mask Channel'}
-          labels={names}
-          onMenuItemClick={this.handleMaskMenuItemClick}
-        />
-      </div>
-    );
-  }
-
   createMaskAlphaSlider() {
     let config = {
       label: 'maskAlpha',
@@ -115,6 +101,8 @@ export default class View3dControls extends React.Component {
     };
     return this.createSliderRow(config);
   }
+
+
 
   createLevelsSlider () {
     let config = {
@@ -232,8 +220,8 @@ export default class View3dControls extends React.Component {
     const receivingImageForFirstTime = !this.props.image && !!newProps.image;
     const imageExists = !!newProps.image && !!this.props.image;
     const imageNameIsDifferent = imageExists && newProps.image.name !== this.props.image.name;
-    const imageChannelsAreDifferent = (newProps.imageChannelNames !== this.props.imageChannelNames) || 
-      (newProps.imageChannelNames.length !== this.props.imageChannelNames.length);
+    const imageChannelsAreDifferent = (newProps.channels !== this.props.channels) || 
+      (newProps.channels.length !== this.props.channels.length);
     return receivingImageForFirstTime || imageNameIsDifferent || imageChannelsAreDifferent ||
       (newProps.mode !== this.props.mode) ||
       (newState.autoRotateChecked !== this.state.autoRotateChecked) || 
@@ -248,7 +236,6 @@ export default class View3dControls extends React.Component {
 
       <div style={STYLES.controlsWrapper}>
       <h4>Global volume rendering settings</h4>
-        {this.createMaskSelect()}
         {this.createMaskAlphaSlider()}
         {this.createBrightnessSlider()}
         {this.createDensitySlider()}

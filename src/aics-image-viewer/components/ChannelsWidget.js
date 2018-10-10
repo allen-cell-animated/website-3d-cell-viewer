@@ -1,4 +1,5 @@
 import React from 'react';
+import { map } from 'lodash';
 
 import {
   CardHeader, 
@@ -71,12 +72,12 @@ export default class ChannelsWidget extends React.Component {
   }
 
   isSegButtonDisabled() {
-    const names = this.props.imageChannelNames.reduce((acc, val) => acc.concat(val.channelNames), []);
+    const names = this.props.channels.map((channel) => channel.name);
     return UtilsService.intersects(SEGMENTATION_CHANNELS, names);
   }
 
   isObsButtonDisabled() {
-    const names = this.props.imageChannelNames.reduce((acc, val) => acc.concat(val.channelNames), []);
+    const names = this.props.channels.map((channel) => channel.name);
     return UtilsService.intersects(OBSERVED_CHANNELS, names);
   }
 
@@ -139,20 +140,18 @@ export default class ChannelsWidget extends React.Component {
   }
 
   getRows() {
-    let actualIndex = -1;
-    return this.props.imageChannelNames.map((imageChannelSet, imageindex) => {
-        return (<div key={`${imageChannelSet.imageName}_${imageindex}`} style={STYLES.wrapper}>
-          <CardHeader key={`${imageChannelSet.imageName}_${imageindex}`} style={{textAlign: 'left', paddingLeft: 0}} title={imageChannelSet.imageName}/>
-          {imageChannelSet.channelNames.map((name, index) => {
-            // get the actual channel index.  index+startingoffset
-            actualIndex ++;
-            let channel = this.props.channels[actualIndex];
+    const { channelGroupedByType, channels} = this.props;
+    return map(channelGroupedByType, (channelArray, key) => {
+      return (<div key={`${key}`} style={STYLES.wrapper}>
+        <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={key}/>
+          {channelArray.map((actualIndex, index) => {
+            let channel = channels[actualIndex];
             return (
-              <ChannelsWidgetRow key={`${imageChannelSet.imageName}_${name}_${actualIndex}`}
+              <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
                                     image={this.props.image}
                                     index={actualIndex}
                                     channelDataReady={channel.dataReady}
-                                    name={name}
+                                    name={channel.name}
                                     checked={channel.channelEnabled}
                                     onChange={this.makeOnCheckHandler(actualIndex)}
                                     onColorChange={this.props.onColorChange}

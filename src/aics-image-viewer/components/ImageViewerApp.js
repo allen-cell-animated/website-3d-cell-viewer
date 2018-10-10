@@ -1,5 +1,6 @@
 // 3rd Party Imports
 import React from 'react';
+import { includes } from 'lodash';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import colorPalette from './shared/colorPalette';
@@ -12,6 +13,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import HttpClient from '../shared/utils/httpClient';
 import UtilsService from '../shared/utils/utilsService';
 import { ViewMode } from '../shared/enums/viewModeEnum';
+import { channelGroupingMap } from '../shared/enums/channelGroups';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
@@ -57,9 +59,8 @@ export default class ImageViewerApp extends React.Component {
       // channels is a flat list of objects of this type:
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
       channels: [],
-      // imageChannelNames is an array of {imageName:aimg.name, channelNames:[]} with 
-      // one entry for every image opened and appended
-      imageChannelNames: []
+      // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
+      channelGroupedByType: {}
     };
 
     this.openImage = this.openImage.bind(this);
@@ -162,6 +163,34 @@ export default class ImageViewerApp extends React.Component {
     this.stopPollingForImage();
   }
 
+  static createChannelGrouping(channels) {
+
+    if (channels) {
+      const grouping = channels.reduce((acc, channel, index) => {
+        if (includes(channelGroupingMap.observed, channel)) {
+          if (!acc.observed) {
+            acc.observed = [];
+          }
+          acc.observed.push(index);
+
+        } else if (includes(channelGroupingMap.segmentation, channel)) {
+          if (!acc.segmentation) {
+            acc.segmentation = [];
+          }
+          acc.segmentation.push(index);
+        } else if (includes(channelGroupingMap.contour, channel)) {
+          if (!acc.contour) {
+            acc.contour = [];
+          }
+          acc.contour.push(index);
+        }
+        return acc;
+      }, {});
+      return grouping;
+    }
+    return {};
+  }
+
   openImage(imageDirectory, queryType) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
@@ -181,33 +210,30 @@ export default class ImageViewerApp extends React.Component {
       .catch(resp => this.handleOpenImageException(resp));
   }
 
-  loadFromJson(obj, title, locationHeader) {
-
-    const aimg = new AICSvolumeDrawable(obj);
-
-    const numIncomingChannels = obj.channels;
-    let numExistingChannels = 0;
-    let imageChannelNames = [];
-    let channels = [];
-
-    const incomingImageChannelNames = {imageName:obj.name, channelNames:[]};
-    for (let i = 0; i < numIncomingChannels; ++i) {
-      const name = obj.channel_names[i] || "Channel "+i;
-      incomingImageChannelNames.channelNames.push(name);
-      channels.push({
-        name: name,
-        channelEnabled: i===0,
-        volumeEnabled: true,
-        isosurfaceEnabled: false,
+  static setInitialChannelState(channelNames, channelColors) {
+    return channelNames.map((channel, index) => {
+      return {
+        name: channel || "Channel " + index,
+        channelEnabled: index === 0,
+        volumeEnabled: false,
+        isosurfaceEnabled: true,
         isovalue: 0.5,
         opacity: 1.0,
-        color: aimg.channel_colors[i + numExistingChannels].slice(),
+        color: channelColors[index].slice(),
         dataReady: false
-      });
-      aimg.fusion[i + numExistingChannels].rgbColor = i === 0 ? aimg.channel_colors[i + numExistingChannels] : 0;
-    }
-    imageChannelNames.push(incomingImageChannelNames);
+      };
+    });
+  }
 
+  loadFromJson(obj, title, locationHeader) {
+    const aimg = new AICSvolumeDrawable(obj);
+
+    let channels = ImageViewerApp.setInitialChannelState(obj.channel_names, aimg.channel_colors);
+    let channelGroupedByType = ImageViewerApp.createChannelGrouping(obj.channel_names);
+
+    for (let i = 0; i < obj.channel_names.length; ++i) {
+      aimg.fusion[i].rgbColor = i === 0 ? aimg.channel_colors[i] : 0;
+    }
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
@@ -221,7 +247,7 @@ export default class ImageViewerApp extends React.Component {
     let nextState = {
       image: aimg,
       channels,
-      imageChannelNames,
+      channelGroupedByType,
       mode: ViewMode.threeD
     };
     this.setState(nextState);
@@ -578,7 +604,7 @@ export default class ImageViewerApp extends React.Component {
                     channels={this.state.channels}
                     method={this.state.method}
                     mode={this.state.mode}
-                    imageChannelNames={this.state.imageChannelNames}
+                    channelGroupedByType={this.state.channelGroupedByType}
                     controlPanelOpen={this.state.controlPanelOpen}
                     setChannelEnabled={this.setChannelEnabled}
                     setVolumeEnabled={this.setVolumeEnabled}

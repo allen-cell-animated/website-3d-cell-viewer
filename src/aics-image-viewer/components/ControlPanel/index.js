@@ -31,7 +31,7 @@ export default class ViewerControlPanel extends React.Component {
           <ChannelsWidget
             image={this.props.image}
             channels={this.props.channels}
-            imageChannelNames={this.props.imageChannelNames}
+            channelGroupedByType={this.props.channelGroupedByType}
             setChannelEnabled={this.props.setChannelEnabled}
             setVolumeEnabled={this.props.setVolumeEnabled}
             setIsosurfaceEnabled={this.props.setIsosurfaceEnabled}
@@ -46,8 +46,8 @@ export default class ViewerControlPanel extends React.Component {
           />
           <View3dControls
             image={this.props.image}
-            imageChannelNames={this.props.imageChannelNames}
             mode={this.props.mode}
+            channels={this.props.channels}
             onAutorotateChange={this.props.onAutorotateChange}
             onUpdateImageDensity={this.props.onUpdateImageDensity}
             onUpdateImageBrightness={this.props.onUpdateImageBrightness}
