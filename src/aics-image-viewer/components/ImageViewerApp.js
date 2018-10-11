@@ -102,6 +102,7 @@ export default class ImageViewerApp extends React.Component {
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
       channels: [],
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
+      // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {}
     };
 
