@@ -20,4 +20,10 @@ export const
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
 
   DOWNLOAD_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
-  IMAGE_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Thumbnails/';
+  IMAGE_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Thumbnails/',
+
+  OBSERVED_CHANNEL_KEY = 'observed',
+  SEGMENATION_CHANNEL_KEY = 'segmentation',
+  CONTOUR_CHANNEL_KEY = 'contour',
+  OTHER_CHANNEL_KEY = 'Other';
+

@@ -1,5 +1,6 @@
 // 3rd Party Imports
 import React from 'react';
+import { includes } from 'lodash';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import colorPalette from './shared/colorPalette';
@@ -12,16 +13,19 @@ import 'bootstrap/dist/css/bootstrap.css';
 import HttpClient from '../shared/utils/httpClient';
 import UtilsService from '../shared/utils/utilsService';
 import { ViewMode } from '../shared/enums/viewModeEnum';
+import { channelGroupingMap } from '../shared/enums/channelGroups';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
   FOV_ID_QUERY,
   IMAGE_NAME_QUERY,
   LEGACY_IMAGE_ID_QUERY,
-  LEGACY_DOWNLOAD_SERVER,
-  DOWNLOAD_SERVER,
   LEGACY_IMAGE_SERVER,
-  IMAGE_SERVER
+  IMAGE_SERVER,
+  OBSERVED_CHANNEL_KEY,
+  SEGMENATION_CHANNEL_KEY,
+  CONTOUR_CHANNEL_KEY,
+  OTHER_CHANNEL_KEY
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -39,6 +43,46 @@ const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
 
 export default class ImageViewerApp extends React.Component {
+
+  static setInitialChannelConfig(channelNames, channelColors) {
+    return channelNames.map((channel, index) => {
+      return {
+        name: channel || "Channel " + index,
+        channelEnabled: index === 0,
+        volumeEnabled: true,
+        isosurfaceEnabled: false,
+        isovalue: 0.5,
+        opacity: 1.0,
+        color: channelColors[index].slice(),
+        dataReady: false
+      };
+    });
+  }
+
+  static createChannelGrouping(channels) {
+    if (channels) {
+      const grouping = channels.reduce((acc, channel, index) => {
+        if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
+          acc[OBSERVED_CHANNEL_KEY].push(index);
+        } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
+          acc[SEGMENATION_CHANNEL_KEY].push(index);
+        } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
+          acc[CONTOUR_CHANNEL_KEY].push(index);
+        } else {
+          acc[OTHER_CHANNEL_KEY].push(index);
+        }
+        return acc;
+      }, {
+        [OBSERVED_CHANNEL_KEY]: [],
+        [SEGMENATION_CHANNEL_KEY]: [],
+        [CONTOUR_CHANNEL_KEY]: [],
+        [OTHER_CHANNEL_KEY]: []
+      });
+      return grouping;
+    }
+    return {};
+  }
+
   constructor(props) {
     super(props);
 
@@ -57,9 +101,9 @@ export default class ImageViewerApp extends React.Component {
       // channels is a flat list of objects of this type:
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
       channels: [],
-      // imageChannelNames is an array of {imageName:aimg.name, channelNames:[]} with 
-      // one entry for every image opened and appended
-      imageChannelNames: []
+      // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
+      // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
+      channelGroupedByType: {}
     };
 
     this.openImage = this.openImage.bind(this);
@@ -182,32 +226,14 @@ export default class ImageViewerApp extends React.Component {
   }
 
   loadFromJson(obj, title, locationHeader) {
-
     const aimg = new AICSvolumeDrawable(obj);
 
-    const numIncomingChannels = obj.channels;
-    let numExistingChannels = 0;
-    let imageChannelNames = [];
-    let channels = [];
+    let channels = ImageViewerApp.setInitialChannelConfig(obj.channel_names, aimg.channel_colors);
+    let channelGroupedByType = ImageViewerApp.createChannelGrouping(obj.channel_names);
 
-    const incomingImageChannelNames = {imageName:obj.name, channelNames:[]};
-    for (let i = 0; i < numIncomingChannels; ++i) {
-      const name = obj.channel_names[i] || "Channel "+i;
-      incomingImageChannelNames.channelNames.push(name);
-      channels.push({
-        name: name,
-        channelEnabled: i===0,
-        volumeEnabled: true,
-        isosurfaceEnabled: false,
-        isovalue: 0.5,
-        opacity: 1.0,
-        color: aimg.channel_colors[i + numExistingChannels].slice(),
-        dataReady: false
-      });
-      aimg.fusion[i + numExistingChannels].rgbColor = i === 0 ? aimg.channel_colors[i + numExistingChannels] : 0;
+    for (let i = 0; i < obj.channel_names.length; ++i) {
+      aimg.fusion[i].rgbColor = i === 0 ? aimg.channel_colors[i] : 0;
     }
-    imageChannelNames.push(incomingImageChannelNames);
-
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
@@ -221,7 +247,7 @@ export default class ImageViewerApp extends React.Component {
     let nextState = {
       image: aimg,
       channels,
-      imageChannelNames,
+      channelGroupedByType,
       mode: ViewMode.threeD
     };
     this.setState(nextState);
@@ -506,6 +532,33 @@ export default class ImageViewerApp extends React.Component {
     this.openImage(name, type);
   }
 
+  toggleVolumeEnabledAndFuse(index, enable) {
+    const { image } = this.state;
+    image.setVolumeChannelEnabled(index, enable);
+    image.fuse();
+  }
+
+  updateImageChannelsFromAppState() {
+    const { channels, image } = this.state;
+    if (image) {
+      channels.forEach((channel, index) => {
+        const volenabled = channel.channelEnabled && channel.volumeEnabled;
+        const isoenabled = channel.channelEnabled && channel.isosurfaceEnabled;
+        this.toggleVolumeEnabledAndFuse(index, volenabled);
+        if (image.hasIsosurface(index)) {
+          if (!isoenabled) {
+            image.destroyIsosurface(index);
+          }
+        }
+        else {
+          if (isoenabled) {
+            image.createIsosurface(index, channel.isovalue, channel.opacity);
+          }
+        }
+      });
+    }
+  }
+
   componentWillUpdate(nextProps, nextState) {
     const channelsChanged = this.state.channels !== nextState.channels;
     const imageChanged = this.state.image !== nextState.image;
@@ -545,6 +598,10 @@ export default class ImageViewerApp extends React.Component {
     }
   }
 
+  componentDidUpdate() {
+    this.updateImageChannelsFromAppState();
+  }
+
   toggleControlPanel() {
     this.setState({ controlPanelOpen: !this.state.controlPanelOpen});
   }
@@ -578,7 +635,7 @@ export default class ImageViewerApp extends React.Component {
                     channels={this.state.channels}
                     method={this.state.method}
                     mode={this.state.mode}
-                    imageChannelNames={this.state.imageChannelNames}
+                    channelGroupedByType={this.state.channelGroupedByType}
                     controlPanelOpen={this.state.controlPanelOpen}
                     setChannelEnabled={this.setChannelEnabled}
                     setVolumeEnabled={this.setVolumeEnabled}
