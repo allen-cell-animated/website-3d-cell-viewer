@@ -78,6 +78,11 @@ export default class ImageViewerApp extends React.Component {
             acc[CONTOUR_CHANNEL_KEY] = [];
           }
           acc[CONTOUR_CHANNEL_KEY].push(index);
+        } else {
+          if (!acc.other) {
+            acc.other = [];
+          }
+          acc.other.push(index);
         }
         return acc;
       }, {});
