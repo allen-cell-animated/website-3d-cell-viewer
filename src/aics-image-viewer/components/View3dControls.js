@@ -102,8 +102,6 @@ export default class View3dControls extends React.Component {
     return this.createSliderRow(config);
   }
 
-
-
   createLevelsSlider () {
     let config = {
       label: 'levels',
@@ -143,7 +141,6 @@ export default class View3dControls extends React.Component {
         this.setState({levelsSlider:[unencoded[0], unencoded[1], unencoded[2]]});
       }
     };
-
     return this.createSliderRow(config);
   }
 

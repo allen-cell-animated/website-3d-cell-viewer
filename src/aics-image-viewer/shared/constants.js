@@ -24,5 +24,6 @@ export const
 
   OBSERVED_CHANNEL_KEY = 'observed',
   SEGMENATION_CHANNEL_KEY = 'segmentation',
-  CONTOUR_CHANNEL_KEY = 'contour';
+  CONTOUR_CHANNEL_KEY = 'contour',
+  OTHER_CHANNEL_KEY = 'Other';
 

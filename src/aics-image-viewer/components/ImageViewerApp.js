@@ -24,7 +24,8 @@ import {
   IMAGE_SERVER,
   OBSERVED_CHANNEL_KEY,
   SEGMENATION_CHANNEL_KEY,
-  CONTOUR_CHANNEL_KEY
+  CONTOUR_CHANNEL_KEY,
+  OTHER_CHANNEL_KEY
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -43,7 +44,7 @@ const ERROR_STATUS = 'Error';
 
 export default class ImageViewerApp extends React.Component {
 
-  static setInitialChannelState(channelNames, channelColors) {
+  static setInitialChannelConfig(channelNames, channelColors) {
     return channelNames.map((channel, index) => {
       return {
         name: channel || "Channel " + index,
@@ -59,33 +60,24 @@ export default class ImageViewerApp extends React.Component {
   }
 
   static createChannelGrouping(channels) {
-
     if (channels) {
       const grouping = channels.reduce((acc, channel, index) => {
         if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
-          if (!acc[OBSERVED_CHANNEL_KEY]) {
-            acc[OBSERVED_CHANNEL_KEY] = [];
-          }
           acc[OBSERVED_CHANNEL_KEY].push(index);
-
         } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
-          if (!acc[SEGMENATION_CHANNEL_KEY]) {
-            acc[SEGMENATION_CHANNEL_KEY] = [];
-          }
           acc[SEGMENATION_CHANNEL_KEY].push(index);
         } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
-          if (!acc[CONTOUR_CHANNEL_KEY]) {
-            acc[CONTOUR_CHANNEL_KEY] = [];
-          }
           acc[CONTOUR_CHANNEL_KEY].push(index);
         } else {
-          if (!acc.other) {
-            acc.other = [];
-          }
-          acc.other.push(index);
+          acc[OTHER_CHANNEL_KEY].push(index);
         }
         return acc;
-      }, {});
+      }, {
+        [OBSERVED_CHANNEL_KEY]: [],
+        [SEGMENATION_CHANNEL_KEY]: [],
+        [CONTOUR_CHANNEL_KEY]: [],
+        [OTHER_CHANNEL_KEY]: []
+      });
       return grouping;
     }
     return {};
@@ -235,7 +227,7 @@ export default class ImageViewerApp extends React.Component {
   loadFromJson(obj, title, locationHeader) {
     const aimg = new AICSvolumeDrawable(obj);
 
-    let channels = ImageViewerApp.setInitialChannelState(obj.channel_names, aimg.channel_colors);
+    let channels = ImageViewerApp.setInitialChannelConfig(obj.channel_names, aimg.channel_colors);
     let channelGroupedByType = ImageViewerApp.createChannelGrouping(obj.channel_names);
 
     for (let i = 0; i < obj.channel_names.length; ++i) {
@@ -539,9 +531,9 @@ export default class ImageViewerApp extends React.Component {
     this.openImage(name, type);
   }
 
-  toggleVolumeEnabledAndFuse(index, enabledOrNot) {
+  toggleVolumeEnabledAndFuse(index, enable) {
     const { image } = this.state;
-    image.setVolumeChannelEnabled(index, enabledOrNot);
+    image.setVolumeChannelEnabled(index, enable);
     image.fuse();
   }
 
