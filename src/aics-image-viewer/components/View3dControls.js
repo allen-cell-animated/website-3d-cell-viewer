@@ -184,17 +184,6 @@ export default class View3dControls extends React.Component {
     this.props.onUpdateImageMaxProjectionMode(checked);
   }
 
-  createAutorotateControls() {
-    return (
-      <Checkbox
-        label={"Rotate View"}
-        checked={this.state.autoRotateChecked}
-        onCheck={this.handleAutorotateCheck}
-        style={STYLES.controlRow}
-      />
-    );
-  }
-
   createProjectionModeControls() {
     return (
       <Checkbox
@@ -229,7 +218,6 @@ export default class View3dControls extends React.Component {
     if (!this.props.image) return null;
 
     return (<div style={STYLES.wrapper}>
-      {this.createAutorotateControls()}
 
       <div style={STYLES.controlsWrapper}>
       <h4>Global volume rendering settings</h4>

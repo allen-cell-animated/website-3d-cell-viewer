@@ -22,44 +22,12 @@ import { channelGroupTitles } from '../shared/enums/channelGroups';
 
 const SEGMENTATION_CHANNELS = ['SEG_STRUCT', 'CON_Memb', 'CON_DNA'];
 const OBSERVED_CHANNELS = ['CMDRP', 'EGFP', 'H3342'];
-const PRESET_COLORS_1 = [
-  [190, 68, 171, 255],
-  [189, 211, 75, 255],
-  [61, 155, 169, 255],
-  [128, 128, 128, 255],
-  [255, 255, 255, 255],
-  [239, 27, 45, 255],
-  [238, 77, 245, 255],
-  [96, 255, 255, 255]
-];
-const PRESET_COLORS_2 = [
-  [128,0,0, 255],
-  [0,128,0, 255],
-  [0,0,128, 255],
-  [32,32,32, 255],
-  [255,255,0, 255],
-  [255,0,255, 255],
-  [0,255,0, 255],
-  [0,0,255, 255]
-];
-
-const PRESET_COLORS_3 = [
-  [128,0,128, 255],
-  [128,128,128, 255],
-  [0,128,128, 255],
-  [128,128,0, 255],
-  [255,255,255, 255],
-  [255,0,0, 255],
-  [255,0,255, 255],
-  [0,255,255, 255]
-];
 
 export default class ChannelsWidget extends React.Component {
   constructor(props) {
     super(props);
     this.isSegButtonDisabled = this.isSegButtonDisabled.bind(this);
     this.isObsButtonDisabled = this.isObsButtonDisabled.bind(this);
-    this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.makeOnCheckHandler = this.makeOnCheckHandler.bind(this);
     this.makeOnVolumeCheckHandler = this.makeOnVolumeCheckHandler.bind(this);
     this.makeOnIsosurfaceCheckHandler = this.makeOnIsosurfaceCheckHandler.bind(this);
@@ -69,10 +37,7 @@ export default class ChannelsWidget extends React.Component {
     this.showSegmentationChannels = this.showSegmentationChannels.bind(this);
     this.showObservedChannels = this.showObservedChannels.bind(this);
 
-    this.presetMap = new Map();
-    this.presetMap.set(1, PRESET_COLORS_1);
-    this.presetMap.set(2, PRESET_COLORS_2);
-    this.presetMap.set(3, PRESET_COLORS_3);
+
   }
 
   isSegButtonDisabled() {
@@ -85,15 +50,7 @@ export default class ChannelsWidget extends React.Component {
     return UtilsService.intersects(OBSERVED_CHANNELS, names);
   }
 
-  makeTurnOnPresetFn(preset) {
-    return () => {
-      if (this.presetMap.has(preset)) {
-        const presets = this.presetMap.get(preset);
 
-        this.props.onApplyColorPresets(presets);
-      }
-    };
-  }
 
   showSegmentationChannels() {
     this.props.showChannels(SEGMENTATION_CHANNELS, true);
@@ -195,14 +152,7 @@ export default class ChannelsWidget extends React.Component {
           <div className="clearfix" style={STYLES.presetRow}>
             <FlatButton style={STYLES.button} label="Seg" onClick={this.showSegmentationChannels} disabled={segButtonDisabled}/>
             <FlatButton style={STYLES.button} label="Obs" onClick={this.showObservedChannels} disabled={obsButtonDisabled}/>
-            <IconMenu className="float-right"
-              iconButtonElement={<IconButton><i className="material-icons">color_lens</i></IconButton>}
-              anchorOrigin={{horizontal: 'right', vertical: 'top'}}
-              targetOrigin={{horizontal: 'right', vertical: 'top'}}>
-              <MenuItem primaryText="Preset 1" onClick={this.makeTurnOnPresetFn(1)}/>
-              <MenuItem primaryText="Preset 2" onClick={this.makeTurnOnPresetFn(2)}/>
-              <MenuItem primaryText="Preset 3" onClick={this.makeTurnOnPresetFn(3)}/>
-            </IconMenu>
+    
           </div>
         </div>
         <div style={STYLES.wrapper}>
