@@ -12,7 +12,7 @@ class BoxRadioButtonGroup extends React.Component {
   getButtonStyle(index, checked) {
     const { buttonStyles } = this.props;
     return {
-      backgroundColor: checked ? this.props.muiTheme.palette.primary1Color : this.props.muiTheme.palette.accent2Color,
+      backgroundColor: checked ? this.props.muiTheme.palette.primary1Color : 'transparent',
       color: checked ? this.props.muiTheme.palette.alternateTextColor : this.props.muiTheme.palette.textColor,
       borderLeft: index === 0 ? 0 : `2px solid ${this.props.muiTheme.palette.primary1Color}`,
       flex: 1,

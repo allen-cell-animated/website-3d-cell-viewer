@@ -121,6 +121,8 @@ const STYLES = {
     height: '100%'
   },
   toolbar: {
+    backgroundColor: 'none',
+    borderBottom: '0.5px solid gray'
   },
   button: {
     margin: 'auto',
