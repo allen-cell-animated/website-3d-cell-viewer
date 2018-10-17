@@ -68,8 +68,10 @@ class BoxRadioButtonGroup extends React.Component {
       <div style={{
         border: `2px solid ${this.props.muiTheme.palette.primary1Color}`,
         display: 'flex',
-        height: '3em',
+        height: '2em',
         borderRadius: 3,
+        flex: 2,
+        margin: 'auto',
         backgroundColor: this.props.muiTheme.palette.canvasColor,
         color: this.props.muiTheme.palette.textColor,
         ...groupStyles

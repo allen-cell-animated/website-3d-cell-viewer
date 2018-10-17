@@ -635,6 +635,7 @@ export default class ImageViewerApp extends React.Component {
                     channels={this.state.channels}
                     method={this.state.method}
                     mode={this.state.mode}
+                    autorotate={this.state.autorotate}
                     channelGroupedByType={this.state.channelGroupedByType}
                     controlPanelOpen={this.state.controlPanelOpen}
                     setChannelEnabled={this.setChannelEnabled}
