@@ -36,3 +36,10 @@
     flex: 1 100%;
   }
 }
+@media only screen and (max-width: 800px) {
+  .cell-viewer-wrapper {
+    .cell-canvas {
+      min-width: 33px;
+    }
+  }
+}

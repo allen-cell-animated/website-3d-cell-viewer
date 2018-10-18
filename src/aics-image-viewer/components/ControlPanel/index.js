@@ -87,7 +87,9 @@ export default class ViewerControlPanel extends React.Component {
             onColorChangeComplete={this.props.onColorChangeComplete}
             channelDataReady={this.props.channelDataReady}
             onApplyColorPresets={this.props.onApplyColorPresets}
-            showChannels={this.props.showChannels}
+            showVolumes={this.props.showVolumes}
+            showSurfaces={this.props.showSurfaces}
+            style={STYLES.channelsWidget}
           />
           <View3dControls
             image={this.props.image}
@@ -112,6 +114,9 @@ const STYLES = {
     boxShadow: 'none',
     borderRadius: 0,
     backgroundColor: 'none'
+  },
+  channelsWidget: {
+    padding: 0,
   },
   noImage: {
     display: 'flex',
