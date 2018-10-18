@@ -48,8 +48,8 @@ export default class ImageViewerApp extends React.Component {
     return channelNames.map((channel, index) => {
       return {
         name: channel || "Channel " + index,
-        channelEnabled: index === 0,
-        volumeEnabled: true,
+        channelEnabled: true,
+        volumeEnabled: index === 0,
         isosurfaceEnabled: false,
         isovalue: 0.5,
         opacity: 1.0,
@@ -69,6 +69,9 @@ export default class ImageViewerApp extends React.Component {
         } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
           acc[CONTOUR_CHANNEL_KEY].push(index);
         } else {
+          if (!acc[OTHER_CHANNEL_KEY]) {
+            acc[OTHER_CHANNEL_KEY] = [];
+          }
           acc[OTHER_CHANNEL_KEY].push(index);
         }
         return acc;
@@ -76,7 +79,6 @@ export default class ImageViewerApp extends React.Component {
         [OBSERVED_CHANNEL_KEY]: [],
         [SEGMENATION_CHANNEL_KEY]: [],
         [CONTOUR_CHANNEL_KEY]: [],
-        [OTHER_CHANNEL_KEY]: []
       });
       return grouping;
     }
@@ -131,7 +133,8 @@ export default class ImageViewerApp extends React.Component {
     this.onUpdateImageMaxProjectionMode = this.onUpdateImageMaxProjectionMode.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
-    this.showChannels = this.showChannels.bind(this);
+    this.showVolumes = this.showVolumes.bind(this);
+    this.showSurfaces = this.showSurfaces.bind(this);
     this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
 
@@ -377,39 +380,50 @@ export default class ImageViewerApp extends React.Component {
    * @param onOrOff boolean - when true all channels that have a name inside of names array
    * will be turned off and the rest will be turned off. When false, vice versa.
    */
-  showChannels(names, onOrOff) {
+  showVolumes(indexes, onOrOff) {
 
-    // // collect up some bools 
-    // this.state.channels.map((channel, index) => {
-    //   return (names.indexOf(channel.name) > -1) ? onOrOff : !onOrOff;
-    // });
-
-    // TODO: update this.state.image with these settings
     this.setState((prevState) => {
 
       if (prevState.image) {
         prevState.channels.forEach((channel, index) => {
-          const enabled = ((names.indexOf(channel.name) > -1) ? onOrOff : !onOrOff);
-          const volenabled = enabled && channel.volumeEnabled;
-          const isoenabled = enabled && channel.isosurfaceEnabled;
-          prevState.image.setVolumeChannelEnabled(index, volenabled);
-          if (prevState.image.hasIsosurface(index)) {
-            if (!isoenabled) {
-              prevState.image.destroyIsosurface(index);
-            }
-          }
-          else {
-            if (isoenabled) {
-              prevState.image.createIsosurface(index, channel.isovalue, channel.opacity);
-            }
-          }
+          const enabled = indexes.indexOf(index) > -1 ? onOrOff : !onOrOff;
+          prevState.image.setVolumeChannelEnabled(index, enabled);
+      
         });
         prevState.image.fuse();
       }
 
       return {
         channels: prevState.channels.map((channel, index) => {
-          return {...channel, channelEnabled: ((names.indexOf(channel.name) > -1) ? onOrOff : !onOrOff) };
+          return { ...channel, volumeEnabled: indexes.indexOf(index) > -1 ? onOrOff : channel.volumeEnabled };
+        })
+      };
+    });
+  }
+
+  showSurfaces(indexes, onOrOff) {
+
+    this.setState((prevState) => {
+
+      if (prevState.image) {
+        prevState.channels.forEach((channel, index) => {
+          const enabled = indexes.indexOf(index) > -1 ? onOrOff : !onOrOff;
+          if (prevState.image.hasIsosurface(index)) {
+            if (!enabled) {
+              prevState.image.destroyIsosurface(index);
+            }
+          }
+          else {
+            if (enabled) {
+              prevState.image.createIsosurface(index, channel.isovalue, channel.opacity);
+            }
+          }
+        });
+      }
+
+      return {
+        channels: prevState.channels.map((channel, index) => {
+          return { ...channel, isosurfaceEnabled: indexes.indexOf(index) > -1 ? onOrOff : channel.isosurfaceEnabled };
         })
       };
     });
@@ -443,7 +457,7 @@ export default class ImageViewerApp extends React.Component {
 
   setVolumeEnabled(index, enabled) {
     this.setState((prevState) => {
-      prevState.image.setVolumeChannelEnabled(index, enabled && prevState.channels[index].channelEnabled);
+      prevState.image.setVolumeChannelEnabled(index, enabled);
       prevState.image.fuse();
 
       return {
@@ -542,8 +556,8 @@ export default class ImageViewerApp extends React.Component {
     const { channels, image } = this.state;
     if (image) {
       channels.forEach((channel, index) => {
-        const volenabled = channel.channelEnabled && channel.volumeEnabled;
-        const isoenabled = channel.channelEnabled && channel.isosurfaceEnabled;
+        const volenabled = channel.volumeEnabled;
+        const isoenabled = channel.isosurfaceEnabled;
         this.toggleVolumeEnabledAndFuse(index, volenabled);
         if (image.hasIsosurface(index)) {
           if (!isoenabled) {
@@ -655,7 +669,8 @@ export default class ImageViewerApp extends React.Component {
                     onUpdateImageMaxProjectionMode={this.onUpdateImageMaxProjectionMode}
                     setImageAxisClip={this.setImageAxisClip}
                     onApplyColorPresets={this.onApplyColorPresets}
-                    showChannels={this.showChannels}
+                    showVolumes={this.showVolumes}
+                    showSurfaces={this.showSurfaces}
               />
             </MenuDrawer>
         </div>

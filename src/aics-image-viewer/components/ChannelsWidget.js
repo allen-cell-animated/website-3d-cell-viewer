@@ -2,6 +2,7 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
+  Card,
   CardHeader, 
   FlatButton, 
   IconButton, 
@@ -34,9 +35,8 @@ export default class ChannelsWidget extends React.Component {
     this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
     this.makeOnSaveIsosurfaceHandler = this.makeOnSaveIsosurfaceHandler.bind(this);
     this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
-    this.showSegmentationChannels = this.showSegmentationChannels.bind(this);
-    this.showObservedChannels = this.showObservedChannels.bind(this);
-
+    this.showVolumes = this.showVolumes.bind(this);
+    this.showSurfaces = this.showSurfaces.bind(this);
 
   }
 
@@ -50,14 +50,12 @@ export default class ChannelsWidget extends React.Component {
     return UtilsService.intersects(OBSERVED_CHANNELS, names);
   }
 
-
-
-  showSegmentationChannels() {
-    this.props.showChannels(SEGMENTATION_CHANNELS, true);
+  showVolumes(channelArray) {
+    this.props.showVolumes(channelArray, true);
   }
 
-  showObservedChannels() {
-    this.props.showChannels(OBSERVED_CHANNELS, true);
+  showSurfaces(channelArray) {
+    this.props.showSurfaces(channelArray, true);
   }
 
   makeOnCheckHandler(index) {
@@ -102,36 +100,58 @@ export default class ChannelsWidget extends React.Component {
 
   getRows() {
     const { channelGroupedByType, channels} = this.props;
+
     return map(channelGroupedByType, (channelArray, key) => {
-      return (<div key={`${key}`} style={STYLES.wrapper}>
-        <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={channelGroupTitles[key] || key}/>
-          {channelArray.map((actualIndex, index) => {
-            let channel = channels[actualIndex];
-            return (
-              <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
-                                    image={this.props.image}
-                                    index={actualIndex}
-                                    channelDataReady={channel.dataReady}
-                                    name={formatChannelName(channel.name)}
-                                    checked={channel.channelEnabled}
-                                    onChange={this.makeOnCheckHandler(actualIndex)}
-                                    onColorChange={this.props.onColorChange}
-                                    onColorChangeComplete={this.props.onColorChangeComplete}
-                                    volumeChecked={channel.volumeEnabled}
-                                    onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
-                                    isosurfaceChecked={channel.isosurfaceEnabled}
-                                    onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
-                                    onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                    onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                    onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
-                                    onOpacityChange={this.makeOnOpacityChange(actualIndex)}
-                                    updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                                    isovalue={channel.isovalue}
-                                    opacity={channel.opacity}
-                                    color={channel.color}/>
-            );
-          })}
-      </div>);
+      return (
+        <div key={`${key}`} style={STYLES.wrapper}>
+          <CardHeader 
+            key={`${key}`} 
+            style={STYLES.header} 
+            title={channelGroupTitles[key] || key
+            }>
+            <div style={STYLES.buttonRow}>
+              <FlatButton 
+                style={STYLES.button} 
+                label="All volumes on" 
+                onClick={() => this.showVolumes(channelArray)} 
+                id={key}
+                />
+              <FlatButton
+                style={STYLES.button}
+                label="All surfaces on"
+                onClick={() => this.showSurfaces(channelArray)}
+                id={key}
+              />
+            </div>
+
+            </CardHeader>
+            {channelArray.map((actualIndex, index) => {
+              let channel = channels[actualIndex];
+              return (
+                <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
+                                      image={this.props.image}
+                                      index={actualIndex}
+                                      channelDataReady={channel.dataReady}
+                                      name={formatChannelName(channel.name)}
+                                      checked={channel.channelEnabled}
+                                      onChange={this.makeOnCheckHandler(actualIndex)}
+                                      onColorChange={this.props.onColorChange}
+                                      onColorChangeComplete={this.props.onColorChangeComplete}
+                                      volumeChecked={channel.volumeEnabled}
+                                      onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
+                                      isosurfaceChecked={channel.isosurfaceEnabled}
+                                      onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
+                                      onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
+                                      onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
+                                      onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
+                                      onOpacityChange={this.makeOnOpacityChange(actualIndex)}
+                                      updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                      isovalue={channel.isovalue}
+                                      opacity={channel.opacity}
+                                      color={channel.color}/>
+              );
+            })}
+        </div>);
     });
   }
 
@@ -144,31 +164,27 @@ export default class ChannelsWidget extends React.Component {
   render() {
     if (!this.props.image) return null;
 
-    const segButtonDisabled = this.isSegButtonDisabled();
-    const obsButtonDisabled = this.isObsButtonDisabled();
     return (
-      <div style={STYLES.wrapper}>
-        <div style={STYLES.buttonRow}>
-          <div className="clearfix" style={STYLES.presetRow}>
-            <FlatButton style={STYLES.button} label="Seg" onClick={this.showSegmentationChannels} disabled={segButtonDisabled}/>
-            <FlatButton style={STYLES.button} label="Obs" onClick={this.showObservedChannels} disabled={obsButtonDisabled}/>
-    
-          </div>
-        </div>
         <div style={STYLES.wrapper}>
           {this.getRows()}
         </div>
-      </div>
     );
   }
 }
 
 const STYLES = {
   wrapper: {
-    width: '100%'
+    width: '100%',
+    padding: 0
+  },
+  header: {
+    textAlign: 'left', 
+    fontWeight: 900,
+    paddingLeft: 0
   },
   buttonRow: {
-    display: 'flex'
+    display: 'flex',
+    flexFlow: 'row wrap'
   },
   button: {
     marginTop: '0.3em',
