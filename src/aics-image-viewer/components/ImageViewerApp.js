@@ -133,8 +133,8 @@ export default class ImageViewerApp extends React.Component {
     this.onUpdateImageMaxProjectionMode = this.onUpdateImageMaxProjectionMode.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
-    this.showVolumes = this.showVolumes.bind(this);
-    this.showSurfaces = this.showSurfaces.bind(this);
+    this.toggleVolumes = this.toggleVolumes.bind(this);
+    this.toggleSurfaces = this.toggleSurfaces.bind(this);
     this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
 
@@ -376,17 +376,16 @@ export default class ImageViewerApp extends React.Component {
 
   /**
    * Toggles checkboxes and channels in 3d view
-   * @param names string array of channel names
-   * @param onOrOff boolean - when true all channels that have a name inside of names array
-   * will be turned off and the rest will be turned off. When false, vice versa.
+   * @param indexes string array of channel indexes to toggle
+   * @param turnOn boolean - determines if channels in array should get turned on or off
    */
-  showVolumes(indexes, onOrOff) {
+  toggleVolumes(indexes, turnOn) {
 
     this.setState((prevState) => {
 
       if (prevState.image) {
         prevState.channels.forEach((channel, index) => {
-          const enabled = indexes.indexOf(index) > -1 ? onOrOff : !onOrOff;
+          const enabled = includes(indexes, index) ? turnOn : !turnOn;
           prevState.image.setVolumeChannelEnabled(index, enabled);
       
         });
@@ -395,19 +394,19 @@ export default class ImageViewerApp extends React.Component {
 
       return {
         channels: prevState.channels.map((channel, index) => {
-          return { ...channel, volumeEnabled: indexes.indexOf(index) > -1 ? onOrOff : channel.volumeEnabled };
+          return { ...channel, volumeEnabled: includes(indexes, index) ? turnOn : channel.volumeEnabled };
         })
       };
     });
   }
 
-  showSurfaces(indexes, onOrOff) {
+  toggleSurfaces(indexes, turnOn) {
 
     this.setState((prevState) => {
 
       if (prevState.image) {
         prevState.channels.forEach((channel, index) => {
-          const enabled = indexes.indexOf(index) > -1 ? onOrOff : !onOrOff;
+          const enabled = includes(indexes, index) ? turnOn : !turnOn;
           if (prevState.image.hasIsosurface(index)) {
             if (!enabled) {
               prevState.image.destroyIsosurface(index);
@@ -423,7 +422,7 @@ export default class ImageViewerApp extends React.Component {
 
       return {
         channels: prevState.channels.map((channel, index) => {
-          return { ...channel, isosurfaceEnabled: indexes.indexOf(index) > -1 ? onOrOff : channel.isosurfaceEnabled };
+          return { ...channel, isosurfaceEnabled: includes(indexes, index) ? turnOn : channel.isosurfaceEnabled };
         })
       };
     });
@@ -669,8 +668,8 @@ export default class ImageViewerApp extends React.Component {
                     onUpdateImageMaxProjectionMode={this.onUpdateImageMaxProjectionMode}
                     setImageAxisClip={this.setImageAxisClip}
                     onApplyColorPresets={this.onApplyColorPresets}
-                    showVolumes={this.showVolumes}
-                    showSurfaces={this.showSurfaces}
+                    showVolumes={this.toggleVolumes}
+                    showSurfaces={this.toggleSurfaces}
               />
             </MenuDrawer>
         </div>
