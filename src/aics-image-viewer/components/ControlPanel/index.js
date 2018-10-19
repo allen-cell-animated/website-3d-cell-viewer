@@ -1,5 +1,13 @@
 import React from 'react';
-import { Card, CardText, Toolbar, FlatButton, IconMenu, IconButton, MenuItem} from 'material-ui';
+import { 
+  Card, 
+  CardText,
+  Toolbar, 
+  FlatButton, 
+  IconMenu, 
+  IconButton, 
+  MenuItem
+} from 'material-ui';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";

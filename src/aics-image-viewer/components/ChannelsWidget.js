@@ -2,12 +2,8 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
-  Card,
   CardHeader, 
-  FlatButton, 
-  IconButton, 
-  IconMenu,
-   MenuItem
+  FlatButton
 } from 'material-ui';
 
 import UtilsService from '../shared/utils/utilsService';
@@ -124,41 +120,35 @@ export default class ChannelsWidget extends React.Component {
               />
             </div>
 
-            </CardHeader>
-            {channelArray.map((actualIndex, index) => {
-              let channel = channels[actualIndex];
-              return (
-                <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
-                                      image={this.props.image}
-                                      index={actualIndex}
-                                      channelDataReady={channel.dataReady}
-                                      name={formatChannelName(channel.name)}
-                                      checked={channel.channelEnabled}
-                                      onChange={this.makeOnCheckHandler(actualIndex)}
-                                      onColorChange={this.props.onColorChange}
-                                      onColorChangeComplete={this.props.onColorChangeComplete}
-                                      volumeChecked={channel.volumeEnabled}
-                                      onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
-                                      isosurfaceChecked={channel.isosurfaceEnabled}
-                                      onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
-                                      onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                      onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                      onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
-                                      onOpacityChange={this.makeOnOpacityChange(actualIndex)}
-                                      updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                                      isovalue={channel.isovalue}
-                                      opacity={channel.opacity}
-                                      color={channel.color}/>
-              );
-            })}
+          </CardHeader>
+          {channelArray.map((actualIndex, index) => {
+            let channel = channels[actualIndex];
+            return (
+              <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
+                                    image={this.props.image}
+                                    index={actualIndex}
+                                    channelDataReady={channel.dataReady}
+                                    name={formatChannelName(channel.name)}
+                                    checked={channel.channelEnabled}
+                                    onChange={this.makeOnCheckHandler(actualIndex)}
+                                    onColorChange={this.props.onColorChange}
+                                    onColorChangeComplete={this.props.onColorChangeComplete}
+                                    volumeChecked={channel.volumeEnabled}
+                                    onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
+                                    isosurfaceChecked={channel.isosurfaceEnabled}
+                                    onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
+                                    onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
+                                    onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
+                                    onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
+                                    onOpacityChange={this.makeOnOpacityChange(actualIndex)}
+                                    updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                    isovalue={channel.isovalue}
+                                    opacity={channel.opacity}
+                                    color={channel.color}/>
+            );
+          })}
         </div>);
     });
-  }
-
-  componentWillReceiveProps(nextProps) {
-  }
-
-  componentWillMount() {
   }
 
   render() {

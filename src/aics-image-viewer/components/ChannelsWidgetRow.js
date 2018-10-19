@@ -96,7 +96,7 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `vol_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label={"volume"}
+        label="volume"
         checked={this.props.volumeChecked || false}
         onCheck={this.props.onVolumeCheckboxChange}
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
@@ -111,7 +111,7 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `iso_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label={"surface"}
+        label="surface"
         checked={this.props.isosurfaceChecked || false}
         onCheck={this.props.onIsosurfaceChange}
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
