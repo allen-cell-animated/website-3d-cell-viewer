@@ -380,51 +380,20 @@ export default class ImageViewerApp extends React.Component {
    * @param turnOn boolean - determines if channels in array should get turned on or off
    */
   toggleVolumes(indexes, turnOn) {
-
-    this.setState((prevState) => {
-
-      if (prevState.image) {
-        prevState.channels.forEach((channel, index) => {
-          const enabled = includes(indexes, index) ? turnOn : !turnOn;
-          prevState.image.setVolumeChannelEnabled(index, enabled);
-      
-        });
-        prevState.image.fuse();
-      }
-
-      return {
-        channels: prevState.channels.map((channel, index) => {
-          return { ...channel, volumeEnabled: includes(indexes, index) ? turnOn : channel.volumeEnabled };
-        })
-      };
+    const { channels } = this.state;
+    this.setState({
+      channels: channels.map((channel, index) => {
+        return { ...channel, volumeEnabled: includes(indexes, index) ? turnOn : channel.volumeEnabled };
+      })
     });
   }
 
   toggleSurfaces(indexes, turnOn) {
-
-    this.setState((prevState) => {
-
-      if (prevState.image) {
-        prevState.channels.forEach((channel, index) => {
-          const enabled = includes(indexes, index) ? turnOn : !turnOn;
-          if (prevState.image.hasIsosurface(index)) {
-            if (!enabled) {
-              prevState.image.destroyIsosurface(index);
-            }
-          }
-          else {
-            if (enabled) {
-              prevState.image.createIsosurface(index, channel.isovalue, channel.opacity);
-            }
-          }
-        });
-      }
-
-      return {
-        channels: prevState.channels.map((channel, index) => {
+    const { channels } = this.state;
+    this.setState({
+      channels: channels.map((channel, index) => {
           return { ...channel, isosurfaceEnabled: includes(indexes, index) ? turnOn : channel.isosurfaceEnabled };
         })
-      };
     });
   }
 
