@@ -173,20 +173,23 @@ export default class ChannelsWidgetRow extends React.Component {
     } else { return null; }
   }
 
+  renderCardHeaderTitle() {
+    return (
+      <div key={this.props.index} style={STYLES.row}>
+        {this.createColorPicker()}
+        {<span style={STYLES.channelName}>{this.props.name}</span>}
+        {this.createVolumeCheckbox()}
+        {this.createIsosurfaceCheckbox()}
+      </div>
+    );
+  }
+
   render() {
     let id = `channel_checkbox${this.props.index}`;
     return (
       <Card key={this.props.index} className='row-card' style={STYLES.rowCard}>
         <CardHeader 
-          title={
-            (
-              <div key={this.props.index} style={STYLES.row}>
-                {this.createColorPicker()}
-                {<span style={STYLES.channelName}>{this.props.name}</span>}
-                {this.createVolumeCheckbox()}
-                {this.createIsosurfaceCheckbox()}
-              </div>
-            )}
+          title={this.renderCardHeaderTitle()}
           style={STYLES.header} 
           titleStyle={STYLES.headerTextStyle}
           showExpandableButton={true} 
@@ -213,13 +216,13 @@ export default class ChannelsWidgetRow extends React.Component {
 
 const STYLES = {
   header: {
-    padding: '0.25em',
+    padding: '0.25em'
   },
   headerTextStyle: {
-    display: 'flex',
+    display: 'flex'
   },
   headerSubTitleTextStyle: {
-    display: 'flex',
+    display: 'flex'
   },
   cardIcon: { 
     fill: colorPalette.primary1Color, 
