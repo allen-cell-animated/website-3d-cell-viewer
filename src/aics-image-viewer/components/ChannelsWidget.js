@@ -2,10 +2,11 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
-  CardHeader, 
-  FlatButton
+  CardHeader,
+  IconButton
 } from 'material-ui';
 
+import colorPalette from './shared/colorPalette';
 import UtilsService from '../shared/utils/utilsService';
 import formatChannelName from '../shared/utils/formatChannelNames';
 
@@ -31,9 +32,11 @@ export default class ChannelsWidget extends React.Component {
     this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
     this.makeOnSaveIsosurfaceHandler = this.makeOnSaveIsosurfaceHandler.bind(this);
     this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
+    this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
     this.showSurfaces = this.showSurfaces.bind(this);
-
+    this.hideVolumes = this.hideVolumes.bind(this);
+    this.hideSurfaces = this.hideSurfaces.bind(this);
   }
 
   isSegButtonDisabled() {
@@ -52,6 +55,14 @@ export default class ChannelsWidget extends React.Component {
 
   showSurfaces(channelArray) {
     this.props.showSurfaces(channelArray, true);
+  }
+
+  hideVolumes(channelArray) {
+    this.props.showVolumes(channelArray, false);
+  }
+
+  hideSurfaces(channelArray) {
+    this.props.showSurfaces(channelArray, false);
   }
 
   makeOnCheckHandler(index) {
@@ -94,6 +105,48 @@ export default class ChannelsWidget extends React.Component {
     };
   }
 
+  renderVisiblityControls(key, channelArray) {
+    return (
+      <div style={STYLES.buttonRow}>
+        All volumes:
+        <IconButton 
+          style={STYLES.button}
+          label="on"
+          onClick={() => this.showVolumes(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility</i>
+        </IconButton>
+        <IconButton
+          style={STYLES.button}
+          label="off"
+          onClick={() => this.hideVolumes(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility_off</i>
+        </IconButton>
+        All surfaces:
+        <IconButton
+          style={STYLES.button}
+          label="on"
+          onClick={() => this.showSurfaces(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility</i>
+        </IconButton>
+        <IconButton
+          style={STYLES.button}
+          label="off"
+          onClick={() => this.hideSurfaces(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility_off</i>
+        </IconButton>
+      </div>
+
+    );
+  }
+
   getRows() {
     const { channelGroupedByType, channels} = this.props;
 
@@ -105,20 +158,8 @@ export default class ChannelsWidget extends React.Component {
             style={STYLES.header} 
             title={channelGroupTitles[key] || key
             }>
-            <div style={STYLES.buttonRow}>
-              <FlatButton 
-                style={STYLES.button} 
-                label="All volumes on" 
-                onClick={() => this.showVolumes(channelArray)} 
-                id={key}
-                />
-              <FlatButton
-                style={STYLES.button}
-                label="All surfaces on"
-                onClick={() => this.showSurfaces(channelArray)}
-                id={key}
-              />
-            </div>
+              {this.renderVisiblityControls(key, channelArray)}
+  
 
           </CardHeader>
           {channelArray.map((actualIndex, index) => {
@@ -174,11 +215,15 @@ const STYLES = {
   },
   buttonRow: {
     display: 'flex',
-    flexFlow: 'row wrap'
+    flexFlow: 'row wrap',
+    justifyContent: 'flex-end'
   },
   button: {
-    marginTop: '0.3em',
-    display: 'inline-block'
+    display: 'inline-block',
+    minWidth: 'initial',
+    height: 'initial',
+    color: colorPalette.primary1Color,
+    padding: 0
   },
   presetRow: {
     width: '100%'
