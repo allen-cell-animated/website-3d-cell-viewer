@@ -96,7 +96,7 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `vol_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label={"volume"}
+        label="volume"
         checked={this.props.volumeChecked || false}
         onCheck={this.props.onVolumeCheckboxChange}
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
@@ -111,7 +111,7 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `iso_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label={"isosurface"}
+        label="surface"
         checked={this.props.isosurfaceChecked || false}
         onCheck={this.props.onIsosurfaceChange}
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
@@ -119,6 +119,19 @@ export default class ChannelsWidgetRow extends React.Component {
         id={id}
         style={STYLES.channelCheckbox}
       />
+    );
+  }
+
+  createColorPicker() {
+    return (
+      <div style={STYLES.colorPicker}>
+        <ColorPicker color={this.props.color}
+          onColorChange={this.props.onColorChange}
+          onColorChangeComplete={this.props.onColorChangeComplete}
+          idx={this.props.index}
+          width={18}
+          name={this.props.name} />
+      </div>
     );
   }
 
@@ -160,47 +173,35 @@ export default class ChannelsWidgetRow extends React.Component {
     } else { return null; }
   }
 
+  renderCardHeaderTitle() {
+    return (
+      <div key={this.props.index} style={STYLES.row}>
+        {this.createColorPicker()}
+        {<span style={STYLES.channelName}>{this.props.name}</span>}
+        {this.createVolumeCheckbox()}
+        {this.createIsosurfaceCheckbox()}
+      </div>
+    );
+  }
+
   render() {
     let id = `channel_checkbox${this.props.index}`;
     return (
       <Card key={this.props.index} className='row-card' style={STYLES.rowCard}>
-        <CardHeader style={STYLES.header} showExpandableButton={true} iconStyle={STYLES.cardIcon} closeIcon={<Edit />}>
-          <div key={this.props.index} style={STYLES.row}>
-          <div style={STYLES.colorPicker}>
-            <ColorPicker color={this.props.color}
-                           onColorChange={this.props.onColorChange}
-                           onColorChangeComplete={this.props.onColorChangeComplete}
-                           idx={this.props.index}
-                           width={18}
-                           name={this.props.name}/>
-          </div>
-            <div 
-              className="channel-checkbox-container" 
-              style={STYLES.channelCheckboxContainer}
-              data-toggle="tooltip"
-              data-placement="bottom"
-              title={this.props.name}>
-              <Checkbox
-                label={this.props.name}
-                checked={this.props.checked || false}
-                onCheck={this.props.onChange}
-                checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
-                uncheckedIcon={<VisibilityOff style={STYLES.uncheckedIcon}/>}
-                iconStyle={STYLES.iconStyle}
-                id={id}
-                style={STYLES.channelCheckbox}
-                labelStyle={STYLES.channelCheckboxLabel}
-              />
-            </div>
-          </div>
+        <CardHeader 
+          title={this.renderCardHeaderTitle()}
+          style={STYLES.header} 
+          titleStyle={STYLES.headerTextStyle}
+          showExpandableButton={true} 
+          iconStyle={STYLES.cardIcon} 
+          >
         </CardHeader>
+
         <CardText expandable={true} className="channel-options-card" style={STYLES.channelOptionsCard}>
           <div className="volume-options column" style={STYLES.column}>
-          {this.createVolumeCheckbox()}
           {this.createTFEditor()}
           </div>
           <div className="surface-options column" style={STYLES.column}>
-          {this.createIsosurfaceCheckbox()}
           {this.createIsovalueSlider()}
           {this.createOpacitySlider()}
           {this.createSaveIsosurfaceSTLButton()}
@@ -215,12 +216,21 @@ export default class ChannelsWidgetRow extends React.Component {
 
 const STYLES = {
   header: {
-    padding: '0.25em',
-    height: 45
+    padding: '0.25em'
+  },
+  headerTextStyle: {
+    display: 'flex'
+  },
+  headerSubTitleTextStyle: {
+    display: 'flex'
   },
   cardIcon: { 
     fill: colorPalette.primary1Color, 
     color: colorPalette.primary1Color 
+  },
+  channelName: {
+    display: 'inline-block',
+    width: 160
   },
   checkedIcon: { fill: colorPalette.textColor },
   uncheckedIcon: { fill: colorPalette.accent3Color },
@@ -230,9 +240,6 @@ const STYLES = {
   column: {
     flex: '1 1 100%'
   },
-  flexContainer: {
-    flex: '0 1'
-  },
   rowCard: {
     backgroundColor: 'none',
     borderRadius: 'none',
@@ -240,35 +247,19 @@ const STYLES = {
     zIndex: 'inital'
   },
   row: {
-    position: 'absolute',
-    top: 10,
     display: 'flex',
-    flex: 1,
-    justifyContent: 'space-evenly'
+    flexFlow: 'row wrap',
+    justifyContent: 'flex-start'
   },
   raisedButton: {
     marginLeft: '2px',
     marginRight: '2px'
   },
-  channelCheckboxContainer: {
-    flex: 4,
-    margin: 'auto'
-  },
-  sliderInset: {
-    display: 'flex',
-    flexFlow:'row wrap',
-    padding: 0,
-    paddingLeft: '45px'
-  },
-  channelCheckboxLabel: {
-    width: '75%',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    overflow: 'hidden'
-  },
   channelCheckbox: {
-   fontSize: 14,
-   width: 'initial'
+    fontSize: 14,
+    width: 'initial',
+    margin: 'auto',
+    marginRight: 16
   },
   colorPicker: {
     flex: 1,

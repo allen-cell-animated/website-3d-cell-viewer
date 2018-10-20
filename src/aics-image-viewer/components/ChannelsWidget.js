@@ -2,13 +2,12 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
-  CardHeader, 
-  FlatButton, 
-  IconButton, 
-  IconMenu,
-   MenuItem
+  Card,
+  CardHeader,
+  IconButton
 } from 'material-ui';
 
+import colorPalette from './shared/colorPalette';
 import UtilsService from '../shared/utils/utilsService';
 import formatChannelName from '../shared/utils/formatChannelNames';
 
@@ -34,10 +33,11 @@ export default class ChannelsWidget extends React.Component {
     this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
     this.makeOnSaveIsosurfaceHandler = this.makeOnSaveIsosurfaceHandler.bind(this);
     this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
-    this.showSegmentationChannels = this.showSegmentationChannels.bind(this);
-    this.showObservedChannels = this.showObservedChannels.bind(this);
-
-
+    this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
+    this.showVolumes = this.showVolumes.bind(this);
+    this.showSurfaces = this.showSurfaces.bind(this);
+    this.hideVolumes = this.hideVolumes.bind(this);
+    this.hideSurfaces = this.hideSurfaces.bind(this);
   }
 
   isSegButtonDisabled() {
@@ -50,14 +50,20 @@ export default class ChannelsWidget extends React.Component {
     return UtilsService.intersects(OBSERVED_CHANNELS, names);
   }
 
-
-
-  showSegmentationChannels() {
-    this.props.showChannels(SEGMENTATION_CHANNELS, true);
+  showVolumes(channelArray) {
+    this.props.showVolumes(channelArray, true);
   }
 
-  showObservedChannels() {
-    this.props.showChannels(OBSERVED_CHANNELS, true);
+  showSurfaces(channelArray) {
+    this.props.showSurfaces(channelArray, true);
+  }
+
+  hideVolumes(channelArray) {
+    this.props.showVolumes(channelArray, false);
+  }
+
+  hideSurfaces(channelArray) {
+    this.props.showSurfaces(channelArray, false);
   }
 
   makeOnCheckHandler(index) {
@@ -100,11 +106,64 @@ export default class ChannelsWidget extends React.Component {
     };
   }
 
+  renderVisiblityControls(key, channelArray) {
+    return (
+      <div style={STYLES.buttonRow}>
+        All volumes:
+        <IconButton 
+          style={STYLES.button}
+          label="on"
+          onClick={() => this.showVolumes(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility</i>
+        </IconButton>
+        <IconButton
+          style={STYLES.button}
+          label="off"
+          onClick={() => this.hideVolumes(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility_off</i>
+        </IconButton>
+        All surfaces:
+        <IconButton
+          style={STYLES.button}
+          label="on"
+          onClick={() => this.showSurfaces(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility</i>
+        </IconButton>
+        <IconButton
+          style={STYLES.button}
+          label="off"
+          onClick={() => this.hideSurfaces(channelArray)}
+          id={key}
+        >
+          <i className="material-icons">visibility_off</i>
+        </IconButton>
+      </div>
+
+    );
+  }
+
   getRows() {
     const { channelGroupedByType, channels} = this.props;
+
     return map(channelGroupedByType, (channelArray, key) => {
-      return (<div key={`${key}`} style={STYLES.wrapper}>
-        <CardHeader key={`${key}`} style={{ textAlign: 'left', paddingLeft: 0 }} title={channelGroupTitles[key] || key}/>
+      return (
+        <Card key={`${key}`} style={STYLES.wrapper}>
+          <CardHeader 
+            key={`${key}`} 
+            style={STYLES.header} 
+            titleStyle={STYLES.headerTitle}
+            title={channelGroupTitles[key] || key}
+            >
+            {this.renderVisiblityControls(key, channelArray)}
+  
+
+          </CardHeader>
           {channelArray.map((actualIndex, index) => {
             let channel = channels[actualIndex];
             return (
@@ -131,48 +190,47 @@ export default class ChannelsWidget extends React.Component {
                                     color={channel.color}/>
             );
           })}
-      </div>);
+        </Card>);
     });
-  }
-
-  componentWillReceiveProps(nextProps) {
-  }
-
-  componentWillMount() {
   }
 
   render() {
     if (!this.props.image) return null;
 
-    const segButtonDisabled = this.isSegButtonDisabled();
-    const obsButtonDisabled = this.isObsButtonDisabled();
     return (
-      <div style={STYLES.wrapper}>
-        <div style={STYLES.buttonRow}>
-          <div className="clearfix" style={STYLES.presetRow}>
-            <FlatButton style={STYLES.button} label="Seg" onClick={this.showSegmentationChannels} disabled={segButtonDisabled}/>
-            <FlatButton style={STYLES.button} label="Obs" onClick={this.showObservedChannels} disabled={obsButtonDisabled}/>
-    
-          </div>
-        </div>
         <div style={STYLES.wrapper}>
           {this.getRows()}
         </div>
-      </div>
     );
   }
 }
 
 const STYLES = {
   wrapper: {
-    width: '100%'
+    width: '100%',
+    padding: 0,
+  },
+  header: {
+    textAlign: 'left', 
+    fontWeight: 900,
+    borderBottom: `0.5px solid ${colorPalette.disabledColor}`
+  },
+  headerTitle: {
+    fontWeight: 700,
+    fontSize:'1.125rem'
   },
   buttonRow: {
-    display: 'flex'
+    display: 'flex',
+    flexFlow: 'row wrap',
+    justifyContent: 'flex-end',
+
   },
   button: {
-    marginTop: '0.3em',
-    display: 'inline-block'
+    display: 'inline-block',
+    minWidth: 'initial',
+    height: 'initial',
+    color: colorPalette.primary1Color,
+    padding: 0
   },
   presetRow: {
     width: '100%'
