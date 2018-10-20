@@ -2,6 +2,7 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
+  Card,
   CardHeader,
   IconButton
 } from 'material-ui';
@@ -152,13 +153,14 @@ export default class ChannelsWidget extends React.Component {
 
     return map(channelGroupedByType, (channelArray, key) => {
       return (
-        <div key={`${key}`} style={STYLES.wrapper}>
+        <Card key={`${key}`} style={STYLES.wrapper}>
           <CardHeader 
             key={`${key}`} 
             style={STYLES.header} 
-            title={channelGroupTitles[key] || key
-            }>
-              {this.renderVisiblityControls(key, channelArray)}
+            titleStyle={STYLES.headerTitle}
+            title={channelGroupTitles[key] || key}
+            >
+            {this.renderVisiblityControls(key, channelArray)}
   
 
           </CardHeader>
@@ -188,7 +190,7 @@ export default class ChannelsWidget extends React.Component {
                                     color={channel.color}/>
             );
           })}
-        </div>);
+        </Card>);
     });
   }
 
@@ -206,17 +208,22 @@ export default class ChannelsWidget extends React.Component {
 const STYLES = {
   wrapper: {
     width: '100%',
-    padding: 0
+    padding: 0,
   },
   header: {
     textAlign: 'left', 
     fontWeight: 900,
-    paddingLeft: 0
+    borderBottom: `0.5px solid ${colorPalette.disabledColor}`
+  },
+  headerTitle: {
+    fontWeight: 700,
+    fontSize:'1.125rem'
   },
   buttonRow: {
     display: 'flex',
     flexFlow: 'row wrap',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+
   },
   button: {
     display: 'inline-block',
