@@ -194,7 +194,7 @@ export default class ChannelsWidgetRow extends React.Component {
           titleStyle={STYLES.headerTextStyle}
           showExpandableButton={true} 
           iconStyle={STYLES.cardIcon} 
-          closeIcon={<Edit />}>
+          >
         </CardHeader>
 
         <CardText expandable={true} className="channel-options-card" style={STYLES.channelOptionsCard}>
