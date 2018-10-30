@@ -1,13 +1,14 @@
 import React from 'react';
 import { 
-  Card, 
-  CardText,
-  Toolbar, 
   FlatButton, 
   IconMenu, 
   IconButton, 
   MenuItem
 } from 'material-ui';
+
+import { 
+  Card
+} from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
@@ -63,24 +64,33 @@ export default class ViewerControlPanel extends React.Component {
   render() {
     return (
 
-      <Card style={STYLES.wrapper} open={this.state.open} className="control-panel">
-        <Toolbar style={STYLES.toolbar}>
-          <ViewModeRadioButtons 
-            image={this.props.image}
-            onViewModeChange={this.props.onViewModeChange}
-          />
-          {this.createAutorotateControls()}
-          <IconMenu className="float-right"
-            style={STYLES.button}
-            iconButtonElement={<IconButton><i className="material-icons">color_lens</i></IconButton>}
-            anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-            targetOrigin={{ horizontal: 'right', vertical: 'top' }}>
-            <MenuItem primaryText="Color preset 1" onClick={this.makeTurnOnPresetFn(1)} />
-            <MenuItem primaryText="Color preset 2" onClick={this.makeTurnOnPresetFn(2)} />
-            <MenuItem primaryText="Color preset 3" onClick={this.makeTurnOnPresetFn(3)} />
-          </IconMenu>
-        </Toolbar>
-        {this.props.image ? <CardText>
+      <Card 
+        style={STYLES.wrapper} 
+        open={this.state.open} 
+        className="control-panel"
+        actions={[this.createAutorotateControls()]}
+        extra={(
+        <IconMenu
+          style={STYLES.button}
+          iconButtonElement={<IconButton><i className="material-icons">color_lens</i></IconButton>}
+          anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+          targetOrigin={{ horizontal: 'right', vertical: 'top' }}>
+          <MenuItem primaryText="Color preset 1" onClick={this.makeTurnOnPresetFn(1)} />
+          <MenuItem primaryText="Color preset 2" onClick={this.makeTurnOnPresetFn(2)} />
+          <MenuItem primaryText="Color preset 3" onClick={this.makeTurnOnPresetFn(3)} />
+        </IconMenu>)
+        }
+        title={
+            <ViewModeRadioButtons
+              image={this.props.image}
+              onViewModeChange={this.props.onViewModeChange}
+            />
+            
+    
+        }
+        >
+
+        {this.props.image ? <div>
           <ChannelsWidget
             image={this.props.image}
             channels={this.props.channels}
@@ -111,7 +121,7 @@ export default class ViewerControlPanel extends React.Component {
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
           />
-        </CardText> : null}
+        </div> : null}
       </Card>
     );
   }
@@ -132,10 +142,6 @@ const STYLES = {
     justifyContent: 'center',
     width: '100%',
     height: '100%'
-  },
-  toolbar: {
-    backgroundColor: 'none',
-    borderBottom: '0.5px solid gray'
   },
   button: {
     margin: 'auto',

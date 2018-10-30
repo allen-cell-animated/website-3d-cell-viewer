@@ -1,27 +1,36 @@
 import React from 'react';
 import {
-  Card,
   CardHeader,
   CardText,
   Checkbox,
   RaisedButton,
   Slider
 } from 'material-ui';
+
+import { 
+  Icon, 
+  Collapse, 
+  List,
+}
+from 'antd';
+const Panel = Collapse.Panel;
+
 import Visibility from 'material-ui/svg-icons/action/visibility';
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
-import Edit from 'material-ui/svg-icons/image/edit';
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
-import '../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
-import './tf-editor.html';
+import '../../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
+import '../tf-editor.html';
 import 'react-polymer';
 
-import colorPalette from './shared/colorPalette';
+import colorPalette from '../shared/colorPalette';
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX
-} from '../shared/constants';
+} from '../../shared/constants';
 
-import ColorPicker from './ColorPicker.js';
+import ColorPicker from '../ColorPicker.js';
+
+import './styles.scss';
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -50,12 +59,6 @@ export default class ChannelsWidgetRow extends React.Component {
       this.tfeditor.setData(this.props.index, this.props.image.channelData.channels[this.props.index]);
       this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
     }
-  }
-
-  componentWillUnmount() {
-    // if (this.tfeditor) {
-    //   this.tfeditor.destroy();
-    // }
   }
 
   createIsovalueSlider() {
@@ -99,6 +102,7 @@ export default class ChannelsWidgetRow extends React.Component {
         label="volume"
         checked={this.props.volumeChecked || false}
         onCheck={this.props.onVolumeCheckboxChange}
+        labelPosition="left"
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
         uncheckedIcon={<VisibilityOff style={STYLES.uncheckedIcon}/>}
         id={id}
@@ -114,6 +118,7 @@ export default class ChannelsWidgetRow extends React.Component {
         label="surface"
         checked={this.props.isosurfaceChecked || false}
         onCheck={this.props.onIsosurfaceChange}
+        labelPosition="left"
         checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
         uncheckedIcon={<VisibilityOff style={STYLES.uncheckedIcon}/>}
         id={id}
@@ -173,96 +178,100 @@ export default class ChannelsWidgetRow extends React.Component {
     } else { return null; }
   }
 
+  renderSubHeader() {
+    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox()];
+  }
+
   renderCardHeaderTitle() {
     return (
-      <div key={this.props.index} style={STYLES.row}>
-        {this.createColorPicker()}
+      <div key={this.props.index} >
         {<span style={STYLES.channelName}>{this.props.name}</span>}
-        {this.createVolumeCheckbox()}
-        {this.createIsosurfaceCheckbox()}
       </div>
+    );
+  }
+
+  renderCollapseHeader() {
+    return (
+      <List.Item
+        key={this.props.index}
+        className='row-card'
+        actions={this.renderSubHeader()}
+      >
+        <List.Item.Meta
+          title={this.renderCardHeaderTitle()}
+          avatar={this.createColorPicker()}
+        />
+      </List.Item>
+
     );
   }
 
   render() {
     let id = `channel_checkbox${this.props.index}`;
     return (
-      <Card key={this.props.index} className='row-card' style={STYLES.rowCard}>
-        <CardHeader 
-          title={this.renderCardHeaderTitle()}
-          style={STYLES.header} 
-          titleStyle={STYLES.headerTextStyle}
-          showExpandableButton={true} 
-          iconStyle={STYLES.cardIcon} 
-          >
-        </CardHeader>
-
-        <CardText expandable={true} className="channel-options-card" style={STYLES.channelOptionsCard}>
+      <div>
+      {this.renderCollapseHeader()}
+      <Collapse 
+        bordered={false} 
+        className="channel-options-card" 
+        >
+        <Panel
+          header={(
+          <Icon 
+            type="setting" 
+            theme="filled" 
+            style={{ fontSize: '1.2em'}}
+            />
+          )}
+          key={id}
+          showArrow={false}
+        >
           <div className="volume-options column" style={STYLES.column}>
-          {this.createTFEditor()}
+            {this.createTFEditor()}
           </div>
           <div className="surface-options column" style={STYLES.column}>
-          {this.createIsovalueSlider()}
-          {this.createOpacitySlider()}
-          {this.createSaveIsosurfaceSTLButton()}
-          {this.createSaveIsosurfaceGLTFButton()}
+            {this.createIsovalueSlider()}
+            {this.createOpacitySlider()}
+            {this.createSaveIsosurfaceSTLButton()}
+            {this.createSaveIsosurfaceGLTFButton()}
           </div>
-        </CardText>
-      </Card>
-
+        </Panel>
+      </Collapse>
+      </div>
     );
   }
 }
 
 const STYLES = {
-  header: {
-    padding: '0.25em'
-  },
-  headerTextStyle: {
-    display: 'flex'
-  },
-  headerSubTitleTextStyle: {
-    display: 'flex'
-  },
-  cardIcon: { 
-    fill: colorPalette.primary1Color, 
-    color: colorPalette.primary1Color 
-  },
   channelName: {
     display: 'inline-block',
     width: 160
   },
-  checkedIcon: { fill: colorPalette.textColor },
-  uncheckedIcon: { fill: colorPalette.accent3Color },
-  channelOptionsCard:{
-    display: 'flex'
+  checkedIcon: { 
+    fill: colorPalette.textColor 
+  },
+  uncheckedIcon: { 
+    fill: colorPalette.accent3Color 
   },
   column: {
     flex: '1 1 100%'
   },
-  rowCard: {
-    backgroundColor: 'none',
-    borderRadius: 'none',
-    boxShadow: 'none',
-    zIndex: 'inital'
-  },
   row: {
     display: 'flex',
     flexFlow: 'row wrap',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    width: '100%',
   },
   raisedButton: {
     marginLeft: '2px',
     marginRight: '2px'
   },
   channelCheckbox: {
-    fontSize: 14,
     width: 'initial',
     margin: 'auto',
-    marginRight: 16
+    width: '30%',
   },
   colorPicker: {
-    flex: 1,
     margin: 'auto',
     marginRight: 16
   },
