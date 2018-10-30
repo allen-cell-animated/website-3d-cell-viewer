@@ -307,7 +307,7 @@ export default class AxisClipSliders extends React.Component {
                            showPlay={this.state.playButtons.stop || this.state.playButtons.pause} /> : <div style={STYLES.placeholder}></div>;
     return (
       <div className="clip-sliders" >
-        <h4 className="sectionSubHeader">
+        <h4 className="sectionSubHeader" style={STYLES.header}>
           Region of interest clipping
         </h4>
         <div className="sectionBody">
@@ -333,6 +333,9 @@ const STYLES = {
   slider: {
     flex: 7,
     marginTop: '0.5em'
+  },
+  header: {
+    color: 'white',
   },
   sliderName: {
     flex: 1
