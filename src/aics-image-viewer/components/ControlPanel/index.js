@@ -1,13 +1,10 @@
 import React from 'react';
-import { 
-  FlatButton, 
-  IconMenu, 
-  IconButton, 
-  MenuItem
-} from 'material-ui';
 
 import { 
-  Card
+  Card,
+  Button,
+  Dropdown,
+  Menu,
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -35,25 +32,24 @@ export default class ViewerControlPanel extends React.Component {
     this.setState({open: !this.state.open});
   }
 
-  makeTurnOnPresetFn(preset) {
-    return () => {
-      if (this.presetMap.has(preset)) {
-        const presets = this.presetMap.get(preset);
-
-        this.props.onApplyColorPresets(presets);
-      }
-    };
+  makeTurnOnPresetFn({ key }) {
+    const presets = this.presetMap.get(Number(key));
+    this.props.onApplyColorPresets(presets);
   }
 
   createAutorotateControls() {
     const {
       autorotate
     } = this.props;
-    const buttonType = autorotate ? "pause_circle_outline" : "play_circle_outline";
+    const buttonType = autorotate ? "pause-circle" : "play-circle";
     return (
-      <FlatButton onClick={this.handleAutorotateCheck} style={STYLES.button}>
-        <i className="mdc-fab__icon material-icons" style={{ verticalAlign: 'middle' }}>{buttonType}</i> Turntable
-      </FlatButton>
+      <Button 
+        icon={buttonType} 
+        onClick={this.handleAutorotateCheck} 
+      >
+        Turntable
+      </Button>
+
     );
   }
 
@@ -62,34 +58,31 @@ export default class ViewerControlPanel extends React.Component {
   }
 
   render() {
+    const dropDownMenuItems = (
+      <Menu onClick={this.makeTurnOnPresetFn}>
+        {Array.from(this.presetMap.keys()).map(key => <Menu.Item key={key}>Color preset {key}</Menu.Item>)}
+      </Menu>
+    );
     return (
-
       <Card 
         style={STYLES.wrapper} 
         open={this.state.open} 
         className="control-panel"
-        actions={[this.createAutorotateControls()]}
-        extra={(
-        <IconMenu
-          style={STYLES.button}
-          iconButtonElement={<IconButton><i className="material-icons">color_lens</i></IconButton>}
-          anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-          targetOrigin={{ horizontal: 'right', vertical: 'top' }}>
-          <MenuItem primaryText="Color preset 1" onClick={this.makeTurnOnPresetFn(1)} />
-          <MenuItem primaryText="Color preset 2" onClick={this.makeTurnOnPresetFn(2)} />
-          <MenuItem primaryText="Color preset 3" onClick={this.makeTurnOnPresetFn(3)} />
-        </IconMenu>)
-        }
+        extra={
+          <div>
+            {this.createAutorotateControls()}
+            <Dropdown
+                overlay={dropDownMenuItems}
+              >
+              <Button shape="circle" icon="bg-colors" />
+            </Dropdown>
+          </div>}
         title={
             <ViewModeRadioButtons
               image={this.props.image}
               onViewModeChange={this.props.onViewModeChange}
-            />
-            
-    
-        }
+            />}
         >
-
         {this.props.image ? <div>
           <ChannelsWidget
             image={this.props.image}
@@ -127,12 +120,6 @@ export default class ViewerControlPanel extends React.Component {
   }
 }
 const STYLES = {
-  wrapper: {
-    height: '100%',
-    boxShadow: 'none',
-    borderRadius: 0,
-    backgroundColor: 'none'
-  },
   channelsWidget: {
     padding: 0,
   },

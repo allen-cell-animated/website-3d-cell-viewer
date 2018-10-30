@@ -1,13 +1,10 @@
 import React from 'react';
 import Nouislider from 'react-nouislider';
 import NumericInput from 'react-numeric-input';
-import { 
-  Checkbox,
-  CardHeader,
-} from 'material-ui';
 
 import {
-  Card
+  Card,
+  Checkbox,
 } from 'antd';
 
 export default class View3dControls extends React.Component {
@@ -28,28 +25,6 @@ export default class View3dControls extends React.Component {
     };
   }
 
-  createSliderRow(config) {
-    return (
-      <div style={STYLES.controlRow}>
-        <div style={STYLES.controlName}>{config.label}</div>
-        <div style={STYLES.control}>
-          {this.createSlider(config.start, config.range, config.onUpdate)}
-        </div>
-      </div>
-    );
-  }
-
-  createSlider(start, range, onUpdate) {
-    return (
-      <Nouislider
-        range={range}
-        start={start}
-        behaviour="drag"
-        connect={true}
-        onUpdate={onUpdate}/>
-    );
-  }
-
   handleMaskMenuItemClick(i) {
     this.props.image.setChannelAsMask(i);
   }
@@ -65,7 +40,7 @@ export default class View3dControls extends React.Component {
       onUpdate: (values, handle, unencoded, tap, positions) => {
         let val = values[0] / 100.0;
         this.props.onUpdateImageMaskAlpha(val);
-        this.setState({maskAlphaSlider:unencoded[0]});
+        this.setState({ maskAlphaSlider: unencoded[0] });
       }
     };
     return this.createSliderRow(config);
@@ -112,8 +87,8 @@ export default class View3dControls extends React.Component {
       label: 'levels',
       start: [this.state.levelsSlider[0], this.state.levelsSlider[1], this.state.levelsSlider[2]],
       range: {
-        'min': 0,
-        'max': 255
+        min: 0,
+        max: 255
       },
       onUpdate: (values, handle, unencoded, tap, positions) => {
         let minThumb = unencoded[0];
@@ -184,20 +159,9 @@ export default class View3dControls extends React.Component {
     this.props.onAutorotateChange();
   }
 
-  handleMaxProjectionCheck(event, checked) {
-    this.setState({maxProjectionChecked:checked});
-    this.props.onUpdateImageMaxProjectionMode(checked);
-  }
-
-  createProjectionModeControls() {
-    return (
-      <Checkbox
-        label={"Max projection"}
-        checked={this.state.maxProjectionChecked}
-        onCheck={this.handleMaxProjectionCheck}
-        style={STYLES.controlRow}
-      />
-    );
+  handleMaxProjectionCheck({target}) {
+    this.setState({ maxProjectionChecked: target.checked });
+    this.props.onUpdateImageMaxProjectionMode(target.checked);
   }
 
   componentWillReceiveProps(newProps) {
@@ -207,6 +171,7 @@ export default class View3dControls extends React.Component {
   }
 
   shouldComponentUpdate(newProps, newState) {
+
     // TODO add better identifiers of images than name (like an id)
     const receivingImageForFirstTime = !this.props.image && !!newProps.image;
     const imageExists = !!newProps.image && !!this.props.image;
@@ -219,19 +184,54 @@ export default class View3dControls extends React.Component {
       (newState.maxProjectionChecked !== this.state.maxProjectionChecked);
   }
 
+
+  createSliderRow(config) {
+    return (
+      <div style={STYLES.controlRow}>
+        <div style={STYLES.controlName}>{config.label}</div>
+        <div style={STYLES.control}>
+          {this.createSlider(config.start, config.range, config.onUpdate)}
+        </div>
+      </div>
+    );
+  }
+
+  createSlider(start, range, onUpdate) {
+    return (
+      <Nouislider
+        range={range}
+        start={start}
+        connected={true}
+        behavior="drag"
+        onUpdate={onUpdate} 
+        />
+    );
+  }
+
+  createProjectionModeControls() {
+    return (
+      <Checkbox
+        checked={this.state.maxProjectionChecked}
+        onChange={this.handleMaxProjectionCheck}
+      >Max projection
+      </Checkbox>
+    );
+  }
+
   render() {
     if (!this.props.image) return null;
 
     return (
-      <Card type="inner">
-
-      <div style={STYLES.controlsWrapper}>
-      <CardHeader title="Global volume rendering settings" />
+      <Card 
+        extra={this.createProjectionModeControls()}
+        title="Global volume rendering settings"
+        type="inner">
+        <div style={STYLES.slidersWrapper}>
         {this.createMaskAlphaSlider()}
         {this.createBrightnessSlider()}
         {this.createDensitySlider()}
         {this.createLevelsSlider()}
-        {this.createProjectionModeControls()}
+          
       </div>
     </Card>);
   }
@@ -239,7 +239,8 @@ export default class View3dControls extends React.Component {
 
 const STYLES = {
   slidersWrapper: {
-    width: 'calc(100% - 17px)'
+    width: 'calc(100% - 20px)',
+    margin: 'auto',
   },
   controlRow: {
     height: '3em',
@@ -251,6 +252,7 @@ const STYLES = {
   },
   control: {
     flex: 5,
-    height: 30
+    height: 30,
+    marginTop: 15,
   }
 };

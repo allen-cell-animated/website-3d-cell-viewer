@@ -2,7 +2,6 @@ import React from 'react';
 import { map } from 'lodash';
 
 import {
-  CardHeader,
   IconButton,
 } from 'material-ui';
 
@@ -113,7 +112,6 @@ export default class ChannelsWidget extends React.Component {
   renderVisiblityControls(key, channelArray) {
     return (
       <div style={STYLES.buttonRow}>
-        <div style={STYLES.controls}></div>
         <div className="volume-controls" style={STYLES.controls}>
           <label>
           All volumes
@@ -170,16 +168,16 @@ export default class ChannelsWidget extends React.Component {
           title={channelGroupTitles[key] || key}
           extra={this.renderVisiblityControls(key, channelArray)}
           type="inner"
+          key={key}
 
         >
               <List 
                 itemLayout="horizontal"
-
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
                   const channel = channels[actualIndex];           
                   return (
-                  <ChannelsWidgetRow key={`${actualIndex}_${channel.name}_${actualIndex}`}
+                  <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
                                         image={this.props.image}
                                         index={actualIndex}
                                         channelDataReady={channel.dataReady}
@@ -227,7 +225,7 @@ const STYLES = {
   },
   controls: {
     width: '30%',
-    margin: 'auto',
+    marginLeft: 'auto',
   },
   buttonRow: {
     display: 'flex',
