@@ -1,9 +1,14 @@
 import React from 'react';
 import Nouislider from 'react-nouislider';
 import NumericInput from 'react-numeric-input';
-import { Checkbox } from 'material-ui';
+import { 
+  Checkbox,
+  CardHeader,
+} from 'material-ui';
 
-import DropdownMenu from './shared/DropdownMenu';
+import {
+  Card
+} from 'antd';
 
 export default class View3dControls extends React.Component {
   constructor(props) {
@@ -217,24 +222,22 @@ export default class View3dControls extends React.Component {
   render() {
     if (!this.props.image) return null;
 
-    return (<div style={STYLES.wrapper}>
+    return (
+      <Card type="inner">
 
       <div style={STYLES.controlsWrapper}>
-      <h4>Global volume rendering settings</h4>
+      <CardHeader title="Global volume rendering settings" />
         {this.createMaskAlphaSlider()}
         {this.createBrightnessSlider()}
         {this.createDensitySlider()}
         {this.createLevelsSlider()}
         {this.createProjectionModeControls()}
       </div>
-    </div>);
+    </Card>);
   }
 }
 
 const STYLES = {
-  wrapper: {
-    margin: '2em 0'
-  },
   slidersWrapper: {
     width: 'calc(100% - 17px)'
   },

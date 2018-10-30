@@ -8,8 +8,6 @@
 }
 
 .control-panel {
-  flex-direction:column;
-  display: flex;
   flex: 1 auto;
   order: 1;
   overflow-y: scroll;
@@ -17,6 +15,9 @@
   border-right: 0.5px solid #D0D8DB;
   .card-title {
     padding: 2px;
+  }
+  .ant-card-body{
+    padding: 0;
   }
   //slider settings
   @extend %axis-override;
