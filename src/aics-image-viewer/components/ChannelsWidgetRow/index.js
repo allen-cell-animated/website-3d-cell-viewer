@@ -1,16 +1,16 @@
 import React from 'react';
 import {
-  CardHeader,
-  CardText,
   Checkbox,
-  RaisedButton,
   Slider
 } from 'material-ui';
 
-import { 
+import {
+  Button,
   Icon, 
   Collapse, 
   List,
+  Col,
+  Row,
 }
 from 'antd';
 const Panel = Collapse.Panel;
@@ -64,34 +64,42 @@ export default class ChannelsWidgetRow extends React.Component {
   createIsovalueSlider() {
     const isoRange = { min: 0, max: 255 };
     return (
-      <div style={STYLES.controlRow} className="slider-row">
+      <Row>
+        <Col span={10}>
+          <label style={STYLES.controlName}>isovalue</label>
+        </Col>
+        <Col span={12}>          
           <Slider
-            name="isovalue"
-            disabled={!this.props.isosurfaceChecked}
-            min={isoRange.min || 0}
-            max={isoRange.max || 225}
-            defaultValue={ISOVALUE_DEFAULT}
-            sliderStyle={STYLES.slider}
-            onChange={this.props.onIsovalueChange}/>
-          <div style={STYLES.controlName}>isovalue</div>
-      </div>
+              name="isovalue"
+              disabled={!this.props.isosurfaceChecked}
+              min={isoRange.min || 0}
+              max={isoRange.max || 225}
+              defaultValue={ISOVALUE_DEFAULT}
+              sliderStyle={STYLES.slider}
+              onChange={this.props.onIsovalueChange}/>
+        </Col>
+      </Row>
     );
   }
 
   createOpacitySlider() {
     const range = {min:0, max:ISOSURFACE_OPACITY_SLIDER_MAX};
     return (
-      <div style={STYLES.controlRow} className="slider-row">
-        <Slider
-          name="opacity"
-          disabled={!this.props.isosurfaceChecked}
-          min={range.min}
-          max={range.max}
-          defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
-          sliderStyle={STYLES.slider}
-          onChange={this.props.onOpacityChange}/>
-        <div style={STYLES.controlName}>opacity</div>
-      </div>
+      <Row>
+        <Col span={10}>
+          <label style={STYLES.controlName}>opacity</label>
+        </Col>
+        <Col span={12}>   
+          <Slider
+            name="opacity"
+            disabled={!this.props.isosurfaceChecked}
+            min={range.min}
+            max={range.max}
+            defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
+            sliderStyle={STYLES.slider}
+            onChange={this.props.onOpacityChange}/>
+        </Col>
+      </Row>
     );
   }
 
@@ -142,23 +150,23 @@ export default class ChannelsWidgetRow extends React.Component {
 
   createSaveIsosurfaceGLTFButton() {
     return (
-      <RaisedButton
-        label="Save GLTF"
+      <Button
         disabled={!this.props.isosurfaceChecked}
         onClick={this.props.onSaveIsosurfaceGLTF}
         style={STYLES.raisedButton}
-      />
+      >Save GLTF
+      </Button>
     );
   }
 
   createSaveIsosurfaceSTLButton() {
     return (
-      <RaisedButton
-        label="Save STL"
+      <Button
         disabled={!this.props.isosurfaceChecked}
         onClick={this.props.onSaveIsosurfaceSTL}
         style={STYLES.raisedButton}
-      />
+      >Save STL
+      </Button>
     );
   }
 
@@ -226,15 +234,17 @@ export default class ChannelsWidgetRow extends React.Component {
           key={id}
           showArrow={false}
         >
-          <div className="volume-options column" style={STYLES.column}>
-            {this.createTFEditor()}
-          </div>
-          <div className="surface-options column" style={STYLES.column}>
-            {this.createIsovalueSlider()}
-            {this.createOpacitySlider()}
-            {this.createSaveIsosurfaceSTLButton()}
-            {this.createSaveIsosurfaceGLTFButton()}
-          </div>
+        <Row>
+            <Col span={12}>
+              {this.createTFEditor()}
+            </Col>
+            <Col span={12}>
+              {this.createIsovalueSlider()}
+              {this.createOpacitySlider()}
+              {this.createSaveIsosurfaceSTLButton()}
+              {this.createSaveIsosurfaceGLTFButton()}
+            </Col>
+          </Row>
         </Panel>
       </Collapse>
       </div>
@@ -253,15 +263,6 @@ const STYLES = {
   uncheckedIcon: { 
     fill: colorPalette.accent3Color 
   },
-  column: {
-    flex: '1 1 100%'
-  },
-  row: {
-    display: 'flex',
-    flexFlow: 'row wrap',
-    justifyContent: 'flex-start',
-    width: '100%',
-  },
   raisedButton: {
     marginLeft: '2px',
     marginRight: '2px'
@@ -275,17 +276,9 @@ const STYLES = {
     margin: 'auto',
     marginRight: 16
   },
-  control: {
-    flex: 5,
-    height: 30
-  },
   slider: {
     marginBottom: '4px',
     marginTop: '4px'
-  },
-  controlRow: {
-    flex: '1 100%',
-    margin:'4px'
   },
   controlName: {
     whiteSpace: 'nowrap'
