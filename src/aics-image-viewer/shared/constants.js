@@ -19,8 +19,8 @@ export const
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
 
-  DOWNLOAD_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
-  IMAGE_SERVER = 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Thumbnails/',
+  DOWNLOAD_SERVER = process.env.DOWNLOAD_SERVER,
+  IMAGE_SERVER = process.env.IMAGE_SERVER,
 
   OBSERVED_CHANNEL_KEY = 'observed',
   SEGMENATION_CHANNEL_KEY = 'segmentation',
