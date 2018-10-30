@@ -8,7 +8,6 @@ import {
   AICSvolumeDrawable, 
   AICSvolumeLoader 
 } from 'volume-viewer';
-import 'bootstrap/dist/css/bootstrap.css';
 
 import HttpClient from '../shared/utils/httpClient';
 import UtilsService from '../shared/utils/utilsService';
