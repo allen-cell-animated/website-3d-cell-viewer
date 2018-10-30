@@ -234,7 +234,7 @@ export default class ChannelsWidgetRow extends React.Component {
           key={id}
           showArrow={false}
         >
-        <Row>
+        <Row type="flex" justify="space-between">
             <Col span={12}>
               {this.createTFEditor()}
             </Col>
