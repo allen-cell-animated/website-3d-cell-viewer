@@ -1,8 +1,12 @@
 const path = require('path');
 const webpack = require('webpack');
+const fs = require('fs');
+
+const lessToJs = require('less-vars-to-js');
+const themeVariables = lessToJs(fs.readFileSync(path.join(__dirname, './src/aics-image-viewer/styles/ant-vars.less'), 'utf8'));
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ExtractPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: ['babel-polyfill', './public/index.js'],
@@ -15,7 +19,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-    new ExtractPlugin('bundle.[hash].css'),
+    new ExtractTextPlugin('bundle.[hash].css'),
     new webpack.DefinePlugin({
       APP_VERSION: JSON.stringify(require("./package.json").version)
     }),
@@ -45,7 +49,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        loader: ExtractPlugin.extract({
+        loader: ExtractTextPlugin.extract({
           use: [
             {
               loader: 'css-loader',
@@ -70,6 +74,39 @@ module.exports = {
           'style-loader',
           'css-loader'
         ]
+      },
+      {
+          loader: 'babel-loader',
+          exclude: /node_modules/,
+          test: /\.js$/,
+          options: {
+              plugins: [
+                  ['import', { libraryName: "antd", style: true }]
+              ]
+          },
+      },
+      {
+        test: /\.less$/,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: "css-loader",
+              options: {
+                camelCase: true,
+                importLoaders: 1
+              }
+
+            },
+            {
+              loader: "less-loader",
+              options: {
+                javascriptEnabled: true,
+                modifyVars: themeVariables,
+
+              }
+            }
+          ]
+        })
       },
       {
         test: /\.(woff|woff2|tff|eot|glyph|svg)$/,

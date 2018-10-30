@@ -1,12 +1,11 @@
  #cell-viewer {
-
-   h4{
+  body {
+     font-family: 'Overpass-Light';
+  }
+   h1, h2, h3, h4 {
      font-family: 'Merriweather Sans';
-     font-weight: 700;
-     font-size: 1.125rem
    }
    p {
-     font-family: 'Overpass-Light';
      font-weight: 300;
      font-size: 1rem;
    }

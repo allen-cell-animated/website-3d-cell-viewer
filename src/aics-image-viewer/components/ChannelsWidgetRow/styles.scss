@@ -1,0 +1,32 @@
+@import "../../assets/styles/variables";
+
+.control-panel {
+    .ant-card-body {
+        padding: 0;
+    }
+    .ant-list-item {
+        padding: 0;
+    }
+    .ant-collapse-item {
+
+        .ant-collapse-header {
+            padding: 0.25rem 1rem;
+
+            text-align: right;
+        }
+    }
+    .row-card.ant-list-item {
+        border-bottom: none;
+    }
+    .ant-card-extra {
+        label {
+            font-size: 12px;
+        }
+    }
+    .row-card {
+        padding: 1rem 1rem 0.5rem 1rem;
+    }
+    .ant-collapse-borderless {
+        background-color: $background-gray;
+    }
+}
