@@ -18,7 +18,7 @@ import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../shared/constants';
 
-import ChannelsWidgetRow from './ChannelsWidgetRow/index';
+import ChannelsWidgetRow from './ChannelsWidgetRow';
 
 import { channelGroupTitles } from '../shared/enums/channelGroups';
 

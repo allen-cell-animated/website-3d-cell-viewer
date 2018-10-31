@@ -19,7 +19,7 @@ import Visibility from 'material-ui/svg-icons/action/visibility';
 import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
-import '../../../../node_modules/@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
+import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
 import '../tf-editor.html';
 import 'react-polymer';
 
@@ -268,7 +268,6 @@ const STYLES = {
     marginRight: '2px'
   },
   channelCheckbox: {
-    width: 'initial',
     margin: 'auto',
     width: '30%',
   },
