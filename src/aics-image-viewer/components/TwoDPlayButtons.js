@@ -4,7 +4,9 @@ import {
   Input } from 'antd';
 
 import BoxRadioButtonGroup from './shared/BoxRadioButtonGroup';
-import { ThicknessUnit, STRING_TO_SYMBOL } from '../shared/enums/thicknessUnit';
+import thicknessUnit from '../shared/enums/thicknessUnit';
+
+const ThicknessUnit = thicknessUnit.mainMapping;
 
 export default class TwoDPlayButtons extends React.Component {
   constructor(props) {
@@ -18,7 +20,7 @@ export default class TwoDPlayButtons extends React.Component {
   }
 
   handleButtonGroupChange(stringMode) {
-    let mode = STRING_TO_SYMBOL[stringMode];
+    let mode = thicknessUnit.STRING_TO_SYMBOL[stringMode];
     this.props.setUnit(mode);
   }
 

@@ -2,13 +2,13 @@ import React from 'react';
 import { AICSview3d } from 'volume-viewer';
 import { CircularProgress, FlatButton, FontIcon } from 'material-ui';
 
-import { VIEW_MODE_ENUM_TO_LABEL_MAP } from '../../shared/enumDisplayMap';
-import { ViewMode } from '../../shared/enums/viewModeEnum';
+import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders.js';
 
 import './styles.scss';
 
+const ViewMode = viewMode.mainMapping;
 const VIEW_3D_VIEWER = 'view3dviewer';
 
 export default class ViewerWrapper extends React.Component {
@@ -29,7 +29,7 @@ export default class ViewerWrapper extends React.Component {
 
  componentWillReceiveProps(newProps) {
    if (this.view3D && this.props.mode && this.props.mode !== newProps.mode) {
-     this.view3D.setCameraMode(VIEW_MODE_ENUM_TO_LABEL_MAP.get(newProps.mode));
+     this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newProps.mode));
    }
    if (this.view3D && this.props.autorotate !== newProps.autorotate) {
      this.view3D.setAutoRotate(newProps.autorotate);

@@ -2,10 +2,12 @@ import * as _ from 'lodash';
 import Nouislider from 'react-nouislider';
 import React from 'react';
 
-import { ThicknessUnit } from '../shared/enums/thicknessUnit';
-import { ViewMode } from '../shared/enums/viewModeEnum';
+import enums from '../shared/enums';
 
 import TwoDPlayButtons from './TwoDPlayButtons';
+
+const ViewMode = enums.viewMode.mainMapping;
+const ThicknessUnit = enums.thicknessUnit.mainMapping;
 
 const AXES = Object.freeze(['x', 'y', 'z']);
 const VIEWMODES = Object.freeze([ViewMode.yz, ViewMode.xz, ViewMode.xy]);

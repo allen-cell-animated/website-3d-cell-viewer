@@ -11,8 +11,7 @@ import {
 
 import HttpClient from '../shared/utils/httpClient';
 import UtilsService from '../shared/utils/utilsService';
-import { ViewMode } from '../shared/enums/viewModeEnum';
-import { channelGroupingMap } from '../shared/enums/channelGroups';
+import enums from '../shared/enums';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
@@ -33,6 +32,9 @@ import ViewerWrapper from './CellViewerCanvasWrapper';
 
 import '../assets/styles/globals.scss';
 import '../assets/styles/no-ui-slider.min.scss';
+
+const ViewMode = enums.viewMode.mainMapping;
+const channelGroupingMap = enums.channelGroups.channelGroupingMap;
 
 const muiTheme = getMuiTheme({
   fontFamily: 'Overpass, sans-serif',
