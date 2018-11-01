@@ -1,12 +1,8 @@
 import React from 'react';
-import { map } from 'lodash';
+import { map, filter } from 'lodash';
 
 import {
-  IconButton,
-} from 'material-ui';
-
-import {
-  Card, 
+  Card,
   List,
 } from 'antd';
 
@@ -18,6 +14,7 @@ import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../shared/constants';
 
+import SharedCheckBox from './shared/SharedCheckBox';
 import ChannelsWidgetRow from './ChannelsWidgetRow';
 
 import { channelGroupTitles } from '../shared/enums/channelGroups';
@@ -76,17 +73,17 @@ export default class ChannelsWidget extends React.Component {
   }
 
   makeOnVolumeCheckHandler(index) {
-    return (event, value) => {
+    return ({ target }) => {
       if (this.props.setVolumeEnabled) {
-        this.props.setVolumeEnabled(index, value);
+        this.props.setVolumeEnabled(index, target.checked);
       }
     };
   }
 
   makeOnIsosurfaceCheckHandler(index) {
-    return (event, value) => {
+    return ({ target }) => {
       if (this.props.setIsosurfaceEnabled) {
-        this.props.setIsosurfaceEnabled(index, value);
+        this.props.setIsosurfaceEnabled(index, target.checked);
       }
     };
   }
@@ -110,50 +107,25 @@ export default class ChannelsWidget extends React.Component {
   }
 
   renderVisiblityControls(key, channelArray) {
+    const { channels} = this.props;
+    const volChecked = filter(channelArray, channelIndex => channels[channelIndex].volumeEnabled);
+    const isoChecked = filter(channelArray, channelIndex => channels[channelIndex].isosurfaceEnabled);
     return (
       <div style={STYLES.buttonRow}>
-        <div className="volume-controls" style={STYLES.controls}>
-          <label>
-          All volumes
-          </label>
-          <IconButton 
-            style={STYLES.button}
-            label="on"
-            onClick={() => this.showVolumes(channelArray)}
-            id={key}
-          >
-            <i className="material-icons">visibility</i>
-          </IconButton>
-          <IconButton
-            style={STYLES.button}
-            label="off"
-            onClick={() => this.hideVolumes(channelArray)}
-            id={key}
-          >
-            <i className="material-icons">visibility_off</i>
-          </IconButton>
-        </div>
-        <div className="surface-controls" style={STYLES.controls}>
-          <label>
-          All surfaces
-          </label>
-          <IconButton
-            style={STYLES.button}
-            label="on"
-            onClick={() => this.showSurfaces(channelArray)}
-            id={key}
-          >
-            <i className="material-icons">visibility</i>
-          </IconButton>
-          <IconButton
-            style={STYLES.button}
-            label="off"
-            onClick={() => this.hideSurfaces(channelArray)}
-            id={key}
-          >
-            <i className="material-icons">visibility_off</i>
-          </IconButton>
-        </div>
+          <SharedCheckBox 
+            allOptions={channelArray}
+            checkedList={volChecked} 
+            label="All volumes"
+            onChecked={this.showVolumes}
+            onUnchecekd={this.hideVolumes}
+          />
+          <SharedCheckBox
+            allOptions={channelArray}
+            checkedList={isoChecked}
+            label="All surfaces"
+            onChecked={this.showSurfaces}
+            onUnchecekd={this.hideSurfaces}
+          />
       </div>
 
     );
@@ -222,10 +194,6 @@ const STYLES = {
   header: {
     textAlign: 'left', 
     fontWeight: 900,
-  },
-  controls: {
-    width: '30%',
-    marginLeft: 'auto',
   },
   buttonRow: {
     display: 'flex',
