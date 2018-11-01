@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-  Checkbox,
-  Slider
+  Slider,
 } from 'material-ui';
 
 import {
@@ -11,12 +10,10 @@ import {
   List,
   Col,
   Row,
+  Checkbox,
 }
 from 'antd';
-const Panel = Collapse.Panel;
 
-import Visibility from 'material-ui/svg-icons/action/visibility';
-import VisibilityOff from 'material-ui/svg-icons/action/visibility-off';
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
 import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
@@ -32,6 +29,7 @@ import ColorPicker from '../ColorPicker.js';
 
 import './styles.scss';
 
+const Panel = Collapse.Panel;
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
 
@@ -107,15 +105,12 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `vol_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label="volume"
-        checked={this.props.volumeChecked || false}
-        onCheck={this.props.onVolumeCheckboxChange}
-        labelPosition="left"
-        checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
-        uncheckedIcon={<VisibilityOff style={STYLES.uncheckedIcon}/>}
+        checked={this.props.volumeChecked }
+        onChange={this.props.onVolumeCheckboxChange}
         id={id}
-        style={STYLES.channelCheckbox}
-      />
+      >
+        volume
+      </ Checkbox>
     );
   }
 
@@ -123,15 +118,13 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `iso_checkbox${this.props.index}`;
     return (
       <Checkbox
-        label="surface"
-        checked={this.props.isosurfaceChecked || false}
-        onCheck={this.props.onIsosurfaceChange}
-        labelPosition="left"
-        checkedIcon={<Visibility style={STYLES.checkedIcon}/>}
-        uncheckedIcon={<VisibilityOff style={STYLES.uncheckedIcon}/>}
+        checked={this.props.isosurfaceChecked }
+        onChange={this.props.onIsosurfaceChange}
+        style={{width: 120}}
         id={id}
-        style={STYLES.channelCheckbox}
-      />
+        >
+        surface
+      </Checkbox>
     );
   }
 
@@ -266,10 +259,6 @@ const STYLES = {
   raisedButton: {
     marginLeft: '2px',
     marginRight: '2px'
-  },
-  channelCheckbox: {
-    margin: 'auto',
-    width: '30%',
   },
   colorPicker: {
     margin: 'auto',

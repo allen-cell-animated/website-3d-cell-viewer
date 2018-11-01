@@ -2,8 +2,6 @@
 import React from 'react';
 import { includes } from 'lodash';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import colorPalette from './shared/colorPalette';
 import { 
   AICSvolumeDrawable, 
   AICSvolumeLoader 
@@ -36,10 +34,6 @@ import '../assets/styles/no-ui-slider.min.scss';
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
 
-const muiTheme = getMuiTheme({
-  fontFamily: 'Overpass, sans-serif',
-  palette: colorPalette
-});
 const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
 
@@ -598,7 +592,7 @@ export default class ImageViewerApp extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider >
         <div className="cell-viewer-app">
           <MenuDrawer 
               controlPanelOpen={this.state.controlPanelOpen}>
