@@ -1,7 +1,6 @@
 // 3rd Party Imports
 import React from 'react';
 import { includes } from 'lodash';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import { 
   AICSvolumeDrawable, 
   AICSvolumeLoader 
@@ -592,7 +591,6 @@ export default class ImageViewerApp extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider >
         <div className="cell-viewer-app">
           <MenuDrawer 
               controlPanelOpen={this.state.controlPanelOpen}>
@@ -637,7 +635,6 @@ export default class ImageViewerApp extends React.Component {
               />
             </MenuDrawer>
         </div>
-      </MuiThemeProvider>
     );
   }
 

@@ -89,7 +89,7 @@ export default class ChannelsWidget extends React.Component {
   }
 
   makeOnIsovalueChange(index) {
-    return (values, newValue) => {
+    return (newValue) => {
       this.props.updateIsovalue(index, newValue);
     };
   }
@@ -101,7 +101,7 @@ export default class ChannelsWidget extends React.Component {
   }
 
   makeOnOpacityChange(index) {
-    return (values, newValue) => {
+    return (newValue) => {
       this.props.updateIsosurfaceOpacity(index, newValue/ISOSURFACE_OPACITY_SLIDER_MAX);
     };
   }

@@ -1,7 +1,4 @@
 import React from 'react';
-import {
-  Slider,
-} from 'material-ui';
 
 import {
   Button,
@@ -11,6 +8,7 @@ import {
   Col,
   Row,
   Checkbox,
+  Slider,
 }
 from 'antd';
 
