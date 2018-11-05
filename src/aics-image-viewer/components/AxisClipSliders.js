@@ -2,10 +2,12 @@ import * as _ from 'lodash';
 import Nouislider from 'react-nouislider';
 import React from 'react';
 
-import { ThicknessUnit } from '../shared/enums/thicknessUnit';
-import { ViewMode } from '../shared/enums/viewModeEnum';
+import enums from '../shared/enums';
 
 import TwoDPlayButtons from './TwoDPlayButtons';
+
+const ViewMode = enums.viewMode.mainMapping;
+const ThicknessUnit = enums.thicknessUnit.mainMapping;
 
 const AXES = Object.freeze(['x', 'y', 'z']);
 const VIEWMODES = Object.freeze([ViewMode.yz, ViewMode.xz, ViewMode.xy]);
@@ -307,7 +309,7 @@ export default class AxisClipSliders extends React.Component {
                            showPlay={this.state.playButtons.stop || this.state.playButtons.pause} /> : <div style={STYLES.placeholder}></div>;
     return (
       <div className="clip-sliders" >
-        <h4 className="sectionSubHeader">
+        <h4 className="sectionSubHeader" style={STYLES.header}>
           Region of interest clipping
         </h4>
         <div className="sectionBody">
@@ -333,6 +335,9 @@ const STYLES = {
   slider: {
     flex: 7,
     marginTop: '0.5em'
+  },
+  header: {
+    color: 'white',
   },
   sliderName: {
     flex: 1

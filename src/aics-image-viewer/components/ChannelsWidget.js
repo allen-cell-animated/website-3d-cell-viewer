@@ -1,11 +1,10 @@
 import React from 'react';
-import { map } from 'lodash';
+import { map, filter } from 'lodash';
 
 import {
   Card,
-  CardHeader,
-  IconButton
-} from 'material-ui';
+  List,
+} from 'antd';
 
 import colorPalette from './shared/colorPalette';
 import UtilsService from '../shared/utils/utilsService';
@@ -15,6 +14,7 @@ import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../shared/constants';
 
+import SharedCheckBox from './shared/SharedCheckBox';
 import ChannelsWidgetRow from './ChannelsWidgetRow';
 
 import { channelGroupTitles } from '../shared/enums/channelGroups';
@@ -73,23 +73,23 @@ export default class ChannelsWidget extends React.Component {
   }
 
   makeOnVolumeCheckHandler(index) {
-    return (event, value) => {
+    return ({ target }) => {
       if (this.props.setVolumeEnabled) {
-        this.props.setVolumeEnabled(index, value);
+        this.props.setVolumeEnabled(index, target.checked);
       }
     };
   }
 
   makeOnIsosurfaceCheckHandler(index) {
-    return (event, value) => {
+    return ({ target }) => {
       if (this.props.setIsosurfaceEnabled) {
-        this.props.setIsosurfaceEnabled(index, value);
+        this.props.setIsosurfaceEnabled(index, target.checked);
       }
     };
   }
 
   makeOnIsovalueChange(index) {
-    return (values, newValue) => {
+    return (newValue) => {
       this.props.updateIsovalue(index, newValue);
     };
   }
@@ -101,48 +101,31 @@ export default class ChannelsWidget extends React.Component {
   }
 
   makeOnOpacityChange(index) {
-    return (values, newValue) => {
+    return (newValue) => {
       this.props.updateIsosurfaceOpacity(index, newValue/ISOSURFACE_OPACITY_SLIDER_MAX);
     };
   }
 
   renderVisiblityControls(key, channelArray) {
+    const { channels} = this.props;
+    const volChecked = filter(channelArray, channelIndex => channels[channelIndex].volumeEnabled);
+    const isoChecked = filter(channelArray, channelIndex => channels[channelIndex].isosurfaceEnabled);
     return (
       <div style={STYLES.buttonRow}>
-        All volumes:
-        <IconButton 
-          style={STYLES.button}
-          label="on"
-          onClick={() => this.showVolumes(channelArray)}
-          id={key}
-        >
-          <i className="material-icons">visibility</i>
-        </IconButton>
-        <IconButton
-          style={STYLES.button}
-          label="off"
-          onClick={() => this.hideVolumes(channelArray)}
-          id={key}
-        >
-          <i className="material-icons">visibility_off</i>
-        </IconButton>
-        All surfaces:
-        <IconButton
-          style={STYLES.button}
-          label="on"
-          onClick={() => this.showSurfaces(channelArray)}
-          id={key}
-        >
-          <i className="material-icons">visibility</i>
-        </IconButton>
-        <IconButton
-          style={STYLES.button}
-          label="off"
-          onClick={() => this.hideSurfaces(channelArray)}
-          id={key}
-        >
-          <i className="material-icons">visibility_off</i>
-        </IconButton>
+          <SharedCheckBox 
+            allOptions={channelArray}
+            checkedList={volChecked} 
+            label="All volumes"
+            onChecked={this.showVolumes}
+            onUnchecekd={this.hideVolumes}
+          />
+          <SharedCheckBox
+            allOptions={channelArray}
+            checkedList={isoChecked}
+            label="All surfaces"
+            onChecked={this.showSurfaces}
+            onUnchecekd={this.hideSurfaces}
+          />
       </div>
 
     );
@@ -153,44 +136,46 @@ export default class ChannelsWidget extends React.Component {
 
     return map(channelGroupedByType, (channelArray, key) => {
       return (
-        <Card key={`${key}`} style={STYLES.wrapper}>
-          <CardHeader 
-            key={`${key}`} 
-            style={STYLES.header} 
-            titleStyle={STYLES.headerTitle}
-            title={channelGroupTitles[key] || key}
-            >
-            {this.renderVisiblityControls(key, channelArray)}
-  
+        <Card
+          title={channelGroupTitles[key] || key}
+          extra={this.renderVisiblityControls(key, channelArray)}
+          type="inner"
+          key={key}
 
-          </CardHeader>
-          {channelArray.map((actualIndex, index) => {
-            let channel = channels[actualIndex];
-            return (
-              <ChannelsWidgetRow key={`${index}_${channel.name}_${actualIndex}`}
-                                    image={this.props.image}
-                                    index={actualIndex}
-                                    channelDataReady={channel.dataReady}
-                                    name={formatChannelName(channel.name)}
-                                    checked={channel.channelEnabled}
-                                    onChange={this.makeOnCheckHandler(actualIndex)}
-                                    onColorChange={this.props.onColorChange}
-                                    onColorChangeComplete={this.props.onColorChangeComplete}
-                                    volumeChecked={channel.volumeEnabled}
-                                    onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
-                                    isosurfaceChecked={channel.isosurfaceEnabled}
-                                    onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
-                                    onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                    onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                    onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
-                                    onOpacityChange={this.makeOnOpacityChange(actualIndex)}
-                                    updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                                    isovalue={channel.isovalue}
-                                    opacity={channel.opacity}
-                                    color={channel.color}/>
-            );
-          })}
-        </Card>);
+        >
+              <List 
+                itemLayout="horizontal"
+                dataSource={channelArray}
+                renderItem={(actualIndex) => {
+                  const channel = channels[actualIndex];           
+                  return (
+                  <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
+                                        image={this.props.image}
+                                        index={actualIndex}
+                                        channelDataReady={channel.dataReady}
+                                        name={formatChannelName(channel.name)}
+                                        checked={channel.channelEnabled}
+                                        onChange={this.makeOnCheckHandler(actualIndex)}
+                                        onColorChange={this.props.onColorChange}
+                                        onColorChangeComplete={this.props.onColorChangeComplete}
+                                        volumeChecked={channel.volumeEnabled}
+                                        onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
+                                        isosurfaceChecked={channel.isosurfaceEnabled}
+                                        onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
+                                        onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
+                                        onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
+                                        onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
+                                        onOpacityChange={this.makeOnOpacityChange(actualIndex)}
+                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                        isovalue={channel.isovalue}
+                                        opacity={channel.opacity}
+                                        color={channel.color}
+                                        />
+                );}
+              }
+              />
+              </Card>
+        );
     });
   }
 
@@ -198,7 +183,7 @@ export default class ChannelsWidget extends React.Component {
     if (!this.props.image) return null;
 
     return (
-        <div style={STYLES.wrapper}>
+        <div>
           {this.getRows()}
         </div>
     );
@@ -206,31 +191,22 @@ export default class ChannelsWidget extends React.Component {
 }
 
 const STYLES = {
-  wrapper: {
-    width: '100%',
-    padding: 0,
-  },
   header: {
     textAlign: 'left', 
     fontWeight: 900,
-    borderBottom: `0.5px solid ${colorPalette.disabledColor}`
-  },
-  headerTitle: {
-    fontWeight: 700,
-    fontSize:'1.125rem'
   },
   buttonRow: {
     display: 'flex',
     flexFlow: 'row wrap',
     justifyContent: 'flex-end',
-
   },
   button: {
     display: 'inline-block',
     minWidth: 'initial',
     height: 'initial',
     color: colorPalette.primary1Color,
-    padding: 0
+    padding: 0,
+    width: 24,
   },
   presetRow: {
     width: '100%'

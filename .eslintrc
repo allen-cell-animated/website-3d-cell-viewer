@@ -12,7 +12,6 @@
     "react"
   ],
   "rules": {
-    "comma-dangle": 1,
     "comma-style": [1, "last"],
     "curly": [1, "multi-line"],
     "eol-last": 1,

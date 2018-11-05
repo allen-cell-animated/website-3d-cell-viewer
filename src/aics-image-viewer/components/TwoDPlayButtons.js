@@ -1,17 +1,27 @@
 import React from 'react';
-import { IconButton } from 'material-ui';
+import { 
+  Button, 
+  Input } from 'antd';
 
 import BoxRadioButtonGroup from './shared/BoxRadioButtonGroup';
-import { ThicknessUnit } from '../shared/enums/thicknessUnit';
+import thicknessUnit from '../shared/enums/thicknessUnit';
+
+const ThicknessUnit = thicknessUnit.mainMapping;
 
 export default class TwoDPlayButtons extends React.Component {
   constructor(props) {
     super(props);
     this.setWidth = this.setWidth.bind(this);
+    this.handleButtonGroupChange = this.handleButtonGroupChange.bind(this);
   }
 
   setWidth(event) {
     this.props.setWidth(event.target.valueAsNumber);
+  }
+
+  handleButtonGroupChange(stringMode) {
+    let mode = thicknessUnit.STRING_TO_SYMBOL[stringMode];
+    this.props.setUnit(mode);
   }
 
   render() {
@@ -19,20 +29,16 @@ export default class TwoDPlayButtons extends React.Component {
       {
         id: ThicknessUnit.percent.toString(),
         label: 'Percent',
-        onClick: () => {this.props.setUnit(ThicknessUnit.percent);}
       },
       {
         id: ThicknessUnit.slice.toString(),
         label: 'Slice(s)',
-        onClick: () => {this.props.setUnit(ThicknessUnit.slice);}
       }
     ];
 
     const onClick = this.props.showPlay ? this.props.play : this.props.pause;
-    const icon = this.props.showPlay ? 'play_arrow' : 'pause';
-    const playButton = <IconButton iconStyle={STYLES.icon} onClick={onClick}>
-      <i className="material-icons">{icon}</i>
-    </IconButton>;
+    const icon = this.props.showPlay ? 'caret-right' : 'pause';
+    const playButton = <Button type="primary" onClick={onClick} icon={icon} />;
 
     return (
       <div style={STYLES.wrapper}>
@@ -40,48 +46,31 @@ export default class TwoDPlayButtons extends React.Component {
           {this.props.min}, {this.props.max}
         </div>
         <div>
-          <input type="number" style={STYLES.numberInput} value={this.props.width} onChange={this.setWidth}/>
+          <Input type="number" value={this.props.width} onChange={this.setWidth}/>
         </div>
         <div>
-          <BoxRadioButtonGroup options={options} groupStyles={STYLES.buttonGroup} buttonStyles={STYLES.buttonGroupButton} selectedOption={this.props.unit}/>
+          <BoxRadioButtonGroup 
+            options={options} 
+            selectedOption={this.props.unit}
+            onChangeButton={this.handleButtonGroupChange}
+            />
         </div>
-        <div style={STYLES.playButtons}>
-          <IconButton iconStyle={STYLES.icon} onClick={this.props.goBack}>
-            <i className="material-icons">skip_previous</i>
-          </IconButton>
+        <Button.Group style={STYLES.playButtons}>
+    
+
+          <Button type="primary" shape="circle" icon="step-backward" onClick={this.props.goBack} />
           {playButton}
-          <IconButton  iconStyle={STYLES.icon} onClick={this.props.stop}>
-            <i className="material-icons">stop</i>
-          </IconButton>
-          <IconButton  iconStyle={STYLES.icon} onClick={this.props.goForward}>
-            <i className="material-icons">skip_next</i>
-          </IconButton>
-        </div>
+
+          <Button type="primary" shape="circle" icon="step-forward" onClick={this.props.goForward}/>
+        </Button.Group>
       </div>
     );
   }
 }
 
 const STYLES = {
-  numberInput: {
-    width: 50,
-    textAlign: 'center',
-    marginTop: '0.5em',
-    border: 'none',
-    borderRadius: 3,
-    marginRight: 10
-  },
   playButtons: {
     flex: '1 0 150px'
-  },
-  buttonGroup: {
-    marginTop: '0.5em',
-    height: 'initial'
-  },
-  buttonGroupButton: {
-    height: '1.5em',
-    paddingLeft: 10,
-    paddingRight: 10
   },
   rangeContainer: {
     display: 'flex',

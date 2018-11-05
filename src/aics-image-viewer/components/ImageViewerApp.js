@@ -1,19 +1,14 @@
 // 3rd Party Imports
 import React from 'react';
 import { includes } from 'lodash';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import getMuiTheme from 'material-ui/styles/getMuiTheme';
-import colorPalette from './shared/colorPalette';
 import { 
   AICSvolumeDrawable, 
   AICSvolumeLoader 
 } from 'volume-viewer';
-import 'bootstrap/dist/css/bootstrap.css';
 
 import HttpClient from '../shared/utils/httpClient';
 import UtilsService from '../shared/utils/utilsService';
-import { ViewMode } from '../shared/enums/viewModeEnum';
-import { channelGroupingMap } from '../shared/enums/channelGroups';
+import enums from '../shared/enums';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
@@ -35,10 +30,9 @@ import ViewerWrapper from './CellViewerCanvasWrapper';
 import '../assets/styles/globals.scss';
 import '../assets/styles/no-ui-slider.min.scss';
 
-const muiTheme = getMuiTheme({
-  fontFamily: 'Overpass, sans-serif',
-  palette: colorPalette
-});
+const ViewMode = enums.viewMode.mainMapping;
+const channelGroupingMap = enums.channelGroups.channelGroupingMap;
+
 const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
 
@@ -597,7 +591,6 @@ export default class ImageViewerApp extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider muiTheme={muiTheme}>
         <div className="cell-viewer-app">
           <MenuDrawer 
               controlPanelOpen={this.state.controlPanelOpen}>
@@ -642,7 +635,6 @@ export default class ImageViewerApp extends React.Component {
               />
             </MenuDrawer>
         </div>
-      </MuiThemeProvider>
     );
   }
 

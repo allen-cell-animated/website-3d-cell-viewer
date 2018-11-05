@@ -15,3 +15,8 @@ export const channelGroupTitles = {
     [SEGMENATION_CHANNEL_KEY]:'Segmenation channels',
     [CONTOUR_CHANNEL_KEY]: 'Contour channels'
 };
+
+export default {
+    channelGroupingMap, 
+    channelGroupTitles,
+};

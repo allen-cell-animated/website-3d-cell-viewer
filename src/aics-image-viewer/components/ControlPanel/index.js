@@ -1,13 +1,11 @@
 import React from 'react';
+
 import { 
-  Card, 
-  CardText,
-  Toolbar, 
-  FlatButton, 
-  IconMenu, 
-  IconButton, 
-  MenuItem
-} from 'material-ui';
+  Card,
+  Button,
+  Dropdown,
+  Menu,
+} from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
@@ -34,25 +32,24 @@ export default class ViewerControlPanel extends React.Component {
     this.setState({open: !this.state.open});
   }
 
-  makeTurnOnPresetFn(preset) {
-    return () => {
-      if (this.presetMap.has(preset)) {
-        const presets = this.presetMap.get(preset);
-
-        this.props.onApplyColorPresets(presets);
-      }
-    };
+  makeTurnOnPresetFn({ key }) {
+    const presets = this.presetMap.get(Number(key));
+    this.props.onApplyColorPresets(presets);
   }
 
   createAutorotateControls() {
     const {
       autorotate
     } = this.props;
-    const buttonType = autorotate ? "pause_circle_outline" : "play_circle_outline";
+    const buttonType = autorotate ? "pause-circle" : "play-circle";
     return (
-      <FlatButton onClick={this.handleAutorotateCheck} style={STYLES.button}>
-        <i className="mdc-fab__icon material-icons" style={{ verticalAlign: 'middle' }}>{buttonType}</i> Turntable
-      </FlatButton>
+      <Button 
+        icon={buttonType} 
+        onClick={this.handleAutorotateCheck} 
+      >
+        Turntable
+      </Button>
+
     );
   }
 
@@ -61,26 +58,32 @@ export default class ViewerControlPanel extends React.Component {
   }
 
   render() {
+    const dropDownMenuItems = (
+      <Menu onClick={this.makeTurnOnPresetFn}>
+        {Array.from(this.presetMap.keys()).map(key => <Menu.Item key={key}>Color preset {key}</Menu.Item>)}
+      </Menu>
+    );
     return (
-
-      <Card style={STYLES.wrapper} open={this.state.open} className="control-panel">
-        <Toolbar style={STYLES.toolbar}>
-          <ViewModeRadioButtons 
-            image={this.props.image}
-            onViewModeChange={this.props.onViewModeChange}
-          />
-          {this.createAutorotateControls()}
-          <IconMenu className="float-right"
-            style={STYLES.button}
-            iconButtonElement={<IconButton><i className="material-icons">color_lens</i></IconButton>}
-            anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
-            targetOrigin={{ horizontal: 'right', vertical: 'top' }}>
-            <MenuItem primaryText="Color preset 1" onClick={this.makeTurnOnPresetFn(1)} />
-            <MenuItem primaryText="Color preset 2" onClick={this.makeTurnOnPresetFn(2)} />
-            <MenuItem primaryText="Color preset 3" onClick={this.makeTurnOnPresetFn(3)} />
-          </IconMenu>
-        </Toolbar>
-        {this.props.image ? <CardText>
+      <Card 
+        style={STYLES.wrapper} 
+        open={this.state.open} 
+        className="control-panel"
+        extra={
+          <div>
+            {this.createAutorotateControls()}
+            <Dropdown
+                overlay={dropDownMenuItems}
+              >
+              <Button shape="circle" icon="bg-colors" />
+            </Dropdown>
+          </div>}
+        title={
+            <ViewModeRadioButtons
+              image={this.props.image}
+              onViewModeChange={this.props.onViewModeChange}
+            />}
+        >
+        {this.props.image ? <div>
           <ChannelsWidget
             image={this.props.image}
             channels={this.props.channels}
@@ -111,18 +114,12 @@ export default class ViewerControlPanel extends React.Component {
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
           />
-        </CardText> : null}
+        </div> : null}
       </Card>
     );
   }
 }
 const STYLES = {
-  wrapper: {
-    height: '100%',
-    boxShadow: 'none',
-    borderRadius: 0,
-    backgroundColor: 'none'
-  },
   channelsWidget: {
     padding: 0,
   },
@@ -132,10 +129,6 @@ const STYLES = {
     justifyContent: 'center',
     width: '100%',
     height: '100%'
-  },
-  toolbar: {
-    backgroundColor: 'none',
-    borderBottom: '0.5px solid gray'
   },
   button: {
     margin: 'auto',

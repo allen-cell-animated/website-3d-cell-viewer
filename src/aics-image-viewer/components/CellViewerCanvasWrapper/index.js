@@ -1,14 +1,15 @@
 import React from 'react';
 import { AICSview3d } from 'volume-viewer';
-import { CircularProgress, FlatButton, FontIcon } from 'material-ui';
 
-import { VIEW_MODE_ENUM_TO_LABEL_MAP } from '../../shared/enumDisplayMap';
-import { ViewMode } from '../../shared/enums/viewModeEnum';
+import { Button, Icon } from 'antd';
+
+import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders.js';
 
 import './styles.scss';
 
+const ViewMode = viewMode.mainMapping;
 const VIEW_3D_VIEWER = 'view3dviewer';
 
 export default class ViewerWrapper extends React.Component {
@@ -29,7 +30,7 @@ export default class ViewerWrapper extends React.Component {
 
  componentWillReceiveProps(newProps) {
    if (this.view3D && this.props.mode && this.props.mode !== newProps.mode) {
-     this.view3D.setCameraMode(VIEW_MODE_ENUM_TO_LABEL_MAP.get(newProps.mode));
+     this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newProps.mode));
    }
    if (this.view3D && this.props.autorotate !== newProps.autorotate) {
      this.view3D.setAutoRotate(newProps.autorotate);
@@ -72,11 +73,12 @@ export default class ViewerWrapper extends React.Component {
 
   renderOverlay() {
     const spinner = this.props.loadingImage ?
-      <div style={STYLES.noImage}>
-        <CircularProgress size={60}
-          thickness={7}
-          color="#ffffff"
-          style={{ zIndex: 1000 }} />
+      <div style={STYLES.noImage} >
+        <Icon
+          type="loading"
+          theme="outlined"
+
+          style={{ fontSize: 60, zIndex: 1000 }} />
       </div> : null;
 
     const noImageText = !this.props.loadingImage && !this.props.image ?
@@ -101,13 +103,12 @@ export default class ViewerWrapper extends React.Component {
   }
 
  render() {
-   const arrow = this.props.controlPanelOpen ? 'arrow_back_ios' : 'arrow_forward_ios';
-
+   const arrow = this.props.controlPanelOpen ? 'left' : 'right';
    return (
      <div className='cell-canvas' style={STYLES.viewer}>
-        <FlatButton
+        <Button
           style={STYLES.button}
-          icon={<FontIcon style={STYLES.icon} className="material-icons">{arrow}</FontIcon>}
+          icon={arrow}
           onClick={this.props.handleChannelToggle}
         />
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
@@ -133,7 +134,7 @@ const STYLES = {
     top: 14,
     minWidth: 'none',
     zIndex: 1000,
-    backgroundColor: '#dddddd4f'
+    borderRadius: 0,
   },
   icon: {
     fontSize: 33,
