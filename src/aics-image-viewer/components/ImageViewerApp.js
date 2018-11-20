@@ -43,7 +43,7 @@ export default class ImageViewerApp extends React.Component {
       return {
         name: channel || "Channel " + index,
         channelEnabled: true,
-        volumeEnabled: index === 0,
+        volumeEnabled: index === 0 || index === 1,
         isosurfaceEnabled: false,
         isovalue: 0.5,
         opacity: 1.0,

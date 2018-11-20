@@ -23,10 +23,17 @@
             font-size: 12px;
         }
     }
-    .row-card {
-        padding: 1rem 1rem 0.5rem 1rem;
+    .ant-card-head-title {
+        margin-left: 20px;
     }
-    .ant-collapse-borderless {
-        background-color: $background-gray;
+    .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
+        top: -75%;
+        transform: translateY(-75%);
     }
+   .ant-collapse>.ant-collapse-item {
+       border-bottom: none;
+   }
+   .ant-collapse-content{
+       overflow: visible;
+   }
 }

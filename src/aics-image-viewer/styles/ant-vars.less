@@ -2,29 +2,157 @@
 @purple: #8048f3;
 @light-gray: #6e6e6e;
 @bright-green: #b2d030;
-@dark-blue: #003057;
 
 // -------- Colors -----------
-@primary-color          : @purple;
+@primary-color          : tint(@purple, 90%);
 @success-color          : @bright-green;
-@highlight-color        : @bright-green;
+@highlight-color        : @purple;
+@warning-color          : @gold-6;
+@normal-color           : @light-gray;
+@background-color       : @dark-gray;
+@disabled-color         : fade(@light-gray, 10%);
+@disabled-bg            : @background-color;
+// Border color
+@border-color-base      :  @light-gray;  // base border outline a component
+
+
+
+// Color used by default to control hover and active backgrounds and for
+// alert info backgrounds.
+@primary-6: @primary-color;                                 // color used to control the text color of active buttons, don't use, use @primary-color
+
 
 // Background color for `<body>`
-@body-background        : #fff;
-// Base background color for most components
-@component-background   : #fff;
-@font-family  : "Overpass-Light", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif,
-"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-@code-family            : "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-@heading-color          : fade(@dark-blue, 85%);
-@text-color             : fade(@dark-blue, 65%);
-@text-color-secondary   : fade(@dark-blue, 45%);
-@heading-color-dark     : fade(#fff, 100%);
-@text-color-dark        : fade(#fff, 85%);
-@text-color-secondary-dark: fade(#fff, 65%);
-@font-size-base         : 14px;
-@font-size-lg           : @font-size-base + 2px;
-@font-size-sm           : 12px;
-@line-height-base       : 1.5;
-@border-radius-base     : 4px;
-@border-radius-sm       : 2px;
+@body-background        : @background-color;
+//// Base background color for most components
+@component-background   :  @background-color;
+@heading-color          : #fff;
+@text-color             : darken(#fff, 25%);
+@text-color-secondary   : darken(#fff, 40%);
+
+@background-color-light : lighten(@dark-gray, 10%);  // background of header and selected item
+@background-color-base  : hsv(0, 0, 96%);  // Default grey background color
+
+// The background colors for active and hover states for things like
+// list items or table cells.
+@item-active-bg         : @purple;
+@item-hover-bg          : @primary-color;
+
+@card-actions-background: @dark-gray;
+
+// LINK
+@link-color             : @primary-6;
+@link-hover-color       : color(~`colorPalette("@{link-color}", 5)`);
+@link-active-color      : color(~`colorPalette("@{link-color}", 7)`);
+@link-decoration        : none;
+@link-hover-decoration  : none;
+
+// Layout
+@layout-body-background         : @background-color;
+@layout-header-background       : #001529;
+@layout-footer-background       : darken(@dark-gray, 10%);
+@layout-header-height           : 64px;
+@layout-header-padding          : 0 50px;
+@layout-footer-padding          : 24px 50px;
+@layout-sider-background        : transparent;
+@layout-trigger-height          : 48px;
+@layout-trigger-background      : #002140;
+@layout-trigger-color           : #fff;
+@layout-zero-trigger-width      : 36px;
+@layout-zero-trigger-height     : 42px;
+// Layout light theme
+@layout-sider-background-light  : #fff;
+@layout-trigger-background-light: #fff;
+@layout-trigger-color-light     : @text-color;
+
+// Buttons
+@btn-font-weight        : 400;
+@btn-border-radius-base : @border-radius-base;
+@btn-border-radius-sm   : @border-radius-base;
+
+@btn-primary-color      : #fff;
+@btn-primary-bg         : @purple;
+
+@btn-default-color      : @text-color;
+@btn-default-bg         : @background-color;
+@btn-default-border     : @border-color-base;
+
+@btn-danger-color       : @error-color;
+@btn-danger-bg          : @background-color-base;
+@btn-danger-border      : @border-color-base;
+
+@btn-disable-color      : @disabled-color;
+@btn-disable-bg         : @disabled-bg;
+@btn-disable-border     : @border-color-base;
+
+@btn-padding-base       : 0 @padding-md - 1px;
+@btn-font-size-lg       : @font-size-lg;
+@btn-font-size-sm       : @font-size-base;
+@btn-padding-lg         : @btn-padding-base;
+@btn-padding-sm         : 0 @padding-xs - 1px;
+
+@btn-height-base        : 32px;
+@btn-height-lg          : 40px;
+@btn-height-sm          : 24px;
+
+@btn-circle-size        : @btn-height-base;
+@btn-circle-size-lg     : @btn-height-lg;
+@btn-circle-size-sm     : @btn-height-sm;
+
+@btn-group-border       : @primary-5;
+
+// Checkbox
+@checkbox-size          : 16px;
+@checkbox-color         : @background-color-light;
+@checkbox-check-color   : #fff;
+
+// Radio buttons
+@radio-button-bg           : @btn-default-bg;
+@radio-button-color        : @btn-default-color;
+@radio-button-hover-color  : #fff;
+@radio-button-active-color : #fff;
+
+// Input
+// ---
+@input-height-base           : 32px;
+@input-height-lg             : 40px;
+@input-height-sm             : 24px;
+@input-padding-horizontal    : @control-padding-horizontal - 1px;
+@input-padding-horizontal-base: @input-padding-horizontal;
+@input-padding-horizontal-sm : @control-padding-horizontal-sm - 1px;
+@input-padding-horizontal-lg : @input-padding-horizontal;
+@input-padding-vertical-base : 4px;
+@input-padding-vertical-sm   : 1px;
+@input-padding-vertical-lg   : 6px;
+@input-placeholder-color     : hsv(0, 0, 75%);
+@input-color                 : @text-color-secondary;
+@input-border-color          : @border-color-base;
+@input-bg                    : @light-gray;
+@input-addon-bg              : @background-color-light;
+@input-hover-border-color    : @primary-color;
+@input-disabled-bg           : @disabled-bg;
+@input-outline-offset        : 0 0;
+
+// Collapse
+// ---
+@collapse-header-padding:             12px 0 12px 40px;
+@collapse-header-bg:                  @background-color-light;
+@collapse-content-padding:            @padding-md;
+@collapse-content-bg:                 @component-background;
+
+// Slider
+// ---
+@slider-margin:                       14px 6px 10px;
+@slider-rail-background-color:        @background-color-light;
+@slider-rail-background-color-hover:  #e1e1e1;
+@slider-track-background-color:       @primary-3;
+@slider-track-background-color-hover: @primary-4;
+@slider-handle-color:                 @primary-3;
+@slider-handle-color-hover:           @primary-4;
+@slider-handle-color-focus:           tint(@primary-color, 20%);
+@slider-handle-color-focus-shadow:    tint(@primary-color, 50%);
+@slider-handle-color-tooltip-open:    @primary-color;
+@slider-dot-border-color:             @border-color-split;
+@slider-dot-border-color-active:      tint(@primary-color, 50%);
+@slider-disabled-color:               @disabled-color;
+@slider-disabled-background-color:    @component-background;

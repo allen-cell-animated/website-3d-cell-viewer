@@ -225,7 +225,9 @@ export default class View3dControls extends React.Component {
       <Card 
         extra={this.createProjectionModeControls()}
         title="Global volume rendering settings"
-        type="inner">
+        type="inner"
+        bodyStyle={STYLES.card}
+        >
         <div style={STYLES.slidersWrapper}>
         {this.createMaskAlphaSlider()}
         {this.createBrightnessSlider()}
@@ -238,6 +240,9 @@ export default class View3dControls extends React.Component {
 }
 
 const STYLES = {
+  card: {
+    padding: '16px 24px',
+  },
   slidersWrapper: {
     width: 'calc(100% - 20px)',
     margin: 'auto',

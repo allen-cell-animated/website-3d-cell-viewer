@@ -9,9 +9,7 @@ class MenuDrawer extends React.Component {
 
   componentDidUpdate(prevProps) {
     if(prevProps.controlPanelOpen !== this.props.controlPanelOpen) {
-      setTimeout(function () {
         window.dispatchEvent(new Event('resize'));
-      }, 300);
     }
   }
 
