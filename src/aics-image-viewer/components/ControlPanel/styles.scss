@@ -12,12 +12,15 @@
   order: 1;
   overflow-y: scroll;
   max-width: 540px;
-  border-right: 0.5px solid #D0D8DB;
   .card-title {
     padding: 2px;
   }
   .ant-card-body{
     padding: 0;
+  }
+  .ant-card-extra .ant-btn {
+
+    margin-right: 1em;
   }
   //slider settings
   @extend %axis-override;
