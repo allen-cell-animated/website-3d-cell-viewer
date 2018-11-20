@@ -18,7 +18,7 @@ import {
   LEGACY_IMAGE_SERVER,
   IMAGE_SERVER,
   OBSERVED_CHANNEL_KEY,
-  SEGMENATION_CHANNEL_KEY,
+  SEGMENTATION_CHANNEL_KEY,
   CONTOUR_CHANNEL_KEY,
   OTHER_CHANNEL_KEY
 } from '../shared/constants';
@@ -58,8 +58,8 @@ export default class ImageViewerApp extends React.Component {
       const grouping = channels.reduce((acc, channel, index) => {
         if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
           acc[OBSERVED_CHANNEL_KEY].push(index);
-        } else if (includes(channelGroupingMap[SEGMENATION_CHANNEL_KEY], channel)) {
-          acc[SEGMENATION_CHANNEL_KEY].push(index);
+        } else if (includes(channelGroupingMap[SEGMENTATION_CHANNEL_KEY], channel)) {
+          acc[SEGMENTATION_CHANNEL_KEY].push(index);
         } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
           acc[CONTOUR_CHANNEL_KEY].push(index);
         } else {
@@ -71,7 +71,7 @@ export default class ImageViewerApp extends React.Component {
         return acc;
       }, {
         [OBSERVED_CHANNEL_KEY]: [],
-        [SEGMENATION_CHANNEL_KEY]: [],
+        [SEGMENTATION_CHANNEL_KEY]: [],
         [CONTOUR_CHANNEL_KEY]: [],
       });
       return grouping;
