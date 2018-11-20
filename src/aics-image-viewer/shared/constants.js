@@ -23,7 +23,7 @@ export const
   IMAGE_SERVER = process.env.IMAGE_SERVER,
 
   OBSERVED_CHANNEL_KEY = 'observed',
-  SEGMENATION_CHANNEL_KEY = 'segmentation',
+  SEGMENTATION_CHANNEL_KEY = 'segmentation',
   CONTOUR_CHANNEL_KEY = 'contour',
   OTHER_CHANNEL_KEY = 'Other';
 

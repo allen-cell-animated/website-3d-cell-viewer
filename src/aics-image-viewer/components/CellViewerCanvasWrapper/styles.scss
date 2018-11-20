@@ -12,20 +12,12 @@
   .clip-sliders {
     @extend %axis-override;
     position: absolute;
-    color: #ffffff;
     bottom: 0;
     width: 75%;
     left: 5%;
     display: flex;
     .sectionSubHeader {
       flex: 1;
-    }
-    .sectionBody {
-      flex: 8;
-      div {
-        color: white;
-        text-align: center;
-      }
     }
   
   }

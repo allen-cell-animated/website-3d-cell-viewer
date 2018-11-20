@@ -1,3 +1,4 @@
 public/
 dist/
 src/aics-image-viewer/shared/utils/webgl-debug.js
+node_modules

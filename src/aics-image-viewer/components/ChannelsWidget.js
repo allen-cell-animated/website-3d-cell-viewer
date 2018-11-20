@@ -3,11 +3,11 @@ import { map, filter } from 'lodash';
 
 import {
   Card,
+  Collapse,
   List,
 } from 'antd';
 
 import colorPalette from './shared/colorPalette';
-import UtilsService from '../shared/utils/utilsService';
 import formatChannelName from '../shared/utils/formatChannelNames';
 
 import {
@@ -19,14 +19,11 @@ import ChannelsWidgetRow from './ChannelsWidgetRow';
 
 import { channelGroupTitles } from '../shared/enums/channelGroups';
 
-const SEGMENTATION_CHANNELS = ['SEG_STRUCT', 'CON_Memb', 'CON_DNA'];
-const OBSERVED_CHANNELS = ['CMDRP', 'EGFP', 'H3342'];
+const { Panel } = Collapse;
 
 export default class ChannelsWidget extends React.Component {
   constructor(props) {
     super(props);
-    this.isSegButtonDisabled = this.isSegButtonDisabled.bind(this);
-    this.isObsButtonDisabled = this.isObsButtonDisabled.bind(this);
     this.makeOnCheckHandler = this.makeOnCheckHandler.bind(this);
     this.makeOnVolumeCheckHandler = this.makeOnVolumeCheckHandler.bind(this);
     this.makeOnIsosurfaceCheckHandler = this.makeOnIsosurfaceCheckHandler.bind(this);
@@ -38,16 +35,6 @@ export default class ChannelsWidget extends React.Component {
     this.showSurfaces = this.showSurfaces.bind(this);
     this.hideVolumes = this.hideVolumes.bind(this);
     this.hideSurfaces = this.hideSurfaces.bind(this);
-  }
-
-  isSegButtonDisabled() {
-    const names = this.props.channels.map((channel) => channel.name);
-    return UtilsService.intersects(SEGMENTATION_CHANNELS, names);
-  }
-
-  isObsButtonDisabled() {
-    const names = this.props.channels.map((channel) => channel.name);
-    return UtilsService.intersects(OBSERVED_CHANNELS, names);
   }
 
   showVolumes(channelArray) {
@@ -143,6 +130,12 @@ export default class ChannelsWidget extends React.Component {
           key={key}
 
         >
+        <Collapse 
+          bordered={false}
+          defaultActiveKey={key}>
+            <Panel 
+              key={key}
+            >
               <List 
                 itemLayout="horizontal"
                 dataSource={channelArray}
@@ -174,7 +167,9 @@ export default class ChannelsWidget extends React.Component {
                 );}
               }
               />
-              </Card>
+            </Panel>
+          </Collapse>
+        </Card>
         );
     });
   }
@@ -185,7 +180,7 @@ export default class ChannelsWidget extends React.Component {
     return (
         <div>
           {this.getRows()}
-        </div>
+      </div>
     );
   }
 }

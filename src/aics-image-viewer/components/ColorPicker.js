@@ -73,7 +73,6 @@ class ColorPicker extends React.Component {
         },
         swatch: {
           padding: '5px',
-          background: '#fff',
           borderRadius: '1px',
           boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
           display: 'inline-block',
@@ -82,7 +81,6 @@ class ColorPicker extends React.Component {
         popover: {
           position: 'absolute',
           zIndex: '9999',
-          right: -85
         },
         cover: {
           position: 'fixed',

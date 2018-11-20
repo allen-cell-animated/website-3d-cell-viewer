@@ -1,4 +1,8 @@
 import * as _ from 'lodash';
+import { 
+  Col,
+  Row, 
+} from 'antd';
 import Nouislider from 'react-nouislider';
 import React from 'react';
 
@@ -308,15 +312,19 @@ export default class AxisClipSliders extends React.Component {
                            goForward={this.goForward}
                            showPlay={this.state.playButtons.stop || this.state.playButtons.pause} /> : <div style={STYLES.placeholder}></div>;
     return (
-      <div className="clip-sliders" >
-        <h4 className="sectionSubHeader" style={STYLES.header}>
-          Region of interest clipping
-        </h4>
-        <div className="sectionBody">
-          {this.props.numSlices && this.createSliders()}
-          {playButtons}
-        </div>
-      </div>
+        <Row className="clip-sliders" >
+        <Col span={12}>
+          <h4 className="sectionSubHeader" style={STYLES.header}>
+            Region of interest clipping
+          </h4>
+
+          <div className="sectionBody">
+            {this.props.numSlices && this.createSliders()}
+            {playButtons}
+          </div>
+          </Col>
+
+        </Row>
     );
   }
 
