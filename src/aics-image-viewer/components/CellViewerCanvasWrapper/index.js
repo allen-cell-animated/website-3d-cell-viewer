@@ -41,11 +41,10 @@ export default class ViewerWrapper extends React.Component {
      this.needToSetImage = this.props.image.name !== newProps.image.name;
    } else if (!this.props.image && newProps.image) {
      this.needToSetImage = true;
-     this.view3D.resize();
    }
 
-   // need view3D.resize?
- }
+   this.view3D.resize();
+  }
 
   componentDidUpdate() {
     if (this.props.image && this.view3D && this.needToSetImage) {
