@@ -99,7 +99,12 @@ export default class ImageViewerApp extends React.Component {
       channels: [],
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
-      channelGroupedByType: {}
+      channelGroupedByType: {},
+
+      // did the requested image have a cell id (in queryInput)?
+      hasCellId: false,
+      // is there currently a single cell showing, or a full field?
+      hasCell: false
     };
 
     this.openImage = this.openImage.bind(this);
@@ -114,6 +119,7 @@ export default class ImageViewerApp extends React.Component {
     this.onColorChange = this.onColorChange.bind(this);
     this.onColorChangeComplete = this.onColorChangeComplete.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
+    this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.setQueryInput = this.setQueryInput.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
@@ -289,6 +295,23 @@ export default class ImageViewerApp extends React.Component {
     this.setState((prevState) => {
       return {autorotate: !prevState.autorotate};
     });
+  }
+
+  buildName(cellLine, fovId, cellId) {
+    return cellLine + '/' + cellLine + '_' + fovId + (cellId ? ('_' + cellId) : "");
+  }
+
+  onSwitchFovCell() {
+    if (this.state.hasCellId) {
+      this.setState((prevState) => {
+
+        const name = this.buildName(prevState.queryInput.cellLine, prevState.queryInput.fovId, prevState.hasCell ? null : prevState.queryInput.cellId);
+        const type = this.state.hasCell ? FOV_ID_QUERY : CELL_ID_QUERY;
+        this.openImage(name, type);
+
+        return {hasCell: !prevState.hasCell};
+      });
+    }
   }
 
   onChannelDataReady(index) {
@@ -473,10 +496,10 @@ export default class ImageViewerApp extends React.Component {
   setQueryInput(input, type) {
     let name = input;
     if (type === FOV_ID_QUERY) {
-      name = input.cellLine + '/' + input.cellLine + '_' + input.fovId;
+      name = this.buildName(input.cellLine, input.fovId);
     }
     else if (type === CELL_ID_QUERY) {
-      name = input.cellLine + '/' + input.cellLine + '_' + input.fovId + '_' + input.cellId;
+      name = this.buildName(input.cellLine, input.fovId, input.cellId);
     }
     else if (type === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
@@ -487,13 +510,12 @@ export default class ImageViewerApp extends React.Component {
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
-        name = cellLine + '/' + cellLine + '_' + fovId;
         type = FOV_ID_QUERY;
         if (components.length > 2) {
           cellId = components[2];
-          name = cellLine + '/' + cellLine + '_' + fovId + '_' + cellId;
           type = CELL_ID_QUERY;
         }
+        name = this.buildName(cellLine, fovId, cellId);
       }
       input = {
         cellLine,
@@ -501,9 +523,13 @@ export default class ImageViewerApp extends React.Component {
         cellId
       };
     }
+    // LEGACY_IMAGE_ID_QUERY is a passthrough
+
     this.setState({
       queryInput: input,
-      queryInputType: type
+      queryInputType: type,
+      hasCellId: !!input.cellId,
+      hasCell: !!input.cellId
     });
     this.openImage(name, type);
   }
@@ -623,6 +649,9 @@ export default class ImageViewerApp extends React.Component {
                     onColorChange={this.onColorChange}
                     onColorChangeComplete={this.onColorChangeComplete}
                     onAutorotateChange={this.onAutorotateChange}
+                    hasCell={this.state.hasCell}
+                    hasCellId={this.state.hasCellId}
+                    onSwitchFovCell={this.onSwitchFovCell}
                     onUpdateImageDensity={this.onUpdateImageDensity}
                     onUpdateImageBrightness={this.onUpdateImageBrightness}
                     onUpdateImageMaskAlpha={this.onUpdateImageMaskAlpha}
