@@ -8,11 +8,12 @@
 }
 
 .cell-fov-switch {
-  background-color: #222222;
+  margin-right: 15px;
+  background-color: #444444;
 }
 
 .cell-fov-switch:global(.ant-switch-checked) {
-  background-color: #222222;
+  background-color: #444444;
 }
 
 .control-panel {
