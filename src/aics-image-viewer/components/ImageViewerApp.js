@@ -166,7 +166,6 @@ export default class ImageViewerApp extends React.Component {
       this.setState({
         currentlyLoadedImagePath: imageDirectory,
         queryErrorMessage: null,
-        sendingQueryRequest: false,
         cachingInProgress: false
       });
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader);
@@ -309,18 +308,30 @@ export default class ImageViewerApp extends React.Component {
         const type = this.state.hasCell ? FOV_ID_QUERY : CELL_ID_QUERY;
         this.openImage(name, type);
 
-        return {hasCell: !prevState.hasCell};
+        return {
+          sendingQueryRequest: true,
+          hasCell: !prevState.hasCell
+        };
       });
     }
   }
 
   onChannelDataReady(index) {
     this.setState((prevState) => {
-      return {
-        channels: prevState.channels.map((channel, channelindex) => { 
-          return index === channelindex ? {...channel, dataReady:true} : channel;
-        })
-      };
+      const newChannels = prevState.channels.map((channel, channelindex) => { 
+        return index === channelindex ? {...channel, dataReady:true} : channel;
+      });
+      if (index === 0) {
+        return {
+          sendingQueryRequest: false,
+          channels: newChannels
+        };
+      }
+      else {
+        return {
+          channels: newChannels
+        };
+      } 
     });
   }
 
@@ -529,7 +540,8 @@ export default class ImageViewerApp extends React.Component {
       queryInput: input,
       queryInputType: type,
       hasCellId: !!input.cellId,
-      hasCell: !!input.cellId
+      hasCell: !!input.cellId,
+      sendingQueryRequest: true
     });
     this.openImage(name, type);
   }
