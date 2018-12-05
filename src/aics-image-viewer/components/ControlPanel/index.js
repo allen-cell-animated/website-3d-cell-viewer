@@ -43,7 +43,7 @@ export default class ControlPanel extends React.Component {
       hasCell,
       hasCellId
     } = this.props;
-    const buttonType = hasCell ? "pause-circle" : "play-circle";
+    const buttonType = hasCell ? "zoom-out" : "zoom-in";
     const buttonLabel = hasCell ? "Cell" : "Field";
     return hasCellId ? (
       <Button 
