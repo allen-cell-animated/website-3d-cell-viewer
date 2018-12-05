@@ -7,6 +7,14 @@
   }
 }
 
+.cell-fov-switch {
+  background-color: #222222;
+}
+
+.cell-fov-switch:global(.ant-switch-checked) {
+  background-color: #222222;
+}
+
 .control-panel {
   flex: 1 auto;
   order: 1;

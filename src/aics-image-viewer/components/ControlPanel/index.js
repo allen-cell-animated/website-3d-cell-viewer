@@ -5,6 +5,7 @@ import {
   Button,
   Dropdown,
   Menu,
+  Switch
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -43,16 +44,14 @@ export default class ControlPanel extends React.Component {
       hasCell,
       hasCellId
     } = this.props;
-    const buttonType = hasCell ? "zoom-out" : "zoom-in";
-    const buttonLabel = hasCell ? "Cell" : "Field";
     return hasCellId ? (
-      <Button 
-        icon={buttonType} 
-        onClick={this.handleSwitchFovCell} 
-      >
-        {buttonLabel}
-      </Button>
-
+      <Switch
+        className="cell-fov-switch"
+        defaultChecked={hasCell}
+        checkedChildren="Cell"
+        unCheckedChildren="Field"
+        onChange={this.handleSwitchFovCell}
+      />
     ) : null;
   }
 
