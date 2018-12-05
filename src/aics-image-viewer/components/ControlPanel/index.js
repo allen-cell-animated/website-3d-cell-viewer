@@ -41,13 +41,13 @@ export default class ControlPanel extends React.Component {
 
   createFovCellSwitchControls() {
     const {
-      hasCell,
+      isShowingCell,
       hasCellId
     } = this.props;
     return hasCellId ? (
       <Switch
         className="cell-fov-switch"
-        defaultChecked={hasCell}
+        defaultChecked={isShowingCell}
         checkedChildren="Cell"
         unCheckedChildren="Field"
         onChange={this.handleSwitchFovCell}
