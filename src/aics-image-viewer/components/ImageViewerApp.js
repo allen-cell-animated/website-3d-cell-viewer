@@ -297,7 +297,8 @@ export default class ImageViewerApp extends React.Component {
   }
 
   buildName(cellLine, fovId, cellId) {
-    return cellLine + '/' + cellLine + '_' + fovId + (cellId ? ('_' + cellId) : "");
+    cellId = cellId ? ('_' + cellId) : "";
+    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
 
   onSwitchFovCell() {
