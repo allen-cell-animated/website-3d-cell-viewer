@@ -302,12 +302,15 @@ export default class ImageViewerApp extends React.Component {
 
   onSwitchFovCell() {
     if (this.state.hasCellId) {
+      const name = this.buildName(
+        this.state.queryInput.cellLine, 
+        this.state.queryInput.fovId, 
+        this.state.isShowingCell ? null : this.state.queryInput.cellId
+      );
+      const type = this.state.isShowingCell ? FOV_ID_QUERY : CELL_ID_QUERY;
+      this.openImage(name, type, true);
+
       this.setState((prevState) => {
-
-        const name = this.buildName(prevState.queryInput.cellLine, prevState.queryInput.fovId, prevState.isShowingCell ? null : prevState.queryInput.cellId);
-        const type = this.state.isShowingCell ? FOV_ID_QUERY : CELL_ID_QUERY;
-        this.openImage(name, type, true);
-
         return {
           sendingQueryRequest: true,
           isShowingCell: !prevState.isShowingCell
