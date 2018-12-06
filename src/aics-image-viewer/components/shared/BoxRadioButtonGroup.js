@@ -42,7 +42,7 @@ export default class BoxRadioButtonGroup extends React.Component {
       return null;
     }
     return (
-      <Radio.Group onChange={this.handleChange} defaultValue={selectedOption}>
+      <Radio.Group onChange={this.handleChange} defaultValue={selectedOption} value={selectedOption}>
         {options.map((view, index) => this.createRadioButton(view, index))}
       </Radio.Group>
     );

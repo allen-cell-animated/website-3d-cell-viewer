@@ -160,13 +160,14 @@ export default class ImageViewerApp extends React.Component {
       (a.atlas_height === b.atlas_height));
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory) {
+  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode) {
     if (resp.data.status === OK_STATUS) {
 
       this.setState({
         currentlyLoadedImagePath: imageDirectory,
         queryErrorMessage: null,
-        cachingInProgress: false
+        cachingInProgress: false,
+        mode: doResetViewMode ? ViewMode.threeD : this.state.mode
       });
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader);
       this.stopPollingForImage();
@@ -208,7 +209,7 @@ export default class ImageViewerApp extends React.Component {
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, queryType) {
+  openImage(imageDirectory, queryType, doResetViewMode) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -222,7 +223,7 @@ export default class ImageViewerApp extends React.Component {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
         resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf('/') + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory);
+        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode);
       })
       .catch(resp => this.handleOpenImageException(resp));
   }
@@ -249,8 +250,7 @@ export default class ImageViewerApp extends React.Component {
     let nextState = {
       image: aimg,
       channels,
-      channelGroupedByType,
-      mode: ViewMode.threeD
+      channelGroupedByType
     };
     this.setState(nextState);
   }
@@ -306,7 +306,7 @@ export default class ImageViewerApp extends React.Component {
 
         const name = this.buildName(prevState.queryInput.cellLine, prevState.queryInput.fovId, prevState.isShowingCell ? null : prevState.queryInput.cellId);
         const type = this.state.isShowingCell ? FOV_ID_QUERY : CELL_ID_QUERY;
-        this.openImage(name, type);
+        this.openImage(name, type, true);
 
         return {
           sendingQueryRequest: true,
@@ -543,7 +543,7 @@ export default class ImageViewerApp extends React.Component {
       isShowingCell: !!input.cellId,
       sendingQueryRequest: true
     });
-    this.openImage(name, type);
+    this.openImage(name, type, true);
   }
 
   toggleVolumeEnabledAndFuse(index, enable) {

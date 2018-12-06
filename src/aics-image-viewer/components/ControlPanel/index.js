@@ -103,6 +103,7 @@ export default class ControlPanel extends React.Component {
         title={
             <ViewModeRadioButtons
               image={this.props.image}
+              mode={this.props.mode}
               onViewModeChange={this.props.onViewModeChange}
             />}
         >
