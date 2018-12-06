@@ -104,7 +104,7 @@ export default class ImageViewerApp extends React.Component {
       // did the requested image have a cell id (in queryInput)?
       hasCellId: false,
       // is there currently a single cell showing, or a full field?
-      isShowingCell: false
+      isShowingSegmentedCell: false
     };
 
     this.openImage = this.openImage.bind(this);
@@ -305,15 +305,15 @@ export default class ImageViewerApp extends React.Component {
       const name = this.buildName(
         this.state.queryInput.cellLine, 
         this.state.queryInput.fovId, 
-        this.state.isShowingCell ? null : this.state.queryInput.cellId
+        this.state.isShowingSegmentedCell ? null : this.state.queryInput.cellId
       );
-      const type = this.state.isShowingCell ? FOV_ID_QUERY : CELL_ID_QUERY;
+      const type = this.state.isShowingSegmentedCell ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, true);
 
       this.setState((prevState) => {
         return {
           sendingQueryRequest: true,
-          isShowingCell: !prevState.isShowingCell
+          isShowingSegmentedCell: !prevState.isShowingSegmentedCell
         };
       });
     }
@@ -543,7 +543,7 @@ export default class ImageViewerApp extends React.Component {
       queryInput: input,
       queryInputType: type,
       hasCellId: !!input.cellId,
-      isShowingCell: !!input.cellId,
+      isShowingSegmentedCell: !!input.cellId,
       sendingQueryRequest: true
     });
     this.openImage(name, type, true);
@@ -664,7 +664,7 @@ export default class ImageViewerApp extends React.Component {
                     onColorChange={this.onColorChange}
                     onColorChangeComplete={this.onColorChangeComplete}
                     onAutorotateChange={this.onAutorotateChange}
-                    isShowingCell={this.state.isShowingCell}
+                    isShowingSegmentedCell={this.state.isShowingSegmentedCell}
                     hasCellId={this.state.hasCellId}
                     onSwitchFovCell={this.onSwitchFovCell}
                     onUpdateImageDensity={this.onUpdateImageDensity}
