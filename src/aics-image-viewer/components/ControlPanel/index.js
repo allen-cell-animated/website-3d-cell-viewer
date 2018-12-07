@@ -5,6 +5,7 @@ import {
   Button,
   Dropdown,
   Menu,
+  Switch
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -15,12 +16,13 @@ import { PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3 } from '../../shared/
 
 import './styles.scss';
 
-export default class ViewerControlPanel extends React.Component {
+export default class ControlPanel extends React.Component {
   constructor(props) {
     super(props);
     this.handleToggle = this.handleToggle.bind(this);
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
+    this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.state = {open: true};
     this.presetMap = new Map();
     this.presetMap.set(1, PRESET_COLORS_1);
@@ -35,6 +37,26 @@ export default class ViewerControlPanel extends React.Component {
   makeTurnOnPresetFn({ key }) {
     const presets = this.presetMap.get(Number(key));
     this.props.onApplyColorPresets(presets);
+  }
+
+  createFovCellSwitchControls() {
+    const {
+      isShowingSegmentedCell,
+      hasCellId
+    } = this.props;
+    return hasCellId ? (
+      <Switch
+        className="cell-fov-switch"
+        defaultChecked={isShowingSegmentedCell}
+        checkedChildren="Cell"
+        unCheckedChildren="Field"
+        onChange={this.handleSwitchFovCell}
+      />
+    ) : null;
+  }
+
+  handleSwitchFovCell(event, checked) {
+    this.props.onSwitchFovCell();
   }
 
   createAutorotateControls() {
@@ -70,6 +92,7 @@ export default class ViewerControlPanel extends React.Component {
         className="control-panel"
         extra={
           <div>
+            {this.createFovCellSwitchControls()}
             {this.createAutorotateControls()}
             <Dropdown
                 overlay={dropDownMenuItems}
@@ -80,6 +103,7 @@ export default class ViewerControlPanel extends React.Component {
         title={
             <ViewModeRadioButtons
               image={this.props.image}
+              mode={this.props.mode}
               onViewModeChange={this.props.onViewModeChange}
             />}
         >

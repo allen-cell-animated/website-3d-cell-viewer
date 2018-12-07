@@ -11,7 +11,7 @@ export default class ViewModeRadioButtons extends React.Component {
     this.createRadioButton = this.createRadioButton.bind(this);
     this.onChangeButton = this.onChangeButton.bind(this);
     this.state = {
-      selectedMode: viewModeMapping.threeD
+      selectedMode: props.mode
     };
   }
   
@@ -37,9 +37,7 @@ export default class ViewModeRadioButtons extends React.Component {
     this.receivingImageForFirstTime = !this.props.image && !!newProps.image;
     const imageExists = !!newProps.image && !!this.props.image;
     this.imageNameIsDifferent = imageExists && newProps.image.name !== this.props.image.name;
-    if (this.receivingImageForFirstTime || this.imageNameIsDifferent) {
-      this.setState({ selectedMode: viewModeMapping.threeD});
-    }
+    this.setState({ selectedMode: newProps.mode});
   }
 
   shouldComponentUpdate(newProps, newState) {
