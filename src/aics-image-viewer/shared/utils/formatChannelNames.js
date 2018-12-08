@@ -5,7 +5,8 @@ export default function formatChannelNames(channelName, structureName) {
             Memb: 'Membrane',
             STRUCT: structureName || 'Labeled structure',
             DNA: 'DNA',
-            '100X': 'Bright field'
+            '100X': 'Bright field',
+            '100': 'Bright field'
         };
         return mapping[splitName] ? mapping[splitName] : splitName;
     }
@@ -13,7 +14,8 @@ export default function formatChannelNames(channelName, structureName) {
         CMDRP: 'Membrane',
         EGFP: structureName || 'Labeled structure',
         mtagRFPT: structureName || 'Labeled structure',
-        H3342: 'DNA'
+        H3342: 'DNA',
+        'TL 100X': 'Bright field'
     };
     return mapping[channelName] ? mapping[channelName] : channelName;
 };
