@@ -11,7 +11,8 @@ import colorPalette from './shared/colorPalette';
 import formatChannelName from '../shared/utils/formatChannelNames';
 
 import {
-  ISOSURFACE_OPACITY_SLIDER_MAX
+  ISOSURFACE_OPACITY_SLIDER_MAX,
+  OBSERVED_CHANNEL_KEY
 } from '../shared/constants';
 
 import SharedCheckBox from './shared/SharedCheckBox';
@@ -132,7 +133,7 @@ export default class ChannelsWidget extends React.Component {
         >
         <Collapse 
           bordered={false}
-          defaultActiveKey={key}>
+          defaultActiveKey={key === OBSERVED_CHANNEL_KEY ? key : ""}>
             <Panel 
               key={key}
             >
