@@ -19,7 +19,7 @@ export default class View3dControls extends React.Component {
       maxProjectionChecked: false,
       maskAlphaSlider: 100,
       brightnessSlider: 65,
-      densitySlider: 60,
+      densitySlider: 50,
       levelsSlider: [58.32, 149.00, 255.00],
       pixelSize: props.image ? props.image.pixel_size.slice() : [1,1,1]
     };
