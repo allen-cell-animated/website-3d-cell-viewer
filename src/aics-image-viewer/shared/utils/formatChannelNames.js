@@ -15,7 +15,7 @@ export default function formatChannelNames(channelName, structureName) {
         EGFP: structureName || 'Labeled structure',
         mtagRFPT: structureName || 'Labeled structure',
         H3342: 'DNA',
-        'TL 100X': 'Bright field'
+        'TL 100x': 'Bright field'
     };
     return mapping[channelName] ? mapping[channelName] : channelName;
 };
