@@ -12,6 +12,7 @@ import enums from '../shared/enums';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
+  CELL_SEGMENTATION_CHANNEL_NAME,
   FOV_ID_QUERY,
   IMAGE_NAME_QUERY,
   LEGACY_IMAGE_ID_QUERY,
@@ -244,6 +245,9 @@ export default class ImageViewerApp extends React.Component {
     // GO OUT AND GET THE VOLUME DATA.
     AICSvolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
+      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+        aimg.setChannelAsMask(channelIndex);
+      }
       this.onChannelDataReady(channelIndex);
     });
 
