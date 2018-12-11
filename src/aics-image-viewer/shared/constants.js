@@ -25,7 +25,9 @@ export const
   OBSERVED_CHANNEL_KEY = 'observed',
   SEGMENTATION_CHANNEL_KEY = 'segmentation',
   CONTOUR_CHANNEL_KEY = 'contour',
-  OTHER_CHANNEL_KEY = 'Other';
+  OTHER_CHANNEL_KEY = 'Other',
+
+  CELL_SEGMENTATION_CHANNEL_NAME = 'SEG_Memb';
 
 export const PRESET_COLORS_1 = [
   [190, 68, 171, 255],
