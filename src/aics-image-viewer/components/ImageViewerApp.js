@@ -245,7 +245,7 @@ export default class ImageViewerApp extends React.Component {
     // GO OUT AND GET THE VOLUME DATA.
     AICSvolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
-      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+      if (aimg.volume.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         aimg.setChannelAsMask(channelIndex);
       }
       this.onChannelDataReady(channelIndex);
@@ -271,11 +271,13 @@ export default class ImageViewerApp extends React.Component {
   }
 
   onUpdateImageBrightness(val) {
-    this.state.image.setUniform('BRIGHTNESS', val, true, true);
+      this.state.image.setBrightness(val);
+    //this.state.image.setUniform('BRIGHTNESS', val, true, true);
   }
 
   onUpdateImageDensity(val) {
-    this.state.image.setUniform("DENSITY", val, true, true);
+      this.state.image.setDensity(val);
+    //this.state.image.setUniform("DENSITY", val, true, true);
   }
 
   onUpdateImageGammaLevels(gmin, gmax, gscale) {
@@ -499,6 +501,7 @@ export default class ImageViewerApp extends React.Component {
     if (this.state.image) {
       this.state.image.getChannel(index).setLut(lut, controlPoints);
       this.state.image.fuse();
+      this.state.image.updateLuts();
     }
   }
 

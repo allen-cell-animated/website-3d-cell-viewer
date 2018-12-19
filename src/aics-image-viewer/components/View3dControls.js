@@ -21,7 +21,7 @@ export default class View3dControls extends React.Component {
       brightnessSlider: 65,
       densitySlider: 50,
       levelsSlider: [58.32, 149.00, 255.00],
-      pixelSize: props.image ? props.image.pixel_size.slice() : [1,1,1]
+      pixelSize: props.image ? props.image.volume.pixel_size.slice() : [1,1,1]
     };
   }
 
@@ -166,7 +166,7 @@ export default class View3dControls extends React.Component {
 
   componentWillReceiveProps(newProps) {
     this.setState({
-      pixelSize: newProps.image ? newProps.image.pixel_size.slice() : [1,1,1]
+      pixelSize: newProps.image ? newProps.image.volume.pixel_size.slice() : [1,1,1]
     });
   }
 
