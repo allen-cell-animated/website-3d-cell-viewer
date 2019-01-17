@@ -224,6 +224,7 @@ export default class View3dControls extends React.Component {
     return (
       <Card 
         extra={this.createProjectionModeControls()}
+        bordered={false}
         title="Global volume rendering settings"
         type="inner"
         bodyStyle={STYLES.card}
