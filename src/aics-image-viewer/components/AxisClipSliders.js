@@ -335,7 +335,7 @@ export default class AxisClipSliders extends React.Component {
 
 const STYLES = {
   placeholder: {
-    height: 48
+    height: 32
   },
   row: {
     display: 'flex'

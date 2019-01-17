@@ -45,7 +45,7 @@ export default class TwoDPlayButtons extends React.Component {
         <div style={STYLES.rangeContainer}>
           {this.props.min}, {this.props.max}
         </div>
-        <div>
+        <div style={STYLES.input}>
           <Input type="number" value={this.props.width} onChange={this.setWidth}/>
         </div>
         <div>
@@ -71,6 +71,9 @@ export default class TwoDPlayButtons extends React.Component {
 const STYLES = {
   playButtons: {
     flex: '1 0 150px'
+  },
+  input: {
+    flex: 1,
   },
   rangeContainer: {
     display: 'flex',
