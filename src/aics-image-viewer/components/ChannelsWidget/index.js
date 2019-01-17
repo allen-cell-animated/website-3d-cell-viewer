@@ -7,18 +7,18 @@ import {
   List,
 } from 'antd';
 
-import colorPalette from './shared/colorPalette';
-import formatChannelName from '../shared/utils/formatChannelNames';
-
+import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX,
   OBSERVED_CHANNEL_KEY
-} from '../shared/constants';
+} from '../../shared/constants';
+import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
-import SharedCheckBox from './shared/SharedCheckBox';
-import ChannelsWidgetRow from './ChannelsWidgetRow';
+import colorPalette from '../shared/colorPalette';
+import SharedCheckBox from '../shared/SharedCheckBox';
+import ChannelsWidgetRow from '../ChannelsWidgetRow';
 
-import { channelGroupTitles } from '../shared/enums/channelGroups';
+import './styles.scss';
 
 const { Panel } = Collapse;
 
@@ -121,10 +121,10 @@ export default class ChannelsWidget extends React.Component {
 
   getRows() {
     const { channelGroupedByType, channels} = this.props;
-
     return map(channelGroupedByType, (channelArray, key) => {
       return (
         <Card
+          bordered={false}
           title={channelGroupTitles[key] || key}
           extra={this.renderVisiblityControls(key, channelArray)}
           type="inner"

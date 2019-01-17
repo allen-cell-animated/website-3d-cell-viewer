@@ -1,6 +1,13 @@
 @import "../../assets/styles/variables";
 
 .control-panel {
+    .ant-collapse-content-box {
+        padding: 0 16px 0 16px;
+    }
+    .ant-card-head {
+        margin-bottom: 0;
+        border-color: $light-gray;
+    }
     .ant-card-body {
         padding: 0;
     }
@@ -15,8 +22,16 @@
             text-align: right;
         }
     }
+    .row-card {
+        min-height: 72px;
+        padding: 24px 0 12px 0;
+        border-color: $header-gray;
+    }
     .row-card.ant-list-item {
-        border-bottom: none;
+        flex-flow: row wrap;
+    }
+    .ant-list-item-content {
+        order: 3;
     }
     .ant-card-extra {
         label {
@@ -35,5 +50,14 @@
    }
    .ant-collapse-content{
        overflow: visible;
+   }
+   .controls-closed {
+        padding: 12px 0 12px 0;
+       .ant-list-item-action {
+           order: 3
+       }
+        .ant-list-item-content {
+            order: 2;
+        }
    }
 }

@@ -11,6 +11,7 @@ import {
   Slider,
 }
 from 'antd';
+import classNames from 'classnames';
 
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
@@ -36,6 +37,10 @@ export default class ChannelsWidgetRow extends React.Component {
     super(props);
 
     this.storeTfEditor = this.storeTfEditor.bind(this);
+    this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
+    this.state = {
+      controlsOpen: false,
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -99,30 +104,37 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
+  toggleControlsOpen() {
+    this.setState({
+      controlsOpen: !this.state.controlsOpen
+    });
+  }
+
+
   createVolumeCheckbox() {
     let id = `vol_checkbox${this.props.index}`;
     return (
-      <Checkbox
-        checked={this.props.volumeChecked }
-        onChange={this.props.onVolumeCheckboxChange}
-        id={id}
-      >
-        volume
-      </ Checkbox>
+        <Checkbox
+          checked={this.props.volumeChecked }
+          onChange={this.props.onVolumeCheckboxChange}
+          id={id}
+        >
+          volume
+        </ Checkbox>
     );
   }
 
   createIsosurfaceCheckbox() {
     let id = `iso_checkbox${this.props.index}`;
     return (
-      <Checkbox
-        checked={this.props.isosurfaceChecked }
-        onChange={this.props.onIsosurfaceChange}
-        style={{width: 120}}
-        id={id}
-        >
-        surface
-      </Checkbox>
+        <Checkbox
+          checked={this.props.isosurfaceChecked }
+          onChange={this.props.onIsosurfaceChange}
+          // style={{width: 120}}
+          id={id}
+          >
+          surface
+        </Checkbox>
     );
   }
 
@@ -178,7 +190,11 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   renderSubHeader() {
-    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox()];
+    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
+      type="setting"
+      theme={this.state.controlsOpen ? 'filled' : 'outlined'}
+      onClick={this.toggleControlsOpen}
+    />)];
   }
 
   renderCardHeaderTitle() {
@@ -189,56 +205,38 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
-  renderCollapseHeader() {
+  renderSurfaceControls() {
+     return(<Row type="flex" justify="space-between">
+            <Col span={24}>
+              {this.createIsovalueSlider()}
+              {this.createOpacitySlider()}
+              {this.createSaveIsosurfaceSTLButton()}
+              {this.createSaveIsosurfaceGLTFButton()}
+            </Col>
+          </Row>)
+  }
+
+  render() {
+    let id = `channel_checkbox${this.props.index}`;
+    const rowClass = classNames({
+      'row-card': true,
+      'controls-closed': !this.state.controlsOpen,
+    });
     return (
       <List.Item
         key={this.props.index}
-        className='row-card'
+        className={rowClass}
         actions={this.renderSubHeader()}
       >
         <List.Item.Meta
           title={this.renderCardHeaderTitle()}
           avatar={this.createColorPicker()}
         />
+        {this.state.controlsOpen && this.createTFEditor()}
+        {this.state.controlsOpen && this.renderSurfaceControls()}
+
       </List.Item>
 
-    );
-  }
-
-  render() {
-    let id = `channel_checkbox${this.props.index}`;
-    return (
-      <div>
-      {this.renderCollapseHeader()}
-      <Collapse 
-        bordered={false} 
-        className="channel-options-card" 
-        >
-        <Panel
-          header={(
-          <Icon 
-            type="setting" 
-            theme="filled" 
-            style={{ fontSize: '1.2em'}}
-            />
-          )}
-          key={id}
-          showArrow={false}
-        >
-        <Row type="flex" justify="space-between">
-            <Col span={12}>
-              {this.createTFEditor()}
-            </Col>
-            <Col span={12}>
-              {this.createIsovalueSlider()}
-              {this.createOpacitySlider()}
-              {this.createSaveIsosurfaceSTLButton()}
-              {this.createSaveIsosurfaceGLTFButton()}
-            </Col>
-          </Row>
-        </Panel>
-      </Collapse>
-      </div>
     );
   }
 }
@@ -246,7 +244,7 @@ export default class ChannelsWidgetRow extends React.Component {
 const STYLES = {
   channelName: {
     display: 'inline-block',
-    width: 160
+    minWidth: 90,
   },
   checkedIcon: { 
     fill: colorPalette.textColor 
