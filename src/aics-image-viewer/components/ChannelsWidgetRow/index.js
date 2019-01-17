@@ -115,7 +115,7 @@ export default class ChannelsWidgetRow extends React.Component {
     let id = `vol_checkbox${this.props.index}`;
     return (
         <Checkbox
-          checked={this.props.volumeChecked }
+          checked={this.props.volumeChecked}
           onChange={this.props.onVolumeCheckboxChange}
           id={id}
         >
@@ -130,7 +130,6 @@ export default class ChannelsWidgetRow extends React.Component {
         <Checkbox
           checked={this.props.isosurfaceChecked }
           onChange={this.props.onIsosurfaceChange}
-          // style={{width: 120}}
           id={id}
           >
           surface
@@ -176,20 +175,20 @@ export default class ChannelsWidgetRow extends React.Component {
   createTFEditor() {
     if (this.props.image.channelData.channels[this.props.index]) {
       return (
-        <tf-editor
-          ref={this.storeTfEditor}
-          id={'aicstfeditor_'+this.props.index}
-          fit-to-data={false}
-          width={250}
-          height={150}
-          control-points={JSON.stringify(this.props.image.channelData.channels[this.props.index].lutControlPoints)}
-        >
-        </tf-editor>
+          <tf-editor
+            ref={this.storeTfEditor}
+            id={'aicstfeditor_'+this.props.index}
+            fit-to-data={false}
+            width={250}
+            height={150}
+            control-points={JSON.stringify(this.props.image.channelData.channels[this.props.index].lutControlPoints)}
+          >
+          </tf-editor>
       );
     } else { return null; }
   }
 
-  renderSubHeader() {
+  renderActions() {
     return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
       type="setting"
       theme={this.state.controlsOpen ? 'filled' : 'outlined'}
@@ -197,27 +196,34 @@ export default class ChannelsWidgetRow extends React.Component {
     />)];
   }
 
-  renderCardHeaderTitle() {
-    return (
-      <div key={this.props.index} >
-        {<span style={STYLES.channelName}>{this.props.name}</span>}
-      </div>
-    );
-  }
-
   renderSurfaceControls() {
-     return(<Row type="flex" justify="space-between">
+     return (
             <Col span={24}>
+              <h4 className="ant-list-item-meta-title">Surface settings:</h4>
               {this.createIsovalueSlider()}
               {this.createOpacitySlider()}
               {this.createSaveIsosurfaceSTLButton()}
               {this.createSaveIsosurfaceGLTFButton()}
             </Col>
-          </Row>)
+          );
+  }
+
+  renderControls() {
+    return (
+      <div> {this.props.volumeChecked && 
+        <Row type="flex" justify="space-between" >
+          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
+          {this.createTFEditor()}
+        </Row>}
+        {this.props.isosurfaceChecked &&
+        <Row type="flex" justify="space-between" align="middle">
+          {this.renderSurfaceControls()}
+        </Row>}
+      </div>
+    );
   }
 
   render() {
-    let id = `channel_checkbox${this.props.index}`;
     const rowClass = classNames({
       'row-card': true,
       'controls-closed': !this.state.controlsOpen,
@@ -226,15 +232,13 @@ export default class ChannelsWidgetRow extends React.Component {
       <List.Item
         key={this.props.index}
         className={rowClass}
-        actions={this.renderSubHeader()}
+        actions={this.renderActions()}
       >
         <List.Item.Meta
-          title={this.renderCardHeaderTitle()}
+          title={<span style={STYLES.channelName}>{this.props.name}</span>}
           avatar={this.createColorPicker()}
         />
-        {this.state.controlsOpen && this.createTFEditor()}
-        {this.state.controlsOpen && this.renderSurfaceControls()}
-
+        {this.state.controlsOpen && this.renderControls()}
       </List.Item>
 
     );
