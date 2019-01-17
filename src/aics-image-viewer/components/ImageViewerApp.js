@@ -1,4 +1,5 @@
 // 3rd Party Imports
+import { Layout } from "antd";
 import React from 'react';
 import { includes } from 'lodash';
 import { 
@@ -25,7 +26,6 @@ import {
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
-import MenuDrawer from './MenuDrawer';
 import ViewerWrapper from './CellViewerCanvasWrapper';
 
 import '../assets/styles/globals.scss';
@@ -33,6 +33,7 @@ import '../assets/styles/no-ui-slider.min.scss';
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
+const { Sider, Content } = Layout;
 
 const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
@@ -44,7 +45,7 @@ export default class ImageViewerApp extends React.Component {
       return {
         name: channel || "Channel " + index,
         channelEnabled: true,
-        volumeEnabled: index === 0 || index === 1,
+        volumeEnabled: index === 0 || index === 1 || index === 2,
         isosurfaceEnabled: false,
         isovalue: 0.5,
         opacity: 1.0,
@@ -93,7 +94,7 @@ export default class ImageViewerApp extends React.Component {
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
-      controlPanelOpen: true,
+      controlPanelClosed: false,
 
       // channels is a flat list of objects of this type:
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
@@ -620,12 +621,18 @@ export default class ImageViewerApp extends React.Component {
     }
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
     this.updateImageChannelsFromAppState();
+    // delayed for the animation to finish
+    if (prevState.controlPanelClosed !== this.state.controlPanelClosed) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 200);
+    }
   }
 
-  toggleControlPanel() {
-    this.setState({ controlPanelOpen: !this.state.controlPanelOpen});
+  toggleControlPanel(value) {
+    this.setState({ controlPanelClosed: value});
   }
 
   getNumberOfSlices() {
@@ -637,20 +644,17 @@ export default class ImageViewerApp extends React.Component {
 
   render() {
     return (
-        <div className="cell-viewer-app">
-          <MenuDrawer 
-              controlPanelOpen={this.state.controlPanelOpen}>
-              <ViewerWrapper 
-                    image={this.state.image}
-                    currentMethod={this.state.method}
-                    handleChannelToggle={this.toggleControlPanel}
-                    setAxisClip={this.setAxisClip}
-                    controlPanelOpen={this.state.controlPanelOpen}
-                    mode={this.state.mode}
-                    autorotate={this.state.autorotate}
-                    loadingImage={this.state.sendingQueryRequest}
-                    numSlices={this.getNumberOfSlices()}
-              />
+      <Layout className="cell-viewer-app">
+            <Sider
+              className="control-pannel-holder"
+              collapsible={true}
+              fixed={true}
+              defaultCollapsed={false}
+              collapsedWidth={0}
+              collapsed={this.state.controlPanelClosed}
+              onCollapse={this.toggleControlPanel}
+              width={450}
+            >
               <ControlPanel 
                     image={this.state.image}
                     channels={this.state.channels}
@@ -682,8 +686,24 @@ export default class ImageViewerApp extends React.Component {
                     showVolumes={this.toggleVolumes}
                     showSurfaces={this.toggleSurfaces}
               />
-            </MenuDrawer>
-        </div>
+              </Sider>
+              <Layout className="cell-viewer-wrapper">
+                <Content>
+                  <ViewerWrapper
+                    image={this.state.image}
+                    currentMethod={this.state.method}
+                    handleChannelToggle={this.toggleControlPanel}
+                    onAutorotateChange={this.onAutorotateChange}
+                    setAxisClip={this.setAxisClip}
+                    controlPanelOpen={this.state.controlPanelOpen}
+                    mode={this.state.mode}
+                    autorotate={this.state.autorotate}
+                    loadingImage={this.state.sendingQueryRequest}
+                    numSlices={this.getNumberOfSlices()}
+                  />
+                </Content>
+              </Layout>
+        </Layout>
     );
   }
 

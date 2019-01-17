@@ -1,12 +1,5 @@
 @import "../../assets/styles/axis-style-override";
 
-.drawer-closed {
-  .control-panel {
-    width: 0;
-    min-width: 0px;
-  }
-}
-
 .cell-fov-switch {
   margin-right: 15px;
   background-color: #444444;
@@ -21,6 +14,7 @@
   order: 1;
   overflow-y: scroll;
   max-width: 540px;
+  height: 100vh;
   .card-title {
     padding: 2px;
   }
