@@ -105,6 +105,13 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   toggleControlsOpen() {
+    const { 
+      isosurfaceChecked,
+      volumeChecked,
+    } = this.props;
+    if (!isosurfaceChecked && !volumeChecked) {
+      return;
+    }
     this.setState({
       controlsOpen: !this.state.controlsOpen
     });
