@@ -1,7 +1,7 @@
 import React from 'react';
 import { AICSview3d } from 'volume-viewer';
 
-import { Button, Icon } from 'antd';
+import { Icon } from 'antd';
 
 import viewMode from '../../shared/enums/viewMode';
 
@@ -102,10 +102,8 @@ export default class ViewerWrapper extends React.Component {
   }
 
  render() {
-   const arrow = this.props.controlPanelOpen ? 'left' : 'right';
    return (
      <div className='cell-canvas' style={STYLES.viewer}>
-  
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
         {this.renderClipSliders()}
         <AutoRotateButton 
