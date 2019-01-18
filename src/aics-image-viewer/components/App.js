@@ -38,14 +38,14 @@ const { Sider, Content } = Layout;
 const OK_STATUS = 'OK';
 const ERROR_STATUS = 'Error';
 
-export default class ImageViewerApp extends React.Component {
+export default class App extends React.Component {
 
   static setInitialChannelConfig(channelNames, channelColors) {
     return channelNames.map((channel, index) => {
       return {
         name: channel || "Channel " + index,
         channelEnabled: true,
-        volumeEnabled: index === 0 || index === 1 || index === 2,
+        volumeEnabled: index < 3,
         isosurfaceEnabled: false,
         isovalue: 0.5,
         opacity: 1.0,
@@ -233,8 +233,8 @@ export default class ImageViewerApp extends React.Component {
   loadFromJson(obj, title, locationHeader) {
     const aimg = new AICSvolumeDrawable(obj);
 
-    let channels = ImageViewerApp.setInitialChannelConfig(obj.channel_names, aimg.channel_colors);
-    let channelGroupedByType = ImageViewerApp.createChannelGrouping(obj.channel_names);
+    let channels = App.setInitialChannelConfig(obj.channel_names, aimg.channel_colors);
+    let channelGroupedByType = App.createChannelGrouping(obj.channel_names);
 
     for (let i = 0; i < obj.channel_names.length; ++i) {
       aimg.fusion[i].rgbColor = i === 0 ? aimg.channel_colors[i] : 0;
