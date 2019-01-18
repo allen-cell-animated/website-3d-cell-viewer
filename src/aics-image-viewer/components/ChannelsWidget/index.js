@@ -14,7 +14,7 @@ import {
 } from '../../shared/constants';
 import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
-import colorPalette from '../shared/colorPalette';
+import colorPalette from '../../shared/colorPalette';
 import SharedCheckBox from '../shared/SharedCheckBox';
 import ChannelsWidgetRow from '../ChannelsWidgetRow';
 

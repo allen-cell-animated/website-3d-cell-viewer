@@ -19,7 +19,7 @@ import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
 import '../tf-editor.html';
 import 'react-polymer';
 
-import colorPalette from '../shared/colorPalette';
+import colorPalette from '../../shared/colorPalette';
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../../shared/constants';
