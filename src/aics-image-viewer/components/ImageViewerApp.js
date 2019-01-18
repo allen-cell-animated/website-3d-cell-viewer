@@ -648,7 +648,6 @@ export default class ImageViewerApp extends React.Component {
             <Sider
               className="control-pannel-holder"
               collapsible={true}
-              fixed={true}
               defaultCollapsed={false}
               collapsedWidth={0}
               collapsed={this.state.controlPanelClosed}
