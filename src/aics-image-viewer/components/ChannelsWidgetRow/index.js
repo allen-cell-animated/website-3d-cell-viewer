@@ -179,28 +179,26 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
-  createTFEditor() {
-    if (this.props.image.channelData.channels[this.props.index]) {
-      return (
-          <tf-editor
-            ref={this.storeTfEditor}
-            id={'aicstfeditor_'+this.props.index}
-            fit-to-data={false}
-            width={250}
-            height={150}
-            control-points={JSON.stringify(this.props.image.channelData.channels[this.props.index].lutControlPoints)}
-          >
-          </tf-editor>
-      );
-    } else { return null; }
-  }
-
   renderActions() {
     return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
       type="setting"
       theme={this.state.controlsOpen ? 'filled' : 'outlined'}
       onClick={this.toggleControlsOpen}
     />)];
+  }
+
+  createTFEditor() {
+      return (this.props.image.channelData.channels[this.props.index] &&
+        <tf-editor
+          ref={this.storeTfEditor}
+          id={'aicstfeditor_' + this.props.index}
+          fit-to-data={false}
+          width={250}
+          height={150}
+          control-points={JSON.stringify(this.props.image.channelData.channels[this.props.index].lutControlPoints)}
+        >
+        </tf-editor>
+      );
   }
 
   renderSurfaceControls() {
@@ -217,13 +215,14 @@ export default class ChannelsWidgetRow extends React.Component {
 
   renderControls() {
     return (
-      <div> {this.props.volumeChecked && 
+      <div style={STYLES.settingsContainer}> 
+      {this.props.volumeChecked && 
         <Row type="flex" justify="space-between" >
           <h4 className="ant-list-item-meta-title">Volume settings:</h4>
           {this.createTFEditor()}
         </Row>}
         {this.props.isosurfaceChecked &&
-        <Row type="flex" justify="space-between" align="middle">
+        <Row type="flex" justify="space-between">
           {this.renderSurfaceControls()}
         </Row>}
       </div>
@@ -259,6 +258,9 @@ const STYLES = {
   },
   checkedIcon: { 
     fill: colorPalette.textColor 
+  },
+  settingsContainer: {
+    width: '100%',
   },
   uncheckedIcon: { 
     fill: colorPalette.accent3Color 
