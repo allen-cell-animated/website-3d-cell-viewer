@@ -1,12 +1,12 @@
 import React from 'react';
 import { AICSview3d } from 'volume-viewer';
 
-import { Button, Icon } from 'antd';
+import { Icon } from 'antd';
 
 import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders.js';
-
+import AutoRotateButton from '../AutoRotateButton';
 import './styles.scss';
 
 const ViewMode = viewMode.mainMapping;
@@ -102,16 +102,15 @@ export default class ViewerWrapper extends React.Component {
   }
 
  render() {
-   const arrow = this.props.controlPanelOpen ? 'left' : 'right';
    return (
      <div className='cell-canvas' style={STYLES.viewer}>
-        <Button
-          style={STYLES.button}
-          icon={arrow}
-          onClick={this.props.handleChannelToggle}
-        />
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
         {this.renderClipSliders()}
+        <AutoRotateButton 
+          mode={this.props.mode}
+          autorotate={this.props.autorotate}
+          onAutorotateChange={this.props.onAutorotateChange}
+        />
         {this.renderOverlay()}
      </div>
    );
@@ -121,24 +120,13 @@ export default class ViewerWrapper extends React.Component {
 const STYLES = {
   viewer: {
     display: 'flex',
-    position: 'relative'
+    position: 'relative',
+    height: '100vh',
+    width: '100%',
   },
   view3d: {
     width: '100%',
     display: 'flex'
-  },
-  button: {
-    position: 'absolute',
-    left: 0,
-    top: 14,
-    minWidth: 'none',
-    zIndex: 1000,
-    borderRadius: 0,
-  },
-  icon: {
-    fontSize: 33,
-    color: 'white',
-    paddingLeft: 10
   },
   noImage: {
     position: 'absolute',

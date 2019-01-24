@@ -11,6 +11,7 @@ import {
   Slider,
 }
 from 'antd';
+import classNames from 'classnames';
 
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
@@ -18,7 +19,7 @@ import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
 import '../tf-editor.html';
 import 'react-polymer';
 
-import colorPalette from '../shared/colorPalette';
+import colorPalette from '../../shared/colorPalette';
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX
 } from '../../shared/constants';
@@ -36,6 +37,10 @@ export default class ChannelsWidgetRow extends React.Component {
     super(props);
 
     this.storeTfEditor = this.storeTfEditor.bind(this);
+    this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
+    this.state = {
+      controlsOpen: false,
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -99,30 +104,43 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
+  toggleControlsOpen() {
+    const { 
+      isosurfaceChecked,
+      volumeChecked,
+    } = this.props;
+    if (!isosurfaceChecked && !volumeChecked) {
+      return;
+    }
+    this.setState({
+      controlsOpen: !this.state.controlsOpen
+    });
+  }
+
+
   createVolumeCheckbox() {
     let id = `vol_checkbox${this.props.index}`;
     return (
-      <Checkbox
-        checked={this.props.volumeChecked }
-        onChange={this.props.onVolumeCheckboxChange}
-        id={id}
-      >
-        volume
-      </ Checkbox>
+        <Checkbox
+          checked={this.props.volumeChecked}
+          onChange={this.props.onVolumeCheckboxChange}
+          id={id}
+        >
+          volume
+        </ Checkbox>
     );
   }
 
   createIsosurfaceCheckbox() {
     let id = `iso_checkbox${this.props.index}`;
     return (
-      <Checkbox
-        checked={this.props.isosurfaceChecked }
-        onChange={this.props.onIsosurfaceChange}
-        style={{width: 120}}
-        id={id}
-        >
-        surface
-      </Checkbox>
+        <Checkbox
+          checked={this.props.isosurfaceChecked }
+          onChange={this.props.onIsosurfaceChange}
+          id={id}
+          >
+          surface
+        </Checkbox>
     );
   }
 
@@ -161,12 +179,19 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
+  renderActions() {
+    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
+      type="setting"
+      theme={this.state.controlsOpen ? 'filled' : 'outlined'}
+      onClick={this.toggleControlsOpen}
+    />)];
+  }
+
   createTFEditor() {
-    if (this.props.image.channelData.channels[this.props.index]) {
-      return (
+      return (this.props.image.channelData.channels[this.props.index] &&
         <tf-editor
           ref={this.storeTfEditor}
-          id={'aicstfeditor_'+this.props.index}
+          id={'aicstfeditor_' + this.props.index}
           fit-to-data={false}
           width={250}
           height={150}
@@ -174,71 +199,54 @@ export default class ChannelsWidgetRow extends React.Component {
         >
         </tf-editor>
       );
-    } else { return null; }
   }
 
-  renderSubHeader() {
-    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox()];
-  }
-
-  renderCardHeaderTitle() {
-    return (
-      <div key={this.props.index} >
-        {<span style={STYLES.channelName}>{this.props.name}</span>}
-      </div>
-    );
-  }
-
-  renderCollapseHeader() {
-    return (
-      <List.Item
-        key={this.props.index}
-        className='row-card'
-        actions={this.renderSubHeader()}
-      >
-        <List.Item.Meta
-          title={this.renderCardHeaderTitle()}
-          avatar={this.createColorPicker()}
-        />
-      </List.Item>
-
-    );
-  }
-
-  render() {
-    let id = `channel_checkbox${this.props.index}`;
-    return (
-      <div>
-      {this.renderCollapseHeader()}
-      <Collapse 
-        bordered={false} 
-        className="channel-options-card" 
-        >
-        <Panel
-          header={(
-          <Icon 
-            type="setting" 
-            theme="filled" 
-            style={{ fontSize: '1.2em'}}
-            />
-          )}
-          key={id}
-          showArrow={false}
-        >
-        <Row type="flex" justify="space-between">
-            <Col span={12}>
-              {this.createTFEditor()}
-            </Col>
-            <Col span={12}>
+  renderSurfaceControls() {
+     return (
+            <Col span={24}>
+              <h4 className="ant-list-item-meta-title">Surface settings:</h4>
               {this.createIsovalueSlider()}
               {this.createOpacitySlider()}
               {this.createSaveIsosurfaceSTLButton()}
               {this.createSaveIsosurfaceGLTFButton()}
             </Col>
-          </Row>
-        </Panel>
-      </Collapse>
+          );
+  }
+
+  renderControls() {
+    return (
+      <div style={STYLES.settingsContainer}> 
+      {this.props.volumeChecked && 
+        <Row type="flex" justify="space-between" >
+          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
+          {this.createTFEditor()}
+        </Row>}
+        {this.props.isosurfaceChecked &&
+        <Row type="flex" justify="space-between">
+          {this.renderSurfaceControls()}
+        </Row>}
       </div>
+    );
+  }
+
+  render() {
+    const rowClass = classNames({
+      'row-card': true,
+      'controls-closed': !this.state.controlsOpen,
+    });
+    return (
+      <List.Item
+        key={this.props.index}
+        className={rowClass}
+        actions={this.renderActions()}
+      >
+        <List.Item.Meta
+          title={<span style={STYLES.channelName}>{this.props.name}</span>}
+          avatar={this.createColorPicker()}
+        />
+        {this.state.controlsOpen && this.renderControls()}
+      </List.Item>
+
     );
   }
 }
@@ -246,10 +254,13 @@ export default class ChannelsWidgetRow extends React.Component {
 const STYLES = {
   channelName: {
     display: 'inline-block',
-    width: 160
+    minWidth: 90,
   },
   checkedIcon: { 
     fill: colorPalette.textColor 
+  },
+  settingsContainer: {
+    width: '100%',
   },
   uncheckedIcon: { 
     fill: colorPalette.accent3Color 

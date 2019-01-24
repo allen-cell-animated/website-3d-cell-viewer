@@ -3,17 +3,14 @@
 
 .cell-viewer-wrapper {
   .cell-canvas {
-    order: 2;
-    flex: 10;
-    min-width: 50%;
     z-index: 10;
     transition: width .3s;
   }
   .clip-sliders {
     @extend %axis-override;
     position: absolute;
-    bottom: 0;
-    width: 75%;
+    bottom: 20px;
+    width: 80%;
     left: 5%;
     display: flex;
     .sectionSubHeader {
@@ -23,11 +20,6 @@
   }
 }
 
-.drawer-closed {
-  .cell-canvas  {
-    flex: 1 100%;
-  }
-}
 @media only screen and (max-width: 800px) {
   .cell-viewer-wrapper {
     .cell-canvas {

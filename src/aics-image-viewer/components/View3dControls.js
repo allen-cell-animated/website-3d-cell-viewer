@@ -17,7 +17,7 @@ export default class View3dControls extends React.Component {
     this.state = {
       autoRotateChecked: false,
       maxProjectionChecked: false,
-      maskAlphaSlider: 100,
+      maskAlphaSlider: 50,
       brightnessSlider: 65,
       densitySlider: 50,
       levelsSlider: [58.32, 149.00, 255.00],
@@ -31,14 +31,14 @@ export default class View3dControls extends React.Component {
 
   createMaskAlphaSlider() {
     let config = {
-      label: 'maskAlpha',
+      label: 'crop to cell',
       start: [this.state.maskAlphaSlider],
       range: {
         min: 0,
         max: 100
       },
       onUpdate: (values, handle, unencoded, tap, positions) => {
-        let val = values[0] / 100.0;
+        let val = 1 - (values[0] / 100.0);
         this.props.onUpdateImageMaskAlpha(val);
         this.setState({ maskAlphaSlider: unencoded[0] });
       }
@@ -202,6 +202,7 @@ export default class View3dControls extends React.Component {
         range={range}
         start={start}
         connected={true}
+        tooltips={true}
         behavior="drag"
         onUpdate={onUpdate} 
         />
@@ -224,6 +225,7 @@ export default class View3dControls extends React.Component {
     return (
       <Card 
         extra={this.createProjectionModeControls()}
+        bordered={false}
         title="Global volume rendering settings"
         type="inner"
         bodyStyle={STYLES.card}

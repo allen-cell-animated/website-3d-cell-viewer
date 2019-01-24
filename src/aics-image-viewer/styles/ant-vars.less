@@ -10,16 +10,21 @@
 @warning-color          : @gold-6;
 @normal-color           : @light-gray;
 @background-color       : @dark-gray;
-@disabled-color         : fade(@light-gray, 10%);
+@disabled-color         : fade(@light-gray, 1%);
 @disabled-bg            : @background-color;
 // Border color
 @border-color-base      :  @light-gray;  // base border outline a component
 
-
+// Disabled states
+@disabled-color : fade(@primary-color, 25%);
+@disabled-bg : @background-color;
+@disabled-color-dark : fade(#fff, 35%);
 
 // Color used by default to control hover and active backgrounds and for
 // alert info backgrounds.
+@primary-5: color(~`colorPalette("@{primary-color}", 5)`);  // color used to control the text color in many active and hover states, replace tint(@primary-color, 20%)
 @primary-6: @primary-color;                                 // color used to control the text color of active buttons, don't use, use @primary-color
+@primary-7: color(~`colorPalette("@{primary-color}", 7)`);  // replace shade(@primary-color, 5%)
 
 
 // Background color for `<body>`
@@ -36,7 +41,7 @@
 // The background colors for active and hover states for things like
 // list items or table cells.
 @item-active-bg         : @purple;
-@item-hover-bg          : @primary-color;
+@item-hover-bg          : @primary-5;
 
 @card-actions-background: @dark-gray;
 
@@ -49,7 +54,7 @@
 
 // Layout
 @layout-body-background         : @background-color;
-@layout-header-background       : #001529;
+@layout-header-background       : @background-color;
 @layout-footer-background       : darken(@dark-gray, 10%);
 @layout-header-height           : 64px;
 @layout-header-padding          : 0 50px;
@@ -125,7 +130,7 @@
 @input-padding-vertical-sm   : 1px;
 @input-padding-vertical-lg   : 6px;
 @input-placeholder-color     : hsv(0, 0, 75%);
-@input-color                 : @text-color-secondary;
+@input-color                 : @primary-color;
 @input-border-color          : @border-color-base;
 @input-bg                    : @light-gray;
 @input-addon-bg              : @background-color-light;

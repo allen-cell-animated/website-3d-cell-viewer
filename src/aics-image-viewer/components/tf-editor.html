@@ -42,20 +42,45 @@ Check out the demo page for examples of the different use cases in action.
       }
 
       .aligned {
-        margin: 0 auto;
-        display: inline-flex;
-        /* bottom of button row, which is bottom of whole control */
-        padding-bottom: 10px;
+        margin: auto;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .tick text {
+          fill: #6e6e6e;
+      }
+
+      .axis path,
+      .axis line 
+      {
+          stroke: #6e6e6e;
       }
 
       button {
-        border: 1px solid;
-        padding: 1px 2px;
-        margin-right: 2px;
-        margin-left: 2px;
-        height: 23px;
+        outline: 0;
+        line-height: 1.5;
+        display: inline-block;
+        font-weight: 400;
+        text-align: center;
+        touch-action: manipulation;
         cursor: pointer;
-        overflow: visible;
+        background-image: none;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        padding: 0 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        height: 32px;
+        margin: auto;
+        user-select: none;
+        transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+        position: relative;
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+        color: #bfbfbf;
+        background-color: #313131;
+        border-color: #6e6e6e;
       }
 
       button::-moz-focus-inner {
@@ -80,7 +105,7 @@ Check out the demo page for examples of the different use cases in action.
 
       .line {
         /*fill: steelblue;*/
-        stroke: black;
+        stroke: white;
         stroke-width: 1.5px;
       }
 
@@ -88,7 +113,7 @@ Check out the demo page for examples of the different use cases in action.
         /*fill: #fff;*/
         fill-opacity: .6;
         cursor: move;
-        stroke: black;
+        stroke: white;
         stroke-width: 1.5px;
       }
 
@@ -101,11 +126,11 @@ Check out the demo page for examples of the different use cases in action.
       <svg id="svg-{{id}}" width$="{{width}}" height$="{{height}}"></svg>
       <div class="aligned">
         <!-- <input type="color" id="picker-{{id}}"> -->
-        <button id="export-{{id}}">Export</button>
-        <button id="reset-{{id}}">Reset</button>
-        <button id="auto-{{id}}">Auto</button>
-        <button id="bestfit-{{id}}">BestFit</button>
-        <button id="auto2-{{id}}">Auto_IJ</button>
+        <button id="export-{{id}}" class="ant-btn">Export</button>
+        <button id="reset-{{id}}" class="ant-btn">Reset</button>
+        <button id="auto-{{id}}" class="ant-btn">Auto</button>
+        <button id="bestfit-{{id}}" class="ant-btn">BestFit</button>
+        <button id="auto2-{{id}}" class="ant-btn">Auto_IJ</button>
         <!-- <template is="dom-if" if="{{_external}}"> -->
         <!-- this canvas exists to render the gradient but will not be displayed -->
           <canvas id="canvas-{{id}}" width="256" height="10" style="display:none;"></canvas>
@@ -182,12 +207,12 @@ Check out the demo page for examples of the different use cases in action.
                     this.push('controlPoints', {
                         'x': extent[0],
                         'opacity': 0,
-                        'color': 'gray'
+                        'color': 'white'
                     });
                     this.push('controlPoints', {
                         'x': extent[1],
                         'opacity': 1,
-                        'color': 'gray'
+                        'color': 'white'
                     });
                 }
                 this.selected = this.controlPoints[0];
@@ -265,7 +290,7 @@ Check out the demo page for examples of the different use cases in action.
                     .datum(me.controlPoints)
                     .attr("class", "line")
                     .attr("fill", "url(#tfGradient-" + this.id + ")")
-                    .attr("stroke", "black")
+                    .attr("stroke", "white")
                     .call(function() {
                         me._redraw();
                     });

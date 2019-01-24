@@ -20,7 +20,6 @@ export default class ControlPanel extends React.Component {
   constructor(props) {
     super(props);
     this.handleToggle = this.handleToggle.bind(this);
-    this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.state = {open: true};
@@ -59,26 +58,6 @@ export default class ControlPanel extends React.Component {
     this.props.onSwitchFovCell();
   }
 
-  createAutorotateControls() {
-    const {
-      autorotate
-    } = this.props;
-    const buttonType = autorotate ? "pause-circle" : "play-circle";
-    return (
-      <Button 
-        icon={buttonType} 
-        onClick={this.handleAutorotateCheck} 
-      >
-        Turntable
-      </Button>
-
-    );
-  }
-
-  handleAutorotateCheck(event, checked) {
-    this.props.onAutorotateChange();
-  }
-
   render() {
     const dropDownMenuItems = (
       <Menu onClick={this.makeTurnOnPresetFn}>
@@ -89,16 +68,16 @@ export default class ControlPanel extends React.Component {
       <Card 
         style={STYLES.wrapper} 
         open={this.state.open} 
+        bordered={false}
         className="control-panel"
         extra={
           <div>
-            {this.createFovCellSwitchControls()}
-            {this.createAutorotateControls()}
             <Dropdown
                 overlay={dropDownMenuItems}
               >
-              <Button shape="circle" icon="bg-colors" />
+              <Button>Color</Button>
             </Dropdown>
+            {this.createFovCellSwitchControls()}
           </div>}
         title={
             <ViewModeRadioButtons

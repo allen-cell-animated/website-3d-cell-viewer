@@ -2,9 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './App.scss';
-import ImageViewerApp from '../src/aics-image-viewer/components/ImageViewerApp';
+import App from '../src/aics-image-viewer/components/App';
 
 ReactDOM.render(
-  <ImageViewerApp/>,
+  <App/>,
   document.getElementById('cell-viewer')
 );
