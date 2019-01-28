@@ -9,7 +9,7 @@
     "build-iv": "webpack --config webpack.config.js",
     "build-static": "webpack --config webpack.static.js",
     "start": "npm run build-iv && node ./server.js -p 9020",
-    "predeploy": "npm run build-iv",
+    "predeploy": "DEPLOYMENT_ENV=production npm run build-static",
     "deploy": "gh-pages -d imageviewer -o github"
   },
   "author": "Daniel Toloudis",
