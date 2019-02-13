@@ -5,7 +5,9 @@ import NumericInput from 'react-numeric-input';
 import {
   Card,
   Checkbox,
+  Collapse,
 } from 'antd';
+const Panel = Collapse.Panel;
 
 export default class View3dControls extends React.Component {
   constructor(props) {
@@ -223,27 +225,36 @@ export default class View3dControls extends React.Component {
     if (!this.props.image) return null;
 
     return (
-      <Card 
+      <Card
         extra={this.createProjectionModeControls()}
         bordered={false}
         title="Global volume rendering settings"
         type="inner"
+        className="global-volume-controls"
         bodyStyle={STYLES.card}
-        >
-        <div style={STYLES.slidersWrapper}>
-        {this.createMaskAlphaSlider()}
-        {this.createBrightnessSlider()}
-        {this.createDensitySlider()}
-        {this.createLevelsSlider()}
-          
-      </div>
-    </Card>);
+      >
+        <Collapse
+          bordered={false}
+          >
+          <Panel
+            key="gobal-volume"
+          >
+            <div style={STYLES.slidersWrapper}>
+              {this.createMaskAlphaSlider()}
+              {this.createBrightnessSlider()}
+              {this.createDensitySlider()}
+              {this.createLevelsSlider()}
+            </div>
+          </Panel>
+        </Collapse>
+      </Card>
+    );
   }
 }
 
 const STYLES = {
   card: {
-    padding: '16px 24px',
+    padding: '16px 0px',
   },
   slidersWrapper: {
     width: 'calc(100% - 20px)',

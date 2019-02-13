@@ -28,6 +28,11 @@
   .ant-collapse-item .ant-collapse-header {
     padding: 0;
   }
+  .global-volume-controls {
+        .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
+          transform: translateY(-133%);
+        }
+  }
 
   //slider settings
   @extend %axis-override;
