@@ -16,6 +16,10 @@ export default class View3dControls extends React.Component {
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.handleMaxProjectionCheck = this.handleMaxProjectionCheck.bind(this);
     this.handleMaskMenuItemClick = this.handleMaskMenuItemClick.bind(this);
+    this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
+    this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
+    this.onDensityUpdate = this.onDensityUpdate.bind(this);
+    this.onLevelsUpdate = this.onLevelsUpdate.bind(this);
     this.state = {
       autoRotateChecked: false,
       maxProjectionChecked: false,
@@ -29,16 +33,16 @@ export default class View3dControls extends React.Component {
 
   componentDidMount() {
     this.onAlphaSliderUpdate([50]);
-    this.props.onUpdateImageBrightness(2);
-    this.props.onUpdateImageDensity(0.08);
-    this.props.onUpdateImageGammaLevels(0.22, 1,0.85);
+    this.onBrightnessUpdate([65]);
+    this.onDensityUpdate([50]);
+    this.onLevelsUpdate([58.32, 149.00, 255.00])
   }
 
   handleMaskMenuItemClick(i) {
     this.props.image.setChannelAsMask(i);
   }
 
-  onAlphaSliderUpdate(values, handle, unencoded, tap, positions) {
+  onAlphaSliderUpdate(values) {
     let val = 1 - (values[0] / 100.0);
     this.props.onUpdateImageMaskAlpha(val);
 }
@@ -51,9 +55,15 @@ export default class View3dControls extends React.Component {
         min: 0,
         max: 100
       },
-      onUpdate: this.onAlphaSliderUpdate
+      onUpdate: this.onAlphaSliderUpdate,
     };
     return this.createSliderRow(config);
+  }
+
+  onBrightnessUpdate(values) {
+    let val = 0.05 * (values[0] - 50);
+    let setVal = Math.exp(val);
+    this.props.onUpdateImageBrightness(setVal);
   }
 
   createBrightnessSlider() {
@@ -64,16 +74,15 @@ export default class View3dControls extends React.Component {
         min: 0,
         max: 100
       },
-      onUpdate: (values, handle, unencoded, tap, positions) => {
-        let val = 0.05 * (values[0] - 50);
-        let setVal = Math.exp(val);
-        console.log('brightness ', setVal)
-
-        this.props.onUpdateImageBrightness(setVal);
-        this.setState({brightnessSlider:unencoded[0]});
-      }
+      onUpdate: this.onBrightnessUpdate,
     };
     return this.createSliderRow(config);
+  }
+
+  onDensityUpdate(values) {
+    let val = 0.05 * (values[0] - 100);
+    let setVal = Math.exp(val);
+    this.props.onUpdateImageDensity(setVal);
   }
 
   createDensitySlider () {
@@ -84,15 +93,38 @@ export default class View3dControls extends React.Component {
         min: 0,
         max: 100
       },
-      onUpdate: (values, handle, unencoded, tap, positions) => {
-        let val = 0.05 * (values[0] - 100);
-        let setVal = Math.exp(val);
-        console.log('desnity', setVal)
-        this.props.onUpdateImageDensity(setVal);
-        this.setState({densitySlider:unencoded[0]});
-      }
+      onUpdate: this.onDensityUpdate
     };
     return this.createSliderRow(config);
+  }
+
+  onLevelsUpdate(values, handle, unencoded) {
+    let minThumb = Number(values[0]);
+    let conThumb = Number(values[1]);
+    let maxThumb = Number(values[2]);
+
+    if (conThumb > maxThumb || conThumb < minThumb) {
+      conThumb = 0.5 * (minThumb + maxThumb);
+    }
+    let min = minThumb;
+    let max = maxThumb;
+    let mid = conThumb;
+    let div = 255; //this.getWidth();
+    min /= div;
+    max /= div;
+    mid /= div;
+    let diff = max - min;
+    let x = (mid - min) / diff;
+    let scale = 4 * x * x;
+    if ((mid - 0.5) * (mid - 0.5) < 0.0005) {
+      scale = 1.0;
+    }
+    let vals = {
+      min: min,
+      scale: scale,
+      max: max
+    };
+    this.props.onUpdateImageGammaLevels(vals.min, vals.max, vals.scale);
   }
 
   createLevelsSlider () {
@@ -103,37 +135,7 @@ export default class View3dControls extends React.Component {
         min: 0,
         max: 255
       },
-      onUpdate: (values, handle, unencoded, tap, positions) => {
-        let minThumb = unencoded[0];
-        let conThumb = unencoded[1];
-        let maxThumb = unencoded[2];
-        if (conThumb > maxThumb || conThumb < minThumb) {
-          conThumb = 0.5 * (minThumb + maxThumb);
-        }
-        let min = minThumb;
-        let max = maxThumb;
-        let mid = conThumb;
-        let div = 255; //this.getWidth();
-        min /= div;
-        max /= div;
-        mid /= div;
-        let diff = max - min;
-        let x = (mid - min) / diff;
-        let scale = 4 * x * x;
-        if ((mid - 0.5) * (mid - 0.5) < 0.0005) {
-          scale = 1.0;
-        }
-        let vals = {
-          min: min,
-          scale: scale,
-          max: max
-        };
-        console.log('levels', vals.min, vals.max, vals.scale)
-
-        this.props.onUpdateImageGammaLevels(vals.min, vals.max, vals.scale);
-
-        this.setState({levelsSlider:[unencoded[0], unencoded[1], unencoded[2]]});
-      }
+      onUpdate: this.onLevelsUpdate,
     };
     return this.createSliderRow(config);
   }
