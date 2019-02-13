@@ -1,12 +1,20 @@
 @import "../../assets/styles/variables";
 
 .control-panel {
+    border: 1px solid $border-color;
+
+    .ant-card-inner {
+        border-bottom: 1px solid $border-color;
+    }
     .ant-collapse-content-box {
         padding: 0 16px 0 16px;
     }
+    .ant-collapse-content-active {
+        border-bottom: 1px solid $border-color;
+    }
     .ant-card-head {
         margin-bottom: 0;
-        border-color: $light-gray;
+        border-bottom: 1px solid $border-color;
     }
     .ant-card-body {
         padding: 0;
@@ -42,8 +50,7 @@
         margin-left: 20px;
     }
     .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
-        top: -75%;
-        transform: translateY(-75%);
+        transform: translateY(-100%);
     }
    .ant-collapse>.ant-collapse-item {
        border-bottom: none;
