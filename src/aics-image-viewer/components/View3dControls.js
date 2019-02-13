@@ -27,9 +27,21 @@ export default class View3dControls extends React.Component {
     };
   }
 
+  componentDidMount() {
+    this.onAlphaSliderUpdate([50]);
+    this.props.onUpdateImageBrightness(2);
+    this.props.onUpdateImageDensity(0.08);
+    this.props.onUpdateImageGammaLevels(0.22, 1,0.85);
+  }
+
   handleMaskMenuItemClick(i) {
     this.props.image.setChannelAsMask(i);
   }
+
+  onAlphaSliderUpdate(values, handle, unencoded, tap, positions) {
+    let val = 1 - (values[0] / 100.0);
+    this.props.onUpdateImageMaskAlpha(val);
+}
 
   createMaskAlphaSlider() {
     let config = {
@@ -39,11 +51,7 @@ export default class View3dControls extends React.Component {
         min: 0,
         max: 100
       },
-      onUpdate: (values, handle, unencoded, tap, positions) => {
-        let val = 1 - (values[0] / 100.0);
-        this.props.onUpdateImageMaskAlpha(val);
-        this.setState({ maskAlphaSlider: unencoded[0] });
-      }
+      onUpdate: this.onAlphaSliderUpdate
     };
     return this.createSliderRow(config);
   }
@@ -59,6 +67,8 @@ export default class View3dControls extends React.Component {
       onUpdate: (values, handle, unencoded, tap, positions) => {
         let val = 0.05 * (values[0] - 50);
         let setVal = Math.exp(val);
+        console.log('brightness ', setVal)
+
         this.props.onUpdateImageBrightness(setVal);
         this.setState({brightnessSlider:unencoded[0]});
       }
@@ -77,6 +87,7 @@ export default class View3dControls extends React.Component {
       onUpdate: (values, handle, unencoded, tap, positions) => {
         let val = 0.05 * (values[0] - 100);
         let setVal = Math.exp(val);
+        console.log('desnity', setVal)
         this.props.onUpdateImageDensity(setVal);
         this.setState({densitySlider:unencoded[0]});
       }
@@ -117,6 +128,7 @@ export default class View3dControls extends React.Component {
           scale: scale,
           max: max
         };
+        console.log('levels', vals.min, vals.max, vals.scale)
 
         this.props.onUpdateImageGammaLevels(vals.min, vals.max, vals.scale);
 
