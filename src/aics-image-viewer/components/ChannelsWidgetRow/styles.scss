@@ -2,7 +2,22 @@
 
 .control-panel {
     border: 1px solid $border-color;
-
+    .ant-card-head {
+        margin-bottom: 0;
+        border-bottom: 1px solid $border-color;
+        .ant-checkbox.ant-checkbox-checked {
+            .ant-checkbox-inner {
+                background-color: $dimgray;
+            }
+        }
+    }
+    // hover states of checkboxes 
+    .ant-checkbox:hover .ant-checkbox-inner{
+        border-color: white;
+    }
+    .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+       border-color: white;
+    }
     .ant-card-inner {
         border-bottom: 1px solid $border-color;
     }
@@ -10,10 +25,6 @@
         padding: 0 16px 0 16px;
     }
     .ant-collapse-content-active {
-        border-bottom: 1px solid $border-color;
-    }
-    .ant-card-head {
-        margin-bottom: 0;
         border-bottom: 1px solid $border-color;
     }
     .ant-card-body {
