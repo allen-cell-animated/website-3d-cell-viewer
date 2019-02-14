@@ -9,7 +9,17 @@ import {
 } from 'antd';
 const Panel = Collapse.Panel;
 
+const INITIAL_SETTINGS = {
+  autoRotateChecked: false,
+  maxProjectionChecked: false,
+  maskAlphaSlider: [50],
+  brightnessSlider: [65],
+  densitySlider: [50],
+  levelsSlider: [58.32, 149.00, 255.00],
+};
+
 export default class View3dControls extends React.Component {
+
   constructor(props) {
     super(props);
     this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
@@ -20,22 +30,13 @@ export default class View3dControls extends React.Component {
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
     this.onLevelsUpdate = this.onLevelsUpdate.bind(this);
-    this.state = {
-      autoRotateChecked: false,
-      maxProjectionChecked: false,
-      maskAlphaSlider: 50,
-      brightnessSlider: 65,
-      densitySlider: 50,
-      levelsSlider: [58.32, 149.00, 255.00],
-      pixelSize: props.image ? props.image.pixel_size.slice() : [1,1,1]
-    };
   }
 
   componentDidMount() {
-    this.onAlphaSliderUpdate([50]);
-    this.onBrightnessUpdate([65]);
-    this.onDensityUpdate([50]);
-    this.onLevelsUpdate([58.32, 149.00, 255.00])
+    this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
+    this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
+    this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
+    this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   }
 
   handleMaskMenuItemClick(i) {
@@ -50,7 +51,7 @@ export default class View3dControls extends React.Component {
   createMaskAlphaSlider() {
     let config = {
       label: 'crop to cell',
-      start: [this.state.maskAlphaSlider],
+      start: INITIAL_SETTINGS.maskAlphaSlider,
       range: {
         min: 0,
         max: 100
@@ -69,7 +70,7 @@ export default class View3dControls extends React.Component {
   createBrightnessSlider() {
     let config = {
       label: 'brightness',
-      start: [this.state.brightnessSlider],
+      start: INITIAL_SETTINGS.brightnessSlider,
       range: {
         min: 0,
         max: 100
@@ -88,7 +89,7 @@ export default class View3dControls extends React.Component {
   createDensitySlider () {
     let config = {
       label: 'density',
-      start: [this.state.densitySlider],
+      start: INITIAL_SETTINGS.densitySlider,
       range: {
         min: 0,
         max: 100
@@ -98,7 +99,7 @@ export default class View3dControls extends React.Component {
     return this.createSliderRow(config);
   }
 
-  onLevelsUpdate(values, handle, unencoded) {
+  onLevelsUpdate(values) {
     let minThumb = Number(values[0]);
     let conThumb = Number(values[1]);
     let maxThumb = Number(values[2]);
@@ -130,7 +131,7 @@ export default class View3dControls extends React.Component {
   createLevelsSlider () {
     let config = {
       label: 'levels',
-      start: [this.state.levelsSlider[0], this.state.levelsSlider[1], this.state.levelsSlider[2]],
+      start: INITIAL_SETTINGS.levelsSlider,
       range: {
         min: 0,
         max: 255
@@ -143,22 +144,24 @@ export default class View3dControls extends React.Component {
   createVolumeAxisScaling(config) {
     const SCALE_UI_MIN_VAL = 0.001;
     const SCALE_UI_STEP_SIZE = 0.01;
+    const imagePixelSize = this.props.image ? props.image.pixel_size.slice() : [1, 1, 1];
+
     return (
       <div key={config.key} style={STYLES.controlRow}>
         <div style={STYLES.controlName}>{config.label}</div>
         <div style={STYLES.control}>
-          <NumericInput min={SCALE_UI_MIN_VAL} step={SCALE_UI_STEP_SIZE} value={this.state.pixelSize[config.key]} onChange={config.onUpdate}/>
+          <NumericInput min={SCALE_UI_MIN_VAL} step={SCALE_UI_STEP_SIZE} value={imagePixelSize[config.key]} onChange={config.onUpdate}/>
         </div>
       </div>
     );
   }
 
   makeUpdatePixelSizeFn(i) {
+    const imagePixelSize = this.props.image ? props.image.pixel_size.slice() : [1, 1, 1];
     return (value) => {
-      const pixelSize = this.state.pixelSize.slice();
+      const pixelSize = imagePixelSize.slice();
       pixelSize[i] = value;
       this.props.image.setVoxelSize(pixelSize);
-      this.setState({pixelSize:pixelSize});
     };
   }
 
@@ -180,12 +183,6 @@ export default class View3dControls extends React.Component {
     this.props.onUpdateImageMaxProjectionMode(target.checked);
   }
 
-  componentWillReceiveProps(newProps) {
-    this.setState({
-      pixelSize: newProps.image ? newProps.image.pixel_size.slice() : [1,1,1]
-    });
-  }
-
   shouldComponentUpdate(newProps, newState) {
 
     // TODO add better identifiers of images than name (like an id)
@@ -195,9 +192,7 @@ export default class View3dControls extends React.Component {
     const imageChannelsAreDifferent = (newProps.channels !== this.props.channels) || 
       (newProps.channels.length !== this.props.channels.length);
     return receivingImageForFirstTime || imageNameIsDifferent || imageChannelsAreDifferent ||
-      (newProps.mode !== this.props.mode) ||
-      (newState.autoRotateChecked !== this.state.autoRotateChecked) || 
-      (newState.maxProjectionChecked !== this.state.maxProjectionChecked);
+      (newProps.mode !== this.props.mode);
   }
 
 
@@ -228,7 +223,7 @@ export default class View3dControls extends React.Component {
   createProjectionModeControls() {
     return (
       <Checkbox
-        checked={this.state.maxProjectionChecked}
+        defaultChecked={INITIAL_SETTINGS.maxProjectionChecked}
         onChange={this.handleMaxProjectionCheck}
       >Max projection
       </Checkbox>
