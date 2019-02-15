@@ -64,7 +64,6 @@ export default class TwoDPlayButtons extends React.Component {
               onChangeButton={this.handleButtonGroupChange}
             />
           </Row>
-
           <Col >
             <Button.Group style={STYLES.playButtons}>
               <Button type="primary" shape="circle" icon="step-backward" onClick={this.props.goBack} />
@@ -76,7 +75,6 @@ export default class TwoDPlayButtons extends React.Component {
         <Row type="flex"
           justify="end"
         >
-
         </Row>
       </div>
     );

@@ -140,7 +140,7 @@ export default class App extends React.Component {
     this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
     this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
-    
+
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -325,7 +325,7 @@ export default class App extends React.Component {
         this.state.isShowingSegmentedCell ? null : this.state.queryInput.cellId
       );
       const type = this.state.isShowingSegmentedCell ? FOV_ID_QUERY : CELL_ID_QUERY;
-      this.openImage(name, type, true);
+      this.openImage(name, type, false);
       this.setState((prevState) => {
         return {
           sendingQueryRequest: true,
@@ -508,6 +508,12 @@ export default class App extends React.Component {
     });
   }
 
+  makeOnSaveIsosurfaceHandler(index, type) {
+    return () => {
+      this.props.image.saveChannelIsosurface(index, type);
+    };
+  }
+
   updateChannelTransferFunction(index, lut, controlPoints) {
     if (this.state.image) {
       this.state.image.getChannel(index).setLut(lut, controlPoints);
@@ -667,8 +673,11 @@ export default class App extends React.Component {
               width={450}
             >
               <ControlPanel 
-                    image={this.state.image}
+                    imageName={this.state.image ? this.state.image.name : false}
+                    hasImage={!!this.state.image}
+                    pixelSize={this.state.image ? this.state.image.name : false}
                     channels={this.state.channels}
+                    channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
                     method={this.state.method}
                     mode={this.state.mode}
                     autorotate={this.state.autorotate}
@@ -697,6 +706,7 @@ export default class App extends React.Component {
                     showVolumes={this.toggleVolumes}
                     showSurfaces={this.toggleSurfaces}
                     makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
+                    makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">

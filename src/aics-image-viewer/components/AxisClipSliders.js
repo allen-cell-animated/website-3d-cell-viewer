@@ -324,7 +324,6 @@ export default class AxisClipSliders extends React.Component {
           <h4 className="sectionSubHeader" style={STYLES.header}>
             Region of interest clipping
           </h4>
-
           <Row 
             type="flex"
             justify="space-around"

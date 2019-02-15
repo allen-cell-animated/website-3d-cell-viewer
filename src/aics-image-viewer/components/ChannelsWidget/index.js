@@ -29,7 +29,6 @@ export default class ChannelsWidget extends React.Component {
     this.makeOnVolumeCheckHandler = this.makeOnVolumeCheckHandler.bind(this);
     this.makeOnIsosurfaceCheckHandler = this.makeOnIsosurfaceCheckHandler.bind(this);
     this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
-    this.makeOnSaveIsosurfaceHandler = this.makeOnSaveIsosurfaceHandler.bind(this);
     this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
     this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
@@ -82,11 +81,6 @@ export default class ChannelsWidget extends React.Component {
     };
   }
 
-  makeOnSaveIsosurfaceHandler(index, type) {
-    return () => {
-      this.props.image.saveChannelIsosurface(index, type);
-    };
-  }
 
   makeOnOpacityChange(index) {
     return (newValue) => {
@@ -146,6 +140,8 @@ export default class ChannelsWidget extends React.Component {
                   <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
                                         image={this.props.image}
                                         index={actualIndex}
+                                        channelDataForChannel={this.props.channelDataChannels[actualIndex]}
+                                        lutControlPoints={this.props.channelDataChannels[actualIndex].lutControlPoints}
                                         channelDataReady={channel.dataReady}
                                         name={formatChannelName(channel.name)}
                                         checked={channel.channelEnabled}
@@ -157,8 +153,8 @@ export default class ChannelsWidget extends React.Component {
                                         isosurfaceChecked={channel.isosurfaceEnabled}
                                         onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
                                         onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                        onSaveIsosurfaceSTL={this.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                        onSaveIsosurfaceGLTF={this.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
+                                        onSaveIsosurfaceSTL={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
+                                        onSaveIsosurfaceGLTF={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
                                         onOpacityChange={this.makeOnOpacityChange(actualIndex)}
                                         updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                                         isovalue={channel.isovalue}
@@ -176,8 +172,6 @@ export default class ChannelsWidget extends React.Component {
   }
 
   render() {
-    if (!this.props.image) return null;
-
     return (
         <div>
           {this.getRows()}

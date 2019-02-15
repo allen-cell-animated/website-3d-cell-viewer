@@ -10,21 +10,17 @@ export default class ViewModeRadioButtons extends React.Component {
     super(props);
     this.createRadioButton = this.createRadioButton.bind(this);
     this.onChangeButton = this.onChangeButton.bind(this);
-    this.state = {
-      selectedMode: props.mode
-    };
   }
   
   onChangeButton(stringMode) {
     let mode = viewMode.STRING_TO_SYMBOL[stringMode];
-    if (this.state.selectedMode !== mode) {
-      this.setState({selectedMode: mode});
+    if (this.props.selectedMode !== mode) {
       this.props.onViewModeChange(mode);
     }
   };
 
   createRadioButton(mode) {
-    if (!mode || !this.props.image) {
+    if (!mode || !this.props.imageName) {
       return null;
     }
     return {
@@ -33,20 +29,8 @@ export default class ViewModeRadioButtons extends React.Component {
     };
   }
 
-  componentWillReceiveProps(newProps) {
-    this.receivingImageForFirstTime = !this.props.image && !!newProps.image;
-    const imageExists = !!newProps.image && !!this.props.image;
-    this.imageNameIsDifferent = imageExists && newProps.image.name !== this.props.image.name;
-    this.setState({ selectedMode: newProps.mode});
-  }
-
-  shouldComponentUpdate(newProps, newState) {
-    const modeChanged = this.state.selectedMode !== newState.selectedMode;
-    return this.receivingImageForFirstTime || this.imageNameIsDifferent || modeChanged;
-  }
-
   render() {
-    if (!this.props.image) {
+    if (!this.props.imageName) {
       return null;
     }
 
@@ -55,9 +39,9 @@ export default class ViewModeRadioButtons extends React.Component {
     return (
       <BoxRadioButtonGroup 
         options={options} 
-        selectedOption={this.state.selectedMode.toString()}
+        selectedOption={this.props.mode.toString()}
         onChangeButton={this.onChangeButton}
-        />
+      />
     );
   }
 }

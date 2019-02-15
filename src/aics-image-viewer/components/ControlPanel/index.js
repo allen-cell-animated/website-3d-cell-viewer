@@ -89,15 +89,16 @@ export default class ControlPanel extends React.Component {
           </div>}
         title={
             <ViewModeRadioButtons
-              image={this.props.image}
+              imageName={this.props.imageName}
               mode={this.props.mode}
               onViewModeChange={this.props.onViewModeChange}
             />}
         >
-        {this.props.image ? <div>
+        {this.props.hasImage ? <div>
           <ChannelsWidget
-            image={this.props.image}
+            imageName={this.props.imageName}
             channels={this.props.channels}
+            channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
             setChannelEnabled={this.props.setChannelEnabled}
             setVolumeEnabled={this.props.setVolumeEnabled}
@@ -111,12 +112,13 @@ export default class ControlPanel extends React.Component {
             onApplyColorPresets={this.props.onApplyColorPresets}
             showVolumes={this.props.showVolumes}
             showSurfaces={this.props.showSurfaces}
+            makeOnSaveIsosurfaceHandler={this.props.makeOnSaveIsosurfaceHandler}
             style={STYLES.channelsWidget}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
-            imageName={this.props.image.name}
-            pixelSize={this.props.image.pixel_size}
+            imageName={this.props.imageName}
+            pixelSize={this.props.pixelSize}
             channels={this.props.channels}
             onAutorotateChange={this.props.onAutorotateChange}
             onUpdateImageDensity={this.props.onUpdateImageDensity}
