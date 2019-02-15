@@ -4,17 +4,21 @@ import {
   Card,
   Button,
   Dropdown,
+  Radio,
+  Icon,
   Menu,
   Switch
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
-import View3dControls from "../View3dControls";
+import GlobalVolumeControls from "../GlobalVolumeControls";
 
 import { PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3 } from '../../shared/constants';
 
 import './styles.scss';
+
+const RadioGroup = Radio.Group;
 
 export default class ControlPanel extends React.Component {
   constructor(props) {
@@ -43,15 +47,19 @@ export default class ControlPanel extends React.Component {
       isShowingSegmentedCell,
       hasCellId
     } = this.props;
-    return hasCellId ? (
-      <Switch
-        className="cell-fov-switch"
-        defaultChecked={isShowingSegmentedCell}
-        checkedChildren="Cell"
-        unCheckedChildren="Field"
+    return hasCellId && (
+      <RadioGroup
+        defaultValue={isShowingSegmentedCell ? 'Cell' : "Field"}
         onChange={this.handleSwitchFovCell}
-      />
-    ) : null;
+      >
+        <Radio.Button
+          value="Cell"
+        >Cell</Radio.Button>
+        <Radio.Button
+          value="Field"
+        >Full Field</Radio.Button>
+      </RadioGroup>
+    );
   }
 
   handleSwitchFovCell(event, checked) {
@@ -75,7 +83,7 @@ export default class ControlPanel extends React.Component {
             <Dropdown
                 overlay={dropDownMenuItems}
               >
-              <Button>Color</Button>
+              <Button>Color  <Icon type="down" /></Button>
             </Dropdown>
             {this.createFovCellSwitchControls()}
           </div>}
@@ -105,9 +113,10 @@ export default class ControlPanel extends React.Component {
             showSurfaces={this.props.showSurfaces}
             style={STYLES.channelsWidget}
           />
-          <View3dControls
-            image={this.props.image}
+          <GlobalVolumeControls
             mode={this.props.mode}
+            imageName={this.props.image.name}
+            pixelSize={this.props.image.pixel_size}
             channels={this.props.channels}
             onAutorotateChange={this.props.onAutorotateChange}
             onUpdateImageDensity={this.props.onUpdateImageDensity}
@@ -116,6 +125,7 @@ export default class ControlPanel extends React.Component {
             onUpdateImageGammaLevels={this.props.onUpdateImageGammaLevels}
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
+            makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
           />
         </div> : null}
       </Card>

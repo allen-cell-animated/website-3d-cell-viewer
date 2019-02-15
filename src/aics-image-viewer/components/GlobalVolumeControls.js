@@ -18,14 +18,13 @@ const INITIAL_SETTINGS = {
   levelsSlider: [58.32, 149.00, 255.00],
 };
 
-export default class View3dControls extends React.Component {
+export default class GlobalVolumeControls extends React.Component {
 
   constructor(props) {
     super(props);
-    this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
+    // this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.handleMaxProjectionCheck = this.handleMaxProjectionCheck.bind(this);
-    this.handleMaskMenuItemClick = this.handleMaskMenuItemClick.bind(this);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
@@ -39,9 +38,15 @@ export default class View3dControls extends React.Component {
     this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   }
 
-  handleMaskMenuItemClick(i) {
-    this.props.image.setChannelAsMask(i);
-  }
+  componentDidUpdate(newProps) {
+    const { imageName } = this.props;
+    if (newProps.impageName !== imageName) {
+      this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
+      this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
+      this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
+      this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
+    }
+  } 
 
   onAlphaSliderUpdate(values) {
     let val = 1 - (values[0] / 100.0);
@@ -142,9 +147,10 @@ export default class View3dControls extends React.Component {
   }
 
   createVolumeAxisScaling(config) {
+    const { pixelSize } = this.props;
     const SCALE_UI_MIN_VAL = 0.001;
     const SCALE_UI_STEP_SIZE = 0.01;
-    const imagePixelSize = this.props.image ? props.image.pixel_size.slice() : [1, 1, 1];
+    const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
 
     return (
       <div key={config.key} style={STYLES.controlRow}>
@@ -156,20 +162,11 @@ export default class View3dControls extends React.Component {
     );
   }
 
-  makeUpdatePixelSizeFn(i) {
-    const imagePixelSize = this.props.image ? props.image.pixel_size.slice() : [1, 1, 1];
-    return (value) => {
-      const pixelSize = imagePixelSize.slice();
-      pixelSize[i] = value;
-      this.props.image.setVoxelSize(pixelSize);
-    };
-  }
-
   createVolumeScalingControls () {
     return ['x', 'y', 'z'].map((axis, i) => this.createVolumeAxisScaling({
       key: i,
       label: `${axis} scale`,
-      onUpdate: this.makeUpdatePixelSizeFn(i)
+      onUpdate: this.props.makeUpdatePixelSizeFn(i)
     }));
   }
 
@@ -182,19 +179,6 @@ export default class View3dControls extends React.Component {
     this.setState({ maxProjectionChecked: target.checked });
     this.props.onUpdateImageMaxProjectionMode(target.checked);
   }
-
-  shouldComponentUpdate(newProps, newState) {
-
-    // TODO add better identifiers of images than name (like an id)
-    const receivingImageForFirstTime = !this.props.image && !!newProps.image;
-    const imageExists = !!newProps.image && !!this.props.image;
-    const imageNameIsDifferent = imageExists && newProps.image.name !== this.props.image.name;
-    const imageChannelsAreDifferent = (newProps.channels !== this.props.channels) || 
-      (newProps.channels.length !== this.props.channels.length);
-    return receivingImageForFirstTime || imageNameIsDifferent || imageChannelsAreDifferent ||
-      (newProps.mode !== this.props.mode);
-  }
-
 
   createSliderRow(config) {
     return (
@@ -231,8 +215,7 @@ export default class View3dControls extends React.Component {
   }
 
   render() {
-    if (!this.props.image) return null;
-
+    if (!this.props.imageName) return null;
     return (
       <Card
         extra={this.createProjectionModeControls()}

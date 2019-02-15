@@ -139,7 +139,8 @@ export default class App extends React.Component {
     this.toggleSurfaces = this.toggleSurfaces.bind(this);
     this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
-
+    this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
+    
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -295,6 +296,16 @@ export default class App extends React.Component {
     }
   }
 
+  makeUpdatePixelSizeFn(i) {
+    const { pixelSize } = this.props;
+    const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
+    return (value) => {
+      const pixelSize = imagePixelSize.slice();
+      pixelSize[i] = value;
+      this.state.image.setVoxelSize(pixelSize);
+    };
+  }
+
   onAutorotateChange() {
     this.setState((prevState) => {
       return {autorotate: !prevState.autorotate};
@@ -315,7 +326,6 @@ export default class App extends React.Component {
       );
       const type = this.state.isShowingSegmentedCell ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, true);
-
       this.setState((prevState) => {
         return {
           sendingQueryRequest: true,
@@ -686,6 +696,7 @@ export default class App extends React.Component {
                     onApplyColorPresets={this.onApplyColorPresets}
                     showVolumes={this.toggleVolumes}
                     showSurfaces={this.toggleSurfaces}
+                    makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
