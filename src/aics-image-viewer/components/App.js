@@ -379,7 +379,9 @@ export default class App extends React.Component {
   }
 
   setAxisClip(axis, minval, maxval, isOrthoAxis) {
-    this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
+    if (this.state.image) {
+      this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
+    }
   }
 
   setChannelEnabled(index, enabled) {
@@ -693,7 +695,7 @@ export default class App extends React.Component {
                     currentMethod={this.state.method}
                     handleChannelToggle={this.toggleControlPanel}
                     onAutorotateChange={this.onAutorotateChange}
-                    setAxisClip={this.setAxisClip}
+                    setAxisClip={this.setImageAxisClip}
                     controlPanelOpen={this.state.controlPanelOpen}
                     mode={this.state.mode}
                     autorotate={this.state.autorotate}

@@ -1,7 +1,10 @@
 import React from 'react';
 import { 
   Button, 
-  Input } from 'antd';
+  Col,
+  Input,
+  Row,
+} from 'antd';
 
 import BoxRadioButtonGroup from './shared/BoxRadioButtonGroup';
 import thicknessUnit from '../shared/enums/thicknessUnit';
@@ -42,50 +45,58 @@ export default class TwoDPlayButtons extends React.Component {
 
     return (
       <div style={STYLES.wrapper}>
-        <div style={STYLES.rangeContainer}>
-          {this.props.min}, {this.props.max}
-        </div>
-        <div style={STYLES.input}>
-          <Input type="number" value={this.props.width} onChange={this.setWidth}/>
-        </div>
-        <div>
-          <BoxRadioButtonGroup 
-            options={options} 
-            selectedOption={this.props.unit}
-            onChangeButton={this.handleButtonGroupChange}
+        <Row
+          type="flex"
+          justify="space-around"
+          align="bottom"
+        >
+          <Col style={STYLES.rangeContainer}>
+            {this.props.min}, {this.props.max}
+          </Col>
+          <Row
+            type="flex"
+            justify="space-around"
+          >
+            <Input type="number" value={this.props.width} onChange={this.setWidth} style={STYLES.input}/>
+            <BoxRadioButtonGroup
+              options={options}
+              selectedOption={this.props.unit}
+              onChangeButton={this.handleButtonGroupChange}
             />
-        </div>
-        <Button.Group style={STYLES.playButtons}>
-    
+          </Row>
 
-          <Button type="primary" shape="circle" icon="step-backward" onClick={this.props.goBack} />
-          {playButton}
+          <Col >
+            <Button.Group style={STYLES.playButtons}>
+              <Button type="primary" shape="circle" icon="step-backward" onClick={this.props.goBack} />
+              {playButton}
+              <Button type="primary" shape="circle" icon="step-forward" onClick={this.props.goForward} />
+            </Button.Group>
+          </Col>
+        </Row>
+        <Row type="flex"
+          justify="end"
+        >
 
-          <Button type="primary" shape="circle" icon="step-forward" onClick={this.props.goForward}/>
-        </Button.Group>
+        </Row>
       </div>
     );
   }
 }
 
 const STYLES = {
+  wrapper: {
+    marginBottom: 8,
+  },
   playButtons: {
     flex: '1 0 150px'
   },
   input: {
-    flex: 1,
+    width: 50,
   },
   rangeContainer: {
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingRight: '1em',
-    flexBasis: 150
-  },
-  wrapper: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center'
+    justifyContent: 'flex-end',
+    flexBasis: 80
   },
   icon: {
     color: 'white'

@@ -8,6 +8,7 @@ import React from 'react';
 
 import enums from '../shared/enums';
 
+import AutoRotateButton from './AutoRotateButton';
 import TwoDPlayButtons from './TwoDPlayButtons';
 
 const ViewMode = enums.viewMode.mainMapping;
@@ -299,29 +300,43 @@ export default class AxisClipSliders extends React.Component {
     const activeSlider = this.props.activeAxis;
     const playButtons = this.state.playButtons ?
       <TwoDPlayButtons
-                           width={this.state.playButtons.width}
-                           unit={this.state.playButtons.unit.toString()}
-                           min={this.state.sliders[activeSlider].start[0]}
-                           max={this.state.sliders[activeSlider].start[1]}
-                           setWidth={this.setWidth}
-                           setUnit={this.setUnit}
-                           goBack={this.goBack}
-                           play={this.play}
-                           pause={this.pause}
-                           stop={this.stop}
-                           goForward={this.goForward}
-                           showPlay={this.state.playButtons.stop || this.state.playButtons.pause} /> : <div style={STYLES.placeholder}></div>;
+          width={this.state.playButtons.width}
+          unit={this.state.playButtons.unit.toString()}
+          min={this.state.sliders[activeSlider].start[0]}
+          max={this.state.sliders[activeSlider].start[1]}
+          setWidth={this.setWidth}
+          setUnit={this.setUnit}
+          goBack={this.goBack}
+          play={this.play}
+          pause={this.pause}
+          stop={this.stop}
+          goForward={this.goForward}
+          showPlay={this.state.playButtons.stop || this.state.playButtons.pause} 
+        /> : 
+        <AutoRotateButton
+          mode={this.props.mode}
+          autorotate={this.props.autorotate}
+          onAutorotateChange={this.props.onAutorotateChange}
+        />;
     return (
         <Row className="clip-sliders" >
-        <Col span={12}>
+        <Col span={20}>
           <h4 className="sectionSubHeader" style={STYLES.header}>
             Region of interest clipping
           </h4>
 
-          <div className="sectionBody">
+          <Row 
+            type="flex"
+            justify="space-around"
+            align="bottom"
+          >
+            <Col span={10}>
             {this.props.numSlices && this.createSliders()}
+            </Col>
+            <Col span={14}>
             {playButtons}
-          </div>
+            </Col>
+          </Row>
           </Col>
 
         </Row>
