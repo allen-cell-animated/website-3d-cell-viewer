@@ -38,15 +38,17 @@ export default class GlobalVolumeControls extends React.Component {
     this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   }
 
-  componentDidUpdate(newProps) {
-    const { imageName } = this.props;
-    if (newProps.impageName !== imageName) {
+  componentDidUpdate() {
       this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
       this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
       this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
       this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
-    }
   } 
+
+  shouldComponentUpdate(newProps) {
+    const { imageName } = this.props;
+    return newProps.imageName !== imageName;
+  }
 
   onAlphaSliderUpdate(values) {
     let val = 1 - (values[0] / 100.0);
@@ -99,7 +101,7 @@ export default class GlobalVolumeControls extends React.Component {
         min: 0,
         max: 100
       },
-      onUpdate: this.onDensityUpdate
+      onUpdate: this.onDensityUpdate,
     };
     return this.createSliderRow(config);
   }
