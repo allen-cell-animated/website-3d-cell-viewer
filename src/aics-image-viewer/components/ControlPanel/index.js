@@ -66,12 +66,24 @@ export default class ControlPanel extends React.Component {
     this.props.onSwitchFovCell();
   }
 
-  render() {
+  renderColorPresetsDropdown() {
     const dropDownMenuItems = (
       <Menu onClick={this.makeTurnOnPresetFn}>
         {Array.from(this.presetMap.keys()).map(key => <Menu.Item key={key}>Color preset {key}</Menu.Item>)}
       </Menu>
     );
+    return (
+      <Dropdown
+        trigger={['click']}
+        overlay={dropDownMenuItems}
+      >
+        <Button>Color<Icon type="down" /></Button>
+      </Dropdown>
+    );
+  }
+
+  render() {
+
     return (
       <Card 
         style={STYLES.wrapper} 
@@ -80,11 +92,6 @@ export default class ControlPanel extends React.Component {
         className="control-panel"
         extra={
           <div>
-            <Dropdown
-                overlay={dropDownMenuItems}
-              >
-              <Button>Color  <Icon type="down" /></Button>
-            </Dropdown>
             {this.createFovCellSwitchControls()}
           </div>}
         title={
@@ -94,7 +101,10 @@ export default class ControlPanel extends React.Component {
               onViewModeChange={this.props.onViewModeChange}
             />}
         >
-        {this.props.hasImage ? <div>
+        <Card.Meta 
+          title={this.renderColorPresetsDropdown()}
+        />
+        {this.props.hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
             imageName={this.props.imageName}
             channels={this.props.channels}

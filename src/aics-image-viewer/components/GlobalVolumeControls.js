@@ -247,9 +247,6 @@ export default class GlobalVolumeControls extends React.Component {
 }
 
 const STYLES = {
-  card: {
-    padding: '16px 0px',
-  },
   slidersWrapper: {
     width: 'calc(100% - 20px)',
     margin: 'auto',

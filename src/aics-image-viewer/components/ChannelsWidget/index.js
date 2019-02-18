@@ -123,7 +123,6 @@ export default class ChannelsWidget extends React.Component {
           extra={this.renderVisiblityControls(key, channelArray)}
           type="inner"
           key={key}
-
         >
         <Collapse 
           bordered={false}
