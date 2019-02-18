@@ -75,5 +75,11 @@
             overflow: visible;
         }
 
+        .global-volume-controls {
+            .ant-collapse-content-box {
+                padding: 16px 24px;
+            }
+        }
+
     }
 }
