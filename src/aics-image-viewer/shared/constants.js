@@ -14,7 +14,8 @@ export const
   THREE_D_MODE = '3D',
 
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
-
+  ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
+  ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
@@ -86,7 +87,7 @@ export const PRESET_COLOR_MAP = [
   },
   {
     colors: PRESET_COLORS_2,
-    name: 'Preset 2',
+    name: 'RGB colors',
     key: 2,
   },
   {

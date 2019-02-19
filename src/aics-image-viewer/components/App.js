@@ -24,6 +24,8 @@ import {
   CONTOUR_CHANNEL_KEY,
   OTHER_CHANNEL_KEY,
   PRESET_COLORS_0,
+  ALPHA_MASK_SLIDER_3D_DEFAULT,
+  ALPHA_MASK_SLIDER_2D_DEFAULT,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -96,7 +98,7 @@ export default class App extends React.Component {
       sendingQueryRequest: false,
       openFilesOnly: false,
       controlPanelClosed: false,
-      alphaMaskLevel: [50],
+      alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
       initColors: PRESET_COLORS_0,
       // channels is a flat list of objects of this type:
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
@@ -244,9 +246,9 @@ export default class App extends React.Component {
       aimg.updateChannelColor(i, channels[i].color);
     }
     if (this.state.isShowingSegmentedCell) {
-      this.onUpdateImageMaskAlpha(0.5, [50]);
+      this.onUpdateImageMaskAlpha(ALPHA_MASK_SLIDER_3D_DEFAULT);
     } else {
-      this.onUpdateImageMaskAlpha(1, [0]);
+      this.onUpdateImageMaskAlpha(ALPHA_MASK_SLIDER_2D_DEFAULT);
     }
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
@@ -270,19 +272,38 @@ export default class App extends React.Component {
   }
 
   onViewModeChange(mode) {
-    this.setState({mode});
+    this.setState((prevState) => {
+      // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+      // if full field, dont mask
+      if (prevState.mode === ViewMode.threeD && mode !== ViewMode.threeD) {
+        // Switching to 2d 
+        return {
+          mode,
+          alphaMaskSliderLevel: ALPHA_MASK_SLIDER_2D_DEFAULT,
+        };
+      } else if (
+        prevState.mode !== ViewMode.threeD && 
+        mode === ViewMode.threeD && 
+        this.state.isShowingSegmentedCell
+      ) {
+        // switching to 3d 
+        return {
+          mode,
+          alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
+        };
+      }
+      return {
+        mode,
+      };
+    });
     if (this.state.image) {
       this.state.image.setUniform('isOrtho', mode === ViewMode.threeD ? 0.0 : 1.0);
     }
   }
 
-  onUpdateImageMaskAlpha(val, sliderValue) {
-    console.log(val, sliderValue)
+  onUpdateImageMaskAlpha(sliderValue) {
     if (sliderValue) {
-      this.setState({ alphaMaskLevel: sliderValue });
-    }
-    if (this.state.image) {
-      this.state.image.setUniform('maskAlpha', val, true, true);
+      this.setState({ alphaMaskSliderLevel: sliderValue });
     }
   }
 
@@ -593,9 +614,15 @@ export default class App extends React.Component {
     image.fuse();
   }
 
+  updateImageAlphaMaskFromSliderValue() {
+    let val = 1 - (this.state.alphaMaskSliderLevel[0] / 100.0);
+    this.state.image.setUniform('maskAlpha', val, true, true);
+  }
+
   updateImageChannelsFromAppState() {
     const { channels, image } = this.state;
     if (image) {
+      this.updateImageAlphaMaskFromSliderValue();
       channels.forEach((channel, index) => {
         const volenabled = channel.volumeEnabled;
         const isoenabled = channel.isosurfaceEnabled;
@@ -721,7 +748,7 @@ export default class App extends React.Component {
                     showSurfaces={this.toggleSurfaces}
                     makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
                     makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
-                    alphaMaskLevel={this.state.alphaMaskLevel}
+                    alphaMaskSliderLevel={this.state.alphaMaskSliderLevel}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">

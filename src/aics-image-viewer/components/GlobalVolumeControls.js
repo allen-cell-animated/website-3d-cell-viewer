@@ -32,34 +32,36 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   componentDidMount() {
-    this.onAlphaSliderUpdate(this.props.alphaMaskLevel);
+    this.onAlphaSliderUpdate(this.props.alphaMaskSliderLevel);
     this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
     this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
     this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   }
 
   componentDidUpdate() {
-    console.log('updating')
-      // this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
       this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
       this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
       this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   } 
 
   shouldComponentUpdate(newProps) {
-    const { imageName } = this.props;
-    return newProps.imageName !== imageName;
+    const { 
+      imageName,
+      alphaMaskSliderLevel,
+    } = this.props;
+    const newImage = newProps.imageName !== imageName;
+    const newSliderValue = newProps.alphaMaskSliderLevel[0] !== alphaMaskSliderLevel[0];
+    return newImage || newSliderValue;
   }
 
   onAlphaSliderUpdate(values) {
-    let val = 1 - (values[0] / 100.0);
-    this.props.onUpdateImageMaskAlpha(val, values);
+    this.props.onUpdateImageMaskAlpha([Number(values[0])]);
 }
 
   createMaskAlphaSlider() {
     let config = {
       label: 'crop to cell',
-      start: this.props.alphaMaskLevel,
+      start: this.props.alphaMaskSliderLevel,
       range: {
         min: 0,
         max: 100

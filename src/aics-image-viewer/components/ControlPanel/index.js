@@ -137,7 +137,7 @@ export default class ControlPanel extends React.Component {
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
             makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
-            alphaMaskLevel={this.props.alphaMaskLevel}
+            alphaMaskSliderLevel={this.props.alphaMaskSliderLevel}
           />
         </div> : null}
       </Card>
