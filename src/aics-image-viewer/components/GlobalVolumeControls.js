@@ -22,24 +22,25 @@ export default class GlobalVolumeControls extends React.Component {
 
   constructor(props) {
     super(props);
-    // this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.handleMaxProjectionCheck = this.handleMaxProjectionCheck.bind(this);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
     this.onLevelsUpdate = this.onLevelsUpdate.bind(this);
+    this.createMaskAlphaSlider = this.createMaskAlphaSlider.bind(this);
   }
 
   componentDidMount() {
-    this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
+    this.onAlphaSliderUpdate(this.props.alphaMaskLevel);
     this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
     this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
     this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
   }
 
   componentDidUpdate() {
-      this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
+    console.log('updating')
+      // this.onAlphaSliderUpdate(INITIAL_SETTINGS.maskAlphaSlider);
       this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
       this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
       this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
@@ -52,13 +53,13 @@ export default class GlobalVolumeControls extends React.Component {
 
   onAlphaSliderUpdate(values) {
     let val = 1 - (values[0] / 100.0);
-    this.props.onUpdateImageMaskAlpha(val);
+    this.props.onUpdateImageMaskAlpha(val, values);
 }
 
   createMaskAlphaSlider() {
     let config = {
       label: 'crop to cell',
-      start: INITIAL_SETTINGS.maskAlphaSlider,
+      start: this.props.alphaMaskLevel,
       range: {
         min: 0,
         max: 100

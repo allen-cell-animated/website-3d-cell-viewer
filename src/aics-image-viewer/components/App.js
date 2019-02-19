@@ -22,7 +22,8 @@ import {
   OBSERVED_CHANNEL_KEY,
   SEGMENTATION_CHANNEL_KEY,
   CONTOUR_CHANNEL_KEY,
-  OTHER_CHANNEL_KEY
+  OTHER_CHANNEL_KEY,
+  PRESET_COLORS_0,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -49,7 +50,7 @@ export default class App extends React.Component {
         isosurfaceEnabled: false,
         isovalue: 0.5,
         opacity: 1.0,
-        color: channelColors[index].slice(),
+        color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
         dataReady: false
       };
     });
@@ -95,7 +96,8 @@ export default class App extends React.Component {
       sendingQueryRequest: false,
       openFilesOnly: false,
       controlPanelClosed: false,
-
+      alphaMaskLevel: [50],
+      initColors: PRESET_COLORS_0,
       // channels is a flat list of objects of this type:
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
       channels: [],
@@ -233,12 +235,18 @@ export default class App extends React.Component {
 
   loadFromJson(obj, title, locationHeader) {
     const aimg = new AICSvolumeDrawable(obj);
-
-    let channels = App.setInitialChannelConfig(obj.channel_names, aimg.channel_colors);
+    // if same number of channels, leave the app state alone.
+    let channels = this.state.channels.length === obj.channel_names.length ? 
+      this.state.channels: App.setInitialChannelConfig(obj.channel_names, this.state.initColors);
     let channelGroupedByType = App.createChannelGrouping(obj.channel_names);
-
+    // set image colors
     for (let i = 0; i < obj.channel_names.length; ++i) {
-      aimg.fusion[i].rgbColor = i === 0 ? aimg.channel_colors[i] : 0;
+      aimg.updateChannelColor(i, channels[i].color);
+    }
+    if (this.state.isShowingSegmentedCell) {
+      this.onUpdateImageMaskAlpha(0.5, [50]);
+    } else {
+      this.onUpdateImageMaskAlpha(1, [0]);
     }
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
@@ -268,8 +276,14 @@ export default class App extends React.Component {
     }
   }
 
-  onUpdateImageMaskAlpha(val) {
-    this.state.image.setUniform('maskAlpha', val, true, true);
+  onUpdateImageMaskAlpha(val, sliderValue) {
+    console.log(val, sliderValue)
+    if (sliderValue) {
+      this.setState({ alphaMaskLevel: sliderValue });
+    }
+    if (this.state.image) {
+      this.state.image.setUniform('maskAlpha', val, true, true);
+    }
   }
 
   onUpdateImageBrightness(val) {
@@ -361,14 +375,14 @@ export default class App extends React.Component {
     // TODO if perf problems with this, then try calling only updateChannelColor onColorChange,
     // and the full setState onColorChangeComplete.
     this.setState((prevState) => {
-      let col = [newrgba.r, newrgba.g, newrgba.b, newrgba.a];
+      let newColor = [newrgba.r, newrgba.g, newrgba.b, newrgba.a];
       if (prevState.image) {
-        prevState.image.updateChannelColor(indx, col);
+        prevState.image.updateChannelColor(indx, newColor);
       }
 
       return {
         channels: prevState.channels.map((channel, channelindex) => { 
-          return indx === channelindex ? {...channel, color:col} : channel;
+          return indx === channelindex ? { ...channel, color: newColor} : channel;
         })
       };
     });
@@ -707,6 +721,7 @@ export default class App extends React.Component {
                     showSurfaces={this.toggleSurfaces}
                     makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
                     makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
+                    alphaMaskLevel={this.state.alphaMaskLevel}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">

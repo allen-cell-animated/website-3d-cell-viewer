@@ -61,4 +61,37 @@ export const PRESET_COLORS_3 = [
   [0, 255, 255, 255]
 ];
 
+export const PRESET_COLORS_0 = [
+  [226, 205, 179],
+  [111, 186, 17],
+  [141, 163, 192],
+  [245, 241, 203],
+  [224, 227, 209],
+  [221, 155, 245],
+  [227, 244, 245],
+  [255, 98, 0],
+  [247, 219, 120],
+];
 
+export const PRESET_COLOR_MAP = [
+  {
+    colors: PRESET_COLORS_0,
+    name: 'Default',
+    key: 0,
+  },
+  {
+    colors: PRESET_COLORS_1,
+    name: 'Thumbnail colors',
+    key: 1,
+  },
+  {
+    colors: PRESET_COLORS_2,
+    name: 'Preset 2',
+    key: 2,
+  },
+  {
+    colors: PRESET_COLORS_3,
+    name: 'White structure',
+    key: 3,
+  },
+];

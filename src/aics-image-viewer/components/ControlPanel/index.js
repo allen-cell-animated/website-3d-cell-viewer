@@ -14,9 +14,10 @@ import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
 
-import { PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3 } from '../../shared/constants';
+import {  PRESET_COLORS_0, PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3, PRESET_COLOR_MAP, } from '../../shared/constants';
 
 import './styles.scss';
+import thicknessUnit from '../../shared/enums/thicknessUnit';
 
 const RadioGroup = Radio.Group;
 
@@ -27,10 +28,8 @@ export default class ControlPanel extends React.Component {
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.state = {open: true};
-    this.presetMap = new Map();
-    this.presetMap.set(1, PRESET_COLORS_1);
-    this.presetMap.set(2, PRESET_COLORS_2);
-    this.presetMap.set(3, PRESET_COLORS_3);
+    this.initColorKey = 0;
+    this.presetMap = PRESET_COLOR_MAP;
   }
 
   handleToggle() {
@@ -38,7 +37,7 @@ export default class ControlPanel extends React.Component {
   }
 
   makeTurnOnPresetFn({ key }) {
-    const presets = this.presetMap.get(Number(key));
+    const presets = this.presetMap[key].colors;
     this.props.onApplyColorPresets(presets);
   }
 
@@ -69,7 +68,7 @@ export default class ControlPanel extends React.Component {
   renderColorPresetsDropdown() {
     const dropDownMenuItems = (
       <Menu onClick={this.makeTurnOnPresetFn}>
-        {Array.from(this.presetMap.keys()).map(key => <Menu.Item key={key}>Color preset {key}</Menu.Item>)}
+        {this.presetMap.map((preset, index)=> <Menu.Item key={preset.key}>{preset.name}</Menu.Item>)}
       </Menu>
     );
     return (
@@ -138,6 +137,7 @@ export default class ControlPanel extends React.Component {
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
             makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
+            alphaMaskLevel={this.props.alphaMaskLevel}
           />
         </div> : null}
       </Card>
