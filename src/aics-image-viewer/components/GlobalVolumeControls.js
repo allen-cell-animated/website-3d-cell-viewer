@@ -107,15 +107,13 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onLevelsUpdate(values) {
-    let minThumb = Number(values[0]);
+    let min = Number(values[0]);
     let conThumb = Number(values[1]);
-    let maxThumb = Number(values[2]);
+    let max = Number(values[2]);
 
-    if (conThumb > maxThumb || conThumb < minThumb) {
-      conThumb = 0.5 * (minThumb + maxThumb);
+    if (conThumb > max || conThumb < min) {
+      conThumb = 0.5 * (min + max);
     }
-    let min = minThumb;
-    let max = maxThumb;
     let mid = conThumb;
     let div = 255; //this.getWidth();
     min /= div;
@@ -127,12 +125,7 @@ export default class GlobalVolumeControls extends React.Component {
     if ((mid - 0.5) * (mid - 0.5) < 0.0005) {
       scale = 1.0;
     }
-    let vals = {
-      min: min,
-      scale: scale,
-      max: max
-    };
-    this.props.onUpdateImageGammaLevels(vals.min, vals.max, vals.scale);
+    this.props.onUpdateImageGammaLevels(min, max, scale);
   }
 
   createLevelsSlider () {
