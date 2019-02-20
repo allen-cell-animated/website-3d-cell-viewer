@@ -1,3 +1,85 @@
+@import "../../assets/styles/variables";
+
 .ant-layout-sider-zero-width-trigger {
     z-index: 2000;
+    background-color: $header-gray;
+}
+
+.ant-layout-sider-zero-width-trigger:hover {
+    background-color: $light-gray;
+}
+
+.control-panel {
+    .channel-rows-list {
+        .ant-card-head {
+            margin-bottom: 0;
+            border-bottom: 1px solid $border-color;
+
+            .ant-checkbox.ant-checkbox-checked {
+                .ant-checkbox-inner {
+                    background-color: $dimgray;
+                }
+            }
+        }
+
+        // hover states of checkboxes 
+        .ant-checkbox:hover .ant-checkbox-inner {
+            border-color: white;
+        }
+
+        .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+            border-color: white;
+        }
+
+        .ant-card-inner {
+            border-bottom: 1px solid $border-color;
+        }
+
+        .ant-collapse-content-box {
+            padding: 0 16px 0 16px;
+        }
+
+        .ant-collapse-content-active {
+            border-bottom: 1px solid $border-color;
+        }
+
+        .ant-card-body {
+            padding: 0;
+        }
+
+        .ant-collapse-item {
+            .ant-collapse-header {
+                text-align: right;
+            }
+        }
+
+        .ant-card-extra {
+            label {
+                font-size: 12px;
+            }
+        }
+
+        .ant-card-head-title {
+            margin-left: 20px;
+        }
+
+        .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
+            transform: translateY(-100%);
+        }
+
+        .ant-collapse>.ant-collapse-item {
+            border-bottom: none;
+        }
+
+        .ant-collapse-content {
+            overflow: visible;
+        }
+
+        .global-volume-controls {
+            .ant-collapse-content-box {
+                padding: 16px 24px;
+            }
+        }
+
+    }
 }

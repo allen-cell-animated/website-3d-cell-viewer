@@ -4,17 +4,21 @@ import {
   Card,
   Button,
   Dropdown,
+  Radio,
+  Icon,
   Menu,
   Switch
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
-import View3dControls from "../View3dControls";
+import GlobalVolumeControls from "../GlobalVolumeControls";
 
 import { PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3 } from '../../shared/constants';
 
 import './styles.scss';
+
+const RadioGroup = Radio.Group;
 
 export default class ControlPanel extends React.Component {
   constructor(props) {
@@ -43,27 +47,43 @@ export default class ControlPanel extends React.Component {
       isShowingSegmentedCell,
       hasCellId
     } = this.props;
-    return hasCellId ? (
-      <Switch
-        className="cell-fov-switch"
-        defaultChecked={isShowingSegmentedCell}
-        checkedChildren="Cell"
-        unCheckedChildren="Field"
+    return hasCellId && (
+      <RadioGroup
+        defaultValue={isShowingSegmentedCell ? 'Cell' : "Field"}
         onChange={this.handleSwitchFovCell}
-      />
-    ) : null;
+      >
+        <Radio.Button
+          value="Cell"
+        >Cell</Radio.Button>
+        <Radio.Button
+          value="Field"
+        >Full Field</Radio.Button>
+      </RadioGroup>
+    );
   }
 
   handleSwitchFovCell(event, checked) {
     this.props.onSwitchFovCell();
   }
 
-  render() {
+  renderColorPresetsDropdown() {
     const dropDownMenuItems = (
       <Menu onClick={this.makeTurnOnPresetFn}>
         {Array.from(this.presetMap.keys()).map(key => <Menu.Item key={key}>Color preset {key}</Menu.Item>)}
       </Menu>
     );
+    return (
+      <Dropdown
+        trigger={['click']}
+        overlay={dropDownMenuItems}
+      >
+        <Button>Color<Icon type="down" /></Button>
+      </Dropdown>
+    );
+  }
+
+  render() {
+
     return (
       <Card 
         style={STYLES.wrapper} 
@@ -72,24 +92,23 @@ export default class ControlPanel extends React.Component {
         className="control-panel"
         extra={
           <div>
-            <Dropdown
-                overlay={dropDownMenuItems}
-              >
-              <Button>Color</Button>
-            </Dropdown>
             {this.createFovCellSwitchControls()}
           </div>}
         title={
             <ViewModeRadioButtons
-              image={this.props.image}
+              imageName={this.props.imageName}
               mode={this.props.mode}
               onViewModeChange={this.props.onViewModeChange}
             />}
         >
-        {this.props.image ? <div>
+        <Card.Meta 
+          title={this.renderColorPresetsDropdown()}
+        />
+        {this.props.hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
-            image={this.props.image}
+            imageName={this.props.imageName}
             channels={this.props.channels}
+            channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
             setChannelEnabled={this.props.setChannelEnabled}
             setVolumeEnabled={this.props.setVolumeEnabled}
@@ -103,11 +122,13 @@ export default class ControlPanel extends React.Component {
             onApplyColorPresets={this.props.onApplyColorPresets}
             showVolumes={this.props.showVolumes}
             showSurfaces={this.props.showSurfaces}
+            makeOnSaveIsosurfaceHandler={this.props.makeOnSaveIsosurfaceHandler}
             style={STYLES.channelsWidget}
           />
-          <View3dControls
-            image={this.props.image}
+          <GlobalVolumeControls
             mode={this.props.mode}
+            imageName={this.props.imageName}
+            pixelSize={this.props.pixelSize}
             channels={this.props.channels}
             onAutorotateChange={this.props.onAutorotateChange}
             onUpdateImageDensity={this.props.onUpdateImageDensity}
@@ -116,6 +137,7 @@ export default class ControlPanel extends React.Component {
             onUpdateImageGammaLevels={this.props.onUpdateImageGammaLevels}
             onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
+            makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
           />
         </div> : null}
       </Card>

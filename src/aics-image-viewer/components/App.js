@@ -139,6 +139,7 @@ export default class App extends React.Component {
     this.toggleSurfaces = this.toggleSurfaces.bind(this);
     this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
+    this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
 
     document.addEventListener('keydown', this.handleKeydown, false);
   }
@@ -295,6 +296,16 @@ export default class App extends React.Component {
     }
   }
 
+  makeUpdatePixelSizeFn(i) {
+    const { pixelSize } = this.props;
+    const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
+    return (value) => {
+      const pixelSize = imagePixelSize.slice();
+      pixelSize[i] = value;
+      this.state.image.setVoxelSize(pixelSize);
+    };
+  }
+
   onAutorotateChange() {
     this.setState((prevState) => {
       return {autorotate: !prevState.autorotate};
@@ -314,8 +325,7 @@ export default class App extends React.Component {
         this.state.isShowingSegmentedCell ? null : this.state.queryInput.cellId
       );
       const type = this.state.isShowingSegmentedCell ? FOV_ID_QUERY : CELL_ID_QUERY;
-      this.openImage(name, type, true);
-
+      this.openImage(name, type, false);
       this.setState((prevState) => {
         return {
           sendingQueryRequest: true,
@@ -379,7 +389,9 @@ export default class App extends React.Component {
   }
 
   setAxisClip(axis, minval, maxval, isOrthoAxis) {
-    this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
+    if (this.state.image) {
+      this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
+    }
   }
 
   setChannelEnabled(index, enabled) {
@@ -494,6 +506,12 @@ export default class App extends React.Component {
         })
       };
     });
+  }
+
+  makeOnSaveIsosurfaceHandler(index, type) {
+    return () => {
+      this.props.image.saveChannelIsosurface(index, type);
+    };
   }
 
   updateChannelTransferFunction(index, lut, controlPoints) {
@@ -655,8 +673,11 @@ export default class App extends React.Component {
               width={450}
             >
               <ControlPanel 
-                    image={this.state.image}
+                    imageName={this.state.image ? this.state.image.name : false}
+                    hasImage={!!this.state.image}
+                    pixelSize={this.state.image ? this.state.image.name : false}
                     channels={this.state.channels}
+                    channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
                     method={this.state.method}
                     mode={this.state.mode}
                     autorotate={this.state.autorotate}
@@ -684,6 +705,8 @@ export default class App extends React.Component {
                     onApplyColorPresets={this.onApplyColorPresets}
                     showVolumes={this.toggleVolumes}
                     showSurfaces={this.toggleSurfaces}
+                    makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
+                    makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
@@ -693,7 +716,7 @@ export default class App extends React.Component {
                     currentMethod={this.state.method}
                     handleChannelToggle={this.toggleControlPanel}
                     onAutorotateChange={this.onAutorotateChange}
-                    setAxisClip={this.setAxisClip}
+                    setAxisClip={this.setImageAxisClip}
                     controlPanelOpen={this.state.controlPanelOpen}
                     mode={this.state.mode}
                     autorotate={this.state.autorotate}

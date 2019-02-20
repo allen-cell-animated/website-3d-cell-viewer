@@ -46,7 +46,7 @@ export default class ChannelsWidgetRow extends React.Component {
   componentWillReceiveProps(nextProps) {
     // channelDataReady really only ever goes from false to true.  We don't have a pattern where it can become false.
     if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(nextProps.index, nextProps.image.channelData.channels[nextProps.index]);
+      this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
       this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
     }
   }
@@ -57,7 +57,7 @@ export default class ChannelsWidgetRow extends React.Component {
     this.tfeditor = el;
 
     if (this.props.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(this.props.index, this.props.image.channelData.channels[this.props.index]);
+      this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
       this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
     }
   }
@@ -188,14 +188,14 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   createTFEditor() {
-      return (this.props.image.channelData.channels[this.props.index] &&
+    return (this.props.channelDataForChannel &&
         <tf-editor
           ref={this.storeTfEditor}
           id={'aicstfeditor_' + this.props.index}
           fit-to-data={false}
           width={250}
           height={150}
-          control-points={JSON.stringify(this.props.image.channelData.channels[this.props.index].lutControlPoints)}
+          control-points={JSON.stringify(this.props.lutControlPoints)}
         >
         </tf-editor>
       );

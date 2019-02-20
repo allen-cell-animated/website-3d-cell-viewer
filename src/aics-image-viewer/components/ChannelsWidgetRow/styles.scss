@@ -1,66 +1,32 @@
 @import "../../assets/styles/variables";
-
-.control-panel {
-    .ant-collapse-content-box {
-        padding: 0 16px 0 16px;
-    }
-    .ant-card-head {
-        margin-bottom: 0;
-        border-color: $light-gray;
-    }
-    .ant-card-body {
-        padding: 0;
-    }
-    .ant-list-item {
-        padding: 0;
-    }
-    .ant-collapse-item {
-
-        .ant-collapse-header {
-            padding: 0.25rem 1rem;
-
-            text-align: right;
-        }
-    }
+.channel-rows-list {
     .row-card {
         min-height: 72px;
         padding: 24px 0 12px 0;
-        border-color: $header-gray;
+        border-bottom: 1px solid $border-color;
+
+        .ant-list-item-content {
+            order: 3;
+        }
+
+        .ant-row-flex {
+            margin-top: 1em;
+        }
+        
     }
     .row-card.ant-list-item {
         flex-flow: row wrap;
     }
-    .ant-list-item-content {
-        order: 3;
-    }
-    .ant-card-extra {
-        label {
-            font-size: 12px;
-        }
-    }
-    .ant-card-head-title {
-        margin-left: 20px;
-    }
-    .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
-        top: -75%;
-        transform: translateY(-75%);
-    }
-   .ant-collapse>.ant-collapse-item {
-       border-bottom: none;
-   }
-   .ant-collapse-content{
-       overflow: visible;
-   }
-   .ant-row-flex {
-       margin-top: 1em;
-   }
-   .controls-closed {
+
+    .row-card.controls-closed {
         padding: 12px 0 12px 0;
-       .ant-list-item-action {
-           order: 3
-       }
+
+        .ant-list-item-action {
+            order: 3
+        }
+
         .ant-list-item-content {
             order: 2;
         }
-   }
+    }
 }

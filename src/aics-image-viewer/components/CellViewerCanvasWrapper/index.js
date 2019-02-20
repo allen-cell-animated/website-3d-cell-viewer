@@ -98,6 +98,9 @@ export default class ViewerWrapper extends React.Component {
       activeAxis={this.getActiveAxis()}
       setAxisClip={this.setAxisClip}
       numSlices={numSlices}
+      mode={this.props.mode}
+      autorotate={this.props.autorotate}
+      onAutorotateChange={this.props.onAutorotateChange}
     />);
   }
 
@@ -106,11 +109,7 @@ export default class ViewerWrapper extends React.Component {
      <div className='cell-canvas' style={STYLES.viewer}>
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
         {this.renderClipSliders()}
-        <AutoRotateButton 
-          mode={this.props.mode}
-          autorotate={this.props.autorotate}
-          onAutorotateChange={this.props.onAutorotateChange}
-        />
+
         {this.renderOverlay()}
      </div>
    );
