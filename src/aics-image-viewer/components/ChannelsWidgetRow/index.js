@@ -38,6 +38,7 @@ export default class ChannelsWidgetRow extends React.Component {
 
     this.storeTfEditor = this.storeTfEditor.bind(this);
     this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
+    this.onColorChange = this.onColorChange.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -144,11 +145,16 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
+  onColorChange(newRGB, oldRGB, index) {
+    console.log(newRGB, oldRGB, index)
+    this.props.changeOneChannelSetting(index, 'color', newRGB);
+  }
+
   createColorPicker() {
     return (
       <div style={STYLES.colorPicker}>
         <ColorPicker color={this.props.color}
-          onColorChange={this.props.onColorChange}
+          onColorChange={this.onColorChange}
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
           width={18}

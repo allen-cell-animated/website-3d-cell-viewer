@@ -12,6 +12,16 @@ export const
   XZ_MODE = 'XZ',
   XY_MODE = 'XY',
   THREE_D_MODE = '3D',
+  // App state values
+  SEGMENTED_CELL = 'segmented',
+  FULL_FIELD_IMAGE = 'full field',
+
+  // Channel setting keys
+  ISO_SURFACE_ENABLED = 'isoSurfaceEnabled',
+  VOLUME_ENABLED = 'volumeEnabled',
+
+  // App State Keys,
+  ALPHA_MASK_SLIDER_LEVEL = 'alphaMaskSliderLevel',
 
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
   ALPHA_MASK_SLIDER_3D_DEFAULT = [50],

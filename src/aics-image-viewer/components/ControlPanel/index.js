@@ -14,7 +14,7 @@ import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
 
-import {  PRESET_COLORS_0, PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3, PRESET_COLOR_MAP, } from '../../shared/constants';
+import {  PRESET_COLORS_0, PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3, PRESET_COLOR_MAP, SEGMENTED_CELL, FULL_FIELD_IMAGE, } from '../../shared/constants';
 
 import './styles.scss';
 import thicknessUnit from '../../shared/enums/thicknessUnit';
@@ -48,14 +48,14 @@ export default class ControlPanel extends React.Component {
     } = this.props;
     return hasCellId && (
       <RadioGroup
-        defaultValue={isShowingSegmentedCell ? 'Cell' : "Field"}
+        defaultValue={isShowingSegmentedCell ? SEGMENTED_CELL : FULL_FIELD_IMAGE}
         onChange={this.handleSwitchFovCell}
       >
         <Radio.Button
-          value="Cell"
+          value={SEGMENTED_CELL}
         >Cell</Radio.Button>
         <Radio.Button
-          value="Field"
+          value={FULL_FIELD_IMAGE}
         >Full Field</Radio.Button>
       </RadioGroup>
     );
@@ -109,13 +109,12 @@ export default class ControlPanel extends React.Component {
             channels={this.props.channels}
             channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
-            setChannelEnabled={this.props.setChannelEnabled}
-            setVolumeEnabled={this.props.setVolumeEnabled}
+            changeChannelSettings={this.props.changeChannelSettings}
             setIsosurfaceEnabled={this.props.setIsosurfaceEnabled}
             updateChannelTransferFunction={this.props.updateChannelTransferFunction}
             updateIsovalue={this.props.updateIsovalue}
             updateIsosurfaceOpacity={this.props.updateIsosurfaceOpacity}
-            onColorChange={this.props.onColorChange}
+            changeOneChannelSetting={this.props.changeOneChannelSetting}
             onColorChangeComplete={this.props.onColorChangeComplete}
             channelDataReady={this.props.channelDataReady}
             onApplyColorPresets={this.props.onApplyColorPresets}
