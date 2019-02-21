@@ -7,17 +7,19 @@ import {
   Radio,
   Icon,
   Menu,
-  Switch
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
 
-import {  PRESET_COLORS_0, PRESET_COLORS_1, PRESET_COLORS_2, PRESET_COLORS_3, PRESET_COLOR_MAP, SEGMENTED_CELL, FULL_FIELD_IMAGE, } from '../../shared/constants';
+import { 
+  PRESET_COLOR_MAP, 
+  SEGMENTED_CELL, 
+  FULL_FIELD_IMAGE, 
+} from '../../shared/constants';
 
 import './styles.scss';
-import thicknessUnit from '../../shared/enums/thicknessUnit';
 
 const RadioGroup = Radio.Group;
 
@@ -43,12 +45,12 @@ export default class ControlPanel extends React.Component {
 
   createFovCellSwitchControls() {
     const {
-      isShowingSegmentedCell,
+      imageType,
       hasCellId
     } = this.props;
     return hasCellId && (
       <RadioGroup
-        defaultValue={isShowingSegmentedCell ? SEGMENTED_CELL : FULL_FIELD_IMAGE}
+        defaultValue={imageType}
         onChange={this.handleSwitchFovCell}
       >
         <Radio.Button
@@ -61,8 +63,8 @@ export default class ControlPanel extends React.Component {
     );
   }
 
-  handleSwitchFovCell(event, checked) {
-    this.props.onSwitchFovCell();
+  handleSwitchFovCell({target}) {
+    this.props.onSwitchFovCell(target.value);
   }
 
   renderColorPresetsDropdown() {
@@ -112,8 +114,6 @@ export default class ControlPanel extends React.Component {
             changeChannelSettings={this.props.changeChannelSettings}
             setIsosurfaceEnabled={this.props.setIsosurfaceEnabled}
             updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-            updateIsovalue={this.props.updateIsovalue}
-            updateIsosurfaceOpacity={this.props.updateIsosurfaceOpacity}
             changeOneChannelSetting={this.props.changeOneChannelSetting}
             onColorChangeComplete={this.props.onColorChangeComplete}
             channelDataReady={this.props.channelDataReady}
