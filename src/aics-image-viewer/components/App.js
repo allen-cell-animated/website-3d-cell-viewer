@@ -30,6 +30,7 @@ import {
   VOLUME_ENABLED,
   ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
+  FULL_FIELD_IMAGE,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -56,7 +57,7 @@ export default class App extends React.Component {
         channelEnabled: true,
         [VOLUME_ENABLED]: index < 3,
         [ISO_SURFACE_ENABLED]: false,
-        isovalue: 0.5,
+        isovalue: 100,
         opacity: 1.0,
         color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
         dataReady: false
@@ -113,7 +114,6 @@ export default class App extends React.Component {
         controlPanelClosed: false,
         autorotate: false,
       // is there currently a single cell showing, or a full field?
-        isShowingSegmentedCell: true,
         imageType: SEGMENTED_CELL,
         // fieldFieldOrSegmented
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -127,8 +127,6 @@ export default class App extends React.Component {
     this.loadFromJson = this.loadFromJson.bind(this);
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
-    this.updateIsovalue = this.updateIsovalue.bind(this);
-    this.updateIsosurfaceOpacity = this.updateIsosurfaceOpacity.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.setQueryInput = this.setQueryInput.bind(this);
@@ -184,11 +182,6 @@ export default class App extends React.Component {
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader);
       this.stopPollingForImage();
     } else if (resp.data.status === ERROR_STATUS) {
-      // this.setState({
-      //   queryErrorMessage: resp.data.errorMessage,
-      //   sendingQueryRequest: false,
-      //   cachingInProgress: false
-      // });
       console.log(ERROR_STATUS);
       this.stopPollingForImage();
     } else {
@@ -281,7 +274,6 @@ export default class App extends React.Component {
   }
 
   setUserSelectionsInState(newState) {
-    console.log(newState)
     this.setState({
       userSelections: {
         ...this.state.userSelections,
@@ -366,21 +358,21 @@ export default class App extends React.Component {
     return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
 
-  onSwitchFovCell() {
+  onSwitchFovCell(value) {
     if (this.state.hasCellId) {
       const name = this.buildName(
         this.state.queryInput.cellLine, 
         this.state.queryInput.fovId, 
-        this.state.userSelections.isShowingSegmentedCell ? null : this.state.queryInput.cellId
+        value === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
       );
-      const type = this.state.userSelections.isShowingSegmentedCell ? FOV_ID_QUERY : CELL_ID_QUERY;
+      const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, false);
       this.setState((prevState) => {
         return {
           sendingQueryRequest: true,
           userSelections: {
-            ...this.state.userSelections,
-          isShowingSegmentedCell: !prevState.isShowingSegmentedCell
+              ...this.state.userSelections,
+            imageType: value,
           }
         };
       });
@@ -457,86 +449,27 @@ export default class App extends React.Component {
     switch (keyToChange) {
       case 'isovalue':
         this.state.image.updateIsovalue(index, newValue);
+        break;
       case 'opacity':
-        this.state.image.updateIsovalue(index, isovalue);
+        this.state.image.updateOpacity(index, newValue);
+        break;
       case 'color':
         let newColor = [newValue.r, newValue.g, newValue.b, newValue.a];
         this.state.image.updateChannelColor(index, newColor);
+        break;
       default:
 
     }
   }
 
   changeOneChannelSetting(channelIndex, keyToChange, newValue) {
-    this.handleChangeToImage(channelIndex, keyToChange, newValue);
     const { userSelections } = this.state;
     const newChannels = userSelections[CHANNEL_SETTINGS_KEY].map((channel, index) => {
       return index === channelIndex ? { ...channel, [keyToChange]: newValue } : channel;
     });
     this.setUserSelectionsInState({[CHANNEL_SETTINGS_KEY]: newChannels});
+    this.handleChangeToImage(channelIndex, keyToChange, newValue);
   }
-
-  updateIsovalue(index, isovalue) {
-    this.setState((prevState) => {
-      if (prevState.image) {
-        prevState.image.updateIsovalue(index, isovalue);
-      }
-      return {
-        channels: prevState.channels.map((channel, channelindex) => { 
-          return index === channelindex ? {...channel, isovalue:isovalue} : channel;
-        })
-      };
-    });
-  }
-
-  updateIsosurfaceOpacity(index, newValue) {
-    this.setState((prevState) => {
-      if (prevState.image) {
-        prevState.image.updateOpacity(index, newValue);
-      }
-      return {
-        channels: prevState.channels.map((channel, channelindex) => { 
-          return index === channelindex ? {...channel, opacity:newValue} : channel;
-        })
-      };
-    });
-  }
-
-  // setVolumeEnabled(index, enabled) {
-  //   this.setState((prevState) => {
-  //     prevState.image.setVolumeChannelEnabled(index, enabled);
-  //     prevState.image.fuse();
-
-  //     return {
-  //       channels: prevState.channels.map((channel, channelindex) => { 
-  //         return index === channelindex ? {...channel, volumeEnabled:enabled} : channel;
-  //       })
-  //     };
-  //   });
-  // }
-
-  // setIsosurfaceEnabled(index, enabled) {
-  //   this.setState((prevState) => {
-  //     if (prevState.image) {
-  //       if (prevState.image.hasIsosurface(index)) {
-  //         if (!enabled) {
-  //           prevState.image.destroyIsosurface(index);
-  //         }
-  //       }
-  //       else {
-  //         if (enabled) {
-  //           prevState.image.createIsosurface(index, prevState.channels[index].isovalue, prevState.channels[index].opacity);
-  //         }
-  //       }
-  //     }
-  
-  //     return {
-  //       channels: prevState.channels.map((channel, channelindex) => { 
-  //         return index === channelindex ? {...channel, isosurfaceEnabled:enabled} : channel;
-  //       })
-  //     };
-  //   });
-  // }
 
   makeOnSaveIsosurfaceHandler(index, type) {
     return () => {
@@ -616,11 +549,11 @@ export default class App extends React.Component {
 
   updateImageChannelsFromAppState() {
     const { userSelections, image } = this.state;
+    console.log('updating from state')
     if (image) {
       // set alpha mask state
       this.updateImageAlphaMaskFromSliderValue();
       // set cameraMode
-      console.log(userSelections.mode === ViewMode.threeD)
       this.state.image.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
       // apply channel settings
       userSelections.channelSettings.forEach((channel, index) => {
@@ -630,9 +563,8 @@ export default class App extends React.Component {
         if (image.hasIsosurface(index)) {
           if (!isoenabled) {
             image.destroyIsosurface(index);
-          }
-        }
-        else {
+          } 
+        } else {
           if (isoenabled) {
             image.createIsosurface(index, channel.isovalue, channel.opacity);
           }
@@ -681,14 +613,18 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.userSelections[CHANNEL_SETTINGS_KEY] !== prevState.userSelections[CHANNEL_SETTINGS_KEY]) {
     this.updateImageChannelsFromAppState();
-    }
+    // if (this.state.userSelections[CHANNEL_SETTINGS_KEY] !== prevState.userSelections[CHANNEL_SETTINGS_KEY]) {
+    // }
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 200);
+    }
+    if (this.state.image) {
+      this.state.image.updateMeshColors();
+      this.state.image.fuse();
     }
   }
 
@@ -721,40 +657,36 @@ export default class App extends React.Component {
               width={450}
             >
               <ControlPanel 
-                    imageName={this.state.image ? this.state.image.name : false}
-                    hasImage={!!this.state.image}
-                    pixelSize={this.state.image ? this.state.image.name : false}
-                channels={userSelections.channelSettings}
-                    channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
-                    mode={userSelections.mode}
-                    autorotate={userSelections.autorotate}
-                    channelGroupedByType={this.state.channelGroupedByType}
-                    // setIsosurfaceEnabled={this.setIsosurfaceEnabled}
-                    updateChannelTransferFunction={this.updateChannelTransferFunction}
-                    updateIsovalue={this.updateIsovalue}
-                    updateIsosurfaceOpacity={this.updateIsosurfaceOpacity}
-                    onViewModeChange={this.onViewModeChange}
-                    onColorChangeComplete={this.onColorChangeComplete}
-                    onAutorotateChange={this.onAutorotateChange}
-                isShowingSegmentedCell={userSelections.isShowingSegmentedCell}
-                    imageType={userSelections.imageType}
-                    hasCellId={this.state.hasCellId}
-                    onSwitchFovCell={this.onSwitchFovCell}
-                    onUpdateImageDensity={this.onUpdateImageDensity}
-                    onUpdateImageBrightness={this.onUpdateImageBrightness}
-                    onUpdateImageMaskAlpha={this.onUpdateImageMaskAlpha}
-                    onUpdateImageGammaLevels={this.onUpdateImageGammaLevels}
-                    onUpdateImageMaxProjectionMode={this.onUpdateImageMaxProjectionMode}
-                    setImageAxisClip={this.setImageAxisClip}
-                    onApplyColorPresets={this.onApplyColorPresets}
-                    showVolumes={this.toggleVolumes}
-                    showSurfaces={this.toggleSurfaces}
+                // image state
+                imageName={this.state.image ? this.state.image.name : false}
+                hasImage={!!this.state.image}
+                pixelSize={this.state.image ? this.state.image.name : false}
+                channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
+                hasCellId={this.state.hasCellId}
+                // user selections
+                channels={userSelections.channelSettings}
+                mode={userSelections.mode}
+                imageType={userSelections.imageType}
+                autorotate={userSelections.autorotate}
+                alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
+                // functions
+                updateChannelTransferFunction={this.updateChannelTransferFunction}
+                onViewModeChange={this.onViewModeChange}
+                onColorChangeComplete={this.onColorChangeComplete}
+                onAutorotateChange={this.onAutorotateChange}
+                onSwitchFovCell={this.onSwitchFovCell}
+                onUpdateImageDensity={this.onUpdateImageDensity}
+                onUpdateImageBrightness={this.onUpdateImageBrightness}
+                onUpdateImageMaskAlpha={this.onUpdateImageMaskAlpha}
+                onUpdateImageGammaLevels={this.onUpdateImageGammaLevels}
+                onUpdateImageMaxProjectionMode={this.onUpdateImageMaxProjectionMode}
+                setImageAxisClip={this.setImageAxisClip}
+                onApplyColorPresets={this.onApplyColorPresets}
+                makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
+                makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
                 changeChannelSettings={this.changeChannelSettings}
-                    makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
-                    makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
-              alphaMaskSliderLevel={userSelections.alphaMaskSliderLevel}
-              changeOneChannelSetting={this.changeOneChannelSetting}
+                changeOneChannelSetting={this.changeOneChannelSetting}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
@@ -763,8 +695,8 @@ export default class App extends React.Component {
                     image={this.state.image}
                     onAutorotateChange={this.onAutorotateChange}
                     setAxisClip={this.setImageAxisClip}
-                    mode={this.state.mode}
-                    autorotate={this.state.userSelections.autorotate}
+                    mode={userSelections.mode}
+                    autorotate={userSelections.autorotate}
                     loadingImage={this.state.sendingQueryRequest}
                     numSlices={this.getNumberOfSlices()}
                   />

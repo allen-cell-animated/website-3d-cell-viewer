@@ -146,7 +146,6 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   onColorChange(newRGB, oldRGB, index) {
-    console.log(newRGB, oldRGB, index)
     this.props.changeOneChannelSetting(index, 'color', newRGB);
   }
 
