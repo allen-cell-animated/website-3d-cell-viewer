@@ -7,15 +7,11 @@ import {
   Checkbox,
   Collapse,
 } from 'antd';
+import { ALPHA_MASK_SLIDER_LEVEL, BRIGHTNESS_SLIDER_LEVEL, DENSITY_SLIDER_LEVEL, LEVELS_SLIDER } from '../shared/constants';
 const Panel = Collapse.Panel;
 
 const INITIAL_SETTINGS = {
   autoRotateChecked: false,
-  maxProjectionChecked: false,
-  maskAlphaSlider: [50],
-  brightnessSlider: [65],
-  densitySlider: [50],
-  levelsSlider: [58.32, 149.00, 255.00],
 };
 
 export default class GlobalVolumeControls extends React.Component {
@@ -33,15 +29,16 @@ export default class GlobalVolumeControls extends React.Component {
 
   componentDidMount() {
     this.onAlphaSliderUpdate(this.props.alphaMaskSliderLevel);
-    this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
-    this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
-    this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
+    this.onBrightnessUpdate(this.props.brightnessSliderLevel);
+    this.onDensityUpdate(this.props.densitySliderLevel);
+    this.onLevelsUpdate(this.props.gammaSliderLevel);
   }
 
   componentDidUpdate() {
-      this.onBrightnessUpdate(INITIAL_SETTINGS.brightnessSlider);
-      this.onDensityUpdate(INITIAL_SETTINGS.densitySlider);
-      this.onLevelsUpdate(INITIAL_SETTINGS.levelsSlider);
+    this.onAlphaSliderUpdate(this.props.alphaMaskSliderLevel);
+    this.onBrightnessUpdate(this.props.brightnessSliderLevel);
+    this.onDensityUpdate(this.props.densitySliderLevel);
+    this.onLevelsUpdate(this.props.gammaSliderLevel);
   } 
 
   shouldComponentUpdate(newProps) {
@@ -55,7 +52,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onAlphaSliderUpdate(values) {
-    this.props.onUpdateImageMaskAlpha([Number(values[0])]);
+    this.props.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, [Number(values[0])]);
 }
 
   createMaskAlphaSlider() {
@@ -72,15 +69,13 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onBrightnessUpdate(values) {
-    let val = 0.05 * (values[0] - 50);
-    let setVal = Math.exp(val);
-    this.props.onUpdateImageBrightness(setVal);
+    this.props.handleChangeUserSelection(BRIGHTNESS_SLIDER_LEVEL, values);
   }
 
   createBrightnessSlider() {
     let config = {
       label: 'brightness',
-      start: INITIAL_SETTINGS.brightnessSlider,
+      start: this.props.brightnessSliderLevel,
       range: {
         min: 0,
         max: 100
@@ -91,15 +86,13 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onDensityUpdate(values) {
-    let val = 0.05 * (values[0] - 100);
-    let setVal = Math.exp(val);
-    this.props.onUpdateImageDensity(setVal);
+    this.props.handleChangeUserSelection(DENSITY_SLIDER_LEVEL, values);
   }
 
   createDensitySlider () {
     let config = {
       label: 'density',
-      start: INITIAL_SETTINGS.densitySlider,
+      start: this.props.densitySliderLevel,
       range: {
         min: 0,
         max: 100
@@ -110,38 +103,13 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onLevelsUpdate(values) {
-    let minThumb = Number(values[0]);
-    let conThumb = Number(values[1]);
-    let maxThumb = Number(values[2]);
-
-    if (conThumb > maxThumb || conThumb < minThumb) {
-      conThumb = 0.5 * (minThumb + maxThumb);
-    }
-    let min = minThumb;
-    let max = maxThumb;
-    let mid = conThumb;
-    let div = 255; //this.getWidth();
-    min /= div;
-    max /= div;
-    mid /= div;
-    let diff = max - min;
-    let x = (mid - min) / diff;
-    let scale = 4 * x * x;
-    if ((mid - 0.5) * (mid - 0.5) < 0.0005) {
-      scale = 1.0;
-    }
-    let vals = {
-      min: min,
-      scale: scale,
-      max: max
-    };
-    this.props.onUpdateImageGammaLevels(vals.min, vals.max, vals.scale);
+    this.props.handleChangeUserSelection(LEVELS_SLIDER, values);
   }
 
   createLevelsSlider () {
     let config = {
       label: 'levels',
-      start: INITIAL_SETTINGS.levelsSlider,
+      start: this.props.gammaSliderLevel,
       range: {
         min: 0,
         max: 255
@@ -181,8 +149,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   handleMaxProjectionCheck({target}) {
-    this.setState({ maxProjectionChecked: target.checked });
-    this.props.onUpdateImageMaxProjectionMode(target.checked);
+    this.props.handleChangeUserSelection('maxProject', target.checked);
   }
 
   createSliderRow(config) {
@@ -212,7 +179,7 @@ export default class GlobalVolumeControls extends React.Component {
   createProjectionModeControls() {
     return (
       <Checkbox
-        defaultChecked={INITIAL_SETTINGS.maxProjectionChecked}
+        defaultChecked={this.props.maxProjectOn}
         onChange={this.handleMaxProjectionCheck}
       >Max projection
       </Checkbox>

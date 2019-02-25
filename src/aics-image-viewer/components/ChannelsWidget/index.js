@@ -39,7 +39,6 @@ export default class ChannelsWidget extends React.Component {
   }
 
   showVolumes(channelArray) {
-    console.log(channelArray)
     this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, true);
   }
 

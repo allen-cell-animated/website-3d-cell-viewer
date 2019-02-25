@@ -128,6 +128,7 @@ export default class ControlPanel extends React.Component {
             imageName={this.props.imageName}
             pixelSize={this.props.pixelSize}
             channels={this.props.channels}
+            handleChangeUserSelection={this.props.handleChangeUserSelection}
             onAutorotateChange={this.props.onAutorotateChange}
             onUpdateImageDensity={this.props.onUpdateImageDensity}
             onUpdateImageBrightness={this.props.onUpdateImageBrightness}
@@ -137,6 +138,10 @@ export default class ControlPanel extends React.Component {
             setImageAxisClip={this.props.setImageAxisClip}
             makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
             alphaMaskSliderLevel={this.props.alphaMaskSliderLevel}
+            brightnessSliderLevel={this.props.brightnessSliderLevel}
+            densitySliderLevel={this.props.densitySliderLevel}
+            gammaSliderLevel={this.props.gammaSliderLevel}
+            maxProjectOn={this.props.maxProjectOn}
           />
         </div> : null}
       </Card>

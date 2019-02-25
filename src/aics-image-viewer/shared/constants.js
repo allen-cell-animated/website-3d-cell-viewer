@@ -22,10 +22,16 @@ export const
 
   // App State Keys,
   ALPHA_MASK_SLIDER_LEVEL = 'alphaMaskSliderLevel',
+  BRIGHTNESS_SLIDER_LEVEL = 'brightnessSliderLevel',
+  DENSITY_SLIDER_LEVEL = 'densitySliderLevel',
+  LEVELS_SLIDER = 'levelsSlider',
 
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
   ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
+  BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [65],
+  DENSITY_SLIDER_LEVEL_DEFAULT = [50],
+  LEVELS_SLIDER_DEFAULT = [58.32, 149.00, 255.00],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
