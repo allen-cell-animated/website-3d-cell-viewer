@@ -44,6 +44,12 @@ import ViewerWrapper from './CellViewerCanvasWrapper';
 
 import '../assets/styles/globals.scss';
 import '../assets/styles/no-ui-slider.min.scss';
+import { 
+  gammaSliderToImageValues, 
+  densitySliderToImageValue, 
+  brightnessSliderToImageValue, 
+  alphaSliderToImageValue,
+} from "../shared/utils/sliderValuesToImageValues";
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
@@ -149,13 +155,13 @@ export default class App extends React.Component {
     this.onUpdateImageMaxProjectionMode = this.onUpdateImageMaxProjectionMode.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
-    this.setAxisClip = this.setAxisClip.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
     this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
     this.setUserSelectionsInState = this.setUserSelectionsInState.bind(this);
     this.changeChannelSettings = this.changeChannelSettings.bind(this);
     this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
     this.handleChangeUserSelection = this.handleChangeUserSelection.bind(this);
+    this.handleChangeToImage = this.handleChangeToImage.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -402,27 +408,16 @@ export default class App extends React.Component {
   }
 
   onApplyColorPresets(presets) {
-    this.setState((prevState) => {
-      const { userSelections } = prevState;
-      presets.forEach((color, index) => {
-        prevState.image.updateChannelColor(index, color);
-      });
-  
-      return {
-        userSelections: {
-          ...this.state.userSelections,
-          channelSettings: userSelections.channelSettings.map((channel, channelindex) => { 
-          return presets[channelindex] ? {...channel, color:presets[channelindex]} : channel;
-        })
-        }
-      };
-    });
-  }
+    const { userSelections } = this.state;
 
-  setAxisClip(axis, minval, maxval, isOrthoAxis) {
-    if (this.state.image) {
-      this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
-    }
+    presets.forEach((color, index) => {
+      this.handleChangeToImage('color', color, index);
+    });
+
+    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, channelindex) => {
+      return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
+    });
+    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
   changeChannelSettings(indices, keyToChange, newValue ) {
@@ -434,55 +429,43 @@ export default class App extends React.Component {
   }
 
   handleChangeToImage(keyToChange, newValue, index) {
-    if (!this.state.image) {
+    const { image } = this.state;
+    if (!image) {
       return;
     }
     switch (keyToChange) {
       case 'isovalue':
-        this.state.image.updateIsovalue(index, newValue);
+        image.updateIsovalue(index, newValue);
         break;
       case 'opacity':
-        this.state.image.updateOpacity(index, newValue);
+        image.updateOpacity(index, newValue);
         break;
       case 'color':
-        let newColor = [newValue.r, newValue.g, newValue.b, newValue.a];
-        this.state.image.updateChannelColor(index, newColor);
-        this.state.image.fuse();
+        let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
+        image.updateChannelColor(index, newColor);
+        image.fuse();
+        break;
+      case 'saveIsoSurface': 
+        image.saveChannelIsosurface(index, newValue);
         break;
       case ALPHA_MASK_SLIDER_LEVEL: 
-        let imageMask = 1 - (newValue / 100.0);
-        this.state.image.setUniform('maskAlpha', imageMask, true, true);
-        this.state.image.fuse();
+        let imageMask = alphaSliderToImageValue(newValue);
+        image.setUniform('maskAlpha', imageMask, true, true);
+        image.fuse();
         break;
       case BRIGHTNESS_SLIDER_LEVEL: 
-        let imageBrightness = Math.exp(0.05 * (newValue[0] - 50));
-        this.state.image.setUniform('BRIGHTNESS', imageBrightness, true, true);
+        let imageBrightness = brightnessSliderToImageValue(newValue);
+        image.setUniform('BRIGHTNESS', imageBrightness, true, true);
         break;
       case DENSITY_SLIDER_LEVEL:
-        let imageDensity = Math.exp(0.05 * (newValue[0] - 100));
-        this.state.image.setUniform("DENSITY", imageDensity, true, true);
+        let imageDensity = densitySliderToImageValue(newValue);
+        image.setUniform("DENSITY", imageDensity, true, true);
         break;
       case LEVELS_SLIDER:
-        let min = Number(newValue[0]);
-        let mid = Number(newValue[1]);
-        let max = Number(newValue[2]);
-
-        if (mid > max || mid < min) {
-          mid = 0.5 * (min + max);
-        }
-        let div = 255; //this.getWidth();
-        min /= div;
-        max /= div;
-        mid /= div;
-        let diff = max - min;
-        let x = (mid - min) / diff;
-        let scale = 4 * x * x;
-        if ((mid - 0.5) * (mid - 0.5) < 0.0005) {
-          scale = 1.0;
-        }
-        this.state.image.setUniformNoRerender('GAMMA_MIN', min, true, true);
-        this.state.image.setUniformNoRerender('GAMMA_MAX', max, true, true);
-        this.state.image.setUniform('GAMMA_SCALE', scale, true, true);
+        let imageValues = gammaSliderToImageValues(newValue);
+        image.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
+        image.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
+        image.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
         break;
     }
   }
@@ -500,12 +483,6 @@ export default class App extends React.Component {
 
     this.setUserSelectionsInState({[CHANNEL_SETTINGS]: newChannels});
     this.handleChangeToImage(keyToChange, newValue, channelIndex);
-  }
-
-  makeOnSaveIsosurfaceHandler(index, type) {
-    return () => {
-      this.props.image.saveChannelIsosurface(index, type);
-    };
   }
 
   updateChannelTransferFunction(index, lut, controlPoints) {
@@ -576,7 +553,7 @@ export default class App extends React.Component {
       this.state.image.setUniform('maxProject', userSelections.maxProject ? 1: 0, true, true);
 
       // apply channel settings
-      userSelections.channelSettings.forEach((channel, index) => {
+      userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
         const volenabled = channel[VOLUME_ENABLED];
         const isoenabled = channel[ISO_SURFACE_ENABLED];
         this.state.image.setVolumeChannelEnabled(index, volenabled);
@@ -685,6 +662,7 @@ export default class App extends React.Component {
                 gammaSliderLevel={userSelections[LEVELS_SLIDER]}
                 // functions
                 handleChangeUserSelection={this.handleChangeUserSelection}
+                handleChangeToImage={this.handleChangeToImage}
                 updateChannelTransferFunction={this.updateChannelTransferFunction}
                 onViewModeChange={this.onViewModeChange}
                 onColorChangeComplete={this.onColorChangeComplete}
@@ -694,7 +672,6 @@ export default class App extends React.Component {
                 setImageAxisClip={this.setImageAxisClip}
                 onApplyColorPresets={this.onApplyColorPresets}
                 makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
-                makeOnSaveIsosurfaceHandler={this.makeOnSaveIsosurfaceHandler}
                 changeChannelSettings={this.changeChannelSettings}
                 changeOneChannelSetting={this.changeOneChannelSetting}
               />

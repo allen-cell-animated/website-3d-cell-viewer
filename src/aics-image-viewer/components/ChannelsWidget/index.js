@@ -144,8 +144,8 @@ export default class ChannelsWidget extends React.Component {
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
                                         onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
                                         onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                        onSaveIsosurfaceSTL={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                        onSaveIsosurfaceGLTF={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
+                                        onSaveIsosurfaceSTL={() => this.props.handleChangeToImage('saveIsoSurface', "STL", actualIndex)}
+                                        onSaveIsosurfaceGLTF={() => this.props.handleChangeToImage('saveIsoSurface', "GLTF", actualIndex)}
                                         onOpacityChange={this.makeOnOpacityChange(actualIndex)}
                                         updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                                         isovalue={channel.isovalue}

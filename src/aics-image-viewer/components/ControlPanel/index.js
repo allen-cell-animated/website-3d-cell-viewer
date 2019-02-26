@@ -112,6 +112,7 @@ export default class ControlPanel extends React.Component {
             channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
             changeChannelSettings={this.props.changeChannelSettings}
+            handleChangeToImage={this.props.handleChangeToImage}
             setIsosurfaceEnabled={this.props.setIsosurfaceEnabled}
             updateChannelTransferFunction={this.props.updateChannelTransferFunction}
             changeOneChannelSetting={this.props.changeOneChannelSetting}
@@ -120,7 +121,6 @@ export default class ControlPanel extends React.Component {
             onApplyColorPresets={this.props.onApplyColorPresets}
             showVolumes={this.props.showVolumes}
             showSurfaces={this.props.showSurfaces}
-            makeOnSaveIsosurfaceHandler={this.props.makeOnSaveIsosurfaceHandler}
             style={STYLES.channelsWidget}
           />
           <GlobalVolumeControls
