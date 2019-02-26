@@ -12,7 +12,8 @@ import {
   ISOSURFACE_OPACITY_SLIDER_MAX,
   OBSERVED_CHANNEL_KEY,
   ISO_SURFACE_ENABLED,
-  VOLUME_ENABLED
+  VOLUME_ENABLED,
+  SAVE_ISO_SURFACE
 } from '../../shared/constants';
 import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
@@ -27,10 +28,6 @@ const { Panel } = Collapse;
 export default class ChannelsWidget extends React.Component {
   constructor(props) {
     super(props);
-    this.makeOnVolumeCheckHandler = this.makeOnVolumeCheckHandler.bind(this);
-    this.makeOnIsosurfaceCheckHandler = this.makeOnIsosurfaceCheckHandler.bind(this);
-    this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
-    this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
     this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
     this.showSurfaces = this.showSurfaces.bind(this);
@@ -52,34 +49,6 @@ export default class ChannelsWidget extends React.Component {
 
   hideSurfaces(channelArray) {
     this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
-  }
-
-  makeOnVolumeCheckHandler(index) {
-    return ({ target }) => {
-        this.props.changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
-      
-    };
-  }
-
-  makeOnIsosurfaceCheckHandler(index) {
-    return ({ target }) => {
-        this.props.changeOneChannelSetting(index, ISO_SURFACE_ENABLED, target.checked);
-      
-    };
-  }
-
-  makeOnIsovalueChange(index) {
-    return (newValue) => {
-      this.props.changeOneChannelSetting(index, 'isovalue', newValue);
-    };
-  }
-
-
-  makeOnOpacityChange(index) {
-    return (newValue) => {
-      this.props.changeOneChannelSetting(index, 'opacity', newValue/ISOSURFACE_OPACITY_SLIDER_MAX);
-
-    };
   }
 
   renderVisiblityControls(key, channelArray) {
@@ -137,21 +106,17 @@ export default class ChannelsWidget extends React.Component {
                                         lutControlPoints={this.props.channelDataChannels[actualIndex].lutControlPoints}
                                         channelDataReady={channel.dataReady}
                                         name={formatChannelName(channel.name)}
-                                        onColorChangeComplete={this.props.onColorChangeComplete}
                                         volumeChecked={channel[VOLUME_ENABLED]}
-                                        onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
-                                        changeOneChannelSetting={this.props.changeOneChannelSetting}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
-                                        onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
-                                        onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                        onSaveIsosurfaceSTL={() => this.props.handleChangeToImage('saveIsoSurface', "STL", actualIndex)}
-                                        onSaveIsosurfaceGLTF={() => this.props.handleChangeToImage('saveIsoSurface', "GLTF", actualIndex)}
-                                        onOpacityChange={this.makeOnOpacityChange(actualIndex)}
-                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}
-                                        />
+                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                        changeOneChannelSetting={this.props.changeOneChannelSetting}
+                                        onColorChangeComplete={this.props.onColorChangeComplete}
+                                        handleChangeToImage={this.props.handleChangeToImage}
+
+                  />
                 );}
               }
               />

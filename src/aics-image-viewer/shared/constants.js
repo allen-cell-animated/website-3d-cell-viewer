@@ -26,6 +26,12 @@ export const
   DENSITY_SLIDER_LEVEL = 'densitySliderLevel',
   LEVELS_SLIDER = 'levelsSlider',
 
+  // Volume viewer keys
+  ISO_VALUE = 'isovalue',
+  OPACITY = 'opacity',
+  COLOR = 'color',
+  SAVE_ISO_SURFACE = 'saveIsoSurface',
+
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
   ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],

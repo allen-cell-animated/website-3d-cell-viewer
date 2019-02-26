@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes } from 'lodash';
+import { includes, isEqual, difference } from 'lodash';
 import { 
   AICSvolumeDrawable, 
   AICSvolumeLoader 
@@ -37,6 +37,10 @@ import {
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   DENSITY_SLIDER_LEVEL_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
+  ISO_VALUE,
+  OPACITY,
+  COLOR,
+  SAVE_ISO_SURFACE,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -61,6 +65,10 @@ const INIT_COLORS = PRESET_COLORS_0;
 const CHANNEL_SETTINGS = 'channelSettings';
 
 export default class App extends React.Component {
+  static buildName(cellLine, fovId, cellId) {
+    cellId = cellId ? ('_' + cellId) : "";
+    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
+  }
 
   static setInitialChannelConfig(channelNames, channelColors) {
     return channelNames.map((channel, index) => {
@@ -148,7 +156,6 @@ export default class App extends React.Component {
     this.setQueryInput = this.setQueryInput.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
-    this.onChannelDataReady = this.onChannelDataReady.bind(this);
     this.updateURLSearchParams = this.updateURLSearchParams.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
     this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
@@ -273,7 +280,12 @@ export default class App extends React.Component {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         aimg.setChannelAsMask(channelIndex);
       }
-      this.onChannelDataReady(channelIndex);
+      if (channelIndex === 0) {
+        this.setState({
+          sendingQueryRequest: false,
+        });
+      }
+      this.changeOneChannelSetting(channelIndex, 'dataReady', true);
     });
 
     let nextState = {
@@ -287,6 +299,29 @@ export default class App extends React.Component {
     this.setState(nextState);
   }
 
+  handleChangeUserSelection(key, newValue) {
+    this.setUserSelectionsInState({ [key]: newValue });
+    this.handleChangeToImage(key, newValue);
+  }
+
+  changeOneChannelSetting(channelIndex, keyToChange, newValue) {
+    const { userSelections } = this.state;
+    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
+      return index === channelIndex ? { ...channel, [keyToChange]: newValue } : channel;
+    });
+
+    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+    this.handleChangeToImage(keyToChange, newValue, channelIndex);
+  }
+
+  changeChannelSettings(indices, keyToChange, newValue) {
+    const { userSelections } = this.state;
+    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
+      return { ...channel, [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange] };
+    });
+    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+  }
+
   setUserSelectionsInState(newState) {
     this.setState({
       userSelections: {
@@ -294,6 +329,48 @@ export default class App extends React.Component {
         ...newState,
       }
     });
+  }
+
+  handleChangeToImage(keyToChange, newValue, index) {
+    const { image } = this.state;
+    if (!image) {
+      return;
+    }
+    switch (keyToChange) {
+      case ISO_VALUE:
+        image.updateIsovalue(index, newValue);
+        break;
+      case OPACITY:
+        image.updateOpacity(index, newValue);
+        break;
+      case COLOR:
+        let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
+        image.updateChannelColor(index, newColor);
+        image.fuse();
+        break;
+      case SAVE_ISO_SURFACE:
+        image.saveChannelIsosurface(index, newValue);
+        break;
+      case ALPHA_MASK_SLIDER_LEVEL:
+        let imageMask = alphaSliderToImageValue(newValue);
+        image.setUniform('maskAlpha', imageMask, true, true);
+        image.fuse();
+        break;
+      case BRIGHTNESS_SLIDER_LEVEL:
+        let imageBrightness = brightnessSliderToImageValue(newValue);
+        image.setUniform('BRIGHTNESS', imageBrightness, true, true);
+        break;
+      case DENSITY_SLIDER_LEVEL:
+        let imageDensity = densitySliderToImageValue(newValue);
+        image.setUniform("DENSITY", imageDensity, true, true);
+        break;
+      case LEVELS_SLIDER:
+        let imageValues = gammaSliderToImageValues(newValue);
+        image.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
+        image.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
+        image.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
+        break;
+    }
   }
 
   onViewModeChange(newMode) {
@@ -324,13 +401,15 @@ export default class App extends React.Component {
   }
 
   onUpdateImageMaskAlpha(sliderValue) {
-    if (sliderValue) {
-      this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: sliderValue });
-    }
+    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: sliderValue });
   }
 
   onUpdateImageMaxProjectionMode(checked) {
     this.setUserSelectionsInState({ maxProject: checked });
+  }
+
+  onAutorotateChange() {
+    this.setUserSelectionsInState({ autorotate: !this.state.userSelections.autorotate });
   }
 
   setImageAxisClip(axis, minval, maxval, isOrthoAxis) {
@@ -349,18 +428,9 @@ export default class App extends React.Component {
     };
   }
 
-  onAutorotateChange() {
-    this.setUserSelectionsInState({autorotate: !this.state.userSelections.autorotate});
-  }
-
-  buildName(cellLine, fovId, cellId) {
-    cellId = cellId ? ('_' + cellId) : "";
-    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
-  }
-
   onSwitchFovCell(value) {
     if (this.state.hasCellId) {
-      const name = this.buildName(
+      const name = App.buildName(
         this.state.queryInput.cellLine, 
         this.state.queryInput.fovId, 
         value === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
@@ -379,110 +449,15 @@ export default class App extends React.Component {
     }
   }
 
-  onChannelDataReady(index) {
-    this.setState((prevState) => {
-      const newChannels = prevState.userSelections.channelSettings.map((channel, channelindex) => { 
-        return index === channelindex ? {...channel, dataReady:true} : channel;
-      });
-      if (index === 0) {
-        return {
-          sendingQueryRequest: false,
-          userSelections: {
-            ...this.state.userSelections,
-            channelSettings: newChannels
-          }
-        };
-      }
-      else {
-        return {
-          userSelections: {
-            ...this.state.userSelections,
-            channelSettings: newChannels
-          }
-        };
-      } 
-    });
-  }
-
-  onColorChangeComplete(newrgba, oldrgba, indx) {
-  }
-
   onApplyColorPresets(presets) {
     const { userSelections } = this.state;
-
     presets.forEach((color, index) => {
-      this.handleChangeToImage('color', color, index);
+      this.handleChangeToImage(COLOR, color, index);
     });
-
     const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, channelindex) => {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
     });
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
-  }
-
-  changeChannelSettings(indices, keyToChange, newValue ) {
-    const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
-      return { ...channel, [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange] };
-    });
-    this.setUserSelectionsInState({[CHANNEL_SETTINGS]: newChannels});
-  }
-
-  handleChangeToImage(keyToChange, newValue, index) {
-    const { image } = this.state;
-    if (!image) {
-      return;
-    }
-    switch (keyToChange) {
-      case 'isovalue':
-        image.updateIsovalue(index, newValue);
-        break;
-      case 'opacity':
-        image.updateOpacity(index, newValue);
-        break;
-      case 'color':
-        let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
-        image.updateChannelColor(index, newColor);
-        image.fuse();
-        break;
-      case 'saveIsoSurface': 
-        image.saveChannelIsosurface(index, newValue);
-        break;
-      case ALPHA_MASK_SLIDER_LEVEL: 
-        let imageMask = alphaSliderToImageValue(newValue);
-        image.setUniform('maskAlpha', imageMask, true, true);
-        image.fuse();
-        break;
-      case BRIGHTNESS_SLIDER_LEVEL: 
-        let imageBrightness = brightnessSliderToImageValue(newValue);
-        image.setUniform('BRIGHTNESS', imageBrightness, true, true);
-        break;
-      case DENSITY_SLIDER_LEVEL:
-        let imageDensity = densitySliderToImageValue(newValue);
-        image.setUniform("DENSITY", imageDensity, true, true);
-        break;
-      case LEVELS_SLIDER:
-        let imageValues = gammaSliderToImageValues(newValue);
-        image.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
-        image.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
-        image.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
-        break;
-    }
-  }
-
-  handleChangeUserSelection(key, newValue) {
-    this.setUserSelectionsInState({ [key]: newValue });
-    this.handleChangeToImage(key, newValue);
-  }
-
-  changeOneChannelSetting(channelIndex, keyToChange, newValue) {
-    const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
-      return index === channelIndex ? { ...channel, [keyToChange]: newValue } : channel;
-    });
-
-    this.setUserSelectionsInState({[CHANNEL_SETTINGS]: newChannels});
-    this.handleChangeToImage(keyToChange, newValue, channelIndex);
   }
 
   updateChannelTransferFunction(index, lut, controlPoints) {
@@ -504,10 +479,10 @@ export default class App extends React.Component {
   setQueryInput(input, type) {
     let name = input;
     if (type === FOV_ID_QUERY) {
-      name = this.buildName(input.cellLine, input.fovId);
+      name = App.buildName(input.cellLine, input.fovId);
     }
     else if (type === CELL_ID_QUERY) {
-      name = this.buildName(input.cellLine, input.fovId, input.cellId);
+      name = App.buildName(input.cellLine, input.fovId, input.cellId);
     }
     else if (type === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
@@ -523,7 +498,7 @@ export default class App extends React.Component {
           cellId = components[2];
           type = CELL_ID_QUERY;
         }
-        name = this.buildName(cellLine, fovId, cellId);
+        name = App.buildName(cellLine, fovId, cellId);
       }
       input = {
         cellLine,
@@ -537,21 +512,14 @@ export default class App extends React.Component {
       queryInput: input,
       queryInputType: type,
       hasCellId: !!input.cellId,
-      isShowingSegmentedCell: !!input.cellId,
       sendingQueryRequest: true
     });
     this.openImage(name, type, true);
   }
 
-
   updateImageVolumeAndSurfacesEnabledFromAppState() {
     const { userSelections, image } = this.state;
     if (image) {
-      // set cameraMode
-      this.state.image.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
-      //set max project
-      this.state.image.setUniform('maxProject', userSelections.maxProject ? 1: 0, true, true);
-
       // apply channel settings
       userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
         const volenabled = channel[VOLUME_ENABLED];
@@ -598,11 +566,15 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    const { userSelections } = this.state;
 
-    const channelsChanged = this.state.userSelections[CHANNEL_SETTINGS] !== prevState.userSelections[CHANNEL_SETTINGS];
+    const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
     const newImage = this.state.image && !prevProps.image;
     const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
     if (channelsChanged || imageChanged || newImage) {
+      // Need to update after image loaded
+      this.state.image.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
+      this.state.image.setUniform('maxProject', userSelections.maxProject ? 1 : 0, true, true);
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
       this.state.image.fuse();
     }
