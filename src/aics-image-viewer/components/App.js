@@ -262,14 +262,14 @@ export default class App extends React.Component {
       userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(obj.channel_names, INIT_COLORS);
     let channelGroupedByType = App.createChannelGrouping(obj.channel_names);
     // set image colors
+    // NOTE: seems like there should be a better way to set these initial colors. 
     for (let i = 0; i < obj.channel_names.length; ++i) {
       aimg.updateChannelColor(i, newChannelSettings[i].color);
     }
-    if (userSelections.imageType === SEGMENTED_CELL) {
-      this.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, ALPHA_MASK_SLIDER_3D_DEFAULT);
-    } else {
-      this.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, ALPHA_MASK_SLIDER_2D_DEFAULT);
-    }
+    // set alpha slider first time image is loaded to something that makes sense
+    this.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, 
+      userSelections.imageType === SEGMENTED_CELL ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT);
+
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
@@ -277,15 +277,13 @@ export default class App extends React.Component {
     // GO OUT AND GET THE VOLUME DATA.
     AICSvolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
+      newChannelSettings[channelIndex].dataReady = true;
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         aimg.setChannelAsMask(channelIndex);
       }
       if (channelIndex === 0) {
-        this.setState({
-          sendingQueryRequest: false,
-        });
+        this.setState({ sendingQueryRequest: false });
       }
-      this.changeOneChannelSetting(channelIndex, 'dataReady', true);
     });
 
     let nextState = {
