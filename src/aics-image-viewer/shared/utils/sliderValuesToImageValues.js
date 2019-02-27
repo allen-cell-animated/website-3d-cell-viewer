@@ -27,4 +27,4 @@ export const densitySliderToImageValue = (sliderValues) => (Math.exp(0.05 * (sli
 
 export const brightnessSliderToImageValue = (sliderValues) => (Math.exp(0.05 * (sliderValues[0] - 50)));
 
-export const alphaSliderToImageValue = (sliderValues) => 1 - (sliderValues / 100.0);
+export const alphaSliderToImageValue = (sliderValues) => 1 - (sliderValues[0] / 100.0);
