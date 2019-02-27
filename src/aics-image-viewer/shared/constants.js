@@ -25,6 +25,9 @@ export const
   BRIGHTNESS_SLIDER_LEVEL = 'brightnessSliderLevel',
   DENSITY_SLIDER_LEVEL = 'densitySliderLevel',
   LEVELS_SLIDER = 'levelsSlider',
+  MODE = 'mode',
+  AUTO_ROTATE = 'autorotate',
+  MAX_PROJECT = 'maxProject',
 
   // Volume viewer keys
   ISO_VALUE = 'isovalue',

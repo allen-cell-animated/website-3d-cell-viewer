@@ -27,20 +27,6 @@ export default class GlobalVolumeControls extends React.Component {
     this.createMaskAlphaSlider = this.createMaskAlphaSlider.bind(this);
   }
 
-  componentDidMount() {
-    this.onAlphaSliderUpdate(this.props.alphaMaskSliderLevel);
-    this.onBrightnessUpdate(this.props.brightnessSliderLevel);
-    this.onDensityUpdate(this.props.densitySliderLevel);
-    this.onLevelsUpdate(this.props.gammaSliderLevel);
-  }
-
-  componentDidUpdate() {
-    this.onAlphaSliderUpdate(this.props.alphaMaskSliderLevel);
-    this.onBrightnessUpdate(this.props.brightnessSliderLevel);
-    this.onDensityUpdate(this.props.densitySliderLevel);
-    this.onLevelsUpdate(this.props.gammaSliderLevel);
-  } 
-
   shouldComponentUpdate(newProps) {
     const { 
       imageName,

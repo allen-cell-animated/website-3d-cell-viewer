@@ -41,6 +41,9 @@ import {
   OPACITY,
   COLOR,
   SAVE_ISO_SURFACE,
+  MODE,
+  AUTO_ROTATE,
+  MAX_PROJECT,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -117,7 +120,6 @@ export default class App extends React.Component {
     this.state = {
       image: null,
       files: null,
-      mode: ViewMode.threeD,
       queryInput: null,
       queryInputType: null,
       queryErrorMessage: null,
@@ -130,13 +132,11 @@ export default class App extends React.Component {
       hasCellId: false,
       // state set by the UI:
       userSelections: {
-        mode: ViewMode.threeD,
-        controlPanelClosed: false,
-        autorotate: false,
-        maxProject: false,
-      // is there currently a single cell showing, or a full field?
         imageType: SEGMENTED_CELL,
-        // fieldFieldOrSegmented
+        controlPanelClosed: false,
+        [MODE]: ViewMode.threeD,
+        [AUTO_ROTATE]: false,
+        [MAX_PROJECT]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
         [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT, 
         [DENSITY_SLIDER_LEVEL]: DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -169,6 +169,8 @@ export default class App extends React.Component {
     this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
     this.handleChangeUserSelection = this.handleChangeUserSelection.bind(this);
     this.handleChangeToImage = this.handleChangeToImage.bind(this);
+    this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
+    this.intializeNewImage = this.intializeNewImage.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -254,22 +256,49 @@ export default class App extends React.Component {
       .catch(resp => this.handleOpenImageException(resp));
   }
 
-  loadFromJson(obj, title, locationHeader) {
+  intializeNewImage(aimg) {
     const { userSelections } = this.state;
-    const aimg = new AICSvolumeDrawable(obj);
-    // if same number of channels, leave the app state alone.
-    let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === obj.channel_names.length ? 
-      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(obj.channel_names, INIT_COLORS);
-    let channelGroupedByType = App.createChannelGrouping(obj.channel_names);
-    // set image colors
-    // NOTE: seems like there should be a better way to set these initial colors. 
-    for (let i = 0; i < obj.channel_names.length; ++i) {
-      aimg.updateChannelColor(i, newChannelSettings[i].color);
-    }
+    let alphaLevel = userSelections.imageType === SEGMENTED_CELL ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+    let imageMask = alphaSliderToImageValue(alphaLevel);
+    let imageBrightness = brightnessSliderToImageValue(userSelections.brightnessSliderLevel);
+    let imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel);
+    let imageValues = gammaSliderToImageValues(userSelections.levelsSlider);
     // set alpha slider first time image is loaded to something that makes sense
-    this.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, 
-      userSelections.imageType === SEGMENTED_CELL ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT);
+    this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
 
+    aimg.setUniform('maskAlpha', imageMask, true, true);
+    aimg.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
+    aimg.setUniform('maxProject', userSelections[MAX_PROJECT] ? 1 : 0, true, true);
+    aimg.setUniform('BRIGHTNESS', imageBrightness, true, true);
+    aimg.setUniform("DENSITY", imageDensity, true, true);
+    aimg.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
+    aimg.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
+    aimg.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
+    aimg.fuse();
+  }
+
+  updateStateOnLoadImage(channelNames) {
+    const { userSelections } = this.state;
+    let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === channelNames.length ?
+      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(channelNames, INIT_COLORS);
+    let channelGroupedByType = App.createChannelGrouping(channelNames);
+    this.setUserSelectionsInState({
+      [CHANNEL_SETTINGS]: newChannelSettings,
+      channelGroupedByType
+    });
+    this.setState({
+      channelGroupedByType,
+      userSelections: {
+        ...this.state.userSelections,
+        [CHANNEL_SETTINGS]: newChannelSettings,
+      }
+    });
+    return newChannelSettings;
+  }
+
+  loadFromJson(obj, title, locationHeader) {
+    const aimg = new AICSvolumeDrawable(obj);
+    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names)
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
@@ -281,20 +310,13 @@ export default class App extends React.Component {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         aimg.setChannelAsMask(channelIndex);
       }
-      if (channelIndex === 0) {
+      aimg.updateChannelColor(channelIndex, newChannelSettings[channelIndex].color);
+      if (this.state.sendingQueryRequest) {
         this.setState({ sendingQueryRequest: false });
       }
     });
-
-    let nextState = {
-      image: aimg,
-      channelGroupedByType,
-      userSelections : {
-        ...this.state.userSelections,
-        [CHANNEL_SETTINGS]: newChannelSettings,
-      }
-    };
-    this.setState(nextState);
+    this.intializeNewImage(aimg);
+    this.setState({ image: aimg });
   }
 
   handleChangeUserSelection(key, newValue) {
@@ -346,6 +368,8 @@ export default class App extends React.Component {
         image.updateChannelColor(index, newColor);
         image.fuse();
         break;
+      case MODE:
+        this.state.image.setUniform('isOrtho', newValue === ViewMode.threeD ? 0.0 : 1.0);
       case SAVE_ISO_SURFACE:
         image.saveChannelIsosurface(index, newValue);
         break;
@@ -374,14 +398,14 @@ export default class App extends React.Component {
   onViewModeChange(newMode) {
     const { userSelections } = this.state;
     let newSelectionState = {
-      mode: newMode,
+      [MODE]: newMode,
     };
       // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
       // if full field, dont mask
     if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
       // Switching to 2d 
       newSelectionState = {
-        mode: newMode,
+        [MODE]: newMode,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
     } else if (
@@ -391,10 +415,11 @@ export default class App extends React.Component {
     ) {
       // switching to 3d 
       newSelectionState = {
-          mode: newMode,
+          [MODE]: newMode,
           [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
     }
+    this.handleChangeToImage(MODE, newMode);
     this.setUserSelectionsInState(newSelectionState);
   }
 
@@ -403,11 +428,11 @@ export default class App extends React.Component {
   }
 
   onUpdateImageMaxProjectionMode(checked) {
-    this.setUserSelectionsInState({ maxProject: checked });
+    this.setUserSelectionsInState({ [MAX_PROJECT]: checked });
   }
 
   onAutorotateChange() {
-    this.setUserSelectionsInState({ autorotate: !this.state.userSelections.autorotate });
+    this.setUserSelectionsInState({ [AUTO_ROTATE]: !this.state.userSelections[AUTO_ROTATE] });
   }
 
   setImageAxisClip(axis, minval, maxval, isOrthoAxis) {
@@ -569,10 +594,7 @@ export default class App extends React.Component {
     const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
     const newImage = this.state.image && !prevProps.image;
     const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
-    if (channelsChanged || imageChanged || newImage) {
-      // Need to update after image loaded
-      this.state.image.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
-      this.state.image.setUniform('maxProject', userSelections.maxProject ? 1 : 0, true, true);
+    if ((channelsChanged || imageChanged || newImage) && (this.state.image)) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
       this.state.image.fuse();
     }
@@ -621,11 +643,11 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 // user selections
-                maxProjectOn={userSelections.maxProject}
-                channels={userSelections.channelSettings}
-                mode={userSelections.mode}
+                maxProjectOn={userSelections[MAX_PROJECT]}
+                channels={userSelections[CHANNEL_SETTINGS]}
+                mode={userSelections[MODE]}
                 imageType={userSelections.imageType}
-                autorotate={userSelections.autorotate}
+                autorotate={userSelections[AUTO_ROTATE]}
                 alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
                 brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
                 densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
@@ -653,7 +675,7 @@ export default class App extends React.Component {
                     onAutorotateChange={this.onAutorotateChange}
                     setAxisClip={this.setImageAxisClip}
                     mode={userSelections.mode}
-                    autorotate={userSelections.autorotate}
+                    autorotate={userSelections[AUTO_ROTATE]}
                     loadingImage={this.state.sendingQueryRequest}
                     numSlices={this.getNumberOfSlices()}
                   />
