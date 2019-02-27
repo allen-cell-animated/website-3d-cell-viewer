@@ -9,11 +9,9 @@ import {
 
 import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
-  ISOSURFACE_OPACITY_SLIDER_MAX,
   OBSERVED_CHANNEL_KEY,
   ISO_SURFACE_ENABLED,
   VOLUME_ENABLED,
-  SAVE_ISO_SURFACE
 } from '../../shared/constants';
 import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
