@@ -39,7 +39,7 @@ export default class GlobalVolumeControls extends React.Component {
 
   createMaskAlphaSlider() {
     let config = {
-      label: 'crop to cell',
+      label: 'mask cell',
       start: this.props.alphaMaskSliderLevel,
       range: {
         min: 0,
