@@ -10,10 +10,6 @@ import {
 import { ALPHA_MASK_SLIDER_LEVEL, BRIGHTNESS_SLIDER_LEVEL, DENSITY_SLIDER_LEVEL, LEVELS_SLIDER } from '../shared/constants';
 const Panel = Collapse.Panel;
 
-const INITIAL_SETTINGS = {
-  autoRotateChecked: false,
-};
-
 export default class GlobalVolumeControls extends React.Component {
 
   constructor(props) {
