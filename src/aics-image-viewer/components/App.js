@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes, isEqual, difference } from 'lodash';
+import { includes, isEqual } from 'lodash';
 import { 
   AICSvolumeDrawable, 
   AICSvolumeLoader 
@@ -298,7 +298,7 @@ export default class App extends React.Component {
 
   loadFromJson(obj, title, locationHeader) {
     const aimg = new AICSvolumeDrawable(obj);
-    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names)
+    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
@@ -420,6 +420,9 @@ export default class App extends React.Component {
       };
     }
     this.handleChangeToImage(MODE, newMode);
+    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
+      this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
+    }
     this.setUserSelectionsInState(newSelectionState);
   }
 
@@ -589,8 +592,6 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { userSelections } = this.state;
-
     const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
     const newImage = this.state.image && !prevProps.image;
     const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
