@@ -7,7 +7,7 @@ import {
   Checkbox,
   Collapse,
 } from 'antd';
-import { ALPHA_MASK_SLIDER_LEVEL, BRIGHTNESS_SLIDER_LEVEL, DENSITY_SLIDER_LEVEL, LEVELS_SLIDER } from '../shared/constants';
+import { ALPHA_MASK_SLIDER_LEVEL, BRIGHTNESS_SLIDER_LEVEL, DENSITY_SLIDER_LEVEL, LEVELS_SLIDER, MAX_PROJECT } from '../shared/constants';
 const Panel = Collapse.Panel;
 
 export default class GlobalVolumeControls extends React.Component {
@@ -131,7 +131,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   handleMaxProjectionCheck({target}) {
-    this.props.handleChangeUserSelection('maxProject', target.checked);
+    this.props.handleChangeUserSelection(MAX_PROJECT, target.checked);
   }
 
   createSliderRow(config) {

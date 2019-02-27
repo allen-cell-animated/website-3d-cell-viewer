@@ -373,6 +373,8 @@ export default class App extends React.Component {
       case SAVE_ISO_SURFACE:
         image.saveChannelIsosurface(index, newValue);
         break;
+      case MAX_PROJECT: 
+        image.setUniform('maxProject', newValue ? 1 : 0, true, true);
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
         image.setUniform('maskAlpha', imageMask, true, true);
