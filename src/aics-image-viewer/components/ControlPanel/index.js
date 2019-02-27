@@ -30,8 +30,6 @@ export default class ControlPanel extends React.Component {
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.state = {open: true};
-    this.initColorKey = 0;
-    this.presetMap = PRESET_COLOR_MAP;
   }
 
   handleToggle() {
@@ -39,7 +37,7 @@ export default class ControlPanel extends React.Component {
   }
 
   makeTurnOnPresetFn({ key }) {
-    const presets = this.presetMap[key].colors;
+    const presets = PRESET_COLOR_MAP[key].colors;
     this.props.onApplyColorPresets(presets);
   }
 
@@ -70,7 +68,7 @@ export default class ControlPanel extends React.Component {
   renderColorPresetsDropdown() {
     const dropDownMenuItems = (
       <Menu onClick={this.makeTurnOnPresetFn}>
-        {this.presetMap.map((preset, index)=> <Menu.Item key={preset.key}>{preset.name}</Menu.Item>)}
+        {PRESET_COLOR_MAP.map((preset, index)=> <Menu.Item key={preset.key}>{preset.name}</Menu.Item>)}
       </Menu>
     );
     return (
