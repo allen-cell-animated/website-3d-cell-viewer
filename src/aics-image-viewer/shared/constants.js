@@ -99,7 +99,7 @@ export const PRESET_COLORS_0 = [
   [247, 219, 120],
 ];
 
-export const PRESET_COLOR_MAP = [
+export const PRESET_COLOR_MAP = Object.freeze([
   {
     colors: PRESET_COLORS_0,
     name: 'Default',
@@ -120,4 +120,4 @@ export const PRESET_COLOR_MAP = [
     name: 'White structure',
     key: 3,
   },
-];
+]);
