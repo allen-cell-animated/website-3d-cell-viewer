@@ -159,7 +159,6 @@ export default class App extends React.Component {
     this.updateURLSearchParams = this.updateURLSearchParams.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
     this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
-    this.onUpdateImageMaxProjectionMode = this.onUpdateImageMaxProjectionMode.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
@@ -258,7 +257,8 @@ export default class App extends React.Component {
 
   intializeNewImage(aimg) {
     const { userSelections } = this.state;
-    let alphaLevel = userSelections.imageType === SEGMENTED_CELL ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+    let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+
     let imageMask = alphaSliderToImageValue(alphaLevel);
     let imageBrightness = brightnessSliderToImageValue(userSelections.brightnessSliderLevel);
     let imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel);
@@ -373,8 +373,10 @@ export default class App extends React.Component {
       case SAVE_ISO_SURFACE:
         image.saveChannelIsosurface(index, newValue);
         break;
-      case MAX_PROJECT: 
+      case MAX_PROJECT:         
         image.setUniform('maxProject', newValue ? 1 : 0, true, true);
+        image.fuse();
+        break;
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
         image.setUniform('maskAlpha', imageMask, true, true);
@@ -430,10 +432,6 @@ export default class App extends React.Component {
 
   onUpdateImageMaskAlpha(sliderValue) {
     this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: sliderValue });
-  }
-
-  onUpdateImageMaxProjectionMode(checked) {
-    this.setUserSelectionsInState({ [MAX_PROJECT]: checked });
   }
 
   onAutorotateChange() {
@@ -663,7 +661,6 @@ export default class App extends React.Component {
                 onColorChangeComplete={this.onColorChangeComplete}
                 onAutorotateChange={this.onAutorotateChange}
                 onSwitchFovCell={this.onSwitchFovCell}
-                onUpdateImageMaxProjectionMode={this.onUpdateImageMaxProjectionMode}
                 setImageAxisClip={this.setImageAxisClip}
                 onApplyColorPresets={this.onApplyColorPresets}
                 makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
