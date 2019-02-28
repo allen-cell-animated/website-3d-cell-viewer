@@ -111,28 +111,18 @@ export default class ControlPanel extends React.Component {
             channelGroupedByType={this.props.channelGroupedByType}
             changeChannelSettings={this.props.changeChannelSettings}
             handleChangeToImage={this.props.handleChangeToImage}
-            setIsosurfaceEnabled={this.props.setIsosurfaceEnabled}
             updateChannelTransferFunction={this.props.updateChannelTransferFunction}
             changeOneChannelSetting={this.props.changeOneChannelSetting}
             onColorChangeComplete={this.props.onColorChangeComplete}
-            channelDataReady={this.props.channelDataReady}
             onApplyColorPresets={this.props.onApplyColorPresets}
-            showVolumes={this.props.showVolumes}
-            showSurfaces={this.props.showSurfaces}
             style={STYLES.channelsWidget}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
             imageName={this.props.imageName}
             pixelSize={this.props.pixelSize}
-            channels={this.props.channels}
             handleChangeUserSelection={this.props.handleChangeUserSelection}
             onAutorotateChange={this.props.onAutorotateChange}
-            onUpdateImageDensity={this.props.onUpdateImageDensity}
-            onUpdateImageBrightness={this.props.onUpdateImageBrightness}
-            onUpdateImageMaskAlpha={this.props.onUpdateImageMaskAlpha}
-            onUpdateImageGammaLevels={this.props.onUpdateImageGammaLevels}
-            onUpdateImageMaxProjectionMode={this.props.onUpdateImageMaxProjectionMode}
             setImageAxisClip={this.props.setImageAxisClip}
             makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
             alphaMaskSliderLevel={this.props.alphaMaskSliderLevel}
