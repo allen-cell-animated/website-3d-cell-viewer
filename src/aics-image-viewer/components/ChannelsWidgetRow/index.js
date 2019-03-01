@@ -54,7 +54,6 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // channelDataReady really only ever goes from false to true.  We don't have a pattern where it can become false.
     if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
       this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
       this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
@@ -65,7 +64,7 @@ export default class ChannelsWidgetRow extends React.Component {
   // the Card implementation is controlling this component lifetime event
   storeTfEditor(el) {
     this.tfeditor = el;
-
+    
     if (this.props.channelDataReady && this.tfeditor) {
       this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
       this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
@@ -73,12 +72,18 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   volumeCheckHandler({ target }) {
-    const { index, changeOneChannelSetting} = this.props;
+    const { index, changeOneChannelSetting, isosurfaceChecked} = this.props;
+    if (!target.checked && !isosurfaceChecked) {
+      this.setState({controlsOpen: false});
+    }
     changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
   }
 
   isosurfaceCheckHandler({ target }) {
-    const { index, changeOneChannelSetting } = this.props;
+    const { index, changeOneChannelSetting, volumeChecked } = this.props;
+    if (!target.checked && !volumeChecked) {
+      this.setState({ controlsOpen: false });
+    }
     changeOneChannelSetting(index, ISO_SURFACE_ENABLED, target.checked);
   }
 

@@ -576,7 +576,11 @@ Check out the demo page for examples of the different use cases in action.
             /////// User interaction related event callbacks ////////
 
             _mousedown() {
+                if (!this.controlPoints) {
+                    return;
+                }
                 var me = this;
+
                 var pos = d3.mouse(me.svg.node());
                 var point = {
                     "x": me.xScale.invert(Math.max(0, Math.min(pos[0] - me.margin.left, me._width))),
@@ -593,7 +597,7 @@ Check out the demo page for examples of the different use cases in action.
             }
 
             _mousemove() {
-                if (!this.dragged) {
+                if (!this.dragged || !this.controlPoints) {
                   return;
                 }
                 function equalPoint(a, index, array) {
