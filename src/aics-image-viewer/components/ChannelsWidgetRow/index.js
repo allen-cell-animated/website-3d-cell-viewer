@@ -21,7 +21,11 @@ import 'react-polymer';
 
 import colorPalette from '../../shared/colorPalette';
 import {
-  ISOSURFACE_OPACITY_SLIDER_MAX
+  ISOSURFACE_OPACITY_SLIDER_MAX, 
+  ISO_VALUE, OPACITY, 
+  ISO_SURFACE_ENABLED, 
+  VOLUME_ENABLED,
+  SAVE_ISO_SURFACE
 } from '../../shared/constants';
 
 import ColorPicker from '../ColorPicker.js';
@@ -35,9 +39,15 @@ const ISOVALUE_DEFAULT = 128.0;
 export default class ChannelsWidgetRow extends React.Component {
   constructor(props) {
     super(props);
-
     this.storeTfEditor = this.storeTfEditor.bind(this);
     this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
+    this.onColorChange = this.onColorChange.bind(this);
+    this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
+    this.isosurfaceCheckHandler = this.isosurfaceCheckHandler.bind(this);
+    this.onIsovalueChange = this.onIsovalueChange.bind(this);
+    this.onOpacityChange = this.onOpacityChange.bind(this);
+    this.onSaveIsosurfaceSTL = this.onSaveIsosurfaceSTL.bind(this);
+    this.onSaveIsosurfaceGLTF = this.onSaveIsosurfaceGLTF.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -62,6 +72,36 @@ export default class ChannelsWidgetRow extends React.Component {
     }
   }
 
+  volumeCheckHandler({ target }) {
+    const { index, changeOneChannelSetting} = this.props;
+    changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
+  }
+
+  isosurfaceCheckHandler({ target }) {
+    const { index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(index, ISO_SURFACE_ENABLED, target.checked);
+  }
+
+  onIsovalueChange(newValue) {
+    const { index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(index, ISO_VALUE, newValue);
+  }
+
+  onOpacityChange(newValue) {
+    const { index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(index, OPACITY, newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+  }
+
+  onSaveIsosurfaceSTL() {
+    const { index, handleChangeToImage } = this.props;
+    handleChangeToImage(SAVE_ISO_SURFACE, 'STL', index);
+  }
+
+  onSaveIsosurfaceGLTF() {
+    const { index, handleChangeToImage } = this.props;
+    handleChangeToImage(SAVE_ISO_SURFACE, 'GLTF', index);
+  }
+
   createIsovalueSlider() {
     const isoRange = { min: 0, max: 255 };
     return (
@@ -77,7 +117,7 @@ export default class ChannelsWidgetRow extends React.Component {
               max={isoRange.max || 225}
               defaultValue={ISOVALUE_DEFAULT}
               sliderStyle={STYLES.slider}
-              onChange={this.props.onIsovalueChange}/>
+              onChange={this.onIsovalueChange}/>
         </Col>
       </Row>
     );
@@ -98,7 +138,7 @@ export default class ChannelsWidgetRow extends React.Component {
             max={range.max}
             defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
             sliderStyle={STYLES.slider}
-            onChange={this.props.onOpacityChange}/>
+            onChange={this.onOpacityChange}/>
         </Col>
       </Row>
     );
@@ -123,7 +163,7 @@ export default class ChannelsWidgetRow extends React.Component {
     return (
         <Checkbox
           checked={this.props.volumeChecked}
-          onChange={this.props.onVolumeCheckboxChange}
+          onChange={this.volumeCheckHandler}
           id={id}
         >
           volume
@@ -136,7 +176,7 @@ export default class ChannelsWidgetRow extends React.Component {
     return (
         <Checkbox
           checked={this.props.isosurfaceChecked }
-          onChange={this.props.onIsosurfaceChange}
+          onChange={this.isosurfaceCheckHandler}
           id={id}
           >
           surface
@@ -144,11 +184,15 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
+  onColorChange(newRGB, oldRGB, index) {
+    this.props.changeOneChannelSetting(index, 'color', newRGB);
+  }
+
   createColorPicker() {
     return (
       <div style={STYLES.colorPicker}>
         <ColorPicker color={this.props.color}
-          onColorChange={this.props.onColorChange}
+          onColorChange={this.onColorChange}
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
           width={18}
@@ -161,7 +205,7 @@ export default class ChannelsWidgetRow extends React.Component {
     return (
       <Button
         disabled={!this.props.isosurfaceChecked}
-        onClick={this.props.onSaveIsosurfaceGLTF}
+        onClick={this.onSaveIsosurfaceGLTF}
         style={STYLES.raisedButton}
       >Save GLTF
       </Button>
@@ -172,7 +216,7 @@ export default class ChannelsWidgetRow extends React.Component {
     return (
       <Button
         disabled={!this.props.isosurfaceChecked}
-        onClick={this.props.onSaveIsosurfaceSTL}
+        onClick={this.onSaveIsosurfaceSTL}
         style={STYLES.raisedButton}
       >Save STL
       </Button>

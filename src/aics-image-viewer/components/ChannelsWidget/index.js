@@ -9,8 +9,9 @@ import {
 
 import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
-  ISOSURFACE_OPACITY_SLIDER_MAX,
-  OBSERVED_CHANNEL_KEY
+  OBSERVED_CHANNEL_KEY,
+  ISO_SURFACE_ENABLED,
+  VOLUME_ENABLED,
 } from '../../shared/constants';
 import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
@@ -25,11 +26,6 @@ const { Panel } = Collapse;
 export default class ChannelsWidget extends React.Component {
   constructor(props) {
     super(props);
-    this.makeOnCheckHandler = this.makeOnCheckHandler.bind(this);
-    this.makeOnVolumeCheckHandler = this.makeOnVolumeCheckHandler.bind(this);
-    this.makeOnIsosurfaceCheckHandler = this.makeOnIsosurfaceCheckHandler.bind(this);
-    this.makeOnIsovalueChange = this.makeOnIsovalueChange.bind(this);
-    this.makeOnOpacityChange = this.makeOnOpacityChange.bind(this);
     this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
     this.showSurfaces = this.showSurfaces.bind(this);
@@ -38,60 +34,25 @@ export default class ChannelsWidget extends React.Component {
   }
 
   showVolumes(channelArray) {
-    this.props.showVolumes(channelArray, true);
+    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, true);
   }
 
   showSurfaces(channelArray) {
-    this.props.showSurfaces(channelArray, true);
+    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, true);
   }
 
   hideVolumes(channelArray) {
-    this.props.showVolumes(channelArray, false);
+    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, false);
   }
 
   hideSurfaces(channelArray) {
-    this.props.showSurfaces(channelArray, false);
-  }
-
-  makeOnCheckHandler(index) {
-    return (event, value) => {
-      this.props.setChannelEnabled(index, value);
-    };
-  }
-
-  makeOnVolumeCheckHandler(index) {
-    return ({ target }) => {
-      if (this.props.setVolumeEnabled) {
-        this.props.setVolumeEnabled(index, target.checked);
-      }
-    };
-  }
-
-  makeOnIsosurfaceCheckHandler(index) {
-    return ({ target }) => {
-      if (this.props.setIsosurfaceEnabled) {
-        this.props.setIsosurfaceEnabled(index, target.checked);
-      }
-    };
-  }
-
-  makeOnIsovalueChange(index) {
-    return (newValue) => {
-      this.props.updateIsovalue(index, newValue);
-    };
-  }
-
-
-  makeOnOpacityChange(index) {
-    return (newValue) => {
-      this.props.updateIsosurfaceOpacity(index, newValue/ISOSURFACE_OPACITY_SLIDER_MAX);
-    };
+    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
   }
 
   renderVisiblityControls(key, channelArray) {
     const { channels} = this.props;
-    const volChecked = filter(channelArray, channelIndex => channels[channelIndex].volumeEnabled);
-    const isoChecked = filter(channelArray, channelIndex => channels[channelIndex].isosurfaceEnabled);
+    const volChecked = filter(channelArray, channelIndex => channels[channelIndex][VOLUME_ENABLED]);
+    const isoChecked = filter(channelArray, channelIndex => channels[channelIndex][ISO_SURFACE_ENABLED]);
     return (
       <div style={STYLES.buttonRow}>
           <SharedCheckBox 
@@ -143,23 +104,17 @@ export default class ChannelsWidget extends React.Component {
                                         lutControlPoints={this.props.channelDataChannels[actualIndex].lutControlPoints}
                                         channelDataReady={channel.dataReady}
                                         name={formatChannelName(channel.name)}
-                                        checked={channel.channelEnabled}
-                                        onChange={this.makeOnCheckHandler(actualIndex)}
-                                        onColorChange={this.props.onColorChange}
-                                        onColorChangeComplete={this.props.onColorChangeComplete}
-                                        volumeChecked={channel.volumeEnabled}
-                                        onVolumeCheckboxChange={this.makeOnVolumeCheckHandler(actualIndex)}
-                                        isosurfaceChecked={channel.isosurfaceEnabled}
-                                        onIsosurfaceChange={this.makeOnIsosurfaceCheckHandler(actualIndex)}
-                                        onIsovalueChange={this.makeOnIsovalueChange(actualIndex)}
-                                        onSaveIsosurfaceSTL={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "STL")}
-                                        onSaveIsosurfaceGLTF={this.props.makeOnSaveIsosurfaceHandler(actualIndex, "GLTF")}
-                                        onOpacityChange={this.makeOnOpacityChange(actualIndex)}
-                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                        volumeChecked={channel[VOLUME_ENABLED]}
+                                        isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}
-                                        />
+                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                        changeOneChannelSetting={this.props.changeOneChannelSetting}
+                                        onColorChangeComplete={this.props.onColorChangeComplete}
+                                        handleChangeToImage={this.props.handleChangeToImage}
+
+                  />
                 );}
               }
               />

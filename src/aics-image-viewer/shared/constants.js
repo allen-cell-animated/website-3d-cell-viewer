@@ -12,9 +12,35 @@ export const
   XZ_MODE = 'XZ',
   XY_MODE = 'XY',
   THREE_D_MODE = '3D',
+  // App state values
+  SEGMENTED_CELL = 'segmented',
+  FULL_FIELD_IMAGE = 'full field',
+
+  // Channel setting keys
+  ISO_SURFACE_ENABLED = 'isoSurfaceEnabled',
+  VOLUME_ENABLED = 'volumeEnabled',
+
+  // App State Keys,
+  ALPHA_MASK_SLIDER_LEVEL = 'alphaMaskSliderLevel',
+  BRIGHTNESS_SLIDER_LEVEL = 'brightnessSliderLevel',
+  DENSITY_SLIDER_LEVEL = 'densitySliderLevel',
+  LEVELS_SLIDER = 'levelsSlider',
+  MODE = 'mode',
+  AUTO_ROTATE = 'autorotate',
+  MAX_PROJECT = 'maxProject',
+
+  // Volume viewer keys
+  ISO_VALUE = 'isovalue',
+  OPACITY = 'opacity',
+  COLOR = 'color',
+  SAVE_ISO_SURFACE = 'saveIsoSurface',
 
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
-
+  ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
+  ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
+  BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [65],
+  DENSITY_SLIDER_LEVEL_DEFAULT = [50],
+  LEVELS_SLIDER_DEFAULT = [58.32, 149.00, 255.00],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
@@ -61,4 +87,37 @@ export const PRESET_COLORS_3 = [
   [0, 255, 255, 255]
 ];
 
+export const PRESET_COLORS_0 = [
+  [226, 205, 179],
+  [111, 186, 17],
+  [141, 163, 192],
+  [245, 241, 203],
+  [224, 227, 209],
+  [221, 155, 245],
+  [227, 244, 245],
+  [255, 98, 0],
+  [247, 219, 120],
+];
 
+export const PRESET_COLOR_MAP = Object.freeze([
+  {
+    colors: PRESET_COLORS_0,
+    name: 'Default',
+    key: 0,
+  },
+  {
+    colors: PRESET_COLORS_1,
+    name: 'Thumbnail colors',
+    key: 1,
+  },
+  {
+    colors: PRESET_COLORS_2,
+    name: 'RGB colors',
+    key: 2,
+  },
+  {
+    colors: PRESET_COLORS_3,
+    name: 'White structure',
+    key: 3,
+  },
+]);
