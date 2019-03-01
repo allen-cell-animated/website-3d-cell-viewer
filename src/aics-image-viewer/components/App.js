@@ -123,11 +123,9 @@ export default class App extends React.Component {
       image: null,
       view3d: null,
       files: null,
-      queryInput: {
-        cellId: props.cellId,
-        fovId: props.fovId,
-        cellLine: props.cellLine,
-      },
+      cellId: props.cellId,
+      fovId: props.fovId,
+      cellLine: props.cellLine,
       queryInputType: null,
       queryErrorMessage: null,
       sendingQueryRequest: false,
@@ -187,9 +185,9 @@ export default class App extends React.Component {
     const { userSelections } = this.state;
       if (this.state.hasCellId) {
         const name = App.buildName(
-          this.state.queryInput.cellLine,
-          this.state.queryInput.fovId,
-          userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
+          this.state.cellLine,
+          this.state.fovId,
+          userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.cellId
         );
         const type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
         this.openImage(name, type, false);
@@ -500,9 +498,9 @@ export default class App extends React.Component {
   onSwitchFovCell(value) {
     if (this.state.hasCellId) {
       const name = App.buildName(
-        this.state.queryInput.cellLine, 
-        this.state.queryInput.fovId, 
-        value === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
+        this.state.cellLine, 
+        this.state.fovId, 
+        value === FULL_FIELD_IMAGE ? null : this.state.cellId
       );
       const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, false);
@@ -548,14 +546,15 @@ export default class App extends React.Component {
   }
 
   setQueryInput(input, type) {
+    const queryInputType = type || this.state.queryInputType;
     let name = input;
-    if (type === FOV_ID_QUERY) {
+    if (queryInputType === FOV_ID_QUERY) {
       name = App.buildName(input.cellLine, input.fovId);
     }
-    else if (type === CELL_ID_QUERY) {
+    else if (queryInputType === CELL_ID_QUERY) {
       name = App.buildName(input.cellLine, input.fovId, input.cellId);
     }
-    else if (type === IMAGE_NAME_QUERY) {
+    else if (queryInputType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
       const components = input.split("_");
       let cellLine = "";
@@ -564,28 +563,25 @@ export default class App extends React.Component {
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
-        type = FOV_ID_QUERY;
+        queryInputType = FOV_ID_QUERY;
         if (components.length > 2) {
           cellId = components[2];
-          type = CELL_ID_QUERY;
+          queryInputType = CELL_ID_QUERY;
         }
         name = App.buildName(cellLine, fovId, cellId);
       }
-      input = {
-        cellLine,
-        fovId,
-        cellId
-      };
     }
     // LEGACY_IMAGE_ID_QUERY is a passthrough
 
     this.setState({
-      queryInput: input,
-      queryInputType: type,
+      cellLine,
+      fovId,
+      cellId,
+      queryInputType,
       hasCellId: !!input.cellId,
       sendingQueryRequest: true
     });
-    this.openImage(name, type, true);
+    this.openImage(name, queryInputType, true);
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
@@ -637,9 +633,24 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    const {
+      cellId,
+      fovId,
+      cellLine,
+    } = this.props;
+    const newRequest = cellId !== prevProps.cellId;
+    if (newRequest) {
+      if (cellId && fovId && cellLine) {
+        this.setQueryInput({ cellId, fovId, cellLine });
+      } else if (fovId && cellLine) {
+        this.setQueryInput({ fovId, cellLine });
+      }
+      return;
+    } 
+
     const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
-    const newImage = this.state.image && !prevProps.image;
-    const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
+    const newImage = this.state.image && !prevState.image;
+    const imageChanged = this.state.image && prevState.image ? this.state.image.imageName !== prevState.image.imageName : false;
     if ((channelsChanged || imageChanged || newImage) && (this.state.image)) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
       this.state.view3d.updateActiveChannels(this.state.image);
