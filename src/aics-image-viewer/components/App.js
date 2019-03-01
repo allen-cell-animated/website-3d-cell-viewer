@@ -645,7 +645,7 @@ export default class App extends React.Component {
                 // image state
                 imageName={this.state.image ? this.state.image.name : false}
                 hasImage={!!this.state.image}
-                pixelSize={this.state.image ? this.state.image.name : false}
+                pixelSize={this.state.image ? this.state.image.pixel_size : [1,1,1]}
                 channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
