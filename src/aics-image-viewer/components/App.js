@@ -546,7 +546,7 @@ export default class App extends React.Component {
   }
 
   setQueryInputAndRequestImage(input, type) {
-    const queryInputType = type || this.state.queryInputType;
+    let queryInputType = type || this.state.queryInputType;
     let name = input;
     if (queryInputType === FOV_ID_QUERY) {
       name = App.buildName(input.cellLine, input.fovId);
@@ -640,7 +640,7 @@ export default class App extends React.Component {
     } = this.props;
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
-      console.log(cellId, fovId, cellLine)
+      console.log(cellId, fovId, cellLine);
       this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
       return;
     } 
