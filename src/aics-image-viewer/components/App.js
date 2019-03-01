@@ -3,8 +3,8 @@ import { Layout } from "antd";
 import React from 'react';
 import { includes, isEqual } from 'lodash';
 import { 
-  AICSvolumeDrawable, 
-  AICSvolumeLoader 
+  Volume, 
+  VolumeLoader 
 } from 'volume-viewer';
 
 import HttpClient from '../shared/utils/httpClient';
@@ -119,6 +119,7 @@ export default class App extends React.Component {
 
     this.state = {
       image: null,
+      view3d: null,
       files: null,
       queryInput: null,
       queryInputType: null,
@@ -170,7 +171,13 @@ export default class App extends React.Component {
     this.handleChangeToImage = this.handleChangeToImage.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.intializeNewImage = this.intializeNewImage.bind(this);
+    this.onView3DCreated = this.onView3DCreated.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
+  }
+
+  onView3DCreated(view3d) {
+    console.log("GOT VIEW3D");
+    this.setState({view3d});
   }
 
   stopPollingForImage() {
@@ -266,15 +273,15 @@ export default class App extends React.Component {
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
 
-    aimg.setUniform('maskAlpha', imageMask, true, true);
-    aimg.setUniform('isOrtho', userSelections.mode === ViewMode.threeD ? 0.0 : 1.0);
-    aimg.setUniform('maxProject', userSelections[MAX_PROJECT] ? 1 : 0, true, true);
-    aimg.setUniform('BRIGHTNESS', imageBrightness, true, true);
-    aimg.setUniform("DENSITY", imageDensity, true, true);
-    aimg.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
-    aimg.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
-    aimg.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
-    aimg.fuse();
+    const { view3d } = this.state;
+    view3d.updateMaskAlpha(aimg, imageMask);
+    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT] ? true : false);
+    view3d.updateExposure(imageBrightness);
+    view3d.updateDensity(aimg, imageDensity);
+    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+    // update current camera mode to make sure the image gets the update
+    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.updateActiveChannels(aimg);
   }
 
   updateStateOnLoadImage(channelNames) {
@@ -297,20 +304,25 @@ export default class App extends React.Component {
   }
 
   loadFromJson(obj, title, locationHeader) {
-    const aimg = new AICSvolumeDrawable(obj);
+    const aimg = new Volume(obj);
+    console.log("CREATED VOLUME");
     const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
-      obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));      
+      obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
     }
     // GO OUT AND GET THE VOLUME DATA.
-    AICSvolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
+    VolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
+      console.log("GOT CHANNEL DATA " + channelIndex);
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
       newChannelSettings[channelIndex].dataReady = true;
-      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
-        aimg.setChannelAsMask(channelIndex);
+      if (this.state.view3d) {
+        if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+          this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
+        }
+        this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
       }
-      aimg.updateChannelColor(channelIndex, newChannelSettings[channelIndex].color);
+      // when any channel data has arrived:
       if (this.state.sendingQueryRequest) {
         this.setState({ sendingQueryRequest: false });
       }
@@ -352,49 +364,48 @@ export default class App extends React.Component {
   }
 
   handleChangeToImage(keyToChange, newValue, index) {
-    const { image } = this.state;
-    if (!image) {
+    const { image, view3d } = this.state;
+    if (!image || !view3d) {
       return;
     }
     switch (keyToChange) {
       case ISO_VALUE:
-        image.updateIsovalue(index, newValue);
+        view3d.updateIsosurface(image, index, newValue);
         break;
       case OPACITY:
-        image.updateOpacity(index, newValue);
+        view3d.updateOpacity(image, index, newValue);
         break;
       case COLOR:
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
-        image.updateChannelColor(index, newColor);
-        image.fuse();
+        view3d.updateChannelColor(image, index, newColor);
+        view3d.updateActiveChannels(image);
         break;
       case MODE:
-        this.state.image.setUniform('isOrtho', newValue === ViewMode.threeD ? 0.0 : 1.0);
-      case SAVE_ISO_SURFACE:
-        image.saveChannelIsosurface(index, newValue);
+        view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
         break;
-      case MAX_PROJECT:         
-        image.setUniform('maxProject', newValue ? 1 : 0, true, true);
-        image.fuse();
+      case SAVE_ISO_SURFACE:
+        view3d.saveChannelIsosurface(image, index, newValue);
+        break;
+      case MAX_PROJECT:
+        view3d.setMaxProjectMode(image, newValue ? true : false);
+        view3d.updateActiveChannels(image);
         break;
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
-        image.setUniform('maskAlpha', imageMask, true, true);
-        image.fuse();
+        view3d.updateMaskAlpha(image, imageMask);
+        view3d.updateActiveChannels(image);
         break;
       case BRIGHTNESS_SLIDER_LEVEL:
         let imageBrightness = brightnessSliderToImageValue(newValue);
-        image.setUniform('BRIGHTNESS', imageBrightness, true, true);
+        view3d.updateExposure(imageBrightness);
         break;
       case DENSITY_SLIDER_LEVEL:
         let imageDensity = densitySliderToImageValue(newValue);
-        image.setUniform("DENSITY", imageDensity, true, true);
+        view3d.updateDensity(image, imageDensity);
         break;
       case LEVELS_SLIDER:
         let imageValues = gammaSliderToImageValues(newValue);
-        image.setUniformNoRerender('GAMMA_MIN', imageValues.min, true, true);
-        image.setUniformNoRerender('GAMMA_MAX', imageValues.max, true, true);
-        image.setUniform('GAMMA_SCALE', imageValues.scale, true, true);
+        view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
         break;
     }
   }
@@ -439,8 +450,8 @@ export default class App extends React.Component {
   }
 
   setImageAxisClip(axis, minval, maxval, isOrthoAxis) {
-    if (this.state.image) {
-      this.state.image.setAxisClip(axis, minval, maxval, isOrthoAxis);
+    if (this.state.view3d && this.state.image) {
+      this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
     }
   }
 
@@ -489,7 +500,9 @@ export default class App extends React.Component {
   updateChannelTransferFunction(index, lut, controlPoints) {
     if (this.state.image) {
       this.state.image.getChannel(index).setLut(lut, controlPoints);
-      this.state.image.fuse();
+      if (this.state.view3d) {
+        this.state.view3d.updateLuts(this.state.image);
+      }
     }
   }
 
@@ -544,20 +557,20 @@ export default class App extends React.Component {
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
-    const { userSelections, image } = this.state;
+    const { userSelections, image, view3d } = this.state;
     if (image) {
       // apply channel settings
       userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
         const volenabled = channel[VOLUME_ENABLED];
         const isoenabled = channel[ISO_SURFACE_ENABLED];
-        this.state.image.setVolumeChannelEnabled(index, volenabled);
-        if (image.hasIsosurface(index)) {
+        view3d.setVolumeChannelEnabled(image, index, volenabled);
+        if (view3d.hasIsosurface(image, index)) {
           if (!isoenabled) {
-            image.destroyIsosurface(index);
+            view3d.clearIsosurface(image, index);
           } 
         } else {
           if (isoenabled) {
-            image.createIsosurface(index, channel.isovalue, channel.opacity);
+            view3d.createIsosurface(image, index, channel.isovalue, channel.opacity);
           }
         }
       });
@@ -597,7 +610,7 @@ export default class App extends React.Component {
     const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
     if ((channelsChanged || imageChanged || newImage) && (this.state.image)) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
-      this.state.image.fuse();
+      this.state.view3d.updateActiveChannels(this.state.image);
     }
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
@@ -639,8 +652,8 @@ export default class App extends React.Component {
                 // image state
                 imageName={this.state.image ? this.state.image.name : false}
                 hasImage={!!this.state.image}
-                pixelSize={this.state.image ? this.state.image.name : false}
-                channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
+                pixelSize={this.state.image ? this.state.image.pixelSize : [1,1,1]}
+                channelDataChannels={this.state.image ? this.state.image.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 // user selections
@@ -678,6 +691,7 @@ export default class App extends React.Component {
                     autorotate={userSelections[AUTO_ROTATE]}
                     loadingImage={this.state.sendingQueryRequest}
                     numSlices={this.getNumberOfSlices()}
+                    onView3DCreated={this.onView3DCreated}
                   />
                 </Content>
               </Layout>

@@ -66,7 +66,7 @@ export default class ChannelsWidgetRow extends React.Component {
   storeTfEditor(el) {
     this.tfeditor = el;
 
-    if (this.props.channelDataReady && this.tfeditor) {
+    if (/*this.props.channelDataReady && */ this.tfeditor && this.props.channelDataForChannel) {
       this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
       this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
     }
