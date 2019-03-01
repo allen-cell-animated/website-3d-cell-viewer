@@ -1,12 +1,14 @@
 @import "../../assets/styles/variables";
 
-.ant-layout-sider-zero-width-trigger {
-    z-index: 2000;
-    background-color: $header-gray;
-}
+.cell-viewer-app {
+    .ant-layout-sider-zero-width-trigger {
+        z-index: 2000;
+        background-color: $header-gray;
+    }
 
-.ant-layout-sider-zero-width-trigger:hover {
-    background-color: $light-gray;
+    .ant-layout-sider-zero-width-trigger:hover {
+        background-color: $light-gray;
+    }
 }
 
 .control-panel {

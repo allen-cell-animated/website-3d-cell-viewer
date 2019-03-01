@@ -119,12 +119,15 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-
     this.state = {
       image: null,
       view3d: null,
       files: null,
-      queryInput: null,
+      queryInput: {
+        cellId: props.cellId,
+        fovId: props.fovId,
+        cellLine: props.cellLine,
+      },
       queryInputType: null,
       queryErrorMessage: null,
       sendingQueryRequest: false,
@@ -134,7 +137,7 @@ export default class App extends React.Component {
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
       // did the requested image have a cell id (in queryInput)?
-      hasCellId: false,
+      hasCellId: !!props.cellId,
       // state set by the UI:
       userSelections: {
         imageType: SEGMENTED_CELL,
@@ -180,8 +183,21 @@ export default class App extends React.Component {
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
+  componentDidMount() {
+    const { userSelections } = this.state;
+      if (this.state.hasCellId) {
+        const name = App.buildName(
+          this.state.queryInput.cellLine,
+          this.state.queryInput.fovId,
+          userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
+        );
+        const type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
+        this.openImage(name, type, false);
+    }
+  }
+
   onView3DCreated(view3d) {
-    this.setState({view3d});
+    this.setState({ view3d });
   }
 
   stopPollingForImage() {
