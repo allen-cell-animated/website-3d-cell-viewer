@@ -75,7 +75,12 @@ export default class ChannelsWidget extends React.Component {
   }
 
   getRows() {
-    const { channelGroupedByType, channels} = this.props;
+    const { 
+      channelGroupedByType, 
+      channels, 
+      channelDataReady,
+      channelDataChannels,
+    } = this.props;
     return map(channelGroupedByType, (channelArray, key) => {
       return (
         <Card
@@ -98,14 +103,13 @@ export default class ChannelsWidget extends React.Component {
                   const channel = channels[actualIndex];           
                   return (
                   <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
-                                        image={this.props.image}
                                         index={actualIndex}
-                                        channelDataForChannel={this.props.channelDataChannels[actualIndex]}
-                                        lutControlPoints={this.props.channelDataChannels[actualIndex].lutControlPoints}
-                                        channelDataReady={channel.dataReady}
+                                        channelDataForChannel={channelDataChannels[actualIndex]}
+                                        lutControlPoints={channelDataChannels[actualIndex].lutControlPoints}
                                         name={formatChannelName(channel.name)}
                                         volumeChecked={channel[VOLUME_ENABLED]}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
+                                        channelDataReady={channelDataReady[actualIndex]}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}

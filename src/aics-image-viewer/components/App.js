@@ -125,6 +125,7 @@ export default class App extends React.Component {
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
+      channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
@@ -197,6 +198,7 @@ export default class App extends React.Component {
 
       this.setState({
         currentlyLoadedImagePath: imageDirectory,
+        channelDataReady: {},
         queryErrorMessage: null,
         cachingInProgress: false,
         mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
@@ -306,7 +308,10 @@ export default class App extends React.Component {
     // GO OUT AND GET THE VOLUME DATA.
     AICSvolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
-      newChannelSettings[channelIndex].dataReady = true;
+      const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
+      this.setState({
+        channelDataReady: newChannelDataReady
+      });
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         aimg.setChannelAsMask(channelIndex);
       }
@@ -370,6 +375,7 @@ export default class App extends React.Component {
         break;
       case MODE:
         this.state.image.setUniform('isOrtho', newValue === ViewMode.threeD ? 0.0 : 1.0);
+        break;
       case SAVE_ISO_SURFACE:
         image.saveChannelIsosurface(index, newValue);
         break;
@@ -643,6 +649,7 @@ export default class App extends React.Component {
                 channelDataChannels={this.state.image ? this.state.image.channelData.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
+                channelDataReady={this.state.channelDataReady}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 channels={userSelections[CHANNEL_SETTINGS]}
