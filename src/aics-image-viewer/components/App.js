@@ -160,7 +160,7 @@ export default class App extends React.Component {
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
-    this.setQueryInput = this.setQueryInput.bind(this);
+    this.setQueryInputAndRequestImage = this.setQueryInputAndRequestImage.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
     this.updateURLSearchParams = this.updateURLSearchParams.bind(this);
@@ -545,7 +545,7 @@ export default class App extends React.Component {
     }
   }
 
-  setQueryInput(input, type) {
+  setQueryInputAndRequestImage(input, type) {
     const queryInputType = type || this.state.queryInputType;
     let name = input;
     if (queryInputType === FOV_ID_QUERY) {
@@ -610,12 +610,12 @@ export default class App extends React.Component {
   componentWillMount() {
     const legacyImageIdToShow = UtilsService.getParameterByName(LEGACY_IMAGE_ID_QUERY);
     if (legacyImageIdToShow) {
-      this.setQueryInput(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
+      this.setQueryInputAndRequestImage(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
     }
     else {
       const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
       if (imageIdToShow) {
-        this.setQueryInput(imageIdToShow, IMAGE_NAME_QUERY);
+        this.setQueryInputAndRequestImage(imageIdToShow, IMAGE_NAME_QUERY);
       }
       else {
         // cellid and cellline and fovid
@@ -623,10 +623,10 @@ export default class App extends React.Component {
         const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
         const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
         if (cellId && fovId && cellLine) {
-          this.setQueryInput({cellId, fovId, cellLine}, CELL_ID_QUERY);
+          this.setQueryInputAndRequestImage({cellId, fovId, cellLine}, CELL_ID_QUERY);
         }
         else if (fovId && cellLine) {
-          this.setQueryInput({fovId, cellLine}, FOV_ID_QUERY);
+          this.setQueryInputAndRequestImage({fovId, cellLine}, FOV_ID_QUERY);
         }
       }
     }
@@ -640,11 +640,8 @@ export default class App extends React.Component {
     } = this.props;
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
-      if (cellId && fovId && cellLine) {
-        this.setQueryInput({ cellId, fovId, cellLine });
-      } else if (fovId && cellLine) {
-        this.setQueryInput({ fovId, cellLine });
-      }
+      console.log(cellId, fovId, cellLine)
+      this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
       return;
     } 
 
