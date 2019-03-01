@@ -72,12 +72,18 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   volumeCheckHandler({ target }) {
-    const { index, changeOneChannelSetting} = this.props;
+    const { index, changeOneChannelSetting, isosurfaceChecked} = this.props;
+    if (!target.checked && !isosurfaceChecked) {
+      this.setState({controlsOpen: false});
+    }
     changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
   }
 
   isosurfaceCheckHandler({ target }) {
-    const { index, changeOneChannelSetting } = this.props;
+    const { index, changeOneChannelSetting, volumeChecked } = this.props;
+    if (!target.checked && !volumeChecked) {
+      this.setState({ controlsOpen: false });
+    }
     changeOneChannelSetting(index, ISO_SURFACE_ENABLED, target.checked);
   }
 
