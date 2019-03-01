@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import './App.scss';
-import { ImageViewerApp } from '../dist';
+import { ImageViewerApp } from '../src';
 
 ReactDOM.render(
   <ImageViewerApp

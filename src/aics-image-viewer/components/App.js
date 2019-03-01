@@ -547,7 +547,12 @@ export default class App extends React.Component {
 
   setQueryInputAndRequestImage(input, type) {
     let queryInputType = type || this.state.queryInputType;
-    let name = input;
+    let {
+      cellId,
+      fovId,
+      cellLine,
+    } = input;
+    let name;
     if (queryInputType === FOV_ID_QUERY) {
       name = App.buildName(input.cellLine, input.fovId);
     }
@@ -557,9 +562,9 @@ export default class App extends React.Component {
     else if (queryInputType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
       const components = input.split("_");
-      let cellLine = "";
-      let fovId = "";
-      let cellId = "";
+      cellLine = "";
+      fovId = "";
+      cellId = "";
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
@@ -571,11 +576,9 @@ export default class App extends React.Component {
         name = App.buildName(cellLine, fovId, cellId);
       }
     }
-    // LEGACY_IMAGE_ID_QUERY is a passthrough
-
     this.setState({
-      cellLine,
-      fovId,
+      cellLine: cellLine,
+      fovId: fovId,
       cellId,
       queryInputType,
       hasCellId: !!input.cellId,
@@ -642,13 +645,8 @@ export default class App extends React.Component {
     if (newRequest) {
       console.log(cellId, fovId, cellLine);
       this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
-      return;
-    } 
-
-    const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
-    const newImage = this.state.image && !prevState.image;
-    const imageChanged = this.state.image && prevState.image ? this.state.image.imageName !== prevState.image.imageName : false;
-    if ((channelsChanged || imageChanged || newImage) && (this.state.image)) {
+    }
+    if (this.state.image) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
       this.state.view3d.updateActiveChannels(this.state.image);
     }

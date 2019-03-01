@@ -1,6 +1,6 @@
 {
   "name": "ac-3d-viewer",
-  "version": "1.0.11",
+  "version": "1.0.13",
   "description": "web view of cell volume images",
   "main": "dist/index.js",
   "module": "dist/index.js",
