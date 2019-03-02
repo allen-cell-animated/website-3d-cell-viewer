@@ -123,11 +123,6 @@ module.exports = {
       {
         test: /Worker\.js$/,
         use: 'worker-loader?inline=true'
-      },
-      {
-        test: /\.html$/,
-        exclude: /index\.html/,
-        use: ['polymer-webpack-loader']
       }
     ]
   }

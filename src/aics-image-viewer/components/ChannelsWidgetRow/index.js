@@ -15,9 +15,8 @@ import classNames from 'classnames';
 
 // polyfill for window.customElements (Firefox) - required for tf-editor to work.
 // see https://github.com/webcomponents/webcomponentsjs/issues/870
-import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
-import '../tf-editor.html';
-import 'react-polymer';
+
+import TfEditor from '../TfEditor';
 
 import colorPalette from '../../shared/colorPalette';
 import {
@@ -54,21 +53,22 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
-      this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
-    }
+    // channelDataReady really only ever goes from false to true.  We don't have a pattern where it can become false.
+    // if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
+    //   this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
+    //   this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
+    // }
   }
 
   // this happens after componentWillMount, after render, and before componentDidMount. it is set in a ref={} attr.
   // the Card implementation is controlling this component lifetime event
   storeTfEditor(el) {
     this.tfeditor = el;
-    
-    if (this.props.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
-      this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
-    }
+
+    // if (this.props.channelDataReady && this.tfeditor) {
+    //   this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
+    //   this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
+    // }
   }
 
   volumeCheckHandler({ target }) {
@@ -237,17 +237,30 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   createTFEditor() {
-    return (this.props.channelDataForChannel &&
-        <tf-editor
+    // return (this.props.channelDataForChannel &&
+    //     <tf-editor
+    //       ref={this.storeTfEditor}
+    //       id={'aicstfeditor_' + this.props.index}
+    //       fit-to-data={false}
+    //       width={250}
+    //       height={150}
+    //       control-points={JSON.stringify(this.props.lutControlPoints)}
+    //     >
+    //     </tf-editor>
+    //   );
+    return (<TfEditor 
+          index={this.props.index}
           ref={this.storeTfEditor}
           id={'aicstfeditor_' + this.props.index}
           fit-to-data={false}
           width={250}
           height={150}
+          volumeData={this.props.channelDataForChannel.volumeData}
+          channelData={this.props.channelDataForChannel}
+          controlPoints={this.props.channelDataForChannel.lutControlPoints}
           control-points={JSON.stringify(this.props.lutControlPoints)}
-        >
-        </tf-editor>
-      );
+          updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+    />)
   }
 
   renderSurfaceControls() {

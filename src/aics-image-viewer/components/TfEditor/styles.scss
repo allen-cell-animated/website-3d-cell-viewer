@@ -1,0 +1,88 @@
+      :host {
+          display: block;
+      }
+
+      .bar rect {
+          fill: steelblue;
+      }
+
+      .aligned {
+          margin: auto;
+          display: flex;
+          flex-flow: row wrap;
+          justify-content: space-between;
+          align-items: center;
+      }
+
+      .tick text {
+          fill: #6e6e6e;
+      }
+
+      .axis path,
+      .axis line {
+          stroke: #6e6e6e;
+      }
+
+      button {
+          outline: 0;
+          line-height: 1.5;
+          display: inline-block;
+          font-weight: 400;
+          text-align: center;
+          touch-action: manipulation;
+          cursor: pointer;
+          background-image: none;
+          border: 1px solid transparent;
+          white-space: nowrap;
+          padding: 0 10px;
+          font-size: 12px;
+          border-radius: 4px;
+          height: 32px;
+          margin: auto;
+          user-select: none;
+          transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+          position: relative;
+          box-shadow: 0 2px 0 rgba(0, 0, 0, 0.015);
+          color: #bfbfbf;
+          background-color: #313131;
+          border-color: #6e6e6e;
+      }
+
+      button::-moz-focus-inner {
+          border: none;
+          padding: 1px 2px;
+      }
+
+      input[type=color] {
+          border: 1px solid;
+          width: 44px;
+          height: 23px;
+          margin-left: 2px;
+          margin-right: 2px;
+          padding: 1px 2px;
+          cursor: pointer;
+      }
+
+      rect {
+          fill: none;
+          pointer-events: all;
+      }
+
+      .line {
+          /*fill: steelblue;*/
+          stroke: white;
+          stroke-width: 1.5px;
+      }
+
+      circle {
+          /*fill: #fff;*/
+          fill-opacity: .6;
+          cursor: move;
+          stroke: white;
+          stroke-width: 1.5px;
+      }
+
+      .selected {
+          fill: #ff7f0e;
+          stroke: #ff7f0e;
+      }

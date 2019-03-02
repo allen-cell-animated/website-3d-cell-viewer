@@ -126,7 +126,7 @@ export default class App extends React.Component {
       cellId: props.cellId,
       fovId: props.fovId,
       cellLine: props.cellLine,
-      queryInputType: null,
+      queryInputType: CELL_ID_QUERY,
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
@@ -529,6 +529,7 @@ export default class App extends React.Component {
 
   updateChannelTransferFunction(index, lut, controlPoints) {
     if (this.state.image) {
+      console.log(lut, controlPoints)
       this.state.image.getChannel(index).setLut(lut, controlPoints);
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);
@@ -553,11 +554,14 @@ export default class App extends React.Component {
       cellLine,
     } = input;
     let name;
+    console.log(queryInputType)
     if (queryInputType === FOV_ID_QUERY) {
-      name = App.buildName(input.cellLine, input.fovId);
+      name = App.buildName(cellLine, fovId);
+      console.log('fov', name)
     }
     else if (queryInputType === CELL_ID_QUERY) {
-      name = App.buildName(input.cellLine, input.fovId, input.cellId);
+      name = App.buildName(cellLine, fovId, cellId);
+      console.log('cell', name)
     }
     else if (queryInputType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
@@ -574,6 +578,8 @@ export default class App extends React.Component {
           queryInputType = CELL_ID_QUERY;
         }
         name = App.buildName(cellLine, fovId, cellId);
+        console.log('legacy', name)
+
       }
     }
     this.setState({
