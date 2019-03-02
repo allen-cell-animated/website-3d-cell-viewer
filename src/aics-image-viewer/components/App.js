@@ -529,7 +529,6 @@ export default class App extends React.Component {
 
   updateChannelTransferFunction(index, lut, controlPoints) {
     if (this.state.image) {
-      console.log(lut, controlPoints)
       this.state.image.getChannel(index).setLut(lut, controlPoints);
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);

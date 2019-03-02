@@ -237,17 +237,6 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   createTFEditor() {
-    // return (this.props.channelDataForChannel &&
-    //     <tf-editor
-    //       ref={this.storeTfEditor}
-    //       id={'aicstfeditor_' + this.props.index}
-    //       fit-to-data={false}
-    //       width={250}
-    //       height={150}
-    //       control-points={JSON.stringify(this.props.lutControlPoints)}
-    //     >
-    //     </tf-editor>
-    //   );
     return (<TfEditor 
           index={this.props.index}
           ref={this.storeTfEditor}
@@ -258,9 +247,8 @@ export default class ChannelsWidgetRow extends React.Component {
           volumeData={this.props.channelDataForChannel.volumeData}
           channelData={this.props.channelDataForChannel}
           controlPoints={this.props.channelDataForChannel.lutControlPoints}
-          control-points={JSON.stringify(this.props.lutControlPoints)}
           updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-    />)
+    />);
   }
 
   renderSurfaceControls() {

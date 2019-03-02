@@ -21,6 +21,11 @@ export default class MyTfEditor extends React.Component {
         this._drawChart = this._drawChart.bind(this);
         this._redraw = this._redraw.bind(this);
         this._drawCanvas = this._drawCanvas.bind(this);
+        this._autoXF = this._autoXF.bind(this);
+        this._resetXF = this._resetXF.bind(this);
+        this._export = this._export.bind(this);
+        this._auto2XF = this._auto2XF.bind(this);
+        this._bestFitXF = this._bestFitXF.bind(this);
         this.createElements();
         this.svgElement = React.createRef();
     }
@@ -274,7 +279,7 @@ export default class MyTfEditor extends React.Component {
         svg.select("path").datum(controlPoints).attr("d", me.area);
 
         // Add circle to connect and interact with the control points
-        var circle = svg.selectAll("circle").data(controlPoints)
+        var circle = svg.selectAll("circle").data(controlPoints);
 
         circle.enter().append("circle")
             .attr("cx", function (d) {
@@ -518,7 +523,7 @@ export default class MyTfEditor extends React.Component {
     }
 
     _autoXF() {
-
+        console.log(this._channel.lutGenerator_auto())
         this._channel.lutGenerator_auto();
 
         this.selected = this.props.controlPoints[0];
@@ -536,7 +541,6 @@ export default class MyTfEditor extends React.Component {
     }
 
     _bestFitXF() {
-
         this._channel.lutGenerator_bestFit();
 
         this.selected = this.props.controlPoints[0];
@@ -783,7 +787,7 @@ export default class MyTfEditor extends React.Component {
                 if (x3dNode.localName === "opacitymapvolumestyle" || x3dNode.localName === "blendedvolumestyle") {
                     var parentVolume = null;
                     if (x3dNode.parentNode.localName == "composedvolumestyle") {
-                        parentVolume = x3dNode.parentNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]")
+                        parentVolume = x3dNode.parentNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
                     } else {
                         parentVolume = x3dNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
                     }
@@ -890,9 +894,9 @@ export default class MyTfEditor extends React.Component {
                     <button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</button>
                     <button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</button>
                     <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas}></canvas>
+                </div>
             </div>
-            </div>
-        )
+        );
     }
 };
 
