@@ -85,7 +85,9 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onLevelsUpdate(values) {
-    this.props.handleChangeUserSelection(LEVELS_SLIDER, values);
+    this.props.handleChangeUserSelection(LEVELS_SLIDER, 
+      [Number(values[0]), Number(values[1]), Number(values[2])]
+    );
   }
 
   createLevelsSlider () {
