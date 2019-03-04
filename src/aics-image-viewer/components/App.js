@@ -126,6 +126,7 @@ export default class App extends React.Component {
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
+      channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
@@ -204,6 +205,7 @@ export default class App extends React.Component {
 
       this.setState({
         currentlyLoadedImagePath: imageDirectory,
+        channelDataReady: {},
         queryErrorMessage: null,
         cachingInProgress: false,
         mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
@@ -315,7 +317,10 @@ export default class App extends React.Component {
     VolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
       console.log("GOT CHANNEL DATA " + channelIndex);
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
-      newChannelSettings[channelIndex].dataReady = true;
+      const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
+      this.setState({
+        channelDataReady: newChannelDataReady
+      });
       if (this.state.view3d) {
         if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
           this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
@@ -656,6 +661,7 @@ export default class App extends React.Component {
                 channelDataChannels={this.state.image ? this.state.image.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
+                channelDataReady={this.state.channelDataReady}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 channels={userSelections[CHANNEL_SETTINGS]}
