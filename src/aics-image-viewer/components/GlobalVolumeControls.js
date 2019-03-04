@@ -187,7 +187,6 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   createProjectionModeControls() {
-    console.log(this.props.pathTraceOn);
     return (
       <div style={STYLES.controlRow}>
         <Checkbox
