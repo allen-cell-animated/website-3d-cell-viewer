@@ -272,8 +272,8 @@ export default class App extends React.Component {
     let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(userSelections[BRIGHTNESS_SLIDER_LEVEL]);
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL]);
+    let imageBrightness = brightnessSliderToImageValue(userSelections[BRIGHTNESS_SLIDER_LEVEL], userSelections[PATH_TRACE]);
+    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
@@ -377,7 +377,7 @@ export default class App extends React.Component {
   }
 
   handleChangeToImage(keyToChange, newValue, index) {
-    const { image, view3d } = this.state;
+    const { image, userSelections, view3d } = this.state;
     if (!image || !view3d) {
       return;
     }
@@ -412,11 +412,11 @@ export default class App extends React.Component {
         view3d.updateActiveChannels(image);
         break;
       case BRIGHTNESS_SLIDER_LEVEL:
-        let imageBrightness = brightnessSliderToImageValue(newValue);
+        let imageBrightness = brightnessSliderToImageValue(newValue, userSelections[PATH_TRACE]);
         view3d.updateExposure(imageBrightness);
         break;
       case DENSITY_SLIDER_LEVEL:
-        let imageDensity = densitySliderToImageValue(newValue);
+        let imageDensity = densitySliderToImageValue(newValue, userSelections[PATH_TRACE]);
         view3d.updateDensity(image, imageDensity);
         break;
       case LEVELS_SLIDER:

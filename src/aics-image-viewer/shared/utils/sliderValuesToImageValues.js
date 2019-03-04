@@ -23,8 +23,8 @@ export const gammaSliderToImageValues = (sliderValues) => {
     };
 };
 
-export const densitySliderToImageValue = (sliderValues) => (+sliderValues[0] * 0.333);
+export const densitySliderToImageValue = (sliderValues, isPathTrace) => (isPathTrace ? +sliderValues[0] : +sliderValues[0] * 0.333);
 
-export const brightnessSliderToImageValue = (sliderValues) => (Math.log( +sliderValues[0] / 100.0 + 0.5));
+export const brightnessSliderToImageValue = (sliderValues, isPathTrace) => (isPathTrace ? +sliderValues[0] / 100.0 : Math.log( +sliderValues[0] / 100.0 + 0.5));
 
 export const alphaSliderToImageValue = (sliderValues) => 1 - (sliderValues[0] / 100.0);
