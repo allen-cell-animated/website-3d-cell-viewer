@@ -3,8 +3,10 @@ import { Layout } from "antd";
 import React from 'react';
 import { includes, isEqual } from 'lodash';
 import { 
+  RENDERMODE_PATHTRACE,
+  RENDERMODE_RAYMARCH,
   Volume, 
-  VolumeLoader 
+  VolumeLoader,
 } from 'volume-viewer';
 
 import HttpClient from '../shared/utils/httpClient';
@@ -44,6 +46,7 @@ import {
   MODE,
   AUTO_ROTATE,
   MAX_PROJECT,
+  PATH_TRACE,
 } from '../shared/constants';
 
 import ControlPanel from './ControlPanel';
@@ -139,6 +142,7 @@ export default class App extends React.Component {
         [MODE]: ViewMode.threeD,
         [AUTO_ROTATE]: false,
         [MAX_PROJECT]: false,
+        [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
         [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT, 
         [DENSITY_SLIDER_LEVEL]: DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -281,7 +285,8 @@ export default class App extends React.Component {
     view3d.addVolume(aimg);
 
     view3d.updateMaskAlpha(aimg, imageMask);
-    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT] ? true : false);
+    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+    view3d.setVolumeRenderMode(aimg, userSelections[PATH_TRACE] ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
     view3d.updateExposure(imageBrightness);
     view3d.updateDensity(aimg, imageDensity);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
@@ -397,6 +402,9 @@ export default class App extends React.Component {
       case MAX_PROJECT:
         view3d.setMaxProjectMode(image, newValue ? true : false);
         view3d.updateActiveChannels(image);
+        break;
+      case PATH_TRACE:
+        view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
         break;
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
@@ -656,7 +664,9 @@ export default class App extends React.Component {
               onCollapse={this.toggleControlPanel}
               width={450}
             >
-              <ControlPanel 
+              <ControlPanel
+                // viewer capabilities
+                canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
                 // image state
                 imageName={this.state.image ? this.state.image.name : false}
                 hasImage={!!this.state.image}
@@ -667,6 +677,7 @@ export default class App extends React.Component {
                 channelDataReady={this.state.channelDataReady}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
+                pathTraceOn={userSelections[PATH_TRACE]}
                 channels={userSelections[CHANNEL_SETTINGS]}
                 mode={userSelections[MODE]}
                 imageType={userSelections.imageType}

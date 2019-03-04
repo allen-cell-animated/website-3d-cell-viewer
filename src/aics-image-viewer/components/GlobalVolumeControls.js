@@ -7,7 +7,14 @@ import {
   Checkbox,
   Collapse,
 } from 'antd';
-import { ALPHA_MASK_SLIDER_LEVEL, BRIGHTNESS_SLIDER_LEVEL, DENSITY_SLIDER_LEVEL, LEVELS_SLIDER, MAX_PROJECT } from '../shared/constants';
+import { 
+  ALPHA_MASK_SLIDER_LEVEL, 
+  BRIGHTNESS_SLIDER_LEVEL, 
+  DENSITY_SLIDER_LEVEL, 
+  LEVELS_SLIDER, 
+  MAX_PROJECT,
+  PATH_TRACE,
+} from '../shared/constants';
 const Panel = Collapse.Panel;
 
 export default class GlobalVolumeControls extends React.Component {
@@ -16,6 +23,7 @@ export default class GlobalVolumeControls extends React.Component {
     super(props);
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.handleMaxProjectionCheck = this.handleMaxProjectionCheck.bind(this);
+    this.handlePathTraceCheck = this.handlePathTraceCheck.bind(this);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
@@ -27,10 +35,12 @@ export default class GlobalVolumeControls extends React.Component {
     const { 
       imageName,
       alphaMaskSliderLevel,
+      pathTraceOn,
     } = this.props;
     const newImage = newProps.imageName !== imageName;
+    const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
     const newSliderValue = newProps.alphaMaskSliderLevel[0] !== alphaMaskSliderLevel[0];
-    return newImage || newSliderValue;
+    return newImage || newSliderValue || newPathTraceValue;
   }
 
   onAlphaSliderUpdate(values) {
@@ -136,6 +146,10 @@ export default class GlobalVolumeControls extends React.Component {
     this.props.handleChangeUserSelection(MAX_PROJECT, target.checked);
   }
 
+  handlePathTraceCheck({target}) {
+    this.props.handleChangeUserSelection(PATH_TRACE, target.checked);
+  }
+
   createSliderRow(config) {
     return (
       <div style={STYLES.controlRow}>
@@ -160,13 +174,29 @@ export default class GlobalVolumeControls extends React.Component {
     );
   }
 
-  createProjectionModeControls() {
+  createRenderModeControls() {
     return (
-      <Checkbox
-        defaultChecked={this.props.maxProjectOn}
-        onChange={this.handleMaxProjectionCheck}
-      >Max projection
-      </Checkbox>
+      <div style={STYLES.controlRow}>
+        <Checkbox
+          defaultChecked={this.props.pathTraceOn}
+          onChange={this.handlePathTraceCheck}
+        >Path trace
+        </Checkbox>
+      </div>
+    );
+  }
+
+  createProjectionModeControls() {
+    console.log(this.props.pathTraceOn);
+    return (
+      <div style={STYLES.controlRow}>
+        <Checkbox
+          defaultChecked={this.props.maxProjectOn}
+          disabled={this.props.pathTraceOn}
+          onChange={this.handleMaxProjectionCheck}
+        >Max projection
+        </Checkbox>
+      </div>
     );
   }
 
@@ -174,7 +204,6 @@ export default class GlobalVolumeControls extends React.Component {
     if (!this.props.imageName) return null;
     return (
       <Card
-        extra={this.createProjectionModeControls()}
         bordered={false}
         title="Global volume rendering settings"
         type="inner"
@@ -192,6 +221,8 @@ export default class GlobalVolumeControls extends React.Component {
               {this.createBrightnessSlider()}
               {this.createDensitySlider()}
               {this.createLevelsSlider()}
+              {this.createProjectionModeControls()}
+              {this.props.canPathTrace && this.createRenderModeControls()}
             </div>
           </Panel>
         </Collapse>
