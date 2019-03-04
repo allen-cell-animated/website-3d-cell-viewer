@@ -47,15 +47,6 @@ export default class ViewerWrapper extends React.Component {
    this.view3D.resize();
   }
 
-  componentDidUpdate() {
-    if (this.props.image && this.view3D && this.needToSetImage) {
-      this.view3D.removeAllVolumes();
-      this.view3D.addVolume(this.props.image);
-      console.log("VOLUME ADDED TO VIEW");
-      this.view3D.updateActiveChannels(this.props.image);
-    }
- }
-
   getActiveAxis() {
     const { mode } = this.props;
     switch (mode) {

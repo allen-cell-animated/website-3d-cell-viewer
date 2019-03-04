@@ -177,7 +177,6 @@ export default class App extends React.Component {
   }
 
   onView3DCreated(view3d) {
-    console.log("GOT VIEW3D");
     this.setState({view3d});
   }
 
@@ -269,13 +268,18 @@ export default class App extends React.Component {
     let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(userSelections.brightnessSliderLevel);
-    let imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel);
-    let imageValues = gammaSliderToImageValues(userSelections.levelsSlider);
+    let imageBrightness = brightnessSliderToImageValue(userSelections[BRIGHTNESS_SLIDER_LEVEL]);
+    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL]);
+    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
 
     const { view3d } = this.state;
+    
+    // Here is where we officially hand the image to the volume-viewer
+    view3d.removeAllVolumes();
+    view3d.addVolume(aimg);
+
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT] ? true : false);
     view3d.updateExposure(imageBrightness);
@@ -307,7 +311,7 @@ export default class App extends React.Component {
 
   loadFromJson(obj, title, locationHeader) {
     const aimg = new Volume(obj);
-    console.log("CREATED VOLUME");
+
     const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
@@ -315,7 +319,6 @@ export default class App extends React.Component {
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
-      console.log("GOT CHANNEL DATA " + channelIndex);
       aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
       const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
       this.setState({
