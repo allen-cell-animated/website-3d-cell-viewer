@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   Button,
   Icon, 
@@ -237,17 +236,23 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   createTFEditor() {
+    const {
+      channelDataForChannel,
+      updateChannelTransferFunction,
+      index,
+    } = this.props;
+    console.log(channelDataForChannel.volumeData)
     return (<TfEditor 
-          index={this.props.index}
+          index={index}
           ref={this.storeTfEditor}
-          id={'aicstfeditor_' + this.props.index}
+          id={'aicstfeditor_' + index}
           fit-to-data={false}
           width={250}
           height={150}
-          volumeData={this.props.channelDataForChannel.volumeData}
-          channelData={this.props.channelDataForChannel}
-          controlPoints={this.props.channelDataForChannel.lutControlPoints}
-          updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+          volumeData={channelDataForChannel.volumeData}
+          channelData={channelDataForChannel}
+          controlPoints={channelDataForChannel.lutControlPoints}
+          updateChannelTransferFunction={updateChannelTransferFunction}
     />);
   }
 

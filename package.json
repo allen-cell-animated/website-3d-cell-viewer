@@ -1,6 +1,6 @@
 {
   "name": "ac-3d-viewer",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "web view of cell volume images",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -23,7 +23,6 @@
   "dependencies": {
     "@polymer/polymer": "^2.2.0",
     "@webcomponents/webcomponentsjs": "^1.0.19",
-    "antd": "^3.10.2",
     "babel-polyfill": "^6.23.0",
     "classnames": "^2.2.5",
     "command-line-args": "^5.0.2",
@@ -45,10 +44,12 @@
     "whatwg-fetch": "^2.0.3"
   },
   "peerDependencies": {
+    "antd": "^3.10.2",
     "react": "^15.6.2",
     "react-dom": "^15.6.2"
   },
   "devDependencies": {
+    "antd": "^3.10.2",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.1",

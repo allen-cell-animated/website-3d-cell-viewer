@@ -1,9 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
-const fs = require('fs');
+
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const lessToJs = require('less-vars-to-js');
-const themeVariables = lessToJs(fs.readFileSync(path.join(__dirname, './src/aics-image-viewer/styles/ant-vars.less'), 'utf8'));
 
 module.exports = {
   entry: './src/index.js',
@@ -31,6 +29,14 @@ module.exports = {
         commonjs2: 'react-dom',
         commonjs: 'react-dom',
         amd: 'react-dom'
+      }
+    },
+    {
+      'antd': {
+        root: 'antd',
+        commonjs2: 'antd',
+        commonjs: 'antd',
+        amd: 'antd'
       }
     },
     {
@@ -100,11 +106,11 @@ module.exports = {
         loader: 'babel-loader',
         exclude: /node_modules/,
         test: /\.js$/,
-        options: {
-          plugins: [
-            ['import', { libraryName: "antd", style: true }]
-          ]
-        },
+        // options: {
+        //   plugins: [
+        //     ['import', { libraryName: "antd", style: true }]
+        //   ]
+        // },
       },
       {
         test: /\.less$/,
