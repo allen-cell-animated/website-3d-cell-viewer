@@ -126,7 +126,6 @@ export default class App extends React.Component {
       cellId: props.cellId,
       fovId: props.fovId,
       cellLine: props.cellLine,
-      queryInputType: CELL_ID_QUERY,
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
@@ -504,14 +503,12 @@ export default class App extends React.Component {
       );
       const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, false);
-      this.setState((prevState) => {
-        return {
+      this.setState({
           sendingQueryRequest: true,
           userSelections: {
               ...this.state.userSelections,
             imageType: value,
           }
-        };
       });
     }
   }
@@ -546,23 +543,20 @@ export default class App extends React.Component {
   }
 
   setQueryInputAndRequestImage(input, type) {
-    let queryInputType = type || this.state.queryInputType;
+    let imageType = type || this.state.userSelections.imageType;
     let {
       cellId,
       fovId,
       cellLine,
     } = input;
     let name;
-    console.log("QUERY TYPE", queryInputType)
-    if (queryInputType === FOV_ID_QUERY) {
+    if (imageType === FULL_FIELD_IMAGE) {
       name = App.buildName(cellLine, fovId);
-      console.log('fov', name)
     }
-    else if (queryInputType === CELL_ID_QUERY) {
+    else if (imageType === SEGMENTED_CELL) {
       name = App.buildName(cellLine, fovId, cellId);
-      console.log('cell', name)
     }
-    else if (queryInputType === IMAGE_NAME_QUERY) {
+    else if (imageType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
       const components = input.split("_");
       cellLine = "";
@@ -571,24 +565,26 @@ export default class App extends React.Component {
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
-        queryInputType = FOV_ID_QUERY;
+        imageType = FOV_ID_QUERY;
         if (components.length > 2) {
           cellId = components[2];
-          queryInputType = CELL_ID_QUERY;
+          imageType = CELL_ID_QUERY;
         }
         name = App.buildName(cellLine, fovId, cellId);
-        console.log('legacy', name)
       }
     }
     this.setState({
       cellLine: cellLine,
       fovId: fovId,
       cellId,
-      queryInputType,
       hasCellId: !!input.cellId,
-      sendingQueryRequest: true
+      sendingQueryRequest: true,
+      userSelections: {
+        ...this.state.userSelections,
+        imageType,
+      }
     });
-    this.openImage(name, queryInputType, true);
+    this.openImage(name, imageType, true);
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
