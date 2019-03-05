@@ -29,6 +29,7 @@ import {
 import ColorPicker from '../ColorPicker.js';
 
 import './styles.scss';
+import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
 
 const Panel = Collapse.Panel;
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
@@ -75,6 +76,7 @@ export default class ChannelsWidgetRow extends React.Component {
     if (!target.checked && !isosurfaceChecked) {
       this.setState({controlsOpen: false});
     }
+    console.log('volume check handler', index, VOLUME_ENABLED, target.checked)
     changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
   }
 
@@ -189,13 +191,17 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   onColorChange(newRGB, oldRGB, index) {
-    this.props.changeOneChannelSetting(index, 'color', newRGB);
+    console.log(newRGB)
+    const color = rgbObjectToArray(newRGB);
+    this.props.changeOneChannelSetting(index, 'color', color);
   }
 
   createColorPicker() {
+    const color = colorArrayToRgbObject(this.props.color);
     return (
       <div style={STYLES.colorPicker}>
-        <ColorPicker color={this.props.color}
+        <ColorPicker 
+          color={color}
           onColorChange={this.onColorChange}
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
