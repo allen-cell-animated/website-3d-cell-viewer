@@ -28,6 +28,7 @@ export const
   MODE = 'mode',
   AUTO_ROTATE = 'autorotate',
   MAX_PROJECT = 'maxProject',
+  PATH_TRACE = 'pathTrace',
 
   // Volume viewer keys
   ISO_VALUE = 'isovalue',

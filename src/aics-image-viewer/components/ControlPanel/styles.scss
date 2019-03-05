@@ -1,4 +1,9 @@
 @import "../../assets/styles/axis-style-override";
+
+::-webkit-scrollbar { 
+  display: none; 
+}
+
 .control-panel {
     flex: 1 auto;
     order: 1;

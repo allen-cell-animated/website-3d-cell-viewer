@@ -131,6 +131,8 @@ export default class ControlPanel extends React.Component {
             densitySliderLevel={this.props.densitySliderLevel}
             gammaSliderLevel={this.props.gammaSliderLevel}
             maxProjectOn={this.props.maxProjectOn}
+            canPathTrace={this.props.canPathTrace}
+            pathTraceOn={this.props.pathTraceOn}
           />
         </div> : null}
       </Card>

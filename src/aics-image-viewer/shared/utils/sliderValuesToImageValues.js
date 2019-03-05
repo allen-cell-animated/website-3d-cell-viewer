@@ -23,8 +23,10 @@ export const gammaSliderToImageValues = (sliderValues) => {
     };
 };
 
-export const densitySliderToImageValue = (sliderValues) => (Math.exp(0.05 * (sliderValues[0] - 100)));
+// Density and brightness are overloaded for the two supported rendering modes in the volume viewer.
+// These formulae are somewhat ad-hoc based on what will subjectively look reasonable in the viewer, and should be considered tweakable.
+export const densitySliderToImageValue = (sliderValues, isPathTrace) => (isPathTrace ? +sliderValues[0] : +sliderValues[0] * 0.333);
 
-export const brightnessSliderToImageValue = (sliderValues) => (Math.exp(0.05 * (sliderValues[0] - 50)));
+export const brightnessSliderToImageValue = (sliderValues, isPathTrace) => (isPathTrace ? +sliderValues[0] / 100.0 : Math.log( +sliderValues[0] / 100.0 + 0.5));
 
 export const alphaSliderToImageValue = (sliderValues) => 1 - (sliderValues[0] / 100.0);

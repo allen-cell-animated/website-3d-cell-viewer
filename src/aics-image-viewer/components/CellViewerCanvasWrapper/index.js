@@ -1,5 +1,5 @@
 import React from 'react';
-import { AICSview3d } from 'volume-viewer';
+import { View3d } from 'volume-viewer';
 
 import { Icon } from 'antd';
 
@@ -24,7 +24,8 @@ export default class ViewerWrapper extends React.Component {
  componentDidMount() {
    if (!this.view3D) {
      let el = document.getElementById(VIEW_3D_VIEWER);
-     this.view3D = new AICSview3d(el);
+     this.view3D = new View3d(el);
+     this.props.onView3DCreated(this.view3D);
    }
  }
 
@@ -45,12 +46,6 @@ export default class ViewerWrapper extends React.Component {
 
    this.view3D.resize();
   }
-
-  componentDidUpdate() {
-    if (this.props.image && this.view3D && this.needToSetImage) {
-      this.view3D.setImage(this.props.image);
-    }
- }
 
   getActiveAxis() {
     const { mode } = this.props;
@@ -83,7 +78,7 @@ export default class ViewerWrapper extends React.Component {
     const noImageText = !this.props.loadingImage && !this.props.image ?
       <div style={STYLES.noImage}>No image selected</div> : null;
     if (!!noImageText && this.view3D) {
-      this.view3D.destroyImage();
+      this.view3D.removeAllVolumes();
     }
     return noImageText || spinner;
   }
