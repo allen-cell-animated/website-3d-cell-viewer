@@ -553,7 +553,7 @@ export default class App extends React.Component {
       cellLine,
     } = input;
     let name;
-    console.log(queryInputType)
+    console.log("QUERY TYPE", queryInputType)
     if (queryInputType === FOV_ID_QUERY) {
       name = App.buildName(cellLine, fovId);
       console.log('fov', name)
@@ -578,7 +578,6 @@ export default class App extends React.Component {
         }
         name = App.buildName(cellLine, fovId, cellId);
         console.log('legacy', name)
-
       }
     }
     this.setState({
@@ -646,21 +645,27 @@ export default class App extends React.Component {
       fovId,
       cellLine,
     } = this.props;
-    const newRequest = cellId !== prevProps.cellId;
-    if (newRequest) {
-      console.log(cellId, fovId, cellLine);
-      this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
-    }
-    if (this.state.image) {
-      this.updateImageVolumeAndSurfacesEnabledFromAppState();
-      this.state.view3d.updateActiveChannels(this.state.image);
-    }
+    const { userSelections } = this.state;
+
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 200);
     }
+    const newRequest = cellId !== prevProps.cellId;
+    if (newRequest) {
+      return this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
+    }
+
+    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
+    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
+    const newImage = this.state.image && !prevState.image;
+    if (this.state.image && (channelsChanged || newImage || imageChanged )) {
+      this.updateImageVolumeAndSurfacesEnabledFromAppState();
+      this.state.image.fuse();
+    }
+
   }
 
   toggleControlPanel(value) {
