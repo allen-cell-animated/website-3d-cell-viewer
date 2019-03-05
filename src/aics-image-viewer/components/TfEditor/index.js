@@ -53,7 +53,7 @@ export default class MyTfEditor extends React.Component {
 
     componentDidMount() {
         this.createElements();
-        this.setData(this.props.index, this.props.channelData);
+        this.setData();
         this.ready();
     }
 
@@ -658,8 +658,8 @@ export default class MyTfEditor extends React.Component {
      */
 
 
-    setData(index, channel) {
-        if (!channel) {
+    setData() {
+        if (!this.props.channelData) {
             throw new Error('Transfer Function Editor setData called with no channel data.');
         }
         this._updateScales();
