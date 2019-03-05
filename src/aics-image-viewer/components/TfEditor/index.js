@@ -2,6 +2,8 @@ import React from 'react';
 import * as d3 from "d3";
 import './styles.scss';
 
+import { Button } from 'antd';
+
 export default class MyTfEditor extends React.Component {
 
     static get is() {
@@ -26,14 +28,51 @@ export default class MyTfEditor extends React.Component {
         this._export = this._export.bind(this);
         this._auto2XF = this._auto2XF.bind(this);
         this._bestFitXF = this._bestFitXF.bind(this);
-        this.createElements();
         this.svgElement = React.createRef();
+        /**
+         * The X axis range is delimited to the input data range.
+         * If false, the range will be set by default: [0-255]
+        */
+        this.fitToData = props.fitToData || false;
+        /**
+         * TF control points.
+         *
+         * The control points that define the transfer function. User
+         * added points will be reflected in the _control-points_
+         * attribute. Example:
+         *
+         *     [{"x":0,"opacity":0,"color":"blue"},
+         *      {"x":102.3,"opacity":0.55,"color":"green"},
+         *      {"x":255,"opacity":1,"color":"red"}]
+         * @type {Array}
+         */
+        this.state = {
+            controlPoints: props.controlPoints,
+        };
     }
 
     componentDidMount() {
+        this.createElements();
         this.setData(this.props.index, this.props.channelData);
         this.ready();
     }
+
+    componentDidUpdate(prevProps) {
+        const {
+            controlPoints,
+            volumeData
+        } = this.props;
+        if (prevProps.controlPoints !== controlPoints) {
+            this.setState({
+                controlPoints,
+            });
+        }
+        this._redraw();
+        if (!prevProps.volumeData && volumeData) {
+            this._redrawHistogram();
+        }
+    }
+
 
     createElements() {
         // Custom margins
@@ -44,7 +83,19 @@ export default class MyTfEditor extends React.Component {
             left: 25
         };
         this.formatCount = d3.format(",.0f");
+        /**
+         * The number of bins to represent the histogram of the input data.
+         *
+         * @type {Number}
+         */
+        this.numberBins = 256;
 
+        /**
+         * The number of ticks to be displayed in the axis.
+         *
+         * @type {Number}
+         */
+        this.numberTicks = 4;
         // Axis scales
         this.xScale = d3.scaleLinear();
         this.yScale = d3.scaleLinear();
@@ -64,13 +115,13 @@ export default class MyTfEditor extends React.Component {
         // Keep track of control points interaction
         this.dragged = null;
         this.selected = null;
-        this.last_color = 'green';
+        this.last_color = 'purple';
     }
 
     _initializeElements() {
         var extent = [0, 255];
-        if (this.fitToData && this._data && this._data.length > 0) {
-            extent = d3.extent(this._data);
+        if (this.fitToData && this.props.volumeData && this.props.volumeData.length > 0) {
+            extent = d3.extent(this.props.volumeData);
         }
         var me = this;
         this.xScale
@@ -87,19 +138,23 @@ export default class MyTfEditor extends React.Component {
         this.bins
             .domain(this.xScale.domain())
             .thresholds(this.xScale.ticks(this.numberBins));
-        if (this.props.controlPoints.length === 0) {
-            this.push('controlPoints', {
+        if (this.state.controlPoints.length === 0) {
+            let newControlPoints = [
+                {
                 'x': extent[0],
                 'opacity': 0,
                 'color': 'white'
-            });
-            this.push('controlPoints', {
+                },
+            {
                 'x': extent[1],
                 'opacity': 1,
                 'color': 'white'
+            }];
+            this.setState({
+                controlPoints: newControlPoints
             });
         }
-        this.selected = this.props.controlPoints[0];
+        this.selected = this.state.controlPoints[0];
         this.area
             .x(function (d) {
                 return me.xScale(d.x);
@@ -149,7 +204,7 @@ export default class MyTfEditor extends React.Component {
 
         // Draw control points
         g.append("path")
-            .datum(me.props.controlPoints)
+            .datum(me.state.controlPoints)
             .attr("class", "line")
             .attr("fill", "url(#tfGradient-" + this.id + ")")
             .attr("stroke", "white")
@@ -193,12 +248,12 @@ export default class MyTfEditor extends React.Component {
     // update scales with new data input
     _updateScales() {
         if (this.fitToData) {
-            var dataExtent = d3.extent(this._data);
+            var dataExtent = d3.extent(this.props.volumeData);
             // First obtain the index of points to be maintain;
             var x0 = -1;
             var x1 = -1;
             // Override dirty checking
-            var controlPoints = this.props.controlPoints;
+            let { controlPoints } = this.state;
             for (var i = controlPoints.length - 1; i >= 0; i--) {
                 x1 = (controlPoints[i].x >= dataExtent[1]) ? i : x1;
                 if (controlPoints[i].x <= dataExtent[0]) {
@@ -206,17 +261,19 @@ export default class MyTfEditor extends React.Component {
                     break;
                 }
             }
+            let newControlPoints = [...controlPoints];
             // Delete control points out of range
-            if (x1 != -1) {
-                controlPoints[x1].x = dataExtent[1];
-                controlPoints.splice(x1, controlPoints.length - x1 - 1);
+            if (x1 !== -1) {
+                newControlPoints[x1].x = dataExtent[1];
+                newControlPoints.splice(x1, newControlPoints.length - x1 - 1);
             }
-            if (x0 != -1) {
-                controlPoints[x0].x = dataExtent[0];
-                controlPoints.splice(0, x0);
+            if (x0 !== -1) {
+                newControlPoints[x0].x = dataExtent[0];
+                newControlPoints.splice(0, x0);
             }
-            this.props.controlPoints = [];
-            this.props.controlPoints = controlPoints;
+            this.setState({
+                controlPoints: newControlPoints,
+            });
             this.xScale.domain(dataExtent);
             this.dataScale.domain(dataExtent);
         } else {
@@ -239,8 +296,8 @@ export default class MyTfEditor extends React.Component {
     _redrawHistogram() {
         var me = this;
         d3.select(this.svgElement.current).select("g").selectAll(".bar").remove();
-        if (this._data && this._data.length > 0) {
-            var bins = this.bins(this._data);
+        if (this.props.volumeData && this.props.volumeData.length > 0) {
+            var bins = this.bins(this.props.volumeData);
             this.binScale.domain([0.1, d3.max(bins, function (d) {
                 return d.length;
             })]);
@@ -271,7 +328,7 @@ export default class MyTfEditor extends React.Component {
         var me = this;
         const {
             controlPoints
-        } = this.props;
+        } = this.state;
         if (!controlPoints) {
             return;
         }
@@ -371,9 +428,11 @@ export default class MyTfEditor extends React.Component {
      * Draw the TF output in the canvas container.
      */
     _drawCanvas() {
-        if (this.props.controlPoints != undefined && this.props.controlPoints.length > 0) {
-
-            var extent = [this.props.controlPoints[0].x, this.props.controlPoints[this.props.controlPoints.length - 1].x];
+        const {
+            controlPoints
+        } = this.state;
+        if (controlPoints !== undefined && controlPoints.length > 0) {
+            var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
             // Convinient access
             var x0 = this.dataScale(extent[0]),
                 x1 = this.dataScale(extent[1]);
@@ -395,8 +454,8 @@ export default class MyTfEditor extends React.Component {
             var x0c = x0 * width / 256;
             var x1c = x1 * width / 256;
             var grd = ctx.createLinearGradient(x0c, 0, x1c, 0);
-            for (var i = 0; i < this.props.controlPoints.length; i++) {
-                var d = this.props.controlPoints[i];
+            for (var i = 0; i < controlPoints.length; i++) {
+                var d = controlPoints[i];
                 //var d = this.get('controlPoints', i);
                 var color = d3.color(d.color);
                 color.opacity = d.opacity;
@@ -413,20 +472,12 @@ export default class MyTfEditor extends React.Component {
                 // extract the alphas.
                 opacityGradient[i] = imagedata.data[i * 4 + 3];
             }
-
-            // notify observers...
-            // if (this.onChangeCallback) {
-            //     this.onChangeCallback(this._channelIndex,
-            //         opacityGradient,
-            //         this.props.controlPoints
-            //     );
-            // }
-
+            // send update to image rendering
             this.props.updateChannelTransferFunction(this.props.index,
                 opacityGradient,
-                this.props.controlPoints
+                controlPoints
             );
-            if (ctx.canvas.parentNode._x3domNode != undefined) {
+            if (ctx.canvas.parentNode._x3domNode !== undefined) {
                 ctx.canvas.parentNode._x3domNode.invalidateGLObject();
             }
         }
@@ -446,24 +497,29 @@ export default class MyTfEditor extends React.Component {
         var bisect = d3.bisector(function (a, b) {
             return a.x - b.x;
         }).left;
-        var indexPos = bisect(me.controlPoints, point);
-        this.props.controlPoints.splice(indexPos, 0, point);
-        me._redraw();
+        var indexPos = bisect(me.state.controlPoints, point);
+
+        let newControlPoints = [...this.state.controlPoints];
+        newControlPoints.splice(indexPos, 0, point);
+        this.setState({
+            controlPoints: newControlPoints,
+        });
     }
 
     _mousemove() {
         if (!this.dragged) {
             return;
         }
+        const { controlPoints } = this.state;
         function equalPoint(a, index, array) {
-            return a.x == this.x && a.opacity == this.opacity && a.color == this.color;
+            return a.x === this.x && a.opacity === this.opacity && a.color === this.color;
         };
-        var index = this.props.controlPoints.findIndex(equalPoint, this.selected);
-        if (index == -1) {
+        var index = controlPoints.findIndex(equalPoint, this.selected);
+        if (index === -1) {
             return;
         }
         var m = d3.mouse(d3.select(this.svgElement.current).node());
-        this.selected = this.dragged = this.props.controlPoints[index];
+        this.selected = this.dragged = controlPoints[index];
         this.dragged.x = this.xScale.invert(Math.max(0, Math.min(this._width, m[0] - this.margin.left)));
         this.dragged.opacity = this.yScale.invert(Math.max(0, Math.min(this._height, m[1] - this.margin.top)));
         var bisect = d3.bisector(function (a, b) {
@@ -472,16 +528,19 @@ export default class MyTfEditor extends React.Component {
         var bisect2 = d3.bisector(function (a, b) {
             return a.x - b.x;
         }).right;
-        var virtualIndex = bisect(this.props.controlPoints, this.dragged);
-        var virtualIndex2 = bisect2(this.props.controlPoints, this.dragged);
+        var virtualIndex = bisect(controlPoints, this.dragged);
+        var virtualIndex2 = bisect2(controlPoints, this.dragged);
+        let newControlPoints = [...controlPoints];
         if (virtualIndex < index) {
-            this.props.controlPoints.splice(virtualIndex, 1);
+            newControlPoints.splice(virtualIndex, 1);
         } else if (virtualIndex > index) {
-            this.props.controlPoints.splice(index + 1, 1);
+            newControlPoints.splice(index + 1, 1);
         } else if (virtualIndex2 - index >= 2) {
-            this.props.controlPoints.splice(index + 1, 1);
+            newControlPoints.splice(index + 1, 1);
         }
-        this._redraw();
+        this.setState({
+            controlPoints: newControlPoints,
+        });
     }
 
     _mouseup() {
@@ -498,17 +557,20 @@ export default class MyTfEditor extends React.Component {
         switch (d3.event.keyCode) {
             case 46:
                 { // delete
-                    var i = this.props.controlPoints.indexOf(this.selected);
-                    this.props.controlPoints.splice(i, 1);
-                    this.selected = this.props.controlPoints.length > 0 ? this.props.controlPoints[i > 0 ? i - 1 : 0] : null;
-                    this._redraw();
+                    var i = this.state.controlPoints.indexOf(this.selected);
+                    let newControlPoints = [...this.state.controlPoints];
+                    newControlPoints.splice(i, 1);
+                    this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
+                    this.setState({
+                        controlPoints: newControlPoints,
+                    });
                     break;
                 }
         }
     }
 
     _export() {
-        var jsonContent = JSON.stringify(this.props.controlPoints);
+        var jsonContent = JSON.stringify(this.state.controlPoints);
         var a = document.createElement("a");
         document.body.appendChild(a);
         a.style = "display: none";
@@ -523,37 +585,46 @@ export default class MyTfEditor extends React.Component {
     }
 
     _autoXF() {
-        console.log(this._channel.lutGenerator_auto())
-        this._channel.lutGenerator_auto();
+        const { channelData } = this.props;
 
-        this.selected = this.props.controlPoints[0];
+        channelData.lutGenerator_auto();
+        this.selected = channelData.lutControlPoints[0];
 
-        this._redraw();  // this only?
+        this.setState({
+            controlPoints: channelData.lutControlPoints,
+        });
     }
 
     _auto2XF() {
+        const { channelData } = this.props;
 
-        this._channel.lutGenerator_auto2();
+        channelData.lutGenerator_auto2();
+        this.selected = channelData.lutControlPoints[0];
 
-        this.selected = this.props.controlPoints[0];
-
-        this._redraw();  // this only?
+        this.setState({
+            controlPoints: channelData.lutControlPoints,
+        });
     }
 
     _bestFitXF() {
-        this._channel.lutGenerator_bestFit();
+        const { channelData } = this.props;
 
-        this.selected = this.props.controlPoints[0];
+        channelData.lutGenerator_bestFit();
+        this.selected = channelData.lutControlPoints[0];
 
-        this._redraw();  // this only?
+        this.setState({
+            controlPoints: channelData.lutControlPoints,
+        }); 
     }
 
     _resetXF() {
-        this._channel.lutGenerator_fullRange();
+        const { channelData } = this.props;
 
-        this.selected = this.props.controlPoints[0];
-
-        this._redraw();  // this only?
+        channelData.lutGenerator_fullRange();
+        this.selected = channelData.lutControlPoints[0];
+        this.setState({
+            controlPoints: channelData.lutControlPoints,
+        });
     }
 
     /////// Public API functions ///////
@@ -596,11 +667,6 @@ export default class MyTfEditor extends React.Component {
         if (!channel) {
             throw new Error('Transfer Function Editor setData called with no channel data.');
         }
-        this._channelIndex = index;
-        this._channel = channel;
-        this._data = this.props.volumeData;
-        this.controlPoints = channel.lutControlPoints;
-
         this._updateScales();
         this._updateAxis();
         this._redraw();
@@ -641,126 +707,6 @@ export default class MyTfEditor extends React.Component {
 
     _isCanvasNeeded(canvasSelector) {
         return canvasSelector === '' || canvasSelector === '#canvas-' + this.id;
-    }
-
-    // Define Polymer component properties
-    static get properties() {
-        return {
-            /**
-             * Unique identifier for the dom element.
-             *
-             * @type {String}
-             */
-            id: {
-                type: String,
-                value: 'tf-1',
-            },
-            /**
-             * Metadata describing a nome for the element (Optional).
-             *
-             * @type {String}
-             */
-            name: {
-                type: String,
-                value: 'TF-Editor',
-            },
-
-            /**
-             * CSSselector to an ImageTexture node from the X3DOM Framework (Optional).
-             *
-             * @type {CSSselector}
-             */
-            x3domSelector: {
-                type: String,
-                value: '',
-                observer: '_x3domSelectorChanged',
-            },
-            /**
-             * Explicit selector to an existent canvas (Optional).
-             * The referenced canvas must have a minimun width of 256
-             * pixels and 1 pixel height.
-             *
-             * @type {CSSselector}
-             */
-            canvasSelector: {
-                type: String,
-                value: '',
-                observer: '_canvasSelectorChanged',
-            },
-            /**
-             * Computed property
-             * @type {Boolean}
-             */
-            _external: {
-                type: Boolean,
-                computed: '_isCanvasNeeded(canvasSelector)',
-            },
-            /**
-             * Explicit width fot the element (Optional).
-             *
-             * @type {Number}
-             */
-            width: {
-                type: Number,
-                value: 375,
-            },
-            /**
-             * Explicit height fot the element (Optional).
-             *
-             * @type {Number}
-             */
-            height: {
-                type: Number,
-                value: 200,
-            },
-            /**
-             * The number of bins to represent the histogram of the input data.
-             *
-             * @type {Number}
-             */
-            numberBins: {
-                type: Number,
-                value: 256,
-            },
-            /**
-             * The number of ticks to be displayed in the axis.
-             *
-             * @type {Number}
-             */
-            numberTicks: {
-                type: Number,
-                value: 4,
-            },
-            /**
-             * The X axis range is delimited to the input data range.
-             * If false, the range will be set by default: [0-255]
-             */
-            fitToData: {
-                type: Boolean,
-                value: false,
-            },
-
-            /**
-             * TF control points.
-             *
-             * The control points that define the transfer function. User
-             * added points will be reflected in the _control-points_
-             * attribute. Example:
-             *
-             *     [{"x":0,"opacity":0,"color":"blue"},
-             *      {"x":102.3,"opacity":0.55,"color":"green"},
-             *      {"x":255,"opacity":1,"color":"red"}]
-             * @type {Array}
-             */
-            controlPoints: {
-                type: Array,
-                value: function () {
-                    return [];
-                },
-                reflectToAttribute: true,
-                notify: true
-            }
-        };
     }
 
     _x3domSelectorChanged(newValue, oldValue) {
@@ -866,7 +812,7 @@ export default class MyTfEditor extends React.Component {
     _canvasSelectorChanged(newValue, oldValue) {
         if (newValue !== '') {
             var newElement = document.querySelector(newValue);
-            if (newElement != null && newElement.localName === "canvas") {
+            if (newElement !== null && newElement.localName === "canvas") {
                 newElement.setAttribute("id", "tf-canvas-" + this.id);
                 newElement.setAttribute("width", "256px");
                 newElement.setAttribute("height", "5px");
@@ -888,12 +834,13 @@ export default class MyTfEditor extends React.Component {
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
-                        <button id={`export-${id}`} className="ant-btn" onClick={this._export}>Export</button>
-                    <button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</button>
-                    <button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</button>
-                    <button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</button>
-                    <button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</button>
-                    <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas}></canvas>
+                    <Button id={`export-${id}`} className="ant-btn" onClick={this._export}>Export</Button>
+                    <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
+                    <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</Button>
+                    <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
+                    <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
+                    {/* <!-- this canvas exists to render the gradient but will not be displayed --> */}
+                    <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas>
                 </div>
             </div>
         );
