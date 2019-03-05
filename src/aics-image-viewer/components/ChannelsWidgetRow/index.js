@@ -38,7 +38,6 @@ const ISOVALUE_DEFAULT = 128.0;
 export default class ChannelsWidgetRow extends React.Component {
   constructor(props) {
     super(props);
-    this.storeTfEditor = this.storeTfEditor.bind(this);
     this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
@@ -52,31 +51,11 @@ export default class ChannelsWidgetRow extends React.Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    // channelDataReady really only ever goes from false to true.  We don't have a pattern where it can become false.
-    // if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
-    //   this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
-    //   this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
-    // }
-  }
-
-  // this happens after componentWillMount, after render, and before componentDidMount. it is set in a ref={} attr.
-  // the Card implementation is controlling this component lifetime event
-  storeTfEditor(el) {
-    this.tfeditor = el;
-
-    // if (this.props.channelDataReady && this.tfeditor) {
-    //   this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
-    //   this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
-    // }
-  }
-
   volumeCheckHandler({ target }) {
     const { index, changeOneChannelSetting, isosurfaceChecked} = this.props;
     if (!target.checked && !isosurfaceChecked) {
       this.setState({controlsOpen: false});
     }
-    console.log('volume check handler', index, VOLUME_ENABLED, target.checked)
     changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
   }
 
@@ -191,7 +170,6 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   onColorChange(newRGB, oldRGB, index) {
-    console.log(newRGB)
     const color = rgbObjectToArray(newRGB);
     this.props.changeOneChannelSetting(index, 'color', color);
   }
@@ -247,10 +225,8 @@ export default class ChannelsWidgetRow extends React.Component {
       updateChannelTransferFunction,
       index,
     } = this.props;
-    console.log(channelDataForChannel.volumeData)
     return (<TfEditor 
           index={index}
-          ref={this.storeTfEditor}
           id={'aicstfeditor_' + index}
           fit-to-data={false}
           width={250}
