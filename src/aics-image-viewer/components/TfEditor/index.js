@@ -59,14 +59,9 @@ export default class MyTfEditor extends React.Component {
 
     componentDidUpdate(prevProps) {
         const {
-            controlPoints,
             volumeData
         } = this.props;
-        if (prevProps.controlPoints !== controlPoints) {
-            this.setState({
-                controlPoints,
-            });
-        }
+
         this._redraw();
         if (!prevProps.volumeData && volumeData) {
             this._redrawHistogram();
