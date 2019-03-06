@@ -287,7 +287,7 @@ export default class App extends React.Component {
   }
 
   intializeNewImage(aimg) {
-    const { userSelections } = this.state;
+    const { userSelections, view3d } = this.state;
     let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
@@ -296,22 +296,22 @@ export default class App extends React.Component {
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
-
-    const { view3d } = this.state;
     
     // Here is where we officially hand the image to the volume-viewer
     view3d.removeAllVolumes();
+
     view3d.addVolume(aimg);
 
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    view3d.setVolumeRenderMode(aimg, userSelections[PATH_TRACE] ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
     view3d.updateExposure(imageBrightness);
     view3d.updateDensity(aimg, imageDensity);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.updateActiveChannels(aimg);
+
+
   }
 
   updateStateOnLoadImage(channelNames) {
@@ -410,7 +410,8 @@ export default class App extends React.Component {
       case COLOR:
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
         view3d.updateChannelColor(image, index, newColor);
-        view3d.updateActiveChannels(image);
+        view3d.updateMaterial(image);
+        // view3d.updateActiveChannels(image);
         break;
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
@@ -424,6 +425,7 @@ export default class App extends React.Component {
         break;
       case PATH_TRACE:
         view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
+        view3d.updateActiveChannels(image);
         break;
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
@@ -611,6 +613,7 @@ export default class App extends React.Component {
           }
         }
       });
+      view3d.updateActiveChannels(image);
     }
   }
 
@@ -669,9 +672,7 @@ export default class App extends React.Component {
     const newImage = this.state.image && !prevState.image;
     if (this.state.image && (channelsChanged || newImage || imageChanged )) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
-      this.state.image.fuse();
     }
-
   }
 
   toggleControlPanel(value) {
