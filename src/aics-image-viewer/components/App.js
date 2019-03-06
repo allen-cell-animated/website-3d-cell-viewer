@@ -181,16 +181,22 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    const { userSelections } = this.state;
-      if (this.state.hasCellId) {
-        const name = App.buildName(
-          this.state.cellLine,
-          this.state.fovId,
+    const { userSelections, cellId, cellLine, fovId} = this.state;
+    let name;
+    let type;
+    if (cellId && !this.props.isLegacyName) {
+      name = App.buildName(
+        cellLine,
+        fovId,
           userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.cellId
         );
-        const type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
-        this.openImage(name, type, false);
+      type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
+      // cellId is a in the form directory/legacyName;
+    } else if (cellId && this.props.isLegacyName) {
+      name = cellId;
+      type = LEGACY_IMAGE_ID_QUERY;
     }
+    this.openImage(name, type, false);
   }
 
   onView3DCreated(view3d) {
@@ -550,25 +556,25 @@ export default class App extends React.Component {
       cellLine,
     } = input;
     let name;
-    if (imageType === FULL_FIELD_IMAGE) {
+    if (imageType === FULL_FIELD_IMAGE && cellLine && fovId) {
       name = App.buildName(cellLine, fovId);
     }
-    else if (imageType === SEGMENTED_CELL) {
+    else if (imageType === SEGMENTED_CELL && cellLine && fovId && cellId) {
       name = App.buildName(cellLine, fovId, cellId);
     }
     else if (imageType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
-      const components = input.split("_");
+      const components = cellId.split("_");
       cellLine = "";
       fovId = "";
       cellId = "";
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
-        imageType = FOV_ID_QUERY;
+        imageType = FULL_FIELD_IMAGE;
         if (components.length > 2) {
           cellId = components[2];
-          imageType = CELL_ID_QUERY;
+          imageType = SEGMENTED_CELL;
         }
         name = App.buildName(cellLine, fovId, cellId);
       }
@@ -640,6 +646,7 @@ export default class App extends React.Component {
       cellId,
       fovId,
       cellLine,
+      isLegacyName,
     } = this.props;
     const { userSelections } = this.state;
 
@@ -651,6 +658,9 @@ export default class App extends React.Component {
     }
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
+      if (isLegacyName) {
+        return this.setQueryInputAndRequestImage({ cellId }, LEGACY_IMAGE_ID_QUERY);
+      }
       return this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
     }
 
