@@ -411,7 +411,6 @@ export default class App extends React.Component {
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
         view3d.updateChannelColor(image, index, newColor);
         view3d.updateMaterial(image);
-        // view3d.updateActiveChannels(image);
         break;
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));

@@ -12,9 +12,6 @@ import {
 from 'antd';
 import classNames from 'classnames';
 
-// polyfill for window.customElements (Firefox) - required for tf-editor to work.
-// see https://github.com/webcomponents/webcomponentsjs/issues/870
-
 import TfEditor from '../TfEditor';
 
 import colorPalette from '../../shared/colorPalette';
@@ -227,7 +224,6 @@ export default class ChannelsWidgetRow extends React.Component {
     } = this.props;
     return (<TfEditor 
           index={index}
-          id={'aicstfeditor_' + index}
           fit-to-data={false}
           width={250}
           height={150}
