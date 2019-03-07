@@ -31,6 +31,22 @@
   .ant-collapse-item .ant-collapse-header {
     padding: 0;
   }
+  .ant-checkbox-inner {
+    background-color: transparent;
+  }
+
+  .ant-checkbox-indeterminate .ant-checkbox-inner {
+    background-color: transparent;
+
+    :after {
+      background-color: white;
+
+    }
+  }
+
+  .ant-collapse {
+    border-radius: 0;
+  }
   //slider settings
   @extend %axis-override;
 }

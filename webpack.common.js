@@ -40,11 +40,7 @@ module.exports = {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        include: [
-          path.resolve(__dirname, 'public'),
-          path.resolve(__dirname, 'src/aics-image-viewer/components')
-        ],
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /dist/],
         use: 'babel-loader'
       },
       {
@@ -74,16 +70,6 @@ module.exports = {
           'style-loader',
           'css-loader'
         ]
-      },
-      {
-          loader: 'babel-loader',
-          exclude: /node_modules/,
-          test: /\.js$/,
-          options: {
-              plugins: [
-                  ['import', { libraryName: "antd", style: true }]
-              ]
-          },
       },
       {
         test: /\.less$/,
@@ -123,11 +109,6 @@ module.exports = {
       {
         test: /Worker\.js$/,
         use: 'worker-loader?inline=true'
-      },
-      {
-        test: /\.html$/,
-        exclude: /index\.html/,
-        use: ['polymer-webpack-loader']
       }
     ]
   }

@@ -19,11 +19,10 @@ class ColorPicker extends React.Component {
       b: '19',
       a: '1'
     };
-    const newColor = props.color || [defaultColor.r, defaultColor.g, defaultColor.b];
-    let color = { r: newColor[0], g: newColor[1], b:newColor[2], a: '1' };
+    const color = props.color || defaultColor;
     this.state = {
       displayColorPicker: false,
-      color: color
+      color,
     };
   }
 
@@ -51,13 +50,9 @@ class ColorPicker extends React.Component {
     }
   };
 
-  componentDidMount() {
-    this.props.onColorChange(this.state.color, this.state.color, this.props.idx);
-  }
-
   componentWillReceiveProps(newProps) {
     if (newProps.color && newProps.color !== this.state.color) {
-      this.setState({color: {r:newProps.color[0], g:newProps.color[1], b:newProps.color[2], a:newProps.color[3]} });
+      this.setState({ color: newProps.color });
     }
   }
 

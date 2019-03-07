@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {
   Button,
   Icon, 
@@ -13,11 +12,7 @@ import {
 from 'antd';
 import classNames from 'classnames';
 
-// polyfill for window.customElements (Firefox) - required for tf-editor to work.
-// see https://github.com/webcomponents/webcomponentsjs/issues/870
-import '@webcomponents/webcomponentsjs/webcomponents-sd-ce.js';
-import '../tf-editor.html';
-import 'react-polymer';
+import TfEditor from '../TfEditor';
 
 import colorPalette from '../../shared/colorPalette';
 import {
@@ -31,6 +26,7 @@ import {
 import ColorPicker from '../ColorPicker.js';
 
 import './styles.scss';
+import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
 
 const Panel = Collapse.Panel;
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
@@ -39,7 +35,6 @@ const ISOVALUE_DEFAULT = 128.0;
 export default class ChannelsWidgetRow extends React.Component {
   constructor(props) {
     super(props);
-    this.storeTfEditor = this.storeTfEditor.bind(this);
     this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
@@ -51,24 +46,6 @@ export default class ChannelsWidgetRow extends React.Component {
     this.state = {
       controlsOpen: false,
     };
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.channelDataReady !== nextProps.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(nextProps.index, nextProps.channelDataForChannel);
-      this.tfeditor.onChangeCallback = nextProps.updateChannelTransferFunction;
-    }
-  }
-
-  // this happens after componentWillMount, after render, and before componentDidMount. it is set in a ref={} attr.
-  // the Card implementation is controlling this component lifetime event
-  storeTfEditor(el) {
-    this.tfeditor = el;
-    
-    if (this.props.channelDataReady && this.tfeditor) {
-      this.tfeditor.setData(this.props.index, this.props.channelDataForChannel);
-      this.tfeditor.onChangeCallback = this.props.updateChannelTransferFunction;
-    }
   }
 
   volumeCheckHandler({ target }) {
@@ -190,13 +167,16 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   onColorChange(newRGB, oldRGB, index) {
-    this.props.changeOneChannelSetting(index, 'color', newRGB);
+    const color = rgbObjectToArray(newRGB);
+    this.props.changeOneChannelSetting(index, 'color', color);
   }
 
   createColorPicker() {
+    const color = colorArrayToRgbObject(this.props.color);
     return (
       <div style={STYLES.colorPicker}>
-        <ColorPicker color={this.props.color}
+        <ColorPicker 
+          color={color}
           onColorChange={this.onColorChange}
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
@@ -237,17 +217,21 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   createTFEditor() {
-    return (this.props.channelDataForChannel &&
-        <tf-editor
-          ref={this.storeTfEditor}
-          id={'aicstfeditor_' + this.props.index}
+    const {
+      channelDataForChannel,
+      updateChannelTransferFunction,
+      index,
+    } = this.props;
+    return (<TfEditor 
+          index={index}
           fit-to-data={false}
           width={250}
           height={150}
-          control-points={JSON.stringify(this.props.lutControlPoints)}
-        >
-        </tf-editor>
-      );
+          volumeData={channelDataForChannel.volumeData}
+          channelData={channelDataForChannel}
+          controlPoints={channelDataForChannel.lutControlPoints}
+          updateChannelTransferFunction={updateChannelTransferFunction}
+    />);
   }
 
   renderSurfaceControls() {

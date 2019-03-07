@@ -1,12 +1,14 @@
 @import "../../assets/styles/variables";
 
-.ant-layout-sider-zero-width-trigger {
-    z-index: 2000;
-    background-color: $header-gray;
-}
+.cell-viewer-app {
+    .ant-layout-sider-zero-width-trigger {
+        z-index: 2000;
+        background-color: $header-gray;
+    }
 
-.ant-layout-sider-zero-width-trigger:hover {
-    background-color: $light-gray;
+    .ant-layout-sider-zero-width-trigger:hover {
+        background-color: $light-gray;
+    }
 }
 
 .control-panel {
@@ -49,7 +51,7 @@
 
         .ant-collapse-item {
             .ant-collapse-header {
-                text-align: right;
+                height: 0;
             }
         }
 
@@ -64,7 +66,9 @@
         }
 
         .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
-            transform: translateY(-100%);
+            transform: translateY(-250%);
+            position: absolute;
+            left: 16px;
         }
 
         .ant-collapse>.ant-collapse-item {

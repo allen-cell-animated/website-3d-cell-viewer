@@ -119,13 +119,13 @@ export default class App extends React.Component {
 
   constructor(props) {
     super(props);
-
     this.state = {
       image: null,
       view3d: null,
       files: null,
-      queryInput: null,
-      queryInputType: null,
+      cellId: props.cellId,
+      fovId: props.fovId,
+      cellLine: props.cellLine,
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
@@ -134,7 +134,7 @@ export default class App extends React.Component {
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
       // did the requested image have a cell id (in queryInput)?
-      hasCellId: false,
+      hasCellId: !!props.cellId,
       // state set by the UI:
       userSelections: {
         imageType: SEGMENTED_CELL,
@@ -159,7 +159,7 @@ export default class App extends React.Component {
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
-    this.setQueryInput = this.setQueryInput.bind(this);
+    this.setQueryInputAndRequestImage = this.setQueryInputAndRequestImage.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
     this.updateURLSearchParams = this.updateURLSearchParams.bind(this);
@@ -180,8 +180,27 @@ export default class App extends React.Component {
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
+  componentDidMount() {
+    const { userSelections, cellId, cellLine, fovId} = this.state;
+    let name;
+    let type;
+    if (cellId && !this.props.isLegacyName) {
+      name = App.buildName(
+        cellLine,
+        fovId,
+          userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.cellId
+        );
+      type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
+      // cellId is a in the form directory/legacyName;
+    } else if (cellId && this.props.isLegacyName) {
+      name = cellId;
+      type = LEGACY_IMAGE_ID_QUERY;
+    }
+    this.openImage(name, type, false);
+  }
+
   onView3DCreated(view3d) {
-    this.setState({view3d});
+    this.setState({ view3d });
   }
 
   stopPollingForImage() {
@@ -268,7 +287,7 @@ export default class App extends React.Component {
   }
 
   intializeNewImage(aimg) {
-    const { userSelections } = this.state;
+    const { userSelections, view3d } = this.state;
     let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
@@ -277,22 +296,22 @@ export default class App extends React.Component {
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
-
-    const { view3d } = this.state;
     
     // Here is where we officially hand the image to the volume-viewer
     view3d.removeAllVolumes();
+
     view3d.addVolume(aimg);
 
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    view3d.setVolumeRenderMode(aimg, userSelections[PATH_TRACE] ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
     view3d.updateExposure(imageBrightness);
     view3d.updateDensity(aimg, imageDensity);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.updateActiveChannels(aimg);
+
+
   }
 
   updateStateOnLoadImage(channelNames) {
@@ -391,7 +410,7 @@ export default class App extends React.Component {
       case COLOR:
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
         view3d.updateChannelColor(image, index, newColor);
-        view3d.updateActiveChannels(image);
+        view3d.updateMaterial(image);
         break;
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
@@ -405,6 +424,7 @@ export default class App extends React.Component {
         break;
       case PATH_TRACE:
         view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
+        view3d.updateActiveChannels(image);
         break;
       case ALPHA_MASK_SLIDER_LEVEL:
         let imageMask = alphaSliderToImageValue(newValue);
@@ -484,20 +504,18 @@ export default class App extends React.Component {
   onSwitchFovCell(value) {
     if (this.state.hasCellId) {
       const name = App.buildName(
-        this.state.queryInput.cellLine, 
-        this.state.queryInput.fovId, 
-        value === FULL_FIELD_IMAGE ? null : this.state.queryInput.cellId
+        this.state.cellLine, 
+        this.state.fovId, 
+        value === FULL_FIELD_IMAGE ? null : this.state.cellId
       );
       const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
       this.openImage(name, type, false);
-      this.setState((prevState) => {
-        return {
+      this.setState({
           sendingQueryRequest: true,
           userSelections: {
               ...this.state.userSelections,
             imageType: value,
           }
-        };
       });
     }
   }
@@ -531,45 +549,49 @@ export default class App extends React.Component {
     }
   }
 
-  setQueryInput(input, type) {
-    let name = input;
-    if (type === FOV_ID_QUERY) {
-      name = App.buildName(input.cellLine, input.fovId);
+  setQueryInputAndRequestImage(input, type) {
+    let imageType = type || this.state.userSelections.imageType;
+    let {
+      cellId,
+      fovId,
+      cellLine,
+    } = input;
+    let name;
+    if (imageType === FULL_FIELD_IMAGE && cellLine && fovId) {
+      name = App.buildName(cellLine, fovId);
     }
-    else if (type === CELL_ID_QUERY) {
-      name = App.buildName(input.cellLine, input.fovId, input.cellId);
+    else if (imageType === SEGMENTED_CELL && cellLine && fovId && cellId) {
+      name = App.buildName(cellLine, fovId, cellId);
     }
-    else if (type === IMAGE_NAME_QUERY) {
+    else if (imageType === IMAGE_NAME_QUERY) {
       // decompose the name into cellLine, fovId, and cellId ?
-      const components = input.split("_");
-      let cellLine = "";
-      let fovId = "";
-      let cellId = "";
+      const components = cellId.split("_");
+      cellLine = "";
+      fovId = "";
+      cellId = "";
       if (components.length >= 2) {
         cellLine = components[0];
         fovId = components[1];
-        type = FOV_ID_QUERY;
+        imageType = FULL_FIELD_IMAGE;
         if (components.length > 2) {
           cellId = components[2];
-          type = CELL_ID_QUERY;
+          imageType = SEGMENTED_CELL;
         }
         name = App.buildName(cellLine, fovId, cellId);
       }
-      input = {
-        cellLine,
-        fovId,
-        cellId
-      };
     }
-    // LEGACY_IMAGE_ID_QUERY is a passthrough
-
     this.setState({
-      queryInput: input,
-      queryInputType: type,
+      cellLine: cellLine,
+      fovId: fovId,
+      cellId,
       hasCellId: !!input.cellId,
-      sendingQueryRequest: true
+      sendingQueryRequest: true,
+      userSelections: {
+        ...this.state.userSelections,
+        imageType,
+      }
     });
-    this.openImage(name, type, true);
+    this.openImage(name, imageType, true);
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
@@ -590,6 +612,7 @@ export default class App extends React.Component {
           }
         }
       });
+      view3d.updateActiveChannels(image);
     }
   }
 
@@ -598,12 +621,12 @@ export default class App extends React.Component {
   componentWillMount() {
     const legacyImageIdToShow = UtilsService.getParameterByName(LEGACY_IMAGE_ID_QUERY);
     if (legacyImageIdToShow) {
-      this.setQueryInput(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
+      this.setQueryInputAndRequestImage(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
     }
     else {
       const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
       if (imageIdToShow) {
-        this.setQueryInput(imageIdToShow, IMAGE_NAME_QUERY);
+        this.setQueryInputAndRequestImage(imageIdToShow, IMAGE_NAME_QUERY);
       }
       else {
         // cellid and cellline and fovid
@@ -611,28 +634,43 @@ export default class App extends React.Component {
         const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
         const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
         if (cellId && fovId && cellLine) {
-          this.setQueryInput({cellId, fovId, cellLine}, CELL_ID_QUERY);
+          this.setQueryInputAndRequestImage({cellId, fovId, cellLine}, CELL_ID_QUERY);
         }
         else if (fovId && cellLine) {
-          this.setQueryInput({fovId, cellLine}, FOV_ID_QUERY);
+          this.setQueryInputAndRequestImage({fovId, cellLine}, FOV_ID_QUERY);
         }
       }
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const channelsChanged = !isEqual(this.state.userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
-    const newImage = this.state.image && !prevProps.image;
-    const imageChanged = this.state.image && prevProps.image ? this.state.image.imageName !== prevState.image.imageName : false;
-    if ((channelsChanged || imageChanged || newImage) && (this.state.image)) {
-      this.updateImageVolumeAndSurfacesEnabledFromAppState();
-      this.state.view3d.updateActiveChannels(this.state.image);
-    }
+    const {
+      cellId,
+      fovId,
+      cellLine,
+      isLegacyName,
+    } = this.props;
+    const { userSelections } = this.state;
+
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
       }, 200);
+    }
+    const newRequest = cellId !== prevProps.cellId;
+    if (newRequest) {
+      if (isLegacyName) {
+        return this.setQueryInputAndRequestImage({ cellId }, LEGACY_IMAGE_ID_QUERY);
+      }
+      return this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
+    }
+
+    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
+    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
+    const newImage = this.state.image && !prevState.image;
+    if (this.state.image && (channelsChanged || newImage || imageChanged )) {
+      this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
   }
 
