@@ -106,7 +106,6 @@ export default class ChannelsWidget extends React.Component {
                   <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
                                         index={actualIndex}
                                         channelDataForChannel={channelDataChannels[actualIndex]}
-                                        lutControlPoints={channelDataChannels[actualIndex].lutControlPoints}
                                         name={formatChannelName(channel.name)}
                                         volumeChecked={channel[VOLUME_ENABLED]}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
