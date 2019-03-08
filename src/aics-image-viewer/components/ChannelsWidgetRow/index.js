@@ -218,6 +218,7 @@ export default class ChannelsWidgetRow extends React.Component {
 
   createTFEditor() {
     const {
+      channelControlPoints,
       channelDataForChannel,
       updateChannelTransferFunction,
       index,
@@ -229,7 +230,7 @@ export default class ChannelsWidgetRow extends React.Component {
           height={150}
           volumeData={channelDataForChannel.volumeData}
           channelData={channelDataForChannel}
-          controlPoints={channelDataForChannel.lutControlPoints}
+          controlPoints={channelControlPoints}
           updateChannelTransferFunction={updateChannelTransferFunction}
     />);
   }

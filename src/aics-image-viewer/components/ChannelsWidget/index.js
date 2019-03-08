@@ -78,6 +78,7 @@ export default class ChannelsWidget extends React.Component {
     const { 
       channelGroupedByType, 
       channels, 
+      channelControlPoints,
       channelDataReady,
       channelDataChannels,
     } = this.props;
@@ -110,6 +111,7 @@ export default class ChannelsWidget extends React.Component {
                                         volumeChecked={channel[VOLUME_ENABLED]}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
                                         channelDataReady={channelDataReady[actualIndex]}
+                                        channelControlPoints={channelControlPoints[actualIndex]}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}

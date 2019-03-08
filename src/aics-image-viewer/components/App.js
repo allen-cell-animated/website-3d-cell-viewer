@@ -130,6 +130,7 @@ export default class App extends React.Component {
       sendingQueryRequest: false,
       openFilesOnly: false,
       channelDataReady: {},
+      channelControlPoints: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
@@ -342,11 +343,15 @@ export default class App extends React.Component {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
     }
     // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
-      aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
+    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
+      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
+      aimg.setLut(channelIndex, lutObject.lut);
+
       const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
+      const newChannelControlPoints = { ...this.state.channelControlPoints, [channelIndex]: lutObject.controlPoints};
       this.setState({
-        channelDataReady: newChannelDataReady
+        channelDataReady: newChannelDataReady,
+        channelControlPoints: newChannelControlPoints,
       });
       if (this.state.view3d) {
         if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
@@ -533,7 +538,7 @@ export default class App extends React.Component {
 
   updateChannelTransferFunction(index, lut, controlPoints) {
     if (this.state.image) {
-      this.state.image.getChannel(index).setLut(lut, controlPoints);
+      this.state.image.setLut(index, lut);
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);
       }
@@ -713,6 +718,7 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 channelDataReady={this.state.channelDataReady}
+                channelControlPoints={this.state.channelControlPoints}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}

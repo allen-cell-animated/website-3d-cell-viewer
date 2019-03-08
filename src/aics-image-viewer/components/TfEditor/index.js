@@ -4,6 +4,8 @@ import './styles.scss';
 
 import { Button } from 'antd';
 
+const DEFAULT_COLOR = 'purple';
+
 export default class MyTfEditor extends React.Component {
 
     static get is() {
@@ -47,7 +49,7 @@ export default class MyTfEditor extends React.Component {
          * @type {Array}
          */
         this.state = {
-            controlPoints: props.controlPoints,
+            controlPoints: props.controlPoints.map(controlPoint => ({...controlPoint, color:DEFAULT_COLOR})),
         };
     }
 
@@ -110,7 +112,7 @@ export default class MyTfEditor extends React.Component {
         // Keep track of control points interaction
         this.dragged = null;
         this.selected = null;
-        this.last_color = 'purple';
+        this.last_color = DEFAULT_COLOR;
     }
 
     _initializeElements() {
@@ -138,12 +140,12 @@ export default class MyTfEditor extends React.Component {
                 {
                 'x': extent[0],
                 'opacity': 0,
-                'color': 'white'
+                'color': DEFAULT_COLOR
                 },
             {
                 'x': extent[1],
                 'opacity': 1,
-                'color': 'white'
+                'color': DEFAULT_COLOR
             }];
             this.setState({
                 controlPoints: newControlPoints
@@ -469,8 +471,7 @@ export default class MyTfEditor extends React.Component {
             }
             // send update to image rendering
             this.props.updateChannelTransferFunction(this.props.index,
-                opacityGradient,
-                controlPoints
+                opacityGradient
             );
             if (ctx.canvas.parentNode._x3domNode !== undefined) {
                 ctx.canvas.parentNode._x3domNode.invalidateGLObject();
@@ -582,43 +583,48 @@ export default class MyTfEditor extends React.Component {
     _autoXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_auto();
-        this.selected = channelData.lutControlPoints[0];
+        const lutObj = channelData.histogram.lutGenerator_auto();
+        const pts = lutObj.controlPoints.map(pt => ({...pt, color:DEFAULT_COLOR}));
+        this.selected = pts[0];
 
         this.setState({
-            controlPoints: channelData.lutControlPoints,
+            controlPoints: pts,
         });
     }
 
     _auto2XF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_auto2();
-        this.selected = channelData.lutControlPoints[0];
+        const lutObj = channelData.histogram.lutGenerator_auto2();
+        const pts = lutObj.controlPoints.map(pt => ({...pt, color:DEFAULT_COLOR}));
+        this.selected = pts[0];
 
         this.setState({
-            controlPoints: channelData.lutControlPoints,
+            controlPoints: pts,
         });
     }
 
     _bestFitXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_bestFit();
-        this.selected = channelData.lutControlPoints[0];
+        const lutObj = channelData.histogram.lutGenerator_bestFit();
+        const pts = lutObj.controlPoints.map(pt => ({...pt, color:DEFAULT_COLOR}));
+        this.selected = pts[0];
 
         this.setState({
-            controlPoints: channelData.lutControlPoints,
-        }); 
+            controlPoints: pts,
+        });
     }
 
     _resetXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_fullRange();
-        this.selected = channelData.lutControlPoints[0];
+        const lutObj = channelData.histogram.lutGenerator_fullRange();
+        const pts = lutObj.controlPoints.map(pt => ({...pt, color:DEFAULT_COLOR}));
+        this.selected = pts[0];
+
         this.setState({
-            controlPoints: channelData.lutControlPoints,
+            controlPoints: pts,
         });
     }
 
