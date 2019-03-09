@@ -110,11 +110,12 @@ export default class ChannelsWidget extends React.Component {
                                         volumeChecked={channel[VOLUME_ENABLED]}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
                                         channelDataReady={channelDataReady[actualIndex]}
-                                        channelControlPoints={channelControlPoints[actualIndex]}
+                                        channelControlPoints={channel.controlPoints}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}
                                         updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                                        updateChannelLutControlPoints={this.props.updateChannelLutControlPoints}
                                         changeOneChannelSetting={this.props.changeOneChannelSetting}
                                         onColorChangeComplete={this.props.onColorChangeComplete}
                                         handleChangeToImage={this.props.handleChangeToImage}

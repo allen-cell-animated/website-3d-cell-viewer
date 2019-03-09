@@ -221,6 +221,7 @@ export default class ChannelsWidgetRow extends React.Component {
       channelControlPoints,
       channelDataForChannel,
       updateChannelTransferFunction,
+      updateChannelLutControlPoints,
       index,
     } = this.props;
     return (<TfEditor 
@@ -232,6 +233,7 @@ export default class ChannelsWidgetRow extends React.Component {
           channelData={channelDataForChannel}
           controlPoints={channelControlPoints}
           updateChannelTransferFunction={updateChannelTransferFunction}
+          updateChannelLutControlPoints={updateChannelLutControlPoints}
     />);
   }
 

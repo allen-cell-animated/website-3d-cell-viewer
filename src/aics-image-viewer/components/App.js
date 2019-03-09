@@ -51,6 +51,7 @@ import {
 
 import ControlPanel from './ControlPanel';
 import ViewerWrapper from './CellViewerCanvasWrapper';
+import {TFEDITOR_DEFAULT_COLOR} from './TfEditor';
 
 import '../assets/styles/globals.scss';
 import '../assets/styles/no-ui-slider.min.scss';
@@ -130,7 +131,6 @@ export default class App extends React.Component {
       sendingQueryRequest: false,
       openFilesOnly: false,
       channelDataReady: {},
-      channelControlPoints: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
@@ -158,6 +158,7 @@ export default class App extends React.Component {
     this.loadFromJson = this.loadFromJson.bind(this);
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
+    this.updateChannelLutControlPoints = this.updateChannelLutControlPoints.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.setQueryInputAndRequestImage = this.setQueryInputAndRequestImage.bind(this);
@@ -344,14 +345,19 @@ export default class App extends React.Component {
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
-      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
-      aimg.setLut(channelIndex, lutObject.lut);
 
       const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
-      const newChannelControlPoints = { ...this.state.channelControlPoints, [channelIndex]: lutObject.controlPoints};
+
+      // first time: if userSelections control points don't exist yet, then do some init.
+      if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex].controlPoints) {
+        const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
+        aimg.setLut(channelIndex, lutObject.lut);
+        const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
+        this.updateChannelLutControlPoints(channelIndex, newControlPoints);  
+      }
+    
       this.setState({
-        channelDataReady: newChannelDataReady,
-        channelControlPoints: newChannelControlPoints,
+        channelDataReady: newChannelDataReady
       });
       if (this.state.view3d) {
         if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
@@ -536,13 +542,17 @@ export default class App extends React.Component {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
-  updateChannelTransferFunction(index, lut, controlPoints) {
+  updateChannelTransferFunction(index, lut) {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);
       }
     }
+  }
+  
+  updateChannelLutControlPoints(index, controlPoints) {
+    this.changeOneChannelSetting(index, 'controlPoints', controlPoints);
   }
 
   updateURLSearchParams(input, type) {
@@ -718,7 +728,6 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 channelDataReady={this.state.channelDataReady}
-                channelControlPoints={this.state.channelControlPoints}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}
@@ -734,6 +743,7 @@ export default class App extends React.Component {
                 handleChangeUserSelection={this.handleChangeUserSelection}
                 handleChangeToImage={this.handleChangeToImage}
                 updateChannelTransferFunction={this.updateChannelTransferFunction}
+                updateChannelLutControlPoints={this.updateChannelLutControlPoints}
                 onViewModeChange={this.onViewModeChange}
                 onColorChangeComplete={this.onColorChangeComplete}
                 onAutorotateChange={this.onAutorotateChange}
