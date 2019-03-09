@@ -225,6 +225,7 @@ export default class ChannelsWidgetRow extends React.Component {
       index,
     } = this.props;
     return (<TfEditor 
+          id={'TFEditor'+index}
           index={index}
           fit-to-data={false}
           width={250}

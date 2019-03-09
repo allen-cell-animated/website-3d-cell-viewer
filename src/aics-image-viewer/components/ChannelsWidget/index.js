@@ -78,7 +78,6 @@ export default class ChannelsWidget extends React.Component {
     const { 
       channelGroupedByType, 
       channels, 
-      channelControlPoints,
       channelDataReady,
       channelDataChannels,
     } = this.props;
@@ -101,7 +100,7 @@ export default class ChannelsWidget extends React.Component {
                 itemLayout="horizontal"
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
-                  const channel = channels[actualIndex];           
+                  const channel = channels[actualIndex];
                   return (
                   <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
                                         index={actualIndex}

@@ -348,7 +348,7 @@ export default class App extends React.Component {
 
       const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
 
-      // first time: if userSelections control points don't exist yet, then do some init.
+      // first time: if userSelections control points don't exist yet for this channel, then do some init.
       if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex].controlPoints) {
         const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
         aimg.setLut(channelIndex, lutObject.lut);
