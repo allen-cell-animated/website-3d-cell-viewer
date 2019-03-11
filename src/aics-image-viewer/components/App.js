@@ -157,6 +157,7 @@ export default class App extends React.Component {
 
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
+    this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
@@ -335,6 +336,32 @@ export default class App extends React.Component {
     return newChannelSettings;
   }
 
+  onChannelDataLoaded(aimg, newChannelSettings, channelIndex) {
+    const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true};
+
+    // first time: if userSelections control points don't exist yet for this channel, then do some init.
+    if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex][LUT_CONTROL_POINTS]) {
+      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
+      aimg.setLut(channelIndex, lutObject.lut);
+      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
+      this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
+    }
+  
+    this.setState({
+      channelDataReady: newChannelDataReady
+    });
+    if (this.state.view3d) {
+      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+        this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
+      }
+      this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
+    }
+    // when any channel data has arrived:
+    if (this.state.sendingQueryRequest) {
+      this.setState({ sendingQueryRequest: false });
+    }
+  }
+
   loadFromJson(obj, title, locationHeader) {
     const aimg = new Volume(obj);
 
@@ -345,30 +372,7 @@ export default class App extends React.Component {
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
-
-      const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
-
-      // first time: if userSelections control points don't exist yet for this channel, then do some init.
-      if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex][LUT_CONTROL_POINTS]) {
-        const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
-        aimg.setLut(channelIndex, lutObject.lut);
-        const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
-        this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
-      }
-    
-      this.setState({
-        channelDataReady: newChannelDataReady
-      });
-      if (this.state.view3d) {
-        if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
-          this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
-        }
-        this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
-      }
-      // when any channel data has arrived:
-      if (this.state.sendingQueryRequest) {
-        this.setState({ sendingQueryRequest: false });
-      }
+      this.onChannelDataLoaded(aimg, newChannelSettings, channelIndex);
     });
     this.intializeNewImage(aimg);
     this.setState({ image: aimg });
