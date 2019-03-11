@@ -113,7 +113,6 @@ export default class ControlPanel extends React.Component {
             channelDataReady={this.props.channelDataReady}
             handleChangeToImage={this.props.handleChangeToImage}
             updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-            updateChannelLutControlPoints={this.props.updateChannelLutControlPoints}
             changeOneChannelSetting={this.props.changeOneChannelSetting}
             onColorChangeComplete={this.props.onColorChangeComplete}
             onApplyColorPresets={this.props.onApplyColorPresets}

@@ -9,8 +9,9 @@ import {
 
 import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
-  OBSERVED_CHANNEL_KEY,
   ISO_SURFACE_ENABLED,
+  LUT_CONTROL_POINTS,
+  OBSERVED_CHANNEL_KEY,
   VOLUME_ENABLED,
 } from '../../shared/constants';
 import { channelGroupTitles } from '../../shared/enums/channelGroups';
@@ -109,12 +110,11 @@ export default class ChannelsWidget extends React.Component {
                                         volumeChecked={channel[VOLUME_ENABLED]}
                                         isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
                                         channelDataReady={channelDataReady[actualIndex]}
-                                        channelControlPoints={channel.controlPoints}
+                                        channelControlPoints={channel[LUT_CONTROL_POINTS]}
                                         isovalue={channel.isovalue}
                                         opacity={channel.opacity}
                                         color={channel.color}
                                         updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                                        updateChannelLutControlPoints={this.props.updateChannelLutControlPoints}
                                         changeOneChannelSetting={this.props.changeOneChannelSetting}
                                         onColorChangeComplete={this.props.onColorChangeComplete}
                                         handleChangeToImage={this.props.handleChangeToImage}

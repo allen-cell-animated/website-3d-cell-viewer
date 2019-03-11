@@ -144,7 +144,7 @@ export default class MyTfEditor extends React.Component {
                 'opacity': 1,
                 'color': TFEDITOR_DEFAULT_COLOR
             }];
-            this.props.updateChannelLutControlPoints(this.props.index, newControlPoints);
+            this.props.updateChannelLutControlPoints(newControlPoints);
         }
         this.selected = this.props.controlPoints[0];
         this.area
@@ -264,7 +264,7 @@ export default class MyTfEditor extends React.Component {
                 newControlPoints.splice(0, x0);
             }
 
-            this.updateChannelLutControlPoints(this.props.index, newControlPoints);
+            this.updateChannelLutControlPoints(newControlPoints);
 
             this.xScale.domain(dataExtent);
             this.dataScale.domain(dataExtent);
@@ -493,7 +493,7 @@ export default class MyTfEditor extends React.Component {
 
         let newControlPoints = [...this.props.controlPoints];
         newControlPoints.splice(indexPos, 0, point);
-        this.props.updateChannelLutControlPoints(this.props.index, newControlPoints);
+        this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
     _mousemove() {
@@ -528,7 +528,7 @@ export default class MyTfEditor extends React.Component {
         } else if (virtualIndex2 - index >= 2) {
             newControlPoints.splice(index + 1, 1);
         }
-        this.props.updateChannelLutControlPoints(this.props.index, newControlPoints);
+        this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
     _mouseup() {
@@ -549,7 +549,7 @@ export default class MyTfEditor extends React.Component {
                     let newControlPoints = [...this.props.controlPoints];
                     newControlPoints.splice(i, 1);
                     this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
-                    this.props.updateChannelLutControlPoints(this.props.index, newControlPoints);
+                    this.props.updateChannelLutControlPoints(newControlPoints);
                     break;
                 }
         }
@@ -573,7 +573,7 @@ export default class MyTfEditor extends React.Component {
     updateControlPointsWithoutColor(ptsWithoutColor) {
         const pts = ptsWithoutColor.map(pt => ({...pt, color:TFEDITOR_DEFAULT_COLOR}));
         this.selected = pts[0];
-        this.props.updateChannelLutControlPoints(this.props.index, pts);
+        this.props.updateChannelLutControlPoints(pts);
     }
 
     _autoXF() {

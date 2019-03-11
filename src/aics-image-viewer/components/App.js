@@ -30,6 +30,7 @@ import {
   ALPHA_MASK_SLIDER_2D_DEFAULT,
   SEGMENTED_CELL,
   VOLUME_ENABLED,
+  LUT_CONTROL_POINTS,
   ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
   FULL_FIELD_IMAGE,
@@ -158,7 +159,6 @@ export default class App extends React.Component {
     this.loadFromJson = this.loadFromJson.bind(this);
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
-    this.updateChannelLutControlPoints = this.updateChannelLutControlPoints.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.setQueryInputAndRequestImage = this.setQueryInputAndRequestImage.bind(this);
@@ -349,11 +349,11 @@ export default class App extends React.Component {
       const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
 
       // first time: if userSelections control points don't exist yet for this channel, then do some init.
-      if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex].controlPoints) {
+      if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex][LUT_CONTROL_POINTS]) {
         const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
         aimg.setLut(channelIndex, lutObject.lut);
         const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
-        this.updateChannelLutControlPoints(channelIndex, newControlPoints);  
+        this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
       }
     
       this.setState({
@@ -551,10 +551,6 @@ export default class App extends React.Component {
     }
   }
   
-  updateChannelLutControlPoints(index, controlPoints) {
-    this.changeOneChannelSetting(index, 'controlPoints', controlPoints);
-  }
-
   updateURLSearchParams(input, type) {
     if (input && type) {
       const params = new URLSearchParams();
@@ -743,7 +739,6 @@ export default class App extends React.Component {
                 handleChangeUserSelection={this.handleChangeUserSelection}
                 handleChangeToImage={this.handleChangeToImage}
                 updateChannelTransferFunction={this.updateChannelTransferFunction}
-                updateChannelLutControlPoints={this.updateChannelLutControlPoints}
                 onViewModeChange={this.onViewModeChange}
                 onColorChangeComplete={this.onColorChangeComplete}
                 onAutorotateChange={this.onAutorotateChange}
