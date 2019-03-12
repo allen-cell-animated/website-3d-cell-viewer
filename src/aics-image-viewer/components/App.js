@@ -30,6 +30,7 @@ import {
   ALPHA_MASK_SLIDER_2D_DEFAULT,
   SEGMENTED_CELL,
   VOLUME_ENABLED,
+  LUT_CONTROL_POINTS,
   ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
   FULL_FIELD_IMAGE,
@@ -51,6 +52,7 @@ import {
 
 import ControlPanel from './ControlPanel';
 import ViewerWrapper from './CellViewerCanvasWrapper';
+import {TFEDITOR_DEFAULT_COLOR} from './TfEditor';
 
 import '../assets/styles/globals.scss';
 import '../assets/styles/no-ui-slider.min.scss';
@@ -155,6 +157,7 @@ export default class App extends React.Component {
 
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
+    this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
@@ -333,6 +336,32 @@ export default class App extends React.Component {
     return newChannelSettings;
   }
 
+  onChannelDataLoaded(aimg, newChannelSettings, channelIndex) {
+    const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true};
+
+    // first time: if userSelections control points don't exist yet for this channel, then do some init.
+    if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex][LUT_CONTROL_POINTS]) {
+      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
+      aimg.setLut(channelIndex, lutObject.lut);
+      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
+      this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
+    }
+  
+    this.setState({
+      channelDataReady: newChannelDataReady
+    });
+    if (this.state.view3d) {
+      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+        this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
+      }
+      this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
+    }
+    // when any channel data has arrived:
+    if (this.state.sendingQueryRequest) {
+      this.setState({ sendingQueryRequest: false });
+    }
+  }
+
   loadFromJson(obj, title, locationHeader) {
     const aimg = new Volume(obj);
 
@@ -342,22 +371,8 @@ export default class App extends React.Component {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
     }
     // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(obj.images, (url, channelIndex, atlasdata, atlaswidth, atlasheight) => {
-      aimg.setChannelDataFromAtlas(channelIndex, atlasdata, atlaswidth, atlasheight);
-      const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true} ;
-      this.setState({
-        channelDataReady: newChannelDataReady
-      });
-      if (this.state.view3d) {
-        if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
-          this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
-        }
-        this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
-      }
-      // when any channel data has arrived:
-      if (this.state.sendingQueryRequest) {
-        this.setState({ sendingQueryRequest: false });
-      }
+    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
+      this.onChannelDataLoaded(aimg, newChannelSettings, channelIndex);
     });
     this.intializeNewImage(aimg);
     this.setState({ image: aimg });
@@ -531,15 +546,15 @@ export default class App extends React.Component {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
-  updateChannelTransferFunction(index, lut, controlPoints) {
+  updateChannelTransferFunction(index, lut) {
     if (this.state.image) {
-      this.state.image.getChannel(index).setLut(lut, controlPoints);
+      this.state.image.setLut(index, lut);
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);
       }
     }
   }
-
+  
   updateURLSearchParams(input, type) {
     if (input && type) {
       const params = new URLSearchParams();

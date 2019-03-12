@@ -17,10 +17,12 @@ import TfEditor from '../TfEditor';
 import colorPalette from '../../shared/colorPalette';
 import {
   ISOSURFACE_OPACITY_SLIDER_MAX, 
-  ISO_VALUE, OPACITY, 
+  ISO_VALUE, 
   ISO_SURFACE_ENABLED, 
+  LUT_CONTROL_POINTS,
+  OPACITY, 
+  SAVE_ISO_SURFACE,
   VOLUME_ENABLED,
-  SAVE_ISO_SURFACE
 } from '../../shared/constants';
 
 import ColorPicker from '../ColorPicker.js';
@@ -43,6 +45,7 @@ export default class ChannelsWidgetRow extends React.Component {
     this.onOpacityChange = this.onOpacityChange.bind(this);
     this.onSaveIsosurfaceSTL = this.onSaveIsosurfaceSTL.bind(this);
     this.onSaveIsosurfaceGLTF = this.onSaveIsosurfaceGLTF.bind(this);
+    this.onUpdateLutControlPoints = this.onUpdateLutControlPoints.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -72,6 +75,11 @@ export default class ChannelsWidgetRow extends React.Component {
   onOpacityChange(newValue) {
     const { index, changeOneChannelSetting } = this.props;
     changeOneChannelSetting(index, OPACITY, newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+  }
+
+  onUpdateLutControlPoints(newValue) {
+    const { index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(index, LUT_CONTROL_POINTS, newValue);
   }
 
   onSaveIsosurfaceSTL() {
@@ -218,19 +226,22 @@ export default class ChannelsWidgetRow extends React.Component {
 
   createTFEditor() {
     const {
+      channelControlPoints,
       channelDataForChannel,
       updateChannelTransferFunction,
       index,
     } = this.props;
     return (<TfEditor 
+          id={'TFEditor'+index}
           index={index}
           fit-to-data={false}
           width={250}
           height={150}
           volumeData={channelDataForChannel.volumeData}
           channelData={channelDataForChannel}
-          controlPoints={channelDataForChannel.lutControlPoints}
+          controlPoints={channelControlPoints}
           updateChannelTransferFunction={updateChannelTransferFunction}
+          updateChannelLutControlPoints={this.onUpdateLutControlPoints}
     />);
   }
 
