@@ -4,6 +4,8 @@ import './styles.scss';
 
 import { Button } from 'antd';
 
+export const TFEDITOR_DEFAULT_COLOR = 'purple';
+
 export default class MyTfEditor extends React.Component {
 
     static get is() {
@@ -46,9 +48,6 @@ export default class MyTfEditor extends React.Component {
          *      {"x":255,"opacity":1,"color":"red"}]
          * @type {Array}
          */
-        this.state = {
-            controlPoints: props.controlPoints,
-        };
     }
 
     componentDidMount() {
@@ -110,7 +109,7 @@ export default class MyTfEditor extends React.Component {
         // Keep track of control points interaction
         this.dragged = null;
         this.selected = null;
-        this.last_color = 'purple';
+        this.last_color = TFEDITOR_DEFAULT_COLOR;
     }
 
     _initializeElements() {
@@ -133,23 +132,21 @@ export default class MyTfEditor extends React.Component {
         this.bins
             .domain(this.xScale.domain())
             .thresholds(this.xScale.ticks(this.numberBins));
-        if (this.state.controlPoints.length === 0) {
+        if (this.props.controlPoints.length === 0) {
             let newControlPoints = [
                 {
                 'x': extent[0],
                 'opacity': 0,
-                'color': 'white'
+                'color': TFEDITOR_DEFAULT_COLOR
                 },
             {
                 'x': extent[1],
                 'opacity': 1,
-                'color': 'white'
+                'color': TFEDITOR_DEFAULT_COLOR
             }];
-            this.setState({
-                controlPoints: newControlPoints
-            });
+            this.props.updateChannelLutControlPoints(newControlPoints);
         }
-        this.selected = this.state.controlPoints[0];
+        this.selected = this.props.controlPoints[0];
         this.area
             .x(function (d) {
                 return me.xScale(d.x);
@@ -199,7 +196,7 @@ export default class MyTfEditor extends React.Component {
 
         // Draw control points
         g.append("path")
-            .datum(me.state.controlPoints)
+            .datum(me.props.controlPoints)
             .attr("class", "line")
             .attr("fill", "url(#tfGradient-" + this.id + ")")
             .attr("stroke", "white")
@@ -248,7 +245,7 @@ export default class MyTfEditor extends React.Component {
             var x0 = -1;
             var x1 = -1;
             // Override dirty checking
-            let { controlPoints } = this.state;
+            let { controlPoints } = this.props;
             for (var i = controlPoints.length - 1; i >= 0; i--) {
                 x1 = (controlPoints[i].x >= dataExtent[1]) ? i : x1;
                 if (controlPoints[i].x <= dataExtent[0]) {
@@ -266,9 +263,9 @@ export default class MyTfEditor extends React.Component {
                 newControlPoints[x0].x = dataExtent[0];
                 newControlPoints.splice(0, x0);
             }
-            this.setState({
-                controlPoints: newControlPoints,
-            });
+
+            this.updateChannelLutControlPoints(newControlPoints);
+
             this.xScale.domain(dataExtent);
             this.dataScale.domain(dataExtent);
         } else {
@@ -323,7 +320,7 @@ export default class MyTfEditor extends React.Component {
         var me = this;
         const {
             controlPoints
-        } = this.state;
+        } = this.props;
         if (!controlPoints) {
             return;
         }
@@ -425,7 +422,7 @@ export default class MyTfEditor extends React.Component {
     _drawCanvas() {
         const {
             controlPoints
-        } = this.state;
+        } = this.props;
         if (controlPoints !== undefined && controlPoints.length > 0) {
             var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
             // Convinient access
@@ -468,9 +465,9 @@ export default class MyTfEditor extends React.Component {
                 opacityGradient[i] = imagedata.data[i * 4 + 3];
             }
             // send update to image rendering
-            this.props.updateChannelTransferFunction(this.props.index,
-                opacityGradient,
-                controlPoints
+            this.props.updateChannelTransferFunction(
+                this.props.index,
+                opacityGradient
             );
             if (ctx.canvas.parentNode._x3domNode !== undefined) {
                 ctx.canvas.parentNode._x3domNode.invalidateGLObject();
@@ -492,20 +489,18 @@ export default class MyTfEditor extends React.Component {
         var bisect = d3.bisector(function (a, b) {
             return a.x - b.x;
         }).left;
-        var indexPos = bisect(me.state.controlPoints, point);
+        var indexPos = bisect(me.props.controlPoints, point);
 
-        let newControlPoints = [...this.state.controlPoints];
+        let newControlPoints = [...this.props.controlPoints];
         newControlPoints.splice(indexPos, 0, point);
-        this.setState({
-            controlPoints: newControlPoints,
-        });
+        this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
     _mousemove() {
         if (!this.dragged) {
             return;
         }
-        const { controlPoints } = this.state;
+        const { controlPoints } = this.props;
         function equalPoint(a, index, array) {
             return a.x === this.x && a.opacity === this.opacity && a.color === this.color;
         };
@@ -533,9 +528,7 @@ export default class MyTfEditor extends React.Component {
         } else if (virtualIndex2 - index >= 2) {
             newControlPoints.splice(index + 1, 1);
         }
-        this.setState({
-            controlPoints: newControlPoints,
-        });
+        this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
     _mouseup() {
@@ -552,20 +545,18 @@ export default class MyTfEditor extends React.Component {
         switch (d3.event.keyCode) {
             case 46:
                 { // delete
-                    var i = this.state.controlPoints.indexOf(this.selected);
-                    let newControlPoints = [...this.state.controlPoints];
+                    var i = this.props.controlPoints.indexOf(this.selected);
+                    let newControlPoints = [...this.props.controlPoints];
                     newControlPoints.splice(i, 1);
                     this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
-                    this.setState({
-                        controlPoints: newControlPoints,
-                    });
+                    this.props.updateChannelLutControlPoints(newControlPoints);
                     break;
                 }
         }
     }
 
     _export() {
-        var jsonContent = JSON.stringify(this.state.controlPoints);
+        var jsonContent = JSON.stringify(this.props.controlPoints);
         var a = document.createElement("a");
         document.body.appendChild(a);
         a.style = "display: none";
@@ -579,47 +570,38 @@ export default class MyTfEditor extends React.Component {
         window.URL.revokeObjectURL(url);
     }
 
+    updateControlPointsWithoutColor(ptsWithoutColor) {
+        const pts = ptsWithoutColor.map(pt => ({...pt, color:TFEDITOR_DEFAULT_COLOR}));
+        this.selected = pts[0];
+        this.props.updateChannelLutControlPoints(pts);
+    }
+
     _autoXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_auto();
-        this.selected = channelData.lutControlPoints[0];
-
-        this.setState({
-            controlPoints: channelData.lutControlPoints,
-        });
+        const lutObj = channelData.histogram.lutGenerator_auto();
+        this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
     _auto2XF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_auto2();
-        this.selected = channelData.lutControlPoints[0];
-
-        this.setState({
-            controlPoints: channelData.lutControlPoints,
-        });
+        const lutObj = channelData.histogram.lutGenerator_auto2();
+        this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
     _bestFitXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_bestFit();
-        this.selected = channelData.lutControlPoints[0];
-
-        this.setState({
-            controlPoints: channelData.lutControlPoints,
-        }); 
+        const lutObj = channelData.histogram.lutGenerator_bestFit();
+        this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
     _resetXF() {
         const { channelData } = this.props;
 
-        channelData.lutGenerator_fullRange();
-        this.selected = channelData.lutControlPoints[0];
-        this.setState({
-            controlPoints: channelData.lutControlPoints,
-        });
+        const lutObj = channelData.histogram.lutGenerator_fullRange();
+        this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
     /////// Public API functions ///////
