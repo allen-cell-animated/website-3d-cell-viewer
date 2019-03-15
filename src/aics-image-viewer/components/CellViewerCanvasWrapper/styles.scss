@@ -5,6 +5,8 @@
   .cell-canvas {
     z-index: 10;
     transition: width .3s;
+    height: 100%;
+    width: 100%;
   }
   .clip-sliders {
     @extend %axis-override;

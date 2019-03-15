@@ -100,11 +100,13 @@ export default class ViewerWrapper extends React.Component {
   }
 
  render() {
+   const {
+     appHeight
+   } = this.props;
    return (
-     <div className='cell-canvas' style={STYLES.viewer}>
+     <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight}} >
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
         {this.renderClipSliders()}
-
         {this.renderOverlay()}
      </div>
    );
@@ -115,8 +117,6 @@ const STYLES = {
   viewer: {
     display: 'flex',
     position: 'relative',
-    height: '100vh',
-    width: '100%',
   },
   view3d: {
     width: '100%',

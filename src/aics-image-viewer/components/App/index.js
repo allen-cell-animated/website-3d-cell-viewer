@@ -9,9 +9,9 @@ import {
   VolumeLoader,
 } from 'volume-viewer';
 
-import HttpClient from '../shared/utils/httpClient';
-import UtilsService from '../shared/utils/utilsService';
-import enums from '../shared/enums';
+import HttpClient from '../../shared/utils/httpClient';
+import UtilsService from '../../shared/utils/utilsService';
+import enums from '../../shared/enums';
 import {
   CELL_ID_QUERY,
   CELL_LINE_QUERY,
@@ -19,8 +19,6 @@ import {
   FOV_ID_QUERY,
   IMAGE_NAME_QUERY,
   LEGACY_IMAGE_ID_QUERY,
-  LEGACY_IMAGE_SERVER,
-  IMAGE_SERVER,
   OBSERVED_CHANNEL_KEY,
   SEGMENTATION_CHANNEL_KEY,
   CONTOUR_CHANNEL_KEY,
@@ -48,20 +46,23 @@ import {
   AUTO_ROTATE,
   MAX_PROJECT,
   PATH_TRACE,
-} from '../shared/constants';
+} from '../../shared/constants';
 
-import ControlPanel from './ControlPanel';
-import ViewerWrapper from './CellViewerCanvasWrapper';
-import {TFEDITOR_DEFAULT_COLOR} from './TfEditor';
+import ControlPanel from '../ControlPanel';
+import ViewerWrapper from '../CellViewerCanvasWrapper';
+import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
 
-import '../assets/styles/globals.scss';
-import '../assets/styles/no-ui-slider.min.scss';
+
+import '../../assets/styles/globals.scss';
+import '../../assets/styles/no-ui-slider.min.scss';
 import { 
   gammaSliderToImageValues, 
   densitySliderToImageValue, 
   brightnessSliderToImageValue, 
   alphaSliderToImageValue,
-} from "../shared/utils/sliderValuesToImageValues";
+} from "../../shared/utils/sliderValuesToImageValues";
+
+import './styles.scss';
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
@@ -77,7 +78,6 @@ export default class App extends React.Component {
     cellId = cellId ? ('_' + cellId) : "";
     return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
-
   static setInitialChannelConfig(channelNames, channelColors) {
     return channelNames.map((channel, index) => {
       return {
@@ -93,31 +93,6 @@ export default class App extends React.Component {
     });
   }
 
-  static createChannelGrouping(channels) {
-    if (channels) {
-      const grouping = channels.reduce((acc, channel, index) => {
-        if (includes(channelGroupingMap[OBSERVED_CHANNEL_KEY], channel)) {
-          acc[OBSERVED_CHANNEL_KEY].push(index);
-        } else if (includes(channelGroupingMap[SEGMENTATION_CHANNEL_KEY], channel)) {
-          acc[SEGMENTATION_CHANNEL_KEY].push(index);
-        } else if (includes(channelGroupingMap[CONTOUR_CHANNEL_KEY], channel)) {
-          acc[CONTOUR_CHANNEL_KEY].push(index);
-        } else {
-          if (!acc[OTHER_CHANNEL_KEY]) {
-            acc[OTHER_CHANNEL_KEY] = [];
-          }
-          acc[OTHER_CHANNEL_KEY].push(index);
-        }
-        return acc;
-      }, {
-        [OBSERVED_CHANNEL_KEY]: [],
-        [SEGMENTATION_CHANNEL_KEY]: [],
-        [CONTOUR_CHANNEL_KEY]: [],
-      });
-      return grouping;
-    }
-    return {};
-  }
 
   constructor(props) {
     super(props);
@@ -126,8 +101,8 @@ export default class App extends React.Component {
       view3d: null,
       files: null,
       cellId: props.cellId,
-      fovId: props.fovId,
-      cellLine: props.cellLine,
+      fovPath: props.fovPath,
+      cellPath: props.cellPath,
       queryErrorMessage: null,
       sendingQueryRequest: false,
       openFilesOnly: false,
@@ -158,6 +133,7 @@ export default class App extends React.Component {
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
+
     this.onViewModeChange = this.onViewModeChange.bind(this);
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
@@ -180,30 +156,99 @@ export default class App extends React.Component {
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.intializeNewImage = this.intializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
+    this.createChannelGrouping = this.createChannelGrouping.bind(this);
+    this.beginRequestImage = this.beginRequestImage.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
-  componentDidMount() {
-    const { userSelections, cellId, cellLine, fovId} = this.state;
-    let name;
-    let type;
-    if (cellId && !this.props.isLegacyName) {
-      name = App.buildName(
-        cellLine,
-        fovId,
-          userSelections.imageType === FULL_FIELD_IMAGE ? null : this.state.cellId
-        );
-      type = userSelections.imageType === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
-      // cellId is a in the form directory/legacyName;
-    } else if (cellId && this.props.isLegacyName) {
-      name = cellId;
-      type = LEGACY_IMAGE_ID_QUERY;
+  componentWillMount() {
+    const legacyImageIdToShow = UtilsService.getParameterByName(LEGACY_IMAGE_ID_QUERY);
+    if (legacyImageIdToShow) {
+      this.setQueryInputAndRequestImage(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
     }
-    this.openImage(name, type, false);
+    else {
+      const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
+      if (imageIdToShow) {
+        this.setQueryInputAndRequestImage(imageIdToShow, IMAGE_NAME_QUERY);
+      }
+      else {
+        // cellid and cellline and fovid
+        const cellId = UtilsService.getParameterByName(CELL_ID_QUERY);
+        const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
+        const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
+        if (cellId && fovId && cellLine) {
+          this.setQueryInputAndRequestImage({ cellId, fovId, cellLine }, CELL_ID_QUERY);
+        }
+        else if (fovId && cellLine) {
+          this.setQueryInputAndRequestImage({ fovId, cellLine }, FOV_ID_QUERY);
+        }
+      }
+    }
   }
 
+  componentDidMount() {
+    const { cellId } = this.props;
+    if (cellId) {
+      this.beginRequestImage();
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const {
+      cellId,
+      fovId,
+      cellLine,
+      isLegacyName,
+    } = this.props;
+    const { userSelections } = this.state;
+
+    // delayed for the animation to finish
+    if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 200);
+    }
+    const newRequest = cellId !== prevProps.cellId;
+
+    if (newRequest) {
+      this.beginRequestImage();
+    }
+    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
+    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
+    const newImage = this.state.image && !prevState.image;
+    if (this.state.image && (channelsChanged || newImage || imageChanged)) {
+      console.log('updating from state');
+      this.updateImageVolumeAndSurfacesEnabledFromAppState();
+    }
+  }
   onView3DCreated(view3d) {
     this.setState({ view3d });
+  }
+
+  createChannelGrouping(channels) {
+    const {
+      initialChannelAcc,
+      groupToChannelNameMap,
+    } = this.props;
+    if (channels) {
+      const grouping = channels.reduce((acc, channel, index) => {
+        if (includes(groupToChannelNameMap[OBSERVED_CHANNEL_KEY], channel)) {
+          acc[OBSERVED_CHANNEL_KEY].push(index);
+        } else if (includes(groupToChannelNameMap[SEGMENTATION_CHANNEL_KEY], channel)) {
+          acc[SEGMENTATION_CHANNEL_KEY].push(index);
+        } else if (includes(groupToChannelNameMap[CONTOUR_CHANNEL_KEY], channel)) {
+          acc[CONTOUR_CHANNEL_KEY].push(index);
+        } else {
+          if (!acc[OTHER_CHANNEL_KEY]) {
+            acc[OTHER_CHANNEL_KEY] = [];
+          }
+          acc[OTHER_CHANNEL_KEY].push(index);
+        }
+        return acc;
+      }, initialChannelAcc);
+      return grouping;
+    }
+    return {};
   }
 
   stopPollingForImage() {
@@ -270,16 +315,20 @@ export default class App extends React.Component {
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, queryType, doResetViewMode) {
+  openImage(imageDirectory, doResetViewMode) {
+    console.log("PATH in OPEN IMAGE", imageDirectory, this.state.currentlyLoadedImagePath);
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
+    const {
+      baseUrl,
+    } = this.props;
 
-    const BASE_URL = queryType === LEGACY_IMAGE_ID_QUERY ? LEGACY_IMAGE_SERVER : IMAGE_SERVER;
-    const toLoad = BASE_URL + imageDirectory + '_atlas.json';
+    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
-    HttpClient.getJSON(toLoad, {absolute:true, mode:'cors'})
+    console.log(toLoad);
+    new HttpClient().getJSON(toLoad, {mode:'cors'})
       .then(resp => {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
@@ -321,7 +370,7 @@ export default class App extends React.Component {
     const { userSelections } = this.state;
     let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === channelNames.length ?
       userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(channelNames, INIT_COLORS);
-    let channelGroupedByType = App.createChannelGrouping(channelNames);
+    let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
       [CHANNEL_SETTINGS]: newChannelSettings,
       channelGroupedByType
@@ -337,16 +386,16 @@ export default class App extends React.Component {
   }
 
   onChannelDataLoaded(aimg, newChannelSettings, channelIndex) {
-    const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true};
+    const newChannelDataReady = { ...this.state.channelDataReady, [channelIndex]: true };
 
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
     if (!this.state.userSelections[CHANNEL_SETTINGS][channelIndex][LUT_CONTROL_POINTS]) {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
       aimg.setLut(channelIndex, lutObject.lut);
-      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({...controlPoint, color:TFEDITOR_DEFAULT_COLOR}));
+      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
-  
+
     this.setState({
       channelDataReady: newChannelDataReady
     });
@@ -354,7 +403,7 @@ export default class App extends React.Component {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         this.state.view3d.setVolumeChannelAsMask(aimg, channelIndex);
       }
-      this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);  
+      this.state.view3d.updateChannelColor(aimg, channelIndex, newChannelSettings[channelIndex].color);
     }
     // when any channel data has arrived:
     if (this.state.sendingQueryRequest) {
@@ -370,8 +419,10 @@ export default class App extends React.Component {
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
     }
+    console.log("IN LOAD FROM JSON", obj);
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
+      console.log(channelIndex);
       this.onChannelDataLoaded(aimg, newChannelSettings, channelIndex);
     });
     this.intializeNewImage(aimg);
@@ -518,13 +569,14 @@ export default class App extends React.Component {
 
   onSwitchFovCell(value) {
     if (this.state.hasCellId) {
-      const name = App.buildName(
+      const name = this.props.buildName(
         this.state.cellLine, 
         this.state.fovId, 
         value === FULL_FIELD_IMAGE ? null : this.state.cellId
       );
       const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
-      this.openImage(name, type, false);
+
+      this.openImage(name, false);
       this.setState({
           sendingQueryRequest: true,
           userSelections: {
@@ -554,7 +606,7 @@ export default class App extends React.Component {
       }
     }
   }
-  
+
   updateURLSearchParams(input, type) {
     if (input && type) {
       const params = new URLSearchParams();
@@ -594,7 +646,7 @@ export default class App extends React.Component {
         }
         name = App.buildName(cellLine, fovId, cellId);
       }
-    }
+    } 
     this.setState({
       cellLine: cellLine,
       fovId: fovId,
@@ -606,7 +658,36 @@ export default class App extends React.Component {
         imageType,
       }
     });
-    this.openImage(name, imageType, true);
+    console.log(name, imageType);
+    this.openImage(name, true);
+  }
+
+  beginRequestImage(type) {
+    const {
+      fovPath, 
+      cellPath,
+      cellId,
+    } = this.props;
+    let imageType = type || this.state.userSelections.imageType;
+    let path;
+    if (imageType === FULL_FIELD_IMAGE ) {
+      path = fovPath;
+    }
+    else if (imageType === SEGMENTED_CELL) {
+      path = cellPath;
+    }
+    this.setState({
+      cellId,
+      path,
+      hasCellId: !!cellId,
+      sendingQueryRequest: true,
+      userSelections: {
+        ...this.state.userSelections,
+        imageType,
+      }
+    });
+    console.log("OPENING", path, imageType);
+    this.openImage(path, true);
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
@@ -631,64 +712,6 @@ export default class App extends React.Component {
     }
   }
 
-  // TODO : For use as a true react component, maybe we could pass the image id and query type as PROPS!!!!!!!!!!
-  // and the getParameterByName could be done in the index.html or index.js.
-  componentWillMount() {
-    const legacyImageIdToShow = UtilsService.getParameterByName(LEGACY_IMAGE_ID_QUERY);
-    if (legacyImageIdToShow) {
-      this.setQueryInputAndRequestImage(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
-    }
-    else {
-      const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
-      if (imageIdToShow) {
-        this.setQueryInputAndRequestImage(imageIdToShow, IMAGE_NAME_QUERY);
-      }
-      else {
-        // cellid and cellline and fovid
-        const cellId = UtilsService.getParameterByName(CELL_ID_QUERY);
-        const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
-        const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
-        if (cellId && fovId && cellLine) {
-          this.setQueryInputAndRequestImage({cellId, fovId, cellLine}, CELL_ID_QUERY);
-        }
-        else if (fovId && cellLine) {
-          this.setQueryInputAndRequestImage({fovId, cellLine}, FOV_ID_QUERY);
-        }
-      }
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const {
-      cellId,
-      fovId,
-      cellLine,
-      isLegacyName,
-    } = this.props;
-    const { userSelections } = this.state;
-
-    // delayed for the animation to finish
-    if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
-      setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-      }, 200);
-    }
-    const newRequest = cellId !== prevProps.cellId;
-    if (newRequest) {
-      if (isLegacyName) {
-        return this.setQueryInputAndRequestImage({ cellId }, LEGACY_IMAGE_ID_QUERY);
-      }
-      return this.setQueryInputAndRequestImage({ cellId, fovId, cellLine });
-    }
-
-    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
-    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
-    const newImage = this.state.image && !prevState.image;
-    if (this.state.image && (channelsChanged || newImage || imageChanged )) {
-      this.updateImageVolumeAndSurfacesEnabledFromAppState();
-    }
-  }
-
   toggleControlPanel(value) {
     this.setState({ 
       userSelections: {
@@ -707,7 +730,10 @@ export default class App extends React.Component {
   render() {
     const { userSelections } = this.state;
     return (
-      <Layout className="cell-viewer-app">
+      <Layout 
+        className="cell-viewer-app"
+        style={{height: this.props.appHeight}}
+      >
             <Sider
               className="control-pannel-holder"
               collapsible={true}
@@ -765,6 +791,7 @@ export default class App extends React.Component {
                     loadingImage={this.state.sendingQueryRequest}
                     numSlices={this.getNumberOfSlices()}
                     onView3DCreated={this.onView3DCreated}
+                    appHeight={this.props.appHeight}
                   />
                 </Content>
               </Layout>
@@ -776,4 +803,23 @@ export default class App extends React.Component {
     document.removeEventListener('keydown', this.handleKeydown, false);
   }
 }
+
+App.defaultProps = {
+  initialChannelAcc: {
+    [OBSERVED_CHANNEL_KEY]: [],
+    [SEGMENTATION_CHANNEL_KEY]: [],
+    [CONTOUR_CHANNEL_KEY]: [],
+  },
+  groupToChannelNameMap: channelGroupingMap,
+  IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.3.0',
+  DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
+  IMAGE_SERVER: 'https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.3.0/Cell-Viewer_Thumbnails/',
+  buildName :  (cellLine, fovId, cellId) => {
+    cellId = cellId ? ('_' + cellId) : "";
+    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
+  },
+  appHeight: '100vh',
+  cellPath: '',
+  fovPath: '',
+};
 

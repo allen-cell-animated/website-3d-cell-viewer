@@ -85,7 +85,7 @@ export default class ControlPanel extends React.Component {
 
     return (
       <Card 
-        style={STYLES.wrapper} 
+        style={{...STYLES.wrapper, height: this.props.appHeight}} 
         open={this.state.open} 
         bordered={false}
         className="control-panel"
