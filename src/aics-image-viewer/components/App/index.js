@@ -9,6 +9,7 @@ import {
   VolumeLoader,
 } from 'volume-viewer';
 
+import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
 import HttpClient from '../../shared/utils/httpClient';
 import UtilsService from '../../shared/utils/utilsService';
 import enums from '../../shared/enums';
@@ -209,9 +210,10 @@ export default class App extends React.Component {
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
       if (cellPath === prevProps.nextImgPath ) {
-        console.log("NEXT IMGAGE", cellPath);
+        console.log("NEXT IMAGE", cellPath);
         this.loadNextImage();
       } else if (cellPath === prevProps.prevImgPath) {
+        console.log("PREV IMAGE", cellPath);
         this.loadPrevImage();
       } else {
         this.beginRequestImage();
@@ -374,6 +376,7 @@ export default class App extends React.Component {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
 
@@ -415,6 +418,14 @@ export default class App extends React.Component {
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
+    else {
+      const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
+      aimg.setLut(channelIndex, lut);
+      view3d.updateLuts(aimg);
+
+      // re-set with copy of current data...?
+      // this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, thisChannelsSettings[LUT_CONTROL_POINTS].slice());
+    }
     this.setState({
       channelDataReady: newChannelDataReady
     });
@@ -448,6 +459,9 @@ export default class App extends React.Component {
     const { image, prevImg } = this.state;
     const { prevImgPath } = this.props;
 
+    if (!prevImg) {
+      console.log("NO PREV IMAGE EXISTS!");
+    }
     this.intializeNewImage(prevImg);
     this.openImage(prevImgPath, true, 'prevImg');
     this.setState({
@@ -458,9 +472,12 @@ export default class App extends React.Component {
   }
 
   loadNextImage() {
-    const { image, nextImg, userSelections, view3d } = this.state;
+    const { image, nextImg } = this.state;
     const { nextImgPath } = this.props;
 
+    if (!nextImg) {
+      console.log("NO NEXT IMAGE EXISTS!");
+    }
     this.intializeNewImage(nextImg);
     this.openImage(nextImgPath, true, 'nextImg');
     this.setState({
@@ -711,25 +728,34 @@ export default class App extends React.Component {
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
     const { userSelections, image, view3d } = this.state;
-    if (image && image.loaded) {
+    if (image) {
       // apply channel settings
       userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
-
-        const volenabled = channel[VOLUME_ENABLED];
-        const isoenabled = channel[ISO_SURFACE_ENABLED];
-        
-        view3d.setVolumeChannelEnabled(image, index, volenabled);
-        view3d.updateChannelColor(image, index, channel.color);
-        if (view3d.hasIsosurface(image, index)) {
-          
-          if (!isoenabled) {
-            view3d.clearIsosurface(image, index);
-          } 
-        } else {
-
-          if (isoenabled) {
-            view3d.createIsosurface(image, index, channel.isovalue, channel.opacity);
+        if (image.getChannel(index).loaded) {
+          const volenabled = channel[VOLUME_ENABLED];
+          const isoenabled = channel[ISO_SURFACE_ENABLED];
+  
+          // re-set with copy of current data...?
+          if (channel[LUT_CONTROL_POINTS]) {
+            const lut = controlPointsToLut(channel[LUT_CONTROL_POINTS]);
+            image.setLut(index, lut);
+            view3d.updateLuts(image);
+            // this.changeOneChannelSetting(index, LUT_CONTROL_POINTS, channel[LUT_CONTROL_POINTS].slice());
           }
+  
+          view3d.setVolumeChannelEnabled(image, index, volenabled);
+          view3d.updateChannelColor(image, index, channel.color);
+          if (view3d.hasIsosurface(image, index)) {
+            
+            if (!isoenabled) {
+              view3d.clearIsosurface(image, index);
+            } 
+          } else {
+  
+            if (isoenabled) {
+              view3d.createIsosurface(image, index, channel.isovalue, channel.opacity);
+            }
+          }  
         }
       });
       console.log("UPDATED CHANNELS FROM STATE");
