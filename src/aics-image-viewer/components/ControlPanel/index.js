@@ -94,7 +94,7 @@ export default class ControlPanel extends React.Component {
             {this.createFovCellSwitchControls()}
           </div>
         }
-        title={
+        title={renderConfig.ViewModeRaidoButtons && 
             <ViewModeRadioButtons
               imageName={this.props.imageName}
               mode={this.props.mode}
@@ -102,7 +102,7 @@ export default class ControlPanel extends React.Component {
             />}
         >
         <Card.Meta 
-          title={this.renderColorPresetsDropdown()}
+          title={renderConfig.ColorPresetsDropdown && this.renderColorPresetsDropdown()}
         />
         {this.props.hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
@@ -118,6 +118,7 @@ export default class ControlPanel extends React.Component {
             onColorChangeComplete={this.props.onColorChangeComplete}
             onApplyColorPresets={this.props.onApplyColorPresets}
             style={STYLES.channelsWidget}
+            renderConfig={renderConfig}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
@@ -134,6 +135,7 @@ export default class ControlPanel extends React.Component {
             maxProjectOn={this.props.maxProjectOn}
             canPathTrace={this.props.canPathTrace}
             pathTraceOn={this.props.pathTraceOn}
+            renderConfig={renderConfig}
           />
         </div> : null}
       </Card>

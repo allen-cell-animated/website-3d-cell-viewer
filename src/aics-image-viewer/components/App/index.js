@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes, isEqual } from 'lodash';
+import { includes, isEqual, filter } from 'lodash';
 import { 
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
@@ -78,12 +78,13 @@ export default class App extends React.Component {
     cellId = cellId ? ('_' + cellId) : "";
     return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
-  static setInitialChannelConfig(channelNames, channelColors) {
+  static setInitialChannelConfig(channelNames, channelColors, filterFunc) {
     return channelNames.map((channel, index) => {
       return {
         name: channel || "Channel " + index,
         [VOLUME_ENABLED]: false,
         [ISO_SURFACE_ENABLED]: index === 1,
+        hideChannel: filterFunc(channel),
         isovalue: 188,
         opacity: 1.0,
         color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
@@ -257,6 +258,7 @@ export default class App extends React.Component {
         }
         return acc;
       }, initialChannelAcc);
+
       return grouping;
     }
     return {};
@@ -381,8 +383,10 @@ export default class App extends React.Component {
 
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
+    const { filterFunc } = this.props;
+
     let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === channelNames.length ?
-      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(channelNames, INIT_COLORS);
+      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(channelNames, INIT_COLORS, filterFunc);
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
       [CHANNEL_SETTINGS]: newChannelSettings,
@@ -819,6 +823,7 @@ export default class App extends React.Component {
                     numSlices={this.getNumberOfSlices()}
                     onView3DCreated={this.onView3DCreated}
                     appHeight={this.props.appHeight}
+                    renderConfig={renderConfig}
                   />
                 </Content>
               </Layout>
@@ -856,6 +861,11 @@ App.defaultProps = {
     ViewModeRadioButtons: true,
     FovCellSwitchControls: true,
     SaveSurfaceButtons: true,
+    AlphaMask: true,
+    BrightnessSlider: true,
+    DensitySlider: true,
+    LevelsSliders: true,
+    ColorPresetsDropdown: true,
   }
 };
 

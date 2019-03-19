@@ -1,5 +1,5 @@
 @import "../../assets/styles/axis-style-override";
-
+@import "../../assets/styles/variables.scss";
 ::-webkit-scrollbar { 
   display: none; 
 }
@@ -31,7 +31,7 @@
     padding: 0;
   }
   .ant-checkbox-inner {
-    background-color: transparent;
+    background-color: $background-dark-gray;
   }
 
   .ant-checkbox-indeterminate .ant-checkbox-inner {

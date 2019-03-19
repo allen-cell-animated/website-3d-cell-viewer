@@ -83,6 +83,10 @@ export default class ChannelsWidget extends React.Component {
       channelDataChannels,
     } = this.props;
     return map(channelGroupedByType, (channelArray, key) => {
+      console.log(channelArray);
+      if (!channelArray.length) {
+        return null;
+      }
       return (
         <Card
           bordered={false}
@@ -102,6 +106,9 @@ export default class ChannelsWidget extends React.Component {
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
                   const channel = channels[actualIndex];
+                  if (channel.hideChannel) {
+                    return [];
+                  }
                   return (
                   <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
                                         index={actualIndex}

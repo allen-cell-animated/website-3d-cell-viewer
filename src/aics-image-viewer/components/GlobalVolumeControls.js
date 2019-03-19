@@ -201,6 +201,7 @@ export default class GlobalVolumeControls extends React.Component {
 
   render() {
     if (!this.props.imageName) return null;
+    const { renderConfig } = this.props;
     return (
       <Card
         bordered={false}
@@ -216,10 +217,10 @@ export default class GlobalVolumeControls extends React.Component {
             key="gobal-volume"
           >
             <div style={STYLES.slidersWrapper}>
-              {this.createMaskAlphaSlider()}
-              {this.createBrightnessSlider()}
-              {this.createDensitySlider()}
-              {this.createLevelsSlider()}
+              {renderConfig.AlphaMask && this.createMaskAlphaSlider()}
+              {renderConfig.BrightnessSlider && this.createBrightnessSlider()}
+              {renderConfig.DensitySlider && this.createDensitySlider()}
+              {renderConfig.LevelsSliders && this.createLevelsSlider()}
               {this.createProjectionModeControls()}
               {this.props.canPathTrace && this.createRenderModeControls()}
             </div>
