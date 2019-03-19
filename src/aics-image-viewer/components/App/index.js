@@ -719,6 +719,7 @@ export default class App extends React.Component {
         const isoenabled = channel[ISO_SURFACE_ENABLED];
         
         view3d.setVolumeChannelEnabled(image, index, volenabled);
+        view3d.updateChannelColor(image, index, channel.color);
         if (view3d.hasIsosurface(image, index)) {
           
           if (!isoenabled) {
