@@ -82,17 +82,18 @@ export default class ControlPanel extends React.Component {
   }
 
   render() {
-
+    const { renderConfig } = this.props;
     return (
       <Card 
         style={{...STYLES.wrapper, height: this.props.appHeight}} 
         open={this.state.open} 
         bordered={false}
         className="control-panel"
-        extra={
+        extra={renderConfig.FovCellSwitchControls &&
           <div>
             {this.createFovCellSwitchControls()}
-          </div>}
+          </div>
+        }
         title={
             <ViewModeRadioButtons
               imageName={this.props.imageName}
