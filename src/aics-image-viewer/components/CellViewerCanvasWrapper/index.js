@@ -37,13 +37,6 @@ export default class ViewerWrapper extends React.Component {
      this.view3D.setAutoRotate(newProps.autorotate);
    }
 
-   this.needToSetImage = false;
-   if (this.props.image && newProps.image) {
-     this.needToSetImage = this.props.image.name !== newProps.image.name;
-   } else if (!this.props.image && newProps.image) {
-     this.needToSetImage = true;
-   }
-
    this.view3D.resize();
   }
 

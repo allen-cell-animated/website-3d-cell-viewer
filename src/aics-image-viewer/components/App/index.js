@@ -84,7 +84,7 @@ export default class App extends React.Component {
         name: channel || "Channel " + index,
         [VOLUME_ENABLED]: false,
         [ISO_SURFACE_ENABLED]: index === 1,
-        isovalue: 100,
+        isovalue: 188,
         opacity: 1.0,
         color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
         dataReady: false
@@ -283,13 +283,15 @@ export default class App extends React.Component {
 
   handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey) {
     if (resp.data.status === OK_STATUS) {
-      this.setState({
-        currentlyLoadedImagePath: imageDirectory,
-        channelDataReady: {},
-        queryErrorMessage: null,
-        cachingInProgress: false,
-        mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
-      });
+      if (this.stateKey === 'image') {
+        this.setState({
+          currentlyLoadedImagePath: imageDirectory,
+          channelDataReady: {},
+          queryErrorMessage: null,
+          cachingInProgress: false,
+          mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
+        });  
+      }
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey);
       this.stopPollingForImage();
     } else if (resp.data.status === ERROR_STATUS) {
@@ -326,9 +328,6 @@ export default class App extends React.Component {
   }
 
   openImage(imageDirectory, doResetViewMode, stateKey) {
-    const {
-      cellId
-    } = this.props;
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -366,6 +365,8 @@ export default class App extends React.Component {
     view3d.removeAllVolumes();
     view3d.addVolume(aimg);
 
+    this.updateImageVolumeAndSurfacesEnabledFromAppState();
+
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
     view3d.updateExposure(imageBrightness);
@@ -398,7 +399,10 @@ export default class App extends React.Component {
   }
 
   onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex) {
-    const { view3d, channelDataReady } = this.state;
+    const { image, view3d, channelDataReady } = this.state;
+    if (aimg !== image) {
+      return;
+    }
     const newChannelDataReady = { ...channelDataReady, [channelIndex]: true };
     const volenabled = thisChannelsSettings[VOLUME_ENABLED];
     const isoenabled = thisChannelsSettings[ISO_SURFACE_ENABLED];
@@ -410,9 +414,6 @@ export default class App extends React.Component {
       aimg.setLut(channelIndex, lutObject.lut);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
-    }
-    if ( aimg.loaded) {
-      console.log('loaded');
     }
     this.setState({
       channelDataReady: newChannelDataReady
@@ -436,6 +437,10 @@ export default class App extends React.Component {
     // when any channel data has arrived:
     if (this.state.sendingQueryRequest) {
       this.setState({ sendingQueryRequest: false });
+    }
+    if (aimg.loaded) {
+      console.log('loaded');
+      view3d.updateActiveChannels(aimg);
     }
   }
 
@@ -706,7 +711,7 @@ export default class App extends React.Component {
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
     const { userSelections, image, view3d } = this.state;
-    if (image) {
+    if (image && image.loaded) {
       // apply channel settings
       userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
 
