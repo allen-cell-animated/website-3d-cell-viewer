@@ -442,9 +442,9 @@ export default class App extends React.Component {
       // re-set with copy of current data...?
       // this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, thisChannelsSettings[LUT_CONTROL_POINTS].slice());
     }
-    this.setState({
-      channelDataReady: newChannelDataReady
-    });
+    // this.setState({
+    //   channelDataReady: newChannelDataReady
+    // });
     if (view3d) {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         view3d.setVolumeChannelAsMask(aimg, channelIndex);
