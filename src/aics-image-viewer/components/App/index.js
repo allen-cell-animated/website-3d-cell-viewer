@@ -365,7 +365,17 @@ export default class App extends React.Component {
     // Here is where we officially hand the image to the volume-viewer
     
     view3d.removeAllVolumes();
-    view3d.addVolume(aimg);
+    view3d.addVolume(aimg, {
+      channels: userSelections[CHANNEL_SETTINGS].map((ch) => {
+        return {
+          enabled: ch[VOLUME_ENABLED],
+          isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
+          isovalue: ch.isovalue,
+          isosurfaceOpacity: ch.opacity,
+          color: ch.color
+        };
+      })
+    });
 
     //this.updateImageVolumeAndSurfacesEnabledFromAppState();
 
@@ -409,7 +419,13 @@ export default class App extends React.Component {
     const newChannelDataReady = { ...channelDataReady, [channelIndex]: true };
     const volenabled = thisChannelsSettings[VOLUME_ENABLED];
     const isoenabled = thisChannelsSettings[ISO_SURFACE_ENABLED];
-    view3d.setVolumeChannelEnabled(aimg, channelIndex, volenabled);
+    view3d.setVolumeChannelOptions(aimg, channelIndex, {
+      enabled: volenabled,
+      color: thisChannelsSettings.color,
+      isosurfaceEnabled: isoenabled,
+      isovalue: thisChannelsSettings.isovalue,
+      isosurfaceOpacity: thisChannelsSettings.opacity
+    });
 
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
     if (!thisChannelsSettings[LUT_CONTROL_POINTS]) {
@@ -433,18 +449,8 @@ export default class App extends React.Component {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         view3d.setVolumeChannelAsMask(aimg, channelIndex);
       }
-      view3d.updateChannelColor(aimg, channelIndex, thisChannelsSettings.color);
     }
 
-    if (view3d.hasIsosurface(aimg, channelIndex)) {
-      if (!isoenabled) {
-        view3d.clearIsosurface(aimg, channelIndex);
-      }
-    } else {
-      if (isoenabled) {
-        view3d.createIsosurface(aimg, channelIndex, thisChannelsSettings.isovalue, thisChannelsSettings.opacity);
-      }
-    }
     // when any channel data has arrived:
     if (this.state.sendingQueryRequest) {
       this.setState({ sendingQueryRequest: false });
@@ -462,12 +468,14 @@ export default class App extends React.Component {
     if (!prevImg) {
       console.log("NO PREV IMAGE EXISTS!");
     }
+    // assume prevImg is available to initialize
     this.intializeNewImage(prevImg);
-    this.openImage(prevImgPath, true, 'prevImg');
     this.setState({
       image: prevImg,
       nextImg: image
     });
+    // preload the new "prevImg"
+    this.openImage(prevImgPath, true, 'prevImg');
 
   }
 
@@ -478,12 +486,14 @@ export default class App extends React.Component {
     if (!nextImg) {
       console.log("NO NEXT IMAGE EXISTS!");
     }
+    // assume nextImg is available to initialize
     this.intializeNewImage(nextImg);
-    this.openImage(nextImgPath, true, 'nextImg');
     this.setState({
       image: nextImg, 
       prevImg: image
     });
+    // preload the new "nextImg"
+    this.openImage(nextImgPath, true, 'nextImg');
   }
 
   loadFromJson(obj, title, locationHeader, stateKey) {
@@ -543,14 +553,20 @@ export default class App extends React.Component {
     }
     switch (keyToChange) {
       case ISO_VALUE:
-        view3d.updateIsosurface(image, index, newValue);
+        view3d.setVolumeChannelOptions(image, index, {
+          isovalue: newValue,
+        });
         break;
       case OPACITY:
-        view3d.updateOpacity(image, index, newValue);
+        view3d.setVolumeChannelOptions(image, index, {
+          isosurfaceOpacity: newValue
+        });  
         break;
       case COLOR:
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
-        view3d.updateChannelColor(image, index, newColor);
+        view3d.setVolumeChannelOptions(image, index, {
+          color: newColor,
+        });  
         view3d.updateMaterial(image);
         break;
       case MODE:
@@ -743,19 +759,13 @@ export default class App extends React.Component {
             // this.changeOneChannelSetting(index, LUT_CONTROL_POINTS, channel[LUT_CONTROL_POINTS].slice());
           }
   
-          view3d.setVolumeChannelEnabled(image, index, volenabled);
-          view3d.updateChannelColor(image, index, channel.color);
-          if (view3d.hasIsosurface(image, index)) {
-            
-            if (!isoenabled) {
-              view3d.clearIsosurface(image, index);
-            } 
-          } else {
-  
-            if (isoenabled) {
-              view3d.createIsosurface(image, index, channel.isovalue, channel.opacity);
-            }
-          }  
+          view3d.setVolumeChannelOptions(image, index, {
+            enabled: volenabled,
+            color: channel.color,
+            isosurfaceEnabled: isoenabled,
+            isovalue: channel.isovalue,
+            isosurfaceOpacity: channel.opacity
+          });  
         }
       });
       console.log("UPDATED CHANNELS FROM STATE");
