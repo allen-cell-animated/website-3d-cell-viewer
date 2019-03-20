@@ -367,7 +367,7 @@ export default class App extends React.Component {
     view3d.removeAllVolumes();
     view3d.addVolume(aimg);
 
-    this.updateImageVolumeAndSurfacesEnabledFromAppState();
+    //this.updateImageVolumeAndSurfacesEnabledFromAppState();
 
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
