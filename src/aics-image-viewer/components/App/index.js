@@ -812,7 +812,6 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 channelDataReady={this.state.channelDataReady}
-                imageChannelToUiSetting={this.state.imageChannelToUiSetting}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}
