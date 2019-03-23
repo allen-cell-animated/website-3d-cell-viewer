@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes, isEqual, filter } from 'lodash';
+import { includes, isEqual, filter, find, map, uniq, indexOf } from 'lodash';
 import { 
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
@@ -63,6 +63,7 @@ import {
 } from "../../shared/utils/sliderValuesToImageValues";
 
 import './styles.scss';
+import { finished } from "stream";
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
@@ -78,17 +79,16 @@ export default class App extends React.Component {
     cellId = cellId ? ('_' + cellId) : "";
     return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
-  static setInitialChannelConfig(channelNames, channelColors, filterFunc) {
+  static setInitialChannelConfig(channelNames, channelColors) {
     return channelNames.map((channel, index) => {
       return {
-        name: channel || "Channel " + index,
+        name: channel.split('_')[0] || "Channel " + index,
         [VOLUME_ENABLED]: false,
         [ISO_SURFACE_ENABLED]: index === 1,
-        hideChannel: filterFunc(channel),
         isovalue: 188,
         opacity: 1.0,
         color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
-        dataReady: false
+        dataReady: false,
       };
     });
   }
@@ -159,6 +159,7 @@ export default class App extends React.Component {
     this.beginRequestImage = this.beginRequestImage.bind(this);
     this.loadNextImage = this.loadNextImage.bind(this);
     this.loadPrevImage = this.loadPrevImage.bind(this);
+    this.getChannelSetting = this.getChannelSetting.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -198,8 +199,10 @@ export default class App extends React.Component {
     const {
       cellId,
       cellPath,
+      filterFunc,
+
     } = this.props;
-    const { userSelections } = this.state;
+    const { userSelections, image } = this.state;
     
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
@@ -224,6 +227,15 @@ export default class App extends React.Component {
     if (newImage || channelsChanged || imageChanged) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
+    // if (image && filterFunc !== prevProps.filterFunc) {
+    //   console.log('chanaging grouping');
+    //   const filteredChannels = filterFunc ? filter(image.channel_names, filterFunc) : image.channel_names;
+    //   const channelGroupedByType = this.createChannelGrouping(filteredChannels);
+
+    //   this.setState({
+    //     channelGroupedByType,
+    //   });
+    // }
   }
 
   onView3DCreated(view3d) {
@@ -237,6 +249,7 @@ export default class App extends React.Component {
       keyList,
     } = this.props;
     if (channels) {
+      console.log('creating new grouping with', channels);
       const grouping = channels.reduce((acc, channel, index) => {
         let other = true;
         keyList.forEach(key => {
@@ -340,7 +353,6 @@ export default class App extends React.Component {
     const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
-    console.log(toLoad);
     new HttpClient().getJSON(toLoad, {mode:'cors'})
       .then(resp => {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
@@ -363,30 +375,30 @@ export default class App extends React.Component {
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
     
     // Here is where we officially hand the image to the volume-viewer
-    
-    view3d.removeAllVolumes();
-    view3d.addVolume(aimg);
+    if (view3d) {
 
-    this.updateImageVolumeAndSurfacesEnabledFromAppState();
-
-    view3d.updateMaskAlpha(aimg, imageMask);
-    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    view3d.updateExposure(imageBrightness);
-    view3d.updateDensity(aimg, imageDensity);
-    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
-    // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
-    view3d.updateActiveChannels(aimg);
-
-
+      view3d.removeAllVolumes();
+      view3d.addVolume(aimg);
+  
+      view3d.updateMaskAlpha(aimg, imageMask);
+      view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+      view3d.updateExposure(imageBrightness);
+      view3d.updateDensity(aimg, imageDensity);
+      view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+      // update current camera mode to make sure the image gets the update
+      view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+      view3d.updateActiveChannels(aimg);
+    }
   }
+
 
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
     const { filterFunc } = this.props;
+    const filteredChannels = filterFunc ? filter(channelNames, filterFunc) : channelNames;
 
-    let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === channelNames.length ?
-      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(channelNames, INIT_COLORS, filterFunc);
+    let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === filteredChannels.length ?
+      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(filteredChannels, INIT_COLORS, filterFunc);
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
       [CHANNEL_SETTINGS]: newChannelSettings,
@@ -417,7 +429,7 @@ export default class App extends React.Component {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
       aimg.setLut(channelIndex, lutObject.lut);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
-      this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, newControlPoints);
+      this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
     this.setState({
       channelDataReady: newChannelDataReady
@@ -462,7 +474,7 @@ export default class App extends React.Component {
   }
 
   loadNextImage() {
-    const { image, nextImg, userSelections, view3d } = this.state;
+    const { image, nextImg  } = this.state;
     const { nextImgPath } = this.props;
 
     this.intializeNewImage(nextImg);
@@ -476,14 +488,15 @@ export default class App extends React.Component {
   loadFromJson(obj, title, locationHeader, stateKey) {
     const aimg = new Volume(obj);
 
-    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
+    const  newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
       obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
-      this.onChannelDataLoaded(aimg, newChannelSettings[channelIndex], channelIndex);
+      const thisChannelSettings = find(newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex);
     });
     if (stateKey === 'image') {
       this.intializeNewImage(aimg);
@@ -496,10 +509,10 @@ export default class App extends React.Component {
     this.handleChangeToImage(key, newValue);
   }
 
-  changeOneChannelSetting(channelIndex, keyToChange, newValue) {
+  changeOneChannelSetting(channelName, channelIndex, keyToChange, newValue) {
     const { userSelections } = this.state;
     const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
-      return index === channelIndex ? { ...channel, [keyToChange]: newValue } : channel;
+      return channel.name === channelName ? { ...channel, [keyToChange]: newValue } : channel;
     });
 
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
@@ -713,29 +726,43 @@ export default class App extends React.Component {
     this.openImage(path, true, 'image');
   }
 
-  updateImageVolumeAndSurfacesEnabledFromAppState() {
-    const { userSelections, image, view3d } = this.state;
-    if (image && image.loaded) {
-      // apply channel settings
-      userSelections[CHANNEL_SETTINGS].forEach((channel, index) => {
+  getChannelSetting(channelName) {
+    const { userSelections } = this.state;
+    console.log(userSelections[CHANNEL_SETTINGS])
+  }
 
-        const volenabled = channel[VOLUME_ENABLED];
-        const isoenabled = channel[ISO_SURFACE_ENABLED];
-        
-        view3d.setVolumeChannelEnabled(image, index, volenabled);
-        view3d.updateChannelColor(image, index, channel.color);
-        if (view3d.hasIsosurface(image, index)) {
-          
+  updateImageVolumeAndSurfacesEnabledFromAppState() {
+    const { image, view3d, userSelections } = this.state;
+    const { filterFunc} = this.props;
+    if (image) {
+      // apply channel settings
+      // image.channel_names
+      image.channel_names.forEach((channelName, imageIndex) => {
+        if (filterFunc && !filterFunc(channelName)) {
+          return;
+        }
+        const channelSetting = find(userSelections[CHANNEL_SETTINGS], (channel) => (
+          channel.name === channelName.split('_')[0]
+        ));
+        const volenabled = channelSetting[VOLUME_ENABLED];
+        const isoenabled = channelSetting[ISO_SURFACE_ENABLED];
+        console.log( volenabled, isoenabled);
+        view3d.setVolumeChannelEnabled(image, imageIndex, volenabled);
+        view3d.updateChannelColor(image, imageIndex, channelSetting.color);
+
+        if (view3d.hasIsosurface(image, imageIndex)) {
+
           if (!isoenabled) {
-            view3d.clearIsosurface(image, index);
+            view3d.clearIsosurface(image, imageIndex);
           } 
         } else {
 
           if (isoenabled) {
-            view3d.createIsosurface(image, index, channel.isovalue, channel.opacity);
+            view3d.createIsosurface(image, imageIndex, channelSetting.isovalue, channelSetting.opacity);
           }
         }
       });
+
       console.log("UPDATED CHANNELS FROM STATE");
       view3d.updateActiveChannels(image);
     }
@@ -785,10 +812,11 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 channelDataReady={this.state.channelDataReady}
+                imageChannelToUiSetting={this.state.imageChannelToUiSetting}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}
-                channels={userSelections[CHANNEL_SETTINGS]}
+                channelSettings={userSelections[CHANNEL_SETTINGS]}
                 mode={userSelections[MODE]}
                 imageType={userSelections.imageType}
                 autorotate={userSelections[AUTO_ROTATE]}
