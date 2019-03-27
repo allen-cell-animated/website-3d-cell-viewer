@@ -17,6 +17,7 @@
     "eol-last": 1,
     "eqeqeq": 1,
     "new-cap": 1,
+    "no-undef": "error",
     "no-array-constructor": 1,
     "no-mixed-spaces-and-tabs": 1,
     "no-new-object": 1,
