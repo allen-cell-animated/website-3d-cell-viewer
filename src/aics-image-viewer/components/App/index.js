@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes, isEqual, filter, find, map, uniq, indexOf } from 'lodash';
+import { includes, isEqual, filter, find } from 'lodash';
 import { 
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
@@ -134,7 +134,6 @@ export default class App extends React.Component {
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
-    this.updateURLSearchParams = this.updateURLSearchParams.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
     this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
@@ -194,10 +193,8 @@ export default class App extends React.Component {
     const {
       cellId,
       cellPath,
-      filterFunc,
-
     } = this.props;
-    const { userSelections, image } = this.state;
+    const { userSelections } = this.state;
     
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
@@ -294,7 +291,7 @@ export default class App extends React.Component {
       (a.atlas_height === b.atlas_height));
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey) {
+  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, resetLuts) {
     if (resp.data.status === OK_STATUS) {
       if (this.stateKey === 'image') {
         this.setState({
@@ -305,10 +302,9 @@ export default class App extends React.Component {
           mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
         });  
       }
-      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey);
+      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, resetLuts);
       this.stopPollingForImage();
     } else if (resp.data.status === ERROR_STATUS) {
-      console.log(ERROR_STATUS);
       this.stopPollingForImage();
     } else {
       this.setState({
@@ -331,11 +327,11 @@ export default class App extends React.Component {
     else {
       message = JSON.stringify(resp);
     }
-    console.log(message);
+    // console.log(message);
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, doResetViewMode, stateKey) {
+  openImage(imageDirectory, doResetViewMode, stateKey, resetLuts) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -351,12 +347,13 @@ export default class App extends React.Component {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
         resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf('/') + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey);
+        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, resetLuts);
       })
       .catch(resp => this.handleOpenImageException(resp));
   }
 
   intializeNewImage(aimg, newChannelSettings) {
+    console.log('new image')
     const { userSelections, view3d } = this.state;
     const { filterFunc } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
@@ -374,7 +371,7 @@ export default class App extends React.Component {
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
-        const ch = this.getOneChannelSetting(name);
+        const ch = this.getOneChannelSetting(name, channelSetting);
         if (!ch) {
           return {};
         }
@@ -431,7 +428,7 @@ export default class App extends React.Component {
     return newChannelSettings;
   }
 
-  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex) {
+  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, resetLuts) {
     const { image, view3d } = this.state;
     if (aimg !== image) {
       return;
@@ -447,19 +444,16 @@ export default class App extends React.Component {
     });
 
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
-    if (!thisChannelsSettings[LUT_CONTROL_POINTS]) {
+    // OR if we are switching between FOV or SEG
+    if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
       aimg.setLut(channelIndex, lutObject.lut);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
-    }
-    else {
+    } else {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
       aimg.setLut(channelIndex, lut);
       view3d.updateLuts(aimg);
-
-      // re-set with copy of current data...?
-      // this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, thisChannelsSettings[LUT_CONTROL_POINTS].slice());
     }
 
     if (view3d) {
@@ -481,9 +475,6 @@ export default class App extends React.Component {
     const { image, prevImg } = this.state;
     const { prevImgPath } = this.props;
 
-    if (!prevImg) {
-      console.log("NO PREV IMAGE EXISTS!");
-    }
     // assume prevImg is available to initialize
     this.intializeNewImage(prevImg);
     this.setState({
@@ -499,9 +490,6 @@ export default class App extends React.Component {
     const { image, nextImg } = this.state;
     const { nextImgPath } = this.props;
 
-    if (!nextImg) {
-      console.log("NO NEXT IMAGE EXISTS!");
-    }
     // assume nextImg is available to initialize
     this.intializeNewImage(nextImg);
     this.setState({
@@ -512,7 +500,7 @@ export default class App extends React.Component {
     this.openImage(nextImgPath, true, 'nextImg');
   }
 
-  loadFromJson(obj, title, locationHeader, stateKey) {
+  loadFromJson(obj, title, locationHeader, stateKey, resetLuts) {
     const aimg = new Volume(obj);
 
     const  newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
@@ -524,7 +512,7 @@ export default class App extends React.Component {
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
       const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
-      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex);
+      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, resetLuts);
     });
     if (stateKey === 'image') {
       this.intializeNewImage(aimg, newChannelSettings);
@@ -679,7 +667,7 @@ export default class App extends React.Component {
   onSwitchFovCell(value) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
-    this.openImage(path, false, 'image');
+    this.openImage(path, false, 'image', true);
     this.setState({
         sendingQueryRequest: true,
         userSelections: {
@@ -707,15 +695,6 @@ export default class App extends React.Component {
       if (this.state.view3d) {
         this.state.view3d.updateLuts(this.state.image);
       }
-    }
-  }
-
-  updateURLSearchParams(input, type) {
-    if (input && type) {
-      const params = new URLSearchParams();
-      params.set(type, input);
-      window.history.pushState({}, '', `${location.pathname}?${params}`);
-      this.setState({[type]: input});
     }
   }
 
@@ -747,7 +726,6 @@ export default class App extends React.Component {
       }
     });
     if (preLoad) {
-      console.log("PRELOADING!");
       this.openImage(nextImgPath, true, 'nextImg');
       this.openImage(prevImgPath, true, 'prevImg');
     }
