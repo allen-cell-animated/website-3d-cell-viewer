@@ -66,9 +66,18 @@
         }
 
         .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow {
-            transform: translateY(-250%);
+            transform: translateY(-230%);
             position: absolute;
             left: 16px;
+        }
+
+        .ant-collapse>.ant-collapse-item>.ant-collapse-header[aria-expanded="true"] .anticon-right svg {
+            transform: rotate(90deg);
+        }
+
+        .ant-collapse>.ant-collapse-item>.ant-collapse-header .arrow svg {
+            transform: rotate(0);
+            transition: transform 0.24s;
         }
 
         .ant-collapse>.ant-collapse-item {
