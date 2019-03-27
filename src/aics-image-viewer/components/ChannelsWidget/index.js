@@ -1,5 +1,5 @@
 import React from 'react';
-import { map, filter, find, includes } from 'lodash';
+import { map, filter, find } from 'lodash';
 
 import {
   Card,

@@ -6,7 +6,6 @@ import { Icon } from 'antd';
 import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders.js';
-import AutoRotateButton from '../AutoRotateButton';
 import './styles.scss';
 
 const ViewMode = viewMode.mainMapping;

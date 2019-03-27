@@ -8,6 +8,14 @@
     "ecmaVersion": 6,
     "sourceType": "module"
   },
+  "globals": {
+    "document": true,
+    "clearInterval": true,
+    "setInterval": true,
+    "window": true,
+    "Event": true,
+    "setTimeout": true
+  },
   "plugins": [
     "react"
   ],
