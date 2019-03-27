@@ -82,10 +82,17 @@ export default class ControlPanel extends React.Component {
   }
 
   render() {
-    const { renderConfig } = this.props;
+    const { 
+      renderConfig, 
+      appHeight, 
+      imageName,
+      hasImage,
+      mode, 
+      onViewModeChange 
+    } = this.props;
     return (
       <Card 
-        style={{...STYLES.wrapper, height: this.props.appHeight}} 
+        style={{...STYLES.wrapper, height: appHeight}} 
         open={this.state.open} 
         bordered={false}
         className="control-panel"
@@ -96,15 +103,15 @@ export default class ControlPanel extends React.Component {
         }
         title={renderConfig.ViewModeRadioButtons && 
             <ViewModeRadioButtons
-              imageName={this.props.imageName}
-              mode={this.props.mode}
-              onViewModeChange={this.props.onViewModeChange}
+              imageName={imageName}
+              mode={mode}
+              onViewModeChange={onViewModeChange}
             />}
         >
         <Card.Meta 
           title={renderConfig.ColorPresetsDropdown && this.renderColorPresetsDropdown()}
         />
-        {this.props.hasImage ? <div className="channel-rows-list">
+        {hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
             imageName={this.props.imageName}
             channelSettings={this.props.channelSettings}

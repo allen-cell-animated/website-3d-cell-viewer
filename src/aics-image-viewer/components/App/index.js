@@ -58,7 +58,6 @@ import {
 } from "../../shared/utils/sliderValuesToImageValues";
 
 import './styles.scss';
-import { finished } from "stream";
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
@@ -70,13 +69,6 @@ const INIT_COLORS = PRESET_COLORS_0;
 const CHANNEL_SETTINGS = 'channelSettings';
 
 export default class App extends React.Component {
-
-  static nameClean(channelName) {
-    if (includes(channelName, '_seg') || includes(channelName, '_raw')) {
-      return channelName.split('_')[0];
-    }
-    return channelName;
-  }
 
   constructor(props) {
     super(props);
@@ -144,6 +136,7 @@ export default class App extends React.Component {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
+    this.nameClean = this.nameClean.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -194,7 +187,7 @@ export default class App extends React.Component {
     const { defaultVolumesOn, defaultSurfacesOn } = this.props;
     return channelNames.map((channel, index) => {
       return {
-        name: App.nameClean(channel) || "Channel " + index,
+        name: this.nameClean(channel) || "Channel " + index,
         [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
         [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
         isovalue: 188,
@@ -203,6 +196,18 @@ export default class App extends React.Component {
         dataReady: false,
       };
     });
+  }
+
+  // PROP for standardizing channel names. 
+  //Ie if you want both segmenation and raw of the same protein to have the same UI settings.
+  nameClean(channelName) {
+    const {
+      channelNameClean
+    } = this.props;
+    if (channelNameClean) {
+      return channelNameClean(channelName);
+    }
+    return channelName;
   }
 
   createChannelGrouping(channels) {
@@ -702,7 +707,7 @@ export default class App extends React.Component {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
     return find(channelSettings, (channel) => {
-      return channel.name === App.nameClean(channelName);
+      return channel.name === this.nameClean(channelName);
     });
   }
 
@@ -803,7 +808,7 @@ export default class App extends React.Component {
                 changeChannelSettings={this.changeChannelSettings}
                 changeOneChannelSetting={this.changeOneChannelSetting}
                 filterFunc={this.props.filterFunc}
-                nameClean={App.nameClean}
+                nameClean={this.nameClean}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
@@ -848,17 +853,17 @@ App.defaultProps = {
   fovPath: '',
   keyList: [OBSERVED_CHANNEL_KEY, SEGMENTATION_CHANNEL_KEY, CONTOUR_CHANNEL_KEY],
   renderConfig: {
+    AlphaMask: true,
     AutoRotateButton: true,
     AxisClipSliders: true, 
-    ColorPicker: true, 
-    ViewModeRadioButtons: true,
-    FovCellSwitchControls: true,
-    SaveSurfaceButtons: true,
-    AlphaMask: true,
     BrightnessSlider: true,
+    ColorPicker: true, 
+    ColorPresetsDropdown: true,
     DensitySlider: true,
     LevelsSliders: true,
-    ColorPresetsDropdown: true,
+    SaveSurfaceButtons: true,
+    FovCellSwitchControls: true,
+    ViewModeRadioButtons: true,
   }
 };
 
