@@ -80,20 +80,13 @@ export default class App extends React.Component {
     cellId = cellId ? ('_' + cellId) : "";
     return `${cellLine}/${cellLine}_${fovId}${cellId}`;
   }
-  static setInitialChannelConfig(channelNames, channelColors) {
-    return channelNames.map((channel, index) => {
-      return {
-        name: channel.split('_')[0] || "Channel " + index,
-        [VOLUME_ENABLED]: false,
-        [ISO_SURFACE_ENABLED]: index === 1,
-        isovalue: 188,
-        opacity: 1.0,
-        color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
-        dataReady: false,
-      };
-    });
-  }
 
+  static nameClean(channelName) {
+    if (includes(channelName, '_seg') || includes(channelName, '_raw')) {
+      return channelName.split('_')[0];
+    }
+    return channelName;
+  }
 
   constructor(props) {
     super(props);
@@ -160,7 +153,8 @@ export default class App extends React.Component {
     this.beginRequestImage = this.beginRequestImage.bind(this);
     this.loadNextImage = this.loadNextImage.bind(this);
     this.loadPrevImage = this.loadPrevImage.bind(this);
-    this.getChannelSetting = this.getChannelSetting.bind(this);
+    this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
+    this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -214,10 +208,8 @@ export default class App extends React.Component {
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
       if (cellPath === prevProps.nextImgPath ) {
-        console.log("NEXT IMAGE", cellPath);
         this.loadNextImage();
       } else if (cellPath === prevProps.prevImgPath) {
-        console.log("PREV IMAGE", cellPath);
         this.loadPrevImage();
       } else {
         this.beginRequestImage();
@@ -229,19 +221,25 @@ export default class App extends React.Component {
     if (newImage || channelsChanged || imageChanged) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
-    // if (image && filterFunc !== prevProps.filterFunc) {
-    //   console.log('chanaging grouping');
-    //   const filteredChannels = filterFunc ? filter(image.channel_names, filterFunc) : image.channel_names;
-    //   const channelGroupedByType = this.createChannelGrouping(filteredChannels);
-
-    //   this.setState({
-    //     channelGroupedByType,
-    //   });
-    // }
   }
 
   onView3DCreated(view3d) {
     this.setState({ view3d });
+  }
+
+  setInitialChannelConfig(channelNames, channelColors) {
+    const { defaultVolumesOn, defaultSurfacesOn } = this.props;
+    return channelNames.map((channel, index) => {
+      return {
+        name: App.nameClean(channel) || "Channel " + index,
+        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
+        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
+        isovalue: 188,
+        opacity: 1.0,
+        color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
+        dataReady: false,
+      };
+    });
   }
 
   createChannelGrouping(channels) {
@@ -251,7 +249,6 @@ export default class App extends React.Component {
       keyList,
     } = this.props;
     if (channels) {
-      console.log('creating new grouping with', channels);
       const grouping = channels.reduce((acc, channel, index) => {
         let other = true;
         keyList.forEach(key => {
@@ -263,7 +260,6 @@ export default class App extends React.Component {
           }
         });
         if (other) {
-
           if (!acc[OTHER_CHANNEL_KEY]) {
             acc[OTHER_CHANNEL_KEY] = [];
           }
@@ -335,11 +331,6 @@ export default class App extends React.Component {
     else {
       message = JSON.stringify(resp);
     }
-    // this.setState({
-    //   queryErrorMessage: message,
-    //   sendingQueryRequest: false,
-    //   cachingInProgress: false
-    // });
     console.log(message);
     this.stopPollingForImage();
   }
@@ -365,8 +356,10 @@ export default class App extends React.Component {
       .catch(resp => this.handleOpenImageException(resp));
   }
 
-  intializeNewImage(aimg) {
+  intializeNewImage(aimg, newChannelSettings) {
     const { userSelections, view3d } = this.state;
+    const { filterFunc } = this.props;
+    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
@@ -380,7 +373,21 @@ export default class App extends React.Component {
     
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
-      channels: userSelections[CHANNEL_SETTINGS].map((ch) => {
+      channels: aimg.channel_names.map((name) => {
+        const ch = this.getOneChannelSetting(name);
+        if (!ch) {
+          return {};
+        }
+        if (filterFunc && !filterFunc(name)) {
+          return {
+            enabled: false,
+            isosurfaceEnableed: false,
+            isovalue: ch.isovalue,
+            isosurfaceOpacity: ch.opacity,
+            color: ch.color
+          };
+        } 
+   
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
@@ -390,8 +397,6 @@ export default class App extends React.Component {
         };
       })
     });
-
-    //this.updateImageVolumeAndSurfacesEnabledFromAppState();
 
     view3d.updateMaskAlpha(aimg, imageMask);
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
@@ -405,18 +410,16 @@ export default class App extends React.Component {
 
   }
 
-
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
     const { filterFunc } = this.props;
     const filteredChannels = filterFunc ? filter(channelNames, filterFunc) : channelNames;
 
     let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === filteredChannels.length ?
-      userSelections[CHANNEL_SETTINGS] : App.setInitialChannelConfig(filteredChannels, INIT_COLORS, filterFunc);
+      userSelections[CHANNEL_SETTINGS] : this.setInitialChannelConfig(filteredChannels, INIT_COLORS, filterFunc);
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
       [CHANNEL_SETTINGS]: newChannelSettings,
-      channelGroupedByType
     });
     this.setState({
       channelGroupedByType,
@@ -429,11 +432,10 @@ export default class App extends React.Component {
   }
 
   onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex) {
-    const { image, view3d, channelDataReady } = this.state;
+    const { image, view3d } = this.state;
     if (aimg !== image) {
       return;
     }
-    const newChannelDataReady = { ...channelDataReady, [channelIndex]: true };
     const volenabled = thisChannelsSettings[VOLUME_ENABLED];
     const isoenabled = thisChannelsSettings[ISO_SURFACE_ENABLED];
     view3d.setVolumeChannelOptions(aimg, channelIndex, {
@@ -459,9 +461,7 @@ export default class App extends React.Component {
       // re-set with copy of current data...?
       // this.changeOneChannelSetting(channelIndex, LUT_CONTROL_POINTS, thisChannelsSettings[LUT_CONTROL_POINTS].slice());
     }
-    // this.setState({
-    //   channelDataReady: newChannelDataReady
-    // });
+
     if (view3d) {
       if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
         view3d.setVolumeChannelAsMask(aimg, channelIndex);
@@ -473,7 +473,6 @@ export default class App extends React.Component {
       this.setState({ sendingQueryRequest: false });
     }
     if (aimg.loaded) {
-      console.log('loaded');
       view3d.updateActiveChannels(aimg);
     }
   }
@@ -523,11 +522,12 @@ export default class App extends React.Component {
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
-      const thisChannelSettings = find(newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+      // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+      const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
       this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex);
     });
     if (stateKey === 'image') {
-      this.intializeNewImage(aimg);
+      this.intializeNewImage(aimg, newChannelSettings);
     }
     this.setState({ [stateKey]: aimg });
   }
@@ -677,23 +677,17 @@ export default class App extends React.Component {
   }
 
   onSwitchFovCell(value) {
-    if (this.state.hasCellId) {
-      const name = this.props.buildName(
-        this.state.cellLine, 
-        this.state.fovId, 
-        value === FULL_FIELD_IMAGE ? null : this.state.cellId
-      );
-      const type = value === FULL_FIELD_IMAGE ? FOV_ID_QUERY : CELL_ID_QUERY;
-
-      this.openImage(name, false, 'image');
-      this.setState({
-          sendingQueryRequest: true,
-          userSelections: {
-              ...this.state.userSelections,
-            imageType: value,
-          }
-      });
-    }
+    const { cellPath, fovPath } = this.props;
+    const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
+    this.openImage(path, false, 'image');
+    this.setState({
+        sendingQueryRequest: true,
+        userSelections: {
+            ...this.state.userSelections,
+          imageType: value,
+        }
+    });
+    
   }
 
   onApplyColorPresets(presets) {
@@ -760,37 +754,28 @@ export default class App extends React.Component {
     this.openImage(path, true, 'image');
   }
 
-  getChannelSetting(channelName) {
+  getOneChannelSetting(channelName, newSettings) {
     const { userSelections } = this.state;
-    console.log(userSelections[CHANNEL_SETTINGS])
+    const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
+    return find(channelSettings, (channel) => {
+      return channel.name === App.nameClean(channelName);
+    });
   }
 
   updateImageVolumeAndSurfacesEnabledFromAppState() {
-    const { image, view3d, userSelections } = this.state;
-    const { filterFunc} = this.props;
-    if (image.getChannel(index).loaded) {
-      // apply channel settings
-      // image.channel_names
-      image.channel_names.forEach((channelName, imageIndex) => {
-        if (filterFunc && !filterFunc(channelName)) {
-          return;
-        }
-        const channelSetting = find(userSelections[CHANNEL_SETTINGS], (channel) => (
-          channel.name === channelName.split('_')[0]
-        ));
+    const { image, view3d } = this.state;
+    // apply channel settings
+    // image.channel_names
+    if (!image) {
+      return; 
+    }
+    image.channel_names.forEach((channelName, imageIndex) => {
+      if (image.getChannel(imageIndex).loaded) {
+        const channelSetting = this.getOneChannelSetting(channelName);
         const volenabled = channelSetting[VOLUME_ENABLED];
         const isoenabled = channelSetting[ISO_SURFACE_ENABLED];
-        console.log( volenabled, isoenabled);
 
-          // re-set with copy of current data...?
-        if (channelSetting[LUT_CONTROL_POINTS]) {
-          const lut = controlPointsToLut(channelSetting[LUT_CONTROL_POINTS]);
-          image.setLut(index, lut);
-          view3d.updateLuts(image);
-            // this.changeOneChannelSetting(index, LUT_CONTROL_POINTS, channel[LUT_CONTROL_POINTS].slice());
-        }
-
-        view3d.setVolumeChannelOptions(image, index, {
+        view3d.setVolumeChannelOptions(image, imageIndex, {
           enabled: volenabled,
           color: channelSetting.color,
           isosurfaceEnabled: isoenabled,
@@ -798,12 +783,11 @@ export default class App extends React.Component {
           isosurfaceOpacity: channelSetting.opacity
         });
 
-      })
-    };
+      };
+    });
 
-    console.log("UPDATED CHANNELS FROM STATE");
     view3d.updateActiveChannels(image);
-    }
+  
   }
 
   toggleControlPanel(value) {
@@ -874,6 +858,8 @@ export default class App extends React.Component {
                 makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
                 changeChannelSettings={this.changeChannelSettings}
                 changeOneChannelSetting={this.changeOneChannelSetting}
+                filterFunc={this.props.filterFunc}
+                nameClean={App.nameClean}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
@@ -907,6 +893,8 @@ App.defaultProps = {
     [SEGMENTATION_CHANNEL_KEY]: [],
     [CONTOUR_CHANNEL_KEY]: [],
   },
+  defaultSurfacesOn: [1],
+  defaultVolumesOn: [],
   groupToChannelNameMap: channelGroupingMap,
   IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.3.0',
   DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',

@@ -52,34 +52,34 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   volumeCheckHandler({ target }) {
-    const { index, changeOneChannelSetting, isosurfaceChecked} = this.props;
+    const { channelName, index, changeOneChannelSetting, isosurfaceChecked} = this.props;
     if (!target.checked && !isosurfaceChecked) {
       this.setState({controlsOpen: false});
     }
-    changeOneChannelSetting(index, VOLUME_ENABLED, target.checked);
+    changeOneChannelSetting(channelName, index, VOLUME_ENABLED, target.checked);
   }
 
   isosurfaceCheckHandler({ target }) {
-    const { index, changeOneChannelSetting, volumeChecked } = this.props;
+    const { channelName, index, changeOneChannelSetting, volumeChecked } = this.props;
     if (!target.checked && !volumeChecked) {
       this.setState({ controlsOpen: false });
     }
-    changeOneChannelSetting(index, ISO_SURFACE_ENABLED, target.checked);
+    changeOneChannelSetting(channelName, index, ISO_SURFACE_ENABLED, target.checked);
   }
 
   onIsovalueChange(newValue) {
-    const { index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(index, ISO_VALUE, newValue);
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, ISO_VALUE, newValue);
   }
 
   onOpacityChange(newValue) {
-    const { index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(index, OPACITY, newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, OPACITY, newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
   }
 
   onUpdateLutControlPoints(newValue) {
-    const { index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(index, LUT_CONTROL_POINTS, newValue);
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, LUT_CONTROL_POINTS, newValue);
   }
 
   onSaveIsosurfaceSTL() {
@@ -175,8 +175,9 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   onColorChange(newRGB, oldRGB, index) {
+    const { channelName } = this.props;
     const color = rgbObjectToArray(newRGB);
-    this.props.changeOneChannelSetting(index, 'color', color);
+    this.props.changeOneChannelSetting(channelName, index, 'color', color);
   }
 
   createColorPicker() {
@@ -261,7 +262,7 @@ export default class ChannelsWidgetRow extends React.Component {
     return (
       <div style={STYLES.settingsContainer}> 
       {this.props.volumeChecked && 
-        <Row type="flex" justify="space-between" >
+        <Row type="flex" justify="space-between" className="volume-settings">
           <h4 className="ant-list-item-meta-title">Volume settings:</h4>
           {this.createTFEditor()}
         </Row>}
@@ -305,6 +306,7 @@ const STYLES = {
   },
   settingsContainer: {
     width: '100%',
+    order: 3,
   },
   uncheckedIcon: { 
     fill: colorPalette.accent3Color 

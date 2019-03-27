@@ -94,7 +94,7 @@ export default class ControlPanel extends React.Component {
             {this.createFovCellSwitchControls()}
           </div>
         }
-        title={renderConfig.ViewModeRaidoButtons && 
+        title={renderConfig.ViewModeRadioButtons && 
             <ViewModeRadioButtons
               imageName={this.props.imageName}
               mode={this.props.mode}
@@ -107,7 +107,7 @@ export default class ControlPanel extends React.Component {
         {this.props.hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
             imageName={this.props.imageName}
-            channels={this.props.channels}
+            channelSettings={this.props.channelSettings}
             channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
             changeChannelSettings={this.props.changeChannelSettings}
@@ -119,6 +119,8 @@ export default class ControlPanel extends React.Component {
             onApplyColorPresets={this.props.onApplyColorPresets}
             style={STYLES.channelsWidget}
             renderConfig={renderConfig}
+            filterFunc={this.props.filterFunc}
+            nameClean={this.props.nameClean}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
