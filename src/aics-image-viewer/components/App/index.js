@@ -11,15 +11,9 @@ import {
 
 import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
 import HttpClient from '../../shared/utils/httpClient';
-import UtilsService from '../../shared/utils/utilsService';
 import enums from '../../shared/enums';
 import {
-  CELL_ID_QUERY,
-  CELL_LINE_QUERY,
   CELL_SEGMENTATION_CHANNEL_NAME,
-  FOV_ID_QUERY,
-  IMAGE_NAME_QUERY,
-  LEGACY_IMAGE_ID_QUERY,
   OBSERVED_CHANNEL_KEY,
   SEGMENTATION_CHANNEL_KEY,
   CONTOUR_CHANNEL_KEY,
@@ -153,30 +147,6 @@ export default class App extends React.Component {
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
-  componentWillMount() {
-    const legacyImageIdToShow = UtilsService.getParameterByName(LEGACY_IMAGE_ID_QUERY);
-    if (legacyImageIdToShow) {
-      this.setQueryInputAndRequestImage(legacyImageIdToShow, LEGACY_IMAGE_ID_QUERY);
-    }
-    else {
-      const imageIdToShow = UtilsService.getParameterByName(IMAGE_NAME_QUERY);
-      if (imageIdToShow) {
-        this.setQueryInputAndRequestImage(imageIdToShow, IMAGE_NAME_QUERY);
-      }
-      else {
-        // cellid and cellline and fovid
-        const cellId = UtilsService.getParameterByName(CELL_ID_QUERY);
-        const fovId = UtilsService.getParameterByName(FOV_ID_QUERY);
-        const cellLine = UtilsService.getParameterByName(CELL_LINE_QUERY);
-        if (cellId && fovId && cellLine) {
-          this.setQueryInputAndRequestImage({ cellId, fovId, cellLine }, CELL_ID_QUERY);
-        }
-        else if (fovId && cellLine) {
-          this.setQueryInputAndRequestImage({ fovId, cellLine }, FOV_ID_QUERY);
-        }
-      }
-    }
-  }
 
   componentDidMount() {
     const { cellId } = this.props;
