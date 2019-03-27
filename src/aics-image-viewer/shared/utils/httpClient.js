@@ -18,7 +18,7 @@ export default class HttpClient {
         data: {
           error: 'unknown_error',
           message: 'error in parsing response json',
-          host: this.BASE_URL,
+          host: response.headers.get('Location'),
           time: (new Date()).toISOString()
         }
       }));

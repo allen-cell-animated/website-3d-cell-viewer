@@ -14,7 +14,9 @@
     "setInterval": true,
     "window": true,
     "Event": true,
-    "setTimeout": true
+    "setTimeout": true,
+    "fetch": true,
+    "Promise": true
   },
   "plugins": [
     "react"
