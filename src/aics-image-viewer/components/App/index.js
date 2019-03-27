@@ -76,10 +76,6 @@ const INIT_COLORS = PRESET_COLORS_0;
 const CHANNEL_SETTINGS = 'channelSettings';
 
 export default class App extends React.Component {
-  static buildName(cellLine, fovId, cellId) {
-    cellId = cellId ? ('_' + cellId) : "";
-    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
-  }
 
   static nameClean(channelName) {
     if (includes(channelName, '_seg') || includes(channelName, '_raw')) {
@@ -877,10 +873,6 @@ App.defaultProps = {
   IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.3.0',
   DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
   IMAGE_SERVER: 'https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.3.0/Cell-Viewer_Thumbnails/',
-  buildName :  (cellLine, fovId, cellId) => {
-    cellId = cellId ? ('_' + cellId) : "";
-    return `${cellLine}/${cellLine}_${fovId}${cellId}`;
-  },
   appHeight: '100vh',
   cellPath: '',
   fovPath: '',
