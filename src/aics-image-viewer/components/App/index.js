@@ -324,7 +324,6 @@ export default class App extends React.Component {
   }
 
   intializeNewImage(aimg, newChannelSettings) {
-    console.log('new image')
     const { userSelections, view3d } = this.state;
     const { filterFunc } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
@@ -853,17 +852,17 @@ App.defaultProps = {
   fovPath: '',
   keyList: [OBSERVED_CHANNEL_KEY, SEGMENTATION_CHANNEL_KEY, CONTOUR_CHANNEL_KEY],
   renderConfig: {
-    AlphaMask: true,
-    AutoRotateButton: true,
-    AxisClipSliders: true, 
-    BrightnessSlider: true,
-    ColorPicker: true, 
-    ColorPresetsDropdown: true,
-    DensitySlider: true,
-    LevelsSliders: true,
-    SaveSurfaceButtons: true,
-    FovCellSwitchControls: true,
-    ViewModeRadioButtons: true,
+    alphaMask: true,
+    autoRotateButton: true,
+    axisClipSliders: true, 
+    brightnessSlider: true,
+    colorPicker: true, 
+    colorPresetsDropdown: true,
+    densitySlider: true,
+    levelsSliders: true,
+    saveSurfaceButtons: true,
+    fovCellSwitchControls: true,
+    viewModeRadioButtons: true,
   }
 };
 

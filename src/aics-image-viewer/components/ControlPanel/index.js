@@ -96,12 +96,12 @@ export default class ControlPanel extends React.Component {
         open={this.state.open} 
         bordered={false}
         className="control-panel"
-        extra={renderConfig.FovCellSwitchControls &&
+        extra={renderConfig.fovCellSwitchControls &&
           <div>
             {this.createFovCellSwitchControls()}
           </div>
         }
-        title={renderConfig.ViewModeRadioButtons && 
+        title={renderConfig.viewModeRadioButtons && 
             <ViewModeRadioButtons
               imageName={imageName}
               mode={mode}
@@ -109,7 +109,7 @@ export default class ControlPanel extends React.Component {
             />}
         >
         <Card.Meta 
-          title={renderConfig.ColorPresetsDropdown && this.renderColorPresetsDropdown()}
+          title={renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()}
         />
         {hasImage ? <div className="channel-rows-list">
           <ChannelsWidget

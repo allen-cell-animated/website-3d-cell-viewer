@@ -217,10 +217,10 @@ export default class GlobalVolumeControls extends React.Component {
             key="gobal-volume"
           >
             <div style={STYLES.slidersWrapper}>
-              {renderConfig.AlphaMask && this.createMaskAlphaSlider()}
-              {renderConfig.BrightnessSlider && this.createBrightnessSlider()}
-              {renderConfig.DensitySlider && this.createDensitySlider()}
-              {renderConfig.LevelsSliders && this.createLevelsSlider()}
+              {renderConfig.alphaMask && this.createMaskAlphaSlider()}
+              {renderConfig.brightnessSlider && this.createBrightnessSlider()}
+              {renderConfig.densitySlider && this.createDensitySlider()}
+              {renderConfig.levelsSliders && this.createLevelsSlider()}
               {this.createProjectionModeControls()}
               {this.props.canPathTrace && this.createRenderModeControls()}
             </div>

@@ -99,7 +99,7 @@ export default class ViewerWrapper extends React.Component {
    return (
      <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight}} >
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
-        {renderConfig.AxisClipSliders && this.renderClipSliders()}
+        {renderConfig.axisClipSliders && this.renderClipSliders()}
         {this.renderOverlay()}
      </div>
    );
