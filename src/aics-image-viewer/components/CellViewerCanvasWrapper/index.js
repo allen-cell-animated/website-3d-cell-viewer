@@ -6,7 +6,6 @@ import { Icon } from 'antd';
 import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders.js';
-import AutoRotateButton from '../AutoRotateButton';
 import './styles.scss';
 
 const ViewMode = viewMode.mainMapping;
@@ -35,13 +34,6 @@ export default class ViewerWrapper extends React.Component {
    }
    if (this.view3D && this.props.autorotate !== newProps.autorotate) {
      this.view3D.setAutoRotate(newProps.autorotate);
-   }
-
-   this.needToSetImage = false;
-   if (this.props.image && newProps.image) {
-     this.needToSetImage = this.props.image.name !== newProps.image.name;
-   } else if (!this.props.image && newProps.image) {
-     this.needToSetImage = true;
    }
 
    this.view3D.resize();
@@ -100,11 +92,14 @@ export default class ViewerWrapper extends React.Component {
   }
 
  render() {
+   const {
+     appHeight,
+     renderConfig,
+   } = this.props;
    return (
-     <div className='cell-canvas' style={STYLES.viewer}>
+     <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight}} >
         <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
-        {this.renderClipSliders()}
-
+        {renderConfig.axisClipSliders && this.renderClipSliders()}
         {this.renderOverlay()}
      </div>
    );
@@ -115,8 +110,6 @@ const STYLES = {
   viewer: {
     display: 'flex',
     position: 'relative',
-    height: '100vh',
-    width: '100%',
   },
   view3d: {
     width: '100%',

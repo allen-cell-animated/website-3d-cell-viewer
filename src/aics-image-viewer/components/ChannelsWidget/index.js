@@ -1,5 +1,5 @@
 import React from 'react';
-import { map, filter } from 'lodash';
+import { map, filter, find } from 'lodash';
 
 import {
   Card,
@@ -51,9 +51,14 @@ export default class ChannelsWidget extends React.Component {
   }
 
   renderVisiblityControls(key, channelArray) {
-    const { channels} = this.props;
-    const volChecked = filter(channelArray, channelIndex => channels[channelIndex][VOLUME_ENABLED]);
-    const isoChecked = filter(channelArray, channelIndex => channels[channelIndex][ISO_SURFACE_ENABLED]);
+    const { channelSettings, channelDataChannels, nameClean} = this.props;
+
+    const arrayOfNames = map(channelArray, channelIndex => {
+      const channelName = channelDataChannels[channelIndex].name;
+      return nameClean(channelName);
+    });
+    const volChecked = filter(arrayOfNames, name => find(channelSettings, {name: name})[VOLUME_ENABLED]);
+    const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name })[ISO_SURFACE_ENABLED]);
     return (
       <div style={STYLES.buttonRow}>
           <SharedCheckBox 
@@ -78,11 +83,16 @@ export default class ChannelsWidget extends React.Component {
   getRows() {
     const { 
       channelGroupedByType, 
-      channels, 
+      channelSettings, 
       channelDataReady,
       channelDataChannels,
+      filterFunc,
+      nameClean,
     } = this.props;
     return map(channelGroupedByType, (channelArray, key) => {
+      if (!channelArray.length || (filterFunc && !filterFunc(key))) {
+        return null;
+      }
       return (
         <Card
           bordered={false}
@@ -101,24 +111,28 @@ export default class ChannelsWidget extends React.Component {
                 itemLayout="horizontal"
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
-                  const channel = channels[actualIndex];
+                  const thisChannelSettings = find(channelSettings, (channel) => { 
+                    return channel.name === nameClean(channelDataChannels[actualIndex].name);
+                  });
+      
                   return (
-                  <ChannelsWidgetRow    key={`${actualIndex}_${channel.name}_${actualIndex}`}
-                                        index={actualIndex}
-                                        channelDataForChannel={channelDataChannels[actualIndex]}
-                                        name={formatChannelName(channel.name)}
-                                        volumeChecked={channel[VOLUME_ENABLED]}
-                                        isosurfaceChecked={channel[ISO_SURFACE_ENABLED]}
-                                        channelDataReady={channelDataReady[actualIndex]}
-                                        channelControlPoints={channel[LUT_CONTROL_POINTS]}
-                                        isovalue={channel.isovalue}
-                                        opacity={channel.opacity}
-                                        color={channel.color}
-                                        updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                                        changeOneChannelSetting={this.props.changeOneChannelSetting}
-                                        onColorChangeComplete={this.props.onColorChangeComplete}
-                                        handleChangeToImage={this.props.handleChangeToImage}
-
+                  <ChannelsWidgetRow    
+                      key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
+                      index={actualIndex}
+                      channelName={thisChannelSettings.name}
+                      channelDataForChannel={channelDataChannels[actualIndex]}
+                      name={formatChannelName(thisChannelSettings.name)}
+                      volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
+                      isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
+                      channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
+                      isovalue={thisChannelSettings.isovalue}
+                      opacity={thisChannelSettings.opacity}
+                      color={thisChannelSettings.color}
+                      channelDataReady={channelDataReady[actualIndex]}
+                      updateChannelTransferFunction={this.props.updateChannelTransferFunction}
+                      changeOneChannelSetting={this.props.changeOneChannelSetting}
+                      onColorChangeComplete={this.props.onColorChangeComplete}
+                      handleChangeToImage={this.props.handleChangeToImage}
                   />
                 );}
               }

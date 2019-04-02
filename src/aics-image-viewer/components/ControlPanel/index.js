@@ -82,31 +82,39 @@ export default class ControlPanel extends React.Component {
   }
 
   render() {
-
+    const { 
+      renderConfig, 
+      appHeight, 
+      imageName,
+      hasImage,
+      mode, 
+      onViewModeChange 
+    } = this.props;
     return (
       <Card 
-        style={STYLES.wrapper} 
+        style={{...STYLES.wrapper, height: appHeight}} 
         open={this.state.open} 
         bordered={false}
         className="control-panel"
-        extra={
+        extra={renderConfig.fovCellSwitchControls &&
           <div>
             {this.createFovCellSwitchControls()}
-          </div>}
-        title={
+          </div>
+        }
+        title={renderConfig.viewModeRadioButtons && 
             <ViewModeRadioButtons
-              imageName={this.props.imageName}
-              mode={this.props.mode}
-              onViewModeChange={this.props.onViewModeChange}
+              imageName={imageName}
+              mode={mode}
+              onViewModeChange={onViewModeChange}
             />}
         >
         <Card.Meta 
-          title={this.renderColorPresetsDropdown()}
+          title={renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()}
         />
-        {this.props.hasImage ? <div className="channel-rows-list">
+        {hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
             imageName={this.props.imageName}
-            channels={this.props.channels}
+            channelSettings={this.props.channelSettings}
             channelDataChannels={this.props.channelDataChannels}
             channelGroupedByType={this.props.channelGroupedByType}
             changeChannelSettings={this.props.changeChannelSettings}
@@ -117,6 +125,9 @@ export default class ControlPanel extends React.Component {
             onColorChangeComplete={this.props.onColorChangeComplete}
             onApplyColorPresets={this.props.onApplyColorPresets}
             style={STYLES.channelsWidget}
+            renderConfig={renderConfig}
+            filterFunc={this.props.filterFunc}
+            nameClean={this.props.nameClean}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
@@ -133,6 +144,7 @@ export default class ControlPanel extends React.Component {
             maxProjectOn={this.props.maxProjectOn}
             canPathTrace={this.props.canPathTrace}
             pathTraceOn={this.props.pathTraceOn}
+            renderConfig={renderConfig}
           />
         </div> : null}
       </Card>

@@ -1,6 +1,6 @@
 {
   "name": "ac-3d-viewer",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "description": "web view of cell volume images",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -37,7 +37,7 @@
     "roboto-fontface": "^0.8.0",
     "three": "^0.91.0",
     "url-search-params": "^0.10.0",
-    "volume-viewer": "^2.0.0-alpha.3",
+    "volume-viewer": "file:../volume-viewer",
     "whatwg-fetch": "^2.0.3"
   },
   "peerDependencies": {

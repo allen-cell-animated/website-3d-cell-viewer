@@ -1,12 +1,10 @@
-const BASE_URL = process.env.IMAGE_VIEWER_SERVICE_URL;
-
 export default class HttpClient {
 
   // fetch response.json() is a promise but we want return the json itself
-  static parseJSON(response, options) {
+  parseJSON(response, options) {
     return response.json()
       .then((json) => ({
-        locationHeader: (options && options.absolute) ? '' : `${BASE_URL}/${response.headers.get('Location')}`,
+        locationHeader: response.headers.get('Location'),
         status: response.status,
         ok: response.ok,
         data: json || {
@@ -20,16 +18,16 @@ export default class HttpClient {
         data: {
           error: 'unknown_error',
           message: 'error in parsing response json',
-          host: BASE_URL,
+          host: response.headers.get('Location'),
           time: (new Date()).toISOString()
         }
       }));
   }
 
-  static getJSON(url, options) {
-    return fetch((options && options.absolute) ? `${url}` : `${BASE_URL}${url}`, options)
+  getJSON(url, options) {
+    return fetch(url, options)
       .then(response => {
-        return HttpClient.parseJSON(response, options);
+        return this.parseJSON(response, options);
       })
       .then(response => {
         if (response.ok) {
