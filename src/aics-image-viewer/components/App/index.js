@@ -199,7 +199,7 @@ export default class App extends React.Component {
   }
 
   // PROP for standardizing channel names. 
-  //Ie if you want both segmenation and raw of the same protein to have the same UI settings.
+  // Ie if you want both segmentation and raw of the same protein to have the same UI settings.
   nameClean(channelName) {
     const {
       channelNameClean
@@ -762,7 +762,7 @@ export default class App extends React.Component {
         style={{height: this.props.appHeight}}
       >
             <Sider
-              className="control-pannel-holder"
+              className="control-panel-holder"
               collapsible={true}
               defaultCollapsed={false}
               collapsedWidth={0}
