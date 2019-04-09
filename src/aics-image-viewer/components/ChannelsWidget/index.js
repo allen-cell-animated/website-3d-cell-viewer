@@ -57,8 +57,8 @@ export default class ChannelsWidget extends React.Component {
       const channelName = channelDataChannels[channelIndex].name;
       return nameClean(channelName);
     });
-    const volChecked = filter(arrayOfNames, name => find(channelSettings, {name: name})[VOLUME_ENABLED]);
-    const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name })[ISO_SURFACE_ENABLED]);
+    const volChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[VOLUME_ENABLED] : false);
+    const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[ISO_SURFACE_ENABLED] : false);
     return (
       <div style={STYLES.buttonRow}>
           <SharedCheckBox 
@@ -114,8 +114,8 @@ export default class ChannelsWidget extends React.Component {
                   const thisChannelSettings = find(channelSettings, (channel) => { 
                     return channel.name === nameClean(channelDataChannels[actualIndex].name);
                   });
-      
-                  return (
+                  
+                  return (thisChannelSettings ? 
                   <ChannelsWidgetRow    
                       key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
                       index={actualIndex}
@@ -133,7 +133,7 @@ export default class ChannelsWidget extends React.Component {
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
                       handleChangeToImage={this.props.handleChangeToImage}
-                  />
+                  /> : <div></div>
                 );}
               }
               />

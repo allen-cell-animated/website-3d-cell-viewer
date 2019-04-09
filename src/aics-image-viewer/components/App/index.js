@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from 'react';
-import { includes, isEqual, filter, find } from 'lodash';
+import { includes, isEqual, filter, find, map } from 'lodash';
 import { 
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
@@ -380,20 +380,19 @@ export default class App extends React.Component {
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
     const { filterFunc } = this.props;
-    const filteredChannels = filterFunc ? filter(channelNames, filterFunc) : channelNames;
 
-    let newChannelSettings = userSelections[CHANNEL_SETTINGS].length === filteredChannels.length ?
-      userSelections[CHANNEL_SETTINGS] : this.setInitialChannelConfig(filteredChannels, INIT_COLORS, filterFunc);
+    const cleanNewNames = map(channelNames, this.nameClean);
+    const filteredNewChannelNames = filterFunc ? filter(cleanNewNames, filterFunc) : cleanNewNames;
+    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], ele => this.nameClean(ele.name));
+    let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames) ?
+      userSelections[CHANNEL_SETTINGS] : this.setInitialChannelConfig(filteredNewChannelNames, INIT_COLORS, filterFunc);
+
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
       [CHANNEL_SETTINGS]: newChannelSettings,
     });
     this.setState({
       channelGroupedByType,
-      userSelections: {
-        ...this.state.userSelections,
-        [CHANNEL_SETTINGS]: newChannelSettings,
-      }
     });
     return newChannelSettings;
   }
@@ -417,12 +416,14 @@ export default class App extends React.Component {
     // OR if we are switching between FOV or SEG
     if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
-      aimg.setLut(channelIndex, lutObject.lut);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
+      console.log(thisChannelsSettings.name, 'INDEX', channelIndex, newControlPoints.map(ele => ele.x))
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     } else {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
+      console.log(thisChannelsSettings.name, 'INDEX', channelIndex, thisChannelsSettings[LUT_CONTROL_POINTS].map(ele => ele.x))
       aimg.setLut(channelIndex, lut);
+      // QUESTION: I switched this off and didn't see a difference, is it needed?
       view3d.updateLuts(aimg);
     }
 
@@ -720,6 +721,9 @@ export default class App extends React.Component {
     image.channel_names.forEach((channelName, imageIndex) => {
       if (image.getChannel(imageIndex).loaded) {
         const channelSetting = this.getOneChannelSetting(channelName);
+        if (!channelSetting) {
+          return;
+        }
         const volenabled = channelSetting[VOLUME_ENABLED];
         const isoenabled = channelSetting[ISO_SURFACE_ENABLED];
 
@@ -730,7 +734,6 @@ export default class App extends React.Component {
           isovalue: channelSetting.isovalue,
           isosurfaceOpacity: channelSetting.opacity
         });
-
       };
     });
 
