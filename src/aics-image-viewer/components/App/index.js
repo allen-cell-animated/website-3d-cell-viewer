@@ -417,11 +417,9 @@ export default class App extends React.Component {
     if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
-      console.log(thisChannelsSettings.name, 'INDEX', channelIndex, newControlPoints.map(ele => ele.x))
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     } else {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
-      console.log(thisChannelsSettings.name, 'INDEX', channelIndex, thisChannelsSettings[LUT_CONTROL_POINTS].map(ele => ele.x))
       aimg.setLut(channelIndex, lut);
       // QUESTION: I switched this off and didn't see a difference, is it needed?
       view3d.updateLuts(aimg);
