@@ -46,8 +46,8 @@ export function controlPointsToLut(controlPoints) {
   ctx.fillRect(x0c, 0, x1c - x0c + 1, height);
 
   // extract one row
-  var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
-  for (var i = 0; i < 256; ++i) {
+  const imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
+  for (let i = 0; i < 256; ++i) {
       // extract the alphas.
       opacityGradient[i] = imagedata.data[i * 4 + 3];
   }
