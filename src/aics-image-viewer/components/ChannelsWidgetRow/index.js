@@ -231,10 +231,12 @@ export default class ChannelsWidgetRow extends React.Component {
       channelDataForChannel,
       updateChannelTransferFunction,
       index,
+      imageName,
     } = this.props;
     return (<TfEditor 
           id={'TFEditor'+index}
           index={index}
+          imageName={imageName}
           fit-to-data={false}
           width={250}
           height={150}
