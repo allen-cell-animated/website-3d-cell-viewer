@@ -1,17 +1,17 @@
 // 3rd Party Imports
 import { Layout } from "antd";
-import React from 'react';
-import { includes, isEqual, filter, find, map } from 'lodash';
-import { 
+import React from "react";
+import { includes, isEqual, filter, find, map } from "lodash";
+import {
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
-  Volume, 
-  VolumeLoader,
-} from 'volume-viewer';
+  Volume,
+  VolumeLoader
+} from "volume-viewer";
 
-import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
-import HttpClient from '../../shared/utils/httpClient';
-import enums from '../../shared/enums';
+import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
+import HttpClient from "../../shared/utils/httpClient";
+import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
   OBSERVED_CHANNEL_KEY,
@@ -40,36 +40,34 @@ import {
   MODE,
   AUTO_ROTATE,
   MAX_PROJECT,
-  PATH_TRACE,
-} from '../../shared/constants';
+  PATH_TRACE
+} from "../../shared/constants";
 
-import ControlPanel from '../ControlPanel';
-import ViewerWrapper from '../CellViewerCanvasWrapper';
-import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
+import ControlPanel from "../ControlPanel";
+import ViewerWrapper from "../CellViewerCanvasWrapper";
+import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
-
-import '../../assets/styles/globals.scss';
-import '../../assets/styles/no-ui-slider.min.scss';
-import { 
-  gammaSliderToImageValues, 
-  densitySliderToImageValue, 
-  brightnessSliderToImageValue, 
-  alphaSliderToImageValue,
+import "../../assets/styles/globals.scss";
+import "../../assets/styles/no-ui-slider.min.scss";
+import {
+  gammaSliderToImageValues,
+  densitySliderToImageValue,
+  brightnessSliderToImageValue,
+  alphaSliderToImageValue
 } from "../../shared/utils/sliderValuesToImageValues";
 
-import './styles.scss';
+import "./styles.scss";
 
 const ViewMode = enums.viewMode.mainMapping;
 const channelGroupingMap = enums.channelGroups.channelGroupingMap;
 const { Sider, Content } = Layout;
 
-const OK_STATUS = 'OK';
-const ERROR_STATUS = 'Error';
+const OK_STATUS = "OK";
+const ERROR_STATUS = "Error";
 const INIT_COLORS = PRESET_COLORS_0;
-const CHANNEL_SETTINGS = 'channelSettings';
+const CHANNEL_SETTINGS = "channelSettings";
 
 export default class App extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -97,12 +95,12 @@ export default class App extends React.Component {
         [MAX_PROJECT]: false,
         [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
-        [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT, 
+        [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
         [DENSITY_SLIDER_LEVEL]: DENSITY_SLIDER_LEVEL_DEFAULT,
         [LEVELS_SLIDER]: LEVELS_SLIDER_DEFAULT,
         // channelSettings is a flat list of objects of this type:
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-        [CHANNEL_SETTINGS]: [],
+        [CHANNEL_SETTINGS]: []
       }
     };
 
@@ -111,7 +109,9 @@ export default class App extends React.Component {
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
     this.onViewModeChange = this.onViewModeChange.bind(this);
-    this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
+    this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(
+      this
+    );
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
@@ -137,9 +137,8 @@ export default class App extends React.Component {
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.nameClean = this.nameClean.bind(this);
-    document.addEventListener('keydown', this.handleKeydown, false);
+    document.addEventListener("keydown", this.handleKeydown, false);
   }
-
 
   componentDidMount() {
     const { cellId } = this.props;
@@ -149,21 +148,21 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      cellId,
-      cellPath,
-    } = this.props;
+    const { cellId, cellPath } = this.props;
     const { userSelections } = this.state;
-    
+
     // delayed for the animation to finish
-    if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
+    if (
+      prevState.userSelections.controlPanelClosed !==
+      this.state.userSelections.controlPanelClosed
+    ) {
       setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
+        window.dispatchEvent(new Event("resize"));
       }, 200);
     }
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
-      if (cellPath === prevProps.nextImgPath ) {
+      if (cellPath === prevProps.nextImgPath) {
         this.loadNextImage();
       } else if (cellPath === prevProps.prevImgPath) {
         this.loadPrevImage();
@@ -171,9 +170,15 @@ export default class App extends React.Component {
         this.beginRequestImage();
       }
     }
-    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
+    const channelsChanged = !isEqual(
+      userSelections[CHANNEL_SETTINGS],
+      prevState.userSelections[CHANNEL_SETTINGS]
+    );
     const newImage = this.state.image && !prevState.image;
-    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
+    const imageChanged =
+      this.state.image &&
+      prevState.image &&
+      this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
@@ -192,18 +197,18 @@ export default class App extends React.Component {
         [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
         isovalue: 188,
         opacity: 1.0,
-        color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
-        dataReady: false,
+        color: channelColors[index]
+          ? channelColors[index].slice()
+          : [226, 205, 179], // guard for unexpectedly longer channel list
+        dataReady: false
       };
     });
   }
 
-  // PROP for standardizing channel names. 
+  // PROP for standardizing channel names.
   // Ie if you want both segmentation and raw of the same protein to have the same UI settings.
   nameClean(channelName) {
-    const {
-      channelNameClean
-    } = this.props;
+    const { channelNameClean } = this.props;
     if (channelNameClean) {
       return channelNameClean(channelName);
     }
@@ -211,11 +216,7 @@ export default class App extends React.Component {
   }
 
   createChannelGrouping(channels) {
-    const {
-      initialChannelAcc,
-      groupToChannelNameMap,
-      keyList,
-    } = this.props;
+    const { initialChannelAcc, groupToChannelNameMap, keyList } = this.props;
     if (channels) {
       const grouping = channels.reduce((acc, channel, index) => {
         let other = true;
@@ -251,29 +252,46 @@ export default class App extends React.Component {
   }
 
   checkDimensionsMatch(a, b) {
-    return ((a.width === b.width) ||
-      (a.height === b.height) ||
-      (a.rows === b.rows) ||
-      (a.cols === b.cols) ||
-      (a.tiles === b.tiles) ||
-      (a.tile_width === b.tile_width) ||
-      (a.tile_height === b.tile_height) ||
-      (a.atlas_width === b.atlas_width) ||
-      (a.atlas_height === b.atlas_height));
+    return (
+      a.width === b.width ||
+      a.height === b.height ||
+      a.rows === b.rows ||
+      a.cols === b.cols ||
+      a.tiles === b.tiles ||
+      a.tile_width === b.tile_width ||
+      a.tile_height === b.tile_height ||
+      a.atlas_width === b.atlas_width ||
+      a.atlas_height === b.atlas_height
+    );
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, resetLuts) {
+  handleOpenImageResponse(
+    resp,
+    queryType,
+    imageDirectory,
+    doResetViewMode,
+    stateKey,
+    resetLuts
+  ) {
     if (resp.data.status === OK_STATUS) {
-      if (this.stateKey === 'image') {
+      if (this.stateKey === "image") {
         this.setState({
           currentlyLoadedImagePath: imageDirectory,
           channelDataReady: {},
           queryErrorMessage: null,
           cachingInProgress: false,
-          mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
-        });  
+          mode: doResetViewMode
+            ? ViewMode.threeD
+            : this.state.userSelections.mode
+        });
       }
-      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, resetLuts);
+      this.loadFromJson(
+        resp.data,
+        resp.data.name,
+        resp.locationHeader,
+        stateKey,
+        resetLuts
+      );
       this.stopPollingForImage();
     } else if (resp.data.status === ERROR_STATUS) {
       this.stopPollingForImage();
@@ -288,14 +306,11 @@ export default class App extends React.Component {
     let message = "Unknown Error";
     if (resp.data && resp.data.message) {
       message = resp.data.message;
-    }
-    else if (resp.stack) {
+    } else if (resp.stack) {
       message = resp.stack;
-    }
-    else if (resp.message) {
+    } else if (resp.message) {
       message = resp.message;
-    }
-    else {
+    } else {
       message = JSON.stringify(resp);
     }
     // console.log(message);
@@ -306,19 +321,27 @@ export default class App extends React.Component {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
-    const {
-      baseUrl,
-    } = this.props;
+    const { baseUrl } = this.props;
 
-    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
+    const toLoad = baseUrl
+      ? `${baseUrl}/${imageDirectory}_atlas.json`
+      : `${imageDirectory}'_atlas.json`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
-    new HttpClient().getJSON(toLoad, {mode:'cors'})
+    new HttpClient()
+      .getJSON(toLoad, { mode: "cors" })
       .then(resp => {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
-        resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf('/') + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, resetLuts);
+        resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf("/") + 1);
+        return this.handleOpenImageResponse(
+          resp,
+          0,
+          imageDirectory,
+          doResetViewMode,
+          stateKey,
+          resetLuts
+        );
       })
       .catch(resp => this.handleOpenImageException(resp));
   }
@@ -326,21 +349,32 @@ export default class App extends React.Component {
   intializeNewImage(aimg, newChannelSettings) {
     const { userSelections, view3d } = this.state;
     const { filterFunc } = this.props;
-    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
-    let alphaLevel = userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+    const channelSetting =
+      newChannelSettings || userSelections[CHANNEL_SETTINGS];
+    let alphaLevel =
+      userSelections.imageType === SEGMENTED_CELL &&
+      userSelections.mode === ViewMode.threeD
+        ? ALPHA_MASK_SLIDER_3D_DEFAULT
+        : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(userSelections[BRIGHTNESS_SLIDER_LEVEL], userSelections[PATH_TRACE]);
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
+    let imageBrightness = brightnessSliderToImageValue(
+      userSelections[BRIGHTNESS_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
+    let imageDensity = densitySliderToImageValue(
+      userSelections[DENSITY_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
-    this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
-    
+    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
+
     // Here is where we officially hand the image to the volume-viewer
-    
+
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
-      channels: aimg.channel_names.map((name) => {
+      channels: aimg.channel_names.map(name => {
         const ch = this.getOneChannelSetting(name, channelSetting);
         if (!ch) {
           return {};
@@ -353,8 +387,8 @@ export default class App extends React.Component {
             isosurfaceOpacity: ch.opacity,
             color: ch.color
           };
-        } 
-   
+        }
+
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
@@ -371,10 +405,11 @@ export default class App extends React.Component {
     view3d.updateDensity(aimg, imageDensity);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setCameraMode(
+      enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode)
+    );
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
-
   }
 
   updateStateOnLoadImage(channelNames) {
@@ -382,17 +417,26 @@ export default class App extends React.Component {
     const { filterFunc } = this.props;
 
     const cleanNewNames = map(channelNames, this.nameClean);
-    const filteredNewChannelNames = filterFunc ? filter(cleanNewNames, filterFunc) : cleanNewNames;
-    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], ele => this.nameClean(ele.name));
-    let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames) ?
-      userSelections[CHANNEL_SETTINGS] : this.setInitialChannelConfig(filteredNewChannelNames, INIT_COLORS, filterFunc);
+    const filteredNewChannelNames = filterFunc
+      ? filter(cleanNewNames, filterFunc)
+      : cleanNewNames;
+    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], ele =>
+      this.nameClean(ele.name)
+    );
+    let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames)
+      ? userSelections[CHANNEL_SETTINGS]
+      : this.setInitialChannelConfig(
+          filteredNewChannelNames,
+          INIT_COLORS,
+          filterFunc
+        );
 
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
-      [CHANNEL_SETTINGS]: newChannelSettings,
+      [CHANNEL_SETTINGS]: newChannelSettings
     });
     this.setState({
-      channelGroupedByType,
+      channelGroupedByType
     });
     return newChannelSettings;
   }
@@ -416,8 +460,16 @@ export default class App extends React.Component {
     // OR if we are switching between FOV or SEG
     if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
-      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
-      this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
+      const newControlPoints = lutObject.controlPoints.map(controlPoint => ({
+        ...controlPoint,
+        color: TFEDITOR_DEFAULT_COLOR
+      }));
+      this.changeOneChannelSetting(
+        thisChannelsSettings.name,
+        channelIndex,
+        LUT_CONTROL_POINTS,
+        newControlPoints
+      );
     } else {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
       aimg.setLut(channelIndex, lut);
@@ -426,7 +478,9 @@ export default class App extends React.Component {
     }
 
     if (view3d) {
-      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+      if (
+        aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME
+      ) {
         view3d.setVolumeChannelAsMask(aimg, channelIndex);
       }
     }
@@ -451,8 +505,7 @@ export default class App extends React.Component {
       nextImg: image
     });
     // preload the new "prevImg"
-    this.openImage(prevImgPath, true, 'prevImg');
-
+    this.openImage(prevImgPath, true, "prevImg");
   }
 
   loadNextImage() {
@@ -462,28 +515,39 @@ export default class App extends React.Component {
     // assume nextImg is available to initialize
     this.intializeNewImage(nextImg);
     this.setState({
-      image: nextImg, 
+      image: nextImg,
       prevImg: image
     });
     // preload the new "nextImg"
-    this.openImage(nextImgPath, true, 'nextImg');
+    this.openImage(nextImgPath, true, "nextImg");
   }
 
   loadFromJson(obj, title, locationHeader, stateKey, resetLuts) {
     const aimg = new Volume(obj);
 
-    const  newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
+    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
     // if we have some url to prepend to the atlas file names, do it now.
     if (locationHeader) {
-      obj.images = obj.images.map(img => ({ ...img, name: `${locationHeader}${img.name}` }));
+      obj.images = obj.images.map(img => ({
+        ...img,
+        name: `${locationHeader}${img.name}`
+      }));
     }
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-      const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
-      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, resetLuts);
+      const thisChannelSettings = this.getOneChannelSetting(
+        obj.channel_names[channelIndex],
+        newChannelSettings
+      );
+      this.onChannelDataLoaded(
+        aimg,
+        thisChannelSettings,
+        channelIndex,
+        resetLuts
+      );
     });
-    if (stateKey === 'image') {
+    if (stateKey === "image") {
       this.intializeNewImage(aimg, newChannelSettings);
     }
     this.setState({ [stateKey]: aimg });
@@ -496,9 +560,13 @@ export default class App extends React.Component {
 
   changeOneChannelSetting(channelName, channelIndex, keyToChange, newValue) {
     const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
-      return channel.name === channelName ? { ...channel, [keyToChange]: newValue } : channel;
-    });
+    const newChannels = userSelections[CHANNEL_SETTINGS].map(
+      (channel, index) => {
+        return channel.name === channelName
+          ? { ...channel, [keyToChange]: newValue }
+          : channel;
+      }
+    );
 
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
     this.handleChangeToImage(keyToChange, newValue, channelIndex);
@@ -506,9 +574,16 @@ export default class App extends React.Component {
 
   changeChannelSettings(indices, keyToChange, newValue) {
     const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
-      return { ...channel, [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange] };
-    });
+    const newChannels = userSelections[CHANNEL_SETTINGS].map(
+      (channel, index) => {
+        return {
+          ...channel,
+          [keyToChange]: includes(indices, index)
+            ? newValue
+            : channel[keyToChange]
+        };
+      }
+    );
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
@@ -516,7 +591,7 @@ export default class App extends React.Component {
     this.setState({
       userSelections: {
         ...this.state.userSelections,
-        ...newState,
+        ...newState
       }
     });
   }
@@ -529,23 +604,27 @@ export default class App extends React.Component {
     switch (keyToChange) {
       case ISO_VALUE:
         view3d.setVolumeChannelOptions(image, index, {
-          isovalue: newValue,
+          isovalue: newValue
         });
         break;
       case OPACITY:
         view3d.setVolumeChannelOptions(image, index, {
           isosurfaceOpacity: newValue
-        });  
+        });
         break;
       case COLOR:
-        let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
+        let newColor = newValue.r
+          ? [newValue.r, newValue.g, newValue.b, newValue.a]
+          : newValue;
         view3d.setVolumeChannelOptions(image, index, {
-          color: newColor,
-        });  
+          color: newColor
+        });
         view3d.updateMaterial(image);
         break;
       case MODE:
-        view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
+        view3d.setCameraMode(
+          enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue)
+        );
         break;
       case SAVE_ISO_SURFACE:
         view3d.saveChannelIsosurface(image, index, newValue);
@@ -555,7 +634,9 @@ export default class App extends React.Component {
         view3d.updateActiveChannels(image);
         break;
       case PATH_TRACE:
-        view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
+        view3d.setVolumeRenderMode(
+          newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH
+        );
         view3d.updateActiveChannels(image);
         break;
       case ALPHA_MASK_SLIDER_LEVEL:
@@ -564,16 +645,27 @@ export default class App extends React.Component {
         view3d.updateActiveChannels(image);
         break;
       case BRIGHTNESS_SLIDER_LEVEL:
-        let imageBrightness = brightnessSliderToImageValue(newValue, userSelections[PATH_TRACE]);
+        let imageBrightness = brightnessSliderToImageValue(
+          newValue,
+          userSelections[PATH_TRACE]
+        );
         view3d.updateExposure(imageBrightness);
         break;
       case DENSITY_SLIDER_LEVEL:
-        let imageDensity = densitySliderToImageValue(newValue, userSelections[PATH_TRACE]);
+        let imageDensity = densitySliderToImageValue(
+          newValue,
+          userSelections[PATH_TRACE]
+        );
         view3d.updateDensity(image, imageDensity);
         break;
       case LEVELS_SLIDER:
         let imageValues = gammaSliderToImageValues(newValue);
-        view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
+        view3d.setGamma(
+          image,
+          imageValues.min,
+          imageValues.scale,
+          imageValues.max
+        );
         break;
     }
   }
@@ -581,30 +673,36 @@ export default class App extends React.Component {
   onViewModeChange(newMode) {
     const { userSelections } = this.state;
     let newSelectionState = {
-      [MODE]: newMode,
+      [MODE]: newMode
     };
-      // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-      // if full field, dont mask
-    if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching to 2d 
+    // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+    // if full field, dont mask
+    if (
+      userSelections.mode === ViewMode.threeD &&
+      newMode !== ViewMode.threeD
+    ) {
+      // Switching to 2d
       newSelectionState = {
         [MODE]: newMode,
-        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
+        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT
       };
     } else if (
-      userSelections.mode !== ViewMode.threeD && 
-      newMode === ViewMode.threeD && 
+      userSelections.mode !== ViewMode.threeD &&
+      newMode === ViewMode.threeD &&
       this.state.userSelections.imageType === SEGMENTED_CELL
     ) {
-      // switching to 3d 
+      // switching to 3d
       newSelectionState = {
-          [MODE]: newMode,
-          [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
+        [MODE]: newMode,
+        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT
       };
     }
     this.handleChangeToImage(MODE, newMode);
     if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
-      this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
+      this.handleChangeToImage(
+        ALPHA_MASK_SLIDER_LEVEL,
+        newSelectionState[ALPHA_MASK_SLIDER_LEVEL]
+      );
     }
     this.setUserSelectionsInState(newSelectionState);
   }
@@ -614,19 +712,27 @@ export default class App extends React.Component {
   }
 
   onAutorotateChange() {
-    this.setUserSelectionsInState({ [AUTO_ROTATE]: !this.state.userSelections[AUTO_ROTATE] });
+    this.setUserSelectionsInState({
+      [AUTO_ROTATE]: !this.state.userSelections[AUTO_ROTATE]
+    });
   }
 
   setImageAxisClip(axis, minval, maxval, isOrthoAxis) {
     if (this.state.view3d && this.state.image) {
-      this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
+      this.state.view3d.setAxisClip(
+        this.state.image,
+        axis,
+        minval,
+        maxval,
+        isOrthoAxis
+      );
     }
   }
 
   makeUpdatePixelSizeFn(i) {
     const { pixelSize } = this.props;
     const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
-    return (value) => {
+    return value => {
       const pixelSize = imagePixelSize.slice();
       pixelSize[i] = value;
       this.state.image.setVoxelSize(pixelSize);
@@ -636,15 +742,14 @@ export default class App extends React.Component {
   onSwitchFovCell(value) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
-    this.openImage(path, false, 'image', true);
+    this.openImage(path, false, "image", true);
     this.setState({
-        sendingQueryRequest: true,
-        userSelections: {
-            ...this.state.userSelections,
-          imageType: value,
-        }
+      sendingQueryRequest: true,
+      userSelections: {
+        ...this.state.userSelections,
+        imageType: value
+      }
     });
-    
   }
 
   onApplyColorPresets(presets) {
@@ -652,9 +757,13 @@ export default class App extends React.Component {
     presets.forEach((color, index) => {
       this.handleChangeToImage(COLOR, color, index);
     });
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, channelindex) => {
-      return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
-    });
+    const newChannels = userSelections[CHANNEL_SETTINGS].map(
+      (channel, channelindex) => {
+        return presets[channelindex]
+          ? { ...channel, color: presets[channelindex] }
+          : channel;
+      }
+    );
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
@@ -669,19 +778,18 @@ export default class App extends React.Component {
 
   beginRequestImage(type) {
     const {
-      fovPath, 
+      fovPath,
       cellPath,
       cellId,
-      prevImgPath, 
+      prevImgPath,
       nextImgPath,
-      preLoad,
+      preLoad
     } = this.props;
     let imageType = type || this.state.userSelections.imageType;
     let path;
-    if (imageType === FULL_FIELD_IMAGE ) {
+    if (imageType === FULL_FIELD_IMAGE) {
       path = fovPath;
-    }
-    else if (imageType === SEGMENTED_CELL) {
+    } else if (imageType === SEGMENTED_CELL) {
       path = cellPath;
     }
     this.setState({
@@ -691,20 +799,20 @@ export default class App extends React.Component {
       sendingQueryRequest: true,
       userSelections: {
         ...this.state.userSelections,
-        imageType,
+        imageType
       }
     });
     if (preLoad) {
-      this.openImage(nextImgPath, true, 'nextImg');
-      this.openImage(prevImgPath, true, 'prevImg');
+      this.openImage(nextImgPath, true, "nextImg");
+      this.openImage(prevImgPath, true, "prevImg");
     }
-    this.openImage(path, true, 'image');
+    this.openImage(path, true, "image");
   }
 
   getOneChannelSetting(channelName, newSettings) {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
-    return find(channelSettings, (channel) => {
+    return find(channelSettings, channel => {
       return channel.name === this.nameClean(channelName);
     });
   }
@@ -714,7 +822,7 @@ export default class App extends React.Component {
     // apply channel settings
     // image.channel_names
     if (!image) {
-      return; 
+      return;
     }
     image.channel_names.forEach((channelName, imageIndex) => {
       if (image.getChannel(imageIndex).loaded) {
@@ -732,24 +840,28 @@ export default class App extends React.Component {
           isovalue: channelSetting.isovalue,
           isosurfaceOpacity: channelSetting.opacity
         });
-      };
+      }
     });
 
     view3d.updateActiveChannels(image);
-  
   }
 
   toggleControlPanel(value) {
-    this.setState({ 
+    this.setState({
       userSelections: {
         ...this.state.userSelections,
-      controlPanelClosed: value
-    }});
+        controlPanelClosed: value
+      }
+    });
   }
 
   getNumberOfSlices() {
     if (this.state.image) {
-      return { x: this.state.image.x, y: this.state.image.y, z: this.state.image.z };
+      return {
+        x: this.state.image.x,
+        y: this.state.image.y,
+        z: this.state.image.z
+      };
     }
     return {};
   }
@@ -758,81 +870,87 @@ export default class App extends React.Component {
     const { userSelections } = this.state;
     const { renderConfig } = this.props;
     return (
-      <Layout 
+      <Layout
         className="cell-viewer-app"
-        style={{height: this.props.appHeight}}
+        style={{ height: this.props.appHeight }}
       >
-            <Sider
-              className="control-panel-holder"
-              collapsible={true}
-              defaultCollapsed={false}
-              collapsedWidth={0}
-              collapsed={this.state.userSelections.controlPanelClosed}
-              onCollapse={this.toggleControlPanel}
-              width={450}
-            >
-              <ControlPanel
-                renderConfig={renderConfig}
-                // viewer capabilities
-                canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
-                // image state
-                imageName={this.state.image ? this.state.image.name : false}
-                hasImage={!!this.state.image}
-                pixelSize={this.state.image ? this.state.image.pixel_size : [1,1,1]}
-                channelDataChannels={this.state.image ? this.state.image.channels : null}
-                channelGroupedByType={this.state.channelGroupedByType}
-                hasCellId={this.state.hasCellId}
-                channelDataReady={this.state.channelDataReady}
-                // user selections
-                maxProjectOn={userSelections[MAX_PROJECT]}
-                pathTraceOn={userSelections[PATH_TRACE]}
-                channelSettings={userSelections[CHANNEL_SETTINGS]}
-                mode={userSelections[MODE]}
-                imageType={userSelections.imageType}
-                autorotate={userSelections[AUTO_ROTATE]}
-                alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
-                brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
-                densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
-                gammaSliderLevel={userSelections[LEVELS_SLIDER]}
-                // functions
-                handleChangeUserSelection={this.handleChangeUserSelection}
-                handleChangeToImage={this.handleChangeToImage}
-                updateChannelTransferFunction={this.updateChannelTransferFunction}
-                onViewModeChange={this.onViewModeChange}
-                onColorChangeComplete={this.onColorChangeComplete}
-                onAutorotateChange={this.onAutorotateChange}
-                onSwitchFovCell={this.onSwitchFovCell}
-                setImageAxisClip={this.setImageAxisClip}
-                onApplyColorPresets={this.onApplyColorPresets}
-                makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
-                changeChannelSettings={this.changeChannelSettings}
-                changeOneChannelSetting={this.changeOneChannelSetting}
-                filterFunc={this.props.filterFunc}
-                nameClean={this.nameClean}
-              />
-              </Sider>
-              <Layout className="cell-viewer-wrapper">
-                <Content>
-                  <ViewerWrapper
-                    image={this.state.image}
-                    onAutorotateChange={this.onAutorotateChange}
-                    setAxisClip={this.setImageAxisClip}
-                    mode={userSelections.mode}
-                    autorotate={userSelections[AUTO_ROTATE]}
-                    loadingImage={this.state.sendingQueryRequest}
-                    numSlices={this.getNumberOfSlices()}
-                    onView3DCreated={this.onView3DCreated}
-                    appHeight={this.props.appHeight}
-                    renderConfig={renderConfig}
-                  />
-                </Content>
-              </Layout>
+        <Sider
+          className="control-panel-holder"
+          collapsible={true}
+          defaultCollapsed={false}
+          collapsedWidth={0}
+          collapsed={this.state.userSelections.controlPanelClosed}
+          onCollapse={this.toggleControlPanel}
+          width={450}
+        >
+          <ControlPanel
+            renderConfig={renderConfig}
+            // viewer capabilities
+            canPathTrace={
+              this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false
+            }
+            // image state
+            imageName={this.state.image ? this.state.image.name : false}
+            hasImage={!!this.state.image}
+            pixelSize={
+              this.state.image ? this.state.image.pixel_size : [1, 1, 1]
+            }
+            channelDataChannels={
+              this.state.image ? this.state.image.channels : null
+            }
+            channelGroupedByType={this.state.channelGroupedByType}
+            hasCellId={this.state.hasCellId}
+            channelDataReady={this.state.channelDataReady}
+            // user selections
+            maxProjectOn={userSelections[MAX_PROJECT]}
+            pathTraceOn={userSelections[PATH_TRACE]}
+            channelSettings={userSelections[CHANNEL_SETTINGS]}
+            mode={userSelections[MODE]}
+            imageType={userSelections.imageType}
+            autorotate={userSelections[AUTO_ROTATE]}
+            alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
+            brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
+            densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
+            gammaSliderLevel={userSelections[LEVELS_SLIDER]}
+            // functions
+            handleChangeUserSelection={this.handleChangeUserSelection}
+            handleChangeToImage={this.handleChangeToImage}
+            updateChannelTransferFunction={this.updateChannelTransferFunction}
+            onViewModeChange={this.onViewModeChange}
+            onColorChangeComplete={this.onColorChangeComplete}
+            onAutorotateChange={this.onAutorotateChange}
+            onSwitchFovCell={this.onSwitchFovCell}
+            setImageAxisClip={this.setImageAxisClip}
+            onApplyColorPresets={this.onApplyColorPresets}
+            makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
+            changeChannelSettings={this.changeChannelSettings}
+            changeOneChannelSetting={this.changeOneChannelSetting}
+            filterFunc={this.props.filterFunc}
+            nameClean={this.nameClean}
+          />
+        </Sider>
+        <Layout className="cell-viewer-wrapper">
+          <Content>
+            <ViewerWrapper
+              image={this.state.image}
+              onAutorotateChange={this.onAutorotateChange}
+              setAxisClip={this.setImageAxisClip}
+              mode={userSelections.mode}
+              autorotate={userSelections[AUTO_ROTATE]}
+              loadingImage={this.state.sendingQueryRequest}
+              numSlices={this.getNumberOfSlices()}
+              onView3DCreated={this.onView3DCreated}
+              appHeight={this.props.appHeight}
+              renderConfig={renderConfig}
+            />
+          </Content>
         </Layout>
+      </Layout>
     );
   }
 
   componentWillUnmount() {
-    document.removeEventListener('keydown', this.handleKeydown, false);
+    document.removeEventListener("keydown", this.handleKeydown, false);
   }
 }
 
@@ -840,30 +958,35 @@ App.defaultProps = {
   initialChannelAcc: {
     [OBSERVED_CHANNEL_KEY]: [],
     [SEGMENTATION_CHANNEL_KEY]: [],
-    [CONTOUR_CHANNEL_KEY]: [],
+    [CONTOUR_CHANNEL_KEY]: []
   },
   defaultSurfacesOn: [1],
   defaultVolumesOn: [],
   groupToChannelNameMap: channelGroupingMap,
-  IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.3.0',
-  DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
-  IMAGE_SERVER: 'https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.3.0/Cell-Viewer_Thumbnails/',
-  appHeight: '100vh',
-  cellPath: '',
-  fovPath: '',
-  keyList: [OBSERVED_CHANNEL_KEY, SEGMENTATION_CHANNEL_KEY, CONTOUR_CHANNEL_KEY],
+  IMAGE_VIEWER_SERVICE_URL:
+    "//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.4.0",
+  DOWNLOAD_SERVER: "http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Data/",
+  IMAGE_SERVER:
+    "http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
+  appHeight: "100vh",
+  cellPath: "",
+  fovPath: "",
+  keyList: [
+    OBSERVED_CHANNEL_KEY,
+    SEGMENTATION_CHANNEL_KEY,
+    CONTOUR_CHANNEL_KEY
+  ],
   renderConfig: {
     alphaMask: true,
     autoRotateButton: true,
-    axisClipSliders: true, 
+    axisClipSliders: true,
     brightnessSlider: true,
-    colorPicker: true, 
+    colorPicker: true,
     colorPresetsDropdown: true,
     densitySlider: true,
     levelsSliders: true,
     saveSurfaceButtons: true,
     fovCellSwitchControls: true,
-    viewModeRadioButtons: true,
+    viewModeRadioButtons: true
   }
 };
-
