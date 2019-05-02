@@ -61,7 +61,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onBrightnessUpdate(values) {
-    this.props.handleChangeUserSelection(BRIGHTNESS_SLIDER_LEVEL, values);
+    this.props.handleChangeUserSelection(BRIGHTNESS_SLIDER_LEVEL, [Number(values[0])]);
   }
 
   createBrightnessSlider() {
@@ -78,7 +78,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onDensityUpdate(values) {
-    this.props.handleChangeUserSelection(DENSITY_SLIDER_LEVEL, values);
+    this.props.handleChangeUserSelection(DENSITY_SLIDER_LEVEL, [Number(values[0])]);
   }
 
   createDensitySlider () {
