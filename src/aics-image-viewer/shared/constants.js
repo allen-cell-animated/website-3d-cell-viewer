@@ -42,7 +42,8 @@ export const
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [65],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
-  LEVELS_SLIDER_DEFAULT = [58.32, 149.00, 255.00],
+  // LEVELS_SLIDER_DEFAULT = [58.32, 149.00, 255.00],
+  LEVELS_SLIDER_DEFAULT = [0.0, 127.00, 255.00],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
@@ -101,8 +102,7 @@ export const PRESET_COLORS_0 = [
   [247, 219, 120],
 ];
 
-export const PRESET_COLOR_MAP = Object.freeze([
-  {
+export const PRESET_COLOR_MAP = Object.freeze([{
     colors: PRESET_COLORS_0,
     name: 'Default',
     key: 0,
