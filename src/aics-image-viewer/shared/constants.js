@@ -43,7 +43,6 @@ export const
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
   LEVELS_SLIDER_DEFAULT = [35.00, 140.00, 255.00],
-  //LEVELS_SLIDER_DEFAULT = [0.0, 127.00, 255.00],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
