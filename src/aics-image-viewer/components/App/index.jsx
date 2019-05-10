@@ -41,6 +41,8 @@ import {
   AUTO_ROTATE,
   MAX_PROJECT,
   PATH_TRACE,
+  LUT_MIN_PERCENTILE, 
+  LUT_MAX_PERCENTILE,
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
@@ -415,7 +417,7 @@ export default class App extends React.Component {
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
     // OR if we are switching between FOV or SEG
     if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
-      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_percentiles(0.5, 0.983);
+      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     } else {

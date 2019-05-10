@@ -37,6 +37,12 @@ export const
   COLOR = 'color',
   SAVE_ISO_SURFACE = 'saveIsoSurface',
 
+  // These settings were chosen to work well with most AICS microscopy pipeline images.
+  // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity, 
+  // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
+  LUT_MIN_PERCENTILE = 0.5,
+  LUT_MAX_PERCENTILE = 0.983,
+
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
   ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
