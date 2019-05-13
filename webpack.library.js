@@ -14,8 +14,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx']
   },
-  externals: [
-    {
+  externals: [{
       react: {
         root: 'React',
         commonjs2: 'react',
@@ -65,8 +64,7 @@ module.exports = {
   ],
   devtool: 'cheap-module-source-map',
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.(js|jsx)$/,
         include: [
           path.resolve(__dirname, 'src')
@@ -109,35 +107,33 @@ module.exports = {
       },
       {
         test: /\.less$/,
-          use: [
-            'style-loader',
-            {
-              loader: "css-loader",
-              options: {
-                camelCase: true,
-                importLoaders: 1
-              }
-
-            },
-            {
-              loader: "less-loader",
-              options: {
-                javascriptEnabled: true,
-              }
-            }
-          ]
-      },
-      {
-        test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
         use: [
+          'style-loader',
           {
-            loader: 'url-loader',
+            loader: "css-loader",
             options: {
-              limit: 10000,
-              name: 'imageviewer/font/[name].[ext]'
+              camelCase: true,
+              importLoaders: 1
+            }
+
+          },
+          {
+            loader: "less-loader",
+            options: {
+              javascriptEnabled: true,
             }
           }
         ]
+      },
+      {
+        test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            name: 'imageviewer/font/[name].[ext]'
+          }
+        }]
       },
       {
         test: /Worker\.js$/,

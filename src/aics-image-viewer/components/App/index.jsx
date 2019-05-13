@@ -41,6 +41,8 @@ import {
   AUTO_ROTATE,
   MAX_PROJECT,
   PATH_TRACE,
+  LUT_MIN_PERCENTILE, 
+  LUT_MAX_PERCENTILE,
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
@@ -415,7 +417,7 @@ export default class App extends React.Component {
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
     // OR if we are switching between FOV or SEG
     if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
-      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_auto2();
+      const lutObject = aimg.getHistogram(channelIndex).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     } else {
@@ -845,9 +847,9 @@ App.defaultProps = {
   defaultSurfacesOn: [1],
   defaultVolumesOn: [],
   groupToChannelNameMap: channelGroupingMap,
-  IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.3.0',
-  DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-3-0/Cell-Viewer_Data/',
-  IMAGE_SERVER: 'https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.3.0/Cell-Viewer_Thumbnails/',
+  IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.4.0',
+  DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Data/',
+  IMAGE_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Thumbnails/',
   appHeight: '100vh',
   cellPath: '',
   fovPath: '',

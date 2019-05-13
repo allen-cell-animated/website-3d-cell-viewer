@@ -1,21 +1,21 @@
 const path = require('path');
 const webpack = require('webpack');
-const fs = require('fs');
 
-const lessToJs = require('less-vars-to-js');
-const themeVariables = lessToJs(fs.readFileSync(path.join(__dirname, './src/aics-image-viewer/styles/ant-vars.less'), 'utf8'));
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: ['babel-polyfill', './public/index.js'],
+  entry: ['babel-polyfill', './public/index.jsx'],
   output: {
     path: path.resolve(__dirname, 'imageviewer'),
     filename: 'image-viewer-ui.bundle.js'
   },
+  resolve: {
+    extensions: ['.js', '.jsx']
+  },
   plugins: [
-    new CleanWebpackPlugin(['imageviewer']),
+    new CleanWebpackPlugin(['imageviewer/*']),
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
@@ -24,7 +24,6 @@ module.exports = {
       APP_VERSION: JSON.stringify(require("./package.json").version)
     }),
     new webpack.ProvidePlugin({
-      d3: 'd3',
       THREE: 'three',
       jQuery: 'jquery',
       $: 'jquery'
@@ -33,36 +32,34 @@ module.exports = {
     // see: https://github.com/webcomponents/webcomponentsjs/issues/794
     new webpack.IgnorePlugin(/vertx/)
   ],
-  resolve: {
-    extensions: ['.js', '.jsx']
-  },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.(js|jsx)$/,
+        include: [
+          path.resolve(__dirname, 'src')
+        ],
         exclude: [/node_modules/, /dist/],
         use: 'babel-loader'
       },
       {
         test: /\.scss$/,
-        loader: ExtractTextPlugin.extract({
-          use: [
-            {
-              loader: 'css-loader',
-              options: {
-                sourceMap: true
-              }
-            },
-            'resolve-url-loader',
-            {
-              loader: 'sass-loader',
-              options: {
-                sourceMap: true,
-                includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
-              }
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true
             }
-          ]
-        })
+          },
+          'resolve-url-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+              includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+            }
+          }
+        ]
       },
       {
         test: /\.css$/,
@@ -74,47 +71,37 @@ module.exports = {
       {
         loader: 'babel-loader',
         exclude: /node_modules/,
-        test: /\.js$/,
-        options: {
-          plugins: [
-            ['import', { libraryName: "antd", style: true }]
-          ]
-        },
+        test: /\.(js|jsx)$/,
       },
       {
         test: /\.less$/,
-        use: ExtractTextPlugin.extract({
-          use: [
-            {
-              loader: "css-loader",
-              options: {
-                camelCase: true,
-                importLoaders: 1
-              }
-
-            },
-            {
-              loader: "less-loader",
-              options: {
-                javascriptEnabled: true,
-                modifyVars: themeVariables,
-
-              }
+        use: [
+          'style-loader',
+          {
+            loader: "css-loader",
+            options: {
+              camelCase: true,
+              importLoaders: 1
             }
-          ]
-        })
+
+          },
+          {
+            loader: "less-loader",
+            options: {
+              javascriptEnabled: true,
+            }
+          }
+        ]
       },
       {
         test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
-        use: [
-            {
-                loader: 'url-loader',
-                 options: {
-                     limit: 10000,
-                     name: 'imageviewer/font/[name].[ext]'
-               }
-            }
-        ]
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            name: 'imageviewer/font/[name].[ext]'
+          }
+        }]
       },
       {
         test: /Worker\.js$/,

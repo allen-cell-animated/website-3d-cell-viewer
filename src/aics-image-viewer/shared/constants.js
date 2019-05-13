@@ -37,12 +37,18 @@ export const
   COLOR = 'color',
   SAVE_ISO_SURFACE = 'saveIsoSurface',
 
+  // These settings were chosen to work well with most AICS microscopy pipeline images.
+  // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity, 
+  // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
+  LUT_MIN_PERCENTILE = 0.5,
+  LUT_MAX_PERCENTILE = 0.983,
+
   ISOSURFACE_OPACITY_SLIDER_MAX = 255.0,
   ALPHA_MASK_SLIDER_3D_DEFAULT = [50],
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [65],
+  BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
-  LEVELS_SLIDER_DEFAULT = [58.32, 149.00, 255.00],
+  LEVELS_SLIDER_DEFAULT = [35.00, 140.00, 255.00],
   // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
   LEGACY_DOWNLOAD_SERVER = 'http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/',
   LEGACY_IMAGE_SERVER = 'https://cellviewer-1-2-0.allencell.org/aics/thumbnails/',
@@ -101,8 +107,7 @@ export const PRESET_COLORS_0 = [
   [247, 219, 120],
 ];
 
-export const PRESET_COLOR_MAP = Object.freeze([
-  {
+export const PRESET_COLOR_MAP = Object.freeze([{
     colors: PRESET_COLORS_0,
     name: 'Default',
     key: 0,

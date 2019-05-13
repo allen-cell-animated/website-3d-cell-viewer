@@ -29,6 +29,7 @@ export default class MyTfEditor extends React.Component {
         this._resetXF = this._resetXF.bind(this);
         this._export = this._export.bind(this);
         this._auto2XF = this._auto2XF.bind(this);
+        this._auto98XF = this._auto98XF.bind(this);
         this._bestFitXF = this._bestFitXF.bind(this);
         this.svgElement = React.createRef();
         /**
@@ -590,6 +591,13 @@ export default class MyTfEditor extends React.Component {
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
+    _auto98XF() {
+        const { channelData } = this.props;
+
+        const lutObj = channelData.histogram.lutGenerator_percentiles(0.5, 0.983);
+        this.updateControlPointsWithoutColor(lutObj.controlPoints);
+    }
+
     _bestFitXF() {
         const { channelData } = this.props;
 
@@ -811,11 +819,11 @@ export default class MyTfEditor extends React.Component {
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
-                    <Button id={`export-${id}`} className="ant-btn" onClick={this._export}>Export</Button>
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
                     <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</Button>
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
+                    <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
                     {/* <!-- this canvas exists to render the gradient but will not be displayed --> */}
                     <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas>
                 </div>
