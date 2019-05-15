@@ -264,7 +264,7 @@ export default class App extends React.Component {
       (a.atlas_height === b.atlas_height));
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, resetLuts) {
+  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, keepLuts) {
     if (resp.data.status === OK_STATUS) {
       if (this.stateKey === 'image') {
         this.setState({
@@ -275,7 +275,7 @@ export default class App extends React.Component {
           mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
         });  
       }
-      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, resetLuts);
+      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, keepLuts);
       this.stopPollingForImage();
     } else if (resp.data.status === ERROR_STATUS) {
       this.stopPollingForImage();
@@ -304,7 +304,7 @@ export default class App extends React.Component {
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, doResetViewMode, stateKey, resetLuts) {
+  openImage(imageDirectory, doResetViewMode, stateKey, keepLuts) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -315,12 +315,12 @@ export default class App extends React.Component {
     const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
-    new HttpClient().getJSON(toLoad, {mode:'cors'})
+    new HttpClient().getJSON(toLoad, { mode:'cors'})
       .then(resp => {
         // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
         resp.data.status = OK_STATUS;
         resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf('/') + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, resetLuts);
+        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, keepLuts);
       })
       .catch(resp => this.handleOpenImageException(resp));
   }
@@ -399,7 +399,7 @@ export default class App extends React.Component {
     return newChannelSettings;
   }
 
-  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, resetLuts) {
+  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, keepLuts) {
     const { image, view3d } = this.state;
     if (aimg !== image) {
       return;
@@ -416,15 +416,14 @@ export default class App extends React.Component {
 
     // first time: if userSelections control points don't exist yet for this channel, then do some init.
     // OR if we are switching between FOV or SEG
-    if (!thisChannelsSettings[LUT_CONTROL_POINTS] || resetLuts) {
+    if (thisChannelsSettings[LUT_CONTROL_POINTS] && keepLuts) {
+      const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
+      aimg.setLut(channelIndex, lut);
+      view3d.updateLuts(aimg);
+    } else {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
-    } else {
-      const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
-      aimg.setLut(channelIndex, lut);
-      // QUESTION: I switched this off and didn't see a difference, is it needed?
-      view3d.updateLuts(aimg);
     }
 
     if (view3d) {
@@ -471,7 +470,7 @@ export default class App extends React.Component {
     this.openImage(nextImgPath, true, 'nextImg');
   }
 
-  loadFromJson(obj, title, locationHeader, stateKey, resetLuts) {
+  loadFromJson(obj, title, locationHeader, stateKey, keepLuts) {
     const aimg = new Volume(obj);
 
     const  newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
@@ -483,7 +482,7 @@ export default class App extends React.Component {
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
       const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
-      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, resetLuts);
+      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, keepLuts);
     });
     if (stateKey === 'image') {
       this.intializeNewImage(aimg, newChannelSettings);
@@ -638,7 +637,7 @@ export default class App extends React.Component {
   onSwitchFovCell(value) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
-    this.openImage(path, false, 'image', true);
+    this.openImage(path, false, 'image', false);
     this.setState({
         sendingQueryRequest: true,
         userSelections: {
@@ -697,8 +696,8 @@ export default class App extends React.Component {
       }
     });
     if (preLoad) {
-      this.openImage(nextImgPath, true, 'nextImg');
-      this.openImage(prevImgPath, true, 'prevImg');
+      this.openImage(nextImgPath, true, 'nextImg', true);
+      this.openImage(prevImgPath, true, 'prevImg', true);
     }
     this.openImage(path, true, 'image');
   }
