@@ -5,7 +5,7 @@ import { Icon } from 'antd';
 
 import viewMode from '../../shared/enums/viewMode';
 
-import AxisClipSliders from '../AxisClipSliders.js';
+import AxisClipSliders from '../AxisClipSliders';
 import './styles.scss';
 
 const ViewMode = viewMode.mainMapping;

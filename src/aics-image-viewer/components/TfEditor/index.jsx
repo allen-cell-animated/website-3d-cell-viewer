@@ -435,7 +435,7 @@ export default class MyTfEditor extends React.Component {
             }
             this.canvasScale.domain([x0, x1]);
             var ctx = this._canvasContext();
-            if (ctx == null) {
+            if (ctx === null) {
                 return;
             }
             // Clear previous result
@@ -677,7 +677,7 @@ export default class MyTfEditor extends React.Component {
         super.connectedCallback();
 
         //Check for init value in the selectors
-        if (this.x3domSelector != '') {
+        if (this.x3domSelector !== '') {
             this._x3domSelectorChanged(this.x3domSelector, '');
         }
         // poor man's alternative to setCapture/releaseCapture
@@ -695,7 +695,7 @@ export default class MyTfEditor extends React.Component {
     }
 
     _x3domSelectorChanged(newValue, oldValue) {
-        if (newValue != undefined && newValue != "" && newValue != oldValue) {
+        if (newValue !== undefined && newValue !== "" && newValue !== oldValue) {
             var ctx = this;
             var imageObj = new Image();
             imageObj.onload = function () {
@@ -712,17 +712,17 @@ export default class MyTfEditor extends React.Component {
             };
             //Lookup for the volume data
             var x3dNode = document.querySelector(newValue);
-            if (x3dNode != undefined && x3dNode.hasOwnProperty('_x3domNode')) {
+            if (x3dNode !== undefined && x3dNode.hasOwnProperty('_x3domNode')) {
                 var volumeDataUrl = "";
                 // If the provided selector refers to the OpacityMap
                 if (x3dNode.localName === "opacitymapvolumestyle" || x3dNode.localName === "blendedvolumestyle") {
                     var parentVolume = null;
-                    if (x3dNode.parentNode.localName == "composedvolumestyle") {
+                    if (x3dNode.parentNode.localName === "composedvolumestyle") {
                         parentVolume = x3dNode.parentNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
                     } else {
                         parentVolume = x3dNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
                     }
-                    if (parentVolume != null) {
+                    if (parentVolume !== null) {
                         volumeDataUrl = parentVolume.getAttribute("url");
                     }
                 } else if (x3dNode.localName === "volumedata" || x3dNode.localName === "segmentedvolumedata" || x3dNode.localName === "isosurfacevolumedata") {
@@ -735,9 +735,9 @@ export default class MyTfEditor extends React.Component {
                 }
                 // Look for the tranfer funtion texture declaration
                 var tfTextureNode = x3dNode.querySelector("imagetexture[containerField='transferFunction' i]");
-                if (tfTextureNode != null && tfTextureNode.getAttribute("url") != "") {
+                if (tfTextureNode !== null && tfTextureNode.getAttribute("url") !== "") {
                     console.log("WARN: An image texture with a loaded TF founded.");
-                } else if (tfTextureNode != null && tfTextureNode.getAttribute("containerField").toLowerCase() === "transferfunction") {
+                } else if (tfTextureNode !== null && tfTextureNode.getAttribute("containerField").toLowerCase() === "transferfunction") {
                     if (tfTextureNode.children.length > 0) {
                         tfTextureNode.children[0].setAttribute("id", "tf-canvas-" + this.id);
                     } else {
@@ -754,7 +754,7 @@ export default class MyTfEditor extends React.Component {
                     this.canvasSelector = "#tf-canvas-" + this.id;
                 }
 
-                if (volumeDataUrl == "") {
+                if (volumeDataUrl === "") {
                     let canvasDataElement = null;
                     // If the volumeDataUrl is empty, check if the volume data is provided as a canvas element
                     if (x3dNode.localName === "imagetextureatlas") {
@@ -763,12 +763,12 @@ export default class MyTfEditor extends React.Component {
                         }
                     } else {
                         let tmp_node = x3dNode.querySelector("imagetextureatlas[containerField='voxels' i]");
-                        if (tmp_node != null && tmp_node.children.length > 0) {
+                        if (tmp_node !== null && tmp_node.children.length > 0) {
                             canvasDataElement = tmp_node.children[0];
                         }
                     }
                     //Get image data from canvas
-                    if (canvasDataElement != null) {
+                    if (canvasDataElement !== null) {
                         var imageFlattenArray = [];
                         var context = canvasDataElement.getContext('2d');
                         var imgData = context.getImageData(0, 0, canvasDataElement.width, canvasDataElement.height);
@@ -780,7 +780,7 @@ export default class MyTfEditor extends React.Component {
                             maxVal = Math.max(dVal, maxVal);
                             imageFlattenArray.push(dVal);
                         }
-                        if (maxVal == 0) return;
+                        if (maxVal === 0) return;
                         this.setData(imageFlattenArray);
                     }
                 } else {
@@ -801,7 +801,7 @@ export default class MyTfEditor extends React.Component {
                 newElement.setAttribute("id", "tf-canvas-" + this.id);
                 newElement.setAttribute("width", "256px");
                 newElement.setAttribute("height", "5px");
-            } else if (newElement != null && newElement.localName != "canvas") {
+            } else if (newElement !== null && newElement.localName !== "canvas") {
                 this.canvasSelector = oldValue;
             }
             // Redraw the TF in the new canvas element
