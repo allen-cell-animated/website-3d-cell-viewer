@@ -13,6 +13,7 @@
 
 ### Running as a package within another app
 - npm run build
+- install the app as a sym link through npm
 - import the app as is done in public/index.jsx
 
 ## Deployment
