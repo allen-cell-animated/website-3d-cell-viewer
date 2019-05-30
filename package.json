@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "classnames": "^2.2.5",
+    "d3": "^4.11.0",
     "lodash": "^4.17.5",
     "react-color": "^2.13.8",
     "react-nouislider": "^2.0.1",
@@ -29,9 +30,9 @@
     "volume-viewer": "^2.0.0-alpha.7"
   },
   "peerDependencies": {
-    "antd": "^3.16.x",
-    "react": "^16.x",
-    "react-dom": "^16.x"
+    "antd": "3.16.x",
+    "react": "16.x",
+    "react-dom": "16.x"
   },
   "devDependencies": {
     "antd": "^3.16.0",
@@ -48,12 +49,10 @@
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
     "babel-runtime": "^6.26.0",
-    "bootstrap": "^4.0.0-alpha.6",
     "clean-webpack-plugin": "^0.1.16",
     "command-line-args": "^5.1.1",
     "copy-webpack-plugin": "^4.2.3",
     "css-loader": "2.1.0",
-    "d3": "^4.11.0",
     "eslint": "^4.10.0",
     "eslint-plugin-react": "^7.4.0",
     "extract-text-webpack-plugin": "^3.0.2",
@@ -69,11 +68,9 @@
     "prop-types": "^15.5.10",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
-    "react-numeric-input": "^2.2.0",
     "resolve-url-loader": "^2.3.0",
     "sass-loader": "^6.0.7",
     "style-loader": "^0.18.2",
-    "three": "^0.91.0",
     "uglifyjs-webpack-plugin": "^1.0.0-beta.1",
     "url-loader": "^1.0.1",
     "webpack": "^3.4.1",
