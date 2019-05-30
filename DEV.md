@@ -14,8 +14,18 @@
 ### Running as a package within another app
 - npm run build
 - install the app as a sym link through npm
-- import the app as is done in public/index.jsx
-
+- import the app as `import { ImageViewerApp } from "ac-3d-viewer"`
+- send in props as is shown in public/index.jsx
+```
+    <ImageViewerApp
+        cellId={23618}
+        baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
+        cellPath="AICS-17/AICS-17_4187_23618"
+        fovPath="AICS-17/AICS-17_4187"
+        defaultVolumesOn={[0, 1, 2]}
+        defaultSurfacesOn={[]}
+    />
+```
 ## Deployment
 publish to npm package 
 
