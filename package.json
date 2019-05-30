@@ -21,7 +21,6 @@
   "author": "Megan Riel-Mehan",
   "license": "ISC",
   "dependencies": {
-    "antd": "^3.10.2",
     "babel-polyfill": "^6.23.0",
     "classnames": "^2.2.5",
     "command-line-args": "^5.0.2",
