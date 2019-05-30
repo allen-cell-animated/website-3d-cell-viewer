@@ -10,8 +10,6 @@
   ],
   "scripts": {
     "dev": "webpack-dev-server --hot --public --config webpack.dev.js",
-    "css": "postcss src/**/*.scss  --base src --dir package",
-    "babel": "rm -rf package && BABEL_ENV=production babel src --out-dir package",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore --ext .jsx --ext .js ./",
     "build": "webpack --config webpack.library.js",
     "build-iv": "webpack --config webpack.config.js",
