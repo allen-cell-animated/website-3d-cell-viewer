@@ -414,8 +414,7 @@ export default class App extends React.Component {
       isosurfaceOpacity: thisChannelsSettings.opacity
     });
 
-    // first time: if userSelections control points don't exist yet for this channel, then do some init.
-    // OR if we are switching between FOV or SEG
+    // if we want to keep the current control points 
     if (thisChannelsSettings[LUT_CONTROL_POINTS] && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
       aimg.setLut(channelIndex, lut);
@@ -423,6 +422,7 @@ export default class App extends React.Component {
     } else {
       const lutObject = aimg.getHistogram(channelIndex).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
       const newControlPoints = lutObject.controlPoints.map(controlPoint => ({ ...controlPoint, color: TFEDITOR_DEFAULT_COLOR }));
+      aimg.setLut(channelIndex, lutObject.lut);
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
 
