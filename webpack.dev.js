@@ -5,11 +5,11 @@ const common = require('./webpack.common');
 module.exports = merge(common, {
   devtool: 'cheap-module-source-map',
   output: {
-    publicPath: '/imageviewer/'
+    publicPath: '/public/'
   },
   devServer: {
-    publicPath: '/imageviewer/',
-    openPage: 'imageviewer/',
+    publicPath: '/public/',
+    openPage: 'public/',
     port: 9020,
     host: '0.0.0.0',
     disableHostCheck: true
