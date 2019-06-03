@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import './styles.scss';
 
 import { Button } from 'antd';
+import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
 
 export const TFEDITOR_DEFAULT_COLOR = 'purple';
 
@@ -594,7 +595,7 @@ export default class MyTfEditor extends React.Component {
     _auto98XF() {
         const { channelData } = this.props;
 
-        const lutObj = channelData.histogram.lutGenerator_percentiles(0.5, 0.983);
+        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
