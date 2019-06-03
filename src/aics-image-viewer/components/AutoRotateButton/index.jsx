@@ -1,5 +1,4 @@
 import { Button } from 'antd';
-import * as _ from 'lodash';
 import React from 'react';
 
 import viewMode from '../../shared/enums/viewMode';

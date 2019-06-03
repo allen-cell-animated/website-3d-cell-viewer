@@ -2,7 +2,6 @@ import React from 'react';
 import {
   Button,
   Icon, 
-  Collapse, 
   List,
   Col,
   Row,
@@ -25,12 +24,11 @@ import {
   VOLUME_ENABLED,
 } from '../../shared/constants';
 
-import ColorPicker from '../ColorPicker.js';
+import ColorPicker from '../ColorPicker';
 
 import './styles.scss';
 import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
 
-const Panel = Collapse.Panel;
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
 
