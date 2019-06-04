@@ -62,7 +62,7 @@ export default class MyTfEditor extends React.Component {
         const {
             volumeData
         } = this.props;
-        
+
         this._redraw();
         if (!prevProps.volumeData && volumeData) {
             this._redrawHistogram();
@@ -418,42 +418,33 @@ export default class MyTfEditor extends React.Component {
 
     // create the chart content
     _initDraw() {
-        var me = this;
-        // var svg = d3.select(me.svgElement.current).select("g");
-        // svg.select("path").datum(controlPoints).attr("d", me.area);
-
         // Add circle to connect and interact with the control points
-        me._makeCirclesForControlPoints();
+        this._makeCirclesForControlPoints();
 
         // Create a linear gradient definition of the control points
-        me._makeGradient();
+        this._makeGradient();
 
         // Draw gradient in canvas too
-        d3.timeout(function () {
-            me._drawCanvas();
-        }, 100);
+        this._drawCanvas();
     }
 
     // Update the chart content
     _redraw() {
-        var me = this;
-
         // Add circle to connect and interact with the control points
-        me._makeCirclesForControlPoints();
+        this._makeCirclesForControlPoints();
 
         // Create a linear gradient definition of the control points
-        me._makeGradient();
+        this._makeGradient();
 
         if (d3.event) {
             d3.event.preventDefault();
             d3.event.stopPropagation();
         }
 
-        // Draw gradient in canvas too
-        d3.timeout(function () {
-            me._drawCanvas();
-            me._updateImage();
-        }, 100);
+        // Draw gradient in canvas and update image
+        this._drawCanvas();
+        this._updateImage();
+
     }
 
     _updateImage() {
