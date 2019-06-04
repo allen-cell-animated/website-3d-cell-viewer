@@ -7,3 +7,17 @@ There is a server component (aics-image-viewer-service) that can open OME-TIFF, 
 
 The volume shader itself is a heavily modified version of one that has its origins in [Bisque](http://bioimage.ucsb.edu/bisque).
 
+## to use
+- `npm install ac-3d-viewer`
+- import the app as `import { ImageViewerApp } from "ac-3d-viewer"`
+- send in props as is shown in public/index.jsx
+```
+    <ImageViewerApp
+        cellId={23618}
+        baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
+        cellPath="AICS-17/AICS-17_4187_23618"
+        fovPath="AICS-17/AICS-17_4187"
+        defaultVolumesOn={[0, 1, 2]}
+        defaultSurfacesOn={[]}
+    />
+```

@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import './styles.scss';
 
 import { Button } from 'antd';
+import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
 
 export const TFEDITOR_DEFAULT_COLOR = 'purple';
 
@@ -192,8 +193,6 @@ export default class MyTfEditor extends React.Component {
             .attr("spreadMethod", "pad")
             .attr("x1", "0%").attr("y1", "0%")
             .attr("x2", "100%").attr("y2", "0%");
-        //.attr("x1", me.xScale(0)).attr("y1", me.yScale(0))
-        //.attr("x2", me.xScale(255)).attr("y2", me.yScale(0));
 
         // Draw control points
         g.append("path")
@@ -202,7 +201,7 @@ export default class MyTfEditor extends React.Component {
             .attr("fill", "url(#tfGradient-" + this.id + ")")
             .attr("stroke", "white")
             .call(function () {
-                me._redraw();
+                me._initDraw();
             });
 
         // Mouse interaction handler
@@ -316,8 +315,7 @@ export default class MyTfEditor extends React.Component {
         }
     }
 
-    // Update the chart content
-    _redraw() {
+    _makeCirclesForControlPoints() {
         var me = this;
         const {
             controlPoints
@@ -375,8 +373,18 @@ export default class MyTfEditor extends React.Component {
             .raise();
 
         circle.exit().remove();
+    }
 
-        // Create a linear gradient definition of the control points
+    _makeGradient() {
+        const {
+            controlPoints
+        } = this.props;
+        if (!controlPoints) {
+            return;
+        }
+        var svg = d3.select(this.svgElement.current).select("g");
+        svg.select("path").datum(controlPoints).attr("d", this.area);
+
         var gradient = svg.select("linearGradient").selectAll("stop").data(controlPoints);
 
         var MAX_DISPLAY_OPACITY = 0.9;
@@ -405,16 +413,68 @@ export default class MyTfEditor extends React.Component {
             });
 
         gradient.exit().remove();
+    }
+
+
+    // create the chart content
+    _initDraw() {
+        // Add circle to connect and interact with the control points
+        this._makeCirclesForControlPoints();
+
+        // Create a linear gradient definition of the control points
+        this._makeGradient();
+
+        // Draw gradient in canvas too
+        this._drawCanvas();
+    }
+
+    // Update the chart content
+    _redraw() {
+        // Add circle to connect and interact with the control points
+        this._makeCirclesForControlPoints();
+
+        // Create a linear gradient definition of the control points
+        this._makeGradient();
 
         if (d3.event) {
             d3.event.preventDefault();
             d3.event.stopPropagation();
         }
 
-        // Draw gradient in canvas too
-        d3.timeout(function () {
-            me._drawCanvas();
-        }, 100);
+        // Draw gradient in canvas and update image
+        this._drawCanvas();
+        this._updateImage();
+
+    }
+
+    _updateImage() {
+        const {
+            controlPoints
+        } = this.props;
+        var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
+        // Convinient access
+        var x0 = this.dataScale(extent[0]),
+            x1 = this.dataScale(extent[1]);
+
+        var ctx = this._canvasContext();
+        if (!ctx) {
+            return;
+        }
+        var width = ctx.canvas.clientWidth || 256;
+        var x0c = x0 * width / 256;
+        var x1c = x1 * width / 256;
+        // extract one row
+        var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
+        let opacityGradient = new Uint8Array(256);
+        for (var i = 0; i < 256; ++i) {
+            // extract the alphas.
+            opacityGradient[i] = imagedata.data[i * 4 + 3];
+        }
+        // send update to image rendering
+        this.props.updateChannelTransferFunction(
+            this.props.index,
+            opacityGradient
+        );
     }
 
     /**
@@ -458,18 +518,6 @@ export default class MyTfEditor extends React.Component {
             ctx.fillStyle = grd;
             ctx.fillRect(x0c, 0, x1c - x0c + 1, height);
 
-            // extract one row
-            var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
-            let opacityGradient = new Uint8Array(256);
-            for (var i = 0; i < 256; ++i) {
-                // extract the alphas.
-                opacityGradient[i] = imagedata.data[i * 4 + 3];
-            }
-            // send update to image rendering
-            this.props.updateChannelTransferFunction(
-                this.props.index,
-                opacityGradient
-            );
             if (ctx.canvas.parentNode._x3domNode) {
                 ctx.canvas.parentNode._x3domNode.invalidateGLObject();
             }
@@ -594,7 +642,7 @@ export default class MyTfEditor extends React.Component {
     _auto98XF() {
         const { channelData } = this.props;
 
-        const lutObj = channelData.histogram.lutGenerator_percentiles(0.5, 0.983);
+        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
@@ -654,17 +702,12 @@ export default class MyTfEditor extends React.Component {
         }
         this._updateScales();
         this._updateAxis();
-        this._redraw();
-        this._redrawHistogram();
     }
 
     /////// Polymer lifecycle callbacks /////////////
 
     // Initialize elements and perform the drawing of first drawing
     ready() {
-        //this.scopeSubtree(this.$.container, true);
-
-        this.createElements();
         // Access the svg dom element
         this.svg = d3.select(this.svgElement.current);
         this._width = +this.svg.attr("width") - this.margin.left - this.margin.right;
@@ -791,6 +834,7 @@ export default class MyTfEditor extends React.Component {
 
             // Redraw the TF in the new canvas element
             this._drawCanvas();
+            this._updateImage();
         }
     }
 
@@ -806,6 +850,7 @@ export default class MyTfEditor extends React.Component {
             }
             // Redraw the TF in the new canvas element
             this._drawCanvas();
+            this._updateImage();
         }
     }
 
