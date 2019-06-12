@@ -22,8 +22,6 @@ export default class GlobalVolumeControls extends React.Component {
   constructor(props) {
     super(props);
     this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
-    this.handleMaxProjectionCheck = this.handleMaxProjectionCheck.bind(this);
-    this.handlePathTraceCheck = this.handlePathTraceCheck.bind(this);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
@@ -142,14 +140,6 @@ export default class GlobalVolumeControls extends React.Component {
     this.props.onAutorotateChange();
   }
 
-  handleMaxProjectionCheck({target}) {
-    this.props.handleChangeUserSelection(MAX_PROJECT, target.checked);
-  }
-
-  handlePathTraceCheck({target}) {
-    this.props.handleChangeUserSelection(PATH_TRACE, target.checked);
-  }
-
   createSliderRow(config) {
     return (
       <div style={STYLES.controlRow}>
@@ -174,38 +164,13 @@ export default class GlobalVolumeControls extends React.Component {
     );
   }
 
-  createRenderModeControls() {
-    return (
-      <div style={STYLES.controlRow}>
-        <Checkbox
-          defaultChecked={this.props.pathTraceOn}
-          onChange={this.handlePathTraceCheck}
-        >Path trace
-        </Checkbox>
-      </div>
-    );
-  }
-
-  createProjectionModeControls() {
-    return (
-      <div style={STYLES.controlRow}>
-        <Checkbox
-          defaultChecked={this.props.maxProjectOn}
-          disabled={this.props.pathTraceOn}
-          onChange={this.handleMaxProjectionCheck}
-        >Max projection
-        </Checkbox>
-      </div>
-    );
-  }
-
   render() {
     if (!this.props.imageName) return null;
     const { renderConfig } = this.props;
     return (
       <Card
         bordered={false}
-        title="Global volume rendering settings"
+        title="Global volume rendering adjustments"
         type="inner"
         className="global-volume-controls"
         bodyStyle={STYLES.card}
@@ -221,8 +186,6 @@ export default class GlobalVolumeControls extends React.Component {
               {renderConfig.brightnessSlider && this.createBrightnessSlider()}
               {renderConfig.densitySlider && this.createDensitySlider()}
               {renderConfig.levelsSliders && this.createLevelsSlider()}
-              {this.createProjectionModeControls()}
-              {this.props.canPathTrace && this.createRenderModeControls()}
             </div>
           </Panel>
         </Collapse>
