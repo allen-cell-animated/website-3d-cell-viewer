@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import { Layout } from "antd";
+import { Layout, Progress } from "antd";
 import React from 'react';
 import { includes, isEqual, filter, find, map } from 'lodash';
 import { 
@@ -139,6 +139,7 @@ export default class App extends React.Component {
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.nameClean = this.nameClean.bind(this);
+    this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -491,6 +492,7 @@ export default class App extends React.Component {
   }
 
   handleChangeUserSelection(key, newValue) {
+    console.log(key, newValue)
     this.setUserSelectionsInState({ [key]: newValue });
     this.handleChangeToImage(key, newValue);
   }
@@ -632,6 +634,24 @@ export default class App extends React.Component {
       pixelSize[i] = value;
       this.state.image.setVoxelSize(pixelSize);
     };
+  }
+
+  changeRenderingAlgorithm(newAlgorithm) {
+    const { userSelections } = this.state;
+    // already set
+    if (userSelections[newAlgorithm]) {
+      return;
+    }
+    this.setUserSelectionsInState({
+      [PATH_TRACE]: newAlgorithm === PATH_TRACE,
+      [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
+    });
+    this.handleChangeToImage(PATH_TRACE, false);
+    this.handleChangeToImage(MAX_PROJECT, false);
+
+    if (newAlgorithm !== 'volume') {
+      this.handleChangeToImage(newAlgorithm, true);
+    }
   }
 
   onSwitchFovCell(value) {
@@ -810,10 +830,18 @@ export default class App extends React.Component {
                 changeOneChannelSetting={this.changeOneChannelSetting}
                 filterFunc={this.props.filterFunc}
                 nameClean={this.nameClean}
+                changeRenderingAlgorithm={this.changeRenderingAlgorithm}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
                 <Content>
+                  <Progress
+                    strokeColor={userSelections[PATH_TRACE] ? "#313131": "#000"}
+                    percent={99.9}
+                    status={userSelections[PATH_TRACE] ? "active" : ""}
+                    strokeLinecap="square"
+                    showInfo={false}
+                  />
                   <ViewerWrapper
                     image={this.state.image}
                     onAutorotateChange={this.onAutorotateChange}

@@ -7,6 +7,7 @@ import {
   Radio,
   Icon,
   Menu,
+  Progress,
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -16,7 +17,9 @@ import GlobalVolumeControls from "../GlobalVolumeControls";
 import { 
   PRESET_COLOR_MAP, 
   SEGMENTED_CELL, 
-  FULL_FIELD_IMAGE, 
+  FULL_FIELD_IMAGE,
+  PATH_TRACE,
+  MAX_PROJECT, 
 } from '../../shared/constants';
 
 import './styles.scss';
@@ -29,6 +32,7 @@ export default class ControlPanel extends React.Component {
     this.handleToggle = this.handleToggle.bind(this);
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
+    this.changeRenderMode = this.changeRenderMode.bind(this);
     this.state = {open: true};
   }
 
@@ -80,6 +84,20 @@ export default class ControlPanel extends React.Component {
       </Dropdown>
     );
   }
+  changeRenderMode({ target }) {
+    this.props.changeRenderingAlgorithm(target.value);
+  }
+  
+  renderRenderSettings() {
+    return (<div>
+      <Radio.Group defaultValue="volume" onChange={this.changeRenderMode}>
+        <Radio.Button value="volume">Volumetric</Radio.Button>
+        {this.props.canPathTrace && <Radio.Button value={PATH_TRACE}>Path trace</Radio.Button>}
+        <Radio.Button value={MAX_PROJECT}>Max project</Radio.Button>
+      </Radio.Group>
+
+    </div>);
+  }
 
   render() {
     const { 
@@ -109,7 +127,7 @@ export default class ControlPanel extends React.Component {
             />}
         >
         <Card.Meta 
-          title={renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()}
+          title={[this.renderRenderSettings(), renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()]}
         />
         {hasImage ? <div className="channel-rows-list">
           <ChannelsWidget
