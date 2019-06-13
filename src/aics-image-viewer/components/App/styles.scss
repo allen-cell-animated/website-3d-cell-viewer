@@ -2,6 +2,12 @@
     overflow: scroll;
 }
 
+.cell-viewer-app {
+    .ant-radio-button-wrapper-disabled {
+        color: rgb(110, 110, 110);
+    }
+}
+
 .cell-viewer-wrapper {
     .ant-progress-bg {
         position: relative;

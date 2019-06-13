@@ -592,8 +592,14 @@ export default class App extends React.Component {
       // Switching to 2d 
       newSelectionState = {
         [MODE]: newMode,
+        [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
+      // if path trace was enabled in 3D turn it off when switching to 2D. 
+      if (userSelections[PATH_TRACE]) {
+        this.changeRenderingAlgorithm('volume');
+      }
+      // switching from 2D to 3D
     } else if (
       userSelections.mode !== ViewMode.threeD && 
       newMode === ViewMode.threeD && 
@@ -605,6 +611,7 @@ export default class App extends React.Component {
           [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
     }
+
     this.handleChangeToImage(MODE, newMode);
     if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
       this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
@@ -807,6 +814,7 @@ export default class App extends React.Component {
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}
+                renderSetting={userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE: 'volume' }
                 channelSettings={userSelections[CHANNEL_SETTINGS]}
                 mode={userSelections[MODE]}
                 imageType={userSelections.imageType}
@@ -838,7 +846,7 @@ export default class App extends React.Component {
                   <Progress
                     strokeColor={userSelections[PATH_TRACE] ? "#313131": "#000"}
                     percent={99.9}
-                    status={userSelections[PATH_TRACE] ? "active" : ""}
+                    status={userSelections[PATH_TRACE] ? "active" : "normal"}
                     strokeLinecap="square"
                     showInfo={false}
                   />

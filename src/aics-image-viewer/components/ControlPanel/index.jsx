@@ -21,8 +21,10 @@ import {
   PATH_TRACE,
   MAX_PROJECT, 
 } from '../../shared/constants';
+import enums from '../../shared/enums';
 
 import './styles.scss';
+const ViewMode = enums.viewMode.mainMapping;
 
 const RadioGroup = Radio.Group;
 
@@ -89,13 +91,17 @@ export default class ControlPanel extends React.Component {
   }
   
   renderRenderSettings() {
+    const {
+      canPathTrace,
+      mode,
+      renderSetting,
+    } = this.props;
     return (<div>
-      <Radio.Group defaultValue="volume" onChange={this.changeRenderMode}>
-        <Radio.Button value="volume">Volumetric</Radio.Button>
-        {this.props.canPathTrace && <Radio.Button value={PATH_TRACE}>Path trace</Radio.Button>}
-        <Radio.Button value={MAX_PROJECT}>Max project</Radio.Button>
+      <Radio.Group value={renderSetting} onChange={this.changeRenderMode}>
+        <Radio.Button value="volume" key="volume">Volumetric</Radio.Button>
+        {canPathTrace && <Radio.Button value={PATH_TRACE} disabled={mode !== ViewMode.threeD} key={PATH_TRACE}>Path trace</Radio.Button>}
+        <Radio.Button value={MAX_PROJECT} key={MAX_PROJECT}>Max project</Radio.Button>
       </Radio.Group>
-
     </div>);
   }
 
