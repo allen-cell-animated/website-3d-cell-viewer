@@ -492,7 +492,6 @@ export default class App extends React.Component {
   }
 
   handleChangeUserSelection(key, newValue) {
-    console.log(key, newValue)
     this.setUserSelectionsInState({ [key]: newValue });
     this.handleChangeToImage(key, newValue);
   }
