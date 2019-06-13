@@ -3,7 +3,8 @@
 }
 
 .cell-viewer-app {
-    .ant-radio-button-wrapper-disabled {
+    .ant-radio-button-wrapper-disabled,
+    .ant-btn[disabled] {
         color: rgb(110, 110, 110);
     }
 }

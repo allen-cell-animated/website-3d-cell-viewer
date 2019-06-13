@@ -79,15 +79,23 @@ export default class ViewerWrapper extends React.Component {
     if (!this.props.image) {
       return null;
     }
-    const { numSlices } = this.props;
+
+    const { 
+      numSlices, 
+      mode, 
+      pathTraceOn, 
+      autorotate, 
+      onAutorotateChange 
+    } = this.props;
     return (<AxisClipSliders
-      mode={this.props.mode}
+      mode={mode}
       activeAxis={this.getActiveAxis()}
       setAxisClip={this.setAxisClip}
       numSlices={numSlices}
-      mode={this.props.mode}
-      autorotate={this.props.autorotate}
-      onAutorotateChange={this.props.onAutorotateChange}
+      mode={mode}
+      pathTraceOn={pathTraceOn}
+      autorotate={autorotate}
+      onAutorotateChange={onAutorotateChange}
     />);
   }
 

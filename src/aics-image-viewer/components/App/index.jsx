@@ -46,7 +46,7 @@ import {
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
-import ViewerWrapper from '../CellViewerCanvasWrapper';
+import CellViewerCanvasWrapper from '../CellViewerCanvasWrapper';
 import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
 
 
@@ -850,7 +850,7 @@ export default class App extends React.Component {
                     strokeLinecap="square"
                     showInfo={false}
                   />
-                  <ViewerWrapper
+                  <CellViewerCanvasWrapper
                     image={this.state.image}
                     onAutorotateChange={this.onAutorotateChange}
                     setAxisClip={this.setImageAxisClip}
@@ -861,6 +861,7 @@ export default class App extends React.Component {
                     onView3DCreated={this.onView3DCreated}
                     appHeight={this.props.appHeight}
                     renderConfig={renderConfig}
+                    pathTraceOn={userSelections[PATH_TRACE]}
                   />
                 </Content>
               </Layout>
