@@ -844,6 +844,7 @@ export default class App extends React.Component {
                 <Content>
                   <Progress
                     strokeColor={userSelections[PATH_TRACE] ? "#313131": "#000"}
+                    // TODO: place holder for when we actually have an end point for path tracing. Now it's just a animated bar
                     percent={99.9}
                     status={userSelections[PATH_TRACE] ? "active" : "normal"}
                     strokeLinecap="square"
