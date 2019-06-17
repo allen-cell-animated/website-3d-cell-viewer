@@ -20,6 +20,7 @@ import {
   FULL_FIELD_IMAGE,
   PATH_TRACE,
   MAX_PROJECT, 
+  VOLUMETRIC_RENDER,
 } from '../../shared/constants';
 import enums from '../../shared/enums';
 
@@ -98,7 +99,7 @@ export default class ControlPanel extends React.Component {
     } = this.props;
     return (<div>
       <Radio.Group value={renderSetting} onChange={this.changeRenderMode}>
-        <Radio.Button value="volume" key="volume">Volumetric</Radio.Button>
+        <Radio.Button value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>Volumetric</Radio.Button>
         {canPathTrace && <Radio.Button value={PATH_TRACE} disabled={mode !== ViewMode.threeD} key={PATH_TRACE}>Path trace</Radio.Button>}
         <Radio.Button value={MAX_PROJECT} key={MAX_PROJECT}>Max project</Radio.Button>
       </Radio.Group>
