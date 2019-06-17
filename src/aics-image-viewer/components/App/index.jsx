@@ -652,12 +652,8 @@ export default class App extends React.Component {
       [PATH_TRACE]: newAlgorithm === PATH_TRACE,
       [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
     });
-    this.handleChangeToImage(PATH_TRACE, false);
-    this.handleChangeToImage(MAX_PROJECT, false);
-
-    if (newAlgorithm !== 'volume') {
-      this.handleChangeToImage(newAlgorithm, true);
-    }
+    this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
+    this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
   }
 
   onSwitchFovCell(value) {
