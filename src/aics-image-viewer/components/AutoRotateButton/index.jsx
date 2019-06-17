@@ -21,6 +21,7 @@ export default class AutoRotateButton extends React.Component {
         const {
             autorotate,
             mode,
+            disabled
         } = this.props;
         const buttonType = autorotate ? "pause-circle" : "play-circle";
         if (viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(mode) !== THREE_D_MODE) {
@@ -31,6 +32,7 @@ export default class AutoRotateButton extends React.Component {
                 icon={buttonType}
                 className="turn-table-button"
                 onClick={this.handleAutorotateCheck}
+                disabled={disabled}
             >
                 Turntable
             </Button>

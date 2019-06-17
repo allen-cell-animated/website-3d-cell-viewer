@@ -3,4 +3,4 @@ node_modules
 imageviewer/
 environment.txt
 .DS_Store
-dist
+dist/

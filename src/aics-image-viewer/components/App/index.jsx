@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import { Layout } from "antd";
+import { Layout, Progress } from "antd";
 import React from 'react';
 import { includes, isEqual, filter, find, map } from 'lodash';
 import { 
@@ -46,7 +46,7 @@ import {
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
-import ViewerWrapper from '../CellViewerCanvasWrapper';
+import CellViewerCanvasWrapper from '../CellViewerCanvasWrapper';
 import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
 
 
@@ -139,6 +139,7 @@ export default class App extends React.Component {
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.nameClean = this.nameClean.bind(this);
+    this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
     document.addEventListener('keydown', this.handleKeydown, false);
   }
 
@@ -590,8 +591,14 @@ export default class App extends React.Component {
       // Switching to 2d 
       newSelectionState = {
         [MODE]: newMode,
+        [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
+      // if path trace was enabled in 3D turn it off when switching to 2D. 
+      if (userSelections[PATH_TRACE]) {
+        this.changeRenderingAlgorithm('volume');
+      }
+      // switching from 2D to 3D
     } else if (
       userSelections.mode !== ViewMode.threeD && 
       newMode === ViewMode.threeD && 
@@ -603,6 +610,7 @@ export default class App extends React.Component {
           [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
     }
+
     this.handleChangeToImage(MODE, newMode);
     if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
       this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
@@ -632,6 +640,20 @@ export default class App extends React.Component {
       pixelSize[i] = value;
       this.state.image.setVoxelSize(pixelSize);
     };
+  }
+
+  changeRenderingAlgorithm(newAlgorithm) {
+    const { userSelections } = this.state;
+    // already set
+    if (userSelections[newAlgorithm]) {
+      return;
+    }
+    this.setUserSelectionsInState({
+      [PATH_TRACE]: newAlgorithm === PATH_TRACE,
+      [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
+    });
+    this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
+    this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
   }
 
   onSwitchFovCell(value) {
@@ -787,6 +809,7 @@ export default class App extends React.Component {
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}
+                renderSetting={userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE: 'volume' }
                 channelSettings={userSelections[CHANNEL_SETTINGS]}
                 mode={userSelections[MODE]}
                 imageType={userSelections.imageType}
@@ -810,11 +833,20 @@ export default class App extends React.Component {
                 changeOneChannelSetting={this.changeOneChannelSetting}
                 filterFunc={this.props.filterFunc}
                 nameClean={this.nameClean}
+                changeRenderingAlgorithm={this.changeRenderingAlgorithm}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
                 <Content>
-                  <ViewerWrapper
+                  <Progress
+                    strokeColor={userSelections[PATH_TRACE] ? "#313131": "#000"}
+                    // TODO: place holder for when we actually have an end point for path tracing. Now it's just a animated bar
+                    percent={99.9}
+                    status={userSelections[PATH_TRACE] ? "active" : "normal"}
+                    strokeLinecap="square"
+                    showInfo={false}
+                  />
+                  <CellViewerCanvasWrapper
                     image={this.state.image}
                     onAutorotateChange={this.onAutorotateChange}
                     setAxisClip={this.setImageAxisClip}
@@ -825,6 +857,7 @@ export default class App extends React.Component {
                     onView3DCreated={this.onView3DCreated}
                     appHeight={this.props.appHeight}
                     renderConfig={renderConfig}
+                    pathTraceOn={userSelections[PATH_TRACE]}
                   />
                 </Content>
               </Layout>

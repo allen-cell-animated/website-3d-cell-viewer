@@ -316,6 +316,7 @@ export default class AxisClipSliders extends React.Component {
         <AutoRotateButton
           mode={this.props.mode}
           autorotate={this.props.autorotate}
+          disabled={this.props.pathTraceOn}
           onAutorotateChange={this.props.onAutorotateChange}
         />;
     return (

@@ -28,6 +28,7 @@ export const
   MODE = 'mode',
   AUTO_ROTATE = 'autorotate',
   MAX_PROJECT = 'maxProject',
+  VOLUMETRIC_RENDER = 'volume',
   PATH_TRACE = 'pathTrace',
   LUT_CONTROL_POINTS = 'controlPoints',
 
