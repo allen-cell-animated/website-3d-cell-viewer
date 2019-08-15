@@ -80,6 +80,7 @@ export default class ControlPanel extends React.Component {
     );
     return (
       <Dropdown
+        key="colorPresetsDropdown"
         trigger={['click']}
         overlay={dropDownMenuItems}
       >
@@ -97,7 +98,7 @@ export default class ControlPanel extends React.Component {
       mode,
       renderSetting,
     } = this.props;
-    return (<div>
+    return (<div key="renderSettings">
       <Radio.Group value={renderSetting} onChange={this.changeRenderMode}>
         <Radio.Button value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>Volumetric</Radio.Button>
         {canPathTrace && <Radio.Button value={PATH_TRACE} disabled={mode !== ViewMode.threeD} key={PATH_TRACE}>Path trace</Radio.Button>}
