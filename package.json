@@ -29,7 +29,7 @@
     "react-nouislider": "^2.0.1",
     "react-numeric-input": "^2.2.3",
     "reactcss": "^1.2.3",
-    "volume-viewer": "^2.0.0-alpha.7"
+    "volume-viewer": "^2.0.0-alpha.10"
   },
   "peerDependencies": {
     "antd": "3.16.x",
