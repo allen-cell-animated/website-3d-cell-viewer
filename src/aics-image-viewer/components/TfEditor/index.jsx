@@ -4,8 +4,9 @@ import './styles.scss';
 
 import { Button } from 'antd';
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
+import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
 
-export const TFEDITOR_DEFAULT_COLOR = 'purple';
+export const TFEDITOR_DEFAULT_COLOR = 'rgb(255, 255, 255)';
 
 export default class MyTfEditor extends React.Component {
 
@@ -264,7 +265,7 @@ export default class MyTfEditor extends React.Component {
                 newControlPoints.splice(0, x0);
             }
 
-            this.updateChannelLutControlPoints(newControlPoints);
+            this.props.updateChannelLutControlPoints(newControlPoints);
 
             this.xScale.domain(dataExtent);
             this.dataScale.domain(dataExtent);
@@ -451,26 +452,31 @@ export default class MyTfEditor extends React.Component {
         const {
             controlPoints
         } = this.props;
-        var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
-        // Convinient access
-        var x0 = this.dataScale(extent[0]),
-            x1 = this.dataScale(extent[1]);
+        // var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
+        // // Convenient access
+        // var x0 = this.dataScale(extent[0]),
+        //     x1 = this.dataScale(extent[1]);
 
-        var ctx = this._canvasContext();
-        if (!ctx) {
-            return;
-        }
-        var width = ctx.canvas.clientWidth || 256;
-        var x0c = x0 * width / 256;
-        var x1c = x1 * width / 256;
-        // extract one row
-        var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
-        let opacityGradient = new Uint8Array(256);
-        for (var i = 0; i < 256; ++i) {
-            // extract the alphas.
-            opacityGradient[i] = imagedata.data[i * 4 + 3];
-        }
+        // var ctx = this._canvasContext();
+        // if (!ctx) {
+        //     return;
+        // }
+        // var width = ctx.canvas.clientWidth || 256;
+        // var x0c = x0 * width / 256;
+        // var x1c = x1 * width / 256;
+        // // extract one row
+        // var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
+        // let opacityGradient = new Uint8Array(256*4);
+        // for (var i = 0; i < 256; ++i) {
+        //     // extract the alphas.
+        //     opacityGradient[i * 4 + 0] = imagedata.data[i * 4 + 0];
+        //     opacityGradient[i * 4 + 1] = imagedata.data[i * 4 + 1];
+        //     opacityGradient[i * 4 + 2] = imagedata.data[i * 4 + 2];
+        //     opacityGradient[i * 4 + 3] = imagedata.data[i * 4 + 3];
+        // }
+        const opacityGradient = controlPointsToLut(controlPoints);
         // send update to image rendering
+        console.log(opacityGradient);
         this.props.updateChannelTransferFunction(
             this.props.index,
             opacityGradient
@@ -573,6 +579,7 @@ export default class MyTfEditor extends React.Component {
         } else if (virtualIndex2 - index >= 2) {
             newControlPoints.splice(index + 1, 1);
         }
+        //console.log(newControlPoints);
         this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
@@ -616,7 +623,7 @@ export default class MyTfEditor extends React.Component {
     }
 
     updateControlPointsWithoutColor(ptsWithoutColor) {
-        const pts = ptsWithoutColor.map(pt => ({...pt, color:TFEDITOR_DEFAULT_COLOR}));
+        const pts = ptsWithoutColor.map(pt => ({...pt, color:'rgb(255, 255, 255)'}));
         this.selected = pts[0];
         this.props.updateChannelLutControlPoints(pts);
     }
@@ -755,13 +762,16 @@ export default class MyTfEditor extends React.Component {
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
+                    <canvas id={`canvas-${id}`} width={width} height="10" ref={this.canvas}></canvas>
+                </div>
+                <div className="aligned">
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
                     <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</Button>
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
                     <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
                     {/* <!-- this canvas exists to render the gradient but will not be displayed --> */}
-                    <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas>
+                    {/* <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas> */}
                 </div>
             </div>
         );
