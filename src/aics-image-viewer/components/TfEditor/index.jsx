@@ -1,18 +1,17 @@
 import React from 'react';
+import reactCSS from 'reactcss';
 import * as d3 from "d3";
+import { SketchPicker } from 'react-color';
 import './styles.scss';
 
 import { Button } from 'antd';
+
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
 import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
 
 export const TFEDITOR_DEFAULT_COLOR = 'rgb(255, 255, 255)';
 
 export default class MyTfEditor extends React.Component {
-
-    static get is() {
-        return 'tf-editor';
-    }
 
     constructor(props) {
         super(props);
@@ -33,7 +32,17 @@ export default class MyTfEditor extends React.Component {
         this._auto2XF = this._auto2XF.bind(this);
         this._auto98XF = this._auto98XF.bind(this);
         this._bestFitXF = this._bestFitXF.bind(this);
+        this._colorPick = this._colorPick.bind(this);
+        this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
+        this.handleChangeColor = this.handleChangeColor.bind(this);
+        this.handleChangeColorComplete = this.handleChangeColorComplete.bind(this);
+    
         this.svgElement = React.createRef();
+
+        this.state = {
+            displayColorPicker: false
+        };
+      
         /**
          * The X axis range is delimited to the input data range.
          * If false, the range will be set by default: [0-255]
@@ -69,7 +78,6 @@ export default class MyTfEditor extends React.Component {
             this._redrawHistogram();
         }
     }
-
 
     createElements() {
         // Custom margins
@@ -352,8 +360,9 @@ export default class MyTfEditor extends React.Component {
             .on("contextmenu", function (d, i) {
                 // react on right-clicking
                 d3.event.preventDefault();
-                d.color = me.svgElement.current.querySelector("#picker-" + me.id).value;
-                me._redraw();
+                if (!me.dragged) {
+                    me._colorPick();
+                }
             })
             .transition()
             .duration(750)
@@ -505,6 +514,10 @@ export default class MyTfEditor extends React.Component {
     }
 
     /////// User interaction related event callbacks ////////
+
+    _colorPick() {
+        this.setState({ displayColorPicker: !this.state.displayColorPicker });
+    }
 
     _mousedown() {
         var me = this;
@@ -730,17 +743,39 @@ export default class MyTfEditor extends React.Component {
         }
     }
 
+    handleCloseColorPicker() {
+        this.setState({ displayColorPicker: false });
+    };
+
+    handleChangeColor(color) {
+        this.last_color = color.hex;
+        this.selected.color = this.last_color;
+        this._redraw();
+    };
+
+    handleChangeColorComplete(color) {
+        this.last_color = color.hex;
+        this.selected.color = this.last_color;
+        this._redraw();
+    };
+    
     render () {
         const {
             id,
             width,
             height
         } = this.props;
+      
         return (
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
-                    <canvas id={`canvas-${id}`} width={width} height="10" ref={this.canvas}></canvas>
+                    {/* <canvas id={`canvas-${id}`} width={width} height="10" ref={this.canvas}></canvas> */}
+
+                    { this.state.displayColorPicker ? <div style={ STYLES.popover }>
+                        <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
+                        <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor } onChangeComplete={ this.handleChangeColorComplete }/>
+                        </div> : null }
                 </div>
                 <div className="aligned">
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
@@ -756,3 +791,21 @@ export default class MyTfEditor extends React.Component {
     }
 };
 
+const STYLES = {
+    colorPicker: {
+      margin: 'auto',
+      marginRight: 16
+    },
+    cover: {
+        position: 'fixed',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        left: '0px'
+    },
+    popover: {
+        position: 'absolute',
+        zIndex: '9999',
+    },
+};
+  
