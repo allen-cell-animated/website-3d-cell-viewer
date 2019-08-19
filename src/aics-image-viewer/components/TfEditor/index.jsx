@@ -450,35 +450,13 @@ export default class MyTfEditor extends React.Component {
 
     _updateImage() {
         const {
-            controlPoints
+            controlPoints,
+            index
         } = this.props;
-        // var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
-        // // Convenient access
-        // var x0 = this.dataScale(extent[0]),
-        //     x1 = this.dataScale(extent[1]);
-
-        // var ctx = this._canvasContext();
-        // if (!ctx) {
-        //     return;
-        // }
-        // var width = ctx.canvas.clientWidth || 256;
-        // var x0c = x0 * width / 256;
-        // var x1c = x1 * width / 256;
-        // // extract one row
-        // var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
-        // let opacityGradient = new Uint8Array(256*4);
-        // for (var i = 0; i < 256; ++i) {
-        //     // extract the alphas.
-        //     opacityGradient[i * 4 + 0] = imagedata.data[i * 4 + 0];
-        //     opacityGradient[i * 4 + 1] = imagedata.data[i * 4 + 1];
-        //     opacityGradient[i * 4 + 2] = imagedata.data[i * 4 + 2];
-        //     opacityGradient[i * 4 + 3] = imagedata.data[i * 4 + 3];
-        // }
         const opacityGradient = controlPointsToLut(controlPoints);
         // send update to image rendering
-        console.log(opacityGradient);
         this.props.updateChannelTransferFunction(
-            this.props.index,
+            index,
             opacityGradient
         );
     }
