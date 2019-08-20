@@ -35,7 +35,6 @@ export default class MyTfEditor extends React.Component {
         this._colorPick = this._colorPick.bind(this);
         this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
         this.handleChangeColor = this.handleChangeColor.bind(this);
-        this.handleChangeColorComplete = this.handleChangeColorComplete.bind(this);
     
         this.svgElement = React.createRef();
 
@@ -570,7 +569,6 @@ export default class MyTfEditor extends React.Component {
         } else if (virtualIndex2 - index >= 2) {
             newControlPoints.splice(index + 1, 1);
         }
-        //console.log(newControlPoints);
         this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
@@ -753,12 +751,6 @@ export default class MyTfEditor extends React.Component {
         this._redraw();
     };
 
-    handleChangeColorComplete(color) {
-        this.last_color = color.hex;
-        this.selected.color = this.last_color;
-        this._redraw();
-    };
-    
     render () {
         const {
             id,
@@ -774,7 +766,7 @@ export default class MyTfEditor extends React.Component {
 
                     { this.state.displayColorPicker ? <div style={ STYLES.popover }>
                         <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
-                        <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor } onChangeComplete={ this.handleChangeColorComplete }/>
+                        <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor }/>
                         </div> : null }
                 </div>
                 <div className="aligned">
