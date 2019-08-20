@@ -7,14 +7,17 @@ canv.style.width = 256;
 canv.style.height = 1;
 const ctx = canv.getContext("2d");
 
+// @param {string} css_str - string representing a color that is css canvas context2d compatible
+// @param {number} opacity_override - number representing an opacity value from 0 to 1 
+// @return {string} the new rgba color with the opacity applied to its alpha value as a css color string
 function cssColorWithOpacity(css_str, opacity_override) {
   const arr = colorString.get(css_str).value;
   arr[3] = opacity_override;
   return colorString.to.rgb(arr);
 }
 
-// in : x, opacity, color
-// out: 
+// @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
+// @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
 export function controlPointsToLut(controlPoints) {
   const grd = ctx.createLinearGradient(0, 0, 255, 0);
   if (!controlPoints.length || controlPoints.length < 1) {
