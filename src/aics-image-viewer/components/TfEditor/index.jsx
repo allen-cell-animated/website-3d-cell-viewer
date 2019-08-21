@@ -762,8 +762,6 @@ export default class MyTfEditor extends React.Component {
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
-                    {/* <canvas id={`canvas-${id}`} width={width} height="10" ref={this.canvas}></canvas> */}
-
                     { this.state.displayColorPicker ? <div style={ STYLES.popover }>
                         <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
                         <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor }/>
@@ -775,8 +773,6 @@ export default class MyTfEditor extends React.Component {
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
                     <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
-                    {/* <!-- this canvas exists to render the gradient but will not be displayed --> */}
-                    {/* <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas> */}
                 </div>
             </div>
         );
