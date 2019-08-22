@@ -1,17 +1,17 @@
 import React from 'react';
+import reactCSS from 'reactcss';
 import * as d3 from "d3";
+import { SketchPicker } from 'react-color';
 import './styles.scss';
 
 import { Button } from 'antd';
-import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
 
-export const TFEDITOR_DEFAULT_COLOR = 'purple';
+import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
+import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
+
+export const TFEDITOR_DEFAULT_COLOR = 'rgb(255, 255, 255)';
 
 export default class MyTfEditor extends React.Component {
-
-    static get is() {
-        return 'tf-editor';
-    }
 
     constructor(props) {
         super(props);
@@ -32,7 +32,16 @@ export default class MyTfEditor extends React.Component {
         this._auto2XF = this._auto2XF.bind(this);
         this._auto98XF = this._auto98XF.bind(this);
         this._bestFitXF = this._bestFitXF.bind(this);
+        this._colorPick = this._colorPick.bind(this);
+        this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
+        this.handleChangeColor = this.handleChangeColor.bind(this);
+    
         this.svgElement = React.createRef();
+
+        this.state = {
+            displayColorPicker: false
+        };
+      
         /**
          * The X axis range is delimited to the input data range.
          * If false, the range will be set by default: [0-255]
@@ -68,7 +77,6 @@ export default class MyTfEditor extends React.Component {
             this._redrawHistogram();
         }
     }
-
 
     createElements() {
         // Custom margins
@@ -264,7 +272,7 @@ export default class MyTfEditor extends React.Component {
                 newControlPoints.splice(0, x0);
             }
 
-            this.updateChannelLutControlPoints(newControlPoints);
+            this.props.updateChannelLutControlPoints(newControlPoints);
 
             this.xScale.domain(dataExtent);
             this.dataScale.domain(dataExtent);
@@ -351,8 +359,9 @@ export default class MyTfEditor extends React.Component {
             .on("contextmenu", function (d, i) {
                 // react on right-clicking
                 d3.event.preventDefault();
-                d.color = me.svgElement.current.querySelector("#picker-" + me.id).value;
-                me._redraw();
+                if (!me.dragged) {
+                    me._colorPick();
+                }
             })
             .transition()
             .duration(750)
@@ -449,30 +458,13 @@ export default class MyTfEditor extends React.Component {
 
     _updateImage() {
         const {
-            controlPoints
+            controlPoints,
+            index
         } = this.props;
-        var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
-        // Convinient access
-        var x0 = this.dataScale(extent[0]),
-            x1 = this.dataScale(extent[1]);
-
-        var ctx = this._canvasContext();
-        if (!ctx) {
-            return;
-        }
-        var width = ctx.canvas.clientWidth || 256;
-        var x0c = x0 * width / 256;
-        var x1c = x1 * width / 256;
-        // extract one row
-        var imagedata = ctx.getImageData(x0c, 0, x1c - x0c + 1, 1);
-        let opacityGradient = new Uint8Array(256);
-        for (var i = 0; i < 256; ++i) {
-            // extract the alphas.
-            opacityGradient[i] = imagedata.data[i * 4 + 3];
-        }
+        const opacityGradient = controlPointsToLut(controlPoints);
         // send update to image rendering
         this.props.updateChannelTransferFunction(
-            this.props.index,
+            index,
             opacityGradient
         );
     }
@@ -517,14 +509,14 @@ export default class MyTfEditor extends React.Component {
             }
             ctx.fillStyle = grd;
             ctx.fillRect(x0c, 0, x1c - x0c + 1, height);
-
-            if (ctx.canvas.parentNode._x3domNode) {
-                ctx.canvas.parentNode._x3domNode.invalidateGLObject();
-            }
         }
     }
 
     /////// User interaction related event callbacks ////////
+
+    _colorPick() {
+        this.setState({ displayColorPicker: !this.state.displayColorPicker });
+    }
 
     _mousedown() {
         var me = this;
@@ -620,7 +612,7 @@ export default class MyTfEditor extends React.Component {
     }
 
     updateControlPointsWithoutColor(ptsWithoutColor) {
-        const pts = ptsWithoutColor.map(pt => ({...pt, color:TFEDITOR_DEFAULT_COLOR}));
+        const pts = ptsWithoutColor.map(pt => ({...pt, color:'rgb(255, 255, 255)'}));
         this.selected = pts[0];
         this.props.updateChannelLutControlPoints(pts);
     }
@@ -719,10 +711,6 @@ export default class MyTfEditor extends React.Component {
     connectedCallback() {
         super.connectedCallback();
 
-        //Check for init value in the selectors
-        if (this.x3domSelector !== '') {
-            this._x3domSelectorChanged(this.x3domSelector, '');
-        }
         // poor man's alternative to setCapture/releaseCapture
         this.mouseleaveHandler = this._mouseup.bind(this);
         this.$.container.addEventListener("mouseleave", this.mouseleaveHandler);
@@ -735,107 +723,6 @@ export default class MyTfEditor extends React.Component {
 
     _isCanvasNeeded(canvasSelector) {
         return canvasSelector === '' || canvasSelector === '#canvas-' + this.id;
-    }
-
-    _x3domSelectorChanged(newValue, oldValue) {
-        if (newValue && newValue !== "" && newValue !== oldValue) {
-            var ctx = this;
-            var imageObj = new Image();
-            imageObj.onload = function () {
-                var imageFlattenArray = [];
-                var canvas = document.createElement('canvas');
-                var context = canvas.getContext('2d');
-                context.drawImage(this, 0, 0);
-                var imgData = context.getImageData(0, 0, this.width, this.height);
-                // NOTE: Flatten the pixel array, we only keep the R channel
-                for (var i = 0, n = imgData.data.length; i < n; i += 4) {
-                    imageFlattenArray.push(imgData.data[i]);
-                }
-                ctx.setData(imageFlattenArray);
-            };
-            //Lookup for the volume data
-            var x3dNode = document.querySelector(newValue);
-            if (x3dNode && x3dNode.hasOwnProperty('_x3domNode')) {
-                var volumeDataUrl = "";
-                // If the provided selector refers to the OpacityMap
-                if (x3dNode.localName === "opacitymapvolumestyle" || x3dNode.localName === "blendedvolumestyle") {
-                    var parentVolume = null;
-                    if (x3dNode.parentNode.localName === "composedvolumestyle") {
-                        parentVolume = x3dNode.parentNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
-                    } else {
-                        parentVolume = x3dNode.parentNode.querySelector("imagetexture[containerField='transferFunction' i]");
-                    }
-                    if (parentVolume) {
-                        volumeDataUrl = parentVolume.getAttribute("url");
-                    }
-                } else if (x3dNode.localName === "volumedata" || x3dNode.localName === "segmentedvolumedata" || x3dNode.localName === "isosurfacevolumedata") {
-                    volumeDataUrl = x3dNode.querySelector("imagetextureatlas[containerField='voxels' i]").getAttribute("url");
-                } else if (x3dNode.localName === "imagetextureatlas" && x3dNode.getAttribute("containerField").toLowerCase() === "voxels") {
-                    volumeDataUrl = x3dNode.getAttribute("url");
-                } else {
-                    // No volume data node found
-                    return;
-                }
-                // Look for the tranfer funtion texture declaration
-                var tfTextureNode = x3dNode.querySelector("imagetexture[containerField='transferFunction' i]");
-                if (tfTextureNode && tfTextureNode.getAttribute("url") !== "") {
-                    console.log("WARN: An image texture with a loaded TF founded.");
-                } else if (tfTextureNode && tfTextureNode.getAttribute("containerField").toLowerCase() === "transferfunction") {
-                    if (tfTextureNode.children.length > 0) {
-                        tfTextureNode.children[0].setAttribute("id", "tf-canvas-" + this.id);
-                    } else {
-                        tfTextureNode.setAttribute("hideChildren", "true");
-                        var canvas = document.createElement('canvas');
-                        canvas.setAttribute("id", "tf-canvas-" + this.id);
-                        canvas.setAttribute("width", "256px");
-                        canvas.setAttribute("height", "1px");
-                        tfTextureNode.append(canvas);
-                        setTimeout(function () {
-                            x3dom.reload();
-                        }, 1000);
-                    }
-                    this.canvasSelector = "#tf-canvas-" + this.id;
-                }
-
-                if (volumeDataUrl === "") {
-                    let canvasDataElement = null;
-                    // If the volumeDataUrl is empty, check if the volume data is provided as a canvas element
-                    if (x3dNode.localName === "imagetextureatlas") {
-                        if (x3dNode.children.length > 0) {
-                            canvasDataElement = x3dNode.children[0];
-                        }
-                    } else {
-                        let tmp_node = x3dNode.querySelector("imagetextureatlas[containerField='voxels' i]");
-                        if (tmp_node && tmp_node.children.length > 0) {
-                            canvasDataElement = tmp_node.children[0];
-                        }
-                    }
-                    //Get image data from canvas
-                    if (canvasDataElement) {
-                        var imageFlattenArray = [];
-                        var context = canvasDataElement.getContext('2d');
-                        var imgData = context.getImageData(0, 0, canvasDataElement.width, canvasDataElement.height);
-                        var dVal;
-                        var maxVal = -Number.MAX_VALUE;
-                        // NOTE: Flatten the pixel array, we only keep the R channel
-                        for (var i = 0, n = imgData.data.length; i < n; i += 4) {
-                            dVal = imgData.data[i];
-                            maxVal = Math.max(dVal, maxVal);
-                            imageFlattenArray.push(dVal);
-                        }
-                        if (maxVal === 0) return;
-                        this.setData(imageFlattenArray);
-                    }
-                } else {
-                    // The volume data is provided as an image, get it from browser's cache
-                    imageObj.src = volumeDataUrl;
-                }
-            }
-
-            // Redraw the TF in the new canvas element
-            this._drawCanvas();
-            this._updateImage();
-        }
     }
 
     _canvasSelectorChanged(newValue, oldValue) {
@@ -854,26 +741,59 @@ export default class MyTfEditor extends React.Component {
         }
     }
 
+    handleCloseColorPicker() {
+        this.setState({ displayColorPicker: false });
+    };
+
+    handleChangeColor(color) {
+        this.last_color = color.hex;
+        this.selected.color = this.last_color;
+        this._redraw();
+    };
+
     render () {
         const {
             id,
             width,
             height
         } = this.props;
+      
         return (
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
+                <div className="aligned">
+                    { this.state.displayColorPicker ? <div style={ STYLES.popover }>
+                        <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
+                        <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor }/>
+                        </div> : null }
+                </div>
                 <div className="aligned">
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
                     <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</Button>
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
                     <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
-                    {/* <!-- this canvas exists to render the gradient but will not be displayed --> */}
-                    <canvas id={`canvas-${id}`} width="256" height="10" ref={this.canvas} style={{display:'none'}}></canvas>
                 </div>
             </div>
         );
     }
 };
 
+const STYLES = {
+    colorPicker: {
+      margin: 'auto',
+      marginRight: 16
+    },
+    cover: {
+        position: 'fixed',
+        top: '0px',
+        right: '0px',
+        bottom: '0px',
+        left: '0px'
+    },
+    popover: {
+        position: 'absolute',
+        zIndex: '9999',
+    },
+};
+  
