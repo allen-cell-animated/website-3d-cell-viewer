@@ -25,6 +25,9 @@ export default class MyTfEditor extends React.Component {
         this._updateScales = this._updateScales.bind(this);
         this._drawChart = this._drawChart.bind(this);
         this._redraw = this._redraw.bind(this);
+        this._capturedMousemove = this._capturedMousemove.bind(this);
+        this._mousemove = this._mousemove.bind(this);
+        this._mouseup = this._mouseup.bind(this);
         this._drawCanvas = this._drawCanvas.bind(this);
         this._autoXF = this._autoXF.bind(this);
         this._resetXF = this._resetXF.bind(this);
@@ -35,7 +38,6 @@ export default class MyTfEditor extends React.Component {
         this._colorPick = this._colorPick.bind(this);
         this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
         this.handleChangeColor = this.handleChangeColor.bind(this);
-        this.onMouseLeave = this.onMouseLeave.bind(this);
     
         this.svgElement = React.createRef();
 
@@ -77,6 +79,11 @@ export default class MyTfEditor extends React.Component {
         if (!prevProps.volumeData && volumeData) {
             this._redrawHistogram();
         }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener( 'mousemove', this._capturedMousemove );
+        document.removeEventListener( 'mouseup', this._mouseup );
     }
 
     createElements() {
@@ -221,15 +228,11 @@ export default class MyTfEditor extends React.Component {
             .attr("height", me._height + 20)
             .style("opacity", 0)
             .on("mousedown", function () {
-                // setPointerCapture
                 me._mousedown();
-            })
-            .on("mouseup", function () {
-                me._mouseup();
-                // releasePointerCapture
-            })
-            .on("mousemove", function () {
-                me._mousemove();
+
+                document.addEventListener( 'mousemove', me._capturedMousemove, false );
+                document.addEventListener( 'mouseup', me._mouseup, false );
+            
             });
 
         // Draw axis
@@ -353,9 +356,10 @@ export default class MyTfEditor extends React.Component {
                 me.selected = me.dragged = d;
                 me.last_color = d.color;
                 me._redraw();
-            })
-            .on("mouseup", function () {
-                me._mouseup();
+
+                document.addEventListener( 'mousemove', me._capturedMousemove, false );
+                document.addEventListener( 'mouseup', me._mouseup, false );
+
             })
             .on("contextmenu", function (d, i) {
                 // react on right-clicking
@@ -538,10 +542,17 @@ export default class MyTfEditor extends React.Component {
         this.props.updateChannelLutControlPoints(newControlPoints);
     }
 
-    _mousemove() {
+    _capturedMousemove(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        d3.customEvent(event, this._mousemove, this);
+    }
+
+    _mousemove(event) {
         if (!this.dragged) {
             return;
         }
+
         const { controlPoints } = this.props;
         function equalPoint(a, index, array) {
             return a.x === this.x && a.opacity === this.opacity && a.color === this.color;
@@ -574,6 +585,8 @@ export default class MyTfEditor extends React.Component {
     }
 
     _mouseup() {
+        document.removeEventListener( 'mousemove', this._capturedMousemove );
+        document.removeEventListener( 'mouseup', this._mouseup );
         if (!this.dragged) {
             return;
         }
@@ -709,39 +722,6 @@ export default class MyTfEditor extends React.Component {
         this._drawChart();
     }
 
-    connectedCallback() {
-        super.connectedCallback();
-
-        // poor man's alternative to setCapture/releaseCapture
-        this.mouseleaveHandler = this._mouseup.bind(this);
-        this.$.container.addEventListener("mouseleave", this.mouseleaveHandler);
-    }
-
-    disonnectedCallback() {
-        super.disconnectedCallback();
-        this.$.container.removeEventListener("mouseleave", this.mouseleaveHandler);
-    }
-
-    _isCanvasNeeded(canvasSelector) {
-        return canvasSelector === '' || canvasSelector === '#canvas-' + this.id;
-    }
-
-    _canvasSelectorChanged(newValue, oldValue) {
-        if (newValue !== '') {
-            var newElement = document.querySelector(newValue);
-            if (newElement && newElement.localName === "canvas") {
-                newElement.setAttribute("id", "tf-canvas-" + this.id);
-                newElement.setAttribute("width", "256px");
-                newElement.setAttribute("height", "5px");
-            } else if (newElement && newElement.localName !== "canvas") {
-                this.canvasSelector = oldValue;
-            }
-            // Redraw the TF in the new canvas element
-            this._drawCanvas();
-            this._updateImage();
-        }
-    }
-
     handleCloseColorPicker() {
         this.setState({ displayColorPicker: false });
     };
@@ -752,10 +732,6 @@ export default class MyTfEditor extends React.Component {
         this._redraw();
     };
 
-    onMouseLeave() {
-        this._mouseup();
-    }
-
     render () {
         const {
             id,
@@ -765,7 +741,7 @@ export default class MyTfEditor extends React.Component {
       
         return (
             <div id="container">
-                <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} onMouseLeave={this.onMouseLeave}></svg>
+                <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
                     { this.state.displayColorPicker ? <div style={ STYLES.popover }>
                         <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
