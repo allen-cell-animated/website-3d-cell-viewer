@@ -35,6 +35,7 @@ export default class MyTfEditor extends React.Component {
         this._colorPick = this._colorPick.bind(this);
         this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
         this.handleChangeColor = this.handleChangeColor.bind(this);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
     
         this.svgElement = React.createRef();
 
@@ -751,6 +752,10 @@ export default class MyTfEditor extends React.Component {
         this._redraw();
     };
 
+    onMouseLeave() {
+        this._mouseup();
+    }
+
     render () {
         const {
             id,
@@ -760,7 +765,7 @@ export default class MyTfEditor extends React.Component {
       
         return (
             <div id="container">
-                <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
+                <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} onMouseLeave={this.onMouseLeave}></svg>
                 <div className="aligned">
                     { this.state.displayColorPicker ? <div style={ STYLES.popover }>
                         <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
