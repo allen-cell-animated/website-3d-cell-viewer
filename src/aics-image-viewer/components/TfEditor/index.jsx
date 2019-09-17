@@ -648,12 +648,7 @@ export default class MyTfEditor extends React.Component {
     _auto98XF() {
         const { channelData } = this.props;
 
-        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-        console.log("AUTO98");
-        console.log(lutObj.lut);
-        console.log("CONTROL POINTS TO LUT");
-        console.log(controlPointsToLut(lutObj.controlPoints));
-      
+        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);      
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 

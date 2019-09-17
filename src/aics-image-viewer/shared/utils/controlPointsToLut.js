@@ -47,7 +47,6 @@ export function controlPointsToLut(controlPoints) {
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
-  console.log("CONTROL POINTS TO LUT");
-  console.log(imgData.data);
   return imgData.data;
 };
+
