@@ -11,6 +11,9 @@ const ctx = canv.getContext("2d");
 // @param {number} opacity_override - number representing an opacity value from 0 to 1 
 // @return {string} the new rgba color with the opacity applied to its alpha value as a css color string
 function cssColorWithOpacity(css_str, opacity_override) {
+  if (Array.isArray(css_str)) {
+    return colorString.to.rgb([css_str[0], css_str[1], css_str[2], opacity_override]);
+  }
   const arr = colorString.get(css_str).value;
   arr[3] = opacity_override;
   return colorString.to.rgb(arr);
@@ -39,6 +42,7 @@ export function controlPointsToLut(controlPoints) {
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
-  // console.log(imgData.data);
+  console.log("CONTROL POINTS TO LUT");
+  console.log(imgData.data);
   return imgData.data;
 };
