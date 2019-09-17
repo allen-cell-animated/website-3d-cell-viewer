@@ -11,9 +11,17 @@ const ctx = canv.getContext("2d");
 // @param {number} opacity_override - number representing an opacity value from 0 to 1 
 // @return {string} the new rgba color with the opacity applied to its alpha value as a css color string
 function cssColorWithOpacity(css_str, opacity_override) {
+  if (Array.isArray(css_str)) {
+    return colorString.to.rgb([css_str[0], css_str[1], css_str[2], opacity_override]);
+  }
   const arr = colorString.get(css_str).value;
   arr[3] = opacity_override;
   return colorString.to.rgb(arr);
+}
+
+// clamp x to the range [0,1]
+function clamp(x) {
+  return Math.min(1.0, Math.max(0.0, x));
 }
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
@@ -31,7 +39,7 @@ export function controlPointsToLut(controlPoints) {
         // multiply in controlPoints[i].opacity somehow at this time?
         const colorStop = cssColorWithOpacity(controlPoints[i].color, controlPoints[i].opacity);
         //console.log(controlPoints[i].x / 255.0, colorStop);
-        grd.addColorStop(controlPoints[i].x / 255.0, colorStop);
+        grd.addColorStop(clamp((controlPoints[i].x + 0.5)/ 255.0), colorStop);
       }
   }
 
@@ -39,6 +47,6 @@ export function controlPointsToLut(controlPoints) {
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
-  // console.log(imgData.data);
   return imgData.data;
 };
+
