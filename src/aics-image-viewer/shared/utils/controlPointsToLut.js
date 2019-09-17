@@ -19,6 +19,11 @@ function cssColorWithOpacity(css_str, opacity_override) {
   return colorString.to.rgb(arr);
 }
 
+// clamp x to the range [0,1]
+function clamp(x) {
+  return Math.min(1.0, Math.max(0.0, x));
+}
+
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
 export function controlPointsToLut(controlPoints) {
@@ -34,7 +39,7 @@ export function controlPointsToLut(controlPoints) {
         // multiply in controlPoints[i].opacity somehow at this time?
         const colorStop = cssColorWithOpacity(controlPoints[i].color, controlPoints[i].opacity);
         //console.log(controlPoints[i].x / 255.0, colorStop);
-        grd.addColorStop(controlPoints[i].x / 255.0, colorStop);
+        grd.addColorStop(clamp((controlPoints[i].x + 0.5)/ 255.0), colorStop);
       }
   }
 
