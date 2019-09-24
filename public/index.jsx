@@ -20,7 +20,7 @@ ReactDOM.render(
         defaultVolumesOn={[0, 1, 2]}
         defaultSurfacesOn={[]}
         fovDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F4187"
-        cellDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=23618"
+        cellDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C23618"
       />
     </div>
   </section>,
