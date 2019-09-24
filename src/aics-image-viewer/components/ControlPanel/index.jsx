@@ -107,6 +107,34 @@ export default class ControlPanel extends React.Component {
     </div>);
   }
 
+  renderDownloadButton() {
+    const { fovDownloadHref,
+      cellDownloadHref,
+    } = this.props;
+
+    const menu = (
+      <Menu className="download-dropdown">
+        <Menu.Item key="1">
+          <a
+            href={cellDownloadHref}
+          >
+            <Icon type="download" /> Segmented cell
+                </a>
+        </Menu.Item>
+        <Menu.Item key="2">
+          <a
+            href={fovDownloadHref}
+          >
+            <Icon type="download" /> Full field image
+                </a>
+        </Menu.Item>
+      </Menu>
+    );
+    return (<Dropdown overlay={menu} trigger={["click"]}>
+      <Button icon="download" />
+    </Dropdown>);
+  }
+
   render() {
     const { 
       renderConfig, 
@@ -114,7 +142,9 @@ export default class ControlPanel extends React.Component {
       imageName,
       hasImage,
       mode, 
-      onViewModeChange 
+      onViewModeChange,
+      fovDownloadHref,
+      cellDownloadHref,
     } = this.props;
     return (
       <Card 
@@ -125,6 +155,7 @@ export default class ControlPanel extends React.Component {
         extra={renderConfig.fovCellSwitchControls &&
           <div>
             {this.createFovCellSwitchControls()}
+            {this.renderDownloadButton()}
           </div>
         }
         title={renderConfig.viewModeRadioButtons && 
