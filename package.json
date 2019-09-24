@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "classnames": "^2.2.5",
+    "color-string": "^1.5.3",
     "d3": "^4.11.0",
     "lodash": "^4.17.5",
     "react-color": "^2.13.8",
