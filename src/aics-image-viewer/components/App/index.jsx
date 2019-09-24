@@ -779,7 +779,11 @@ export default class App extends React.Component {
 
   render() {
     const { userSelections } = this.state;
-    const { renderConfig } = this.props;
+    const { 
+      renderConfig, 
+      cellDownloadHref, 
+      fovDownloadHref,
+    } = this.props;
     return (
       <Layout 
         className="cell-viewer-app"
@@ -806,6 +810,8 @@ export default class App extends React.Component {
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
                 channelDataReady={this.state.channelDataReady}
+                fovDownloadHref={fovDownloadHref}
+                cellDownloadHref={cellDownloadHref}
                 // user selections
                 maxProjectOn={userSelections[MAX_PROJECT]}
                 pathTraceOn={userSelections[PATH_TRACE]}

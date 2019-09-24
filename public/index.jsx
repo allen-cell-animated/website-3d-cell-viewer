@@ -19,6 +19,8 @@ ReactDOM.render(
         fovPath="AICS-17/AICS-17_4187"
         defaultVolumesOn={[0, 1, 2]}
         defaultSurfacesOn={[]}
+        fovDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F4187"
+        cellDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=23618"
       />
     </div>
   </section>,
