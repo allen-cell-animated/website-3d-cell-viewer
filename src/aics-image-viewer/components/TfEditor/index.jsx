@@ -38,13 +38,13 @@ export default class MyTfEditor extends React.Component {
         this._colorPick = this._colorPick.bind(this);
         this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
         this.handleChangeColor = this.handleChangeColor.bind(this);
-    
+
         this.svgElement = React.createRef();
 
         this.state = {
             displayColorPicker: false
         };
-      
+
         /**
          * The X axis range is delimited to the input data range.
          * If false, the range will be set by default: [0-255]
@@ -82,8 +82,8 @@ export default class MyTfEditor extends React.Component {
     }
 
     componentWillUnmount() {
-        document.removeEventListener( 'mousemove', this._capturedMousemove );
-        document.removeEventListener( 'mouseup', this._mouseup );
+        document.removeEventListener('mousemove', this._capturedMousemove);
+        document.removeEventListener('mouseup', this._mouseup);
     }
 
     createElements() {
@@ -153,15 +153,15 @@ export default class MyTfEditor extends React.Component {
         if (this.props.controlPoints.length === 0) {
             let newControlPoints = [
                 {
-                'x': extent[0],
-                'opacity': 0,
-                'color': TFEDITOR_DEFAULT_COLOR
+                    'x': extent[0],
+                    'opacity': 0,
+                    'color': TFEDITOR_DEFAULT_COLOR
                 },
-            {
-                'x': extent[1],
-                'opacity': 1,
-                'color': TFEDITOR_DEFAULT_COLOR
-            }];
+                {
+                    'x': extent[1],
+                    'opacity': 1,
+                    'color': TFEDITOR_DEFAULT_COLOR
+                }];
             this.props.updateChannelLutControlPoints(newControlPoints);
         }
         this.selected = this.props.controlPoints[0];
@@ -230,9 +230,9 @@ export default class MyTfEditor extends React.Component {
             .on("mousedown", function () {
                 me._mousedown();
 
-                document.addEventListener( 'mousemove', me._capturedMousemove, false );
-                document.addEventListener( 'mouseup', me._mouseup, false );
-            
+                document.addEventListener('mousemove', me._capturedMousemove, false);
+                document.addEventListener('mouseup', me._mouseup, false);
+
             });
 
         // Draw axis
@@ -357,16 +357,15 @@ export default class MyTfEditor extends React.Component {
                 me.last_color = d.color;
                 me._redraw();
 
-                document.addEventListener( 'mousemove', me._capturedMousemove, false );
-                document.addEventListener( 'mouseup', me._mouseup, false );
+                document.addEventListener('mousemove', me._capturedMousemove, false);
+                document.addEventListener('mouseup', me._mouseup, false);
 
             })
             .on("contextmenu", function (d, i) {
                 // react on right-clicking
                 d3.event.preventDefault();
-                if (!me.dragged) {
-                    me._colorPick();
-                }
+                me._mouseup();
+                me._colorPick();
             })
             .transition()
             .duration(750)
@@ -585,8 +584,8 @@ export default class MyTfEditor extends React.Component {
     }
 
     _mouseup() {
-        document.removeEventListener( 'mousemove', this._capturedMousemove );
-        document.removeEventListener( 'mouseup', this._mouseup );
+        document.removeEventListener('mousemove', this._capturedMousemove);
+        document.removeEventListener('mouseup', this._mouseup);
         if (!this.dragged) {
             return;
         }
@@ -626,7 +625,7 @@ export default class MyTfEditor extends React.Component {
     }
 
     updateControlPointsWithoutColor(ptsWithoutColor) {
-        const pts = ptsWithoutColor.map(pt => ({...pt, color:'rgb(255, 255, 255)'}));
+        const pts = ptsWithoutColor.map(pt => ({ ...pt, color: 'rgb(255, 255, 255)' }));
         this.selected = pts[0];
         this.props.updateChannelLutControlPoints(pts);
     }
@@ -648,7 +647,7 @@ export default class MyTfEditor extends React.Component {
     _auto98XF() {
         const { channelData } = this.props;
 
-        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);      
+        const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
     }
 
@@ -732,21 +731,21 @@ export default class MyTfEditor extends React.Component {
         this._redraw();
     };
 
-    render () {
+    render() {
         const {
             id,
             width,
             height
         } = this.props;
-      
+
         return (
             <div id="container">
                 <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
                 <div className="aligned">
-                    { this.state.displayColorPicker ? <div style={ STYLES.popover }>
-                        <div style={ STYLES.cover } onClick={ this.handleCloseColorPicker }/>
-                        <SketchPicker color={ this.last_color } onChange={ this.handleChangeColor }/>
-                        </div> : null }
+                    {this.state.displayColorPicker ? <div style={STYLES.popover}>
+                        <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
+                        <SketchPicker color={this.last_color} onChange={this.handleChangeColor} />
+                    </div> : null}
                 </div>
                 <div className="aligned">
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
@@ -762,8 +761,8 @@ export default class MyTfEditor extends React.Component {
 
 const STYLES = {
     colorPicker: {
-      margin: 'auto',
-      marginRight: 16
+        margin: 'auto',
+        marginRight: 16
     },
     cover: {
         position: 'fixed',
@@ -777,4 +776,3 @@ const STYLES = {
         zIndex: '9999',
     },
 };
-  
