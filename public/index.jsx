@@ -28,7 +28,7 @@ if (params) {
   // quick way to load a atlas.json from a special directory. 
   // 
   if (params.file) {
-    cellid = 0;
+    cellid = 1;
     baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
     cellPath = params.file;
     fovPath = params.file;
