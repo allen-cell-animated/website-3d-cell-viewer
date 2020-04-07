@@ -1,23 +1,36 @@
-# Allen Institute Contribution Agreement
+# Contributing to Allen Institute for Cell Science Open Source
 
-## Contribution Status
-We use this for internal purpose and are currently not accepting pull requests. We are releasing it to the community AS IS. 
- 
-<!-- ## Agreement
+Thank you for your interest in contributing to this Allen Institute for Cell Science open source project! This document is
+a set of guidelines to help you contribute to this project.
 
-This document describes the terms under which you may make “Contributions” — 
-which may include without limitation, software additions, revisions, bug fixes, configuration changes,
-documentation, or any other materials — to any of the projects owned or managed by the Allen Institute.
-If you have questions about these terms, please contact us at terms@alleninstitute.org.  
+## Code of Conduct
 
-You certify that:
+By participating in this project, you are expected to uphold our [Code of
+Conduct][code_of_conduct].
 
-- Your Contributions are either:
-    1.	Created in whole or in part by you and you have the right to submit them under the designated license (described below); or
-    2.	Based upon previous work that, to the best of your knowledge, is covered under an appropriate open source license and you have the right under that license to submit that work with modifications,whether created in whole or in part by you, under the designated license; or
-    3.	Provided directly to you by some other person who certified (1) or (2) and you have not modified them.
-- You are granting your Contributions to the Allen Institute under the terms of the Allen Institute Software License (the “designated license”).
-- You understand and agree that the Allen Institute projects and your Contributions are public and that 
-a record of the Contributions (including all metadata and personal information you submit with them) is 
-maintained indefinitely and may be redistributed consistent with the Allen Institute’s mission and the 
-Allen Institute Software License (the “designated license”).   -->
+[code_of_conduct]: CODE_OF_CONDUCT.md
+
+## Project Documentation
+
+The `README` in the root of the repository should contain or link to
+project documentation. If you cannot find the documentation you're
+looking for, please file a GitHub issue with details of what
+you'd like to see documented.
+
+## How to Contribute
+
+Typical steps to contribute:
+
+1. Fork the repo on GitHub.
+
+2. Create a branch and make your edits on your branch, pushing back to your fork.
+
+3. Ensure that your changes are working, pass any linting and tests in the project. Add tests and documentation as needed.
+
+4. Submit a pull request to merge your fork's branch into this repository, via GitHub.
+
+## Questions or Thoughts?
+
+Talk to us on [one of our community forums][community].
+
+[community]: https://forum.allencell.org/
