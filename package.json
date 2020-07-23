@@ -29,7 +29,7 @@
     "react-nouislider": "^2.0.1",
     "react-numeric-input": "^2.2.3",
     "reactcss": "^1.2.3",
-    "volume-viewer": "^2.0.0-alpha.12"
+    "@aics/volume-viewer": "^2.0.2"
   },
   "peerDependencies": {
     "antd": "3.16.x",
@@ -66,7 +66,7 @@
     "less-vars-to-js": "^1.3.0",
     "mini-css-extract-plugin": "^0.5.0",
     "morgan": "^1.9.1",
-    "node-sass": "^4.9.2",
+    "node-sass": "^4.14.1",
     "prop-types": "^15.5.10",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
