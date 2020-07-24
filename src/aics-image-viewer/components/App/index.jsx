@@ -109,6 +109,7 @@ export default class App extends React.Component {
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
     this.loadFromRaw = this.loadFromRaw.bind(this);
+    this.postLoadFromRaw = this.postLoadFromRaw.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
     this.onViewModeChange = this.onViewModeChange.bind(this);
@@ -156,7 +157,7 @@ export default class App extends React.Component {
     const { userSelections, view3d, image } = this.state;
 
     if (rawDims && rawData && view3d && !prevState.view3d && !image) {
-      this.loadFromRaw(rawDims, rawData, "image");
+      this.loadFromRaw();
     }
 
     // delayed for the animation to finish
@@ -188,6 +189,9 @@ export default class App extends React.Component {
       prevState.image &&
       this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
+      if (rawDims && rawData && view3d && !this.state.image.loaded) {
+        this.postLoadFromRaw();
+      }
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
   }
@@ -376,7 +380,10 @@ export default class App extends React.Component {
     );
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
-    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
+    this.setUserSelectionsInState({
+      [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel,
+      [CHANNEL_SETTINGS]: channelSetting,
+    });
 
     // Here is where we officially hand the image to the volume-viewer
 
@@ -563,32 +570,84 @@ export default class App extends React.Component {
     this.setState({ [stateKey]: aimg });
   }
 
-  loadFromRaw(objDims, objData, stateKey, keepLuts) {
-    const aimg = new Volume(objDims);
+  loadFromRaw() {
+    const { rawDims } = this.props;
+
+    console.log("LOAD FROM RAW");
+    const aimg = new Volume(rawDims);
 
     const newChannelSettings = this.updateStateOnLoadImage(
-      objDims.channel_names
+      rawDims.channel_names
     );
 
-    const volsize = objData.shape[1] * objData.shape[2] * objData.shape[3];
-    for (var i = 0; i < objDims.channels; ++i) {
+    this.intializeNewImage(aimg, newChannelSettings);
+    this.setState({ image: aimg });
+  }
+
+  postLoadFromRaw() {
+    const { rawData, rawDims } = this.props;
+    const aimg = this.state.image;
+    const view3d = this.state.view3d;
+
+    console.log("POST LOAD FROM RAW");
+
+    const { userSelections } = this.state;
+    // prepare a new set of settings
+    const newChannels = userSelections[CHANNEL_SETTINGS].map(
+      (channel, index) => {
+        return { ...channel };
+      }
+    );
+
+    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
+    for (var i = 0; i < rawDims.channels; ++i) {
       aimg.setChannelDataFromVolume(
         i,
-        new Uint8Array(objData.buffer.buffer, i * volsize, volsize)
+        new Uint8Array(rawData.buffer.buffer, i * volsize, volsize)
       );
 
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-      const thisChannelSettings = this.getOneChannelSetting(
-        objDims.channel_names[i],
-        newChannelSettings
-      );
-      this.onChannelDataLoaded(aimg, thisChannelSettings, i, keepLuts);
-    }
+      const thisChannelSettings = newChannels[i];
 
-    if (stateKey === "image") {
-      this.intializeNewImage(aimg, newChannelSettings);
+      const volenabled = thisChannelSettings[VOLUME_ENABLED];
+      const isoenabled = thisChannelSettings[ISO_SURFACE_ENABLED];
+      view3d.setVolumeChannelOptions(aimg, i, {
+        enabled: volenabled,
+        color: thisChannelSettings.color,
+        isosurfaceEnabled: isoenabled,
+        isovalue: thisChannelSettings.isovalue,
+        isosurfaceOpacity: thisChannelSettings.opacity,
+      });
+
+      {
+        console.log("SETTING INITIAL LUT FOR " + i);
+        const lutObject = aimg
+          .getHistogram(i)
+          .lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+        const newControlPoints = lutObject.controlPoints.map(
+          (controlPoint) => ({
+            ...controlPoint,
+            color: TFEDITOR_DEFAULT_COLOR,
+          })
+        );
+        aimg.setLut(i, lutObject.lut);
+
+        thisChannelSettings[LUT_CONTROL_POINTS] = newControlPoints;
+      }
+
+      if (view3d) {
+        if (aimg.channelNames()[i] === CELL_SEGMENTATION_CHANNEL_NAME) {
+          view3d.setVolumeChannelAsMask(aimg, i);
+        }
+      }
     }
-    this.setState({ [stateKey]: aimg });
+    // when any channel data has arrived:
+    if (this.state.sendingQueryRequest) {
+      this.setState({ sendingQueryRequest: false });
+    }
+    aimg.loaded = true;
+    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+    view3d.updateActiveChannels(aimg);
   }
 
   handleChangeUserSelection(key, newValue) {
