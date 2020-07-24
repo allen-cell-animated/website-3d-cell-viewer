@@ -84,7 +84,7 @@ export default class App extends React.Component {
       openFilesOnly: false,
       channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
-      // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
+      // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
       // did the requested image have a cell id (in queryInput)?
       hasCellId: !!props.cellId,
@@ -108,6 +108,7 @@ export default class App extends React.Component {
 
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
+    this.loadFromRaw = this.loadFromRaw.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
     this.onViewModeChange = this.onViewModeChange.bind(this);
@@ -151,8 +152,12 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { cellId, cellPath } = this.props;
-    const { userSelections } = this.state;
+    const { cellId, cellPath, rawDims, rawData } = this.props;
+    const { userSelections, view3d, image } = this.state;
+
+    if (rawDims && rawData && view3d && !prevState.view3d && !image) {
+      this.loadFromRaw(rawDims, rawData, "image");
+    }
 
     // delayed for the animation to finish
     if (
@@ -537,6 +542,7 @@ export default class App extends React.Component {
         name: `${locationHeader}${img.name}`,
       }));
     }
+
     // GO OUT AND GET THE VOLUME DATA.
     VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
@@ -551,6 +557,34 @@ export default class App extends React.Component {
         keepLuts
       );
     });
+    if (stateKey === "image") {
+      this.intializeNewImage(aimg, newChannelSettings);
+    }
+    this.setState({ [stateKey]: aimg });
+  }
+
+  loadFromRaw(objDims, objData, stateKey, keepLuts) {
+    const aimg = new Volume(objDims);
+
+    const newChannelSettings = this.updateStateOnLoadImage(
+      objDims.channel_names
+    );
+
+    const volsize = objData.shape[1] * objData.shape[2] * objData.shape[3];
+    for (var i = 0; i < objDims.channels; ++i) {
+      aimg.setChannelDataFromVolume(
+        i,
+        new Uint8Array(objData.buffer.buffer, i * volsize, volsize)
+      );
+
+      // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+      const thisChannelSettings = this.getOneChannelSetting(
+        objDims.channel_names[i],
+        newChannelSettings
+      );
+      this.onChannelDataLoaded(aimg, thisChannelSettings, i, keepLuts);
+    }
+
     if (stateKey === "image") {
       this.intializeNewImage(aimg, newChannelSettings);
     }
@@ -999,6 +1033,8 @@ export default class App extends React.Component {
 }
 
 App.defaultProps = {
+  rawData: null,
+  rawDims: null,
   initialChannelAcc: {
     [OBSERVED_CHANNEL_KEY]: [],
     [SEGMENTATION_CHANNEL_KEY]: [],
