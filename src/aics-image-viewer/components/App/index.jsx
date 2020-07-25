@@ -189,9 +189,9 @@ export default class App extends React.Component {
       prevState.image &&
       this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
-      if (rawDims && rawData && view3d && !this.state.image.loaded) {
-        this.postLoadFromRaw();
-      }
+      // if (rawDims && rawData && view3d && !this.state.image.loaded) {
+      //   this.postLoadFromRaw();
+      // }
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
   }
@@ -571,17 +571,129 @@ export default class App extends React.Component {
   }
 
   loadFromRaw() {
-    const { rawDims } = this.props;
+    const { rawDims, rawData } = this.props;
 
     console.log("LOAD FROM RAW");
     const aimg = new Volume(rawDims);
+    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
+    for (var i = 0; i < rawDims.channels; ++i) {
+      aimg.setChannelDataFromVolume(
+        i,
+        new Uint8Array(rawData.buffer.buffer, i * volsize, volsize)
+      );
+    }
 
-    const newChannelSettings = this.updateStateOnLoadImage(
+    // const newChannelSettings = this.updateStateOnLoadImage(
+    //   rawDims.channel_names
+    // );
+
+    const cleanNewNames = map(rawDims.channel_names, this.nameClean);
+    const filteredNewChannelNames = cleanNewNames;
+    const { defaultVolumesOn, defaultSurfacesOn } = this.props;
+    let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
+      const lutObject = aimg
+        .getHistogram(index)
+        .lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
+        ...controlPoint,
+        color: TFEDITOR_DEFAULT_COLOR,
+      }));
+      aimg.setLut(index, lutObject.lut);
+
+      return {
+        name: this.nameClean(channel) || "Channel " + index,
+        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
+        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
+        [LUT_CONTROL_POINTS]: newControlPoints,
+        isovalue: 188,
+        opacity: 1.0,
+        color: INIT_COLORS[index]
+          ? INIT_COLORS[index].slice()
+          : [226, 205, 179], // guard for unexpectedly longer channel list
+        dataReady: false,
+      };
+    });
+
+    let channelGroupedByType = this.createChannelGrouping(
       rawDims.channel_names
     );
 
-    this.intializeNewImage(aimg, newChannelSettings);
-    this.setState({ image: aimg });
+    // TODO inline here
+    const { userSelections, view3d } = this.state;
+    const { filterFunc } = this.props;
+    const channelSetting = newChannelSettings;
+    let alphaLevel =
+      userSelections.imageType === SEGMENTED_CELL &&
+      userSelections.mode === ViewMode.threeD
+        ? ALPHA_MASK_SLIDER_3D_DEFAULT
+        : ALPHA_MASK_SLIDER_2D_DEFAULT;
+
+    let imageMask = alphaSliderToImageValue(alphaLevel);
+    let imageBrightness = brightnessSliderToImageValue(
+      userSelections[BRIGHTNESS_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
+    let imageDensity = densitySliderToImageValue(
+      userSelections[DENSITY_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
+    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
+
+    // Here is where we officially hand the image to the volume-viewer
+
+    view3d.removeAllVolumes();
+    view3d.addVolume(aimg, {
+      channels: aimg.channel_names.map((name) => {
+        const ch = find(channelSetting, (channel) => {
+          return channel.name === this.nameClean(name);
+        });
+
+        if (!ch) {
+          return {};
+        }
+        if (filterFunc && !filterFunc(name)) {
+          return {
+            enabled: false,
+            isosurfaceEnableed: false,
+            isovalue: ch.isovalue,
+            isosurfaceOpacity: ch.opacity,
+            color: ch.color,
+          };
+        }
+
+        return {
+          enabled: ch[VOLUME_ENABLED],
+          isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
+          isovalue: ch.isovalue,
+          isosurfaceOpacity: ch.opacity,
+          color: ch.color,
+        };
+      }),
+    });
+
+    view3d.updateMaskAlpha(aimg, imageMask);
+    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+    view3d.updateExposure(imageBrightness);
+    view3d.updateDensity(aimg, imageDensity);
+    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+    // update current camera mode to make sure the image gets the update
+    view3d.setCameraMode(
+      enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode)
+    );
+    // tell view that things have changed for this image
+    view3d.updateActiveChannels(aimg);
+
+    // TODO:
+    // reconcile with postLoadFromRaw
+    this.setState({
+      channelGroupedByType,
+      image: aimg,
+      userSelections: {
+        ...this.state.userSelections,
+        [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel,
+        [CHANNEL_SETTINGS]: channelSetting,
+      },
+    });
   }
 
   postLoadFromRaw() {
@@ -599,13 +711,7 @@ export default class App extends React.Component {
       }
     );
 
-    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
     for (var i = 0; i < rawDims.channels; ++i) {
-      aimg.setChannelDataFromVolume(
-        i,
-        new Uint8Array(rawData.buffer.buffer, i * volsize, volsize)
-      );
-
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
       const thisChannelSettings = newChannels[i];
 
