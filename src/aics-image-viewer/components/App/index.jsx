@@ -189,9 +189,6 @@ export default class App extends React.Component {
       prevState.image &&
       this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
-      // if (rawDims && rawData && view3d && !this.state.image.loaded) {
-      //   this.postLoadFromRaw();
-      // }
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
   }
@@ -1198,7 +1195,9 @@ export default class App extends React.Component {
 }
 
 App.defaultProps = {
+  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: null,
+  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
   rawDims: null,
   initialChannelAcc: {
     [OBSERVED_CHANNEL_KEY]: [],
