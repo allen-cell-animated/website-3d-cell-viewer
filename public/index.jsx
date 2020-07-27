@@ -18,15 +18,19 @@ function parseQueryString() {
 }
 const params = parseQueryString();
 
-let baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/";
-let cellid = 23618;
-let cellPath = "AICS-17/AICS-17_4187_23618";
-let fovPath = "AICS-17/AICS-17_4187";
-let fovDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F4187";
-let cellDownloadHref="https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C23618";
+//let baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/";
+let baseurl =
+  "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails";
+let cellid = 2025;
+let cellPath = "AICS-22/AICS-22_8319_2025";
+let fovPath = "AICS-22/AICS-22_8319";
+let fovDownloadHref =
+  "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319";
+let cellDownloadHref =
+  "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025";
 if (params) {
-  // quick way to load a atlas.json from a special directory. 
-  // 
+  // quick way to load a atlas.json from a special directory.
+  //
   if (params.file) {
     cellid = 1;
     baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
