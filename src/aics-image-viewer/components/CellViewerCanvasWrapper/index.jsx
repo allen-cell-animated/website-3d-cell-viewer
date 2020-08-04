@@ -1,5 +1,5 @@
 import React from 'react';
-import { View3d } from 'volume-viewer';
+import { View3d } from '@aics/volume-viewer';
 
 import { Icon } from 'antd';
 
@@ -9,11 +9,11 @@ import AxisClipSliders from '../AxisClipSliders';
 import './styles.scss';
 
 const ViewMode = viewMode.mainMapping;
-const VIEW_3D_VIEWER = 'view3dviewer';
 
 export default class ViewerWrapper extends React.Component {
  constructor(props) {
    super(props);
+   this.view3dviewerRef = React.createRef();
    this.getActiveAxis = this.getActiveAxis.bind(this);
    this.setAxisClip = this.setAxisClip.bind(this);
    this.renderOverlay = this.renderOverlay.bind(this);
@@ -22,8 +22,7 @@ export default class ViewerWrapper extends React.Component {
 
  componentDidMount() {
    if (!this.view3D) {
-     let el = document.getElementById(VIEW_3D_VIEWER);
-     this.view3D = new View3d(el);
+     this.view3D = new View3d(this.view3dviewerRef.current);
      this.props.onView3DCreated(this.view3D);
    }
  }
@@ -106,7 +105,7 @@ export default class ViewerWrapper extends React.Component {
    } = this.props;
    return (
      <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight}} >
-        <div id={VIEW_3D_VIEWER} style={STYLES.view3d}></div>
+        <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
         {renderConfig.axisClipSliders && this.renderClipSliders()}
         {this.renderOverlay()}
      </div>

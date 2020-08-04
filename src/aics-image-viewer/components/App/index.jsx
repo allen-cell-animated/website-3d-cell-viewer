@@ -7,7 +7,7 @@ import {
   RENDERMODE_RAYMARCH,
   Volume, 
   VolumeLoader,
-} from 'volume-viewer';
+} from '@aics/volume-viewer';
 
 import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
 import HttpClient from '../../shared/utils/httpClient';
@@ -86,7 +86,7 @@ export default class App extends React.Component {
       openFilesOnly: false,
       channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
-      // {observed: channelIndex[], segmenations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
+      // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
       // did the requested image have a cell id (in queryInput)?
       hasCellId: !!props.cellId,
@@ -110,6 +110,7 @@ export default class App extends React.Component {
 
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
+    this.loadFromRaw = this.loadFromRaw.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
     this.onViewModeChange = this.onViewModeChange.bind(this);
@@ -152,12 +153,13 @@ export default class App extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const {
-      cellId,
-      cellPath,
-    } = this.props;
-    const { userSelections } = this.state;
-    
+    const { cellId, cellPath, rawDims, rawData } = this.props;
+    const { userSelections, view3d, image } = this.state;
+
+    if (rawDims && rawData && view3d && !prevState.view3d && !image) {
+      this.loadFromRaw();
+    }
+
     // delayed for the animation to finish
     if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
       setTimeout(() => {
@@ -338,9 +340,9 @@ export default class App extends React.Component {
     let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
     this.setUserSelectionsInState({[ALPHA_MASK_SLIDER_LEVEL] : alphaLevel });
-    
+
     // Here is where we officially hand the image to the volume-viewer
-    
+
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
@@ -489,6 +491,124 @@ export default class App extends React.Component {
       this.intializeNewImage(aimg, newChannelSettings);
     }
     this.setState({ [stateKey]: aimg });
+  }
+
+  loadFromRaw() {
+    const { rawDims, rawData } = this.props;
+
+    const aimg = new Volume(rawDims);
+    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
+    for (var i = 0; i < rawDims.channels; ++i) {
+      aimg.setChannelDataFromVolume(
+        i,
+        new Uint8Array(rawData.buffer.buffer, i * volsize, volsize)
+      );
+    }
+
+    const cleanNewNames = map(rawDims.channel_names, this.nameClean);
+    const filteredNewChannelNames = cleanNewNames;
+    const { defaultVolumesOn, defaultSurfacesOn } = this.props;
+    let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
+      const lutObject = aimg
+        .getHistogram(index)
+        .lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
+        ...controlPoint,
+        color: TFEDITOR_DEFAULT_COLOR,
+      }));
+      aimg.setLut(index, lutObject.lut);
+
+      return {
+        name: this.nameClean(channel) || "Channel " + index,
+        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
+        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
+        [LUT_CONTROL_POINTS]: newControlPoints,
+        isovalue: 188,
+        opacity: 1.0,
+        color: INIT_COLORS[index]
+          ? INIT_COLORS[index].slice()
+          : [226, 205, 179], // guard for unexpectedly longer channel list
+        dataReady: false,
+      };
+    });
+
+    let channelGroupedByType = this.createChannelGrouping(
+      rawDims.channel_names
+    );
+
+    const { userSelections, view3d } = this.state;
+    const { filterFunc } = this.props;
+    const channelSetting = newChannelSettings;
+    let alphaLevel =
+      userSelections.imageType === SEGMENTED_CELL &&
+      userSelections.mode === ViewMode.threeD
+        ? ALPHA_MASK_SLIDER_3D_DEFAULT
+        : ALPHA_MASK_SLIDER_2D_DEFAULT;
+
+    let imageMask = alphaSliderToImageValue(alphaLevel);
+    let imageBrightness = brightnessSliderToImageValue(
+      userSelections[BRIGHTNESS_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
+    let imageDensity = densitySliderToImageValue(
+      userSelections[DENSITY_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
+    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
+
+    // Here is where we officially hand the image to the volume-viewer
+
+    view3d.removeAllVolumes();
+    view3d.addVolume(aimg, {
+      channels: aimg.channel_names.map((name) => {
+        const ch = find(channelSetting, (channel) => {
+          return channel.name === this.nameClean(name);
+        });
+
+        if (!ch) {
+          return {};
+        }
+        if (filterFunc && !filterFunc(name)) {
+          return {
+            enabled: false,
+            isosurfaceEnableed: false,
+            isovalue: ch.isovalue,
+            isosurfaceOpacity: ch.opacity,
+            color: ch.color,
+          };
+        }
+
+        return {
+          enabled: ch[VOLUME_ENABLED],
+          isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
+          isovalue: ch.isovalue,
+          isosurfaceOpacity: ch.opacity,
+          color: ch.color,
+        };
+      }),
+    });
+
+    view3d.updateMaskAlpha(aimg, imageMask);
+    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+    view3d.updateExposure(imageBrightness);
+    view3d.updateDensity(aimg, imageDensity);
+    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+    // update current camera mode to make sure the image gets the update
+    view3d.setCameraMode(
+      enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode)
+    );
+    // tell view that things have changed for this image
+    view3d.updateActiveChannels(aimg);
+
+    this.setState({
+      channelGroupedByType,
+      image: aimg,
+      userSelections: {
+        ...this.state.userSelections,
+        [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel,
+        [CHANNEL_SETTINGS]: channelSetting,
+      },
+    });
   }
 
   handleChangeUserSelection(key, newValue) {
@@ -877,6 +997,10 @@ export default class App extends React.Component {
 }
 
 App.defaultProps = {
+  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
+  rawData: null,
+  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
+  rawDims: null,
   initialChannelAcc: {
     [OBSERVED_CHANNEL_KEY]: [],
     [SEGMENTATION_CHANNEL_KEY]: [],
