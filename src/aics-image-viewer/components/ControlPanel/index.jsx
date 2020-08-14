@@ -7,7 +7,6 @@ import {
   Radio,
   Icon,
   Menu,
-  Progress,
 } from 'antd';
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -143,8 +142,6 @@ export default class ControlPanel extends React.Component {
       hasImage,
       mode, 
       onViewModeChange,
-      fovDownloadHref,
-      cellDownloadHref,
     } = this.props;
     return (
       <Card 

@@ -290,6 +290,7 @@ export default class App extends React.Component {
   }
 
   handleOpenImageException(resp) {
+    /** can uncomment when we are actually using this message var
     let message = "Unknown Error";
     if (resp.data && resp.data.message) {
       message = resp.data.message;
@@ -303,6 +304,7 @@ export default class App extends React.Component {
     else {
       message = JSON.stringify(resp);
     }
+    **/
     // console.log(message);
     this.stopPollingForImage();
   }

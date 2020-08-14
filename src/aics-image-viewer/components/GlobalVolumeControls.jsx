@@ -4,7 +4,6 @@ import NumericInput from 'react-numeric-input';
 
 import {
   Card,
-  Checkbox,
   Collapse,
 } from 'antd';
 import { 
@@ -12,8 +11,6 @@ import {
   BRIGHTNESS_SLIDER_LEVEL, 
   DENSITY_SLIDER_LEVEL, 
   LEVELS_SLIDER, 
-  MAX_PROJECT,
-  PATH_TRACE,
 } from '../shared/constants';
 const Panel = Collapse.Panel;
 
