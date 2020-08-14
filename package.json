@@ -21,15 +21,15 @@
   "author": "Megan Riel-Mehan",
   "license": "ISC",
   "dependencies": {
+    "@aics/volume-viewer": "^2.0.2",
     "classnames": "^2.2.5",
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.20",
     "react-color": "^2.13.8",
     "react-nouislider": "^2.0.1",
     "react-numeric-input": "^2.2.3",
-    "reactcss": "^1.2.3",
-    "@aics/volume-viewer": "^2.0.2"
+    "reactcss": "^1.2.3"
   },
   "peerDependencies": {
     "antd": "3.16.x",
