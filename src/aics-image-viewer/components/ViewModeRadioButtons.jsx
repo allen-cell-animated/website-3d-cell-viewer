@@ -17,7 +17,7 @@ export default class ViewModeRadioButtons extends React.Component {
     if (this.props.selectedMode !== mode) {
       this.props.onViewModeChange(mode);
     }
-  };
+  }
 
   createRadioButton(mode) {
     if (!mode || !this.props.imageName) {
