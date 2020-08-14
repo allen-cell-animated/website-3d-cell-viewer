@@ -1,11 +1,16 @@
 {
+  "extends": ["eslint:recommended"],
+  "env": {
+    "es6": true, 
+    "browser": true
+  },
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true,
       "experimentalObjectRestSpread": true,
       "impliedStrict": true
     },
-    "ecmaVersion": 6,
+    "ecmaVersion": 2018,
     "sourceType": "module"
   },
   "globals": {

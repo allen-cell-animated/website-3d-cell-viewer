@@ -1,5 +1,4 @@
 import React from 'react';
-import reactCSS from 'reactcss';
 import * as d3 from "d3";
 import { SketchPicker } from 'react-color';
 import './styles.scss';
@@ -555,7 +554,7 @@ export default class MyTfEditor extends React.Component {
         const { controlPoints } = this.props;
         function equalPoint(a, index, array) {
             return a.x === this.x && a.opacity === this.opacity && a.color === this.color;
-        };
+        }
         var index = controlPoints.findIndex(equalPoint, this.selected);
         if (index === -1) {
             return;
@@ -723,13 +722,13 @@ export default class MyTfEditor extends React.Component {
 
     handleCloseColorPicker() {
         this.setState({ displayColorPicker: false });
-    };
+    }
 
     handleChangeColor(color) {
         this.last_color = color.hex;
         this.selected.color = this.last_color;
         this._redraw();
-    };
+    }
 
     render() {
         const {
@@ -757,7 +756,7 @@ export default class MyTfEditor extends React.Component {
             </div>
         );
     }
-};
+}
 
 const STYLES = {
     colorPicker: {

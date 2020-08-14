@@ -16,4 +16,4 @@ export default function formatChannelNames(channelName, structureName) {
         return value.test.test(channelName);
     });
     return toReturn ? toReturn.label : channelName;
-};
+}

@@ -290,6 +290,7 @@ export default class App extends React.Component {
   }
 
   handleOpenImageException(resp) {
+    /** can uncomment when we are actually using this message var
     let message = "Unknown Error";
     if (resp.data && resp.data.message) {
       message = resp.data.message;
@@ -303,6 +304,7 @@ export default class App extends React.Component {
     else {
       message = JSON.stringify(resp);
     }
+    **/
     // console.log(message);
     this.stopPollingForImage();
   }
@@ -659,13 +661,13 @@ export default class App extends React.Component {
           isosurfaceOpacity: newValue
         });  
         break;
-      case COLOR:
+      case COLOR: {
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
         view3d.setVolumeChannelOptions(image, index, {
           color: newColor,
         });  
         view3d.updateMaterial(image);
-        break;
+      } break;
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
         break;
@@ -680,23 +682,23 @@ export default class App extends React.Component {
         view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
         view3d.updateActiveChannels(image);
         break;
-      case ALPHA_MASK_SLIDER_LEVEL:
+      case ALPHA_MASK_SLIDER_LEVEL: {
         let imageMask = alphaSliderToImageValue(newValue);
         view3d.updateMaskAlpha(image, imageMask);
         view3d.updateActiveChannels(image);
-        break;
-      case BRIGHTNESS_SLIDER_LEVEL:
+      } break;
+      case BRIGHTNESS_SLIDER_LEVEL: {
         let imageBrightness = brightnessSliderToImageValue(newValue, userSelections[PATH_TRACE]);
         view3d.updateExposure(imageBrightness);
-        break;
-      case DENSITY_SLIDER_LEVEL:
+      } break;
+      case DENSITY_SLIDER_LEVEL: {
         let imageDensity = densitySliderToImageValue(newValue, userSelections[PATH_TRACE]);
         view3d.updateDensity(image, imageDensity);
-        break;
-      case LEVELS_SLIDER:
+      } break;
+      case LEVELS_SLIDER: {
         let imageValues = gammaSliderToImageValues(newValue);
         view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
-        break;
+      } break;
     }
   }
 
@@ -875,7 +877,7 @@ export default class App extends React.Component {
           isovalue: channelSetting.isovalue,
           isosurfaceOpacity: channelSetting.opacity
         });
-      };
+      }
     });
 
     view3d.updateActiveChannels(image);

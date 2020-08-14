@@ -28,11 +28,11 @@ class ColorPicker extends React.Component {
 
   handleClick() {
     this.setState({ displayColorPicker: !this.state.displayColorPicker });
-  };
+  }
 
   handleClose() {
     this.setState({ displayColorPicker: false });
-  };
+  }
 
   handleChange(color) {
     this.setState({ color: color.rgb });
@@ -40,7 +40,7 @@ class ColorPicker extends React.Component {
     if (this.props.onColorChange) {
       this.props.onColorChange(color.rgb, this.state.color, this.props.idx);
     }
-  };
+  }
 
   handleChangeComplete(color) {
     this.setState({ color: color.rgb });
@@ -48,7 +48,7 @@ class ColorPicker extends React.Component {
     if (this.props.onColorChangeComplete) {
       this.props.onColorChangeComplete(color.rgb, this.state.color, this.props.idx);
     }
-  };
+  }
 
   componentWillReceiveProps(newProps) {
     if (newProps.color && newProps.color !== this.state.color) {

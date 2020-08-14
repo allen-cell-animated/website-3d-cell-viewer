@@ -48,5 +48,5 @@ export function controlPointsToLut(controlPoints) {
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
   return imgData.data;
-};
+}
 
