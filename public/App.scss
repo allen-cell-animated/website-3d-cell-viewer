@@ -16,6 +16,6 @@ body {
   width: 100%;
 }
 
-.mycellviewer :global(.ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow) {
-  transform: translateY(-100%);
+.mycellviewer .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+  transform: translateY(-270%);
 }
