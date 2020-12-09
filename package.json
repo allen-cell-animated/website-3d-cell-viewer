@@ -36,12 +36,12 @@
     "reactcss": "^1.2.3"
   },
   "peerDependencies": {
-    "antd": "3.16.x",
+    "antd": "3.20.x",
     "react": "16.x",
     "react-dom": "16.x"
   },
   "devDependencies": {
-    "antd": "^3.16.0",
+    "antd": "^3.20.7",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.1",
