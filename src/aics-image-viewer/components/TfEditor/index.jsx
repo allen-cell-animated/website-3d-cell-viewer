@@ -34,6 +34,7 @@ export default class MyTfEditor extends React.Component {
         this._auto2XF = this._auto2XF.bind(this);
         this._auto98XF = this._auto98XF.bind(this);
         this._bestFitXF = this._bestFitXF.bind(this);
+        this._segmentationColorXF = this._segmentationColorXF.bind(this);
         this._colorPick = this._colorPick.bind(this);
         this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
         this.handleChangeColor = this.handleChangeColor.bind(this);
@@ -629,6 +630,12 @@ export default class MyTfEditor extends React.Component {
         this.props.updateChannelLutControlPoints(pts);
     }
 
+    updateControlPoints(pts) {
+        // TODO do I need to copy the pts here?
+        this.selected = pts[0];
+        this.props.updateChannelLutControlPoints(pts);
+    }
+
     _autoXF() {
         const { channelData } = this.props;
 
@@ -655,6 +662,16 @@ export default class MyTfEditor extends React.Component {
 
         const lutObj = channelData.histogram.lutGenerator_bestFit();
         this.updateControlPointsWithoutColor(lutObj.controlPoints);
+    }
+
+    _segmentationColorXF() {
+        const { channelData } = this.props;
+
+        const lutObj = channelData.histogram.lutGenerator_labelColors();
+        //this.updateControlPointsWithoutColor(lutObj.controlPoints);
+        this.selected = lutObj.controlPoints[0];
+        this.props.updateChannelLutControlPoints(lutObj.controlPoints);
+
     }
 
     _resetXF() {
@@ -752,6 +769,7 @@ export default class MyTfEditor extends React.Component {
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
                     <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
+                    <Button id={`seg-${id}`} className="ant-btn" onClick={this._segmentationColorXF}>Seg</Button>
                 </div>
             </div>
         );
