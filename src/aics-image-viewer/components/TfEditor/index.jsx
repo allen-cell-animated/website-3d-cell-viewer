@@ -668,10 +668,7 @@ export default class MyTfEditor extends React.Component {
         const { channelData } = this.props;
 
         const lutObj = channelData.histogram.lutGenerator_labelColors();
-        //this.updateControlPointsWithoutColor(lutObj.controlPoints);
-        this.selected = lutObj.controlPoints[0];
-        this.props.updateChannelLutControlPoints(lutObj.controlPoints);
-
+        this.updateControlPoints(lutObj.controlPoints);
     }
 
     _resetXF() {
