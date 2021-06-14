@@ -1,9 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
 
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: ['babel-polyfill', './public/index.jsx'],
@@ -19,7 +19,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-    new ExtractTextPlugin('bundle.[hash].css'),
+    new MiniCssExtractPlugin(),
     new webpack.DefinePlugin({
       APP_VERSION: JSON.stringify(require("./package.json").version)
     }),
@@ -64,7 +64,7 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          'style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader'
         ]
       },
