@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import { SketchPicker } from 'react-color';
 import './styles.scss';
 
-import { Button } from 'antd';
+import { Button, Checkbox, Slider } from 'antd';
 
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from '../../shared/constants';
 import { controlPointsToLut } from '../../shared/utils/controlPointsToLut';
@@ -761,12 +761,23 @@ export default class MyTfEditor extends React.Component {
                     </div> : null}
                 </div>
                 <div className="aligned">
+                    <Checkbox></Checkbox>
+                    <Slider
+              name="Alpha"
+              disabled={false}
+              min={0}
+              max={1}
+              defaultValue={1}
+              //sliderStyle={STYLES.slider}
+              onChange={this.handleChangeColor}/>
+                </div>
+                <div className="aligned">
                     <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>Reset</Button>
                     <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>Auto</Button>
                     <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>BestFit</Button>
                     <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>Auto_IJ</Button>
                     <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>Auto_98</Button>
-                    <Button id={`seg-${id}`} className="ant-btn" onClick={this._segmentationColorXF}>Seg</Button>
+                    <Button id={`seg-${id}`} className="ant-btn" onClick={this._segmentationColorXF}>Colorize</Button>
                 </div>
             </div>
         );
