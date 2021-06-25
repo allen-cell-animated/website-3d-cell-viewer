@@ -30,8 +30,8 @@
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
     "lodash": "^4.17.20",
+    "nouislider-react": "^3.4.0",
     "react-color": "^2.13.8",
-    "react-nouislider": "^2.0.1",
     "react-numeric-input": "^2.2.3",
     "reactcss": "^1.2.3"
   },

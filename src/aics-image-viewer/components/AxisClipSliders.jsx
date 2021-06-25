@@ -3,7 +3,9 @@ import {
   Col,
   Row, 
 } from 'antd';
-import Nouislider from 'react-nouislider';
+import Nouislider from 'nouislider-react';
+import 'nouislider/dist/nouislider.css';
+
 import React from 'react';
 
 import enums from '../shared/enums';

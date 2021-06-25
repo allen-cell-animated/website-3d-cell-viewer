@@ -9,6 +9,8 @@ import {
 
 import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
+  COLORIZE_ALPHA,
+  COLORIZE_ENABLED,
   ISO_SURFACE_ENABLED,
   LUT_CONTROL_POINTS,
   OBSERVED_CHANNEL_KEY,
@@ -127,6 +129,8 @@ export default class ChannelsWidget extends React.Component {
                       volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
                       isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
+                      colorizeEnabled={thisChannelSettings[COLORIZE_ENABLED]}
+                      colorizeAlpha={thisChannelSettings[COLORIZE_ALPHA]}
                       isovalue={thisChannelSettings.isovalue}
                       opacity={thisChannelSettings.opacity}
                       color={thisChannelSettings.color}
