@@ -684,8 +684,7 @@ export default class App extends React.Component {
           // TODO get the labelColors from the tf editor component
           const lut = image.getHistogram(index).lutGenerator_labelColors();
           image.setColorPalette(index, lut.lut);
-          // set to slider value, not 1!
-          image.setColorPaletteAlpha(index, 1);
+          image.setColorPaletteAlpha(index, userSelections[CHANNEL_SETTINGS][index][COLORIZE_ALPHA]);
         } else {
           image.setColorPaletteAlpha(index, 0);
         }
