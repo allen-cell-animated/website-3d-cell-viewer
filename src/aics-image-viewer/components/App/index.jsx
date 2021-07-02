@@ -691,7 +691,12 @@ export default class App extends React.Component {
         view3d.updateLuts(image);
         break;
       case COLORIZE_ALPHA:
+        if (userSelections[CHANNEL_SETTINGS][index][COLORIZE_ENABLED]) {
         image.setColorPaletteAlpha(index, newValue);
+        }
+        else {
+          image.setColorPaletteAlpha(index, 0);
+        }
         view3d.updateLuts(image);
         break;
       case MAX_PROJECT:
