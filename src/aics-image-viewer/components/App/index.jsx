@@ -692,7 +692,7 @@ export default class App extends React.Component {
         break;
       case COLORIZE_ALPHA:
         if (userSelections[CHANNEL_SETTINGS][index][COLORIZE_ENABLED]) {
-        image.setColorPaletteAlpha(index, newValue);
+          image.setColorPaletteAlpha(index, newValue);
         }
         else {
           image.setColorPaletteAlpha(index, 0);
