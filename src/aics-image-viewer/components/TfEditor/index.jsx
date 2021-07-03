@@ -888,6 +888,6 @@ const STYLES = {
   control: {
     flex: 5,
     height: 30,
-    marginTop: 15,
+    paddingTop: 15,
   },
 };
