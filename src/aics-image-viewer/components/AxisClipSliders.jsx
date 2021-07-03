@@ -355,7 +355,8 @@ const STYLES = {
     height: 32
   },
   row: {
-    display: 'flex'
+    display: 'flex',
+    color: 'gray'
   },
   slider: {
     flex: 7,
