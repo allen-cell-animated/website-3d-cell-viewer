@@ -1,5 +1,7 @@
 import React from 'react';
-import Nouislider from 'react-nouislider';
+import Nouislider from 'nouislider-react';
+import 'nouislider/distribute/nouislider.css';
+
 import NumericInput from 'react-numeric-input';
 
 import {
@@ -153,7 +155,7 @@ export default class GlobalVolumeControls extends React.Component {
       <Nouislider
         range={range}
         start={start}
-        connected={true}
+        connect={true}
         tooltips={true}
         behavior="drag"
         onUpdate={onUpdate} 

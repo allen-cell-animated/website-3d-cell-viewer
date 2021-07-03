@@ -3,7 +3,9 @@ import {
   Col,
   Row, 
 } from 'antd';
-import Nouislider from 'react-nouislider';
+import Nouislider from 'nouislider-react';
+import 'nouislider/distribute/nouislider.css';
+
 import React from 'react';
 
 import enums from '../shared/enums';
@@ -353,7 +355,8 @@ const STYLES = {
     height: 32
   },
   row: {
-    display: 'flex'
+    display: 'flex',
+    color: 'gray'
   },
   slider: {
     flex: 7,

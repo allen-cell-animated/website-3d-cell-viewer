@@ -15,6 +15,8 @@ import TfEditor from '../TfEditor';
 
 import colorPalette from '../../shared/colorPalette';
 import {
+  COLORIZE_ALPHA,
+  COLORIZE_ENABLED,
   ISOSURFACE_OPACITY_SLIDER_MAX, 
   ISO_VALUE, 
   ISO_SURFACE_ENABLED, 
@@ -44,6 +46,8 @@ export default class ChannelsWidgetRow extends React.Component {
     this.onSaveIsosurfaceSTL = this.onSaveIsosurfaceSTL.bind(this);
     this.onSaveIsosurfaceGLTF = this.onSaveIsosurfaceGLTF.bind(this);
     this.onUpdateLutControlPoints = this.onUpdateLutControlPoints.bind(this);
+    this.updateColorizeMode = this.updateColorizeMode.bind(this);
+    this.updateColorizeAlpha = this.updateColorizeAlpha.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -78,6 +82,17 @@ export default class ChannelsWidgetRow extends React.Component {
   onUpdateLutControlPoints(newValue) {
     const { channelName, index, changeOneChannelSetting } = this.props;
     changeOneChannelSetting(channelName, index, LUT_CONTROL_POINTS, newValue);
+  }
+
+  updateColorizeMode(newValue) {
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, COLORIZE_ENABLED, newValue);
+
+  }
+
+  updateColorizeAlpha(newValue) {
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, COLORIZE_ALPHA, newValue);
   }
 
   onSaveIsosurfaceSTL() {
@@ -227,6 +242,8 @@ export default class ChannelsWidgetRow extends React.Component {
     const {
       channelControlPoints,
       channelDataForChannel,
+      colorizeEnabled, 
+      colorizeAlpha,
       updateChannelTransferFunction,
       index,
       imageName,
@@ -243,6 +260,10 @@ export default class ChannelsWidgetRow extends React.Component {
           controlPoints={channelControlPoints}
           updateChannelTransferFunction={updateChannelTransferFunction}
           updateChannelLutControlPoints={this.onUpdateLutControlPoints}
+          updateColorizeMode={this.updateColorizeMode}
+          updateColorizeAlpha={this.updateColorizeAlpha}
+          colorizeEnabled={colorizeEnabled}
+          colorizeAlpha={colorizeAlpha}
     />);
   }
 

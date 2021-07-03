@@ -24,6 +24,7 @@ import {
   SEGMENTED_CELL,
   VOLUME_ENABLED,
   LUT_CONTROL_POINTS,
+  COLORIZE_ALPHA,
   ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
   FULL_FIELD_IMAGE,
@@ -43,6 +44,7 @@ import {
   PATH_TRACE,
   LUT_MIN_PERCENTILE, 
   LUT_MAX_PERCENTILE,
+  COLORIZE_ENABLED,
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
@@ -51,7 +53,6 @@ import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
 
 
 import '../../assets/styles/globals.scss';
-import '../../assets/styles/no-ui-slider.min.scss';
 import { 
   gammaSliderToImageValues, 
   densitySliderToImageValue, 
@@ -195,6 +196,8 @@ export default class App extends React.Component {
         name: this.nameClean(channel) || "Channel " + index,
         [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
         [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
+        [COLORIZE_ENABLED]: false,
+        [COLORIZE_ALPHA]: 1.0,
         isovalue: 188,
         opacity: 1.0,
         color: channelColors[index] ? channelColors[index].slice() : [226, 205, 179], // guard for unexpectedly longer channel list
@@ -355,7 +358,7 @@ export default class App extends React.Component {
         if (filterFunc && !filterFunc(name)) {
           return {
             enabled: false,
-            isosurfaceEnableed: false,
+            isosurfaceEnabled: false,
             isovalue: ch.isovalue,
             isosurfaceOpacity: ch.opacity,
             color: ch.color
@@ -364,7 +367,7 @@ export default class App extends React.Component {
    
         return {
           enabled: ch[VOLUME_ENABLED],
-          isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
+          isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
           isovalue: ch.isovalue,
           isosurfaceOpacity: ch.opacity,
           color: ch.color
@@ -525,6 +528,8 @@ export default class App extends React.Component {
         [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
         [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
         [LUT_CONTROL_POINTS]: newControlPoints,
+        [COLORIZE_ENABLED]: false,
+        [COLORIZE_ALPHA]: 1.0,
         isovalue: 188,
         opacity: 1.0,
         color: INIT_COLORS[index]
@@ -573,7 +578,7 @@ export default class App extends React.Component {
         if (filterFunc && !filterFunc(name)) {
           return {
             enabled: false,
-            isosurfaceEnableed: false,
+            isosurfaceEnabled: false,
             isovalue: ch.isovalue,
             isosurfaceOpacity: ch.opacity,
             color: ch.color,
@@ -582,7 +587,7 @@ export default class App extends React.Component {
 
         return {
           enabled: ch[VOLUME_ENABLED],
-          isosurfaceEnableed: ch[ISO_SURFACE_ENABLED],
+          isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
           isovalue: ch.isovalue,
           isosurfaceOpacity: ch.opacity,
           color: ch.color,
@@ -673,6 +678,26 @@ export default class App extends React.Component {
         break;
       case SAVE_ISO_SURFACE:
         view3d.saveChannelIsosurface(image, index, newValue);
+        break;
+      case COLORIZE_ENABLED:
+        if (newValue) {
+          // TODO get the labelColors from the tf editor component
+          const lut = image.getHistogram(index).lutGenerator_labelColors();
+          image.setColorPalette(index, lut.lut);
+          image.setColorPaletteAlpha(index, userSelections[CHANNEL_SETTINGS][index][COLORIZE_ALPHA]);
+        } else {
+          image.setColorPaletteAlpha(index, 0);
+        }
+        view3d.updateLuts(image);
+        break;
+      case COLORIZE_ALPHA:
+        if (userSelections[CHANNEL_SETTINGS][index][COLORIZE_ENABLED]) {
+          image.setColorPaletteAlpha(index, newValue);
+        }
+        else {
+          image.setColorPaletteAlpha(index, 0);
+        }
+        view3d.updateLuts(image);
         break;
       case MAX_PROJECT:
         view3d.setMaxProjectMode(image, newValue ? true : false);
