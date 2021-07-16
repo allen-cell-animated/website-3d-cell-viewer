@@ -83,9 +83,10 @@ export default class ChannelsWidget extends React.Component {
   }
 
   getRows() {
-    const { 
-      channelGroupedByType, 
-      channelSettings, 
+    const {
+      channelGroupedByType,
+      channelNameMapping,
+      channelSettings,
       channelDataReady,
       channelDataChannels,
       filterFunc,
@@ -125,7 +126,7 @@ export default class ChannelsWidget extends React.Component {
                       imageName={imageName}
                       channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
-                      name={formatChannelName(thisChannelSettings.name)}
+                      name={formatChannelName(thisChannelSettings.name, channelNameMapping)}
                       volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
                       isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}

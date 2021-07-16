@@ -135,9 +135,10 @@ export default class ControlPanel extends React.Component {
   }
 
   render() {
-    const { 
-      renderConfig, 
-      appHeight, 
+    const {
+      channelNameMapping,
+      renderConfig,
+      appHeight,
       imageName,
       hasImage,
       mode, 
@@ -182,6 +183,7 @@ export default class ControlPanel extends React.Component {
             renderConfig={renderConfig}
             filterFunc={this.props.filterFunc}
             nameClean={this.props.nameClean}
+            channelNameMapping={channelNameMapping}
           />
           <GlobalVolumeControls
             mode={this.props.mode}

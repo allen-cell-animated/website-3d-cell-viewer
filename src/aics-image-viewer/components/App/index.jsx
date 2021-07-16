@@ -926,13 +926,14 @@ export default class App extends React.Component {
 
   render() {
     const { userSelections } = this.state;
-    const { 
-      renderConfig, 
-      cellDownloadHref, 
+    const {
+      renderConfig,
+      cellDownloadHref,
+      channelNameMapping,
       fovDownloadHref,
     } = this.props;
     return (
-      <Layout 
+      <Layout
         className="cell-viewer-app"
         style={{height: this.props.appHeight}}
       >
@@ -987,6 +988,7 @@ export default class App extends React.Component {
                 filterFunc={this.props.filterFunc}
                 nameClean={this.nameClean}
                 changeRenderingAlgorithm={this.changeRenderingAlgorithm}
+                channelNameMapping={channelNameMapping}
               />
               </Sider>
               <Layout className="cell-viewer-wrapper">
@@ -1036,6 +1038,12 @@ App.defaultProps = {
   defaultSurfacesOn: [1],
   defaultVolumesOn: [],
   groupToChannelNameMap: channelGroupingMap,
+  // see nameClean function
+  channelNameClean: null,
+  // allows you to rename channels
+  channelNameMapping: [],
+  // allows you to completely ignore channels by name
+  filterFunc: null,
   IMAGE_VIEWER_SERVICE_URL: '//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.4.0',
   DOWNLOAD_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Data/',
   IMAGE_SERVER: 'http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Thumbnails/',

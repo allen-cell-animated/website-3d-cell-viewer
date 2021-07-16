@@ -6,6 +6,7 @@ import "antd/dist/antd.css";
 import "./App.scss";
 
 import { ImageViewerApp } from "../src";
+import {ChannelNameMapping} from "../src/aics-image-viewer/shared/utils/formatChannelNames.ts"
 
 function parseQueryString() {
   var pairs = location.search.slice(1).split('&');
@@ -13,7 +14,7 @@ function parseQueryString() {
   pairs.forEach(function(pair) {
       pair = pair.split('=');
       result[pair[0]] = decodeURIComponent(pair[1] || '');
-  });  
+  });
   return JSON.parse(JSON.stringify(result));
 }
 const params = parseQueryString();
@@ -41,6 +42,14 @@ if (params) {
   }
 }
 
+const mapping = [
+  { test: /(CMDRP)|(Memb)/g, label: 'Membrane'},
+  { test: /(EGFP)|(RFPT)|(STRUCT)/g, label: 'Labeled structure'},
+  { test: /(H3342)|(DNA)/g, label: 'DNA' },
+  { test: /(100)|(Bright)/g, label: 'Bright field' },
+];
+
+
 ReactDOM.render(
   <section className="ant-layout">
     <div className="mycellviewer">
@@ -55,6 +64,7 @@ ReactDOM.render(
         defaultSurfacesOn={[]}
         fovDownloadHref={fovDownloadHref}
         cellDownloadHref={cellDownloadHref}
+        channelNameMapping={mapping}
       />
     </div>
   </section>,
