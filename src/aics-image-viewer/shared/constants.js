@@ -54,9 +54,6 @@ export const // Keys accepted as URL search parameters
   DOWNLOAD_SERVER = process.env.DOWNLOAD_SERVER,
   // eslint-disable-next-line no-undef
   IMAGE_SERVER = process.env.IMAGE_SERVER,
-  OBSERVED_CHANNEL_KEY = "observed",
-  SEGMENTATION_CHANNEL_KEY = "segmentation",
-  CONTOUR_CHANNEL_KEY = "contour",
   OTHER_CHANNEL_KEY = "Other",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
 

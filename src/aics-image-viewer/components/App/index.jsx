@@ -14,9 +14,6 @@ import HttpClient from '../../shared/utils/httpClient';
 import enums from '../../shared/enums';
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
-  OBSERVED_CHANNEL_KEY,
-  SEGMENTATION_CHANNEL_KEY,
-  CONTOUR_CHANNEL_KEY,
   OTHER_CHANNEL_KEY,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -1049,7 +1046,6 @@ App.defaultProps = {
   appHeight: '100vh',
   cellPath: '',
   fovPath: '',
-  keyList: [OBSERVED_CHANNEL_KEY, SEGMENTATION_CHANNEL_KEY, CONTOUR_CHANNEL_KEY],
   renderConfig: {
     alphaMask: true,
     autoRotateButton: true,
