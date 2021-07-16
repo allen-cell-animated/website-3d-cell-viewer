@@ -48,6 +48,11 @@ const mapping = [
   { test: /(H3342)|(DNA)/g, label: 'DNA' },
   { test: /(100)|(Bright)/g, label: 'Bright field' },
 ];
+const channelGroupingMap = {
+  'Observed channels': ['CMDRP', 'EGFP', 'mtagRFPT', 'H3342', 'H3342_3', 'Bright_100', 'Bright_100X', 'TL 100x', 'TL_100x', 'Bright_2'],
+  'Segmentation channels': ['SEG_STRUCT', 'SEG_Memb', 'SEG_DNA'],
+  'Contour channels': ['CON_Memb', 'CON_DNA']
+};
 
 
 ReactDOM.render(
@@ -65,6 +70,7 @@ ReactDOM.render(
         fovDownloadHref={fovDownloadHref}
         cellDownloadHref={cellDownloadHref}
         channelNameMapping={mapping}
+        groupToChannelNameMap={channelGroupingMap}
       />
     </div>
   </section>,

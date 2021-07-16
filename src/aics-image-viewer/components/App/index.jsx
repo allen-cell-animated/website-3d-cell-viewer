@@ -220,11 +220,15 @@ export default class App extends React.Component {
 
   createChannelGrouping(channels) {
     const {
-      initialChannelAcc,
       groupToChannelNameMap,
-      keyList,
     } = this.props;
     if (channels) {
+
+      const keyList = Object.keys(groupToChannelNameMap);
+      const initialChannelAcc = {};
+      for (const k of keyList) {
+        initialChannelAcc[k] = [];
+      }
       const grouping = channels.reduce((acc, channel, index) => {
         let other = true;
         keyList.forEach(key => {
@@ -1030,14 +1034,10 @@ App.defaultProps = {
   rawData: null,
   // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
   rawDims: null,
-  initialChannelAcc: {
-    [OBSERVED_CHANNEL_KEY]: [],
-    [SEGMENTATION_CHANNEL_KEY]: [],
-    [CONTOUR_CHANNEL_KEY]: [],
-  },
   defaultSurfacesOn: [1],
   defaultVolumesOn: [],
-  groupToChannelNameMap: channelGroupingMap,
+  // collection of {group name : array of channel names that fit under group}
+  groupToChannelNameMap: {},
   // see nameClean function
   channelNameClean: null,
   // allows you to rename channels
