@@ -16,7 +16,6 @@ import {
   OBSERVED_CHANNEL_KEY,
   VOLUME_ENABLED,
 } from '../../shared/constants';
-import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
 import colorPalette from '../../shared/colorPalette';
 import SharedCheckBox from '../shared/SharedCheckBox';
@@ -100,7 +99,7 @@ export default class ChannelsWidget extends React.Component {
       return (
         <Card
           bordered={false}
-          title={channelGroupTitles[key] || key}
+          title={key}
           extra={this.renderVisiblityControls(key, channelArray)}
           type="inner"
           key={key}

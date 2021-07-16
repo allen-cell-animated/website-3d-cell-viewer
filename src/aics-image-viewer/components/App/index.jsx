@@ -63,7 +63,6 @@ import {
 import './styles.scss';
 
 const ViewMode = enums.viewMode.mainMapping;
-const channelGroupingMap = enums.channelGroups.channelGroupingMap;
 const { Sider, Content } = Layout;
 
 const OK_STATUS = 'OK';
