@@ -6,7 +6,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: ['babel-polyfill', './public/index.jsx'],
+  entry: ['./public/index.jsx'],
   output: {
     path: path.resolve(__dirname, 'imageviewer'),
     filename: 'image-viewer-ui.bundle.js'
@@ -34,7 +34,7 @@ module.exports = {
   ],
   module: {
     rules: [{
-        test: /\.(js|jsx)$/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: [
           path.resolve(__dirname, 'src')
         ],
@@ -71,7 +71,7 @@ module.exports = {
       {
         loader: 'babel-loader',
         exclude: /node_modules/,
-        test: /\.(js|jsx)$/,
+        test: /\.(js|jsx|ts|tsx)$/,
       },
       {
         test: /\.less$/,

@@ -65,7 +65,7 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   module: {
     rules: [{
-        test: /\.(js|jsx)$/,
+        test: /\.(js|jsx|ts|tsx)$/,
         include: [
           path.resolve(__dirname, 'src')
         ],
@@ -103,7 +103,7 @@ module.exports = {
       {
         loader: 'babel-loader',
         exclude: /node_modules/,
-        test: /\.js$/,
+        test: /\.(js|jsx|ts|tsx)$/,
       },
       {
         test: /\.less$/,
