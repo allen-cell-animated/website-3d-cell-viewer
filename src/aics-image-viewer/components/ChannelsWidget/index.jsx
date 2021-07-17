@@ -13,7 +13,6 @@ import {
   COLORIZE_ENABLED,
   ISO_SURFACE_ENABLED,
   LUT_CONTROL_POINTS,
-  OBSERVED_CHANNEL_KEY,
   VOLUME_ENABLED,
 } from '../../shared/constants';
 
@@ -92,6 +91,7 @@ export default class ChannelsWidget extends React.Component {
       nameClean,
       imageName,
     } = this.props;
+    const firstKey = Object.keys(channelGroupedByType)[0];
     return map(channelGroupedByType, (channelArray, key) => {
       if (!channelArray.length || (filterFunc && !filterFunc(key))) {
         return null;
@@ -106,7 +106,7 @@ export default class ChannelsWidget extends React.Component {
         >
         <Collapse 
           bordered={false}
-          defaultActiveKey={key === OBSERVED_CHANNEL_KEY ? key : ""}>
+          defaultActiveKey={key === firstKey ? key : ""}>
             <Panel 
               key={key}
             >

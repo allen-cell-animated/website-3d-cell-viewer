@@ -10,5 +10,6 @@ export default function formatChannelNames(name: string, remappings: ChannelName
             return i.label;
         }
     }
+    // no match; return original name
     return name;
 }
