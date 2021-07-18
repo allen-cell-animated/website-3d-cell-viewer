@@ -42,6 +42,7 @@ import {
   LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
   COLORIZE_ENABLED,
+  SINGLE_GROUP_CHANNEL_KEY,
 } from '../../shared/constants';
 
 import ControlPanel from '../ControlPanel';
@@ -225,6 +226,8 @@ export default class App extends React.Component {
       for (const k of keyList) {
         initialChannelAcc[k] = [];
       }
+      // if there are no groupings specified then just use SINGLE_GROUP_CHANNEL_KEY
+      const remainderGroupName = keyList.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
       const grouping = channels.reduce((acc, channel, index) => {
         let other = true;
         keyList.forEach(key => {
@@ -236,16 +239,15 @@ export default class App extends React.Component {
           }
         });
         if (other) {
-          if (!acc[OTHER_CHANNEL_KEY]) {
-            acc[OTHER_CHANNEL_KEY] = [];
+          if (!acc[remainderGroupName]) {
+            acc[remainderGroupName] = [];
           }
-          if (!includes(acc[OTHER_CHANNEL_KEY], index)) {
-            acc[OTHER_CHANNEL_KEY].push(index);
+          if (!includes(acc[remainderGroupName], index)) {
+            acc[remainderGroupName].push(index);
           }
         }
         return acc;
       }, initialChannelAcc);
-
       return grouping;
     }
     return {};

@@ -49,6 +49,7 @@ export const // Keys accepted as URL search parameters
   // eslint-disable-next-line no-undef
   IMAGE_SERVER = process.env.IMAGE_SERVER,
   OTHER_CHANNEL_KEY = "Other",
+  SINGLE_GROUP_CHANNEL_KEY = "Channels",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
 
 export const PRESET_COLORS_1 = [
