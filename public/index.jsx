@@ -43,10 +43,10 @@ if (params) {
 }
 
 const mapping = [
-  { test: /(CMDRP)|(Memb)/g, label: 'Membrane'},
-  { test: /(EGFP)|(RFPT)|(STRUCT)/g, label: 'Labeled structure'},
-  { test: /(H3342)|(DNA)/g, label: 'DNA' },
-  { test: /(100)|(Bright)/g, label: 'Bright field' },
+  { test: /(CMDRP)|(Memb)/, label: 'Membrane'},
+  { test: /(EGFP)|(RFPT)|(STRUCT)/, label: 'Labeled structure'},
+  { test: /(H3342)|(DNA)/, label: 'DNA' },
+  { test: /(100)|(Bright)/, label: 'Bright field' },
 ];
 const channelGroupingMap = {
   'Observed channels': ['CMDRP', 'EGFP', 'mtagRFPT', 'H3342', 'H3342_3', 'Bright_100', 'Bright_100X', 'TL 100x', 'TL_100x', 'Bright_2'],
