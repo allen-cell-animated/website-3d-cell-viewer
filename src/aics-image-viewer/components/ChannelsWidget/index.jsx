@@ -61,9 +61,9 @@ export default class ChannelsWidget extends React.Component {
     const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[ISO_SURFACE_ENABLED] : false);
     return (
       <div style={STYLES.buttonRow}>
-          <SharedCheckBox 
+          <SharedCheckBox
             allOptions={channelArray}
-            checkedList={volChecked} 
+            checkedList={volChecked}
             label="All volumes"
             onChecked={this.showVolumes}
             onUnchecekd={this.hideVolumes}
@@ -104,22 +104,22 @@ export default class ChannelsWidget extends React.Component {
           type="inner"
           key={key}
         >
-        <Collapse 
+        <Collapse
           bordered={false}
           defaultActiveKey={key === firstKey ? key : ""}>
             <Panel 
               key={key}
             >
-              <List 
+              <List
                 itemLayout="horizontal"
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
-                  const thisChannelSettings = find(channelSettings, (channel) => { 
+                  const thisChannelSettings = find(channelSettings, (channel) => {
                     return channel.name === nameClean(channelDataChannels[actualIndex].name);
                   });
-                  
-                  return (thisChannelSettings ? 
-                  <ChannelsWidgetRow    
+
+                  return (thisChannelSettings ?
+                  <ChannelsWidgetRow
                       key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
                       index={actualIndex}
                       imageName={imageName}
@@ -161,7 +161,7 @@ export default class ChannelsWidget extends React.Component {
 
 const STYLES = {
   header: {
-    textAlign: 'left', 
+    textAlign: 'left',
     fontWeight: 900,
   },
   buttonRow: {

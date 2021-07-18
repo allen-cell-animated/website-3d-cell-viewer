@@ -2,10 +2,10 @@
 import { Layout, Progress } from "antd";
 import React from 'react';
 import { includes, isEqual, filter, find, map } from 'lodash';
-import { 
+import {
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
-  Volume, 
+  Volume,
   VolumeLoader,
 } from '@aics/volume-viewer';
 
@@ -39,7 +39,7 @@ import {
   AUTO_ROTATE,
   MAX_PROJECT,
   PATH_TRACE,
-  LUT_MIN_PERCENTILE, 
+  LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
   COLORIZE_ENABLED,
 } from '../../shared/constants';
@@ -50,10 +50,10 @@ import { TFEDITOR_DEFAULT_COLOR } from '../TfEditor';
 
 
 import '../../assets/styles/globals.scss';
-import { 
-  gammaSliderToImageValues, 
-  densitySliderToImageValue, 
-  brightnessSliderToImageValue, 
+import {
+  gammaSliderToImageValues,
+  densitySliderToImageValue,
+  brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
 
@@ -96,7 +96,7 @@ export default class App extends React.Component {
         [MAX_PROJECT]: false,
         [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
-        [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT, 
+        [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
         [DENSITY_SLIDER_LEVEL]: DENSITY_SLIDER_LEVEL_DEFAULT,
         [LEVELS_SLIDER]: LEVELS_SLIDER_DEFAULT,
         // channelSettings is a flat list of objects of this type:
@@ -202,7 +202,7 @@ export default class App extends React.Component {
     });
   }
 
-  // PROP for standardizing channel names. 
+  // PROP for standardizing channel names.
   // Ie if you want both segmentation and raw of the same protein to have the same UI settings.
   nameClean(channelName) {
     const {
@@ -279,7 +279,7 @@ export default class App extends React.Component {
           queryErrorMessage: null,
           cachingInProgress: false,
           mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode
-        });  
+        });
       }
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, keepLuts);
       this.stopPollingForImage();
@@ -363,8 +363,8 @@ export default class App extends React.Component {
             isosurfaceOpacity: ch.opacity,
             color: ch.color
           };
-        } 
-   
+        }
+
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
@@ -422,7 +422,7 @@ export default class App extends React.Component {
       isosurfaceOpacity: thisChannelsSettings.opacity
     });
 
-    // if we want to keep the current control points 
+    // if we want to keep the current control points
     if (thisChannelsSettings[LUT_CONTROL_POINTS] && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
       aimg.setLut(channelIndex, lut);
@@ -471,7 +471,7 @@ export default class App extends React.Component {
     // assume nextImg is available to initialize
     this.intializeNewImage(nextImg);
     this.setState({
-      image: nextImg, 
+      image: nextImg,
       prevImg: image
     });
     // preload the new "nextImg"
@@ -664,13 +664,13 @@ export default class App extends React.Component {
       case OPACITY:
         view3d.setVolumeChannelOptions(image, index, {
           isosurfaceOpacity: newValue
-        });  
+        });
         break;
       case COLOR: {
         let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
         view3d.setVolumeChannelOptions(image, index, {
           color: newColor,
-        });  
+        });
         view3d.updateMaterial(image);
       } break;
       case MODE:
@@ -735,23 +735,23 @@ export default class App extends React.Component {
       // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
       // if full field, dont mask
     if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching to 2d 
+      // Switching to 2d
       newSelectionState = {
         [MODE]: newMode,
         [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
-      // if path trace was enabled in 3D turn it off when switching to 2D. 
+      // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {
         this.changeRenderingAlgorithm('volume');
       }
       // switching from 2D to 3D
     } else if (
-      userSelections.mode !== ViewMode.threeD && 
-      newMode === ViewMode.threeD && 
+      userSelections.mode !== ViewMode.threeD &&
+      newMode === ViewMode.threeD &&
       this.state.userSelections.imageType === SEGMENTED_CELL
     ) {
-      // switching to 3d 
+      // switching to 3d
       newSelectionState = {
           [MODE]: newMode,
           [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -814,7 +814,7 @@ export default class App extends React.Component {
           imageType: value,
         }
     });
-    
+
   }
 
   onApplyColorPresets(presets) {
@@ -839,10 +839,10 @@ export default class App extends React.Component {
 
   beginRequestImage(type) {
     const {
-      fovPath, 
+      fovPath,
       cellPath,
       cellId,
-      prevImgPath, 
+      prevImgPath,
       nextImgPath,
       preLoad,
     } = this.props;
@@ -884,7 +884,7 @@ export default class App extends React.Component {
     // apply channel settings
     // image.channel_names
     if (!image) {
-      return; 
+      return;
     }
     image.channel_names.forEach((channelName, imageIndex) => {
       if (image.getChannel(imageIndex).loaded) {
@@ -906,11 +906,11 @@ export default class App extends React.Component {
     });
 
     view3d.updateActiveChannels(image);
-  
+
   }
 
   toggleControlPanel(value) {
-    this.setState({ 
+    this.setState({
       userSelections: {
         ...this.state.userSelections,
       controlPanelClosed: value
@@ -1049,9 +1049,9 @@ App.defaultProps = {
   renderConfig: {
     alphaMask: true,
     autoRotateButton: true,
-    axisClipSliders: true, 
+    axisClipSliders: true,
     brightnessSlider: true,
-    colorPicker: true, 
+    colorPicker: true,
     colorPresetsDropdown: true,
     densitySlider: true,
     levelsSliders: true,

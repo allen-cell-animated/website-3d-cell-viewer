@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
-import { 
+import {
   Col,
-  Row, 
+  Row,
 } from 'antd';
 import Nouislider from 'nouislider-react';
 import 'nouislider/dist/nouislider.css';
@@ -313,8 +313,8 @@ export default class AxisClipSliders extends React.Component {
           pause={this.pause}
           stop={this.stop}
           goForward={this.goForward}
-          showPlay={this.state.playButtons.stop || this.state.playButtons.pause} 
-        /> : 
+          showPlay={this.state.playButtons.stop || this.state.playButtons.pause}
+        /> :
         <AutoRotateButton
           mode={this.props.mode}
           autorotate={this.props.autorotate}
@@ -327,7 +327,7 @@ export default class AxisClipSliders extends React.Component {
           <h4 className="sectionSubHeader" style={STYLES.header}>
             Region of interest clipping
           </h4>
-          <Row 
+          <Row
             type="flex"
             justify="space-around"
             align="bottom"

@@ -8,11 +8,11 @@ import {
   Card,
   Collapse,
 } from 'antd';
-import { 
-  ALPHA_MASK_SLIDER_LEVEL, 
-  BRIGHTNESS_SLIDER_LEVEL, 
-  DENSITY_SLIDER_LEVEL, 
-  LEVELS_SLIDER, 
+import {
+  ALPHA_MASK_SLIDER_LEVEL,
+  BRIGHTNESS_SLIDER_LEVEL,
+  DENSITY_SLIDER_LEVEL,
+  LEVELS_SLIDER,
 } from '../shared/constants';
 const Panel = Collapse.Panel;
 
@@ -29,7 +29,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   shouldComponentUpdate(newProps) {
-    const { 
+    const {
       imageName,
       alphaMaskSliderLevel,
       pathTraceOn,
@@ -92,7 +92,7 @@ export default class GlobalVolumeControls extends React.Component {
   }
 
   onLevelsUpdate(values) {
-    this.props.handleChangeUserSelection(LEVELS_SLIDER, 
+    this.props.handleChangeUserSelection(LEVELS_SLIDER,
       [Number(values[0]), Number(values[1]), Number(values[2])]
     );
   }
@@ -158,7 +158,7 @@ export default class GlobalVolumeControls extends React.Component {
         connect={true}
         tooltips={true}
         behavior="drag"
-        onUpdate={onUpdate} 
+        onUpdate={onUpdate}
         />
     );
   }
