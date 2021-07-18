@@ -4,7 +4,6 @@ export const // Keys accepted as URL search parameters
   FOV_ID_QUERY = "fovId",
   CELL_LINE_QUERY = "cellLine",
   IMAGE_NAME_QUERY = "name",
-  LEGACY_IMAGE_ID_QUERY = "legacyName_1_2",
   // View modes
   YZ_MODE = "YZ",
   XZ_MODE = "XZ",
@@ -45,11 +44,6 @@ export const // Keys accepted as URL search parameters
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
   LEVELS_SLIDER_DEFAULT = [35.0, 140.0, 255.0],
-  // TODO: fix these server names.  Only LEGACY_IMAGE_SERVER is correct and only if the dataset subdirectory name is known.
-  LEGACY_DOWNLOAD_SERVER =
-    "http://downloads.allencell.org/1.2.0/Cell-Viewer_Data/",
-  LEGACY_IMAGE_SERVER =
-    "https://cellviewer-1-2-0.allencell.org/aics/thumbnails/",
   // eslint-disable-next-line no-undef
   DOWNLOAD_SERVER = process.env.DOWNLOAD_SERVER,
   // eslint-disable-next-line no-undef
