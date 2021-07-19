@@ -50,20 +50,20 @@ export default class ControlPanel extends React.Component {
   createFovCellSwitchControls() {
     const {
       imageType,
-      hasCellId
+      hasCellId,
+      hasParentImage
     } = this.props;
-    return hasCellId && (
-      <RadioGroup
-        defaultValue={imageType}
-        onChange={this.handleSwitchFovCell}
-      >
-        <Radio.Button
-          value={SEGMENTED_CELL}
-        >Cell</Radio.Button>
-        <Radio.Button
-          value={FULL_FIELD_IMAGE}
-        >Full Field</Radio.Button>
-      </RadioGroup>
+    return (
+      hasCellId &&
+      hasParentImage && (
+        <RadioGroup
+          defaultValue={imageType}
+          onChange={this.handleSwitchFovCell}
+        >
+          <Radio.Button value={SEGMENTED_CELL}>Cell</Radio.Button>
+          <Radio.Button value={FULL_FIELD_IMAGE}>Full Field</Radio.Button>
+        </RadioGroup>
+      )
     );
   }
 
