@@ -12,7 +12,7 @@ module.exports = {
     filename: 'image-viewer-ui.bundle.js'
   },
   resolve: {
-    extensions: ['.js', '.jsx']
+    extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   plugins: [
     new CleanWebpackPlugin(['imageviewer/*']),
