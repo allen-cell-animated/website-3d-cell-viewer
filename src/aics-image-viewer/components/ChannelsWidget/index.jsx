@@ -7,16 +7,14 @@ import {
   List,
 } from 'antd';
 
-import formatChannelName from '../../shared/utils/formatChannelNames';
+import formatChannelName from '../../shared/utils/formatChannelNames.ts';
 import {
   COLORIZE_ALPHA,
   COLORIZE_ENABLED,
   ISO_SURFACE_ENABLED,
   LUT_CONTROL_POINTS,
-  OBSERVED_CHANNEL_KEY,
   VOLUME_ENABLED,
 } from '../../shared/constants';
-import { channelGroupTitles } from '../../shared/enums/channelGroups';
 
 import colorPalette from '../../shared/colorPalette';
 import SharedCheckBox from '../shared/SharedCheckBox';
@@ -63,9 +61,9 @@ export default class ChannelsWidget extends React.Component {
     const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[ISO_SURFACE_ENABLED] : false);
     return (
       <div style={STYLES.buttonRow}>
-          <SharedCheckBox 
+          <SharedCheckBox
             allOptions={channelArray}
-            checkedList={volChecked} 
+            checkedList={volChecked}
             label="All volumes"
             onChecked={this.showVolumes}
             onUnchecekd={this.hideVolumes}
@@ -83,15 +81,17 @@ export default class ChannelsWidget extends React.Component {
   }
 
   getRows() {
-    const { 
-      channelGroupedByType, 
-      channelSettings, 
+    const {
+      channelGroupedByType,
+      channelNameMapping,
+      channelSettings,
       channelDataReady,
       channelDataChannels,
       filterFunc,
       nameClean,
       imageName,
     } = this.props;
+    const firstKey = Object.keys(channelGroupedByType)[0];
     return map(channelGroupedByType, (channelArray, key) => {
       if (!channelArray.length || (filterFunc && !filterFunc(key))) {
         return null;
@@ -99,33 +99,33 @@ export default class ChannelsWidget extends React.Component {
       return (
         <Card
           bordered={false}
-          title={channelGroupTitles[key] || key}
+          title={key}
           extra={this.renderVisiblityControls(key, channelArray)}
           type="inner"
           key={key}
         >
-        <Collapse 
+        <Collapse
           bordered={false}
-          defaultActiveKey={key === OBSERVED_CHANNEL_KEY ? key : ""}>
+          defaultActiveKey={key === firstKey ? key : ""}>
             <Panel 
               key={key}
             >
-              <List 
+              <List
                 itemLayout="horizontal"
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
-                  const thisChannelSettings = find(channelSettings, (channel) => { 
+                  const thisChannelSettings = find(channelSettings, (channel) => {
                     return channel.name === nameClean(channelDataChannels[actualIndex].name);
                   });
-                  
-                  return (thisChannelSettings ? 
-                  <ChannelsWidgetRow    
+
+                  return (thisChannelSettings ?
+                  <ChannelsWidgetRow
                       key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
                       index={actualIndex}
                       imageName={imageName}
                       channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
-                      name={formatChannelName(thisChannelSettings.name)}
+                      name={formatChannelName(thisChannelSettings.name, channelNameMapping)}
                       volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
                       isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
@@ -161,7 +161,7 @@ export default class ChannelsWidget extends React.Component {
 
 const STYLES = {
   header: {
-    textAlign: 'left', 
+    textAlign: 'left',
     fontWeight: 900,
   },
   buttonRow: {

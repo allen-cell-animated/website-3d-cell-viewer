@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { 
+import {
   Card,
   Button,
   Dropdown,
@@ -13,12 +13,12 @@ import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
 
-import { 
-  PRESET_COLOR_MAP, 
-  SEGMENTED_CELL, 
+import {
+  PRESET_COLOR_MAP,
+  SEGMENTED_CELL,
   FULL_FIELD_IMAGE,
   PATH_TRACE,
-  MAX_PROJECT, 
+  MAX_PROJECT,
   VOLUMETRIC_RENDER,
 } from '../../shared/constants';
 import enums from '../../shared/enums';
@@ -90,7 +90,7 @@ export default class ControlPanel extends React.Component {
   changeRenderMode({ target }) {
     this.props.changeRenderingAlgorithm(target.value);
   }
-  
+
   renderRenderSettings() {
     const {
       canPathTrace,
@@ -135,18 +135,19 @@ export default class ControlPanel extends React.Component {
   }
 
   render() {
-    const { 
-      renderConfig, 
-      appHeight, 
+    const {
+      channelNameMapping,
+      renderConfig,
+      appHeight,
       imageName,
       hasImage,
-      mode, 
+      mode,
       onViewModeChange,
     } = this.props;
     return (
-      <Card 
-        style={{...STYLES.wrapper, height: appHeight}} 
-        open={this.state.open} 
+      <Card
+        style={{...STYLES.wrapper, height: appHeight}}
+        open={this.state.open}
         bordered={false}
         className="control-panel"
         extra={renderConfig.fovCellSwitchControls &&
@@ -155,14 +156,14 @@ export default class ControlPanel extends React.Component {
             {this.renderDownloadButton()}
           </div>
         }
-        title={renderConfig.viewModeRadioButtons && 
+        title={renderConfig.viewModeRadioButtons &&
             <ViewModeRadioButtons
               imageName={imageName}
               mode={mode}
               onViewModeChange={onViewModeChange}
             />}
         >
-        <Card.Meta 
+        <Card.Meta
           title={[this.renderRenderSettings(), renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()]}
         />
         {hasImage ? <div className="channel-rows-list">
@@ -182,6 +183,7 @@ export default class ControlPanel extends React.Component {
             renderConfig={renderConfig}
             filterFunc={this.props.filterFunc}
             nameClean={this.props.nameClean}
+            channelNameMapping={channelNameMapping}
           />
           <GlobalVolumeControls
             mode={this.props.mode}
