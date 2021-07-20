@@ -959,6 +959,7 @@ export default class App extends React.Component {
                 channelDataChannels={this.state.image ? this.state.image.channels : null}
                 channelGroupedByType={this.state.channelGroupedByType}
                 hasCellId={this.state.hasCellId}
+                hasParentImage={!!this.state.fovPath}
                 channelDataReady={this.state.channelDataReady}
                 fovDownloadHref={fovDownloadHref}
                 cellDownloadHref={cellDownloadHref}
