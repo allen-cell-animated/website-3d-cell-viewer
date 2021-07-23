@@ -822,7 +822,9 @@ export default class App extends React.Component {
   onApplyColorPresets(presets) {
     const { userSelections } = this.state;
     presets.forEach((color, index) => {
-      this.handleChangeToImage(COLOR, color, index);
+      if (index < userSelections[CHANNEL_SETTINGS].length) {
+        this.handleChangeToImage(COLOR, color, index);
+      }
     });
     const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, channelindex) => {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
