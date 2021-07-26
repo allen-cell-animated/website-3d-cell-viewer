@@ -119,7 +119,7 @@ export default class ChannelsWidgetRow extends React.Component {
               min={isoRange.min || 0}
               max={isoRange.max || 225}
               defaultValue={ISOVALUE_DEFAULT}
-              sliderStyle={STYLES.slider}
+              style={STYLES.slider}
               onChange={this.onIsovalueChange}/>
         </Col>
       </Row>
@@ -140,7 +140,7 @@ export default class ChannelsWidgetRow extends React.Component {
             min={range.min}
             max={range.max}
             defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
-            sliderStyle={STYLES.slider}
+            style={STYLES.slider}
             onChange={this.onOpacityChange}/>
         </Col>
       </Row>
