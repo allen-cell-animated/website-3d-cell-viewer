@@ -1,6 +1,6 @@
 {
   "name": "@aics/web-3d-viewer",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "web view of cell volume images",
   "main": "dist/index.js",
   "module": "dist/index.js",
