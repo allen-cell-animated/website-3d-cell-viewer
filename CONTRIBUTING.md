@@ -19,15 +19,19 @@ you'd like to see documented.
 
 ## How to Contribute
 
-Typical steps to contribute:
-
 1. Fork the repo on GitHub.
-
 2. Create a branch and make your edits on your branch, pushing back to your fork.
+3. Make sure `npm run typeCheck`, `npm run test` and `npm run lint` all exit without errors. Add tests and documentation as needed.
+4. Submit a pull request back to main via GitHub using template, include screen shots for visual changes. 
 
-3. Ensure that your changes are working, pass any linting and tests in the project. Add tests and documentation as needed.
+___
 
-4. Submit a pull request to merge your fork's branch into this repository, via GitHub.
+## Publishing
+
+1. Make a new version: `npm version [patch/minor/major]` -- this will give you the new tag, e.g., `2.7.1`
+2. Push the new package.json version: `git push origin main`
+3. Push the new tag: `git push origin v[NEW_TAG]` -- e.g. `git push origin v2.7.1`
+
 
 ## Questions or Thoughts?
 
