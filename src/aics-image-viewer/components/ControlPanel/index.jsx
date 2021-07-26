@@ -107,26 +107,29 @@ export default class ControlPanel extends React.Component {
   }
 
   renderDownloadButton() {
-    const { fovDownloadHref,
+    const { 
+      fovDownloadHref,
       cellDownloadHref,
+      hasCellId, 
+      hasParentImage
     } = this.props;
 
     const menu = (
       <Menu className="download-dropdown">
-        <Menu.Item key="1">
+        {hasCellId && <Menu.Item key="1">
           <a
             href={cellDownloadHref}
           >
             <Icon type="download" /> Segmented cell
                 </a>
-        </Menu.Item>
-        <Menu.Item key="2">
+        </Menu.Item>}
+        { hasParentImage && <Menu.Item key="2">
           <a
             href={fovDownloadHref}
           >
             <Icon type="download" /> Full field image
                 </a>
-        </Menu.Item>
+        </Menu.Item>}
       </Menu>
     );
     return (<Dropdown overlay={menu} trigger={["click"]}>
