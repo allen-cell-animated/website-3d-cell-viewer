@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useDebugValue } from "react";
 import ReactDOM from "react-dom";
+import { find } from "lodash";
 
 import "antd/dist/antd.css";
 
@@ -7,6 +8,19 @@ import "./App.scss";
 
 import { ImageViewerApp } from "../src";
 import {ChannelNameMapping} from "../src/aics-image-viewer/shared/utils/formatChannelNames.ts"
+import FirebaseRequest from "./firebase";
+
+const mapping = [
+  { test: /(CMDRP)|(Memb)/, label: 'Membrane'},
+  { test: /(EGFP)|(RFPT)|(STRUCT)/, label: 'Labeled structure'},
+  { test: /(H3342)|(DNA)/, label: 'DNA' },
+  { test: /(100)|(Bright)/, label: 'Bright field' },
+];
+const channelGroupingMap = {
+  'Observed channels': ['CMDRP', 'EGFP', 'mtagRFPT', 'H3342', 'H3342_3', 'Bright_100', 'Bright_100X', 'TL 100x', 'TL_100x', 'Bright_2'],
+  'Segmentation channels': ['SEG_STRUCT', 'SEG_Memb', 'SEG_DNA'],
+  'Contour channels': ['CON_Memb', 'CON_DNA']
+};
 
 function parseQueryString() {
   var pairs = location.search.slice(1).split('&');
@@ -39,40 +53,64 @@ if (params) {
     fovPath = params.file;
     fovDownloadHref = "";
     cellDownloadHref = "";
+    runApp();
+  }
+  else if (params.dataset && params.id) {
+    const db = new FirebaseRequest();
+
+    db.getAvailableDatasets().then((datasets)=>{
+      const selectedDataset = find(datasets, { id: params.dataset });
+      return selectedDataset;
+    })
+    .then((dataset) => {
+      return db.selectDataset(dataset.manifest);
+    })
+    .then((datasetData)=>{
+      baseurl = datasetData.volumeViewerDataRoot;
+      cellDownloadHref = datasetData.downloadRoot + "/" + params.id;
+      //fovDownloadHref = datasetData.downloadRoot + "/" + params.id;
+    }).then(() => {
+      return db.getFileInfoByCellId(params.id);
+    }).then(fileInfo => {
+      cellPath = fileInfo.volumeviewerPath;
+      fovPath = fileInfo.fovVolumeviewerPath;
+      // strip "_atlas.json" because the viewer is going to add it :(
+      cellPath = cellPath.replace("_atlas.json", "");
+      fovPath = fovPath.replace("_atlas.json", "");
+      runApp();
+
+      // only now do we have all the data needed
+    });
+  }
+  else {
+    runApp();
+
   }
 }
+else {
+  runApp();
+}
 
-const mapping = [
-  { test: /(CMDRP)|(Memb)/, label: 'Membrane'},
-  { test: /(EGFP)|(RFPT)|(STRUCT)/, label: 'Labeled structure'},
-  { test: /(H3342)|(DNA)/, label: 'DNA' },
-  { test: /(100)|(Bright)/, label: 'Bright field' },
-];
-const channelGroupingMap = {
-  'Observed channels': ['CMDRP', 'EGFP', 'mtagRFPT', 'H3342', 'H3342_3', 'Bright_100', 'Bright_100X', 'TL 100x', 'TL_100x', 'Bright_2'],
-  'Segmentation channels': ['SEG_STRUCT', 'SEG_Memb', 'SEG_DNA'],
-  'Contour channels': ['CON_Memb', 'CON_DNA']
-};
-
-
-ReactDOM.render(
-  <section className="ant-layout">
-    <div className="mycellviewer">
-      <ImageViewerApp
-        cellId={cellid}
-        baseUrl={baseurl}
-        //cellPath="AICS-25/AICS-25_6035_43757"
-        //fovPath="AICS-25/AICS-25_6035"
-        cellPath={cellPath}
-        fovPath={fovPath}
-        defaultVolumesOn={[0, 1, 2]}
-        defaultSurfacesOn={[]}
-        fovDownloadHref={fovDownloadHref}
-        cellDownloadHref={cellDownloadHref}
-        channelNameMapping={mapping}
-        groupToChannelNameMap={channelGroupingMap}
-      />
-    </div>
-  </section>,
-  document.getElementById("cell-viewer")
-);
+function runApp() {
+  ReactDOM.render(
+    <section className="ant-layout">
+      <div className="mycellviewer">
+        <ImageViewerApp
+          cellId={cellid}
+          baseUrl={baseurl}
+          //cellPath="AICS-25/AICS-25_6035_43757"
+          //fovPath="AICS-25/AICS-25_6035"
+          cellPath={cellPath}
+          fovPath={fovPath}
+          defaultVolumesOn={[0, 1, 2]}
+          defaultSurfacesOn={[]}
+          fovDownloadHref={fovDownloadHref}
+          cellDownloadHref={cellDownloadHref}
+          channelNameMapping={mapping}
+          groupToChannelNameMap={channelGroupingMap}
+        />
+      </div>
+    </section>,
+    document.getElementById("cell-viewer")
+  );  
+}
