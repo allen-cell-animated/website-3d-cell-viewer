@@ -114,23 +114,21 @@ if (params) {
 
 function runApp() {
   ReactDOM.render(
-    <div className="mycellviewer">
-      <ImageViewerApp
-        cellId={args.cellid}
-        baseUrl={args.baseurl}
-        //cellPath="AICS-25/AICS-25_6035_43757"
-        //fovPath="AICS-25/AICS-25_6035"
-        appHeight="90vh"
-        cellPath={args.cellPath}
-        fovPath={args.fovPath}
-        defaultVolumesOn={args.channelsOn}
-        defaultSurfacesOn={args.surfacesOn}
-        fovDownloadHref={args.fovDownloadHref}
-        cellDownloadHref={args.cellDownloadHref}
-        channelNameMapping={mapping}
-        groupToChannelNameMap={channelGroupingMap}
-      />
-    </div>,
+    <ImageViewerApp
+      cellId={args.cellid}
+      baseUrl={args.baseurl}
+      //cellPath="AICS-25/AICS-25_6035_43757"
+      //fovPath="AICS-25/AICS-25_6035"
+      appHeight="90vh"
+      cellPath={args.cellPath}
+      fovPath={args.fovPath}
+      defaultVolumesOn={args.channelsOn}
+      defaultSurfacesOn={args.surfacesOn}
+      fovDownloadHref={args.fovDownloadHref}
+      cellDownloadHref={args.cellDownloadHref}
+      channelNameMapping={mapping}
+      groupToChannelNameMap={channelGroupingMap}
+    />,
     document.getElementById("cell-viewer")
   );
 }
