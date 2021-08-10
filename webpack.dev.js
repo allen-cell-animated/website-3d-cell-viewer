@@ -5,11 +5,11 @@ const common = require('./webpack.common');
 module.exports = merge(common, {
   devtool: 'eval-source-map',
   output: {
-    publicPath: '/public/'
+    publicPath: '/imageviewer/'
   },
   devServer: {
-    publicPath: '/public/',
-    openPage: 'public/',
+    publicPath: '/imageviewer/',
+    openPage: 'imageviewer/',
     port: 9020,
     host: '0.0.0.0',
     disableHostCheck: true
