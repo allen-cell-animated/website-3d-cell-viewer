@@ -5,7 +5,7 @@ const common = require('./webpack.common');
 module.exports = merge(common, {
   devtool: 'eval-source-map',
   output: {
-    publicPath: 'imageviewer/'
+    publicPath: '/imageviewer/'
   },
   devServer: {
     publicPath: '/imageviewer/',
