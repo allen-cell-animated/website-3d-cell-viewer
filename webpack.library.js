@@ -133,11 +133,7 @@ module.exports = {
             name: 'imageviewer/font/[name].[ext]'
           }
         }]
-      },
-      {
-        test: /Worker\.js$/,
-        use: 'worker-loader?inline=true'
-      },
+      }
     ]
   }
 };

@@ -56,7 +56,9 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+              sassOptions: {
+                includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+              }
             }
           }
         ]
@@ -66,6 +68,7 @@ module.exports = {
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
+            options: {publicPath: "./"}
           },
           "css-loader",
         ]
@@ -104,10 +107,6 @@ module.exports = {
             name: 'imageviewer/font/[name].[ext]'
           }
         }]
-      },
-      {
-        test: /Worker\.js$/,
-        use: 'worker-loader?inline=true'
       }
     ]
   }
