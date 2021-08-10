@@ -93,13 +93,13 @@ else {
 
 function runApp() {
   ReactDOM.render(
-    <section className="ant-layout">
       <div className="mycellviewer">
         <ImageViewerApp
           cellId={cellid}
           baseUrl={baseurl}
           //cellPath="AICS-25/AICS-25_6035_43757"
           //fovPath="AICS-25/AICS-25_6035"
+          appHeight="90vh"
           cellPath={cellPath}
           fovPath={fovPath}
           defaultVolumesOn={[0, 1, 2]}
@@ -109,8 +109,7 @@ function runApp() {
           channelNameMapping={mapping}
           groupToChannelNameMap={channelGroupingMap}
         />
-      </div>
-    </section>,
+      </div>,
     document.getElementById("cell-viewer")
   );  
 }
