@@ -61,11 +61,13 @@ const args = {
 
 if (params) {
   if (params.ch) {
+    // ?ch=1,2
     args.channelsOn = (params.ch.split(",")).map(numstr => parseInt(numstr, 10));
   }
   // quick way to load a atlas.json from a special directory.
   //
   if (params.file) {
+    // ?file=relative-path-to-atlas-on-isilon
     args.cellid = 1;
     args.baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
     args.cellPath = params.file;
@@ -74,6 +76,7 @@ if (params) {
     args.cellDownloadHref = "";
     runApp();
   } else if (params.dataset && params.id) {
+    // ?dataset=aics_hipsc_v2020.1&id=232265
     const db = new FirebaseRequest();
 
     db.getAvailableDatasets()
