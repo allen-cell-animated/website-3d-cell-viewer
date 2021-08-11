@@ -8,6 +8,12 @@ body {
   font-family: 'Overpass'
 }
 
+// Adjust size of container here
+.cell-viewer-app {
+  width: 100vw;
+  height: 100vh !important;
+}
+
 #cell-viewer .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
   transform: translateY(-270%);
 }
