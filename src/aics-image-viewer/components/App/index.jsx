@@ -187,7 +187,7 @@ export default class App extends React.Component {
   }
 
   setInitialChannelConfig(channelNames, channelColors) {
-    const { defaultVolumesOn, defaultSurfacesOn } = this.props;
+    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
     return channelNames.map((channel, index) => {
       return {
         name: this.nameClean(channel) || "Channel " + index,
@@ -514,7 +514,7 @@ export default class App extends React.Component {
 
     const cleanNewNames = map(rawDims.channel_names, this.nameClean);
     const filteredNewChannelNames = cleanNewNames;
-    const { defaultVolumesOn, defaultSurfacesOn } = this.props;
+    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
     let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
       const lutObject = aimg
         .getHistogram(index)
@@ -524,6 +524,11 @@ export default class App extends React.Component {
         color: TFEDITOR_DEFAULT_COLOR,
       }));
       aimg.setLut(index, lutObject.lut);
+
+      // const initSettings = initialChannelSettings[index];
+      // if (initSettings && initSettings.color) {
+
+      // }
 
       return {
         name: this.nameClean(channel) || "Channel " + index,
@@ -1035,8 +1040,12 @@ App.defaultProps = {
   rawData: null,
   // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
   rawDims: null,
+  // list of channel indices
   defaultSurfacesOn: [1],
+  // list of channel indices
   defaultVolumesOn: [],
+  // map of index:{color, lutMin, lutMax}
+  initialChannelSettings: {},
   // collection of {group name : array of channel names that fit under group}
   groupToChannelNameMap: {},
   // see nameClean function

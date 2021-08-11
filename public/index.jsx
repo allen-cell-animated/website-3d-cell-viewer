@@ -9,6 +9,7 @@ import "./App.scss";
 import { ImageViewerApp } from "../src";
 import { ChannelNameMapping } from "../src/aics-image-viewer/shared/utils/formatChannelNames.ts";
 import FirebaseRequest from "./firebase";
+import { registerVersion } from "firebase";
 
 const mapping = [
   { test: /(CMDRP)|(Memb)/, label: "Membrane" },
@@ -57,12 +58,40 @@ const args = {
     "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   channelsOn: [0, 1, 2],
   surfacesOn: [],
+  initialChannelSettings: {"0":{}, "1":{}, "2":{}}
 };
 
 if (params) {
   if (params.ch) {
     // ?ch=1,2
+    // ?luts=0,255,0,255
+    // ?colors=ff0000,00ff00
+    const initialChannelSettings = {};
     args.channelsOn = (params.ch.split(",")).map(numstr => parseInt(numstr, 10));
+    for(let i = 0; i < args.channelsOn.length; ++i) {
+      initialChannelSettings[args.channelsOn[i]] = {};
+    }
+    // look for luts or color
+    if (params.luts) {
+      const luts = (params.luts.split(",")).map(numstr => parseInt(numstr, 10));
+      if (luts.length !== args.channelsOn.length*2) {
+        console.log("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
+      }
+      for(let i = 0; i < args.channelsOn.length; ++i) {
+        initialChannelSettings[args.channelsOn[i]].lutMin = luts[i*2];
+        initialChannelSettings[args.channelsOn[i]].lutMax = luts[i*2+1];
+      }
+    }
+    if (params.colors) {
+      const colors = params.colors.split(",");
+      if (colors.length !== args.channelsOn.length) {
+        console.log("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
+      }
+      for(let i = 0; i < args.channelsOn.length; ++i) {
+        initialChannelSettings[args.channelsOn[i]].color = colors[i];
+      }
+    }
+    args.initialChannelSettings = initialChannelSettings;
   }
   // quick way to load a atlas.json from a special directory.
   //
@@ -114,7 +143,6 @@ if (params) {
 
 function runApp() {
   ReactDOM.render(
-    <div className="mycellviewer">
       <ImageViewerApp
         cellId={args.cellid}
         baseUrl={args.baseurl}
@@ -129,8 +157,8 @@ function runApp() {
         cellDownloadHref={args.cellDownloadHref}
         channelNameMapping={mapping}
         groupToChannelNameMap={channelGroupingMap}
-      />
-    </div>,
+        initialChannelSettings={args.initialChannelSettings}
+      />,
     document.getElementById("cell-viewer")
   );
 }
