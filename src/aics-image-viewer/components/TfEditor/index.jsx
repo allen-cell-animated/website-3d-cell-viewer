@@ -2,7 +2,7 @@ import React from "react";
 import * as d3 from "d3";
 import { SketchPicker } from "react-color";
 import Nouislider from "nouislider-react";
-import "nouislider/distribute/nouislider.css";
+import "nouislider/dist/nouislider.css";
 
 import "./styles.scss";
 

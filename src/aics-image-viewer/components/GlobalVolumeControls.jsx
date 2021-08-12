@@ -1,6 +1,6 @@
 import React from 'react';
 import Nouislider from 'nouislider-react';
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
 
 import NumericInput from 'react-numeric-input';
 
