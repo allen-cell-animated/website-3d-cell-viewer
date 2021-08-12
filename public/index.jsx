@@ -60,6 +60,14 @@ const args = {
   surfacesOn: [],
   initialChannelSettings: {"0":{}, "1":{}, "2":{}}
 };
+const viewerConfig = {
+  view: "3D", // "XY", "XZ", "YZ"
+  mode: "default", // "pathtrace", "maxprojection"
+  maskAlpha: 0,
+  brightness: 70,
+  density: 50,
+  levels: [0,128,255],
+};
 
 if (params) {
   if (params.ch) {
@@ -158,6 +166,7 @@ function runApp() {
         channelNameMapping={mapping}
         groupToChannelNameMap={channelGroupingMap}
         initialChannelSettings={args.initialChannelSettings}
+        viewerConfig={viewerConfig}
       />,
     document.getElementById("cell-viewer")
   );

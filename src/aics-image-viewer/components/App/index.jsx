@@ -65,6 +65,34 @@ const CHANNEL_SETTINGS = "channelSettings";
 export default class App extends React.Component {
   constructor(props) {
     super(props);
+
+    let viewmode = ViewMode.threeD;
+    let pathtrace = false;
+    let maxproject = false;
+    if (props.viewerConfig) {
+      if (props.viewerConfig.mode === "pathtrace") {
+        pathtrace = true;
+        maxproject = false;
+      }
+      else if (props.viewerConfig.mode === "maxprojection") {
+        pathtrace = true;
+        maxproject = false;
+      }
+      else {
+        pathtrace = false;
+        maxproject = false;
+      }
+      if (props.viewerConfig.view === "XY") {
+        viewmode = ViewMode.xy;
+      }
+      else if (props.viewerConfig.view === "YZ") {
+        viewmode = ViewMode.yz;
+      }
+      else if (props.viewerConfig.view === "XZ") {
+        viewmode = ViewMode.xz;
+      }
+    }
+        
     this.state = {
       image: null,
       view3d: null,
@@ -85,14 +113,14 @@ export default class App extends React.Component {
       userSelections: {
         imageType: SEGMENTED_CELL,
         controlPanelClosed: false,
-        [MODE]: ViewMode.threeD,
+        [MODE]: viewmode,
         [AUTO_ROTATE]: false,
-        [MAX_PROJECT]: false,
-        [PATH_TRACE]: false,
-        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
-        [BRIGHTNESS_SLIDER_LEVEL]: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        [DENSITY_SLIDER_LEVEL]: DENSITY_SLIDER_LEVEL_DEFAULT,
-        [LEVELS_SLIDER]: LEVELS_SLIDER_DEFAULT,
+        [MAX_PROJECT]: maxproject,
+        [PATH_TRACE]: pathtrace,
+        [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
+        [BRIGHTNESS_SLIDER_LEVEL]: [props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+        [DENSITY_SLIDER_LEVEL]: [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
+        [LEVELS_SLIDER]: props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
         // channelSettings is a flat list of objects of this type:
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         [CHANNEL_SETTINGS]: [],
@@ -335,12 +363,16 @@ export default class App extends React.Component {
 
   intializeNewImage(aimg, newChannelSettings) {
     const { userSelections, view3d } = this.state;
-    const { filterFunc } = this.props;
+    const { filterFunc, viewerConfig } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
         ? ALPHA_MASK_SLIDER_3D_DEFAULT
         : ALPHA_MASK_SLIDER_2D_DEFAULT;
+    // if maskAlpha is defined in viewerConfig then it will override the above
+    if (viewerConfig.maskAlpha !== undefined) {
+      alphaLevel = [viewerConfig.maskAlpha];
+    }
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
     let imageBrightness = brightnessSliderToImageValue(
@@ -1086,4 +1118,14 @@ App.defaultProps = {
     fovCellSwitchControls: true,
     viewModeRadioButtons: true,
   },
+  viewerConfig: {
+    view: "3D", // "XY", "XZ", "YZ"
+    mode: "default", // "pathtrace", "maxprojection"
+    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
+    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
+    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
+    levels: LEVELS_SLIDER_DEFAULT,
+    region: [0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
+    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
+  }
 };
