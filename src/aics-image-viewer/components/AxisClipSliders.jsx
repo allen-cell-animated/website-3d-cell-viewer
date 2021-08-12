@@ -4,7 +4,7 @@ import {
   Row,
 } from 'antd';
 import Nouislider from 'nouislider-react';
-import 'nouislider/dist/nouislider.css';
+import 'nouislider/distribute/nouislider.css';
 
 import React from 'react';
 

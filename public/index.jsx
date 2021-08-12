@@ -1,4 +1,3 @@
-import React, { useDebugValue } from "react";
 import ReactDOM from "react-dom";
 import { find } from "lodash";
 
@@ -7,9 +6,7 @@ import "antd/dist/antd.css";
 import "./App.scss";
 
 import { ImageViewerApp } from "../src";
-import { ChannelNameMapping } from "../src/aics-image-viewer/shared/utils/formatChannelNames.ts";
 import FirebaseRequest from "./firebase";
-import { registerVersion } from "firebase";
 
 const mapping = [
   { test: /(CMDRP)|(Memb)/, label: "Membrane" },
