@@ -13,6 +13,15 @@
     .ant-progress-bg {
         position: relative;
     }
+
+    .ant-progress, .ant-progress-line {
+        position: absolute;
+    }
+
+    .ant-progress {
+        background-color: white;
+        z-index: 9999;
+    }
     
     .ant-progress-status-active .ant-progress-bg::before {
         position: absolute;
