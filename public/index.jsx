@@ -61,13 +61,16 @@ const args = {
 const viewerConfig = {
   view: "3D", // "XY", "XZ", "YZ"
   mode: "default", // "pathtrace", "maxprojection"
-  maskAlpha: 0,
+  maskAlpha: 50,
   brightness: 70,
   density: 50,
   levels: [0,128,255],
 };
 
 if (params) {
+  if (params.mask) {
+    viewerConfig.maskAlpha = parseInt(params.mask, 10);
+  }
   if (params.ch) {
     // ?ch=1,2
     // ?luts=0,255,0,255
