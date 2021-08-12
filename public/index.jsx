@@ -56,23 +56,19 @@ const channelGroupingMap = {
 
 
 ReactDOM.render(
-  <section className="ant-layout">
-    <div className="mycellviewer">
-      <ImageViewerApp
-        cellId={cellid}
-        baseUrl={baseurl}
-        //cellPath="AICS-25/AICS-25_6035_43757"
-        //fovPath="AICS-25/AICS-25_6035"
-        cellPath={cellPath}
-        fovPath={fovPath}
-        defaultVolumesOn={[0, 1, 2]}
-        defaultSurfacesOn={[]}
-        fovDownloadHref={fovDownloadHref}
-        cellDownloadHref={cellDownloadHref}
-        channelNameMapping={mapping}
-        groupToChannelNameMap={channelGroupingMap}
-      />
-    </div>
-  </section>,
+  <ImageViewerApp
+    cellId={cellid}
+    baseUrl={baseurl}
+    //cellPath="AICS-25/AICS-25_6035_43757"
+    //fovPath="AICS-25/AICS-25_6035"
+    cellPath={cellPath}
+    fovPath={fovPath}
+    defaultVolumesOn={[0, 1, 2]}
+    defaultSurfacesOn={[]}
+    fovDownloadHref={fovDownloadHref}
+    cellDownloadHref={cellDownloadHref}
+    channelNameMapping={mapping}
+    groupToChannelNameMap={channelGroupingMap}
+  />,
   document.getElementById("cell-viewer")
 );
