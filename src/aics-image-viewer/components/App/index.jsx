@@ -92,7 +92,7 @@ export default class App extends React.Component {
         viewmode = ViewMode.xz;
       }
     }
-        
+
     this.state = {
       image: null,
       view3d: null,
@@ -473,7 +473,22 @@ export default class App extends React.Component {
       const initSettings = this.props.initialChannelSettings[channelIndex];
       let lutObject = {};
       if (initSettings && initSettings.lutMin !== undefined && initSettings.lutMax !== undefined) {
-        lutObject = histogram.lutGenerator_minMax(initSettings.lutMin, initSettings.lutMax);
+        // find percentile or mode modifier if provided
+        let lmin = initSettings.lutMin;
+        let lmax = initSettings.lutMax;
+        if (initSettings.lutMinModifier === "m") {
+          lmin = histogram.maxBin * initSettings.lutMin;
+        }
+        else if (initSettings.lutMinModifier === "p") {
+          lmin = histogram.findBinOfPercentile(initSettings.lutMin);
+        }
+        if (initSettings.lutMaxModifier === "m") {
+          lmax = histogram.maxBin * initSettings.lutMax;
+        }
+        else if (initSettings.lutMaxModifier === "p") {
+          lmax = histogram.findBinOfPercentile(initSettings.lutMax);
+        }
+        lutObject = histogram.lutGenerator_minMax(Math.min(lmin, lmax), Math.max(lmin, lmax));
       } else {
         lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
       }
