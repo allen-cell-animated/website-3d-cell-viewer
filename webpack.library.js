@@ -87,7 +87,9 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               sourceMap: true,
-              includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+              sassOptions: {
+                includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+              }
             }
           }
         ]
