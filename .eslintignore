@@ -1,4 +1,3 @@
-public/
 dist/
 src/aics-image-viewer/shared/utils/webgl-debug.js
 server.js

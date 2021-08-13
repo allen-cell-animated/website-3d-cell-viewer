@@ -5,17 +5,16 @@ html,
 body {
   height: 100%;
   width: 100%;
-  display: flex;
   font-family: 'Overpass'
 }
 
-.mycellviewer {
-  display: flex;
-  flex: 1;
-  height: 45vw;
-  width: 100%;
+// Adjust container width (height needs to be changed through the appHeight prop for ImageViewerApp
+// because multiple components depend on it)
+.cell-viewer-app {
+  width: 100vw;
 }
 
-.mycellviewer .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+// aligning the collapse arrows in the control panel
+#cell-viewer .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
   transform: translateY(-270%);
 }

@@ -232,6 +232,7 @@ export default class ChannelsWidgetRow extends React.Component {
 
   renderActions() {
     return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
+      key="openSettingsButton"
       type="setting"
       theme={this.state.controlsOpen ? 'filled' : 'outlined'}
       onClick={this.toggleControlsOpen}

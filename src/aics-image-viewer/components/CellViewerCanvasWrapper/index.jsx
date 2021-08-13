@@ -91,7 +91,6 @@ export default class ViewerWrapper extends React.Component {
       activeAxis={this.getActiveAxis()}
       setAxisClip={this.setAxisClip}
       numSlices={numSlices}
-      mode={mode}
       pathTraceOn={pathTraceOn}
       autorotate={autorotate}
       onAutorotateChange={onAutorotateChange}
