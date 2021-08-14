@@ -109,7 +109,7 @@ if (params) {
         firstchar = lstr.charAt(0);
         if (firstchar === "m" || firstchar === "p") {
           lutmod = firstchar;
-          lvalue = parseFloat(lstr.substring(1));
+          lvalue = parseFloat(lstr.substring(1))/100.0;
         }
         else {
           lutmod = "";
