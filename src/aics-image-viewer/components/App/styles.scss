@@ -10,8 +10,17 @@
 }
 
 .cell-viewer-wrapper {
-    .ant-progress-bg {
+    .ant-layout-content {
         position: relative;
+    }
+
+    .ant-progress, .ant-progress-line {
+        position: absolute;
+    }
+
+    .ant-progress {
+        background-color: white;
+        z-index: 20;
     }
     
     .ant-progress-status-active .ant-progress-bg::before {
