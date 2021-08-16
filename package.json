@@ -25,7 +25,7 @@
   "author": "Megan Riel-Mehan",
   "license": "ISC",
   "dependencies": {
-    "@aics/volume-viewer": "file:../volume-viewer",
+    "@aics/volume-viewer": "^2.1.1",
     "classnames": "^2.2.5",
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
