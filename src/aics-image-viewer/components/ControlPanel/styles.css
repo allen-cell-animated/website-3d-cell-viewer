@@ -43,6 +43,6 @@
   .ant-collapse {
     border-radius: 0;
   }
-  //slider settings
+  /*slider settings*/
   @extend %axis-override;
 }

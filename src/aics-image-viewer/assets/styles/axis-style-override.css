@@ -1,7 +1,7 @@
 @import "./variables.css";
 
 %axis-override {
-    //slider settings
+    /*slider settings*/
     .noUi-handle,
     .noUi-horizontal .noUi-handle {
         box-shadow: none;
