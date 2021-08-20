@@ -44,7 +44,7 @@ import ControlPanel from "../ControlPanel";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
-import "../../assets/styles/globals.scss";
+import "../../assets/styles/globals.css";
 import {
   gammaSliderToImageValues,
   densitySliderToImageValue,
@@ -52,7 +52,7 @@ import {
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
 
-import "./styles.scss";
+import "./styles.css";
 
 const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;

@@ -4,7 +4,7 @@ import { SketchPicker } from "react-color";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
-import "./styles.scss";
+import "./styles.css";
 
 import { Button, Checkbox } from "antd";
 

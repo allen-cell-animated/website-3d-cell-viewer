@@ -4,7 +4,7 @@ import { find } from "lodash";
 
 import "antd/dist/antd.css";
 
-import "./App.scss";
+import "./App.css";
 
 import { ImageViewerApp } from "../src";
 import FirebaseRequest from "./firebase";

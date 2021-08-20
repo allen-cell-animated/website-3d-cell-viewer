@@ -1,5 +1,5 @@
 @import "../../assets/styles/axis-style-override";
-@import "../../assets/styles/variables.scss";
+@import "../../assets/styles/variables.css";
 ::-webkit-scrollbar { 
   display: none; 
 }
