@@ -4,6 +4,8 @@ import { find } from "lodash";
 
 import "antd/dist/antd.css";
 
+// Components
+import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
 import { ImageViewerApp } from "../src";

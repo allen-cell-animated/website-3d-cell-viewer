@@ -41,33 +41,34 @@ module.exports = {
         exclude: [/node_modules/, /dist/],
         use: 'babel-loader'
       },
-      {
-        test: /\.scss$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true
-            }
-          },
-          'resolve-url-loader',
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-              sassOptions: {
-                includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
-              }
-            }
-          }
-        ]
-      },
+      // {
+      //   test: /\.scss$/,
+      //   use: [
+      //     'style-loader',
+      //     {
+      //       loader: 'css-loader',
+      //       options: {
+      //         sourceMap: true
+      //       }
+      //     },
+      //     'resolve-url-loader',
+      //     {
+      //       loader: 'sass-loader',
+      //       options: {
+      //         sourceMap: true,
+      //         sassOptions: {
+      //           includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
+      //         }
+      //       }
+      //     }
+      //   ]
+      // },
       {
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader,
-          'css-loader'
+          'css-loader',
+          'postcss-loader'
         ]
       },
       {
