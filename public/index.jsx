@@ -55,7 +55,7 @@ const args = {
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   channelsOn: [0, 1, 2],
   surfacesOn: [],
-  initialChannelSettings: { 0: {}, 1: {}, 2: {} },
+  initialChannelSettings: {},
 };
 const viewerConfig = {
   view: "3D", // "XY", "XZ", "YZ"
