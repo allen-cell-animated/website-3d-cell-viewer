@@ -1,3 +1,6 @@
+const path = require('path');
+const postcss_url = require('postcss-url');
+
 module.exports = {
     plugins: [
         require('postcss-discard-comments'),
@@ -5,6 +8,7 @@ module.exports = {
         require('postcss-import'),
         require('postcss-simple-vars'),
         require('postcss-mixins'),
-        require('postcss-extend-rule')
+        require('postcss-extend-rule'),
+        require('postcss-url')({url:"copy", basePath:path.resolve(__dirname, "src/aics-image-viewer"), assetsPath:"../../../fonts"})
     ]
 };
