@@ -186,8 +186,6 @@ function runApp() {
     <ImageViewerApp
       cellId={args.cellid}
       baseUrl={args.baseurl}
-      //cellPath="AICS-25/AICS-25_6035_43757"
-      //fovPath="AICS-25/AICS-25_6035"
       appHeight="90vh"
       cellPath={args.cellPath}
       fovPath={args.fovPath}
