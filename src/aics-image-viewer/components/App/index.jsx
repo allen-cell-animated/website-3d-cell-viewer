@@ -1114,9 +1114,6 @@ App.defaultProps = {
   channelNameMapping: [],
   // allows you to completely ignore channels by name
   filterFunc: null,
-  IMAGE_VIEWER_SERVICE_URL: "//allen/aics/animated-cell/Allen-Cell-Explorer/Allen-Cell-Explorer_1.4.0",
-  DOWNLOAD_SERVER: "http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Data/",
-  IMAGE_SERVER: "http://dev-aics-dtp-001/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
   appHeight: "100vh",
   cellPath: "",
   fovPath: "",
