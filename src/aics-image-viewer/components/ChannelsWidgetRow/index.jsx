@@ -28,7 +28,7 @@ import {
 
 import ColorPicker from '../ColorPicker';
 
-import './styles.scss';
+import './styles.css';
 import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;

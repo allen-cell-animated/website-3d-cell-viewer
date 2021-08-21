@@ -4,7 +4,7 @@ import React from 'react';
 import viewMode from '../../shared/enums/viewMode';
 import { THREE_D_MODE } from '../../shared/constants';
 
-import './styles.scss';
+import './styles.css';
 
 export default class AutoRotateButton extends React.Component {
 
