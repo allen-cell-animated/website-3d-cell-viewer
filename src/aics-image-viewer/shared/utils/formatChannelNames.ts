@@ -1,7 +1,7 @@
 export interface ChannelNameMapping {
     test: RegExp;
     label: string;
-};
+}
 
 export default function formatChannelNames(name: string, remappings: ChannelNameMapping[]): string {
     for (const i of remappings) {
