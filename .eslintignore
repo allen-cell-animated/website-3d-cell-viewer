@@ -1,6 +1,4 @@
-dist/
 public/
-lib/
 es/
 type-declarations/
 src/aics-image-viewer/shared/utils/webgl-debug.js

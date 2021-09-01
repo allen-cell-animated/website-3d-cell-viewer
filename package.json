@@ -8,9 +8,6 @@
   "types": "type-declarations",
   "files": [
     "es",
-    "lib",
-    "dist",
-    "style",
     "type-declarations",
     "README.md",
     "package.json"

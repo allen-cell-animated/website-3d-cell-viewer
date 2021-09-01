@@ -4,6 +4,4 @@ imageviewer/
 environment.txt
 .DS_Store
 es/
-lib/
-dist/
 type-declarations/
