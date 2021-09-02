@@ -62,6 +62,17 @@ const ERROR_STATUS = "Error";
 const INIT_COLORS = PRESET_COLORS_0;
 const CHANNEL_SETTINGS = "channelSettings";
 
+function colorHexToArray(hex) {
+  // hex is a xxxxxx string. split it into array of rgb ints
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result) {
+    return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+  }
+  else {
+    return null;
+  }
+}
+
 export default class App extends React.Component {
   constructor(props) {
     super(props);
@@ -212,10 +223,9 @@ export default class App extends React.Component {
       let color = channelColors[index] ? channelColors[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
       const initSettings = initialChannelSettings[index];
       if (initSettings && initSettings.color) {
-        // init color is a xxxxxx string. split it into array of rgb ints
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(initSettings.color);
-        if (result) {
-          color = [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+        const initColor = colorHexToArray(initSettings.color);
+        if (initColor) {
+          color = initColor;
         }
       }
 
@@ -590,10 +600,9 @@ export default class App extends React.Component {
       let color = INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
       const initSettings = initialChannelSettings[index];
       if (initSettings && initSettings.color) {
-        // init color is a xxxxxx string. split it into array of rgb ints
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(initSettings.color);
-        if (result) {
-          color = [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+        const initColor = colorHexToArray(initSettings.color);
+        if (initColor) {
+          color = initColor;
         }
       }
 
