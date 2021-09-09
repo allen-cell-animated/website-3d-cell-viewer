@@ -11,8 +11,3 @@ body {
 .cell-viewer-app {
   width: 100vw;
 }
-
-/* aligning the collapse arrows in the control panel */
-#cell-viewer .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
-  transform: translateY(-270%);
-}
