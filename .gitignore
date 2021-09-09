@@ -3,4 +3,5 @@ node_modules
 imageviewer/
 environment.txt
 .DS_Store
-dist/
+es/
+type-declarations/

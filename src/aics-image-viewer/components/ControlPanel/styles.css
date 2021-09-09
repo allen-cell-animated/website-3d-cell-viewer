@@ -1,5 +1,5 @@
 @import "../../assets/styles/axis-style-override";
-@import "../../assets/styles/variables.scss";
+@import "../../assets/styles/variables.css";
 ::-webkit-scrollbar { 
   display: none; 
 }
@@ -43,6 +43,6 @@
   .ant-collapse {
     border-radius: 0;
   }
-  //slider settings
+  /*slider settings*/
   @extend %axis-override;
 }

@@ -1,7 +1,9 @@
 public/
-dist/
+es/
+type-declarations/
 src/aics-image-viewer/shared/utils/webgl-debug.js
 server.js
 webpack.*.js
+postcss.*.js
 node_modules
 .env

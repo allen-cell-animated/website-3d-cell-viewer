@@ -28,7 +28,7 @@ import {
 
 import ColorPicker from '../ColorPicker';
 
-import './styles.scss';
+import './styles.css';
 import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
@@ -232,6 +232,7 @@ export default class ChannelsWidgetRow extends React.Component {
 
   renderActions() {
     return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
+      key="openSettingsButton"
       type="setting"
       theme={this.state.controlsOpen ? 'filled' : 'outlined'}
       onClick={this.toggleControlsOpen}

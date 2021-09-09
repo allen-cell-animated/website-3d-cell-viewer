@@ -2,7 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   plugins: [
-    new CleanWebpackPlugin(['imageviewer/*']),
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
@@ -42,30 +42,11 @@ module.exports = {
         use: 'babel-loader'
       },
       {
-        test: /\.scss$/,
-        use: [
-          'style-loader',
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true
-            }
-          },
-          'resolve-url-loader',
-          {
-            loader: 'sass-loader',
-            options: {
-              sourceMap: true,
-              includePaths: [`${__dirname}/src/aics-image-viewer/assets/styles`]
-            }
-          }
-        ]
-      },
-      {
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader,
-          'css-loader'
+          'css-loader',
+          'postcss-loader'
         ]
       },
       {
@@ -102,10 +83,6 @@ module.exports = {
             name: 'imageviewer/font/[name].[ext]'
           }
         }]
-      },
-      {
-        test: /Worker\.js$/,
-        use: 'worker-loader?inline=true'
       }
     ]
   }

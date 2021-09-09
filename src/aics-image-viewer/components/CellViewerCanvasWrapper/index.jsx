@@ -6,7 +6,7 @@ import { Icon } from 'antd';
 import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders';
-import './styles.scss';
+import './styles.css';
 
 const ViewMode = viewMode.mainMapping;
 
@@ -91,7 +91,6 @@ export default class ViewerWrapper extends React.Component {
       activeAxis={this.getActiveAxis()}
       setAxisClip={this.setAxisClip}
       numSlices={numSlices}
-      mode={mode}
       pathTraceOn={pathTraceOn}
       autorotate={autorotate}
       onAutorotateChange={onAutorotateChange}

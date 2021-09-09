@@ -7,7 +7,7 @@ import {
   List,
 } from 'antd';
 
-import formatChannelName from '../../shared/utils/formatChannelNames.ts';
+import formatChannelName from '../../shared/utils/formatChannelNames';
 import {
   COLORIZE_ALPHA,
   COLORIZE_ENABLED,
@@ -20,7 +20,7 @@ import colorPalette from '../../shared/colorPalette';
 import SharedCheckBox from '../shared/SharedCheckBox';
 import ChannelsWidgetRow from '../ChannelsWidgetRow';
 
-import './styles.scss';
+import './styles.css';
 
 const { Panel } = Collapse;
 

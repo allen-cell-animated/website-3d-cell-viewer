@@ -24,7 +24,7 @@
             }
         }
 
-        // hover states of checkboxes 
+        /* hover states of checkboxes */
         .ant-checkbox:hover .ant-checkbox-inner {
             border-color: white;
         }

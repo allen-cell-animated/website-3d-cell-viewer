@@ -16,7 +16,7 @@ import {
 } from "../../shared/constants";
 import enums from "../../shared/enums";
 
-import "./styles.scss";
+import "./styles.css";
 const ViewMode = enums.viewMode.mainMapping;
 
 const RadioGroup = Radio.Group;

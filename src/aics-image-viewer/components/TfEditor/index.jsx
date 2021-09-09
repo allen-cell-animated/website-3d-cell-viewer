@@ -2,9 +2,9 @@ import React from "react";
 import * as d3 from "d3";
 import { SketchPicker } from "react-color";
 import Nouislider from "nouislider-react";
-import "nouislider/dist/nouislider.css";
+import "nouislider/distribute/nouislider.css";
 
-import "./styles.scss";
+import "./styles.css";
 
 import { Button, Checkbox } from "antd";
 
