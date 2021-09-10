@@ -27,7 +27,7 @@ const { Panel } = Collapse;
 export default class ChannelsWidget extends React.Component {
   constructor(props) {
     super(props);
-    this.renderVisiblityControls = this.renderVisiblityControls.bind(this);
+    this.renderVisibilityControls = this.renderVisibilityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
     this.showSurfaces = this.showSurfaces.bind(this);
     this.hideVolumes = this.hideVolumes.bind(this);
@@ -50,7 +50,7 @@ export default class ChannelsWidget extends React.Component {
     this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
   }
 
-  renderVisiblityControls(key, channelArray) {
+  renderVisibilityControls(key, channelArray) {
     const { channelSettings, channelDataChannels, nameClean} = this.props;
 
     const arrayOfNames = map(channelArray, channelIndex => {
@@ -100,7 +100,7 @@ export default class ChannelsWidget extends React.Component {
         <Card
           bordered={false}
           title={key}
-          extra={this.renderVisiblityControls(key, channelArray)}
+          extra={this.renderVisibilityControls(key, channelArray)}
           type="inner"
           key={key}
         >
