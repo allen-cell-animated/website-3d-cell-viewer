@@ -28,9 +28,6 @@ module.exports = {
       jQuery: 'jquery',
       $: 'jquery'
     }),
-    // ignores a webcomponents dependency on a server side module since this is for front end only.
-    // see: https://github.com/webcomponents/webcomponentsjs/issues/794
-    new webpack.IgnorePlugin(/vertx/)
   ],
   module: {
     rules: [{
