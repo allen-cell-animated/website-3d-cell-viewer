@@ -20,7 +20,7 @@ export function BottomPanel(props) {
     >
         Options
         <Icon type="double-right" className="button-arrow" />
-    </Button>
+    </Button>;
 
     return (
         <div className="container">
@@ -42,15 +42,6 @@ export function BottomPanel(props) {
                 mask={false}
                 title={title}
             >
-                {/* <Button 
-                    className="close-button"
-
-                    size="small"
-                    onClick={toggleDrawer}
-                >
-                    Options
-                    <Icon type="double-right" className="button-arrow"/>
-                </Button> */}
                 <p>test</p>
             </Drawer>
         </div>

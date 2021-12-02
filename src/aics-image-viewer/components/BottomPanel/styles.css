@@ -9,15 +9,13 @@
 
 .drawer {
     position: absolute;
-    /* display: flex;
-    flex-direction: column;
-    justify-content: flex-end; */
 }
 
 .ant-drawer-content-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    height: unset !important;
 }
 
 .ant-drawer-content, .ant-drawer-header {
@@ -37,9 +35,8 @@
 }
 
 .close-button {
-    /* position: relative; */
-    /* top: -30px; */
-    /* right: 0; */
+    position: absolute;
+    right: 0;
 }
 
 .button-arrow {
