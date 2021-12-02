@@ -1,0 +1,47 @@
+.container { 
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.drawer {
+    position: absolute;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: flex-end; */
+}
+
+.ant-drawer-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.ant-drawer-content, .ant-drawer-header {
+    background: none;
+}
+
+.ant-drawer-body {
+    background-color: #ffffff;
+}
+
+.options-button {
+
+}
+
+.open-button {
+    width: 100px;
+}
+
+.close-button {
+    /* position: relative; */
+    /* top: -30px; */
+    /* right: 0; */
+}
+
+.button-arrow {
+    transform: rotate(90deg);
+}

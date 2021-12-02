@@ -1,32 +1,57 @@
 import React, { useState } from 'react';
-import { Drawer, Button } from 'antd';
+import { Drawer, Button, Icon } from 'antd';
+
+import './styles.css';
 
 export function BottomPanel(props) {
     const [visible, setVisible] = useState(false);
-    const showDrawer = () => {
-        setVisible(true);
+    const toggleDrawer = () => {
+        setVisible(!visible);
     };
     const onClose = () => {
         setVisible(false);
     };
+
+    const title = <Button
+        className="close-button"
+
+        size="small"
+        onClick={toggleDrawer}
+    >
+        Options
+        <Icon type="double-right" className="button-arrow" />
+    </Button>
+
     return (
-        <div style={{ 
-            position: 'absolute',
-            bottom: 0,
-            width: "100%"
-        }}>
-            <Button type="primary" onClick={showDrawer}>
-                Open
+        <div className="container">
+            <Button 
+                className="open-button"
+                size="small"
+                onClick={toggleDrawer}
+            >
+                Options
+                <Icon type="double-left" className="button-arrow"/>
             </Button>
             <Drawer 
-                title="Basic Drawer"
+                className="drawer"
                 placement="bottom"
+                closable={false}
                 onClose={onClose}
-                visible={visible}
                 getContainer={false}
-                style={{ position: 'absolute' }}
+                visible={visible}
+                mask={false}
+                title={title}
             >
-                <p>hi</p>
+                {/* <Button 
+                    className="close-button"
+
+                    size="small"
+                    onClick={toggleDrawer}
+                >
+                    Options
+                    <Icon type="double-right" className="button-arrow"/>
+                </Button> */}
+                <p>test</p>
             </Drawer>
         </div>
     );
