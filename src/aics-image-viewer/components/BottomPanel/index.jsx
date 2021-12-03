@@ -4,9 +4,9 @@ import { Drawer, Button, Icon } from 'antd';
 import './styles.css';
 
 export function BottomPanel(props) {
-    const [visible, setVisible] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const toggleDrawer = () => {
-        setVisible(!visible);
+        setIsVisible(!isVisible);
     };
 
     const closeButton = <Button
@@ -25,7 +25,7 @@ export function BottomPanel(props) {
                 placement="bottom"
                 closable={false}
                 getContainer={false}
-                visible={visible}
+                visible={isVisible}
                 mask={false}
                 title={closeButton}
             >
