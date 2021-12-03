@@ -27,11 +27,14 @@
 }
 
 .options-button {
-
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    margin-right: 0.8em;
 }
 
 .open-button {
-    width: 100px;
+    margin-bottom: 0.6em;
 }
 
 .close-button {
