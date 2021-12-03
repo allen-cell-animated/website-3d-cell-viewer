@@ -41,16 +41,9 @@
     box-shadow: none;
     -webkit-box-shadow: none;
     margin-right: 0.8em;
-}
-
-.open-button {
-    margin-bottom: 0.6em;
-}
-
-.close-button {
+    margin-bottom: 0.2em;
     position: absolute;
     right: 0;
-    margin-bottom: 0.2em;
 }
 
 .button-arrow {
