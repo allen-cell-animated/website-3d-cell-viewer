@@ -18,8 +18,13 @@
     height: unset !important;
 }
 
-.ant-drawer-content, .ant-drawer-header {
+.ant-drawer-content {
     background: none;
+}
+
+.ant-drawer-header {
+    background: none;
+    padding: 21px 24px;
 }
 
 .ant-drawer-body {
@@ -40,6 +45,7 @@
 .close-button {
     position: absolute;
     right: 0;
+    margin-bottom: 0.2em;
 }
 
 .button-arrow {
