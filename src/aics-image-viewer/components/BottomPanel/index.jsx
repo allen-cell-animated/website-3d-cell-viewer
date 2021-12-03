@@ -8,9 +8,6 @@ export function BottomPanel(props) {
     const toggleDrawer = () => {
         setVisible(!visible);
     };
-    const onClose = () => {
-        setVisible(false);
-    };
 
     const closeButton = <Button
         className="options-button close-button"
@@ -23,19 +20,10 @@ export function BottomPanel(props) {
 
     return (
         <div className="container">
-            <Button 
-                className="options-button open-button"
-                size="small"
-                onClick={toggleDrawer}
-            >
-                Options
-                <Icon type="double-left" className="button-arrow"/>
-            </Button>
             <Drawer 
                 className="drawer"
                 placement="bottom"
                 closable={false}
-                onClose={onClose}
                 getContainer={false}
                 visible={visible}
                 mask={false}

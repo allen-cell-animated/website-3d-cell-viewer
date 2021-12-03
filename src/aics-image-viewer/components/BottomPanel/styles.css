@@ -11,6 +11,10 @@
     position: absolute;
 }
 
+.drawer .ant-drawer-content-wrapper {
+    transform: translateY(60%) !important;
+}
+
 .ant-drawer-content-wrapper {
     display: flex;
     flex-direction: column;
@@ -25,10 +29,11 @@
 .ant-drawer-header {
     background: none;
     padding: 21px 24px;
+    border-bottom: none;
 }
 
 .ant-drawer-body {
-    background-color: #ffffff;
+    background-color: transparent;
 }
 
 .options-button {
@@ -49,5 +54,20 @@
 }
 
 .button-arrow {
-    transform: rotate(90deg);
+    transform: rotate(-90deg);
+}
+
+.drawer.ant-drawer-open {
+    .ant-drawer-content-wrapper {
+        transform: none !important;
+    }
+
+    .ant-drawer-body {
+        background-color: #ffffff;
+        opacity: 85%;
+    }
+
+    .button-arrow {
+        transform: rotate(90deg);
+    }
 }
