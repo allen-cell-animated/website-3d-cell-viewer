@@ -9,8 +9,8 @@ export function BottomPanel(props) {
         setIsVisible(!isVisible);
     };
 
-    const closeButton = <Button
-        className="options-button close-button"
+    const optionsButton = <Button
+        className="options-button"
         size="small"
         onClick={toggleDrawer}
     >
@@ -27,7 +27,7 @@ export function BottomPanel(props) {
                 getContainer={false}
                 visible={isVisible}
                 mask={false}
-                title={closeButton}
+                title={optionsButton}
             >
                 <p>test</p>
             </Drawer>
