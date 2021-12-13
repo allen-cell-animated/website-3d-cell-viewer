@@ -26,6 +26,10 @@
     background: none;
 }
 
+.ant-drawer-wrapper-body {
+    opacity: 85%;
+}
+
 .ant-drawer-header {
     background: none;
     padding: 21px 24px;
@@ -57,7 +61,6 @@
 
     .ant-drawer-body {
         background-color: #ffffff;
-        opacity: 85%;
     }
 
     .button-arrow {
