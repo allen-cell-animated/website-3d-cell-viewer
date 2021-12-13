@@ -362,9 +362,6 @@ const STYLES = {
     flex: 7,
     marginTop: '0.5em'
   },
-  header: {
-    color: 'white',
-  },
   sliderName: {
     flex: 1
   },
