@@ -29,7 +29,7 @@ export function BottomPanel(props) {
                 mask={false}
                 title={optionsButton}
             >
-                <p>test</p>
+                {props.children}
             </Drawer>
         </div>
     );
