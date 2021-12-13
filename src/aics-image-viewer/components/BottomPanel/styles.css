@@ -12,7 +12,7 @@
 }
 
 .drawer .ant-drawer-content-wrapper {
-    transform: translateY(67%) !important;
+    transform: translateY(69%) !important;
 }
 
 .ant-drawer-content-wrapper {
@@ -38,7 +38,7 @@
 
 .ant-drawer-body {
     background-color: transparent;
-    height: 120px;
+    height: 130px;
 }
 
 .options-button {
