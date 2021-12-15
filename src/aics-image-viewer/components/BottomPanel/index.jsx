@@ -29,7 +29,9 @@ export function BottomPanel(props) {
                 mask={false}
                 title={optionsButton}
             >
-                {props.children}
+                <div className="drawer-body-wrapper">
+                    {props.children}
+                </div>
             </Drawer>
         </div>
     );

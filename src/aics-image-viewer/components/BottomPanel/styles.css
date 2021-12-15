@@ -37,7 +37,6 @@
 }
 
 .ant-drawer-body {
-    background-color: transparent;
     height: 130px;
 }
 
@@ -55,25 +54,24 @@
     transform: rotate(-90deg);
 }
 
-/* .cell-viewer-wrapper .clip-sliders {
+.drawer-body-wrapper {
     display: none;
-} */
+}
 
 .drawer.ant-drawer-open {
     .ant-drawer-content-wrapper {
         transform: none !important;
     }
+    
+    .drawer-body-wrapper {
+        display: block;
+    }
 
     .ant-drawer-body {
         background-color: #ffffff;
-        /* display: block; */
     }
 
     .button-arrow {
         transform: rotate(90deg);
     }
-
-    /* .cell-viewer-wrapper .clip-sliders {
-        display: flex;
-    } */
 }
