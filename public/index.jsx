@@ -187,6 +187,7 @@ function runApp() {
       cellId={args.cellid}
       baseUrl={args.baseurl}
       appHeight="90vh"
+      marginRight="120px" // TODO: Make this margins instead?
       cellPath={args.cellPath}
       fovPath={args.fovPath}
       defaultVolumesOn={args.channelsOn}

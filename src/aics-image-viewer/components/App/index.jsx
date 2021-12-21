@@ -1070,7 +1070,7 @@ export default class App extends React.Component {
             channelNameMapping={channelNameMapping}
           />
         </Sider>
-        <Layout className="cell-viewer-wrapper">
+        <Layout className="cell-viewer-wrapper" style={{marginRight: this.props.marginRight}}>
           <Content>
             <Progress
               strokeColor={userSelections[PATH_TRACE] ? "#313131" : "#000"}
@@ -1124,6 +1124,7 @@ App.defaultProps = {
   // allows you to completely ignore channels by name
   filterFunc: null,
   appHeight: "100vh",
+  marginRight: "120px",
   cellPath: "",
   fovPath: "",
   renderConfig: {
