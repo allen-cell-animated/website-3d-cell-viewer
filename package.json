@@ -46,7 +46,7 @@
     "reactcss": "^1.2.3"
   },
   "peerDependencies": {
-    "antd": "3.20.x",
+    "antd": "^3.26.20",
     "react": "16.x",
     "react-dom": "16.x"
   },
@@ -59,7 +59,7 @@
     "@babel/runtime": "^7.14.6",
     "@typescript-eslint/parser": "^4.29.3-alpha.4",
     "@typescript-eslint/eslint-plugin": "^4.29.3-alpha.4",
-    "antd": "^3.20.7",
+    "antd": "^3.26.20",
     "axios": "^0.21.1",
     "babel-loader": "^8.2.2",
     "clean-webpack-plugin": "^4.0.0-alpha.0",
