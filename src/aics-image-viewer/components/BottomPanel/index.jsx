@@ -19,7 +19,7 @@ export function BottomPanel(props) {
     </Button>;
 
     return (
-        <div className="container">
+        <div className="bottom-panel">
             <Drawer 
                 className="drawer"
                 placement="bottom"
