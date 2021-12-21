@@ -10,7 +10,6 @@ import {
   VolumeLoader,
   ImageInfo,
   Lut,
-  ControlPoint,
 } from "@aics/volume-viewer";
 
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
@@ -210,6 +209,7 @@ interface AppProps {
   cellDownloadHref: string;
   fovDownloadHref: string;
   preLoad: boolean;
+  pixelSize?: [number, number, number];
 }
 
 interface UserSelectionState {
@@ -260,6 +260,7 @@ interface AppState {
   userSelections: UserSelectionState;
   currentlyLoadedImagePath: string;
   cachingInProgress: boolean;
+  path: string;
 }
 
 const defaultProps: AppProps = {
@@ -319,6 +320,7 @@ const defaultProps: AppProps = {
   cellDownloadHref: "",
   fovDownloadHref: "",
   preLoad: false,
+  pixelSize: undefined,
 };
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -388,6 +390,7 @@ export default class App extends React.Component<AppProps, AppState> {
       },
       currentlyLoadedImagePath: "",
       cachingInProgress: false,
+      path: "",
     };
 
     this.openImageInterval = null;
@@ -738,7 +741,7 @@ export default class App extends React.Component<AppProps, AppState> {
       const histogram = aimg.getHistogram(channelIndex);
 
       const initSettings = this.props.initialChannelSettings[channelIndex];
-      let lutObject = {};
+      let lutObject: Lut = {};
       if (initSettings && initSettings.lutMin !== undefined && initSettings.lutMax !== undefined) {
         // find percentile or mode modifier if provided
         let lmin = initSettings.lutMin;
@@ -829,7 +832,15 @@ export default class App extends React.Component<AppProps, AppState> {
     if (stateKey === "image") {
       this.intializeNewImage(aimg, newChannelSettings);
     }
-    this.setState({ [stateKey]: aimg });
+    if (stateKey === "image") {
+      this.setState({ image: aimg });
+    } else if (stateKey === "prevImg") {
+      this.setState({ prevImg: aimg });
+    } else if (stateKey === "nextImg") {
+      this.setState({ nextImg: aimg });
+    } else {
+      console.error("ERROR invalid or unexpected stateKey");
+    }
   }
 
   loadFromRaw() {
