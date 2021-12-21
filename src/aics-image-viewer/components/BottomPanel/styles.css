@@ -57,6 +57,8 @@
     .drawer.ant-drawer-open {
         .ant-drawer-content-wrapper {
             transform: none !important;
+            box-shadow: none;
+            -webkit-box-shadow: none;
         }
         
         .drawer-body-wrapper {
