@@ -1124,7 +1124,7 @@ App.defaultProps = {
   // allows you to completely ignore channels by name
   filterFunc: null,
   appHeight: "100vh",
-  canvasMargin: "0 120px 0 0",
+  canvasMargin: "0 0 0 0",
   cellPath: "",
   fovPath: "",
   renderConfig: {
