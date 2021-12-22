@@ -324,7 +324,7 @@ export default class AxisClipSliders extends React.Component {
           onAutorotateChange={this.props.onAutorotateChange}
         />;
     return (
-        <Row className="clip-sliders" >
+      <Row className="clip-sliders" >
         <Col span={20}>
           <h4 className="sectionSubHeader">
             Region of interest clipping
@@ -335,15 +335,14 @@ export default class AxisClipSliders extends React.Component {
             align="bottom"
           >
             <Col span={10}>
-            {this.props.numSlices && this.createSliders()}
+              {this.props.numSlices && this.createSliders()}
             </Col>
             <Col span={14}>
-            {playButtons}
+              {playButtons}
             </Col>
           </Row>
-          </Col>
-
-        </Row>
+        </Col>
+      </Row>
     );
   }
 
