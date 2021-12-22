@@ -4,7 +4,7 @@
     width: 100%;
 
     .ant-drawer {
-        position: absolute !important;
+        position: absolute;
     }
     
     .drawer .ant-drawer-content-wrapper {
