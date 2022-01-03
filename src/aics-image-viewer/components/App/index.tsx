@@ -210,6 +210,7 @@ interface AppProps {
   fovDownloadHref: string;
   preLoad: boolean;
   pixelSize?: [number, number, number];
+  canvasMargin: string;
 }
 
 interface UserSelectionState {
@@ -321,6 +322,7 @@ const defaultProps: AppProps = {
   fovDownloadHref: "",
   preLoad: false,
   pixelSize: undefined,
+  canvasMargin: "0 0 0 0",
 };
 
 export default class App extends React.Component<AppProps, AppState> {
@@ -1339,7 +1341,7 @@ export default class App extends React.Component<AppProps, AppState> {
             channelNameMapping={channelNameMapping}
           />
         </Sider>
-        <Layout className="cell-viewer-wrapper" style={{margin: this.props.canvasMargin}}>
+        <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
             <Progress
               strokeColor={userSelections[PATH_TRACE] ? "#313131" : "#000"}
@@ -1370,51 +1372,3 @@ export default class App extends React.Component<AppProps, AppState> {
 
   componentWillUnmount() {}
 }
-
-App.defaultProps = {
-  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
-  rawData: null,
-  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
-  rawDims: null,
-  // list of channel indices
-  defaultSurfacesOn: [1],
-  // list of channel indices
-  defaultVolumesOn: [],
-  // map of index:{color, lutMin, lutMax}
-  initialChannelSettings: {},
-  // collection of {group name : array of channel names that fit under group}
-  groupToChannelNameMap: {},
-  // see nameClean function
-  channelNameClean: null,
-  // allows you to rename channels
-  channelNameMapping: [],
-  // allows you to completely ignore channels by name
-  filterFunc: null,
-  appHeight: "100vh",
-  canvasMargin: "0 0 0 0",
-  cellPath: "",
-  fovPath: "",
-  renderConfig: {
-    alphaMask: true,
-    autoRotateButton: true,
-    axisClipSliders: true,
-    brightnessSlider: true,
-    colorPicker: true,
-    colorPresetsDropdown: true,
-    densitySlider: true,
-    levelsSliders: true,
-    saveSurfaceButtons: true,
-    fovCellSwitchControls: true,
-    viewModeRadioButtons: true,
-  },
-  viewerConfig: {
-    view: "3D", // "XY", "XZ", "YZ"
-    mode: "default", // "pathtrace", "maxprojection"
-    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT,
-    region: [0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
-    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
-  }
-};
