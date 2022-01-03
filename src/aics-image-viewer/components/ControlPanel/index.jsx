@@ -140,7 +140,7 @@ export default class ControlPanel extends React.Component {
 
   render() {
     const {
-      channelNameMapping,
+      viewerChannelSettings,
       renderConfig,
       appHeight,
       imageName,
@@ -198,8 +198,7 @@ export default class ControlPanel extends React.Component {
               style={STYLES.channelsWidget}
               renderConfig={renderConfig}
               filterFunc={this.props.filterFunc}
-              nameClean={this.props.nameClean}
-              channelNameMapping={channelNameMapping}
+              viewerChannelSettings={viewerChannelSettings}
             />
             <GlobalVolumeControls
               mode={this.props.mode}
