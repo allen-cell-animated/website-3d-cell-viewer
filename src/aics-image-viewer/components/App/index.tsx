@@ -70,7 +70,10 @@ export interface ViewerChannelSetting {
   enabled?: boolean;
   surfaceEnabled?: boolean; // false
   lut?: [string, string]; // min and max.
+  isovalue?: number; // valid when surfaceEnabled = true. default 128 or 0.5
+  surfaceOpacity?: number; // valid when surfaceEnabled = true. default 1.0 fully opaque
 }
+
 export interface ViewerChannelGroup {
   name: string;
   channels: ViewerChannelSetting[];
@@ -128,6 +131,7 @@ export const VIEWER_3D_SETTINGS: {
         channels: [],
       },
     ],
+    // must be the true channel name in the volume data
     maskChannelName: "SEG_Memb",
   },
 };
@@ -172,6 +176,9 @@ interface AppProps {
   channelNameMapping: string[];
   // allows you to completely ignore channels by name
   filterFunc?: (string) => boolean;
+
+  // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
+  viewerChannelSettings?: ViewerChannelSettings;
 
   channelGroups: [];
   maskChannelName: string;
