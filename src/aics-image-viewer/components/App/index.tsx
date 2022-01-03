@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout, Progress } from "antd";
 import React from "react";
-import { includes, isEqual, filter, find, map } from "lodash";
+import { includes, isEqual, find, map } from "lodash";
 import {
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
@@ -69,7 +69,7 @@ export interface ViewerChannelSetting {
   color?: string; // 6 digit hex
   enabled?: boolean;
   surfaceEnabled?: boolean; // false
-  lut?: [string, string]; // min and max.
+  lut?: [string, string]; // min and max. these are shorthand expressions.  a plain number (intensity), or a "p##", or a "m##" for percentile or median
   isovalue?: number; // valid when surfaceEnabled = true. default 128 or 0.5
   surfaceOpacity?: number; // valid when surfaceEnabled = true. default 1.0 fully opaque
 }
@@ -154,33 +154,65 @@ function colorHexToArray(hex) {
   }
 }
 
+function findFirstChannelMatchOfGroup(channel: string, g: ViewerChannelGroup): ViewerChannelSetting | undefined {
+  for (const c of g.channels) {
+    // if match exists then test match.
+    // if match was missing, then test for equality with name.
+    if (c.match !== undefined) {
+      // c could be array of strings or a single regex?
+      if (Array.isArray(c.match)) {
+        for (const r of c.match) {
+          const re = new RegExp(r);
+          if (re.test(channel)) {
+            return c;
+          }
+        }
+      } else {
+        const re = new RegExp(c.match);
+        if (re.test(channel)) {
+          return c;
+        }
+      }
+      // now if we get here we know we have failed to find matches.
+      return undefined;
+    } else {
+      // no match field, so test against "name" field. this will not be treated as regex.
+      if (c.name === channel) {
+        return c;
+      }
+      // TODO is this ok??? we would have to check c.name later on too.
+      if (c.name === "*") {
+        return c;
+      }
+    }
+  }
+  return undefined;
+}
+
+function findFirstChannelMatch(channel: string, settings: ViewerChannelSettings): ViewerChannelSetting | undefined {
+  for (const g of settings.groups) {
+    const c = findFirstChannelMatchOfGroup(channel, g);
+    if (c !== undefined) {
+      return c;
+    }
+  }
+  return undefined;
+}
+
+function groupHasChannel(g: ViewerChannelGroup, channel: string): boolean {
+  const c = findFirstChannelMatchOfGroup(channel, g);
+  return c !== undefined;
+}
+
 interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
   // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
   rawDims?: ImageInfo;
 
-  // list of channel indices
-  defaultSurfacesOn: number[];
-  // list of channel indices
-  defaultVolumesOn: number[];
-  // map of index:{color, lutMin, lutMax}
-  initialChannelSettings: {
-    [key: string]: { color: string; lutMin: number; lutMinModifier: string; lutMax: number; lutMaxModifier: string };
-  };
-  // collection of {group name : array of channel names that fit under group}
-  groupToChannelNameMap: { [key: string]: string[] };
-  // see nameClean function
-  channelNameClean?: (string) => string;
-  // allows you to rename channels
-  channelNameMapping: string[];
-  // allows you to completely ignore channels by name
-  filterFunc?: (string) => boolean;
-
   // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
   viewerChannelSettings?: ViewerChannelSettings;
 
-  channelGroups: [];
   maskChannelName: string;
 
   appHeight: string;
@@ -243,6 +275,7 @@ interface UserSelectionState {
     opacity: number;
     color: string;
     dataReady: boolean;
+    [LUT_CONTROL_POINTS]: [];
   }[];
 }
 
@@ -277,22 +310,6 @@ const defaultProps: AppProps = {
   // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
   rawDims: null,
 
-  // list of channel indices
-  defaultSurfacesOn: [1],
-  // list of channel indices
-  defaultVolumesOn: [],
-  // map of index:{color, lutMin, lutMax}
-  initialChannelSettings: {},
-  // collection of {group name : array of channel names that fit under group}
-  groupToChannelNameMap: {},
-  // see nameClean function
-  channelNameClean: undefined,
-  // allows you to rename channels
-  channelNameMapping: [],
-  // allows you to completely ignore channels by name
-  filterFunc: undefined,
-
-  channelGroups: [],
   maskChannelName: "",
 
   appHeight: "100vh",
@@ -436,7 +453,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
-    this.nameClean = this.nameClean.bind(this);
     this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
   }
 
@@ -484,74 +500,59 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   setInitialChannelConfig(channelNames, channelColors) {
-    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
     return channelNames.map((channel, index) => {
       let color = channelColors[index] ? channelColors[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
-      const initSettings = initialChannelSettings[index];
-      if (initSettings && initSettings.color) {
-        const initColor = colorHexToArray(initSettings.color);
-        if (initColor) {
-          color = initColor;
-        }
-      }
 
-      return {
-        name: this.nameClean(channel) || "Channel " + index,
-        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
-        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
-        [COLORIZE_ENABLED]: false,
-        [COLORIZE_ALPHA]: 1.0,
-        isovalue: 188,
-        opacity: 1.0,
-        color: color,
-        dataReady: false,
-      };
+      return this.initializeOneChannelSetting(null, channel, index, color);
     });
   }
 
-  // PROP for standardizing channel names.
-  // Ie if you want both segmentation and raw of the same protein to have the same UI settings.
-  nameClean(channelName) {
-    const { channelNameClean } = this.props;
-    if (channelNameClean) {
-      return channelNameClean(channelName);
-    }
-    return channelName;
-  }
-
   createChannelGrouping(channels) {
-    const { groupToChannelNameMap } = this.props;
-    if (channels) {
-      const keyList = Object.keys(groupToChannelNameMap);
-      const initialChannelAcc = {};
-      for (const k of keyList) {
-        initialChannelAcc[k] = [];
-      }
-      // if there are no groupings specified then just use SINGLE_GROUP_CHANNEL_KEY
-      const remainderGroupName = keyList.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
-      const grouping = channels.reduce((acc, channel, index) => {
-        let other = true;
-        keyList.forEach((key) => {
-          if (includes(groupToChannelNameMap[key], channel)) {
-            if (!includes(acc[key], index)) {
-              acc[key].push(index);
-            }
-            other = false;
-          }
-        });
-        if (other) {
-          if (!acc[remainderGroupName]) {
-            acc[remainderGroupName] = [];
-          }
-          if (!includes(acc[remainderGroupName], index)) {
-            acc[remainderGroupName].push(index);
-          }
-        }
-        return acc;
-      }, initialChannelAcc);
-      return grouping;
+    if (!channels) {
+      return {};
     }
-    return {};
+    const { viewerChannelSettings } = this.props;
+    if (!viewerChannelSettings) {
+      // return all channels
+      return {
+        [SINGLE_GROUP_CHANNEL_KEY]: channels.map(function (val, index) {
+          return index;
+        }),
+      };
+    }
+    const groups = viewerChannelSettings.groups;
+    const keyList = groups.map(function (val) {
+      return val.name;
+    });
+    const initialChannelAcc = {};
+    for (const k of keyList) {
+      initialChannelAcc[k] = [];
+    }
+    // if there are no groupings specified then just use SINGLE_GROUP_CHANNEL_KEY
+    const remainderGroupName = keyList.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
+    const grouping = channels.reduce((acc, channel, index) => {
+      let other = true;
+      for (const g of groups) {
+        if (groupHasChannel(g, channel)) {
+          const key = g.name;
+          if (!includes(acc[key], index)) {
+            acc[key].push(index);
+          }
+          other = false;
+          break;
+        }
+      }
+      if (other) {
+        if (!acc[remainderGroupName]) {
+          acc[remainderGroupName] = [];
+        }
+        if (!includes(acc[remainderGroupName], index)) {
+          acc[remainderGroupName].push(index);
+        }
+      }
+      return acc;
+    }, initialChannelAcc);
+    return grouping;
   }
 
   stopPollingForImage() {
@@ -642,7 +643,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   intializeNewImage(aimg, newChannelSettings?) {
     const { userSelections, view3d } = this.state;
-    const { filterFunc, viewerConfig } = this.props;
+    const { viewerConfig } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
@@ -672,16 +673,6 @@ export default class App extends React.Component<AppProps, AppState> {
         if (!ch) {
           return {};
         }
-        if (filterFunc && !filterFunc(name)) {
-          return {
-            enabled: false,
-            isosurfaceEnabled: false,
-            isovalue: ch.isovalue,
-            isosurfaceOpacity: ch.opacity,
-            color: ch.color,
-          };
-        }
-
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
@@ -705,11 +696,10 @@ export default class App extends React.Component<AppProps, AppState> {
 
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
-    const { filterFunc } = this.props;
 
-    const cleanNewNames = map(channelNames, this.nameClean);
-    const filteredNewChannelNames = filterFunc ? filter(cleanNewNames, filterFunc) : cleanNewNames;
-    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => this.nameClean(ele.name));
+    // TODO filter against viewerChannelSettings to see if any names should not be included
+    const filteredNewChannelNames = channelNames;
+    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => ele.name);
     let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames)
       ? userSelections[CHANNEL_SETTINGS]
       : this.setInitialChannelConfig(filteredNewChannelNames, INIT_COLORS);
@@ -722,6 +712,57 @@ export default class App extends React.Component<AppProps, AppState> {
       channelGroupedByType,
     });
     return newChannelSettings;
+  }
+
+  initializeLut(aimg, channelIndex) {
+    const histogram = aimg.getHistogram(channelIndex);
+
+    const initViewerSettings = this.props.viewerChannelSettings;
+    // find channelIndex among viewerChannelSettings.
+    const name = aimg.channel_names[channelIndex];
+    let lutObject: Lut = {};
+    // default to percentiles
+    lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+    // and if init settings dictate, recompute it:
+    if (initViewerSettings) {
+      const initSettings = findFirstChannelMatch(name, initViewerSettings);
+      if (initSettings) {
+        if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
+          let lutmod = "";
+          let lvalue = 0;
+          let lutvalues = [0, 0];
+          for (let i = 0; i < 2; ++i) {
+            const lstr = initSettings.lut[i];
+            // look at first char of string.
+            let firstchar = lstr.charAt(0);
+            if (firstchar === "m" || firstchar === "p") {
+              lutmod = firstchar;
+              lvalue = parseFloat(lstr.substring(1)) / 100.0;
+            } else {
+              lutmod = "";
+              lvalue = parseFloat(lstr);
+            }
+            if (lutmod === "m") {
+              lutvalues[i] = histogram.maxBin * lvalue;
+            } else if (lutmod === "p") {
+              lutvalues[i] = histogram.findBinOfPercentile(lvalue);
+            }
+          }
+
+          lutObject = histogram.lutGenerator_minMax(
+            Math.min(lutvalues[0], lutvalues[1]),
+            Math.max(lutvalues[0], lutvalues[1])
+          );
+        }
+      }
+    }
+
+    const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
+      ...controlPoint,
+      color: TFEDITOR_DEFAULT_COLOR,
+    }));
+    aimg.setLut(channelIndex, lutObject.lut);
+    return newControlPoints;
   }
 
   onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, keepLuts) {
@@ -746,35 +787,7 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
-
-      const histogram = aimg.getHistogram(channelIndex);
-
-      const initSettings = this.props.initialChannelSettings[channelIndex];
-      let lutObject: Lut = {};
-      if (initSettings && initSettings.lutMin !== undefined && initSettings.lutMax !== undefined) {
-        // find percentile or mode modifier if provided
-        let lmin = initSettings.lutMin;
-        let lmax = initSettings.lutMax;
-        if (initSettings.lutMinModifier === "m") {
-          lmin = histogram.maxBin * initSettings.lutMin;
-        } else if (initSettings.lutMinModifier === "p") {
-          lmin = histogram.findBinOfPercentile(initSettings.lutMin);
-        }
-        if (initSettings.lutMaxModifier === "m") {
-          lmax = histogram.maxBin * initSettings.lutMax;
-        } else if (initSettings.lutMaxModifier === "p") {
-          lmax = histogram.findBinOfPercentile(initSettings.lutMax);
-        }
-        lutObject = histogram.lutGenerator_minMax(Math.min(lmin, lmax), Math.max(lmin, lmax));
-      } else {
-        lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-      }
-
-      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
-        ...controlPoint,
-        color: TFEDITOR_DEFAULT_COLOR,
-      }));
-      aimg.setLut(channelIndex, lutObject.lut);
+      const newControlPoints = this.initializeLut(aimg, channelIndex);
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
 
@@ -852,6 +865,50 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  initializeOneChannelSetting(aimg, channel, index, defaultColor) {
+    const { viewerChannelSettings } = this.props;
+    let color = defaultColor;
+    let volumeEnabled = false; // TODO if unspecified then disabled???
+    let surfaceEnabled = false;
+
+    // note that this modifies aimg also
+    const newControlPoints = aimg ? this.initializeLut(aimg, index) : undefined;
+
+    if (viewerChannelSettings) {
+      // search for channel in settings using groups, names and match values
+      const initSettings = findFirstChannelMatch(channel, viewerChannelSettings);
+      if (initSettings) {
+        if (initSettings.color !== undefined) {
+          const initColor = colorHexToArray(initSettings.color);
+          if (initColor) {
+            color = initColor;
+          }
+        }
+        if (initSettings.enabled !== undefined) {
+          volumeEnabled = initSettings.enabled;
+        }
+        if (initSettings.surfaceEnabled !== undefined) {
+          surfaceEnabled = initSettings.surfaceEnabled;
+        }
+        // TODO display name?
+      }
+    }
+
+    return {
+      // TODO is name the display name or raw channel name?
+      name: channel || "Channel " + index,
+      [VOLUME_ENABLED]: volumeEnabled,
+      [ISO_SURFACE_ENABLED]: surfaceEnabled,
+      [COLORIZE_ENABLED]: false,
+      [COLORIZE_ALPHA]: 1.0,
+      isovalue: 188,
+      opacity: 1.0,
+      color: color,
+      dataReady: false,
+      [LUT_CONTROL_POINTS]: newControlPoints,
+    };
+  }
+
   loadFromRaw() {
     const { rawDims, rawData } = this.props;
     if (!rawData) {
@@ -865,44 +922,15 @@ export default class App extends React.Component<AppProps, AppState> {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    const cleanNewNames = map(rawDims.channel_names, this.nameClean);
-    const filteredNewChannelNames = cleanNewNames;
-    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
+    const filteredNewChannelNames = rawDims.channel_names;
     let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
-      const lutObject = aimg.getHistogram(index).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
-        ...controlPoint,
-        color: TFEDITOR_DEFAULT_COLOR,
-      }));
-      aimg.setLut(index, lutObject.lut);
-
       let color = INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
-      const initSettings = initialChannelSettings[index];
-      if (initSettings && initSettings.color) {
-        const initColor = colorHexToArray(initSettings.color);
-        if (initColor) {
-          color = initColor;
-        }
-      }
-
-      return {
-        name: this.nameClean(channel) || "Channel " + index,
-        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
-        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
-        [LUT_CONTROL_POINTS]: newControlPoints,
-        [COLORIZE_ENABLED]: false,
-        [COLORIZE_ALPHA]: 1.0,
-        isovalue: 188,
-        opacity: 1.0,
-        color: color,
-        dataReady: false,
-      };
+      return this.initializeOneChannelSetting(aimg, channel, index, color);
     });
 
     let channelGroupedByType = this.createChannelGrouping(rawDims.channel_names);
 
     const { userSelections, view3d } = this.state;
-    const { filterFunc } = this.props;
     const channelSetting = newChannelSettings;
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
@@ -923,22 +951,12 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
         const ch = find(channelSetting, (channel) => {
-          return channel.name === this.nameClean(name);
+          return channel.name === name;
         });
 
         if (!ch) {
           return {};
         }
-        if (filterFunc && !filterFunc(name)) {
-          return {
-            enabled: false,
-            isosurfaceEnabled: false,
-            isovalue: ch.isovalue,
-            isosurfaceOpacity: ch.opacity,
-            color: ch.color,
-          };
-        }
-
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
@@ -1234,7 +1252,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
     return find(channelSettings, (channel) => {
-      return channel.name === this.nameClean(channelName);
+      return channel.name === channelName;
     });
   }
 
@@ -1289,7 +1307,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   render() {
     const { userSelections } = this.state;
-    const { renderConfig, cellDownloadHref, channelNameMapping, fovDownloadHref } = this.props;
+    const { renderConfig, cellDownloadHref, fovDownloadHref } = this.props;
     return (
       <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
         <Sider
@@ -1342,10 +1360,7 @@ export default class App extends React.Component<AppProps, AppState> {
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
-            filterFunc={this.props.filterFunc}
-            nameClean={this.nameClean}
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
-            channelNameMapping={channelNameMapping}
           />
         </Sider>
         <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
