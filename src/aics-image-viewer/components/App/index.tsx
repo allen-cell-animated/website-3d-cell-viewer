@@ -573,12 +573,10 @@ export default class App extends React.Component<AppProps, AppState> {
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
 
-    // TODO filter against viewerChannelSettings to see if any names should not be included
-    const filteredNewChannelNames = channelNames;
     const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => ele.name);
-    let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames)
+    let newChannelSettings = isEqual(prevChannelNames, channelNames)
       ? userSelections[CHANNEL_SETTINGS]
-      : this.setInitialChannelConfig(filteredNewChannelNames, INIT_COLORS);
+      : this.setInitialChannelConfig(channelNames, INIT_COLORS);
 
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
@@ -744,7 +742,7 @@ export default class App extends React.Component<AppProps, AppState> {
   initializeOneChannelSetting(aimg, channel, index, defaultColor) {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
-    let volumeEnabled = false; // TODO if unspecified then disabled???
+    let volumeEnabled = false;
     let surfaceEnabled = false;
 
     // note that this modifies aimg also
@@ -766,12 +764,10 @@ export default class App extends React.Component<AppProps, AppState> {
         if (initSettings.surfaceEnabled !== undefined) {
           surfaceEnabled = initSettings.surfaceEnabled;
         }
-        // TODO display name?
       }
     }
 
     return {
-      // TODO is name the display name or raw channel name?
       name: channel || "Channel " + index,
       [VOLUME_ENABLED]: volumeEnabled,
       [ISO_SURFACE_ENABLED]: surfaceEnabled,
@@ -798,8 +794,7 @@ export default class App extends React.Component<AppProps, AppState> {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    const filteredNewChannelNames = rawDims.channel_names;
-    let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
+    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
       let color = INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
       return this.initializeOneChannelSetting(aimg, channel, index, color);
     });
