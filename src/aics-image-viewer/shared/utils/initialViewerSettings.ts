@@ -1,13 +1,26 @@
 export interface ViewerChannelSetting {
-  name: string;
-  // regex or string or array of regexes or strings
-  match?: string[] | string;
-  color?: string; // 6 digit hex
+  // at least one of name or match MUST be present...
+  // name is intended to be the display name for this channel.
+  // if name is not given, use raw data channel name for display
+  name?: string;
+  // regex or string or array of regexes or strings or number for raw channel index
+  // if match is not given, then "name" will be used to match.
+  // if you want to match on channel index, then you must provide the index here.
+  match?: string[] | string | number;
+
+  // 6 digit hex
+  color?: string;
+  // default to false? (TODO)
   enabled?: boolean;
-  surfaceEnabled?: boolean; // false
-  lut?: [string, string]; // min and max. these are shorthand expressions.  a plain number (intensity), or a "p##", or a "m##" for percentile or median
-  isovalue?: number; // valid when surfaceEnabled = true. default 128 or 0.5
-  surfaceOpacity?: number; // valid when surfaceEnabled = true. default 1.0 fully opaque
+  // default to false
+  surfaceEnabled?: boolean;
+  // min and max. these are shorthand expressions.
+  // a plain number (intensity), or a "p##", or a "m##" for percentile or median
+  lut?: [string, string];
+  // valid when surfaceEnabled = true. default 128 or 0.5
+  isovalue?: number;
+  // valid when surfaceEnabled = true. default 1.0 fully opaque
+  surfaceOpacity?: number;
 }
 
 export interface ViewerChannelGroup {
@@ -20,65 +33,21 @@ export interface ViewerChannelSettings {
   groups: ViewerChannelGroup[];
 }
 
-export const VIEWER_3D_SETTINGS: {
-  [key: string]: ViewerChannelSettings;
-} = {
-  aics_hipsc: {
-    groups: [
-      {
-        name: "Observed channels",
-        channels: [
-          { name: "Membrane", match: ["(CMDRP)"], color: "E2CDB3", enabled: true, lut: ["p50", "p98"] },
-          {
-            name: "Labeled structure",
-            match: ["(EGFP)|(RFPT)"],
-            color: "6FBA11",
-            enabled: true,
-            lut: ["p50", "p98"],
-          },
-          { name: "DNA", match: ["(H3342)"], color: "8DA3C0", enabled: true, lut: ["p50", "p98"] },
-          { name: "Bright field", match: ["(100)|(Bright)"], color: "F5F1CB", enabled: false, lut: ["p50", "p98"] },
-        ],
-      },
-      {
-        name: "Segmentation channels",
-        channels: [
-          {
-            name: "Labeled structure",
-            match: ["(SEG_STRUCT)"],
-            color: "E0E3D1",
-            enabled: false,
-            lut: ["p50", "p98"],
-          },
-          { name: "Membrane", match: ["(SEG_Memb)"], color: "DD9BF5", enabled: false, lut: ["p50", "p98"] },
-          { name: "DNA", match: ["(SEG_DNA)"], color: "E3F4F5", enabled: false, lut: ["p50", "p98"] },
-        ],
-      },
-      {
-        name: "Contour channels",
-        channels: [
-          { name: "Membrane", match: ["(CON_Memb)"], color: "FF6200", enabled: false, lut: ["p50", "p98"] },
-          { name: "DNA", match: ["(CON_DNA)"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
-        ],
-      },
-      // TODO how to handle others / unspecified?
-      {
-        name: "Others",
-        channels: [],
-      },
-    ],
-    // must be the true channel name in the volume data
-    maskChannelName: "SEG_Memb",
-  },
-};
-
-export function findFirstChannelMatchOfGroup(channel: string, g: ViewerChannelGroup): ViewerChannelSetting | undefined {
+export function findFirstChannelMatchOfGroup(
+  channel: string,
+  channelIndex: number,
+  g: ViewerChannelGroup
+): ViewerChannelSetting | undefined {
   for (const c of g.channels) {
     // if match exists then test match.
     // if match was missing, then test for equality with name.
     if (c.match !== undefined) {
-      // c could be array of strings or a single regex?
-      if (Array.isArray(c.match)) {
+      // c could be a number, an array of strings or a single regex?
+      if (typeof c.match === "number") {
+        if (c.match === channelIndex) {
+          return c;
+        }
+      } else if (Array.isArray(c.match)) {
         for (const r of c.match) {
           const re = new RegExp(r);
           if (re.test(channel)) {
@@ -107,10 +76,11 @@ export function findFirstChannelMatchOfGroup(channel: string, g: ViewerChannelGr
 
 export function findFirstChannelMatch(
   channel: string,
+  channelIndex: number,
   settings: ViewerChannelSettings
 ): ViewerChannelSetting | undefined {
   for (const g of settings.groups) {
-    const c = findFirstChannelMatchOfGroup(channel, g);
+    const c = findFirstChannelMatchOfGroup(channel, channelIndex, g);
     if (c !== undefined) {
       return c;
     }
@@ -118,15 +88,15 @@ export function findFirstChannelMatch(
   return undefined;
 }
 
-export function groupHasChannel(g: ViewerChannelGroup, channel: string): boolean {
-  const c = findFirstChannelMatchOfGroup(channel, g);
+export function groupHasChannel(g: ViewerChannelGroup, channel: string, channelIndex: number): boolean {
+  const c = findFirstChannelMatchOfGroup(channel, channelIndex, g);
   return c !== undefined;
 }
 
-export function getDisplayName(name: string, settings?: ViewerChannelSettings): string {
+export function getDisplayName(name: string, index: number, settings?: ViewerChannelSettings): string {
   if (settings) {
-    const c = findFirstChannelMatch(name, settings);
-    if (c) {
+    const c = findFirstChannelMatch(name, index, settings);
+    if (c && c.name) {
       return c.name;
     }
   }

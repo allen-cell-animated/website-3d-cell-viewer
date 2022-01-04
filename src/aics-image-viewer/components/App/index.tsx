@@ -414,7 +414,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const grouping = channels.reduce((acc, channel, index) => {
       let other = true;
       for (const g of groups) {
-        if (groupHasChannel(g, channel)) {
+        if (groupHasChannel(g, channel, index)) {
           const key = g.name;
           if (!includes(acc[key], index)) {
             acc[key].push(index);
@@ -606,7 +606,7 @@ export default class App extends React.Component<AppProps, AppState> {
     lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
     // and if init settings dictate, recompute it:
     if (initViewerSettings) {
-      const initSettings = findFirstChannelMatch(name, initViewerSettings);
+      const initSettings = findFirstChannelMatch(name, channelIndex, initViewerSettings);
       if (initSettings) {
         if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
           let lutmod = "";
@@ -757,7 +757,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
-      const initSettings = findFirstChannelMatch(channel, viewerChannelSettings);
+      const initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings);
       if (initSettings) {
         if (initSettings.color !== undefined) {
           const initColor = colorHexToArray(initSettings.color);
