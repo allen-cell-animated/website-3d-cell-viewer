@@ -49,11 +49,6 @@ export const VIEWER_3D_SETTINGS = {
         { name: "DNA", match: ["(CON_DNA)"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
       ],
     },
-    // TODO how to handle others / unspecified?
-    {
-      name: "Others",
-      channels: [],
-    },
   ],
   // must be the true channel name in the volume data
   maskChannelName: "SEG_Memb",
@@ -99,7 +94,19 @@ if (params) {
     // ?ch=1,2
     // ?luts=0,255,0,255
     // ?colors=ff0000,00ff00
-    const initialChannelSettings = {};
+    const initialChannelSettings = {
+      groups: [
+        {name: "Channels", channels: []}
+      ]
+    };
+    // {
+    //   name: "Labeled structure",
+    //   match: ["(EGFP)|(RFPT)"],
+    //   color: "6FBA11",
+    //   enabled: true,
+    //   lut: ["p50", "p98"],
+    // },
+  
     args.channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
     for (let i = 0; i < args.channelsOn.length; ++i) {
       initialChannelSettings[args.channelsOn[i]] = {};

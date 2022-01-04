@@ -14,11 +14,7 @@ import {
 
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import HttpClient from "../../shared/utils/httpClient";
-import {
-  findFirstChannelMatch,
-  groupHasChannel,
-  ViewerChannelSettings,
-} from "../../shared/utils/initialViewerSettings";
+import { findFirstChannelMatch, matchChannel, ViewerChannelSettings } from "../../shared/utils/initialViewerSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
@@ -388,7 +384,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  createChannelGrouping(channels) {
+  createChannelGrouping(channels): { [key: string]: number[] } {
     if (!channels) {
       return {};
     }
@@ -401,38 +397,37 @@ export default class App extends React.Component<AppProps, AppState> {
         }),
       };
     }
+
     const groups = viewerChannelSettings.groups;
-    const keyList = groups.map(function (val) {
-      return val.name;
-    });
-    const initialChannelAcc = {};
-    for (const k of keyList) {
-      initialChannelAcc[k] = [];
-    }
-    // if there are no groupings specified then just use SINGLE_GROUP_CHANNEL_KEY
-    const remainderGroupName = keyList.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
-    const grouping = channels.reduce((acc, channel, index) => {
-      let other = true;
-      for (const g of groups) {
-        if (groupHasChannel(g, channel, index)) {
-          const key = g.name;
-          if (!includes(acc[key], index)) {
-            acc[key].push(index);
+    const grouping = {};
+    const channelsMatched: number[] = [];
+    // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
+    for (const g of groups) {
+      grouping[g.name] = [];
+      g.channels.forEach((groupMatch) => {
+        // check all channels against the match
+        channels.forEach((channel, index) => {
+          // make sure channel was not already matched someplace.
+          if (!includes(channelsMatched, index)) {
+            if (matchChannel(channel, index, groupMatch)) {
+              grouping[g.name].push(index);
+              channelsMatched.push(index);
+            }
           }
-          other = false;
-          break;
+        });
+      });
+    }
+    // now any channels not still matched go in the catchall group.
+    if (channelsMatched.length < channels.length) {
+      const remainderGroupName = groups.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
+      grouping[remainderGroupName] = [];
+      channels.forEach((channel, index) => {
+        // make sure channel was not already matched someplace.
+        if (!includes(channelsMatched, index)) {
+          grouping[remainderGroupName].push(index);
         }
-      }
-      if (other) {
-        if (!acc[remainderGroupName]) {
-          acc[remainderGroupName] = [];
-        }
-        if (!includes(acc[remainderGroupName], index)) {
-          acc[remainderGroupName].push(index);
-        }
-      }
-      return acc;
-    }, initialChannelAcc);
+      });
+    }
     return grouping;
   }
 

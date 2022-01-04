@@ -123,7 +123,7 @@ export default class ChannelsWidget extends React.Component {
                       imageName={imageName}
                       channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
-                      name={getDisplayName(thisChannelSettings.name, viewerChannelSettings)}
+                      name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
                       volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
                       isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
