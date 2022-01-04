@@ -28,16 +28,16 @@ export const VIEWER_3D_SETTINGS: {
       {
         name: "Observed channels",
         channels: [
-          { name: "Membrane", match: ["/(CMDRP)/"], color: "E2CDB3", enabled: true, lut: ["p50", "p98"] },
+          { name: "Membrane", match: ["(CMDRP)"], color: "E2CDB3", enabled: true, lut: ["p50", "p98"] },
           {
             name: "Labeled structure",
-            match: ["/(EGFP)|(RFPT)/"],
+            match: ["(EGFP)|(RFPT)"],
             color: "6FBA11",
             enabled: true,
             lut: ["p50", "p98"],
           },
-          { name: "DNA", match: ["/(H3342)/"], color: "8DA3C0", enabled: true, lut: ["p50", "p98"] },
-          { name: "Bright field", match: ["/(100)|(Bright)/"], color: "F5F1CB", enabled: false, lut: ["p50", "p98"] },
+          { name: "DNA", match: ["(H3342)"], color: "8DA3C0", enabled: true, lut: ["p50", "p98"] },
+          { name: "Bright field", match: ["(100)|(Bright)"], color: "F5F1CB", enabled: false, lut: ["p50", "p98"] },
         ],
       },
       {
@@ -45,20 +45,20 @@ export const VIEWER_3D_SETTINGS: {
         channels: [
           {
             name: "Labeled structure",
-            match: ["/(SEG_STRUCT)/"],
+            match: ["(SEG_STRUCT)"],
             color: "E0E3D1",
             enabled: false,
             lut: ["p50", "p98"],
           },
-          { name: "Membrane", match: ["/(SEG_Memb)/"], color: "DD9BF5", enabled: false, lut: ["p50", "p98"] },
-          { name: "DNA", match: ["/(SEG_DNA)/"], color: "E3F4F5", enabled: false, lut: ["p50", "p98"] },
+          { name: "Membrane", match: ["(SEG_Memb)"], color: "DD9BF5", enabled: false, lut: ["p50", "p98"] },
+          { name: "DNA", match: ["(SEG_DNA)"], color: "E3F4F5", enabled: false, lut: ["p50", "p98"] },
         ],
       },
       {
         name: "Contour channels",
         channels: [
-          { name: "Membrane", match: ["/(CON_Memb)/"], color: "FF6200", enabled: false, lut: ["p50", "p98"] },
-          { name: "DNA", match: ["/(CON_DNA)/"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
+          { name: "Membrane", match: ["(CON_Memb)"], color: "FF6200", enabled: false, lut: ["p50", "p98"] },
+          { name: "DNA", match: ["(CON_DNA)"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
         ],
       },
       // TODO how to handle others / unspecified?
@@ -91,8 +91,6 @@ export function findFirstChannelMatchOfGroup(channel: string, g: ViewerChannelGr
           return c;
         }
       }
-      // now if we get here we know we have failed to find matches.
-      return undefined;
     } else {
       // no match field, so test against "name" field. this will not be treated as regex.
       if (c.name === channel) {

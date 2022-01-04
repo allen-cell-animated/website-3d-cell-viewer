@@ -33,6 +33,55 @@ const channelGroupingMap = {
   "Segmentation channels": ["SEG_STRUCT", "SEG_Memb", "SEG_DNA"],
   "Contour channels": ["CON_Memb", "CON_DNA"],
 };
+const VIEWER_3D_SETTINGS = {
+  aics_hipsc: {
+    groups: [
+      {
+        name: "Observed channels",
+        channels: [
+          { name: "Membrane", match: ["(CMDRP)"], color: "E2CDB3", enabled: true, lut: ["p50", "p98"] },
+          {
+            name: "Labeled structure",
+            match: ["(EGFP)|(RFPT)"],
+            color: "6FBA11",
+            enabled: true,
+            lut: ["p50", "p98"],
+          },
+          { name: "DNA", match: ["(H3342)"], color: "8DA3C0", enabled: true, lut: ["p50", "p98"] },
+          { name: "Bright field", match: ["(100)|(Bright)"], color: "F5F1CB", enabled: false, lut: ["p50", "p98"] },
+        ],
+      },
+      {
+        name: "Segmentation channels",
+        channels: [
+          {
+            name: "Labeled structure",
+            match: ["(SEG_STRUCT)"],
+            color: "E0E3D1",
+            enabled: false,
+            lut: ["p50", "p98"],
+          },
+          { name: "Membrane", match: ["(SEG_Memb)"], color: "DD9BF5", enabled: false, lut: ["p50", "p98"] },
+          { name: "DNA", match: ["(SEG_DNA)"], color: "E3F4F5", enabled: false, lut: ["p50", "p98"] },
+        ],
+      },
+      {
+        name: "Contour channels",
+        channels: [
+          { name: "Membrane", match: ["(CON_Memb)"], color: "FF6200", enabled: false, lut: ["p50", "p98"] },
+          { name: "DNA", match: ["(CON_DNA)"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
+        ],
+      },
+      // TODO how to handle others / unspecified?
+      {
+        name: "Others",
+        channels: [],
+      },
+    ],
+    // must be the true channel name in the volume data
+    maskChannelName: "SEG_Memb",
+  },
+};
 
 function parseQueryString() {
   var pairs = location.search.slice(1).split("&");
@@ -198,6 +247,7 @@ function runApp() {
       groupToChannelNameMap={channelGroupingMap}
       initialChannelSettings={args.initialChannelSettings}
       viewerConfig={viewerConfig}
+      viewerChannelSettings={VIEWER_3D_SETTINGS.aics_hipsc}
     />,
     document.getElementById("cell-viewer")
   );
