@@ -14,11 +14,14 @@ import {
 
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import HttpClient from "../../shared/utils/httpClient";
-import { findFirstChannelMatch, matchChannel, ViewerChannelSettings } from "../../shared/utils/initialViewerSettings";
+import {
+  findFirstChannelMatch,
+  makeChannelIndexGrouping,
+  ViewerChannelSettings,
+} from "../../shared/utils/initialViewerSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
-  OTHER_CHANNEL_KEY,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
   ALPHA_MASK_SLIDER_2D_DEFAULT,
@@ -398,37 +401,7 @@ export default class App extends React.Component<AppProps, AppState> {
       };
     }
 
-    const groups = viewerChannelSettings.groups;
-    const grouping = {};
-    const channelsMatched: number[] = [];
-    // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
-    for (const g of groups) {
-      grouping[g.name] = [];
-      g.channels.forEach((groupMatch) => {
-        // check all channels against the match
-        channels.forEach((channel, index) => {
-          // make sure channel was not already matched someplace.
-          if (!includes(channelsMatched, index)) {
-            if (matchChannel(channel, index, groupMatch)) {
-              grouping[g.name].push(index);
-              channelsMatched.push(index);
-            }
-          }
-        });
-      });
-    }
-    // now any channels not still matched go in the catchall group.
-    if (channelsMatched.length < channels.length) {
-      const remainderGroupName = groups.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
-      grouping[remainderGroupName] = [];
-      channels.forEach((channel, index) => {
-        // make sure channel was not already matched someplace.
-        if (!includes(channelsMatched, index)) {
-          grouping[remainderGroupName].push(index);
-        }
-      });
-    }
-    return grouping;
+    return makeChannelIndexGrouping(channels, viewerChannelSettings);
   }
 
   stopPollingForImage() {

@@ -1,3 +1,7 @@
+import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../../shared/constants";
+
+import { includes } from "lodash";
+
 export interface ViewerChannelSetting {
   // regex or string or array of regexes or strings or number for raw channel index
   // if you want to match on channel index, then you must provide the index here.
@@ -93,4 +97,41 @@ export function getDisplayName(name: string, index: number, settings?: ViewerCha
     }
   }
   return name;
+}
+
+export function makeChannelIndexGrouping(
+  channels: string[],
+  settings: ViewerChannelSettings
+): { [key: string]: number[] } {
+  const groups = settings.groups;
+  const grouping = {};
+  const channelsMatched: number[] = [];
+  // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
+  for (const g of groups) {
+    grouping[g.name] = [];
+    g.channels.forEach((groupMatch) => {
+      // check all channels against the match
+      channels.forEach((channel, index) => {
+        // make sure channel was not already matched someplace.
+        if (!includes(channelsMatched, index)) {
+          if (matchChannel(channel, index, groupMatch)) {
+            grouping[g.name].push(index);
+            channelsMatched.push(index);
+          }
+        }
+      });
+    });
+  }
+  // now any channels not still matched go in the catchall group.
+  if (channelsMatched.length < channels.length) {
+    const remainderGroupName = groups.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
+    grouping[remainderGroupName] = [];
+    channels.forEach((channel, index) => {
+      // make sure channel was not already matched someplace.
+      if (!includes(channelsMatched, index)) {
+        grouping[remainderGroupName].push(index);
+      }
+    });
+  }
+  return grouping;
 }
