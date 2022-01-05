@@ -1,12 +1,9 @@
 import { describe, expect, it } from "@jest/globals";
 
 import {
-  getDisplayName,
   matchChannel,
-  findFirstChannelMatch,
   ViewerChannelSettings,
   ViewerChannelSetting,
-  ViewerChannelGroup,
   makeChannelIndexGrouping,
 } from "../initialViewerSettings";
 
