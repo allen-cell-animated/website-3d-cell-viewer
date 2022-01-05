@@ -6,6 +6,7 @@ import { Icon } from 'antd';
 import viewMode from '../../shared/enums/viewMode';
 
 import AxisClipSliders from '../AxisClipSliders';
+import { BottomPanel } from '../BottomPanel';
 import './styles.css';
 
 const ViewMode = viewMode.mainMapping;
@@ -97,19 +98,21 @@ export default class ViewerWrapper extends React.Component {
     />);
   }
 
- render() {
-   const {
-     appHeight,
-     renderConfig,
-   } = this.props;
-   return (
-     <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight}} >
+  render() {
+    const {
+      appHeight,
+      renderConfig,
+    } = this.props;
+    return (
+      <div className='cell-canvas' style={{ ...STYLES.viewer, height: appHeight }} >
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
-        {renderConfig.axisClipSliders && this.renderClipSliders()}
+        <BottomPanel>
+          {renderConfig.axisClipSliders && this.renderClipSliders()}
+        </BottomPanel>
         {this.renderOverlay()}
-     </div>
-   );
- }
+      </div>
+    );
+  }
 }
 
 const STYLES = {

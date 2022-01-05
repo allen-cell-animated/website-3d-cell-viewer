@@ -1,0 +1,23 @@
+.clip-sliders {
+    .placeholder {
+        height: 32px;
+    }
+
+    .slider-row {
+        display: flex;
+        color: gray;
+    }
+
+    .axis-slider {
+        flex: 7;
+        margin-top: 0.5em;
+    }
+
+    .slider-name {
+        flex: 1;
+    }
+
+    .wrapper {
+        min-height: 325px;
+    }
+}

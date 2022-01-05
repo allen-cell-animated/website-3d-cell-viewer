@@ -8,10 +8,12 @@ import 'nouislider/distribute/nouislider.css';
 
 import React from 'react';
 
-import enums from '../shared/enums';
+import enums from '../../shared/enums';
 
-import AutoRotateButton from './AutoRotateButton';
-import TwoDPlayButtons from './TwoDPlayButtons';
+import AutoRotateButton from '../AutoRotateButton';
+import TwoDPlayButtons from '../TwoDPlayButtons';
+
+import './styles.css';
 
 const ViewMode = enums.viewMode.mainMapping;
 const ThicknessUnit = enums.thicknessUnit.mainMapping;
@@ -223,9 +225,9 @@ export default class AxisClipSliders extends React.Component {
     onUpdate(start);
 
     return (
-      <div key={i} style={STYLES.row}>
-        <div style={STYLES.sliderName}>{axis.toUpperCase()}</div>
-        <div style={STYLES.slider} className="axis-slider">
+      <div key={i} className="slider-row">
+        <div className="slider-name">{axis.toUpperCase()}</div>
+        <div className="axis-slider">
           {slider}
         </div>
       </div>
@@ -322,9 +324,9 @@ export default class AxisClipSliders extends React.Component {
           onAutorotateChange={this.props.onAutorotateChange}
         />;
     return (
-        <Row className="clip-sliders" >
+      <Row className="clip-sliders" >
         <Col span={20}>
-          <h4 className="sectionSubHeader" style={STYLES.header}>
+          <h4 className="sectionSubHeader">
             Region of interest clipping
           </h4>
           <Row
@@ -333,15 +335,14 @@ export default class AxisClipSliders extends React.Component {
             align="bottom"
           >
             <Col span={10}>
-            {this.props.numSlices && this.createSliders()}
+              {this.props.numSlices && this.createSliders()}
             </Col>
             <Col span={14}>
-            {playButtons}
+              {playButtons}
             </Col>
           </Row>
-          </Col>
-
-        </Row>
+        </Col>
+      </Row>
     );
   }
 
@@ -349,26 +350,3 @@ export default class AxisClipSliders extends React.Component {
     this.clearInterval();
   }
 }
-
-const STYLES = {
-  placeholder: {
-    height: 32
-  },
-  row: {
-    display: 'flex',
-    color: 'gray'
-  },
-  slider: {
-    flex: 7,
-    marginTop: '0.5em'
-  },
-  header: {
-    color: 'white',
-  },
-  sliderName: {
-    flex: 1
-  },
-  wrapper: {
-    minHeight: 325
-  }
-};
