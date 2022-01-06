@@ -73,8 +73,6 @@ const args = {
   fovPath: "AICS-22/AICS-22_8319",
   fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
-  channelsOn: [0, 1, 2],
-  surfacesOn: [],
   initialChannelSettings: VIEWER_3D_SETTINGS,
 };
 const viewerConfig = {
@@ -101,9 +99,9 @@ if (params) {
     };
     const ch = initialChannelSettings.groups[0].channels;
   
-    args.channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
-    for (let i = 0; i < args.channelsOn.length; ++i) {
-      ch.push({"match":args.channelsOn[i], "enabled":true});
+    const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
+    for (let i = 0; i < channelsOn.length; ++i) {
+      ch.push({"match":channelsOn[i], "enabled":true});
     }
     // look for luts or color
     if (params.luts) {
@@ -183,8 +181,6 @@ function runApp() {
       canvasMargin="0 120px 0 0"
       cellPath={args.cellPath}
       fovPath={args.fovPath}
-      defaultVolumesOn={args.channelsOn}
-      defaultSurfacesOn={args.surfacesOn}
       fovDownloadHref={args.fovDownloadHref}
       cellDownloadHref={args.cellDownloadHref}
       viewerConfig={viewerConfig}
