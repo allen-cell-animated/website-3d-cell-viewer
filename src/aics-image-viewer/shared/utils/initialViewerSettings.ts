@@ -80,6 +80,9 @@ export function findFirstChannelMatch(
   channelIndex: number,
   settings: ViewerChannelSettings
 ): ViewerChannelSetting | undefined {
+  if (!settings.groups) {
+    return undefined;
+  }
   for (const g of settings.groups) {
     const c = findFirstChannelMatchOfGroup(channel, channelIndex, g);
     if (c !== undefined) {
@@ -107,20 +110,22 @@ export function makeChannelIndexGrouping(
   const grouping = {};
   const channelsMatched: number[] = [];
   // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
-  for (const g of groups) {
-    grouping[g.name] = [];
-    g.channels.forEach((groupMatch) => {
-      // check all channels against the match
-      channels.forEach((channel, index) => {
-        // make sure channel was not already matched someplace.
-        if (!includes(channelsMatched, index)) {
-          if (matchChannel(channel, index, groupMatch)) {
-            grouping[g.name].push(index);
-            channelsMatched.push(index);
+  if (groups !== undefined) {
+    for (const g of groups) {
+      grouping[g.name] = [];
+      g.channels.forEach((groupMatch) => {
+        // check all channels against the match
+        channels.forEach((channel, index) => {
+          // make sure channel was not already matched someplace.
+          if (!includes(channelsMatched, index)) {
+            if (matchChannel(channel, index, groupMatch)) {
+              grouping[g.name].push(index);
+              channelsMatched.push(index);
+            }
           }
-        }
+        });
       });
-    });
+    }
   }
   // now any channels not still matched go in the catchall group.
   if (channelsMatched.length < channels.length) {
