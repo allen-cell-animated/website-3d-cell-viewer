@@ -25,7 +25,7 @@ describe("viewer settings", () => {
     });
   });
   describe("grouping channels", () => {
-    it("groups channels correctly when all match", () => {
+    it("groups channels into their named groups when all match", () => {
       const channelNames = ["test1", "test2", "test3"];
       const settings: ViewerChannelSettings = {
         groups: [
@@ -43,7 +43,7 @@ describe("viewer settings", () => {
         expect(result[i]).toEqual(expected[i]);
       }
     });
-    it("groups channels correctly when none match", () => {
+    it('groups channels into group "Other" when none match', () => {
       const channelNames = ["test1", "test2", "test3"];
       const settings: ViewerChannelSettings = {
         groups: [
@@ -55,13 +55,12 @@ describe("viewer settings", () => {
       };
       const expected = { "1": [], "2": [], "3": [], Other: [0, 1, 2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
-      console.log(result);
       expect(Object.keys(result).length).toBe(4);
       for (const i in result) {
         expect(result[i]).toEqual(expected[i]);
       }
     });
-    it("groups channels correctly when some match", () => {
+    it('groups channels into named groups and "Other" when only some match', () => {
       const channelNames = ["test1", "test2", "test3"];
       const settings: ViewerChannelSettings = {
         groups: [
@@ -73,13 +72,12 @@ describe("viewer settings", () => {
       };
       const expected = { "1": [0], "2": [1], "3": [], Other: [2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
-      console.log(result);
       expect(Object.keys(result).length).toBe(4);
       for (const i in result) {
         expect(result[i]).toEqual(expected[i]);
       }
     });
-    it("groups channels correctly when no groups are given", () => {
+    it('groups all channels into group "Channels" when no groups are given', () => {
       const channelNames = ["test1", "test2", "test3"];
       const settings: ViewerChannelSettings = {
         groups: [],
@@ -87,7 +85,6 @@ describe("viewer settings", () => {
       };
       const expected = { Channels: [0, 1, 2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
-      console.log(result);
       expect(Object.keys(result).length).toBe(1);
       for (const i in result) {
         expect(result[i]).toEqual(expected[i]);
