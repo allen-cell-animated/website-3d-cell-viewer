@@ -1,4 +1,4 @@
-import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../../shared/constants";
+import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 
 import { includes } from "lodash";
 

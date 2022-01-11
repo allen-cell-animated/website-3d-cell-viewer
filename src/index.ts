@@ -4,6 +4,6 @@ export type {
   ViewerChannelSettings,
   ViewerChannelGroup,
   ViewerChannelSetting,
-} from "./aics-image-viewer/shared/utils/initialViewerSettings";
+} from "./aics-image-viewer/shared/utils/viewerChannelSettings";
 
 export { ImageViewerApp };

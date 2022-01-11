@@ -7,7 +7,7 @@ import {
   List,
 } from 'antd';
 
-import {getDisplayName} from '../../shared/utils/initialViewerSettings';
+import {getDisplayName} from '../../shared/utils/viewerChannelSettings';
 import {
   COLORIZE_ALPHA,
   COLORIZE_ENABLED,

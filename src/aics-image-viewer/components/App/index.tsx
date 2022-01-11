@@ -18,7 +18,7 @@ import {
   findFirstChannelMatch,
   makeChannelIndexGrouping,
   ViewerChannelSettings,
-} from "../../shared/utils/initialViewerSettings";
+} from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,

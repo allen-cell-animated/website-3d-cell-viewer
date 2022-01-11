@@ -5,7 +5,7 @@ import {
   ViewerChannelSettings,
   ViewerChannelSetting,
   makeChannelIndexGrouping,
-} from "../initialViewerSettings";
+} from "../viewerChannelSettings";
 
 describe("viewer settings", () => {
   describe("matching names", () => {
