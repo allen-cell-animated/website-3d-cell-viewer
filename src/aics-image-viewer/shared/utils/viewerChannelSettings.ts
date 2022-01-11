@@ -1,7 +1,5 @@
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 
-import { includes } from "lodash";
-
 export interface ViewerChannelSetting {
   // regex or string or array of regexes or strings or number for raw channel index
   // if you want to match on channel index, then you must provide the index here.
@@ -117,7 +115,7 @@ export function makeChannelIndexGrouping(
         // check all channels against the match
         channels.forEach((channel, index) => {
           // make sure channel was not already matched someplace.
-          if (!includes(channelsMatched, index)) {
+          if (!channelsMatched.includes(index)) {
             if (matchChannel(channel, index, groupMatch)) {
               grouping[g.name].push(index);
               channelsMatched.push(index);
@@ -133,7 +131,7 @@ export function makeChannelIndexGrouping(
     grouping[remainderGroupName] = [];
     channels.forEach((channel, index) => {
       // make sure channel was not already matched someplace.
-      if (!includes(channelsMatched, index)) {
+      if (!channelsMatched.includes(index)) {
         grouping[remainderGroupName].push(index);
       }
     });
