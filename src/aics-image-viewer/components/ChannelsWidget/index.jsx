@@ -7,7 +7,7 @@ import {
   List,
 } from 'antd';
 
-import formatChannelName from '../../shared/utils/formatChannelNames';
+import {getDisplayName} from '../../shared/utils/viewerChannelSettings';
 import {
   COLORIZE_ALPHA,
   COLORIZE_ENABLED,
@@ -51,11 +51,10 @@ export default class ChannelsWidget extends React.Component {
   }
 
   renderVisibilityControls(key, channelArray) {
-    const { channelSettings, channelDataChannels, nameClean} = this.props;
+    const { channelSettings, channelDataChannels} = this.props;
 
     const arrayOfNames = map(channelArray, channelIndex => {
-      const channelName = channelDataChannels[channelIndex].name;
-      return nameClean(channelName);
+      return channelDataChannels[channelIndex].name;
     });
     const volChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[VOLUME_ENABLED] : false);
     const isoChecked = filter(arrayOfNames, name => find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[ISO_SURFACE_ENABLED] : false);
@@ -83,13 +82,12 @@ export default class ChannelsWidget extends React.Component {
   getRows() {
     const {
       channelGroupedByType,
-      channelNameMapping,
       channelSettings,
       channelDataReady,
       channelDataChannels,
       filterFunc,
-      nameClean,
       imageName,
+      viewerChannelSettings
     } = this.props;
     const firstKey = Object.keys(channelGroupedByType)[0];
     return map(channelGroupedByType, (channelArray, key) => {
@@ -115,7 +113,7 @@ export default class ChannelsWidget extends React.Component {
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
                   const thisChannelSettings = find(channelSettings, (channel) => {
-                    return channel.name === nameClean(channelDataChannels[actualIndex].name);
+                    return channel.name === channelDataChannels[actualIndex].name;
                   });
 
                   return (thisChannelSettings ?
@@ -125,7 +123,7 @@ export default class ChannelsWidget extends React.Component {
                       imageName={imageName}
                       channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
-                      name={formatChannelName(thisChannelSettings.name, channelNameMapping)}
+                      name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
                       volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
                       isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}

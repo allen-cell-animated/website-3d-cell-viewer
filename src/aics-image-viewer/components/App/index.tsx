@@ -1,25 +1,27 @@
 // 3rd Party Imports
 import { Layout, Progress } from "antd";
 import React from "react";
-import { includes, isEqual, filter, find, map } from "lodash";
-import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader } from "@aics/volume-viewer";
+import { includes, isEqual, find, map } from "lodash";
+import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
 
+import { AppProps, AppState, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import HttpClient from "../../shared/utils/httpClient";
+import { findFirstChannelMatch, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
-  OTHER_CHANNEL_KEY,
+  CHANNEL_SETTINGS,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
   ALPHA_MASK_SLIDER_2D_DEFAULT,
+  FULL_FIELD_IMAGE,
   SEGMENTED_CELL,
   VOLUME_ENABLED,
   LUT_CONTROL_POINTS,
   COLORIZE_ALPHA,
   ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
-  FULL_FIELD_IMAGE,
   BRIGHTNESS_SLIDER_LEVEL,
   DENSITY_SLIDER_LEVEL,
   LEVELS_SLIDER,
@@ -60,20 +62,67 @@ const { Sider, Content } = Layout;
 const OK_STATUS = "OK";
 const ERROR_STATUS = "Error";
 const INIT_COLORS = PRESET_COLORS_0;
-const CHANNEL_SETTINGS = "channelSettings";
 
 function colorHexToArray(hex) {
   // hex is a xxxxxx string. split it into array of rgb ints
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (result) {
     return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
-  }
-  else {
+  } else {
     return null;
   }
 }
 
-export default class App extends React.Component {
+const defaultProps: AppProps = {
+  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
+  rawData: undefined,
+  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
+  rawDims: null,
+
+  maskChannelName: "",
+
+  appHeight: "100vh",
+  cellPath: "",
+  fovPath: "",
+  renderConfig: {
+    alphaMask: true,
+    autoRotateButton: true,
+    axisClipSliders: true,
+    brightnessSlider: true,
+    colorPicker: true,
+    colorPresetsDropdown: true,
+    densitySlider: true,
+    levelsSliders: true,
+    saveSurfaceButtons: true,
+    fovCellSwitchControls: true,
+    viewModeRadioButtons: true,
+  },
+  viewerConfig: {
+    view: "3D", // "XY", "XZ", "YZ"
+    mode: "default", // "pathtrace", "maxprojection"
+    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
+    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
+    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
+    levels: LEVELS_SLIDER_DEFAULT as [number, number, number],
+    region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
+    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
+  },
+  baseUrl: "",
+  nextImgPath: "",
+  prevImgPath: "",
+  cellId: "",
+  cellDownloadHref: "",
+  fovDownloadHref: "",
+  preLoad: false,
+  pixelSize: undefined,
+  canvasMargin: "0 0 0 0",
+};
+
+export default class App extends React.Component<AppProps, AppState> {
+  private openImageInterval: number | null;
+  private stateKey: "image" | "prevImg" | "nextImg";
+
+  static defaultProps = defaultProps;
   constructor(props) {
     super(props);
 
@@ -84,28 +133,26 @@ export default class App extends React.Component {
       if (props.viewerConfig.mode === "pathtrace") {
         pathtrace = true;
         maxproject = false;
-      }
-      else if (props.viewerConfig.mode === "maxprojection") {
+      } else if (props.viewerConfig.mode === "maxprojection") {
         pathtrace = true;
         maxproject = false;
-      }
-      else {
+      } else {
         pathtrace = false;
         maxproject = false;
       }
       if (props.viewerConfig.view === "XY") {
         viewmode = ViewMode.xy;
-      }
-      else if (props.viewerConfig.view === "YZ") {
+      } else if (props.viewerConfig.view === "YZ") {
         viewmode = ViewMode.yz;
-      }
-      else if (props.viewerConfig.view === "XZ") {
+      } else if (props.viewerConfig.view === "XZ") {
         viewmode = ViewMode.xz;
       }
     }
 
     this.state = {
       image: null,
+      nextImg: null,
+      prevImg: null,
       view3d: null,
       files: null,
       cellId: props.cellId,
@@ -136,7 +183,13 @@ export default class App extends React.Component {
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         [CHANNEL_SETTINGS]: [],
       },
+      currentlyLoadedImagePath: "",
+      cachingInProgress: false,
+      path: "",
     };
+
+    this.openImageInterval = null;
+    this.stateKey = "image";
 
     this.openImage = this.openImage.bind(this);
     this.loadFromJson = this.loadFromJson.bind(this);
@@ -169,9 +222,7 @@ export default class App extends React.Component {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
-    this.nameClean = this.nameClean.bind(this);
     this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
-    document.addEventListener("keydown", this.handleKeydown, false);
   }
 
   componentDidMount() {
@@ -218,74 +269,28 @@ export default class App extends React.Component {
   }
 
   setInitialChannelConfig(channelNames, channelColors) {
-    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
     return channelNames.map((channel, index) => {
       let color = channelColors[index] ? channelColors[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
-      const initSettings = initialChannelSettings[index];
-      if (initSettings && initSettings.color) {
-        const initColor = colorHexToArray(initSettings.color);
-        if (initColor) {
-          color = initColor;
-        }
-      }
 
-      return {
-        name: this.nameClean(channel) || "Channel " + index,
-        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
-        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
-        [COLORIZE_ENABLED]: false,
-        [COLORIZE_ALPHA]: 1.0,
-        isovalue: 188,
-        opacity: 1.0,
-        color: color,
-        dataReady: false,
-      };
+      return this.initializeOneChannelSetting(null, channel, index, color);
     });
   }
 
-  // PROP for standardizing channel names.
-  // Ie if you want both segmentation and raw of the same protein to have the same UI settings.
-  nameClean(channelName) {
-    const { channelNameClean } = this.props;
-    if (channelNameClean) {
-      return channelNameClean(channelName);
+  createChannelGrouping(channels): { [key: string]: number[] } {
+    if (!channels) {
+      return {};
     }
-    return channelName;
-  }
+    const { viewerChannelSettings } = this.props;
+    if (!viewerChannelSettings) {
+      // return all channels
+      return {
+        [SINGLE_GROUP_CHANNEL_KEY]: channels.map(function (val, index) {
+          return index;
+        }),
+      };
+    }
 
-  createChannelGrouping(channels) {
-    const { groupToChannelNameMap } = this.props;
-    if (channels) {
-      const keyList = Object.keys(groupToChannelNameMap);
-      const initialChannelAcc = {};
-      for (const k of keyList) {
-        initialChannelAcc[k] = [];
-      }
-      // if there are no groupings specified then just use SINGLE_GROUP_CHANNEL_KEY
-      const remainderGroupName = keyList.length === 0 ? SINGLE_GROUP_CHANNEL_KEY : OTHER_CHANNEL_KEY;
-      const grouping = channels.reduce((acc, channel, index) => {
-        let other = true;
-        keyList.forEach((key) => {
-          if (includes(groupToChannelNameMap[key], channel)) {
-            if (!includes(acc[key], index)) {
-              acc[key].push(index);
-            }
-            other = false;
-          }
-        });
-        if (other) {
-          if (!acc[remainderGroupName]) {
-            acc[remainderGroupName] = [];
-          }
-          if (!includes(acc[remainderGroupName], index)) {
-            acc[remainderGroupName].push(index);
-          }
-        }
-        return acc;
-      }, initialChannelAcc);
-      return grouping;
-    }
-    return {};
+    return makeChannelIndexGrouping(channels, viewerChannelSettings);
   }
 
   stopPollingForImage() {
@@ -317,7 +322,10 @@ export default class App extends React.Component {
           channelDataReady: {},
           queryErrorMessage: null,
           cachingInProgress: false,
-          mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+          userSelections: {
+            ...this.state.userSelections,
+            [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+          },
         });
       }
       this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, keepLuts);
@@ -351,7 +359,7 @@ export default class App extends React.Component {
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, doResetViewMode, stateKey, keepLuts) {
+  openImage(imageDirectory, doResetViewMode, stateKey, keepLuts?) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -371,9 +379,9 @@ export default class App extends React.Component {
       .catch((resp) => this.handleOpenImageException(resp));
   }
 
-  intializeNewImage(aimg, newChannelSettings) {
+  intializeNewImage(aimg, newChannelSettings?) {
     const { userSelections, view3d } = this.state;
-    const { filterFunc, viewerConfig } = this.props;
+    const { viewerConfig } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
@@ -403,16 +411,6 @@ export default class App extends React.Component {
         if (!ch) {
           return {};
         }
-        if (filterFunc && !filterFunc(name)) {
-          return {
-            enabled: false,
-            isosurfaceEnabled: false,
-            isovalue: ch.isovalue,
-            isosurfaceOpacity: ch.opacity,
-            color: ch.color,
-          };
-        }
-
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
@@ -436,14 +434,11 @@ export default class App extends React.Component {
 
   updateStateOnLoadImage(channelNames) {
     const { userSelections } = this.state;
-    const { filterFunc } = this.props;
 
-    const cleanNewNames = map(channelNames, this.nameClean);
-    const filteredNewChannelNames = filterFunc ? filter(cleanNewNames, filterFunc) : cleanNewNames;
-    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => this.nameClean(ele.name));
-    let newChannelSettings = isEqual(prevChannelNames, filteredNewChannelNames)
+    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => ele.name);
+    let newChannelSettings = isEqual(prevChannelNames, channelNames)
       ? userSelections[CHANNEL_SETTINGS]
-      : this.setInitialChannelConfig(filteredNewChannelNames, INIT_COLORS, filterFunc);
+      : this.setInitialChannelConfig(channelNames, INIT_COLORS);
 
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
@@ -453,6 +448,57 @@ export default class App extends React.Component {
       channelGroupedByType,
     });
     return newChannelSettings;
+  }
+
+  initializeLut(aimg, channelIndex) {
+    const histogram = aimg.getHistogram(channelIndex);
+
+    const initViewerSettings = this.props.viewerChannelSettings;
+    // find channelIndex among viewerChannelSettings.
+    const name = aimg.channel_names[channelIndex];
+    let lutObject: Lut = {};
+    // default to percentiles
+    lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+    // and if init settings dictate, recompute it:
+    if (initViewerSettings) {
+      const initSettings = findFirstChannelMatch(name, channelIndex, initViewerSettings);
+      if (initSettings) {
+        if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
+          let lutmod = "";
+          let lvalue = 0;
+          let lutvalues = [0, 0];
+          for (let i = 0; i < 2; ++i) {
+            const lstr = initSettings.lut[i];
+            // look at first char of string.
+            let firstchar = lstr.charAt(0);
+            if (firstchar === "m" || firstchar === "p") {
+              lutmod = firstchar;
+              lvalue = parseFloat(lstr.substring(1)) / 100.0;
+            } else {
+              lutmod = "";
+              lvalue = parseFloat(lstr);
+            }
+            if (lutmod === "m") {
+              lutvalues[i] = histogram.maxBin * lvalue;
+            } else if (lutmod === "p") {
+              lutvalues[i] = histogram.findBinOfPercentile(lvalue);
+            }
+          }
+
+          lutObject = histogram.lutGenerator_minMax(
+            Math.min(lutvalues[0], lutvalues[1]),
+            Math.max(lutvalues[0], lutvalues[1])
+          );
+        }
+      }
+    }
+
+    const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
+      ...controlPoint,
+      color: TFEDITOR_DEFAULT_COLOR,
+    }));
+    aimg.setLut(channelIndex, lutObject.lut);
+    return newControlPoints;
   }
 
   onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, keepLuts) {
@@ -477,37 +523,7 @@ export default class App extends React.Component {
       view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
-
-      const histogram = aimg.getHistogram(channelIndex);
-
-      const initSettings = this.props.initialChannelSettings[channelIndex];
-      let lutObject = {};
-      if (initSettings && initSettings.lutMin !== undefined && initSettings.lutMax !== undefined) {
-        // find percentile or mode modifier if provided
-        let lmin = initSettings.lutMin;
-        let lmax = initSettings.lutMax;
-        if (initSettings.lutMinModifier === "m") {
-          lmin = histogram.maxBin * initSettings.lutMin;
-        }
-        else if (initSettings.lutMinModifier === "p") {
-          lmin = histogram.findBinOfPercentile(initSettings.lutMin);
-        }
-        if (initSettings.lutMaxModifier === "m") {
-          lmax = histogram.maxBin * initSettings.lutMax;
-        }
-        else if (initSettings.lutMaxModifier === "p") {
-          lmax = histogram.findBinOfPercentile(initSettings.lutMax);
-        }
-        lutObject = histogram.lutGenerator_minMax(Math.min(lmin, lmax), Math.max(lmin, lmax));
-      } else {
-        lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-      }
-
-      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
-        ...controlPoint,
-        color: TFEDITOR_DEFAULT_COLOR,
-      }));
-      aimg.setLut(channelIndex, lutObject.lut);
+      const newControlPoints = this.initializeLut(aimg, channelIndex);
       this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
     }
 
@@ -554,7 +570,7 @@ export default class App extends React.Component {
     this.openImage(nextImgPath, true, "nextImg");
   }
 
-  loadFromJson(obj, title, locationHeader, stateKey, keepLuts) {
+  loadFromJson(obj, title, locationHeader, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
     const aimg = new Volume(obj);
 
     const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
@@ -574,11 +590,65 @@ export default class App extends React.Component {
     if (stateKey === "image") {
       this.intializeNewImage(aimg, newChannelSettings);
     }
-    this.setState({ [stateKey]: aimg });
+    if (stateKey === "image") {
+      this.setState({ image: aimg });
+    } else if (stateKey === "prevImg") {
+      this.setState({ prevImg: aimg });
+    } else if (stateKey === "nextImg") {
+      this.setState({ nextImg: aimg });
+    } else {
+      console.error("ERROR invalid or unexpected stateKey");
+    }
+  }
+
+  initializeOneChannelSetting(aimg, channel, index, defaultColor) {
+    const { viewerChannelSettings } = this.props;
+    let color = defaultColor;
+    let volumeEnabled = false;
+    let surfaceEnabled = false;
+
+    // note that this modifies aimg also
+    const newControlPoints = aimg ? this.initializeLut(aimg, index) : undefined;
+
+    if (viewerChannelSettings) {
+      // search for channel in settings using groups, names and match values
+      const initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings);
+      if (initSettings) {
+        if (initSettings.color !== undefined) {
+          const initColor = colorHexToArray(initSettings.color);
+          if (initColor) {
+            color = initColor;
+          }
+        }
+        if (initSettings.enabled !== undefined) {
+          volumeEnabled = initSettings.enabled;
+        }
+        if (initSettings.surfaceEnabled !== undefined) {
+          surfaceEnabled = initSettings.surfaceEnabled;
+        }
+      }
+    }
+
+    return {
+      name: channel || "Channel " + index,
+      [VOLUME_ENABLED]: volumeEnabled,
+      [ISO_SURFACE_ENABLED]: surfaceEnabled,
+      [COLORIZE_ENABLED]: false,
+      [COLORIZE_ALPHA]: 1.0,
+      isovalue: 188,
+      opacity: 1.0,
+      color: color,
+      dataReady: false,
+      [LUT_CONTROL_POINTS]: newControlPoints,
+    };
   }
 
   loadFromRaw() {
     const { rawDims, rawData } = this.props;
+    if (!rawData) {
+      console.error("ERROR loadFromRaw called without rawData being set");
+      return;
+    }
 
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
@@ -586,44 +656,14 @@ export default class App extends React.Component {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    const cleanNewNames = map(rawDims.channel_names, this.nameClean);
-    const filteredNewChannelNames = cleanNewNames;
-    const { defaultVolumesOn, defaultSurfacesOn, initialChannelSettings } = this.props;
-    let newChannelSettings = filteredNewChannelNames.map((channel, index) => {
-      const lutObject = aimg.getHistogram(index).lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-      const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
-        ...controlPoint,
-        color: TFEDITOR_DEFAULT_COLOR,
-      }));
-      aimg.setLut(index, lutObject.lut);
-
+    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
       let color = INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
-      const initSettings = initialChannelSettings[index];
-      if (initSettings && initSettings.color) {
-        const initColor = colorHexToArray(initSettings.color);
-        if (initColor) {
-          color = initColor;
-        }
-      }
-
-      return {
-        name: this.nameClean(channel) || "Channel " + index,
-        [VOLUME_ENABLED]: includes(defaultVolumesOn, index),
-        [ISO_SURFACE_ENABLED]: includes(defaultSurfacesOn, index),
-        [LUT_CONTROL_POINTS]: newControlPoints,
-        [COLORIZE_ENABLED]: false,
-        [COLORIZE_ALPHA]: 1.0,
-        isovalue: 188,
-        opacity: 1.0,
-        color: color,
-        dataReady: false,
-      };
+      return this.initializeOneChannelSetting(aimg, channel, index, color);
     });
 
     let channelGroupedByType = this.createChannelGrouping(rawDims.channel_names);
 
     const { userSelections, view3d } = this.state;
-    const { filterFunc } = this.props;
     const channelSetting = newChannelSettings;
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
@@ -644,22 +684,12 @@ export default class App extends React.Component {
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
         const ch = find(channelSetting, (channel) => {
-          return channel.name === this.nameClean(name);
+          return channel.name === name;
         });
 
         if (!ch) {
           return {};
         }
-        if (filterFunc && !filterFunc(name)) {
-          return {
-            enabled: false,
-            isosurfaceEnabled: false,
-            isovalue: ch.isovalue,
-            isosurfaceOpacity: ch.opacity,
-            color: ch.color,
-          };
-        }
-
         return {
           enabled: ch[VOLUME_ENABLED],
           isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
@@ -726,7 +756,7 @@ export default class App extends React.Component {
     });
   }
 
-  handleChangeToImage(keyToChange, newValue, index) {
+  handleChangeToImage(keyToChange, newValue, index?) {
     const { image, userSelections, view3d } = this.state;
     if (!image || !view3d) {
       return;
@@ -814,7 +844,7 @@ export default class App extends React.Component {
 
   onViewModeChange(newMode) {
     const { userSelections } = this.state;
-    let newSelectionState = {
+    let newSelectionState: Partial<UserSelectionState> = {
       [MODE]: newMode,
     };
     // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
@@ -925,7 +955,7 @@ export default class App extends React.Component {
     }
   }
 
-  beginRequestImage(type) {
+  beginRequestImage(type?) {
     const { fovPath, cellPath, cellId, prevImgPath, nextImgPath, preLoad } = this.props;
     let imageType = type || this.state.userSelections.imageType;
     let path;
@@ -951,11 +981,11 @@ export default class App extends React.Component {
     this.openImage(path, true, "image");
   }
 
-  getOneChannelSetting(channelName, newSettings) {
+  getOneChannelSetting(channelName, newSettings?) {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
     return find(channelSettings, (channel) => {
-      return channel.name === this.nameClean(channelName);
+      return channel.name === channelName;
     });
   }
 
@@ -1010,7 +1040,7 @@ export default class App extends React.Component {
 
   render() {
     const { userSelections } = this.state;
-    const { renderConfig, cellDownloadHref, channelNameMapping, fovDownloadHref } = this.props;
+    const { renderConfig, cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
     return (
       <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
         <Sider
@@ -1056,7 +1086,6 @@ export default class App extends React.Component {
             handleChangeToImage={this.handleChangeToImage}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
             onViewModeChange={this.onViewModeChange}
-            onColorChangeComplete={this.onColorChangeComplete}
             onAutorotateChange={this.onAutorotateChange}
             onSwitchFovCell={this.onSwitchFovCell}
             setImageAxisClip={this.setImageAxisClip}
@@ -1064,13 +1093,11 @@ export default class App extends React.Component {
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
-            filterFunc={this.props.filterFunc}
-            nameClean={this.nameClean}
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
-            channelNameMapping={channelNameMapping}
+            viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>
-        <Layout className="cell-viewer-wrapper" style={{margin: this.props.canvasMargin}}>
+        <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
             <Progress
               strokeColor={userSelections[PATH_TRACE] ? "#313131" : "#000"}
@@ -1099,55 +1126,5 @@ export default class App extends React.Component {
     );
   }
 
-  componentWillUnmount() {
-    document.removeEventListener("keydown", this.handleKeydown, false);
-  }
+  componentWillUnmount() {}
 }
-
-App.defaultProps = {
-  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
-  rawData: null,
-  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
-  rawDims: null,
-  // list of channel indices
-  defaultSurfacesOn: [1],
-  // list of channel indices
-  defaultVolumesOn: [],
-  // map of index:{color, lutMin, lutMax}
-  initialChannelSettings: {},
-  // collection of {group name : array of channel names that fit under group}
-  groupToChannelNameMap: {},
-  // see nameClean function
-  channelNameClean: null,
-  // allows you to rename channels
-  channelNameMapping: [],
-  // allows you to completely ignore channels by name
-  filterFunc: null,
-  appHeight: "100vh",
-  canvasMargin: "0 0 0 0",
-  cellPath: "",
-  fovPath: "",
-  renderConfig: {
-    alphaMask: true,
-    autoRotateButton: true,
-    axisClipSliders: true,
-    brightnessSlider: true,
-    colorPicker: true,
-    colorPresetsDropdown: true,
-    densitySlider: true,
-    levelsSliders: true,
-    saveSurfaceButtons: true,
-    fovCellSwitchControls: true,
-    viewModeRadioButtons: true,
-  },
-  viewerConfig: {
-    view: "3D", // "XY", "XZ", "YZ"
-    mode: "default", // "pathtrace", "maxprojection"
-    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT,
-    region: [0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
-    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
-  }
-};

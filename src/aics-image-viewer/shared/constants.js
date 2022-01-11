@@ -28,6 +28,7 @@ export const // Keys accepted as URL search parameters
   LUT_CONTROL_POINTS = "controlPoints",
   COLORIZE_ALPHA = "colorizeAlpha",
   COLORIZE_ENABLED = "colorizeEnabled",
+  CHANNEL_SETTINGS = "channelSettings",
   // Volume viewer keys
   ISO_VALUE = "isovalue",
   OPACITY = "opacity",
