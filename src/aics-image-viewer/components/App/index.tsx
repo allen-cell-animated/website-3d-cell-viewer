@@ -314,6 +314,52 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
+  openImageFromUrl(url, doResetViewMode, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
+    if (this.stateKey === "image") {
+      this.setState({
+        currentlyLoadedImagePath: url,
+        channelDataReady: {},
+        queryErrorMessage: null,
+        cachingInProgress: false,
+        userSelections: {
+          ...this.state.userSelections,
+          [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+        },
+      });
+    }
+    // use volumeloader to get this going.
+    if (url.endsWith(".tif") || url.endsWith(".tiff")) {
+      VolumeLoader.loadTiff(url, (url, v, channelIndex) => {
+        // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+        const thisChannelSettings = this.getOneChannelSetting(
+          v.imageInfo.channel_names[channelIndex],
+          // race condition with updateStateOnLoadImage below?
+          this.state.userSelections[CHANNEL_SETTINGS]
+        );
+        this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
+      }).then((aimg) => {
+        const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
+
+        if (stateKey === "image") {
+          this.intializeNewImage(aimg, newChannelSettings);
+        }
+        if (stateKey === "image") {
+          this.setState({ image: aimg });
+        } else if (stateKey === "prevImg") {
+          this.setState({ prevImg: aimg });
+        } else if (stateKey === "nextImg") {
+          this.setState({ nextImg: aimg });
+        } else {
+          console.error("ERROR invalid or unexpected stateKey");
+        }
+      });
+    } else if (url.endsWith(".zarr")) {
+      console.error("zarr loading not implemented");
+      //const aimg = VolumeLoader.loadZarr();
+    }
+    this.stopPollingForImage();
+  }
+
   handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, keepLuts) {
     if (resp.data.status === OK_STATUS) {
       if (this.stateKey === "image") {
@@ -364,6 +410,11 @@ export default class App extends React.Component<AppProps, AppState> {
       return;
     }
     const { baseUrl } = this.props;
+
+    // if we only have baseUrl then treat it as full url and load directly!
+    if (baseUrl === "" && imageDirectory.startsWith("http")) {
+      return this.openImageFromUrl(imageDirectory, doResetViewMode, stateKey, keepLuts);
+    }
 
     const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
@@ -582,7 +633,7 @@ export default class App extends React.Component<AppProps, AppState> {
       }));
     }
     // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
+    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, v, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
       const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
       this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, keepLuts);

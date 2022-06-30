@@ -124,9 +124,19 @@ if (params) {
     }
     args.initialChannelSettings = initialChannelSettings;
   }
-  // quick way to load a atlas.json from a special directory.
-  //
-  if (params.file) {
+  if (params.url) {
+    const decodedurl = decodeURI(params.url);
+    args.cellid = 1;
+    args.baseurl = "";
+    args.cellPath = decodedurl;
+    args.fovPath = "";
+    args.fovDownloadHref = "";
+    args.cellDownloadHref = decodedurl;
+    runApp();
+  }
+  else if (params.file) {
+    // quick way to load a atlas.json from a special directory.
+    //
     // ?file=relative-path-to-atlas-on-isilon
     args.cellid = 1;
     args.baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
