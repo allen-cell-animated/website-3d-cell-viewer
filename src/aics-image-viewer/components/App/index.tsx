@@ -314,6 +314,32 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
+  onNewVolumeCreated(aimg: Volume, stateKey: "image" | "prevImg" | "nextImg") {
+    const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
+
+    if (stateKey === "image") {
+      this.intializeNewImage(aimg, newChannelSettings);
+    }
+    if (stateKey === "image") {
+      this.setState({ image: aimg });
+    } else if (stateKey === "prevImg") {
+      this.setState({ prevImg: aimg });
+    } else if (stateKey === "nextImg") {
+      this.setState({ nextImg: aimg });
+    } else {
+      console.error("ERROR invalid or unexpected stateKey");
+    }
+  }
+  onNewChannelData(url: string, v: Volume, channelIndex: number, keepLuts: boolean) {
+    // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+    const thisChannelSettings = this.getOneChannelSetting(
+      v.imageInfo.channel_names[channelIndex],
+      // race condition with updateStateOnLoadImage below?
+      this.state.userSelections[CHANNEL_SETTINGS]
+    );
+    this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
+  }
+
   openImageFromUrl(url, doResetViewMode, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
     if (this.stateKey === "image") {
       this.setState({
@@ -330,28 +356,9 @@ export default class App extends React.Component<AppProps, AppState> {
     // use volumeloader to get this going.
     if (url.endsWith(".tif") || url.endsWith(".tiff")) {
       VolumeLoader.loadTiff(url, (url, v, channelIndex) => {
-        // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-        const thisChannelSettings = this.getOneChannelSetting(
-          v.imageInfo.channel_names[channelIndex],
-          // race condition with updateStateOnLoadImage below?
-          this.state.userSelections[CHANNEL_SETTINGS]
-        );
-        this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
       }).then((aimg) => {
-        const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
-
-        if (stateKey === "image") {
-          this.intializeNewImage(aimg, newChannelSettings);
-        }
-        if (stateKey === "image") {
-          this.setState({ image: aimg });
-        } else if (stateKey === "prevImg") {
-          this.setState({ prevImg: aimg });
-        } else if (stateKey === "nextImg") {
-          this.setState({ nextImg: aimg });
-        } else {
-          console.error("ERROR invalid or unexpected stateKey");
-        }
+        this.onNewVolumeCreated(aimg, stateKey);
       });
     } else if (url.endsWith(".zarr")) {
       console.error("zarr loading not implemented");
