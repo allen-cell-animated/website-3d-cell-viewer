@@ -361,8 +361,13 @@ export default class App extends React.Component<AppProps, AppState> {
         this.onNewVolumeCreated(aimg, stateKey);
       });
     } else if (url.endsWith(".zarr")) {
-      console.error("zarr loading not implemented");
-      //const aimg = VolumeLoader.loadZarr();
+      const timeIndex = 0;
+      const imageName = "0";
+      VolumeLoader.loadZarr(url, imageName, timeIndex, (url, v, channelIndex) => {
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
+      }).then((aimg) => {
+        this.onNewVolumeCreated(aimg, stateKey);
+      });
     }
     this.stopPollingForImage();
   }
