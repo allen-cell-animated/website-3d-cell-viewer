@@ -128,11 +128,24 @@ if (params) {
     const decodedurl = decodeURI(params.url);
 
     args.cellid = 1;
+    // ZARR:
+    // put the store url in baseUrl,
+    // and the image name in cellPath
+    // Time 0 will be loaded.
+    // TODO specify Pyramid level 
+
+    // OME-TIFF:
+    // any split between baseUrl + cellPath is ok
+    // as long as (baseUrl+cellPath) ends with .tif or tiff
+
+    // JSON ATLAS:
+    // any split between baseUrl + cellPath is ok
+    // as long as (baseUrl+cellPath) ends with .json
+
+    // it is understood that if nextImgPath and/or prevImgPath
+    // are provided, they must be relative to baseUrl in addition to cellPath
+    // same deal for fovPath
     if (decodedurl.endsWith(".zarr")) {
-      // to load zarr, put the store url in baseUrl,
-      // and the image name in cellPath
-      // Time 0 will be loaded.
-      // TODO specify Pyramid level 
       args.baseurl = decodedurl;
       if (params.image) {
         args.cellPath = decodeURI(params.image);  
