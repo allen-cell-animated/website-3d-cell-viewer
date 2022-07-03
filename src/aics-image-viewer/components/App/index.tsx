@@ -340,7 +340,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
   }
 
-  openImageFromUrl(url, doResetViewMode, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
+  openImageFromUrl(url: string, subPath: string, doResetViewMode, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
     if (this.stateKey === "image") {
       this.setState({
         currentlyLoadedImagePath: url,
@@ -362,8 +362,7 @@ export default class App extends React.Component<AppProps, AppState> {
       });
     } else if (url.endsWith(".zarr")) {
       const timeIndex = 0;
-      const imageName = "0";
-      VolumeLoader.loadZarr(url, imageName, timeIndex, (url, v, channelIndex) => {
+      VolumeLoader.loadZarr(url, subPath, timeIndex, (url, v, channelIndex) => {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
       }).then((aimg) => {
         this.onNewVolumeCreated(aimg, stateKey);
@@ -425,10 +424,12 @@ export default class App extends React.Component<AppProps, AppState> {
 
     // if we only have baseUrl then treat it as full url and load directly!
     if (baseUrl === "" && imageDirectory.startsWith("http")) {
-      return this.openImageFromUrl(imageDirectory, doResetViewMode, stateKey, keepLuts);
+      return this.openImageFromUrl(imageDirectory, "", doResetViewMode, stateKey, keepLuts);
+    } else if (baseUrl.endsWith(".zarr")) {
+      return this.openImageFromUrl(baseUrl, imageDirectory, doResetViewMode, stateKey, keepLuts);
     }
 
-    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
+    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}` : `${imageDirectory}`;
     //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
     // retrieve the json file directly from its url
     new HttpClient()

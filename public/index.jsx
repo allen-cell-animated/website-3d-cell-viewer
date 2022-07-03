@@ -69,8 +69,8 @@ const args = {
   //baseurl: "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
   baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails",
   cellid: 2025,
-  cellPath: "AICS-22/AICS-22_8319_2025",
-  fovPath: "AICS-22/AICS-22_8319",
+  cellPath: "AICS-22/AICS-22_8319_2025_atlas.json",
+  fovPath: "AICS-22/AICS-22_8319_atlas.json",
   fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
@@ -126,12 +126,36 @@ if (params) {
   }
   if (params.url) {
     const decodedurl = decodeURI(params.url);
+
     args.cellid = 1;
-    args.baseurl = "";
-    args.cellPath = decodedurl;
+    if (decodedurl.endsWith(".zarr")) {
+      // to load zarr, put the store url in baseUrl,
+      // and the image name in cellPath
+      // Time 0 will be loaded.
+      // TODO specify Pyramid level 
+      args.baseurl = decodedurl;
+      if (params.image) {
+        args.cellPath = decodeURI(params.image);  
+      }
+      else {
+        args.cellPath = "0";
+      }
+      args.cellDownloadHref = "";
+    }
+    else {
+      // to load ome-tiff, put the tiff url in cellPath
+      // and leave baseurl empty.  
+      // ???
+      // how to handle:
+      // 1. baseurl in s3, filename of atlas.json
+      // 2. full url to single file tiff
+      // 3. url to zarr store, image subpath, and time
+      args.baseurl = "";
+      args.cellPath = decodedurl;  
+      args.cellDownloadHref = decodedurl;
+    }
     args.fovPath = "";
     args.fovDownloadHref = "";
-    args.cellDownloadHref = decodedurl;
     runApp();
   }
   else if (params.file) {
@@ -168,9 +192,6 @@ if (params) {
       .then((fileInfo) => {
         args.cellPath = fileInfo.volumeviewerPath;
         args.fovPath = fileInfo.fovVolumeviewerPath;
-        // strip "_atlas.json" because the viewer is going to add it :(
-        args.cellPath = args.cellPath.replace("_atlas.json", "");
-        args.fovPath = args.fovPath.replace("_atlas.json", "");
         runApp();
 
         // only now do we have all the data needed
