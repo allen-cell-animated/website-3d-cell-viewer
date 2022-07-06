@@ -340,37 +340,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
   }
 
-  openImageFromUrl(url: string, subPath: string, doResetViewMode, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
-    if (this.stateKey === "image") {
-      this.setState({
-        currentlyLoadedImagePath: url,
-        channelDataReady: {},
-        queryErrorMessage: null,
-        cachingInProgress: false,
-        userSelections: {
-          ...this.state.userSelections,
-          [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-        },
-      });
-    }
-    // use volumeloader to get this going.
-    if (url.endsWith(".tif") || url.endsWith(".tiff")) {
-      VolumeLoader.loadTiff(url, (url, v, channelIndex) => {
-        this.onNewChannelData(url, v, channelIndex, keepLuts);
-      }).then((aimg) => {
-        this.onNewVolumeCreated(aimg, stateKey);
-      });
-    } else if (url.endsWith(".zarr")) {
-      const timeIndex = 0;
-      VolumeLoader.loadZarr(url, subPath, timeIndex, (url, v, channelIndex) => {
-        this.onNewChannelData(url, v, channelIndex, keepLuts);
-      }).then((aimg) => {
-        this.onNewVolumeCreated(aimg, stateKey);
-      });
-    }
-    this.stopPollingForImage();
-  }
-
   handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, keepLuts) {
     if (resp.data.status === OK_STATUS) {
       if (this.stateKey === "image") {
@@ -422,25 +391,61 @@ export default class App extends React.Component<AppProps, AppState> {
     }
     const { baseUrl } = this.props;
 
-    // if we only have baseUrl then treat it as full url and load directly!
-    if (baseUrl === "" && imageDirectory.startsWith("http")) {
-      return this.openImageFromUrl(imageDirectory, "", doResetViewMode, stateKey, keepLuts);
-    } else if (baseUrl.endsWith(".zarr")) {
-      return this.openImageFromUrl(baseUrl, imageDirectory, doResetViewMode, stateKey, keepLuts);
+    // if baseUrl ends with zarr then we have zarr.
+    // otherwise we can combine the baseUrl and imageDirectory to get the url to load.
+    if (baseUrl.endsWith(".zarr")) {
+      const timeIndex = 0;
+      VolumeLoader.loadZarr(baseUrl, imageDirectory, timeIndex, (url, v, channelIndex) => {
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
+      }).then((aimg) => {
+        if (this.stateKey === "image") {
+          this.setState({
+            currentlyLoadedImagePath: imageDirectory,
+            channelDataReady: {},
+            queryErrorMessage: null,
+            cachingInProgress: false,
+            userSelections: {
+              ...this.state.userSelections,
+              [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+            },
+          });
+        }
+        this.onNewVolumeCreated(aimg, stateKey);
+        this.stopPollingForImage();
+      });
+    } else {
+      const fullUrl = `${baseUrl}/${imageDirectory}`;
+      if (fullUrl.endsWith(".json")) {
+        new HttpClient()
+          .getJSON(fullUrl, { mode: "cors" })
+          .then((resp) => {
+            // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
+            resp.data.status = OK_STATUS;
+            resp.locationHeader = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
+            return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, keepLuts);
+          })
+          .catch((resp) => this.handleOpenImageException(resp));
+      } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
+        VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
+          this.onNewChannelData(url, v, channelIndex, keepLuts);
+        }).then((aimg) => {
+          if (this.stateKey === "image") {
+            this.setState({
+              currentlyLoadedImagePath: imageDirectory,
+              channelDataReady: {},
+              queryErrorMessage: null,
+              cachingInProgress: false,
+              userSelections: {
+                ...this.state.userSelections,
+                [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+              },
+            });
+          }
+          this.onNewVolumeCreated(aimg, stateKey);
+          this.stopPollingForImage();
+        });
+      }
     }
-
-    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}` : `${imageDirectory}`;
-    //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
-    // retrieve the json file directly from its url
-    new HttpClient()
-      .getJSON(toLoad, { mode: "cors" })
-      .then((resp) => {
-        // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
-        resp.data.status = OK_STATUS;
-        resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf("/") + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, keepLuts);
-      })
-      .catch((resp) => this.handleOpenImageException(resp));
   }
 
   intializeNewImage(aimg, newChannelSettings?) {

@@ -125,48 +125,53 @@ if (params) {
     args.initialChannelSettings = initialChannelSettings;
   }
   if (params.url) {
-    const decodedurl = decodeURI(params.url);
-
-    args.cellid = 1;
     // ZARR:
+    // ?url=zarrstore&image=imagename
+    // ?url=zarrstore will default to image "0"
+    // zarrstore must end with .zarr
     // put the store url in baseUrl,
     // and the image name in cellPath
     // Time 0 will be loaded.
     // TODO specify Pyramid level 
 
     // OME-TIFF:
+    // ?url=imageurl&image=imagename
+    // ?url=fullimageurl
     // any split between baseUrl + cellPath is ok
     // as long as (baseUrl+cellPath) ends with .tif or tiff
 
     // JSON ATLAS:
+    // ?url=imageurl&image=imagename
+    // ?url=fullimageurl
     // any split between baseUrl + cellPath is ok
     // as long as (baseUrl+cellPath) ends with .json
 
     // it is understood that if nextImgPath and/or prevImgPath
-    // are provided, they must be relative to baseUrl in addition to cellPath
+    // are provided, they must be relative to baseUrl in addition to cellPath.
     // same deal for fovPath
-    if (decodedurl.endsWith(".zarr")) {
-      args.baseurl = decodedurl;
-      if (params.image) {
-        args.cellPath = decodeURI(params.image);  
-      }
-      else {
-        args.cellPath = "0";
-      }
-      args.cellDownloadHref = "";
+
+    let decodedurl = decodeURI(params.url);
+    let decodedimage = "";
+    if (params.image) {
+      decodedimage = decodeURIComponent(params.image);
     }
     else {
-      // to load ome-tiff, put the tiff url in cellPath
-      // and leave baseurl empty.  
-      // ???
-      // how to handle:
-      // 1. baseurl in s3, filename of atlas.json
-      // 2. full url to single file tiff
-      // 3. url to zarr store, image subpath, and time
-      args.baseurl = "";
-      args.cellPath = decodedurl;  
-      args.cellDownloadHref = decodedurl;
+      // image not specified
+      if (decodedurl.endsWith(".zarr")) {
+        decodedimage = "0";
+      }
+      else {
+        spliturl = decodedurl.split("/");
+        decodedimage = spliturl[spliturl.length-1];
+        decodedurl = decodedurl.slice(0, -decodedimage.length);
+      }
     }
+
+    args.cellid = 1;
+    args.baseurl = decodedurl;
+    args.cellPath = decodedimage;
+    // this is invalid for zarr?
+    args.cellDownloadHref = decodedurl+decodedimage;
     args.fovPath = "";
     args.fovDownloadHref = "";
     runApp();
