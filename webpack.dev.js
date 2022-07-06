@@ -5,15 +5,20 @@ module.exports = merge(common, {
   mode: "development",
   devtool: "eval-source-map",
   output: {
-    publicPath: "",
+    publicPath: "/imageviewer/",
   },
   devServer: {
-    publicPath: "/imageviewer/",
-    openPage: "imageviewer/",
+    open: ["imageviewer/"],
     port: 9020,
-    host: "0.0.0.0",
-    disableHostCheck: true,
+    allowedHosts: "all",
+    static: [
+      {
+        publicPath: "/imageviewer/",
+        staticOptions: {
+          dotfiles: "allow",
+        },
+      },
+    ],
   },
-  plugins: [
-  ],
+  plugins: [],
 });
