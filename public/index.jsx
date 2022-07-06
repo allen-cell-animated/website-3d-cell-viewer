@@ -181,7 +181,13 @@ if (params) {
       args.initialChannelSettings =  {
         groups: [
           // first 3 channels on by default!
-          {name: "Channels", channels: [{match:[0,1,2], enabled:true}]}
+          {
+            name: "Channels", 
+            channels: [
+              {match:[0,1,2], enabled:true},
+              {match:"(.+)", enabled:false}
+            ]
+          },
         ]
       };
     }
