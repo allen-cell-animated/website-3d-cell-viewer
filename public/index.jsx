@@ -161,7 +161,7 @@ if (params) {
         decodedimage = "0";
       }
       else {
-        spliturl = decodedurl.split("/");
+        const spliturl = decodedurl.split("/");
         decodedimage = spliturl[spliturl.length-1];
         decodedurl = decodedurl.slice(0, -decodedimage.length);
       }
@@ -174,6 +174,17 @@ if (params) {
     args.cellDownloadHref = decodedurl+decodedimage;
     args.fovPath = "";
     args.fovDownloadHref = "";
+    // if json, then use the CFE settings for now.
+    // (See VIEWER_3D_SETTINGS)
+    // otherwise turn the first 3 channels on and group them
+    if (!decodedimage.endsWith("json")) {
+      args.initialChannelSettings =  {
+        groups: [
+          // first 3 channels on by default!
+          {name: "Channels", channels: [{match:[0,1,2], enabled:true}]}
+        ]
+      };
+    }
     runApp();
   }
   else if (params.file) {

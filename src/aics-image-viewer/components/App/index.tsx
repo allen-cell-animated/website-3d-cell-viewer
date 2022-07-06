@@ -414,7 +414,7 @@ export default class App extends React.Component<AppProps, AppState> {
         this.stopPollingForImage();
       });
     } else {
-      const fullUrl = `${baseUrl}/${imageDirectory}`;
+      const fullUrl = `${baseUrl}${imageDirectory}`;
       if (fullUrl.endsWith(".json")) {
         new HttpClient()
           .getJSON(fullUrl, { mode: "cors" })
