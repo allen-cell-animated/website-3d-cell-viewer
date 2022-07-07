@@ -67,7 +67,7 @@ const params = parseQueryString();
 
 const args = {
   //baseurl: "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
-  baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails",
+  baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/",
   cellid: 2025,
   cellPath: "AICS-22/AICS-22_8319_2025_atlas.json",
   fovPath: "AICS-22/AICS-22_8319_atlas.json",
