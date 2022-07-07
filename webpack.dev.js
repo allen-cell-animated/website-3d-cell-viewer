@@ -8,12 +8,12 @@ module.exports = merge(common, {
   //   publicPath: "imageviewer/",
   // },
   devServer: {
-    open: ["imageviewer/"],
+    open: ["/"],
     port: 9020,
     allowedHosts: "all",
     static: [
       {
-        publicPath: "imageviewer/",
+        //publicPath: "imageviewer/",
         staticOptions: {
           dotfiles: "allow",
         },
