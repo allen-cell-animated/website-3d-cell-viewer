@@ -4,16 +4,16 @@ const common = require("./webpack.common");
 module.exports = merge(common, {
   mode: "development",
   devtool: "eval-source-map",
-  output: {
-    publicPath: "/imageviewer/",
-  },
+  // output: {
+  //   publicPath: "imageviewer/",
+  // },
   devServer: {
     open: ["imageviewer/"],
     port: 9020,
     allowedHosts: "all",
     static: [
       {
-        publicPath: "/imageviewer/",
+        publicPath: "imageviewer/",
         staticOptions: {
           dotfiles: "allow",
         },

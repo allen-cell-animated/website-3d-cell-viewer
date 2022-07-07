@@ -30,8 +30,8 @@
     "postcss": "postcss src/**/*.css --base src --dir es",
     "publish-patch": "npm version patch | xargs -I {} sh -c 'git push origin {}'",
     "postpublish-patch": "git push origin main",
-    "predeploy": "DEPLOYMENT_ENV=production npm run build-static",
-    "deploy": "gh-pages -d imageviewer -o github"
+    "predeploy": "DEPLOYMENT_ENV=production npm run dev",
+    "deploy": "gh-pages -d imageviewer"
   },
   "author": "Megan Riel-Mehan",
   "license": "ISC",
@@ -74,7 +74,7 @@
     "eslint-plugin-react": "^7.20.6",
     "file-loader": "^6.2.0",
     "firebase": "^7.15.3",
-    "gh-pages": "^2.0.0",
+    "gh-pages": "^4.0.0",
     "html-webpack-plugin": "^5.3.2",
     "jest": "^27.0.6",
     "less": "^4.1.1",
