@@ -177,7 +177,7 @@ if (params) {
     // if json, then use the CFE settings for now.
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
-    if (!decodedimage.endsWith("json")) {
+    if (!decodedimage.endsWith("json") && !params.ch) {
       args.initialChannelSettings =  {
         groups: [
           // first 3 channels on by default!
