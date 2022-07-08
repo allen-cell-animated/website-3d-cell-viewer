@@ -30,6 +30,7 @@
     "postcss": "postcss src/**/*.css --base src --dir es",
     "publish-patch": "npm version patch | xargs -I {} sh -c 'git push origin {}'",
     "postpublish-patch": "git push origin main",
+    "prepare": "DEPLOYMENT_ENV=production npm run build",
     "predeploy": "DEPLOYMENT_ENV=production npm run dev",
     "deploy": "gh-pages -d imageviewer -t true"
   },
