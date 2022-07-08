@@ -31,7 +31,7 @@
     "publish-patch": "npm version patch | xargs -I {} sh -c 'git push origin {}'",
     "postpublish-patch": "git push origin main",
     "predeploy": "DEPLOYMENT_ENV=production npm run dev",
-    "deploy": "gh-pages -d imageviewer"
+    "deploy": "gh-pages -d imageviewer -t true"
   },
   "author": "Megan Riel-Mehan",
   "license": "ISC",
