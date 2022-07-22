@@ -6,7 +6,6 @@ import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } 
 
 import { AppProps, AppState, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
-import HttpClient from "../../shared/utils/httpClient";
 import { findFirstChannelMatch, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
@@ -76,7 +75,7 @@ function colorHexToArray(hex) {
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
-  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
+  // rawDims is the volume dims that normally come from a json file
   rawDims: null,
 
   maskChannelName: "",
@@ -200,7 +199,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
-    this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
     this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
@@ -340,31 +338,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, keepLuts) {
-    if (resp.data.status === OK_STATUS) {
-      if (this.stateKey === "image") {
-        this.setState({
-          currentlyLoadedImagePath: imageDirectory,
-          channelDataReady: {},
-          queryErrorMessage: null,
-          cachingInProgress: false,
-          userSelections: {
-            ...this.state.userSelections,
-            [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-          },
-        });
-      }
-      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, keepLuts);
-      this.stopPollingForImage();
-    } else if (resp.data.status === ERROR_STATUS) {
-      this.stopPollingForImage();
-    } else {
-      this.setState({
-        cachingInProgress: true,
-      });
-    }
-  }
-
   handleOpenImageException(resp) {
     /** can uncomment when we are actually using this message var
     let message = "Unknown Error";
@@ -397,38 +370,8 @@ export default class App extends React.Component<AppProps, AppState> {
       const timeIndex = 0;
       VolumeLoader.loadZarr(baseUrl, imageDirectory, timeIndex, (url, v, channelIndex) => {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
-      }).then((aimg) => {
-        if (this.stateKey === "image") {
-          this.setState({
-            currentlyLoadedImagePath: imageDirectory,
-            channelDataReady: {},
-            queryErrorMessage: null,
-            cachingInProgress: false,
-            userSelections: {
-              ...this.state.userSelections,
-              [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-            },
-          });
-        }
-        this.onNewVolumeCreated(aimg, stateKey);
-        this.stopPollingForImage();
-      });
-    } else {
-      const fullUrl = `${baseUrl}${imageDirectory}`;
-      if (fullUrl.endsWith(".json")) {
-        new HttpClient()
-          .getJSON(fullUrl, { mode: "cors" })
-          .then((resp) => {
-            // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
-            resp.data.status = OK_STATUS;
-            resp.locationHeader = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
-            return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, keepLuts);
-          })
-          .catch((resp) => this.handleOpenImageException(resp));
-      } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-        VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
-          this.onNewChannelData(url, v, channelIndex, keepLuts);
-        }).then((aimg) => {
+      })
+        .then((aimg) => {
           if (this.stateKey === "image") {
             this.setState({
               currentlyLoadedImagePath: imageDirectory,
@@ -443,7 +386,54 @@ export default class App extends React.Component<AppProps, AppState> {
           }
           this.onNewVolumeCreated(aimg, stateKey);
           this.stopPollingForImage();
-        });
+        })
+        .catch((resp) => this.handleOpenImageException(resp));
+    } else {
+      const fullUrl = `${baseUrl}${imageDirectory}`;
+
+      if (fullUrl.endsWith(".json")) {
+        const urlPrefix = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
+        VolumeLoader.loadJson(fullUrl, urlPrefix, (url, v, channelIndex) => {
+          this.onNewChannelData(url, v, channelIndex, keepLuts);
+        })
+          .then((aimg) => {
+            if (this.stateKey === "image") {
+              this.setState({
+                currentlyLoadedImagePath: imageDirectory,
+                channelDataReady: {},
+                queryErrorMessage: null,
+                cachingInProgress: false,
+                userSelections: {
+                  ...this.state.userSelections,
+                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+                },
+              });
+            }
+            this.onNewVolumeCreated(aimg, stateKey);
+            this.stopPollingForImage();
+          })
+          .catch((resp) => this.handleOpenImageException(resp));
+      } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
+        VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
+          this.onNewChannelData(url, v, channelIndex, keepLuts);
+        })
+          .then((aimg) => {
+            if (this.stateKey === "image") {
+              this.setState({
+                currentlyLoadedImagePath: imageDirectory,
+                channelDataReady: {},
+                queryErrorMessage: null,
+                cachingInProgress: false,
+                userSelections: {
+                  ...this.state.userSelections,
+                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+                },
+              });
+            }
+            this.onNewVolumeCreated(aimg, stateKey);
+            this.stopPollingForImage();
+          })
+          .catch((resp) => this.handleOpenImageException(resp));
       }
     }
   }
