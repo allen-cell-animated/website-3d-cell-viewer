@@ -58,8 +58,6 @@ import "./styles.css";
 const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;
 
-const OK_STATUS = "OK";
-const ERROR_STATUS = "Error";
 const INIT_COLORS = PRESET_COLORS_0;
 
 function colorHexToArray(hex) {
