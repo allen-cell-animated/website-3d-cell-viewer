@@ -223,6 +223,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
+    this.changeAxisShowing = this.changeAxisShowing.bind(this);
   }
 
   componentDidMount() {
@@ -946,6 +947,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
+  changeAxisShowing(showing) {
+    this.state.view3d.setShowAxis(showing);
+  }
+
   updateChannelTransferFunction(index, lut) {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
@@ -1094,6 +1099,7 @@ export default class App extends React.Component<AppProps, AppState> {
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
+            changeAxisShowing={this.changeAxisShowing}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>

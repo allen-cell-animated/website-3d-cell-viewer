@@ -28,7 +28,7 @@ export default class ControlPanel extends React.Component {
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.changeRenderMode = this.changeRenderMode.bind(this);
-    this.state = { open: true };
+    this.state = { open: true, axisShowing: false };
   }
 
   handleToggle() {
@@ -81,6 +81,13 @@ export default class ControlPanel extends React.Component {
       </Dropdown>
     );
   }
+
+  toggleAxisShowing() {
+    const axisShowing = !this.state.axisShowing;
+    this.setState({axisShowing});
+    this.props.changeAxisShowing(axisShowing);
+  }
+
   changeRenderMode({ target }) {
     this.props.changeRenderingAlgorithm(target.value);
   }
@@ -138,6 +145,16 @@ export default class ControlPanel extends React.Component {
     }
   }
 
+  renderAxesButton() {
+    const { axisShowing } = this.state;
+    const buttonContent = axisShowing ? "Hide Axes" : "Show Axes";
+    return (
+      <Button block={true} onClick={() => this.toggleAxisShowing()}>
+        {buttonContent}
+      </Button>
+    );
+  }
+
   render() {
     const {
       viewerChannelSettings,
@@ -179,6 +196,7 @@ export default class ControlPanel extends React.Component {
               this.renderColorPresetsDropdown(),
           ]}
         />
+        <Card.Meta title={this.renderAxesButton()} />
         {hasImage ? (
           <div className="channel-rows-list">
             <ChannelsWidget
