@@ -8,6 +8,7 @@ import {
   LEVELS_SLIDER,
   MODE,
   AUTO_ROTATE,
+  SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
 } from "../../shared/constants";
@@ -42,6 +43,7 @@ export interface AppProps {
     viewModeRadioButtons: boolean;
   };
   viewerConfig: {
+    showAxes: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
@@ -68,6 +70,7 @@ export interface UserSelectionState {
   [AUTO_ROTATE]: boolean;
   [MAX_PROJECT]: boolean;
   [PATH_TRACE]: boolean;
+  [SHOW_AXES]: boolean;
   [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
   [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,

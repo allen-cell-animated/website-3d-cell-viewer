@@ -34,6 +34,7 @@ import {
   SAVE_ISO_SURFACE,
   MODE,
   AUTO_ROTATE,
+  SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
   LUT_MIN_PERCENTILE,
@@ -98,6 +99,7 @@ const defaultProps: AppProps = {
     viewModeRadioButtons: true,
   },
   viewerConfig: {
+    showAxes: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
@@ -173,6 +175,7 @@ export default class App extends React.Component<AppProps, AppState> {
         controlPanelClosed: false,
         [MODE]: viewmode,
         [AUTO_ROTATE]: false,
+        [SHOW_AXES]: props.viewerConfig.showAxes,
         [MAX_PROJECT]: maxproject,
         [PATH_TRACE]: pathtrace,
         [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -429,6 +432,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setShowAxis(userSelections[SHOW_AXES]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -708,6 +712,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setShowAxis(userSelections[SHOW_AXES]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
@@ -784,6 +789,9 @@ export default class App extends React.Component<AppProps, AppState> {
         break;
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
+        break;
+      case SHOW_AXES:
+        view3d.setShowAxis(newValue);
         break;
       case SAVE_ISO_SURFACE:
         view3d.saveChannelIsosurface(image, index, newValue);
@@ -947,8 +955,9 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
-  changeAxisShowing(showing) {
-    this.state.view3d.setShowAxis(showing);
+  changeAxisShowing(showAxes) {
+    this.setUserSelectionsInState({ showAxes });
+    this.handleChangeToImage(SHOW_AXES, showAxes);
   }
 
   updateChannelTransferFunction(index, lut) {
@@ -1082,6 +1091,7 @@ export default class App extends React.Component<AppProps, AppState> {
             mode={userSelections[MODE]}
             imageType={userSelections.imageType}
             autorotate={userSelections[AUTO_ROTATE]}
+            showAxes={userSelections.showAxes}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}

@@ -28,7 +28,7 @@ export default class ControlPanel extends React.Component {
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
     this.handleSwitchFovCell = this.handleSwitchFovCell.bind(this);
     this.changeRenderMode = this.changeRenderMode.bind(this);
-    this.state = { open: true, axisShowing: false };
+    this.state = { open: true };
   }
 
   handleToggle() {
@@ -83,8 +83,7 @@ export default class ControlPanel extends React.Component {
   }
 
   toggleAxisShowing() {
-    const axisShowing = !this.state.axisShowing;
-    this.setState({axisShowing});
+    const axisShowing = !this.props.showAxes;
     this.props.changeAxisShowing(axisShowing);
   }
 
@@ -146,8 +145,8 @@ export default class ControlPanel extends React.Component {
   }
 
   renderAxesButton() {
-    const { axisShowing } = this.state;
-    const buttonContent = axisShowing ? "Hide Axes" : "Show Axes";
+    const { showAxes } = this.props;
+    const buttonContent = showAxes ? "Hide Axes" : "Show Axes";
     return (
       <Button block={true} onClick={() => this.toggleAxisShowing()}>
         {buttonContent}
