@@ -67,6 +67,7 @@
     "clean-webpack-plugin": "^4.0.0-alpha.0",
     "command-line-args": "^5.1.1",
     "copy-webpack-plugin": "^5.0.4",
+    "cross-env": "^7.0.3",
     "css-loader": "^6.2.0",
     "esbuild": "^0.14.50",
     "esbuild-jest": "^0.5.0",
