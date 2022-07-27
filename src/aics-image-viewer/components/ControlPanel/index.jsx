@@ -148,7 +148,7 @@ export default class ControlPanel extends React.Component {
     const { showAxes } = this.props;
     const buttonContent = showAxes ? "Hide Axes" : "Show Axes";
     return (
-      <Button block={true} onClick={() => this.toggleAxisShowing()}>
+      <Button onClick={() => this.toggleAxisShowing()}>
         {buttonContent}
       </Button>
     );
