@@ -1091,7 +1091,7 @@ export default class App extends React.Component<AppProps, AppState> {
             mode={userSelections[MODE]}
             imageType={userSelections.imageType}
             autorotate={userSelections[AUTO_ROTATE]}
-            showAxes={userSelections.showAxes}
+            showAxes={userSelections[SHOW_AXES]}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
