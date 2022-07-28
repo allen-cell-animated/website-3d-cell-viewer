@@ -87,9 +87,9 @@ export default class ControlPanel extends React.Component {
     this.props.changeAxisShowing(axisShowing);
   }
 
-  toggleBoundsShowing() {
-    const boundsShowing = !this.props.showBounds;
-    this.props.changeBoundsShowing(boundsShowing);
+  toggleBoundingBoxShowing() {
+    const boundingBoxShowing = !this.props.showBoundingBox;
+    this.props.changeBoundingBoxShowing(boundingBoxShowing);
   }
 
   changeRenderMode({ target }) {
@@ -159,11 +159,11 @@ export default class ControlPanel extends React.Component {
     );
   }
 
-  renderBoundsButton() {
-    const { showBounds } = this.props;
-    const buttonContent = showBounds ? "Hide Bounds" : "Show Bounds";
+  renderBoundingBoxButton() {
+    const { showBoundingBox } = this.props;
+    const buttonContent = showBoundingBox ? "Hide Bounds" : "Show Bounds";
     return (
-      <Button onClick={() => this.toggleBoundsShowing()}>
+      <Button onClick={() => this.toggleBoundingBoxShowing()}>
         {buttonContent}
       </Button>
     );
@@ -213,7 +213,7 @@ export default class ControlPanel extends React.Component {
         <Card.Meta
           title={[
             this.renderAxesButton(),
-            this.renderBoundsButton()
+            this.renderBoundingBoxButton()
           ]}
         />
         {hasImage ? (
