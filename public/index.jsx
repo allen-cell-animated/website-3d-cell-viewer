@@ -77,6 +77,7 @@ const args = {
 };
 const viewerConfig = {
   showAxes: false,
+  showBounds: false,
   view: "3D", // "XY", "XZ", "YZ"
   mode: "default", // "pathtrace", "maxprojection"
   maskAlpha: 50,
