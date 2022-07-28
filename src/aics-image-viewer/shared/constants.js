@@ -22,6 +22,7 @@ export const // Keys accepted as URL search parameters
   LEVELS_SLIDER = "levelsSlider",
   MODE = "mode",
   AUTO_ROTATE = "autorotate",
+  SHOW_AXES = "showAxes",
   MAX_PROJECT = "maxProject",
   VOLUMETRIC_RENDER = "volume",
   PATH_TRACE = "pathTrace",

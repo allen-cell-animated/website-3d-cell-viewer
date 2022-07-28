@@ -81,6 +81,12 @@ export default class ControlPanel extends React.Component {
       </Dropdown>
     );
   }
+
+  toggleAxisShowing() {
+    const axisShowing = !this.props.showAxes;
+    this.props.changeAxisShowing(axisShowing);
+  }
+
   changeRenderMode({ target }) {
     this.props.changeRenderingAlgorithm(target.value);
   }
@@ -138,6 +144,16 @@ export default class ControlPanel extends React.Component {
     }
   }
 
+  renderAxesButton() {
+    const { showAxes } = this.props;
+    const buttonContent = showAxes ? "Hide Axes" : "Show Axes";
+    return (
+      <Button onClick={() => this.toggleAxisShowing()}>
+        {buttonContent}
+      </Button>
+    );
+  }
+
   render() {
     const {
       viewerChannelSettings,
@@ -179,6 +195,7 @@ export default class ControlPanel extends React.Component {
               this.renderColorPresetsDropdown(),
           ]}
         />
+        <Card.Meta title={this.renderAxesButton()} />
         {hasImage ? (
           <div className="channel-rows-list">
             <ChannelsWidget

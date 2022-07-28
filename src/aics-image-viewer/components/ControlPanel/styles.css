@@ -5,15 +5,14 @@
 }
 
 .control-panel {
-    flex: 1 auto;
-    order: 1;
-    max-width: 540px;
-    .ant-card-head {
-        border-bottom: none;
+  flex: 1 auto;
+  order: 1;
+  max-width: 540px;
+  .ant-card-head {
+    border-bottom: none;
   }
   .ant-card-meta {
-      margin: 0px;
-      border-bottom: 1px solid $border-color;
+    margin: 0px;
   }
   .ant-card-meta-title {
     margin: 0px;
@@ -38,6 +37,10 @@
       background-color: white;
 
     }
+  }
+
+  .channel-rows-list {
+    border-top: 1px solid $border-color;
   }
 
   .ant-collapse {
