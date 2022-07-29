@@ -100,6 +100,7 @@ const defaultProps: AppProps = {
   },
   viewerConfig: {
     showAxes: false,
+    showBoundingBox: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
@@ -176,6 +177,7 @@ export default class App extends React.Component<AppProps, AppState> {
         [MODE]: viewmode,
         [AUTO_ROTATE]: false,
         [SHOW_AXES]: props.viewerConfig.showAxes,
+        showBoundingBox: props.viewerConfig.showBoundingBox,
         [MAX_PROJECT]: maxproject,
         [PATH_TRACE]: pathtrace,
         [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -227,6 +229,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
+    this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
   }
 
   componentDidMount() {
@@ -433,6 +436,7 @@ export default class App extends React.Component<AppProps, AppState> {
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
+    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -713,6 +717,7 @@ export default class App extends React.Component<AppProps, AppState> {
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
+    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
@@ -792,6 +797,9 @@ export default class App extends React.Component<AppProps, AppState> {
         break;
       case SHOW_AXES:
         view3d.setShowAxis(newValue);
+        break;
+      case "showBoundingBox":
+        view3d.setShowBoundingBox(image, newValue);
         break;
       case SAVE_ISO_SURFACE:
         view3d.saveChannelIsosurface(image, index, newValue);
@@ -960,6 +968,11 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage(SHOW_AXES, showAxes);
   }
 
+  changeBoundingBoxShowing(showBoundingBox) {
+    this.setUserSelectionsInState({ showBoundingBox });
+    this.handleChangeToImage("showBoundingBox", showBoundingBox);
+  }
+
   updateChannelTransferFunction(index, lut) {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
@@ -1092,6 +1105,7 @@ export default class App extends React.Component<AppProps, AppState> {
             imageType={userSelections.imageType}
             autorotate={userSelections[AUTO_ROTATE]}
             showAxes={userSelections[SHOW_AXES]}
+            showBoundingBox={userSelections.showBoundingBox}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
@@ -1110,6 +1124,7 @@ export default class App extends React.Component<AppProps, AppState> {
             changeOneChannelSetting={this.changeOneChannelSetting}
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
             changeAxisShowing={this.changeAxisShowing}
+            changeBoundingBoxShowing={this.changeBoundingBoxShowing}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>

@@ -87,6 +87,11 @@ export default class ControlPanel extends React.Component {
     this.props.changeAxisShowing(axisShowing);
   }
 
+  toggleBoundingBoxShowing() {
+    const boundingBoxShowing = !this.props.showBoundingBox;
+    this.props.changeBoundingBoxShowing(boundingBoxShowing);
+  }
+
   changeRenderMode({ target }) {
     this.props.changeRenderingAlgorithm(target.value);
   }
@@ -154,6 +159,16 @@ export default class ControlPanel extends React.Component {
     );
   }
 
+  renderBoundingBoxButton() {
+    const { showBoundingBox } = this.props;
+    const buttonContent = showBoundingBox ? "Hide Bounds" : "Show Bounds";
+    return (
+      <Button onClick={() => this.toggleBoundingBoxShowing()}>
+        {buttonContent}
+      </Button>
+    );
+  }
+
   render() {
     const {
       viewerChannelSettings,
@@ -195,7 +210,12 @@ export default class ControlPanel extends React.Component {
               this.renderColorPresetsDropdown(),
           ]}
         />
-        <Card.Meta title={this.renderAxesButton()} />
+        <Card.Meta
+          title={[
+            this.renderAxesButton(),
+            this.renderBoundingBoxButton()
+          ]}
+        />
         {hasImage ? (
           <div className="channel-rows-list">
             <ChannelsWidget
