@@ -92,6 +92,10 @@ export default class ControlPanel extends React.Component {
     this.props.changeBoundingBoxShowing(boundingBoxShowing);
   }
 
+  handleResetCamera() {
+    this.props.resetCamera();
+  }
+
   changeRenderMode({ target }) {
     this.props.changeRenderingAlgorithm(target.value);
   }
@@ -213,7 +217,10 @@ export default class ControlPanel extends React.Component {
         <Card.Meta
           title={[
             this.renderAxesButton(),
-            this.renderBoundingBoxButton()
+            this.renderBoundingBoxButton(),
+            <Button onClick={() => this.handleResetCamera()}>
+              Reset Camera
+            </Button>
           ]}
         />
         {hasImage ? (
