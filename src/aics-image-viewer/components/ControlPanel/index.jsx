@@ -173,6 +173,14 @@ export default class ControlPanel extends React.Component {
     );
   }
 
+  renderResetCameraButton() {
+    return (
+      <Button onClick={() => this.handleResetCamera()}>
+        Reset Camera
+      </Button>
+    );
+  }
+
   render() {
     const {
       viewerChannelSettings,
@@ -218,9 +226,7 @@ export default class ControlPanel extends React.Component {
           title={[
             this.renderAxesButton(),
             this.renderBoundingBoxButton(),
-            <Button onClick={() => this.handleResetCamera()}>
-              Reset Camera
-            </Button>
+            this.renderResetCameraButton()
           ]}
         />
         {hasImage ? (
