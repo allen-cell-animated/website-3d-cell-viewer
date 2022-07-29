@@ -230,6 +230,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
     this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
+    this.resetCamera = this.resetCamera.bind(this);
   }
 
   componentDidMount() {
@@ -973,6 +974,12 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
+  resetCamera() {
+    if (this.state.view3d) {
+      this.state.view3d.resetCamera();
+    }
+  }
+
   updateChannelTransferFunction(index, lut) {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
@@ -1125,6 +1132,7 @@ export default class App extends React.Component<AppProps, AppState> {
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
             changeAxisShowing={this.changeAxisShowing}
             changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+            resetCamera={this.resetCamera}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>
