@@ -94,5 +94,11 @@
             }
         }
 
+        .color-customizer {
+            .ant-collapse-content-box {
+                padding: 16px;
+                padding-bottom: 0;
+            }
+        }
     }
 }
