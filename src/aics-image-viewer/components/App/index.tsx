@@ -56,6 +56,7 @@ import {
 } from "../../shared/utils/sliderValuesToImageValues";
 
 import "./styles.css";
+import { rgbObjectToFloatArray } from "../../shared/utils/colorObjectArrayConverting";
 
 const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;
@@ -979,7 +980,7 @@ export default class App extends React.Component<AppProps, AppState> {
   changeBoundingBoxColor(boundingBoxColor) {
     this.setUserSelectionsInState({ boundingBoxColor });
     if (this.state.view3d && this.state.image) {
-      const color = ['r', 'g', 'b'].map(chan => boundingBoxColor[chan] / 255);
+      const color = rgbObjectToFloatArray(boundingBoxColor);
       this.state.view3d.setBoundingBoxColor(this.state.image, color);
     }
   }
@@ -987,7 +988,8 @@ export default class App extends React.Component<AppProps, AppState> {
   changeBackgroundColor(backgroundColor) {
     this.setUserSelectionsInState({ backgroundColor });
     if (this.state.view3d) {
-      this.state.view3d.setBackgroundColor(backgroundColor);
+      const color = rgbObjectToFloatArray(backgroundColor);
+      this.state.view3d.setBackgroundColor(color);
     }
   }
 
