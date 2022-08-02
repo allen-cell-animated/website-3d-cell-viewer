@@ -268,7 +268,10 @@ export default class ControlPanel extends React.Component {
               pathTraceOn={this.props.pathTraceOn}
               renderConfig={renderConfig}
             />
-            <CustomizeWidget />
+            <CustomizeWidget
+              changeBackgroundColor={this.props.changeBackgroundColor}
+              changeBoundingBoxColor={this.props.changeBoundingBoxColor}
+            />
           </div>
         ) : null}
       </Card>

@@ -231,6 +231,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
     this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
     this.resetCamera = this.resetCamera.bind(this);
+    this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
+    this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
   }
 
   componentDidMount() {
@@ -974,6 +976,21 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
+  changeBoundingBoxColor(boundingBoxColor) {
+    this.setUserSelectionsInState({ boundingBoxColor });
+    if (this.state.view3d && this.state.image) {
+      const color = ['r', 'g', 'b'].map(chan => boundingBoxColor[chan] / 255);
+      this.state.view3d.setBoundingBoxColor(this.state.image, color);
+    }
+  }
+
+  changeBackgroundColor(backgroundColor) {
+    this.setUserSelectionsInState({ backgroundColor });
+    if (this.state.view3d) {
+      this.state.view3d.setBackgroundColor(backgroundColor);
+    }
+  }
+
   resetCamera() {
     if (this.state.view3d) {
       this.state.view3d.resetCamera();
@@ -1132,6 +1149,8 @@ export default class App extends React.Component<AppProps, AppState> {
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
             changeAxisShowing={this.changeAxisShowing}
             changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+            changeBackgroundColor={this.changeBackgroundColor}
+            changeBoundingBoxColor={this.changeBoundingBoxColor}
             resetCamera={this.resetCamera}
             viewerChannelSettings={viewerChannelSettings}
           />

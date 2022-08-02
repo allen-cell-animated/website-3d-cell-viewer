@@ -85,7 +85,7 @@ class ColorPicker extends React.Component {
     };
 
     if (this.props.above) {
-      styles.popover.bottom = 'calc(100% + 25px)';
+      styles.popover.bottom = 'calc(100% + 31px)';
     } else {
       styles.popover.top = '1px';
     }

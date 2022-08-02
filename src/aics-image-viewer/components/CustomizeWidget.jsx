@@ -38,9 +38,11 @@ export default class CustomizeWidget extends React.Component {
           <Collapse.Panel key={"color-customization"}>
             <ColorPickerRow
               name={"Background Color"}
+              onColorChange={this.props.changeBackgroundColor}
             />
             <ColorPickerRow
               name={"Bounding Box Color"}
+              onColorChange={this.props.changeBoundingBoxColor}
             />
           </Collapse.Panel>
         </Collapse>
