@@ -12,6 +12,8 @@ function ColorPickerRow({name, color, onColorChange}) {
           color={color}
           onColorChange={onColorChange}
           width={18}
+          disableAlpha={true}
+          above={true}
         />
       </span>
       <span>{name}</span>
@@ -34,8 +36,12 @@ export default class CustomizeWidget extends React.Component {
       >
         <Collapse bordered={false}>
           <Collapse.Panel key={"color-customization"}>
-            <ColorPickerRow name={"Background Color"} />
-            <ColorPickerRow name={"Bounding Box Color"} />
+            <ColorPickerRow
+              name={"Background Color"}
+            />
+            <ColorPickerRow
+              name={"Bounding Box Color"}
+            />
           </Collapse.Panel>
         </Collapse>
       </Card>

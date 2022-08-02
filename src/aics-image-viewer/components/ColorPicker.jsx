@@ -1,5 +1,5 @@
 import React from 'react';
-import { SketchPicker } from 'react-color';
+import { SketchPicker, CustomPicker } from 'react-color';
 import { map } from 'lodash';
 
 class ColorPicker extends React.Component {
@@ -57,7 +57,7 @@ class ColorPicker extends React.Component {
 
   render() {
     const width = this.props.width || 36;
-    const styles = {
+    let styles = {
       color: {
         width: `${width}px`,
         height: '14px',
@@ -82,6 +82,12 @@ class ColorPicker extends React.Component {
         bottom: '0px',
         left: '0px'
       }
+    };
+
+    if (this.props.above) {
+      styles.popover.bottom = 'calc(100% + 25px)';
+    } else {
+      styles.popover.top = '1px';
     }
 
     return (
@@ -89,10 +95,17 @@ class ColorPicker extends React.Component {
         <div style={ styles.swatch } onClick={ this.handleClick }>
           <div style={ styles.color } />
         </div>
-        { this.state.displayColorPicker ? <div style={ styles.popover }>
-          <div style={ styles.cover } onClick={ this.handleClose }/>
-          <SketchPicker color={ this.state.color } onChange={ this.handleChange } onChangeComplete={ this.handleChangeComplete }/>
-        </div> : null }
+        <div style={{position: 'absolute'}}>
+          { this.state.displayColorPicker ? <div style={ styles.popover }>
+            <div style={ styles.cover } onClick={ this.handleClose }/>
+            <SketchPicker
+              color={ this.state.color }
+              onChange={ this.handleChange }
+              onChangeComplete={ this.handleChangeComplete }
+              disableAlpha={ this.props.disableAlpha }
+            />
+          </div> : null }
+        </div>
       </div>
     );
   }
