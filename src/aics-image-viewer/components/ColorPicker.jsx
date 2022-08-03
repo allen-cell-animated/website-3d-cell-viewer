@@ -1,5 +1,5 @@
 import React from 'react';
-import { SketchPicker, CustomPicker } from 'react-color';
+import { SketchPicker } from 'react-color';
 import { map } from 'lodash';
 
 class ColorPicker extends React.Component {

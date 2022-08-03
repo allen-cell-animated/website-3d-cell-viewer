@@ -269,8 +269,11 @@ export default class ControlPanel extends React.Component {
               renderConfig={renderConfig}
             />
             <CustomizeWidget
+              backgroundColor={this.props.backgroundColor}
+              boundingBoxColor={this.props.boundingBoxColor}
               changeBackgroundColor={this.props.changeBackgroundColor}
               changeBoundingBoxColor={this.props.changeBoundingBoxColor}
+              showBoundingBox={this.props.showBoundingBox}
             />
           </div>
         ) : null}

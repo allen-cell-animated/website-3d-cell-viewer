@@ -45,6 +45,8 @@ export interface AppProps {
   viewerConfig: {
     showAxes: boolean;
     showBoundingBox: boolean;
+    boundingBoxColor: [number, number, number];
+    backgroundColor: [number, number, number];
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
@@ -73,6 +75,8 @@ export interface UserSelectionState {
   [PATH_TRACE]: boolean;
   [SHOW_AXES]: boolean;
   showBoundingBox: boolean;
+  boundingBoxColor: [number, number, number];
+  backgroundColor: [number, number, number];
   [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
   [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -87,7 +91,7 @@ export interface UserSelectionState {
     isosurfaceEnabled: boolean;
     isovalue: number;
     opacity: number;
-    color: string;
+    color: [number, number, number];
     dataReady: boolean;
     [LUT_CONTROL_POINTS]: [];
   }[];

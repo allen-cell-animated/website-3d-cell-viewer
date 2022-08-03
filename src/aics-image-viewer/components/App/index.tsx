@@ -56,7 +56,7 @@ import {
 } from "../../shared/utils/sliderValuesToImageValues";
 
 import "./styles.css";
-import { rgbObjectToFloatArray } from "../../shared/utils/colorObjectArrayConverting";
+import { colorArrayToFloatArray, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
 
 const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;
@@ -104,6 +104,8 @@ const defaultProps: AppProps = {
     showBoundingBox: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
+    backgroundColor: [0, 0, 0],
+    boundingBoxColor: [255, 255, 255],
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
@@ -179,6 +181,8 @@ export default class App extends React.Component<AppProps, AppState> {
         [AUTO_ROTATE]: false,
         [SHOW_AXES]: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
+        boundingBoxColor: props.viewerConfig.boundingBoxColor || [255, 255, 255],
+        backgroundColor: props.viewerConfig.backgroundColor || [0, 0, 0],
         [MAX_PROJECT]: maxproject,
         [PATH_TRACE]: pathtrace,
         [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -441,6 +445,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
+    view3d.setBackgroundColor(colorArrayToFloatArray(userSelections.backgroundColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -722,6 +728,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBackgroundColor(colorArrayToFloatArray(userSelections.backgroundColor));
+    view3d.setBoundingBoxColor(colorArrayToFloatArray(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
@@ -977,19 +985,21 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
-  changeBoundingBoxColor(boundingBoxColor) {
+  changeBoundingBoxColor(color) {
+    const boundingBoxColor = rgbObjectToArray(color);
     this.setUserSelectionsInState({ boundingBoxColor });
     if (this.state.view3d && this.state.image) {
-      const color = rgbObjectToFloatArray(boundingBoxColor);
-      this.state.view3d.setBoundingBoxColor(this.state.image, color);
+      const floatColor = colorArrayToFloatArray(boundingBoxColor);
+      this.state.view3d.setBoundingBoxColor(this.state.image, floatColor);
     }
   }
 
-  changeBackgroundColor(backgroundColor) {
+  changeBackgroundColor(color) {
+    const backgroundColor = rgbObjectToArray(color);
     this.setUserSelectionsInState({ backgroundColor });
     if (this.state.view3d) {
-      const color = rgbObjectToFloatArray(backgroundColor);
-      this.state.view3d.setBackgroundColor(color);
+      const floatColor = colorArrayToFloatArray(backgroundColor);
+      this.state.view3d.setBackgroundColor(floatColor);
     }
   }
 
@@ -1132,6 +1142,8 @@ export default class App extends React.Component<AppProps, AppState> {
             autorotate={userSelections[AUTO_ROTATE]}
             showAxes={userSelections[SHOW_AXES]}
             showBoundingBox={userSelections.showBoundingBox}
+            backgroundColor={userSelections.backgroundColor}
+            boundingBoxColor={userSelections.boundingBoxColor}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}

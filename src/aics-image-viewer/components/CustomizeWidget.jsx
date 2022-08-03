@@ -4,59 +4,61 @@ import { Card, Collapse } from 'antd';
 import ColorPicker from './ColorPicker';
 import { colorArrayToRgbObject } from '../shared/utils/colorObjectArrayConverting';
 
-function ColorPickerRow({name, color, onColorChange}) {
+function ColorPickerRow({color, onColorChange, children}) {
   return (
     <div style={STYLES.colorPickerRow}>
       <span style={STYLES.colorPicker}>
         <ColorPicker
-          color={color}
+          color={colorArrayToRgbObject(color)}
           onColorChange={onColorChange}
           width={18}
           disableAlpha={true}
           above={true}
         />
       </span>
-      <span>{name}</span>
+      <span>{children}</span>
     </div>
   );
 }
 
-export default class CustomizeWidget extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
-  render() {
-    return (
-      <Card
-        bordered={false}
-        title="Customize"
-        type="inner"
-        className="color-customizer"
-      >
-        <Collapse bordered={false}>
-          <Collapse.Panel key={"color-customization"}>
-            <ColorPickerRow
-              name={"Background Color"}
-              onColorChange={this.props.changeBackgroundColor}
-            />
-            <ColorPickerRow
-              name={"Bounding Box Color"}
-              onColorChange={this.props.changeBoundingBoxColor}
-            />
-          </Collapse.Panel>
-        </Collapse>
-      </Card>
-    );
-  }
+export default function CustomizeWidget(props) {
+  return (
+    <Card
+      bordered={false}
+      title="Customize"
+      type="inner"
+      className="color-customizer"
+    >
+      <Collapse bordered={false}>
+        <Collapse.Panel key={"color-customization"}>
+          <ColorPickerRow
+            color={props.backgroundColor}
+            onColorChange={props.changeBackgroundColor}
+          >
+            Background Color
+          </ColorPickerRow>
+          <ColorPickerRow
+            color={props.boundingBoxColor}
+            onColorChange={props.changeBoundingBoxColor}
+          >
+            Bounding Box Color
+          </ColorPickerRow>
+        </Collapse.Panel>
+      </Collapse>
+    </Card>
+  );
 }
+
 
 const STYLES = {
   colorPickerRow: {
-    paddingBottom: '16px',
+    paddingTop: '14px',
+    paddingBottom: '10px',
     display: 'flex',
+    borderBottom: '1px solid #6e6e6e',
   },
   colorPicker: {
-    marginRight: '32px',
+    marginRight: '16px',
   },
 };
