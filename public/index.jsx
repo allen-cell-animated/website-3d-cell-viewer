@@ -67,10 +67,10 @@ const params = parseQueryString();
 
 const args = {
   //baseurl: "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
-  baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails",
+  baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/",
   cellid: 2025,
-  cellPath: "AICS-22/AICS-22_8319_2025",
-  fovPath: "AICS-22/AICS-22_8319",
+  cellPath: "AICS-22/AICS-22_8319_2025_atlas.json",
+  fovPath: "AICS-22/AICS-22_8319_atlas.json",
   fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
@@ -124,9 +124,78 @@ if (params) {
     }
     args.initialChannelSettings = initialChannelSettings;
   }
-  // quick way to load a atlas.json from a special directory.
-  //
-  if (params.file) {
+  if (params.url) {
+    // ZARR:
+    // ?url=zarrstore&image=imagename
+    // ?url=zarrstore will default to image "0"
+    // zarrstore must end with .zarr
+    // put the store url in baseUrl,
+    // and the image name in cellPath
+    // Time 0 will be loaded.
+    // TODO specify Pyramid level 
+
+    // OME-TIFF:
+    // ?url=imageurl&image=imagename
+    // ?url=fullimageurl
+    // any split between baseUrl + cellPath is ok
+    // as long as (baseUrl+cellPath) ends with .tif or tiff
+
+    // JSON ATLAS:
+    // ?url=imageurl&image=imagename
+    // ?url=fullimageurl
+    // any split between baseUrl + cellPath is ok
+    // as long as (baseUrl+cellPath) ends with .json
+
+    // it is understood that if nextImgPath and/or prevImgPath
+    // are provided, they must be relative to baseUrl in addition to cellPath.
+    // same deal for fovPath
+
+    let decodedurl = decodeURI(params.url);
+    let decodedimage = "";
+    if (params.image) {
+      decodedimage = decodeURIComponent(params.image);
+    }
+    else {
+      // image not specified
+      if (decodedurl.endsWith(".zarr")) {
+        decodedimage = "0";
+      }
+      else {
+        const spliturl = decodedurl.split("/");
+        decodedimage = spliturl[spliturl.length-1];
+        decodedurl = decodedurl.slice(0, -decodedimage.length);
+      }
+    }
+
+    args.cellid = 1;
+    args.baseurl = decodedurl;
+    args.cellPath = decodedimage;
+    // this is invalid for zarr?
+    args.cellDownloadHref = decodedurl+decodedimage;
+    args.fovPath = "";
+    args.fovDownloadHref = "";
+    // if json, then use the CFE settings for now.
+    // (See VIEWER_3D_SETTINGS)
+    // otherwise turn the first 3 channels on and group them
+    if (!decodedimage.endsWith("json") && !params.ch) {
+      args.initialChannelSettings =  {
+        groups: [
+          // first 3 channels on by default!
+          {
+            name: "Channels", 
+            channels: [
+              {match:[0,1,2], enabled:true},
+              {match:"(.+)", enabled:false}
+            ]
+          },
+        ]
+      };
+    }
+    runApp();
+  }
+  else if (params.file) {
+    // quick way to load a atlas.json from a special directory.
+    //
     // ?file=relative-path-to-atlas-on-isilon
     args.cellid = 1;
     args.baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
@@ -158,9 +227,6 @@ if (params) {
       .then((fileInfo) => {
         args.cellPath = fileInfo.volumeviewerPath;
         args.fovPath = fileInfo.fovVolumeviewerPath;
-        // strip "_atlas.json" because the viewer is going to add it :(
-        args.cellPath = args.cellPath.replace("_atlas.json", "");
-        args.fovPath = args.fovPath.replace("_atlas.json", "");
         runApp();
 
         // only now do we have all the data needed

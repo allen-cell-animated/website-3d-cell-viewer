@@ -10,6 +10,7 @@
     "moduleResolution": "Node",
     "noImplicitAny": false,
     "preserveConstEnums": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "target": "ES6"
