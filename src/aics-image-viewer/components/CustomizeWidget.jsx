@@ -4,7 +4,7 @@ import { Card, Collapse } from 'antd';
 import ColorPicker from './ColorPicker';
 import { colorArrayToRgbObject } from '../shared/utils/colorObjectArrayConverting';
 
-function ColorPickerRow({color, onColorChange, children}) {
+function ColorPickerRow({ color, onColorChange, children }) {
   return (
     <div style={STYLES.colorPickerRow}>
       <span style={STYLES.colorPicker}>
@@ -13,14 +13,12 @@ function ColorPickerRow({color, onColorChange, children}) {
           onColorChange={onColorChange}
           width={18}
           disableAlpha={true}
-          above={true}
         />
       </span>
       <span>{children}</span>
     </div>
   );
 }
-
 
 export default function CustomizeWidget(props) {
   return (
