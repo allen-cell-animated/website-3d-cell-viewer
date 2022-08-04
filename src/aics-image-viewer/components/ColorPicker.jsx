@@ -2,6 +2,9 @@ import React from 'react';
 import { SketchPicker } from 'react-color';
 import { map } from 'lodash';
 
+// if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
+const OPEN_ABOVE_MARGIN = 310;
+
 class ColorPicker extends React.Component {
 
   constructor(props) {
@@ -12,6 +15,8 @@ class ColorPicker extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeComplete = this.handleChangeComplete.bind(this);
 
+    this.swatchRef = React.createRef();
+
     const defaultColor = {
       r: '241',
       g: '112',
@@ -21,12 +26,18 @@ class ColorPicker extends React.Component {
     const color = props.color || defaultColor;
     this.state = {
       displayColorPicker: false,
+      openAboveSwatch: false,
       color,
     };
   }
 
   handleClick() {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+    const swatchRect = this.swatchRef.current.getBoundingClientRect();
+    const noRoomBelowSwatch = swatchRect.bottom > (window.innerHeight - OPEN_ABOVE_MARGIN);
+    this.setState({
+      displayColorPicker: !this.state.displayColorPicker,
+      openAboveSwatch: noRoomBelowSwatch && (swatchRect.top > OPEN_ABOVE_MARGIN),
+    });
   }
 
   handleClose() {
@@ -84,7 +95,7 @@ class ColorPicker extends React.Component {
       }
     };
 
-    if (this.props.above) {
+    if (this.state.openAboveSwatch) {
       styles.popover.bottom = 'calc(100% + 31px)';
     } else {
       styles.popover.top = '1px';
@@ -92,7 +103,7 @@ class ColorPicker extends React.Component {
 
     return (
       <div>
-        <div style={ styles.swatch } onClick={ this.handleClick }>
+        <div style={ styles.swatch } ref={ this.swatchRef } onClick={ this.handleClick }>
           <div style={ styles.color } />
         </div>
         <div style={{position: 'absolute'}}>
