@@ -57,6 +57,7 @@ const STYLES = {
     paddingTop: '14px',
     paddingBottom: '10px',
     display: 'flex',
+    alignItems: 'flex-start',
     borderBottom: '1px solid #6e6e6e',
   },
   colorPicker: {

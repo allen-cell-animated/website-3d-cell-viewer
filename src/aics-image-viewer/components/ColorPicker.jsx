@@ -5,7 +5,7 @@ import { map } from 'lodash';
 // if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
 const OPEN_ABOVE_MARGIN = 310;
 
-class ColorPicker extends React.Component {
+export default class ColorPicker extends React.Component {
 
   constructor(props) {
     super(props);
@@ -68,47 +68,22 @@ class ColorPicker extends React.Component {
 
   render() {
     const width = this.props.width || 36;
-    let styles = {
-      color: {
-        width: `${width}px`,
-        height: '14px',
-        borderRadius: '2px',
-        background: `rgba(${ map(this.state.color, ele => (ele))})`
-      },
-      swatch: {
-        padding: '5px',
-        borderRadius: '1px',
-        boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
-        display: 'inline-block',
-        cursor: 'pointer'
-      },
-      popover: {
-        position: 'absolute',
-        zIndex: '9999',
-      },
-      cover: {
-        position: 'fixed',
-        top: '0px',
-        right: '0px',
-        bottom: '0px',
-        left: '0px'
-      }
-    };
 
+    let popoverDirectionStyle = {};
     if (this.state.openAboveSwatch) {
-      styles.popover.bottom = 'calc(100% + 31px)';
+      popoverDirectionStyle.bottom = '25px';
     } else {
-      styles.popover.top = '1px';
+      popoverDirectionStyle.top = '1px';
     }
 
     return (
       <div>
-        <div style={ styles.swatch } ref={ this.swatchRef } onClick={ this.handleClick }>
-          <div style={ styles.color } />
+        <div style={ STYLES.swatch } ref={ this.swatchRef } onClick={ this.handleClick }>
+          <div style={{ ...STYLES.color, width: `${width}px`, background: `rgba(${map(this.state.color, ele => (ele))})` }} />
         </div>
         <div style={{position: 'absolute'}}>
-          { this.state.displayColorPicker ? <div style={ styles.popover }>
-            <div style={ styles.cover } onClick={ this.handleClose }/>
+          { this.state.displayColorPicker ? <div style={{ ...STYLES.popover, ...popoverDirectionStyle }}>
+            <div style={ STYLES.cover } onClick={ this.handleClose }/>
             <SketchPicker
               color={ this.state.color }
               onChange={ this.handleChange }
@@ -122,4 +97,27 @@ class ColorPicker extends React.Component {
   }
 }
 
-export default ColorPicker;
+const STYLES = {
+  color: {
+    height: '14px',
+    borderRadius: '2px',
+  },
+  swatch: {
+    padding: '5px',
+    borderRadius: '1px',
+    boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
+    display: 'inline-block',
+    cursor: 'pointer'
+  },
+  popover: {
+    position: 'absolute',
+    zIndex: '9999',
+  },
+  cover: {
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px'
+  }
+};
