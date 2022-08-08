@@ -35,6 +35,9 @@ export const // Keys accepted as URL search parameters
   OPACITY = "opacity",
   COLOR = "color",
   SAVE_ISO_SURFACE = "saveIsoSurface",
+
+  BACKGROUND_COLOR = [0, 0, 0],
+  BOUNDING_BOX_COLOR = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
