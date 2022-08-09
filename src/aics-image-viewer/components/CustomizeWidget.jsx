@@ -40,10 +40,8 @@ export default function CustomizeWidget(props) {
             color={props.boundingBoxColor}
             onColorChange={props.changeBoundingBoxColor}
           >
-            {props.showBoundingBox
-              ? "Bounding box color"
-              : <><span style={STYLES.boundingBoxDisabled}>Bounding box color</span> - <i>bounding box turned off</i></>
-            }
+            Bounding box color
+            {!props.showBoundingBox && <i> - bounding box turned off</i>}
           </ColorPickerRow>
         </Collapse.Panel>
       </Collapse>
@@ -54,16 +52,12 @@ export default function CustomizeWidget(props) {
 
 const STYLES = {
   colorPickerRow: {
-    paddingTop: '14px',
-    paddingBottom: '10px',
+    padding: '14px 0',
     display: 'flex',
     alignItems: 'flex-start',
     borderBottom: '1px solid #6e6e6e',
   },
   colorPicker: {
     marginRight: '16px',
-  },
-  boundingBoxDisabled: {
-    color: "#6e6e6e",
   },
 };

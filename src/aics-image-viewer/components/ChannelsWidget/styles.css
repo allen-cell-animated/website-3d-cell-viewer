@@ -96,7 +96,7 @@
 
         .color-customizer {
             .ant-collapse-content-box {
-                padding: 2px 16px 8px;
+                padding: 0 16px;
             }
         }
     }
