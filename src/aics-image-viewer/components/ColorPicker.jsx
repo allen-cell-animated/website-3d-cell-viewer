@@ -68,13 +68,7 @@ export default class ColorPicker extends React.Component {
 
   render() {
     const width = this.props.width || 36;
-
-    let popoverDirectionStyle = {};
-    if (this.state.openAboveSwatch) {
-      popoverDirectionStyle.bottom = '25px';
-    } else {
-      popoverDirectionStyle.top = '1px';
-    }
+    const popoverDirectionStyle = this.state.openAboveSwatch ? {bottom: "25px"} : {top: "1px"};
 
     return (
       <div>

@@ -106,12 +106,12 @@ const defaultProps: AppProps = {
     showBoundingBox: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
-    backgroundColor: BACKGROUND_COLOR as [number, number, number],
-    boundingBoxColor: BOUNDING_BOX_COLOR as [number, number, number],
+    backgroundColor: BACKGROUND_COLOR,
+    boundingBoxColor: BOUNDING_BOX_COLOR,
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT as [number, number, number],
+    levels: LEVELS_SLIDER_DEFAULT,
     region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
     slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   },
