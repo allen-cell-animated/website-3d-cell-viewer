@@ -35,16 +35,22 @@ export interface ViewerChannelSettings {
 }
 
 export function matchChannel(channel: string, channelIndex: number, c: ViewerChannelSetting): boolean {
-  // c could be a number, an array of strings or a single regex
+  // c could be a number, an array of (strings or numbers), or a single regex
   if (typeof c.match === "number") {
     if (c.match === channelIndex) {
       return true;
     }
   } else if (Array.isArray(c.match)) {
     for (const r of c.match) {
-      const re = new RegExp(r);
-      if (re.test(channel)) {
-        return true;
+      if (typeof r === "number") {
+        if (r === channelIndex) {
+          return true;
+        }
+      } else {
+        const re = new RegExp(r);
+        if (re.test(channel)) {
+          return true;
+        }
       }
     }
   } else if (typeof c.match === "string") {

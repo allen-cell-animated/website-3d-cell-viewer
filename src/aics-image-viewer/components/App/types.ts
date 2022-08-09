@@ -17,7 +17,7 @@ import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings"
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
-  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
+  // rawDims is the volume dims that normally come from a json file
   rawDims?: ImageInfo;
 
   // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
