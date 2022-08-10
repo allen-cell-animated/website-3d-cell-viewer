@@ -1240,7 +1240,6 @@ export default class App extends React.Component<AppProps, AppState> {
             />
             <CellViewerCanvasWrapper
               image={this.state.image}
-              onAutorotateChange={this.onAutorotateChange}
               setAxisClip={this.setImageAxisClip}
               mode={userSelections.mode}
               autorotate={userSelections[AUTO_ROTATE]}
@@ -1249,7 +1248,6 @@ export default class App extends React.Component<AppProps, AppState> {
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}
-              pathTraceOn={userSelections[PATH_TRACE]}
             />
           </Content>
         </Layout>

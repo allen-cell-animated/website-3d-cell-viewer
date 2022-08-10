@@ -6,6 +6,7 @@ import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
 import CustomizeWidget from "../CustomizeWidget";
+import AutoRotateButton from "../AutoRotateButton";
 
 import {
   PRESET_COLOR_MAP,
@@ -46,10 +47,7 @@ export default class ControlPanel extends React.Component {
     return (
       hasCellId &&
       hasParentImage && (
-        <RadioGroup
-          defaultValue={imageType}
-          onChange={this.handleSwitchFovCell}
-        >
+        <RadioGroup defaultValue={imageType} onChange={this.handleSwitchFovCell}>
           <Radio.Button value={SEGMENTED_CELL}>Cell</Radio.Button>
           <Radio.Button value={FULL_FIELD_IMAGE}>Full Field</Radio.Button>
         </RadioGroup>
@@ -70,11 +68,7 @@ export default class ControlPanel extends React.Component {
       </Menu>
     );
     return (
-      <Dropdown
-        key="colorPresetsDropdown"
-        trigger={["click"]}
-        overlay={dropDownMenuItems}
-      >
+      <Dropdown key="colorPresetsDropdown" trigger={["click"]} overlay={dropDownMenuItems}>
         <Button>
           Color
           <Icon type="down" />
@@ -110,11 +104,7 @@ export default class ControlPanel extends React.Component {
             Volumetric
           </Radio.Button>
           {canPathTrace && (
-            <Radio.Button
-              value={PATH_TRACE}
-              disabled={mode !== ViewMode.threeD}
-              key={PATH_TRACE}
-            >
+            <Radio.Button value={PATH_TRACE} disabled={mode !== ViewMode.threeD} key={PATH_TRACE}>
               Path trace
             </Radio.Button>
           )}
@@ -127,8 +117,7 @@ export default class ControlPanel extends React.Component {
   }
 
   renderDownloadButton() {
-    const { fovDownloadHref, cellDownloadHref, hasCellId, hasParentImage } =
-      this.props;
+    const { fovDownloadHref, cellDownloadHref, hasCellId, hasParentImage } = this.props;
     if (hasCellId && hasParentImage) {
       const menu = (
         <Menu className="download-dropdown">
@@ -157,41 +146,21 @@ export default class ControlPanel extends React.Component {
   renderAxesButton() {
     const { showAxes } = this.props;
     const buttonContent = showAxes ? "Hide Axes" : "Show Axes";
-    return (
-      <Button onClick={() => this.toggleAxisShowing()}>
-        {buttonContent}
-      </Button>
-    );
+    return <Button onClick={() => this.toggleAxisShowing()}>{buttonContent}</Button>;
   }
 
   renderBoundingBoxButton() {
     const { showBoundingBox } = this.props;
     const buttonContent = showBoundingBox ? "Hide Bounds" : "Show Bounds";
-    return (
-      <Button onClick={() => this.toggleBoundingBoxShowing()}>
-        {buttonContent}
-      </Button>
-    );
+    return <Button onClick={() => this.toggleBoundingBoxShowing()}>{buttonContent}</Button>;
   }
 
   renderResetCameraButton() {
-    return (
-      <Button onClick={() => this.handleResetCamera()}>
-        Reset Camera
-      </Button>
-    );
+    return <Button onClick={() => this.handleResetCamera()}>Reset Camera</Button>;
   }
 
   render() {
-    const {
-      viewerChannelSettings,
-      renderConfig,
-      appHeight,
-      imageName,
-      hasImage,
-      mode,
-      onViewModeChange,
-    } = this.props;
+    const { viewerChannelSettings, renderConfig, appHeight, imageName, hasImage, mode, onViewModeChange } = this.props;
     return (
       <Card
         style={{ ...STYLES.wrapper, height: appHeight }}
@@ -208,28 +177,34 @@ export default class ControlPanel extends React.Component {
         }
         title={
           renderConfig.viewModeRadioButtons && (
-            <ViewModeRadioButtons
-              imageName={imageName}
-              mode={mode}
-              onViewModeChange={onViewModeChange}
-            />
+            <ViewModeRadioButtons imageName={imageName} mode={mode} onViewModeChange={onViewModeChange} />
           )
         }
       >
         <Card.Meta
-          title={[
-            this.renderRenderSettings(),
-            renderConfig.colorPresetsDropdown &&
-              this.renderColorPresetsDropdown(),
-          ]}
+          title={[this.renderRenderSettings(), renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()]}
         />
         <Card.Meta
-          title={<>
-            {this.renderAxesButton()}
-            {this.renderBoundingBoxButton()}
-            {this.renderResetCameraButton()}
-          </>}
+          title={
+            <>
+              {this.renderAxesButton()}
+              {this.renderBoundingBoxButton()}
+              {this.renderResetCameraButton()}
+            </>
+          }
         />
+        {this.props.renderConfig.autoRotateButton && (
+          <Card.Meta
+            title={
+              <AutoRotateButton
+                mode={this.props.mode}
+                autorotate={this.props.autorotate}
+                disabled={this.props.pathTraceOn}
+                onAutorotateChange={this.props.onAutorotateChange}
+              />
+            }
+          />
+        )}
         {hasImage ? (
           <div className="channel-rows-list">
             <ChannelsWidget
@@ -240,9 +215,7 @@ export default class ControlPanel extends React.Component {
               changeChannelSettings={this.props.changeChannelSettings}
               channelDataReady={this.props.channelDataReady}
               handleChangeToImage={this.props.handleChangeToImage}
-              updateChannelTransferFunction={
-                this.props.updateChannelTransferFunction
-              }
+              updateChannelTransferFunction={this.props.updateChannelTransferFunction}
               changeOneChannelSetting={this.props.changeOneChannelSetting}
               onColorChangeComplete={this.props.onColorChangeComplete}
               onApplyColorPresets={this.props.onApplyColorPresets}
