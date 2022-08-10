@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: ['./public/index.jsx'],
@@ -23,6 +24,7 @@ module.exports = {
     new webpack.DefinePlugin({
       APP_VERSION: JSON.stringify(require("./package.json").version)
     }),
+    new CopyWebpackPlugin({patterns:["./.nojekyll"]}),
     new webpack.ProvidePlugin({
       THREE: 'three',
       jQuery: 'jquery',

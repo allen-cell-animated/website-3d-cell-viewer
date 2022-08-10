@@ -6,7 +6,6 @@ import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } 
 
 import { AppProps, AppState, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
-import HttpClient from "../../shared/utils/httpClient";
 import { findFirstChannelMatch, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
@@ -63,8 +62,6 @@ import "./styles.css";
 const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;
 
-const OK_STATUS = "OK";
-const ERROR_STATUS = "Error";
 const INIT_COLORS = PRESET_COLORS_0;
 
 function colorHexToArray(hex) {
@@ -80,7 +77,7 @@ function colorHexToArray(hex) {
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
-  // rawDims is the volume dims that normally come from a json file (see handleOpenImageResponse)
+  // rawDims is the volume dims that normally come from a json file
   rawDims: null,
 
   maskChannelName: "",
@@ -212,7 +209,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
     this.onAutorotateChange = this.onAutorotateChange.bind(this);
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
-    this.handleOpenImageResponse = this.handleOpenImageResponse.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
     this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
@@ -335,29 +331,30 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  handleOpenImageResponse(resp, queryType, imageDirectory, doResetViewMode, stateKey, keepLuts) {
-    if (resp.data.status === OK_STATUS) {
-      if (this.stateKey === "image") {
-        this.setState({
-          currentlyLoadedImagePath: imageDirectory,
-          channelDataReady: {},
-          queryErrorMessage: null,
-          cachingInProgress: false,
-          userSelections: {
-            ...this.state.userSelections,
-            [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-          },
-        });
-      }
-      this.loadFromJson(resp.data, resp.data.name, resp.locationHeader, stateKey, keepLuts);
-      this.stopPollingForImage();
-    } else if (resp.data.status === ERROR_STATUS) {
-      this.stopPollingForImage();
-    } else {
-      this.setState({
-        cachingInProgress: true,
-      });
+  onNewVolumeCreated(aimg: Volume, stateKey: "image" | "prevImg" | "nextImg") {
+    const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
+
+    if (stateKey === "image") {
+      this.intializeNewImage(aimg, newChannelSettings);
     }
+    if (stateKey === "image") {
+      this.setState({ image: aimg });
+    } else if (stateKey === "prevImg") {
+      this.setState({ prevImg: aimg });
+    } else if (stateKey === "nextImg") {
+      this.setState({ nextImg: aimg });
+    } else {
+      console.error("ERROR invalid or unexpected stateKey");
+    }
+  }
+  onNewChannelData(url: string, v: Volume, channelIndex: number, keepLuts: boolean) {
+    // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
+    const thisChannelSettings = this.getOneChannelSetting(
+      v.imageInfo.channel_names[channelIndex],
+      // race condition with updateStateOnLoadImage below?
+      this.state.userSelections[CHANNEL_SETTINGS]
+    );
+    this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
   }
 
   handleOpenImageException(resp) {
@@ -386,18 +383,78 @@ export default class App extends React.Component<AppProps, AppState> {
     }
     const { baseUrl } = this.props;
 
-    const toLoad = baseUrl ? `${baseUrl}/${imageDirectory}_atlas.json` : `${imageDirectory}'_atlas.json`;
-    //const toLoad = BASE_URL + 'AICS-10/AICS-10_5_5_atlas.json';
-    // retrieve the json file directly from its url
-    new HttpClient()
-      .getJSON(toLoad, { mode: "cors" })
-      .then((resp) => {
-        // set up some stuff that the backend caching service was doing for us, to spoof the rest of the code
-        resp.data.status = OK_STATUS;
-        resp.locationHeader = toLoad.substring(0, toLoad.lastIndexOf("/") + 1);
-        return this.handleOpenImageResponse(resp, 0, imageDirectory, doResetViewMode, stateKey, keepLuts);
+    // if baseUrl ends with zarr then we have zarr.
+    // otherwise we can combine the baseUrl and imageDirectory to get the url to load.
+    if (baseUrl.endsWith(".zarr")) {
+      const timeIndex = 0;
+      VolumeLoader.loadZarr(baseUrl, imageDirectory, timeIndex, (url, v, channelIndex) => {
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
       })
-      .catch((resp) => this.handleOpenImageException(resp));
+        .then((aimg) => {
+          if (this.stateKey === "image") {
+            this.setState({
+              currentlyLoadedImagePath: imageDirectory,
+              channelDataReady: {},
+              queryErrorMessage: null,
+              cachingInProgress: false,
+              userSelections: {
+                ...this.state.userSelections,
+                [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+              },
+            });
+          }
+          this.onNewVolumeCreated(aimg, stateKey);
+          this.stopPollingForImage();
+        })
+        .catch((resp) => this.handleOpenImageException(resp));
+    } else {
+      const fullUrl = `${baseUrl}${imageDirectory}`;
+
+      if (fullUrl.endsWith(".json")) {
+        const urlPrefix = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
+        VolumeLoader.loadJson(fullUrl, urlPrefix, (url, v, channelIndex) => {
+          this.onNewChannelData(url, v, channelIndex, keepLuts);
+        })
+          .then((aimg) => {
+            if (this.stateKey === "image") {
+              this.setState({
+                currentlyLoadedImagePath: imageDirectory,
+                channelDataReady: {},
+                queryErrorMessage: null,
+                cachingInProgress: false,
+                userSelections: {
+                  ...this.state.userSelections,
+                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+                },
+              });
+            }
+            this.onNewVolumeCreated(aimg, stateKey);
+            this.stopPollingForImage();
+          })
+          .catch((resp) => this.handleOpenImageException(resp));
+      } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
+        VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
+          this.onNewChannelData(url, v, channelIndex, keepLuts);
+        })
+          .then((aimg) => {
+            if (this.stateKey === "image") {
+              this.setState({
+                currentlyLoadedImagePath: imageDirectory,
+                channelDataReady: {},
+                queryErrorMessage: null,
+                cachingInProgress: false,
+                userSelections: {
+                  ...this.state.userSelections,
+                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+                },
+              });
+            }
+            this.onNewVolumeCreated(aimg, stateKey);
+            this.stopPollingForImage();
+          })
+          .catch((resp) => this.handleOpenImageException(resp));
+      }
+    }
   }
 
   intializeNewImage(aimg, newChannelSettings?) {
@@ -605,7 +662,7 @@ export default class App extends React.Component<AppProps, AppState> {
       }));
     }
     // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, channelIndex) => {
+    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, v, channelIndex) => {
       // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
       const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
       this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, keepLuts);
