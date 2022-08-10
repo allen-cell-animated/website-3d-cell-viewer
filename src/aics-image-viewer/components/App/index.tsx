@@ -36,6 +36,8 @@ import {
   SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
+  BACKGROUND_COLOR,
+  BOUNDING_BOX_COLOR,
   LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
   COLORIZE_ENABLED,
@@ -53,6 +55,7 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
+import { colorArrayToFloatArray, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
 
 import "./styles.css";
 
@@ -100,10 +103,12 @@ const defaultProps: AppProps = {
     showBoundingBox: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
+    backgroundColor: BACKGROUND_COLOR,
+    boundingBoxColor: BOUNDING_BOX_COLOR,
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT as [number, number, number],
+    levels: LEVELS_SLIDER_DEFAULT,
     region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
     slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   },
@@ -175,6 +180,8 @@ export default class App extends React.Component<AppProps, AppState> {
         [AUTO_ROTATE]: false,
         [SHOW_AXES]: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
+        boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
+        backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR,
         [MAX_PROJECT]: maxproject,
         [PATH_TRACE]: pathtrace,
         [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -227,6 +234,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
     this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
     this.resetCamera = this.resetCamera.bind(this);
+    this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
+    this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
   }
 
   componentDidMount() {
@@ -269,6 +278,10 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onView3DCreated(view3d) {
+    const { userSelections } = this.state;
+    view3d.setBackgroundColor(colorArrayToFloatArray(userSelections.backgroundColor));
+    view3d.setShowAxis(userSelections[SHOW_AXES]);
+
     this.setState({ view3d });
   }
 
@@ -493,8 +506,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
-    view3d.setShowAxis(userSelections[SHOW_AXES]);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -774,8 +787,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
-    view3d.setShowAxis(userSelections[SHOW_AXES]);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
@@ -1031,6 +1044,24 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
+  changeBoundingBoxColor(color) {
+    const boundingBoxColor = rgbObjectToArray(color);
+    this.setUserSelectionsInState({ boundingBoxColor });
+    if (this.state.view3d && this.state.image) {
+      const floatColor = colorArrayToFloatArray(boundingBoxColor);
+      this.state.view3d.setBoundingBoxColor(this.state.image, floatColor);
+    }
+  }
+
+  changeBackgroundColor(color) {
+    const backgroundColor = rgbObjectToArray(color);
+    this.setUserSelectionsInState({ backgroundColor });
+    if (this.state.view3d) {
+      const floatColor = colorArrayToFloatArray(backgroundColor);
+      this.state.view3d.setBackgroundColor(floatColor);
+    }
+  }
+
   resetCamera() {
     if (this.state.view3d) {
       this.state.view3d.resetCamera();
@@ -1170,6 +1201,8 @@ export default class App extends React.Component<AppProps, AppState> {
             autorotate={userSelections[AUTO_ROTATE]}
             showAxes={userSelections[SHOW_AXES]}
             showBoundingBox={userSelections.showBoundingBox}
+            backgroundColor={userSelections.backgroundColor}
+            boundingBoxColor={userSelections.boundingBoxColor}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
@@ -1189,6 +1222,8 @@ export default class App extends React.Component<AppProps, AppState> {
             changeRenderingAlgorithm={this.changeRenderingAlgorithm}
             changeAxisShowing={this.changeAxisShowing}
             changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+            changeBackgroundColor={this.changeBackgroundColor}
+            changeBoundingBoxColor={this.changeBoundingBoxColor}
             resetCamera={this.resetCamera}
             viewerChannelSettings={viewerChannelSettings}
           />

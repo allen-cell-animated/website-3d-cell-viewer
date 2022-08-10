@@ -35,6 +35,9 @@ export const // Keys accepted as URL search parameters
   OPACITY = "opacity",
   COLOR = "color",
   SAVE_ISO_SURFACE = "saveIsoSurface",
+
+  BACKGROUND_COLOR: [number, number, number] = [0, 0, 0],
+  BOUNDING_BOX_COLOR: [number, number, number] = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
@@ -45,12 +48,14 @@ export const // Keys accepted as URL search parameters
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
-  LEVELS_SLIDER_DEFAULT = [35.0, 140.0, 255.0],
+  LEVELS_SLIDER_DEFAULT: [number, number, number] = [35.0, 140.0, 255.0],
   OTHER_CHANNEL_KEY = "Other",
   SINGLE_GROUP_CHANNEL_KEY = "Channels",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
 
-export const PRESET_COLORS_1 = [
+type PresetColors = [number, number, number, number?][];
+
+export const PRESET_COLORS_1: PresetColors = [
   [190, 68, 171, 255],
   [189, 211, 75, 255],
   [61, 155, 169, 255],
@@ -60,7 +65,7 @@ export const PRESET_COLORS_1 = [
   [238, 77, 245, 255],
   [96, 255, 255, 255],
 ];
-export const PRESET_COLORS_2 = [
+export const PRESET_COLORS_2: PresetColors = [
   [128, 0, 0, 255],
   [0, 128, 0, 255],
   [0, 0, 128, 255],
@@ -71,7 +76,7 @@ export const PRESET_COLORS_2 = [
   [0, 0, 255, 255],
 ];
 
-export const PRESET_COLORS_3 = [
+export const PRESET_COLORS_3: PresetColors = [
   [128, 0, 128, 255],
   [128, 128, 128, 255],
   [0, 128, 128, 255],
@@ -82,7 +87,7 @@ export const PRESET_COLORS_3 = [
   [0, 255, 255, 255],
 ];
 
-export const PRESET_COLORS_0 = [
+export const PRESET_COLORS_0: PresetColors = [
   [226, 205, 179],
   [111, 186, 17],
   [141, 163, 192],

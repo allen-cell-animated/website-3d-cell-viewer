@@ -1,9 +1,11 @@
 import React from 'react';
-import reactCSS from 'reactcss';
 import { SketchPicker } from 'react-color';
 import { map } from 'lodash';
 
-class ColorPicker extends React.Component {
+// if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
+const OPEN_ABOVE_MARGIN = 310;
+
+export default class ColorPicker extends React.Component {
 
   constructor(props) {
     super(props);
@@ -13,7 +15,9 @@ class ColorPicker extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleChangeComplete = this.handleChangeComplete.bind(this);
 
-    let defaultColor = {
+    this.swatchRef = React.createRef();
+
+    const defaultColor = {
       r: '241',
       g: '112',
       b: '19',
@@ -22,12 +26,18 @@ class ColorPicker extends React.Component {
     const color = props.color || defaultColor;
     this.state = {
       displayColorPicker: false,
+      openAboveSwatch: false,
       color,
     };
   }
 
   handleClick() {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+    const swatchRect = this.swatchRef.current.getBoundingClientRect();
+    const noRoomBelowSwatch = swatchRect.bottom > (window.innerHeight - OPEN_ABOVE_MARGIN);
+    this.setState({
+      displayColorPicker: !this.state.displayColorPicker,
+      openAboveSwatch: noRoomBelowSwatch && (swatchRect.top > OPEN_ABOVE_MARGIN),
+    });
   }
 
   handleClose() {
@@ -58,48 +68,51 @@ class ColorPicker extends React.Component {
 
   render() {
     const width = this.props.width || 36;
-    const styles = reactCSS({
-      'default': {
-        color: {
-          width: `${width}px`,
-          height: '14px',
-          borderRadius: '2px',
-          background: `rgba(${ map(this.state.color, ele => (ele))})`
-        },
-        swatch: {
-          padding: '5px',
-          borderRadius: '1px',
-          boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
-          display: 'inline-block',
-          cursor: 'pointer'
-        },
-        popover: {
-          position: 'absolute',
-          zIndex: '9999',
-        },
-        cover: {
-          position: 'fixed',
-          top: '0px',
-          right: '0px',
-          bottom: '0px',
-          left: '0px'
-        }
-      }
-    });
+    const popoverDirectionStyle = this.state.openAboveSwatch ? {bottom: "25px"} : {top: "1px"};
 
     return (
       <div>
-        <div style={ styles.swatch } onClick={ this.handleClick }>
-          <div style={ styles.color } />
+        <div style={ STYLES.swatch } ref={ this.swatchRef } onClick={ this.handleClick }>
+          <div style={{ ...STYLES.color, width: `${width}px`, background: `rgba(${map(this.state.color, ele => (ele))})` }} />
         </div>
-        { this.state.displayColorPicker ? <div style={ styles.popover }>
-          <div style={ styles.cover } onClick={ this.handleClose }/>
-          <SketchPicker color={ this.state.color } onChange={ this.handleChange } onChangeComplete={ this.handleChangeComplete }/>
-        </div> : null }
-
+        <div style={{position: 'absolute'}}>
+          { this.state.displayColorPicker ? <div style={{ ...STYLES.popover, ...popoverDirectionStyle }}>
+            <div style={ STYLES.cover } onClick={ this.handleClose }/>
+            <SketchPicker
+              color={ this.state.color }
+              onChange={ this.handleChange }
+              onChangeComplete={ this.handleChangeComplete }
+              disableAlpha={ this.props.disableAlpha }
+            />
+          </div> : null }
+        </div>
       </div>
     );
   }
 }
 
-export default ColorPicker;
+const STYLES = {
+  color: {
+    height: '14px',
+    borderRadius: '2px',
+  },
+  swatch: {
+    padding: '5px',
+    borderRadius: '1px',
+    boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
+    display: 'inline-block',
+    cursor: 'pointer',
+    verticalAlign: 'middle'
+  },
+  popover: {
+    position: 'absolute',
+    zIndex: '9999',
+  },
+  cover: {
+    position: 'fixed',
+    top: '0px',
+    right: '0px',
+    bottom: '0px',
+    left: '0px'
+  }
+};

@@ -5,6 +5,7 @@ import { Card, Button, Dropdown, Radio, Icon, Menu } from "antd";
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls from "../GlobalVolumeControls";
+import CustomizeWidget from "../CustomizeWidget";
 
 import {
   PRESET_COLOR_MAP,
@@ -223,11 +224,11 @@ export default class ControlPanel extends React.Component {
           ]}
         />
         <Card.Meta
-          title={[
-            this.renderAxesButton(),
-            this.renderBoundingBoxButton(),
-            this.renderResetCameraButton()
-          ]}
+          title={<>
+            {this.renderAxesButton()}
+            {this.renderBoundingBoxButton()}
+            {this.renderResetCameraButton()}
+          </>}
         />
         {hasImage ? (
           <div className="channel-rows-list">
@@ -266,6 +267,13 @@ export default class ControlPanel extends React.Component {
               canPathTrace={this.props.canPathTrace}
               pathTraceOn={this.props.pathTraceOn}
               renderConfig={renderConfig}
+            />
+            <CustomizeWidget
+              backgroundColor={this.props.backgroundColor}
+              boundingBoxColor={this.props.boundingBoxColor}
+              changeBackgroundColor={this.props.changeBackgroundColor}
+              changeBoundingBoxColor={this.props.changeBoundingBoxColor}
+              showBoundingBox={this.props.showBoundingBox}
             />
           </div>
         ) : null}
