@@ -47,6 +47,7 @@ export interface AppProps {
     showBoundingBox: boolean;
     boundingBoxColor: [number, number, number];
     backgroundColor: [number, number, number];
+    autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],

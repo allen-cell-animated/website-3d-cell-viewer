@@ -101,6 +101,7 @@ const defaultProps: AppProps = {
   viewerConfig: {
     showAxes: false,
     showBoundingBox: false,
+    autorotate: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
     backgroundColor: BACKGROUND_COLOR,
@@ -177,7 +178,7 @@ export default class App extends React.Component<AppProps, AppState> {
         imageType: SEGMENTED_CELL,
         controlPanelClosed: false,
         [MODE]: viewmode,
-        [AUTO_ROTATE]: false,
+        [AUTO_ROTATE]: props.viewerConfig.autorotate,
         [SHOW_AXES]: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
         boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
