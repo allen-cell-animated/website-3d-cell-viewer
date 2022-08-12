@@ -45,6 +45,7 @@ import {
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
+import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
@@ -97,6 +98,9 @@ const defaultProps: AppProps = {
     saveSurfaceButtons: true,
     fovCellSwitchControls: true,
     viewModeRadioButtons: true,
+    resetCameraButton: true,
+    showAxesButton: true,
+    showBoundingBoxButton: true,
   },
   viewerConfig: {
     showAxes: false,
@@ -231,10 +235,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
-    this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
+    this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
     this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
-    this.resetCamera = this.resetCamera.bind(this);
+    this.onResetCamera = this.onResetCamera.bind(this);
     this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
     this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
   }
@@ -947,7 +951,7 @@ export default class App extends React.Component<AppProps, AppState> {
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {
-        this.changeRenderingAlgorithm("volume");
+        this.onChangeRenderingAlgorithm("volume");
       }
       // switching from 2D to 3D
     } else if (
@@ -995,7 +999,7 @@ export default class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  changeRenderingAlgorithm(newAlgorithm) {
+  onChangeRenderingAlgorithm(newAlgorithm) {
     const { userSelections } = this.state;
     // already set
     if (userSelections[newAlgorithm]) {
@@ -1004,12 +1008,13 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({
       [PATH_TRACE]: newAlgorithm === PATH_TRACE,
       [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
+      autorotate: newAlgorithm === PATH_TRACE ? false : userSelections.autorotate,
     });
     this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
     this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
   }
 
-  onSwitchFovCell(value) {
+  onSwitchFovCell(value: string) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
     this.openImage(path, false, "image", false);
@@ -1063,7 +1068,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  resetCamera() {
+  onResetCamera() {
     if (this.state.view3d) {
       this.state.view3d.resetCamera();
     }
@@ -1220,24 +1225,39 @@ export default class App extends React.Component<AppProps, AppState> {
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
-            changeRenderingAlgorithm={this.changeRenderingAlgorithm}
+            changeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
             changeAxisShowing={this.changeAxisShowing}
             changeBoundingBoxShowing={this.changeBoundingBoxShowing}
             changeBackgroundColor={this.changeBackgroundColor}
             changeBoundingBoxColor={this.changeBoundingBoxColor}
-            resetCamera={this.resetCamera}
+            resetCamera={this.onResetCamera}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>
         <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
-            <Progress
-              strokeColor={userSelections[PATH_TRACE] ? "#313131" : "#000"}
-              // TODO: place holder for when we actually have an end point for path tracing. Now it's just a animated bar
-              percent={99.9}
-              status={userSelections[PATH_TRACE] ? "active" : "normal"}
-              strokeLinecap="square"
-              showInfo={false}
+            <Toolbar
+              imageName={this.state.image ? this.state.image.name : false}
+              mode={userSelections.mode}
+              autorotate={userSelections.autorotate}
+              pathTraceOn={userSelections[PATH_TRACE]}
+              imageType={userSelections.imageType}
+              hasParentImage={!!this.state.fovPath}
+              hasCellId={this.state.hasCellId}
+              canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
+              showAxes={userSelections[SHOW_AXES]}
+              showBoundingBox={userSelections.showBoundingBox}
+              renderSetting={
+                userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE : "volume"
+              }
+              onViewModeChange={this.onViewModeChange}
+              onResetCamera={this.onResetCamera}
+              onAutorotateChange={this.onAutorotateChange}
+              onSwitchFovCell={this.onSwitchFovCell}
+              onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
+              changeAxisShowing={this.changeAxisShowing}
+              changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+              renderConfig={renderConfig}
             />
             <CellViewerCanvasWrapper
               image={this.state.image}

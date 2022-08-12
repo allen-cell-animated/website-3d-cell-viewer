@@ -41,6 +41,9 @@ export interface AppProps {
     saveSurfaceButtons: boolean;
     fovCellSwitchControls: boolean;
     viewModeRadioButtons: boolean;
+    resetCameraButton: boolean;
+    showAxesButton: boolean;
+    showBoundingBoxButton: boolean;
   };
   viewerConfig: {
     showAxes: boolean;

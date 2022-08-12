@@ -1,0 +1,22 @@
+.toolbar {
+  position: absolute;
+  width: 100%;
+  margin-top: 10px;
+  z-index: 1500;
+  display: flex;
+  justify-content: center;
+
+  .toolbar-group:not(:last-child) {
+    margin-right: 14px;
+  }
+
+  .toolbar-group > :not(:last-child) {
+    margin-right: 6px;
+  }
+
+  .btn-borderless {
+    background-color: transparent;
+    border: none;
+    color: #bfbfbf;
+  }
+}
