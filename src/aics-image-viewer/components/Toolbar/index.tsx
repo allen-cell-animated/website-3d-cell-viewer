@@ -89,7 +89,7 @@ export default function Toolbar(props: ToolbarProps) {
       )}
 
       <span className="toolbar-group">
-        <Select value={props.renderSetting} onChange={(alg) => props.onChangeRenderingAlgorithm(alg)}>
+        <Select value={props.renderSetting} onChange={props.onChangeRenderingAlgorithm}>
           <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
             Volumetric
           </Select.Option>
