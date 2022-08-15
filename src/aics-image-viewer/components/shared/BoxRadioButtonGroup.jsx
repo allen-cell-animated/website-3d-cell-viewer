@@ -1,11 +1,11 @@
-import React from 'react';
-import { Radio } from 'antd';
+import React from "react";
+import { Radio } from "antd";
 
 export default class BoxRadioButtonGroup extends React.Component {
-
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
+    this.state = BoxRadioButtonGroup.getDerivedStateFromProps(props);
   }
 
   createRadioButton(buttonConfig, id) {
@@ -19,21 +19,12 @@ export default class BoxRadioButtonGroup extends React.Component {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.reset(nextProps);
-  }
-
-  componentWillMount() {
-    this.reset(this.props);
-  }
-
-  handleChange({target}) {
+  handleChange({ target }) {
     this.props.onChangeButton(target.value);
   }
 
-  reset(props) {
-    const defaultOption = props.selectedOption || props.options[0].id;
-    this.setState({selectedMode: defaultOption});
+  static getDerivedStateFromProps(props) {
+    return { selectedMode: props.selectedOption || props.options[0].id };
   }
 
   render() {

@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import { Layout, Progress } from "antd";
+import { Layout } from "antd";
 import React from "react";
 import { includes, isEqual, find, map } from "lodash";
 import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
@@ -948,6 +948,7 @@ export default class App extends React.Component<AppProps, AppState> {
         [MODE]: newMode,
         [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
+        autorotate: false,
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {

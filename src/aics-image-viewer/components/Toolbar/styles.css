@@ -1,7 +1,7 @@
 .toolbar {
   position: absolute;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 12px;
   z-index: 1500;
   display: flex;
   justify-content: center;
@@ -14,9 +14,18 @@
     margin-right: 6px;
   }
 
+  .toolbar-group-right {
+    position: absolute;
+    right: 12px;
+  }
+
   .btn-borderless {
     background-color: transparent;
     border: none;
     color: #bfbfbf;
+  }
+
+  .select-render-setting {
+    min-width: 110px;
   }
 }

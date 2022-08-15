@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import viewMode from '../shared/enums/viewMode';
-import BoxRadioButtonGroup from './shared/BoxRadioButtonGroup';
+import viewMode from "../shared/enums/viewMode";
+import BoxRadioButtonGroup from "./shared/BoxRadioButtonGroup";
 
 const viewModeMapping = viewMode.mainMapping;
 
@@ -11,7 +11,7 @@ export default class ViewModeRadioButtons extends React.Component {
     this.createRadioButton = this.createRadioButton.bind(this);
     this.onChangeButton = this.onChangeButton.bind(this);
   }
-  
+
   onChangeButton(stringMode) {
     let mode = viewMode.STRING_TO_SYMBOL[stringMode];
     if (this.props.selectedMode !== mode) {
@@ -34,11 +34,12 @@ export default class ViewModeRadioButtons extends React.Component {
       return null;
     }
 
-    const options = [viewModeMapping.threeD, viewModeMapping.xy, viewModeMapping.xz, viewModeMapping.yz]
-      .map(this.createRadioButton);
+    const options = [viewModeMapping.threeD, viewModeMapping.xy, viewModeMapping.xz, viewModeMapping.yz].map(
+      this.createRadioButton
+    );
     return (
-      <BoxRadioButtonGroup 
-        options={options} 
+      <BoxRadioButtonGroup
+        options={options}
         selectedOption={this.props.mode.toString()}
         onChangeButton={this.onChangeButton}
       />

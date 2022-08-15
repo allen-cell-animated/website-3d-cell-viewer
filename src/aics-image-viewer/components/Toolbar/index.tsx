@@ -89,7 +89,11 @@ export default function Toolbar(props: ToolbarProps) {
       )}
 
       <span className="toolbar-group">
-        <Select value={props.renderSetting} onChange={props.onChangeRenderingAlgorithm}>
+        <Select
+          className="select-render-setting"
+          value={props.renderSetting}
+          onChange={props.onChangeRenderingAlgorithm}
+        >
           <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
             Volumetric
           </Select.Option>
@@ -112,6 +116,10 @@ export default function Toolbar(props: ToolbarProps) {
           )}
         </span>
       )}
+
+      <span className="toolbar-group-right">
+        <Button icon="download" className="btn-borderless" />
+      </span>
     </div>
   );
 }
