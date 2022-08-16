@@ -1194,8 +1194,6 @@ export default class App extends React.Component<AppProps, AppState> {
             hasCellId={this.state.hasCellId}
             hasParentImage={!!this.state.fovPath}
             channelDataReady={this.state.channelDataReady}
-            fovDownloadHref={fovDownloadHref}
-            cellDownloadHref={cellDownloadHref}
             // user selections
             maxProjectOn={userSelections[MAX_PROJECT]}
             pathTraceOn={userSelections[PATH_TRACE]}
@@ -1240,6 +1238,8 @@ export default class App extends React.Component<AppProps, AppState> {
             <Toolbar
               imageName={this.state.image ? this.state.image.name : false}
               mode={userSelections.mode}
+              fovDownloadHref={fovDownloadHref}
+              cellDownloadHref={cellDownloadHref}
               autorotate={userSelections.autorotate}
               pathTraceOn={userSelections[PATH_TRACE]}
               imageType={userSelections.imageType}

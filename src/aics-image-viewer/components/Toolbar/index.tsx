@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Radio, Select } from "antd";
+import { Button, Dropdown, Icon, Menu, Radio, Select } from "antd";
 import "./styles.css";
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
@@ -15,16 +15,21 @@ import {
   VOLUMETRIC_RENDER,
 } from "../../shared/constants";
 
-interface ToolbarProps {
+interface DownloadButtonProps {
+  fovDownloadHref: string;
+  cellDownloadHref: string;
+  hasCellId: boolean;
+  hasParentImage: boolean;
+}
+
+interface ToolbarProps extends DownloadButtonProps {
   imageName: string;
+  imageType: string;
+  renderSetting: string;
   mode: symbol;
   autorotate: boolean;
   pathTraceOn: boolean;
-  imageType: string;
-  hasParentImage: boolean;
-  hasCellId: boolean;
   canPathTrace: boolean;
-  renderSetting: string;
   showAxes: boolean;
   showBoundingBox: boolean;
 
@@ -46,6 +51,32 @@ interface ToolbarProps {
   };
 }
 
+function DownloadButton({ fovDownloadHref, cellDownloadHref, hasCellId, hasParentImage }: DownloadButtonProps) {
+  if (hasCellId && hasParentImage) {
+    const menu = (
+      <Menu className="download-dropdown">
+        <Menu.Item key="1">
+          <a href={cellDownloadHref}>
+            <Icon type="download" /> Segmented cell
+          </a>
+        </Menu.Item>
+        <Menu.Item key="2">
+          <a href={fovDownloadHref}>
+            <Icon type="download" /> Full field image
+          </a>
+        </Menu.Item>
+      </Menu>
+    );
+    return (
+      <Dropdown overlay={menu} placement="bottomRight" trigger={["click"]}>
+        <Button className="btn-borderless" icon="download" />
+      </Dropdown>
+    );
+  } else {
+    return <Button className="btn-borderless" icon="download" href={cellDownloadHref} />;
+  }
+}
+
 export default function Toolbar(props: ToolbarProps) {
   const { renderConfig } = props;
 
@@ -61,64 +92,77 @@ export default function Toolbar(props: ToolbarProps) {
 
   return (
     <div className="toolbar">
-      {renderGroup1 && (
-        <span className="toolbar-group">
-          {renderConfig.viewModeRadioButtons && (
-            <ViewModeRadioButtons
-              imageName={props.imageName}
-              mode={props.mode}
-              onViewModeChange={props.onViewModeChange}
-            />
-          )}
-          {renderConfig.resetCameraButton && (
-            <Button icon="reload" className="btn-borderless" onClick={props.onResetCamera} />
-          )}
-          {renderConfig.autoRotateButton && (
-            <Button icon={autorotateIcon} disabled={twoDMode || props.pathTraceOn} onClick={props.onAutorotateChange} />
-          )}
-        </span>
-      )}
+      <span className="toolbar-center">
+        {renderGroup1 && (
+          <span className="toolbar-group">
+            {renderConfig.viewModeRadioButtons && (
+              <ViewModeRadioButtons
+                imageName={props.imageName}
+                mode={props.mode}
+                onViewModeChange={props.onViewModeChange}
+              />
+            )}
+            {renderConfig.resetCameraButton && (
+              <Button icon="reload" className="btn-borderless" onClick={props.onResetCamera} />
+            )}
+            {renderConfig.autoRotateButton && (
+              <Button
+                icon={autorotateIcon}
+                disabled={twoDMode || props.pathTraceOn}
+                onClick={props.onAutorotateChange}
+              />
+            )}
+          </span>
+        )}
 
-      {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
-        <span className="toolbar-group">
-          <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
-            <Radio.Button value={SEGMENTED_CELL}>Single cell</Radio.Button>
-            <Radio.Button value={FULL_FIELD_IMAGE}>Full field</Radio.Button>
-          </Radio.Group>
-        </span>
-      )}
+        {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
+          <span className="toolbar-group">
+            <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
+              <Radio.Button value={SEGMENTED_CELL}>Single cell</Radio.Button>
+              <Radio.Button value={FULL_FIELD_IMAGE}>Full field</Radio.Button>
+            </Radio.Group>
+          </span>
+        )}
 
-      <span className="toolbar-group">
-        <Select
-          className="select-render-setting"
-          value={props.renderSetting}
-          onChange={props.onChangeRenderingAlgorithm}
-        >
-          <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
-            Volumetric
-          </Select.Option>
-          {props.canPathTrace && (
-            <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={props.mode !== viewMode.mainMapping.threeD}>
-              Path trace
+        <span className="toolbar-group">
+          <Select
+            className="select-render-setting"
+            value={props.renderSetting}
+            onChange={props.onChangeRenderingAlgorithm}
+          >
+            <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
+              Volumetric
             </Select.Option>
-          )}
-          <Select.Option value={MAX_PROJECT} key={MAX_PROJECT}>
-            Max project
-          </Select.Option>
-        </Select>
+            {props.canPathTrace && (
+              <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={props.mode !== viewMode.mainMapping.threeD}>
+                Path trace
+              </Select.Option>
+            )}
+            <Select.Option value={MAX_PROJECT} key={MAX_PROJECT}>
+              Max project
+            </Select.Option>
+          </Select>
+        </span>
+
+        {renderGroup4 && (
+          <span className="toolbar-group">
+            {renderConfig.showAxesButton && (
+              <Button icon="drag" className="btn-borderless" onClick={toggleAxisShowing} />
+            )}
+            {renderConfig.showBoundingBoxButton && (
+              <Button icon="close-square" className="btn-borderless" onClick={toggleBoundingBoxShowing} />
+            )}
+          </span>
+        )}
       </span>
 
-      {renderGroup4 && (
-        <span className="toolbar-group">
-          {renderConfig.showAxesButton && <Button icon="drag" className="btn-borderless" onClick={toggleAxisShowing} />}
-          {renderConfig.showBoundingBoxButton && (
-            <Button icon="close-square" className="btn-borderless" onClick={toggleBoundingBoxShowing} />
-          )}
-        </span>
-      )}
-
-      <span className="toolbar-group-right">
-        <Button icon="download" className="btn-borderless" />
+      <span className="toolbar-right">
+        <DownloadButton
+          fovDownloadHref={props.fovDownloadHref}
+          cellDownloadHref={props.cellDownloadHref}
+          hasCellId={props.hasCellId}
+          hasParentImage={props.hasParentImage}
+        />
       </span>
     </div>
   );

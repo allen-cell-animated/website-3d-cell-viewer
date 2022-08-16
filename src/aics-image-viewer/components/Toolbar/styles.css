@@ -6,17 +6,17 @@
   display: flex;
   justify-content: center;
 
+  .toolbar-right {
+    position: absolute;
+    right: 12px;
+  }
+
   .toolbar-group:not(:last-child) {
     margin-right: 14px;
   }
 
   .toolbar-group > :not(:last-child) {
     margin-right: 6px;
-  }
-
-  .toolbar-group-right {
-    position: absolute;
-    right: 12px;
   }
 
   .btn-borderless {
@@ -27,5 +27,9 @@
 
   .select-render-setting {
     min-width: 110px;
+  }
+
+  .ant-btn-icon-only {
+    padding-bottom: 1px;
   }
 }
