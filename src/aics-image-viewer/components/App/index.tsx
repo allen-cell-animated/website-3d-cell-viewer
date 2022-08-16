@@ -1191,20 +1191,12 @@ export default class App extends React.Component<AppProps, AppState> {
             pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
             channelDataChannels={this.state.image ? this.state.image.channels : null}
             channelGroupedByType={this.state.channelGroupedByType}
-            hasCellId={this.state.hasCellId}
-            hasParentImage={!!this.state.fovPath}
             channelDataReady={this.state.channelDataReady}
             // user selections
             maxProjectOn={userSelections[MAX_PROJECT]}
             pathTraceOn={userSelections[PATH_TRACE]}
-            renderSetting={
-              userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE : "volume"
-            }
             channelSettings={userSelections[CHANNEL_SETTINGS]}
             mode={userSelections[MODE]}
-            imageType={userSelections.imageType}
-            autorotate={userSelections[AUTO_ROTATE]}
-            showAxes={userSelections[SHOW_AXES]}
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
             boundingBoxColor={userSelections.boundingBoxColor}
@@ -1216,20 +1208,13 @@ export default class App extends React.Component<AppProps, AppState> {
             handleChangeUserSelection={this.handleChangeUserSelection}
             handleChangeToImage={this.handleChangeToImage}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
-            onViewModeChange={this.onViewModeChange}
-            onAutorotateChange={this.onAutorotateChange}
-            onSwitchFovCell={this.onSwitchFovCell}
             setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
-            changeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
-            changeAxisShowing={this.changeAxisShowing}
-            changeBoundingBoxShowing={this.changeBoundingBoxShowing}
             changeBackgroundColor={this.changeBackgroundColor}
             changeBoundingBoxColor={this.changeBoundingBoxColor}
-            resetCamera={this.onResetCamera}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>
