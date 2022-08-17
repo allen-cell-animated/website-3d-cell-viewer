@@ -68,6 +68,8 @@ export interface AppProps {
   preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
+
+  onControlPanelToggle?(collapsed: boolean): void;
 }
 
 export interface UserSelectionState {

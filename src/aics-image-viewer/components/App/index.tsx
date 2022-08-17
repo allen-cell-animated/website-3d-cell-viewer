@@ -1148,6 +1148,10 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   toggleControlPanel(value) {
+    if (this.props.onControlPanelToggle) {
+      this.props.onControlPanelToggle(value);
+    }
+
     this.setState({
       userSelections: {
         ...this.state.userSelections,

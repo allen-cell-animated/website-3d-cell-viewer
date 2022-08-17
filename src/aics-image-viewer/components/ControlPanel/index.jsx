@@ -13,13 +13,7 @@ import "./styles.css";
 export default class ControlPanel extends React.Component {
   constructor(props) {
     super(props);
-    this.handleToggle = this.handleToggle.bind(this);
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
-    this.state = { open: true };
-  }
-
-  handleToggle() {
-    this.setState({ open: !this.state.open });
   }
 
   makeTurnOnPresetFn({ key }) {
@@ -39,7 +33,7 @@ export default class ControlPanel extends React.Component {
       <>
         Palette preset:
         <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
-          <Button style={{marginLeft: "12px"}}>
+          <Button style={{ marginLeft: "12px" }}>
             Color
             <Icon type="down" />
           </Button>
@@ -53,7 +47,6 @@ export default class ControlPanel extends React.Component {
     return (
       <Card
         style={{ ...STYLES.wrapper, height: appHeight }}
-        open={this.state.open}
         bordered={false}
         className="control-panel"
         title={renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()}
