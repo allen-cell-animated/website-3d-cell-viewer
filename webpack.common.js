@@ -1,88 +1,84 @@
-const path = require('path');
-const webpack = require('webpack');
+const path = require("path");
+const webpack = require("webpack");
 
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  entry: ['./public/index.jsx'],
+  entry: ["./public/index.jsx"],
   output: {
-    path: path.resolve(__dirname, 'imageviewer'),
-    filename: 'image-viewer-ui.bundle.js'
+    path: path.resolve(__dirname, "imageviewer"),
+    filename: "image-viewer-ui.bundle.js",
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx']
+    extensions: [".js", ".jsx", ".ts", ".tsx"],
   },
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: './public/index.html'
+      template: "./public/index.html",
     }),
     new MiniCssExtractPlugin(),
     new webpack.DefinePlugin({
-      APP_VERSION: JSON.stringify(require("./package.json").version)
+      APP_VERSION: JSON.stringify(require("./package.json").version),
     }),
-    new CopyWebpackPlugin({patterns:["./.nojekyll"]}),
+    new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
     new webpack.ProvidePlugin({
-      THREE: 'three',
-      jQuery: 'jquery',
-      $: 'jquery'
+      THREE: "three",
+      jQuery: "jquery",
+      $: "jquery",
     }),
   ],
   module: {
-    rules: [{
+    rules: [
+      {
         test: /\.(js|jsx|ts|tsx)$/,
-        include: [
-          path.resolve(__dirname, 'src')
-        ],
+        include: [path.resolve(__dirname, "src")],
         exclude: [/node_modules/, /dist/],
-        use: 'babel-loader'
+        use: "babel-loader",
       },
       {
         test: /\.css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader',
-          'postcss-loader'
-        ]
+        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
       },
       {
-        loader: 'babel-loader',
+        loader: "babel-loader",
         exclude: /node_modules/,
         test: /\.(js|jsx|ts|tsx)$/,
       },
       {
         test: /\.less$/,
         use: [
-          'style-loader',
+          "style-loader",
           {
             loader: "css-loader",
             options: {
               camelCase: true,
-              importLoaders: 1
-            }
-
+              importLoaders: 1,
+            },
           },
           {
             loader: "less-loader",
             options: {
               javascriptEnabled: true,
-            }
-          }
-        ]
+            },
+          },
+        ],
       },
       {
         test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
-        use: [{
-          loader: 'url-loader',
-          options: {
-            limit: 10000,
-            name: 'imageviewer/font/[name].[ext]'
-          }
-        }]
-      }
-    ]
-  }
+        use: [
+          {
+            loader: "url-loader",
+            options: {
+              limit: 10000,
+              name: "imageviewer/font/[name].[ext]",
+            },
+          },
+        ],
+      },
+    ],
+  },
 };
