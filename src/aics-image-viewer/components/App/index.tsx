@@ -948,7 +948,6 @@ export default class App extends React.Component<AppProps, AppState> {
         [MODE]: newMode,
         [PATH_TRACE]: false,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
-        autorotate: false,
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {
