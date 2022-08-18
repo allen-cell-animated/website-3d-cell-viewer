@@ -1,10 +1,9 @@
 import React from "react";
-import { Button, Dropdown, Icon, Menu, Radio, Select } from "antd";
+import { Button, Dropdown, Icon, Menu, Radio, Select, Tooltip } from "antd";
 import "./styles.css";
 
 import ViewModeRadioButtons from "../ViewModeRadioButtons";
 
-// TODO use ts enum
 import viewMode from "../../shared/enums/viewMode";
 import {
   FULL_FIELD_IMAGE,
@@ -106,14 +105,18 @@ export default function Toolbar(props: ToolbarProps) {
               />
             )}
             {renderConfig.resetCameraButton && (
-              <Button icon="reload" className="btn-borderless" onClick={props.onResetCamera} />
+              <Tooltip placement="bottom" title="Reset camera">
+                <Button icon="reload" className="btn-borderless" onClick={props.onResetCamera} />
+              </Tooltip>
             )}
             {renderConfig.autoRotateButton && (
-              <Button
-                icon={autorotateIcon}
-                disabled={twoDMode || props.pathTraceOn}
-                onClick={props.onAutorotateChange}
-              />
+              <Tooltip placement="bottom" title="Turntable">
+                <Button
+                  icon={autorotateIcon}
+                  disabled={twoDMode || props.pathTraceOn}
+                  onClick={props.onAutorotateChange}
+                />
+              </Tooltip>
             )}
           </span>
         )}
@@ -150,10 +153,14 @@ export default function Toolbar(props: ToolbarProps) {
         {renderGroup4 && (
           <span className="toolbar-group">
             {renderConfig.showAxesButton && (
-              <Button icon="drag" className="btn-borderless" onClick={toggleAxisShowing} />
+              <Tooltip placement="bottom" title={props.showAxes ? "Hide axes" : "Show axes"}>
+                <Button icon="drag" className="btn-borderless" onClick={toggleAxisShowing} />
+              </Tooltip>
             )}
             {renderConfig.showBoundingBoxButton && (
-              <Button icon="close-square" className="btn-borderless" onClick={toggleBoundingBoxShowing} />
+              <Tooltip placement="bottom" title={props.showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
+                <Button icon="close-square" className="btn-borderless" onClick={toggleBoundingBoxShowing} />
+              </Tooltip>
             )}
           </span>
         )}
