@@ -16,17 +16,20 @@ import {
 } from "../../shared/constants";
 
 interface DownloadButtonProps {
-  fovDownloadHref: string;
   cellDownloadHref: string;
-  hasCellId: boolean;
-  hasParentImage: boolean;
+  fovDownloadHref: string;
+  hasFov: boolean;
 }
 
-interface ToolbarProps extends DownloadButtonProps {
+interface ToolbarProps {
   imageName: string;
   imageType: string;
   renderSetting: string;
+  cellDownloadHref: string;
+  fovDownloadHref: string;
   mode: symbol;
+  hasCellId: boolean;
+  hasParentImage: boolean;
   autorotate: boolean;
   pathTraceOn: boolean;
   canPathTrace: boolean;
@@ -51,8 +54,8 @@ interface ToolbarProps extends DownloadButtonProps {
   };
 }
 
-function DownloadButton({ fovDownloadHref, cellDownloadHref, hasCellId, hasParentImage }: DownloadButtonProps) {
-  if (hasCellId && hasParentImage) {
+function DownloadButton({ fovDownloadHref, cellDownloadHref, hasFov }: DownloadButtonProps) {
+  if (hasFov) {
     const menu = (
       <Menu className="download-dropdown">
         <Menu.Item key="1">
@@ -158,10 +161,9 @@ export default function Toolbar(props: ToolbarProps) {
 
       <span className="toolbar-right">
         <DownloadButton
-          fovDownloadHref={props.fovDownloadHref}
           cellDownloadHref={props.cellDownloadHref}
-          hasCellId={props.hasCellId}
-          hasParentImage={props.hasParentImage}
+          fovDownloadHref={props.fovDownloadHref}
+          hasFov={props.hasCellId && props.hasParentImage}
         />
       </span>
     </div>

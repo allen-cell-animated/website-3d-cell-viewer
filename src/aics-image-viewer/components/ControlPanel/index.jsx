@@ -14,10 +14,13 @@ export default class ControlPanel extends React.Component {
   constructor(props) {
     super(props);
     this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
+    this.onColorChangeComplete = this.onColorChangeComplete.bind(this);
+    this.state = { palette: 0, customColor: false };
   }
 
   makeTurnOnPresetFn({ key }) {
     const presets = PRESET_COLOR_MAP[key].colors;
+    this.setState({ palette: key, customColor: false });
     this.props.onApplyColorPresets(presets);
   }
 
@@ -34,12 +37,21 @@ export default class ControlPanel extends React.Component {
         Palette preset:
         <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
           <Button style={{ marginLeft: "12px" }}>
-            Color
+            {this.state.customColor ? "Custom" : PRESET_COLOR_MAP[this.state.palette].name }
             <Icon type="down" />
           </Button>
         </Dropdown>
       </>
     );
+  }
+
+  onColorChangeComplete() {
+    if (this.props.onColorChangeComplete) {
+      this.props.onColorChangeComplete();
+    }
+    if (!this.state.customColor) {
+      this.setState({ customColor: true });
+    }
   }
 
   render() {
@@ -63,7 +75,7 @@ export default class ControlPanel extends React.Component {
               handleChangeToImage={this.props.handleChangeToImage}
               updateChannelTransferFunction={this.props.updateChannelTransferFunction}
               changeOneChannelSetting={this.props.changeOneChannelSetting}
-              onColorChangeComplete={this.props.onColorChangeComplete}
+              onColorChangeComplete={this.onColorChangeComplete}
               onApplyColorPresets={this.props.onApplyColorPresets}
               style={STYLES.channelsWidget}
               renderConfig={renderConfig}
