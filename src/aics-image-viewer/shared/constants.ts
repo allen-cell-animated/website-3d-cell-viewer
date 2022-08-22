@@ -36,6 +36,9 @@ export const // Keys accepted as URL search parameters
   COLOR = "color",
   SAVE_ISO_SURFACE = "saveIsoSurface",
 
+  // Control panel will automatically close if viewport is less than this width
+  CONTROL_PANEL_CLOSE_WIDTH = 900,
+
   BACKGROUND_COLOR: [number, number, number] = [0, 0, 0],
   BOUNDING_BOX_COLOR: [number, number, number] = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.

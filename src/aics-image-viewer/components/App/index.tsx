@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from "react";
-import { includes, isEqual, find, map } from "lodash";
+import { includes, isEqual, find, map, debounce } from "lodash";
 import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
 
 import { AppProps, AppState, UserSelectionState } from "./types";
@@ -42,6 +42,7 @@ import {
   LUT_MAX_PERCENTILE,
   COLORIZE_ENABLED,
   SINGLE_GROUP_CHANNEL_KEY,
+  CONTROL_PANEL_CLOSE_WIDTH,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
@@ -180,7 +181,7 @@ export default class App extends React.Component<AppProps, AppState> {
       // state set by the UI:
       userSelections: {
         imageType: SEGMENTED_CELL,
-        controlPanelClosed: false,
+        controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
         [MODE]: viewmode,
         [AUTO_ROTATE]: props.viewerConfig.autorotate,
         [SHOW_AXES]: props.viewerConfig.showAxes,
@@ -244,6 +245,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   componentDidMount() {
+    const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
+    window.addEventListener("resize", debouncedResizeHandler);
+
     const { cellId } = this.props;
     if (cellId) {
       this.beginRequestImage();
@@ -935,6 +939,12 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  onWindowResize() {
+    if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
+      this.setUserSelectionsInState({ controlPanelClosed: true });
+    }
+  }
+
   onViewModeChange(newMode) {
     const { userSelections } = this.state;
     let newSelectionState: Partial<UserSelectionState> = {
@@ -1151,12 +1161,7 @@ export default class App extends React.Component<AppProps, AppState> {
       this.props.onControlPanelToggle(value);
     }
 
-    this.setState({
-      userSelections: {
-        ...this.state.userSelections,
-        controlPanelClosed: value,
-      },
-    });
+    this.setUserSelectionsInState({ controlPanelClosed: value });
   }
 
   getNumberOfSlices() {

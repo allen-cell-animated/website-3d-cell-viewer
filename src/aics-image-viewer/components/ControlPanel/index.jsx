@@ -33,15 +33,12 @@ export default class ControlPanel extends React.Component {
       </Menu>
     );
     return (
-      <>
-        Palette preset:
-        <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
-          <Button style={{ marginLeft: "12px" }}>
-            {this.state.customColor ? "Custom" : PRESET_COLOR_MAP[this.state.palette].name }
-            <Icon type="down" />
-          </Button>
-        </Dropdown>
-      </>
+      <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
+        <Button>
+          Palette
+          <Icon type="down" />
+        </Button>
+      </Dropdown>
     );
   }
 
