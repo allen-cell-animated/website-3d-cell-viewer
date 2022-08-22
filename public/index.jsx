@@ -78,6 +78,7 @@ const args = {
 const viewerConfig = {
   showAxes: false,
   showBoundingBox: false,
+  autorotate: false,
   view: "3D", // "XY", "XZ", "YZ"
   mode: "default", // "pathtrace", "maxprojection"
   maskAlpha: 50,
@@ -95,15 +96,13 @@ if (params) {
     // ?luts=0,255,0,255
     // ?colors=ff0000,00ff00
     const initialChannelSettings = {
-      groups: [
-        {name: "Channels", channels: []}
-      ]
+      groups: [{ name: "Channels", channels: [] }],
     };
     const ch = initialChannelSettings.groups[0].channels;
-  
+
     const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
     for (let i = 0; i < channelsOn.length; ++i) {
-      ch.push({"match":channelsOn[i], "enabled":true});
+      ch.push({ match: channelsOn[i], enabled: true });
     }
     // look for luts or color
     if (params.luts) {
@@ -112,7 +111,7 @@ if (params) {
         console.log("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
       }
       for (let i = 0; i < ch.length; ++i) {
-        ch[i]["lut"] = [luts[i*2], luts[i*2+1]];
+        ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
       }
     }
     if (params.colors) {
@@ -134,7 +133,7 @@ if (params) {
     // put the store url in baseUrl,
     // and the image name in cellPath
     // Time 0 will be loaded.
-    // TODO specify Pyramid level 
+    // TODO specify Pyramid level
 
     // OME-TIFF:
     // ?url=imageurl&image=imagename
@@ -156,15 +155,13 @@ if (params) {
     let decodedimage = "";
     if (params.image) {
       decodedimage = decodeURIComponent(params.image);
-    }
-    else {
+    } else {
       // image not specified
       if (decodedurl.endsWith(".zarr")) {
         decodedimage = "0";
-      }
-      else {
+      } else {
         const spliturl = decodedurl.split("/");
-        decodedimage = spliturl[spliturl.length-1];
+        decodedimage = spliturl[spliturl.length - 1];
         decodedurl = decodedurl.slice(0, -decodedimage.length);
       }
     }
@@ -173,29 +170,28 @@ if (params) {
     args.baseurl = decodedurl;
     args.cellPath = decodedimage;
     // this is invalid for zarr?
-    args.cellDownloadHref = decodedurl+decodedimage;
+    args.cellDownloadHref = decodedurl + decodedimage;
     args.fovPath = "";
     args.fovDownloadHref = "";
     // if json, then use the CFE settings for now.
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
     if (!decodedimage.endsWith("json") && !params.ch) {
-      args.initialChannelSettings =  {
+      args.initialChannelSettings = {
         groups: [
           // first 3 channels on by default!
           {
-            name: "Channels", 
+            name: "Channels",
             channels: [
-              {match:[0,1,2], enabled:true},
-              {match:"(.+)", enabled:false}
-            ]
+              { match: [0, 1, 2], enabled: true },
+              { match: "(.+)", enabled: false },
+            ],
           },
-        ]
+        ],
       };
     }
     runApp();
-  }
-  else if (params.file) {
+  } else if (params.file) {
     // quick way to load a atlas.json from a special directory.
     //
     // ?file=relative-path-to-atlas-on-isilon

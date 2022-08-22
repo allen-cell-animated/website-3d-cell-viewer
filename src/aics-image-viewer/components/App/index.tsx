@@ -101,6 +101,7 @@ const defaultProps: AppProps = {
   viewerConfig: {
     showAxes: false,
     showBoundingBox: false,
+    autorotate: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
     backgroundColor: BACKGROUND_COLOR,
@@ -177,7 +178,7 @@ export default class App extends React.Component<AppProps, AppState> {
         imageType: SEGMENTED_CELL,
         controlPanelClosed: false,
         [MODE]: viewmode,
-        [AUTO_ROTATE]: false,
+        [AUTO_ROTATE]: props.viewerConfig.autorotate,
         [SHOW_AXES]: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
         boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
@@ -1240,7 +1241,6 @@ export default class App extends React.Component<AppProps, AppState> {
             />
             <CellViewerCanvasWrapper
               image={this.state.image}
-              onAutorotateChange={this.onAutorotateChange}
               setAxisClip={this.setImageAxisClip}
               mode={userSelections.mode}
               autorotate={userSelections[AUTO_ROTATE]}
@@ -1249,7 +1249,6 @@ export default class App extends React.Component<AppProps, AppState> {
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}
-              pathTraceOn={userSelections[PATH_TRACE]}
             />
           </Content>
         </Layout>
