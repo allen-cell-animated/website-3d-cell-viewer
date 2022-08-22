@@ -10,23 +10,14 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 
-export default class ControlPanel extends React.Component {
-  constructor(props) {
-    super(props);
-    this.makeTurnOnPresetFn = this.makeTurnOnPresetFn.bind(this);
-    this.onColorChangeComplete = this.onColorChangeComplete.bind(this);
-    this.state = { palette: 0, customColor: false };
-  }
+export default function ControlPanel(props) {
+  const { viewerChannelSettings, renderConfig, hasImage } = props;
 
-  makeTurnOnPresetFn({ key }) {
-    const presets = PRESET_COLOR_MAP[key].colors;
-    this.setState({ palette: key, customColor: false });
-    this.props.onApplyColorPresets(presets);
-  }
+  const makeTurnOnPresetFn = ({ key }) => props.onApplyColorPresets(PRESET_COLOR_MAP[key].colors);
 
-  renderColorPresetsDropdown() {
+  const renderColorPresetsDropdown = () => {
     const dropDownMenuItems = (
-      <Menu onClick={this.makeTurnOnPresetFn}>
+      <Menu onClick={makeTurnOnPresetFn}>
         {PRESET_COLOR_MAP.map((preset, _index) => (
           <Menu.Item key={preset.key}>{preset.name}</Menu.Item>
         ))}
@@ -35,78 +26,65 @@ export default class ControlPanel extends React.Component {
     return (
       <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
         <Button>
-          Palette
+          Apply palette
           <Icon type="down" />
         </Button>
       </Dropdown>
     );
-  }
+  };
 
-  onColorChangeComplete() {
-    if (this.props.onColorChangeComplete) {
-      this.props.onColorChangeComplete();
-    }
-    if (!this.state.customColor) {
-      this.setState({ customColor: true });
-    }
-  }
-
-  render() {
-    const { viewerChannelSettings, renderConfig, appHeight, hasImage } = this.props;
-    return (
-      <Card
-        style={{ ...STYLES.wrapper, height: appHeight }}
-        bordered={false}
-        className="control-panel"
-        title={renderConfig.colorPresetsDropdown && this.renderColorPresetsDropdown()}
-      >
-        {hasImage && (
-          <div className="channel-rows-list">
-            <ChannelsWidget
-              imageName={this.props.imageName}
-              channelSettings={this.props.channelSettings}
-              channelDataChannels={this.props.channelDataChannels}
-              channelGroupedByType={this.props.channelGroupedByType}
-              changeChannelSettings={this.props.changeChannelSettings}
-              channelDataReady={this.props.channelDataReady}
-              handleChangeToImage={this.props.handleChangeToImage}
-              updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-              changeOneChannelSetting={this.props.changeOneChannelSetting}
-              onColorChangeComplete={this.onColorChangeComplete}
-              onApplyColorPresets={this.props.onApplyColorPresets}
-              style={STYLES.channelsWidget}
-              renderConfig={renderConfig}
-              filterFunc={this.props.filterFunc}
-              viewerChannelSettings={viewerChannelSettings}
-            />
-            <GlobalVolumeControls
-              mode={this.props.mode}
-              imageName={this.props.imageName}
-              pixelSize={this.props.pixelSize}
-              handleChangeUserSelection={this.props.handleChangeUserSelection}
-              setImageAxisClip={this.props.setImageAxisClip}
-              makeUpdatePixelSizeFn={this.props.makeUpdatePixelSizeFn}
-              alphaMaskSliderLevel={this.props.alphaMaskSliderLevel}
-              brightnessSliderLevel={this.props.brightnessSliderLevel}
-              densitySliderLevel={this.props.densitySliderLevel}
-              gammaSliderLevel={this.props.gammaSliderLevel}
-              maxProjectOn={this.props.maxProjectOn}
-              canPathTrace={this.props.canPathTrace}
-              pathTraceOn={this.props.pathTraceOn}
-              renderConfig={renderConfig}
-            />
-            <CustomizeWidget
-              backgroundColor={this.props.backgroundColor}
-              boundingBoxColor={this.props.boundingBoxColor}
-              changeBackgroundColor={this.props.changeBackgroundColor}
-              changeBoundingBoxColor={this.props.changeBoundingBoxColor}
-              showBoundingBox={this.props.showBoundingBox}
-            />
-          </div>
-        )}
-      </Card>
-    );
-  }
+  return (
+    <Card
+      bordered={false}
+      className="control-panel"
+      title={renderConfig.colorPresetsDropdown && renderColorPresetsDropdown()}
+    >
+      {hasImage && (
+        <div className="channel-rows-list">
+          <ChannelsWidget
+            imageName={props.imageName}
+            channelSettings={props.channelSettings}
+            channelDataChannels={props.channelDataChannels}
+            channelGroupedByType={props.channelGroupedByType}
+            changeChannelSettings={props.changeChannelSettings}
+            channelDataReady={props.channelDataReady}
+            handleChangeToImage={props.handleChangeToImage}
+            updateChannelTransferFunction={props.updateChannelTransferFunction}
+            changeOneChannelSetting={props.changeOneChannelSetting}
+            onColorChangeComplete={props.onColorChangeComplete}
+            onApplyColorPresets={props.onApplyColorPresets}
+            style={STYLES.channelsWidget}
+            renderConfig={renderConfig}
+            filterFunc={props.filterFunc}
+            viewerChannelSettings={viewerChannelSettings}
+          />
+          <GlobalVolumeControls
+            mode={props.mode}
+            imageName={props.imageName}
+            pixelSize={props.pixelSize}
+            handleChangeUserSelection={props.handleChangeUserSelection}
+            setImageAxisClip={props.setImageAxisClip}
+            makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
+            alphaMaskSliderLevel={props.alphaMaskSliderLevel}
+            brightnessSliderLevel={props.brightnessSliderLevel}
+            densitySliderLevel={props.densitySliderLevel}
+            gammaSliderLevel={props.gammaSliderLevel}
+            maxProjectOn={props.maxProjectOn}
+            canPathTrace={props.canPathTrace}
+            pathTraceOn={props.pathTraceOn}
+            renderConfig={renderConfig}
+          />
+          <CustomizeWidget
+            backgroundColor={props.backgroundColor}
+            boundingBoxColor={props.boundingBoxColor}
+            changeBackgroundColor={props.changeBackgroundColor}
+            changeBoundingBoxColor={props.changeBoundingBoxColor}
+            showBoundingBox={props.showBoundingBox}
+          />
+        </div>
+      )}
+    </Card>
+  );
 }
 
 const STYLES = {
