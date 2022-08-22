@@ -22,9 +22,15 @@
   }
 
   .btn-borderless {
-    background-color: transparent;
-    border: none;
     color: #bfbfbf;
+  }
+
+  .btn-borderless:not(:hover) {
+    background-color: transparent;
+  }
+
+  .btn-borderless:not(:focus) {
+    border: none;
   }
 
   .select-render-setting {

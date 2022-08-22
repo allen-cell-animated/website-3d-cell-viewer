@@ -80,7 +80,7 @@ function DownloadButton({ fovDownloadHref, cellDownloadHref, hasFov }: DownloadB
 }
 
 export default function Toolbar(props: ToolbarProps) {
-  const { renderConfig } = props;
+  const { renderConfig, showAxes, showBoundingBox } = props;
 
   const twoDMode = viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(props.mode) !== THREE_D_MODE;
   const autorotateIcon = props.autorotate && !twoDMode ? "pause-circle" : "play-circle";
@@ -89,8 +89,8 @@ export default function Toolbar(props: ToolbarProps) {
     renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
   const renderGroup4 = renderConfig.showAxesButton || renderConfig.showBoundingBoxButton;
 
-  const toggleAxisShowing = () => props.changeAxisShowing(!props.showAxes);
-  const toggleBoundingBoxShowing = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
+  const toggleAxis = () => props.changeAxisShowing(!props.showAxes);
+  const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
   return (
     <div className="toolbar">
@@ -153,13 +153,17 @@ export default function Toolbar(props: ToolbarProps) {
         {renderGroup4 && (
           <span className="toolbar-group">
             {renderConfig.showAxesButton && (
-              <Tooltip placement="bottom" title={props.showAxes ? "Hide axes" : "Show axes"}>
-                <Button icon="drag" className="btn-borderless" onClick={toggleAxisShowing} />
+              <Tooltip placement="bottom" title={showAxes ? "Hide axes" : "Show axes"}>
+                <Button icon="drag" className={showAxes ? "" : "btn-borderless"} onClick={toggleAxis} />
               </Tooltip>
             )}
             {renderConfig.showBoundingBoxButton && (
-              <Tooltip placement="bottom" title={props.showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
-                <Button icon="close-square" className="btn-borderless" onClick={toggleBoundingBoxShowing} />
+              <Tooltip placement="bottom" title={showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
+                <Button
+                  icon="close-square"
+                  className={showBoundingBox ? "" : "btn-borderless"}
+                  onClick={toggleBoundingBox}
+                />
               </Tooltip>
             )}
           </span>
