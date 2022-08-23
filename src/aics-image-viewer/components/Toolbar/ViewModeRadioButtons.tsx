@@ -6,7 +6,6 @@ const viewModeMapping = viewMode.mainMapping;
 
 interface ViewModeRadioButtonsProps {
   onViewModeChange(newMode: symbol): void;
-  imageName: string;
   mode: symbol;
 }
 
