@@ -245,6 +245,10 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   componentDidMount() {
+    if (this.state.userSelections.controlPanelClosed && this.props.onControlPanelToggle) {
+      this.props.onControlPanelToggle(true);
+    }
+
     const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
     window.addEventListener("resize", debouncedResizeHandler);
 
@@ -941,7 +945,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onWindowResize() {
     if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
-      this.setUserSelectionsInState({ controlPanelClosed: true });
+      this.toggleControlPanel(true);
     }
   }
 
