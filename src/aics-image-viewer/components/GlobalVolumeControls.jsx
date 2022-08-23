@@ -20,7 +20,6 @@ export default class GlobalVolumeControls extends React.Component {
 
   constructor(props) {
     super(props);
-    this.handleAutorotateCheck = this.handleAutorotateCheck.bind(this);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
     this.onDensityUpdate = this.onDensityUpdate.bind(this);
@@ -132,11 +131,6 @@ export default class GlobalVolumeControls extends React.Component {
       label: `${axis} scale`,
       onUpdate: this.props.makeUpdatePixelSizeFn(i)
     }));
-  }
-
-  handleAutorotateCheck(event, checked) {
-    this.setState({autoRotateChecked:checked});
-    this.props.onAutorotateChange();
   }
 
   createSliderRow(config) {

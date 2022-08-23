@@ -1,0 +1,43 @@
+.toolbar {
+  position: absolute;
+  width: 100%;
+  margin-top: 12px;
+  z-index: 1500;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  padding: 0 12px;
+
+  .toolbar-right {
+    position: absolute;
+    right: 12px;
+  }
+
+  .toolbar-group:not(:last-child) {
+    margin-right: 14px;
+  }
+
+  .toolbar-group > :not(:last-child) {
+    margin-right: 6px;
+  }
+
+  .btn-borderless {
+    color: #bfbfbf;
+  }
+
+  .btn-borderless:not(:hover) {
+    background-color: transparent;
+  }
+
+  .btn-borderless:not(:focus) {
+    border: none;
+  }
+
+  .select-render-setting {
+    min-width: 110px;
+  }
+
+  .ant-btn-icon-only {
+    padding-bottom: 1px;
+  }
+}

@@ -41,6 +41,9 @@ export interface AppProps {
     saveSurfaceButtons: boolean;
     fovCellSwitchControls: boolean;
     viewModeRadioButtons: boolean;
+    resetCameraButton: boolean;
+    showAxesButton: boolean;
+    showBoundingBoxButton: boolean;
   };
   viewerConfig: {
     showAxes: boolean;
@@ -65,6 +68,8 @@ export interface AppProps {
   preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
+
+  onControlPanelToggle?(collapsed: boolean): void;
 }
 
 export interface UserSelectionState {
