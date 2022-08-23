@@ -43,21 +43,21 @@
   .slider-x {
     color: var(--color-x);
     .noUi-handle {
-      background-color: var(--color-x);
+      background-color: var(--color-x) !important;
     }
   }
 
   .slider-y {
     color: var(--color-y);
     .noUi-handle {
-      background-color: var(--color-y);
+      background-color: var(--color-y) !important;
     }
   }
 
   .slider-z {
     color: var(--color-z);
     .noUi-handle {
-      background-color: var(--color-z);
+      background-color: var(--color-z) !important;
     }
   }
 }
