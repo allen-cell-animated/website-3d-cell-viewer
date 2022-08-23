@@ -1,6 +1,10 @@
 @import "../../assets/styles/axis-style-override";
 
 .clip-sliders {
+  --color-x: #ff4d4d;
+  --color-y: #61d900;
+  --color-z: #0099ff;
+
   @extend %axis-override;
   max-width: 612px;
   position: absolute;
@@ -34,5 +38,26 @@
 
   .slider-slices {
     flex: 0 0 80px;
+  }
+
+  .slider-x {
+    color: var(--color-x);
+    .noUi-handle {
+      background-color: var(--color-x);
+    }
+  }
+
+  .slider-y {
+    color: var(--color-y);
+    .noUi-handle {
+      background-color: var(--color-y);
+    }
+  }
+
+  .slider-z {
+    color: var(--color-z);
+    .noUi-handle {
+      background-color: var(--color-z);
+    }
   }
 }
