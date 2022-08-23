@@ -67,11 +67,7 @@ export default function Toolbar(props: ToolbarProps) {
         {renderGroup1 && (
           <span className="toolbar-group">
             {renderConfig.viewModeRadioButtons && (
-              <ViewModeRadioButtons
-                imageName={props.imageName}
-                mode={props.mode}
-                onViewModeChange={props.onViewModeChange}
-              />
+              <ViewModeRadioButtons mode={props.mode} onViewModeChange={props.onViewModeChange} />
             )}
             {renderConfig.resetCameraButton && (
               <Tooltip placement="bottom" title="Reset camera">
