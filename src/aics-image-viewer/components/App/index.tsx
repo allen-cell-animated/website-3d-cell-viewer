@@ -43,6 +43,7 @@ import {
   COLORIZE_ENABLED,
   SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
+  VOLUMETRIC_RENDER,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
@@ -965,7 +966,7 @@ export default class App extends React.Component<AppProps, AppState> {
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {
-        this.onChangeRenderingAlgorithm("volume");
+        this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
       }
       // switching from 2D to 3D
     } else if (
