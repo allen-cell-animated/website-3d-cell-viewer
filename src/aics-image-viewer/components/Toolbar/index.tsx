@@ -16,7 +16,6 @@ import {
 } from "../../shared/constants";
 
 interface ToolbarProps {
-  imageName: string;
   imageType: string;
   renderSetting: string;
   cellDownloadHref: string;

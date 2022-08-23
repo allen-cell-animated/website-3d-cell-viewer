@@ -1234,7 +1234,6 @@ export default class App extends React.Component<AppProps, AppState> {
         <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
             <Toolbar
-              imageName={this.state.image ? this.state.image.name : false}
               mode={userSelections.mode}
               fovDownloadHref={fovDownloadHref}
               cellDownloadHref={cellDownloadHref}
