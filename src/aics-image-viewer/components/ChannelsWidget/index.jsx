@@ -49,9 +49,7 @@ export default class ChannelsWidget extends React.Component {
   renderVisibilityControls(key, channelArray) {
     const { channelSettings, channelDataChannels } = this.props;
 
-    const arrayOfNames = map(channelArray, (channelIndex) => {
-      return channelDataChannels[channelIndex].name;
-    });
+    const arrayOfNames = map(channelArray, (channelIndex) => channelDataChannels[channelIndex].name);
     const volChecked = filter(arrayOfNames, (name) =>
       find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[VOLUME_ENABLED] : false
     );
@@ -107,9 +105,10 @@ export default class ChannelsWidget extends React.Component {
                 itemLayout="horizontal"
                 dataSource={channelArray}
                 renderItem={(actualIndex) => {
-                  const thisChannelSettings = find(channelSettings, (channel) => {
-                    return channel.name === channelDataChannels[actualIndex].name;
-                  });
+                  const thisChannelSettings = find(
+                    channelSettings,
+                    (channel) => channel.name === channelDataChannels[actualIndex].name
+                  );
 
                   return thisChannelSettings ? (
                     <ChannelsWidgetRow
