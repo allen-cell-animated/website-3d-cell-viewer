@@ -8,6 +8,7 @@ import {
   LEVELS_SLIDER,
   MODE,
   AUTO_ROTATE,
+  SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
 } from "../../shared/constants";
@@ -40,8 +41,16 @@ export interface AppProps {
     saveSurfaceButtons: boolean;
     fovCellSwitchControls: boolean;
     viewModeRadioButtons: boolean;
+    resetCameraButton: boolean;
+    showAxesButton: boolean;
+    showBoundingBoxButton: boolean;
   };
   viewerConfig: {
+    showAxes: boolean;
+    showBoundingBox: boolean;
+    boundingBoxColor: [number, number, number];
+    backgroundColor: [number, number, number];
+    autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
@@ -59,6 +68,8 @@ export interface AppProps {
   preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
+
+  onControlPanelToggle?(collapsed: boolean): void;
 }
 
 export interface UserSelectionState {
@@ -68,6 +79,10 @@ export interface UserSelectionState {
   [AUTO_ROTATE]: boolean;
   [MAX_PROJECT]: boolean;
   [PATH_TRACE]: boolean;
+  [SHOW_AXES]: boolean;
+  showBoundingBox: boolean;
+  boundingBoxColor: [number, number, number];
+  backgroundColor: [number, number, number];
   [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
   [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -82,7 +97,7 @@ export interface UserSelectionState {
     isosurfaceEnabled: boolean;
     isovalue: number;
     opacity: number;
-    color: string;
+    color: [number, number, number];
     dataReady: boolean;
     [LUT_CONTROL_POINTS]: [];
   }[];

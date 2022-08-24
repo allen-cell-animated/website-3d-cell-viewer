@@ -1,7 +1,7 @@
 // 3rd Party Imports
-import { Layout, Progress } from "antd";
+import { Layout } from "antd";
 import React from "react";
-import { includes, isEqual, find, map } from "lodash";
+import { includes, isEqual, find, map, debounce } from "lodash";
 import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
 
 import { AppProps, AppState, UserSelectionState } from "./types";
@@ -33,15 +33,21 @@ import {
   SAVE_ISO_SURFACE,
   MODE,
   AUTO_ROTATE,
+  SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
+  BACKGROUND_COLOR,
+  BOUNDING_BOX_COLOR,
   LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
   COLORIZE_ENABLED,
   SINGLE_GROUP_CHANNEL_KEY,
+  CONTROL_PANEL_CLOSE_WIDTH,
+  VOLUMETRIC_RENDER,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
+import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
@@ -52,6 +58,7 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
+import { colorArrayToFloatArray, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
 
 import "./styles.css";
 
@@ -93,14 +100,22 @@ const defaultProps: AppProps = {
     saveSurfaceButtons: true,
     fovCellSwitchControls: true,
     viewModeRadioButtons: true,
+    resetCameraButton: true,
+    showAxesButton: true,
+    showBoundingBoxButton: true,
   },
   viewerConfig: {
+    showAxes: false,
+    showBoundingBox: false,
+    autorotate: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
+    backgroundColor: BACKGROUND_COLOR,
+    boundingBoxColor: BOUNDING_BOX_COLOR,
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT as [number, number, number],
+    levels: LEVELS_SLIDER_DEFAULT,
     region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
     slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   },
@@ -167,9 +182,13 @@ export default class App extends React.Component<AppProps, AppState> {
       // state set by the UI:
       userSelections: {
         imageType: SEGMENTED_CELL,
-        controlPanelClosed: false,
+        controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
         [MODE]: viewmode,
-        [AUTO_ROTATE]: false,
+        [AUTO_ROTATE]: props.viewerConfig.autorotate,
+        [SHOW_AXES]: props.viewerConfig.showAxes,
+        showBoundingBox: props.viewerConfig.showBoundingBox,
+        boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
+        backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR,
         [MAX_PROJECT]: maxproject,
         [PATH_TRACE]: pathtrace,
         [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -218,10 +237,22 @@ export default class App extends React.Component<AppProps, AppState> {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
-    this.changeRenderingAlgorithm = this.changeRenderingAlgorithm.bind(this);
+    this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
+    this.changeAxisShowing = this.changeAxisShowing.bind(this);
+    this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
+    this.onResetCamera = this.onResetCamera.bind(this);
+    this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
+    this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
   }
 
   componentDidMount() {
+    if (this.state.userSelections.controlPanelClosed && this.props.onControlPanelToggle) {
+      this.props.onControlPanelToggle(true);
+    }
+
+    const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
+    window.addEventListener("resize", debouncedResizeHandler);
+
     const { cellId } = this.props;
     if (cellId) {
       this.beginRequestImage();
@@ -261,6 +292,10 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onView3DCreated(view3d) {
+    const { userSelections } = this.state;
+    view3d.setBackgroundColor(colorArrayToFloatArray(userSelections.backgroundColor));
+    view3d.setShowAxis(userSelections[SHOW_AXES]);
+
     this.setState({ view3d });
   }
 
@@ -485,6 +520,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -764,6 +801,8 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
 
@@ -841,6 +880,12 @@ export default class App extends React.Component<AppProps, AppState> {
       case MODE:
         view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
         break;
+      case SHOW_AXES:
+        view3d.setShowAxis(newValue);
+        break;
+      case "showBoundingBox":
+        view3d.setShowBoundingBox(image, newValue);
+        break;
       case SAVE_ISO_SURFACE:
         view3d.saveChannelIsosurface(image, index, newValue);
         break;
@@ -899,6 +944,12 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  onWindowResize() {
+    if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
+      this.toggleControlPanel(true);
+    }
+  }
+
   onViewModeChange(newMode) {
     const { userSelections } = this.state;
     let newSelectionState: Partial<UserSelectionState> = {
@@ -915,7 +966,7 @@ export default class App extends React.Component<AppProps, AppState> {
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections[PATH_TRACE]) {
-        this.changeRenderingAlgorithm("volume");
+        this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
       }
       // switching from 2D to 3D
     } else if (
@@ -963,7 +1014,7 @@ export default class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  changeRenderingAlgorithm(newAlgorithm) {
+  onChangeRenderingAlgorithm(newAlgorithm) {
     const { userSelections } = this.state;
     // already set
     if (userSelections[newAlgorithm]) {
@@ -972,12 +1023,13 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({
       [PATH_TRACE]: newAlgorithm === PATH_TRACE,
       [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
+      autorotate: newAlgorithm === PATH_TRACE ? false : userSelections.autorotate,
     });
     this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
     this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
   }
 
-  onSwitchFovCell(value) {
+  onSwitchFovCell(value: string) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
     this.openImage(path, false, "image", false);
@@ -1001,6 +1053,40 @@ export default class App extends React.Component<AppProps, AppState> {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
     });
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+  }
+
+  changeAxisShowing(showAxes) {
+    this.setUserSelectionsInState({ showAxes });
+    this.handleChangeToImage(SHOW_AXES, showAxes);
+  }
+
+  changeBoundingBoxShowing(showBoundingBox) {
+    this.setUserSelectionsInState({ showBoundingBox });
+    this.handleChangeToImage("showBoundingBox", showBoundingBox);
+  }
+
+  changeBoundingBoxColor(color) {
+    const boundingBoxColor = rgbObjectToArray(color);
+    this.setUserSelectionsInState({ boundingBoxColor });
+    if (this.state.view3d && this.state.image) {
+      const floatColor = colorArrayToFloatArray(boundingBoxColor);
+      this.state.view3d.setBoundingBoxColor(this.state.image, floatColor);
+    }
+  }
+
+  changeBackgroundColor(color) {
+    const backgroundColor = rgbObjectToArray(color);
+    this.setUserSelectionsInState({ backgroundColor });
+    if (this.state.view3d) {
+      const floatColor = colorArrayToFloatArray(backgroundColor);
+      this.state.view3d.setBackgroundColor(floatColor);
+    }
+  }
+
+  onResetCamera() {
+    if (this.state.view3d) {
+      this.state.view3d.resetCamera();
+    }
   }
 
   updateChannelTransferFunction(index, lut) {
@@ -1076,12 +1162,11 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   toggleControlPanel(value) {
-    this.setState({
-      userSelections: {
-        ...this.state.userSelections,
-        controlPanelClosed: value,
-      },
-    });
+    if (this.props.onControlPanelToggle) {
+      this.props.onControlPanelToggle(value);
+    }
+
+    this.setUserSelectionsInState({ controlPanelClosed: value });
   }
 
   getNumberOfSlices() {
@@ -1119,21 +1204,15 @@ export default class App extends React.Component<AppProps, AppState> {
             pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
             channelDataChannels={this.state.image ? this.state.image.channels : null}
             channelGroupedByType={this.state.channelGroupedByType}
-            hasCellId={this.state.hasCellId}
-            hasParentImage={!!this.state.fovPath}
             channelDataReady={this.state.channelDataReady}
-            fovDownloadHref={fovDownloadHref}
-            cellDownloadHref={cellDownloadHref}
             // user selections
             maxProjectOn={userSelections[MAX_PROJECT]}
             pathTraceOn={userSelections[PATH_TRACE]}
-            renderSetting={
-              userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE : "volume"
-            }
             channelSettings={userSelections[CHANNEL_SETTINGS]}
             mode={userSelections[MODE]}
-            imageType={userSelections.imageType}
-            autorotate={userSelections[AUTO_ROTATE]}
+            showBoundingBox={userSelections.showBoundingBox}
+            backgroundColor={userSelections.backgroundColor}
+            boundingBoxColor={userSelections.boundingBoxColor}
             alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
@@ -1142,31 +1221,44 @@ export default class App extends React.Component<AppProps, AppState> {
             handleChangeUserSelection={this.handleChangeUserSelection}
             handleChangeToImage={this.handleChangeToImage}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
-            onViewModeChange={this.onViewModeChange}
-            onAutorotateChange={this.onAutorotateChange}
-            onSwitchFovCell={this.onSwitchFovCell}
             setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
-            changeRenderingAlgorithm={this.changeRenderingAlgorithm}
+            changeBackgroundColor={this.changeBackgroundColor}
+            changeBoundingBoxColor={this.changeBoundingBoxColor}
             viewerChannelSettings={viewerChannelSettings}
           />
         </Sider>
         <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
-            <Progress
-              strokeColor={userSelections[PATH_TRACE] ? "#313131" : "#000"}
-              // TODO: place holder for when we actually have an end point for path tracing. Now it's just a animated bar
-              percent={99.9}
-              status={userSelections[PATH_TRACE] ? "active" : "normal"}
-              strokeLinecap="square"
-              showInfo={false}
+            <Toolbar
+              mode={userSelections.mode}
+              fovDownloadHref={fovDownloadHref}
+              cellDownloadHref={cellDownloadHref}
+              autorotate={userSelections.autorotate}
+              pathTraceOn={userSelections[PATH_TRACE]}
+              imageType={userSelections.imageType}
+              hasParentImage={!!this.state.fovPath}
+              hasCellId={this.state.hasCellId}
+              canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
+              showAxes={userSelections[SHOW_AXES]}
+              showBoundingBox={userSelections.showBoundingBox}
+              renderSetting={
+                userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE : "volume"
+              }
+              onViewModeChange={this.onViewModeChange}
+              onResetCamera={this.onResetCamera}
+              onAutorotateChange={this.onAutorotateChange}
+              onSwitchFovCell={this.onSwitchFovCell}
+              onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
+              changeAxisShowing={this.changeAxisShowing}
+              changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+              renderConfig={renderConfig}
             />
             <CellViewerCanvasWrapper
               image={this.state.image}
-              onAutorotateChange={this.onAutorotateChange}
               setAxisClip={this.setImageAxisClip}
               mode={userSelections.mode}
               autorotate={userSelections[AUTO_ROTATE]}
@@ -1175,7 +1267,6 @@ export default class App extends React.Component<AppProps, AppState> {
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}
-              pathTraceOn={userSelections[PATH_TRACE]}
             />
           </Content>
         </Layout>

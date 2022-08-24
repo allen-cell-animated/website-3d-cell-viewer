@@ -94,5 +94,10 @@
             }
         }
 
+        .color-customizer {
+            .ant-collapse-content-box {
+                padding: 0 16px;
+            }
+        }
     }
 }

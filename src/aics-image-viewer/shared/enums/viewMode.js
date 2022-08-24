@@ -1,10 +1,10 @@
 import {THREE_D_MODE, XY_MODE, XZ_MODE, YZ_MODE} from '../constants';
 
 export const mainMapping = {
-  yz: Symbol('yz'),
-  xz: Symbol('xz'),
+  threeD: Symbol('threeD'),
   xy: Symbol('xy'),
-  threeD: Symbol('threeD')
+  xz: Symbol('xz'),
+  yz: Symbol('yz'),
 };
 
 const VIEW_MODE_ENUM_AND_LABELS = [

@@ -5,28 +5,34 @@
 }
 
 .control-panel {
-    flex: 1 auto;
-    order: 1;
-    max-width: 540px;
-    .ant-card-head {
-        border-bottom: none;
+  flex: 1 auto;
+  order: 1;
+  max-width: 540px;
+
+  .ant-card-head {
+    border-radius: 0;
+    border-bottom: none;
   }
+
   .ant-card-meta {
-      margin: 0px;
-      border-bottom: 1px solid $border-color;
+    margin: 0px;
   }
+
   .ant-card-meta-title {
     margin: 0px;
     padding: 0px 24px 16px 24px;
     display: flex;
     justify-content: space-between;
   }
+
   .ant-card-body {
     padding: 0;
   }
+
   .ant-collapse-item .ant-collapse-header {
     padding: 0 !important;
   }
+
   .ant-checkbox-inner {
     background-color: transparent;
   }
@@ -40,8 +46,17 @@
     }
   }
 
-  .ant-collapse {
-    border-radius: 0;
+  .channel-rows-list {
+    border-top: 1px solid $border-color;
+  }
+
+  .ant-collapse-content {
+    border-radius: 0 !important;
+    border-bottom-color: #6e6e6e;
+  }
+
+  .channel-rows-list > .ant-card:last-child .ant-collapse-content {
+    border-bottom: none;
   }
   /*slider settings*/
   @extend %axis-override;
