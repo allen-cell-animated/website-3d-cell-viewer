@@ -1,66 +1,65 @@
 @import "../../assets/styles/variables";
 
 .row-card {
-    :host {
-        display: block;
-    }
+  :host {
+    display: block;
+  }
 
-    .bar rect {
-        fill: $border-color;
-    }
+  .bar rect {
+    fill: $border-color;
+  }
 
-    .aligned {
-        margin: auto;
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: space-between;
-        align-items: center;
-    }
+  .aligned {
+    margin: auto;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-    .tick text {
-        fill: $text-gray;
-    }
+  .tick text {
+    fill: $text-gray;
+  }
 
-    .axis path,
-    .axis line {
-        stroke: $border-color;
-    }
+  .axis path,
+  .axis line {
+    stroke: $border-color;
+  }
 
-    button::-moz-focus-inner {
-        border: none;
-        padding: 1px 2px;
-    }
+  button::-moz-focus-inner {
+    border: none;
+    padding: 1px 2px;
+  }
 
-    input[type=color] {
-        border: 1px solid;
-        width: 44px;
-        height: 23px;
-        margin-left: 2px;
-        margin-right: 2px;
-        padding: 1px 2px;
-        cursor: pointer;
-    }
+  input[type="color"] {
+    border: 1px solid;
+    width: 44px;
+    height: 23px;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding: 1px 2px;
+    cursor: pointer;
+  }
 
-    rect {
-        fill: none;
-        pointer-events: all;
-    }
+  rect {
+    fill: none;
+    pointer-events: all;
+  }
 
-    .line {
-        stroke: $light-gray;
-        stroke-width: 1.5px;
-    }
+  .line {
+    stroke: $light-gray;
+    stroke-width: 1.5px;
+  }
 
-    circle {
-        fill-opacity: .6;
-        cursor: move;
-        stroke: $light-gray;
-        stroke-width: 1.5px;
-    }
+  circle {
+    fill-opacity: 0.6;
+    cursor: move;
+    stroke: $light-gray;
+    stroke-width: 1.5px;
+  }
 
-    .selected {
-        fill: 'white';
-        stroke: 'white';
-    }
+  .selected {
+    fill: "white";
+    stroke: "white";
+  }
 }
-

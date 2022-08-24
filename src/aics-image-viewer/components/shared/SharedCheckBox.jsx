@@ -1,50 +1,47 @@
-import React from 'react';
-import { Checkbox } from 'antd';
-
+import React from "react";
+import { Checkbox } from "antd";
 
 export default class SharedCheckbox extends React.Component {
-    constructor(props) {
-        super(props);
-        this.onCheckAllChange = this.onCheckAllChange.bind(this);
-        this.state = {
-            checkedList: props.checkedList,
-            indeterminate: true,
-            checkAll: false,
-        };
-    }
-    
-    componentWillReceiveProps(newProps) {
-        const { checkedList, allOptions } = newProps;
-        this.setState({
-            checkedList,
-            indeterminate: !!checkedList.length && (checkedList.length < allOptions.length),
-            checkAll: checkedList.length === allOptions.length,
-        });
-    }
-    
-    onCheckAllChange ({ target }) {
-        const { allOptions, onChecked, onUnchecekd } = this.props;
-        target.checked ? onChecked(allOptions) : onUnchecekd(allOptions);
-        this.setState({
-            checkedList: target.checked ? allOptions : [],
-            indeterminate: false,
-            checkAll: target.checked,
-        });
-    }
+  constructor(props) {
+    super(props);
+    this.onCheckAllChange = this.onCheckAllChange.bind(this);
+    this.state = {
+      checkedList: props.checkedList,
+      indeterminate: true,
+      checkAll: false,
+    };
+  }
 
-    render() {
-        const { label } = this.props;
-        return (
+  componentWillReceiveProps(newProps) {
+    const { checkedList, allOptions } = newProps;
+    this.setState({
+      checkedList,
+      indeterminate: !!checkedList.length && checkedList.length < allOptions.length,
+      checkAll: checkedList.length === allOptions.length,
+    });
+  }
 
-            <Checkbox
-                indeterminate={this.state.indeterminate}
-                onChange={this.onCheckAllChange}
-                checked={this.state.checkAll}
-                style={{margin: 'auto', width: 120}}
-            >
-                {label}
-          </Checkbox>
+  onCheckAllChange({ target }) {
+    const { allOptions, onChecked, onUnchecekd } = this.props;
+    target.checked ? onChecked(allOptions) : onUnchecekd(allOptions);
+    this.setState({
+      checkedList: target.checked ? allOptions : [],
+      indeterminate: false,
+      checkAll: target.checked,
+    });
+  }
 
-        );
-    }
+  render() {
+    const { label } = this.props;
+    return (
+      <Checkbox
+        indeterminate={this.state.indeterminate}
+        onChange={this.onCheckAllChange}
+        checked={this.state.checkAll}
+        style={{ margin: "auto", width: 120 }}
+      >
+        {label}
+      </Checkbox>
+    );
+  }
 }

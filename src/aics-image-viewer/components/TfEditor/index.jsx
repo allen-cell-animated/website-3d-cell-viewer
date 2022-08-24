@@ -133,24 +133,14 @@ export default class MyTfEditor extends React.Component {
 
   _initializeElements() {
     var extent = [0, 255];
-    if (
-      this.fitToData &&
-      this.props.volumeData &&
-      this.props.volumeData.length > 0
-    ) {
+    if (this.fitToData && this.props.volumeData && this.props.volumeData.length > 0) {
       extent = d3.extent(this.props.volumeData);
     }
     var me = this;
     this.xScale.rangeRound([0, this._width]).domain(extent);
     this.yScale.domain([0, 1]).range([this._height, 0]);
-    this.binScale
-      .domain([1, 10])
-      .range([this._height, 0])
-      .base(2)
-      .clamp([0, this._height]);
-    this.bins
-      .domain(this.xScale.domain())
-      .thresholds(this.xScale.ticks(this.numberBins));
+    this.binScale.domain([1, 10]).range([this._height, 0]).base(2).clamp([0, this._height]);
+    this.bins.domain(this.xScale.domain()).thresholds(this.xScale.ticks(this.numberBins));
     if (this.props.controlPoints.length === 0) {
       let newControlPoints = [
         {
@@ -196,12 +186,7 @@ export default class MyTfEditor extends React.Component {
   // Perform the drawing
   _drawChart() {
     var me = this;
-    var g = this.svg
-      .append("g")
-      .attr(
-        "transform",
-        "translate(" + this.margin.left + "," + this.margin.top + ")"
-      );
+    var g = this.svg.append("g").attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
     // Draw initial histogram
     this._redrawHistogram();
@@ -291,9 +276,7 @@ export default class MyTfEditor extends React.Component {
       this.xScale.domain([0, 255]);
       this.dataScale.domain([0, 255]);
     }
-    this.bins
-      .domain(this.xScale.domain())
-      .thresholds(this.xScale.ticks(this.numberBins));
+    this.bins.domain(this.xScale.domain()).thresholds(this.xScale.ticks(this.numberBins));
   }
 
   // update the axis with the new data input
@@ -301,9 +284,7 @@ export default class MyTfEditor extends React.Component {
     let svg = d3.select(this.svgElement.current).select("g");
     var xTicks = this.xScale.ticks(this.numberTicks);
     xTicks[xTicks.length - 1] = this.xScale.domain()[1];
-    svg
-      .selectAll(".axis.axis--x")
-      .call(d3.axisBottom(this.xScale).tickValues(xTicks));
+    svg.selectAll(".axis.axis--x").call(d3.axisBottom(this.xScale).tickValues(xTicks));
   }
 
   // update the chart data
@@ -318,19 +299,13 @@ export default class MyTfEditor extends React.Component {
           return d.length;
         }),
       ]);
-      var bar = d3
-        .select(this.svgElement.current)
-        .select("g")
-        .selectAll(".bar")
-        .data(bins);
+      var bar = d3.select(this.svgElement.current).select("g").selectAll(".bar").data(bins);
       var barEnter = bar
         .enter()
         .append("g")
         .attr("class", "bar")
         .attr("transform", function (d) {
-          return (
-            "translate(" + me.xScale(d.x0) + "," + me.binScale(d.length) + ")"
-          );
+          return "translate(" + me.xScale(d.x0) + "," + me.binScale(d.length) + ")";
         });
 
       barEnter
@@ -418,10 +393,7 @@ export default class MyTfEditor extends React.Component {
     var svg = d3.select(this.svgElement.current).select("g");
     svg.select("path").datum(controlPoints).attr("d", this.area);
 
-    var gradient = svg
-      .select("linearGradient")
-      .selectAll("stop")
-      .data(controlPoints);
+    var gradient = svg.select("linearGradient").selectAll("stop").data(controlPoints);
 
     var MAX_DISPLAY_OPACITY = 0.9;
 
@@ -497,10 +469,7 @@ export default class MyTfEditor extends React.Component {
   _drawCanvas() {
     const { controlPoints } = this.props;
     if (controlPoints && controlPoints.length > 0) {
-      var extent = [
-        controlPoints[0].x,
-        controlPoints[controlPoints.length - 1].x,
-      ];
+      var extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
       // Convinient access
       var x0 = this.dataScale(extent[0]),
         x1 = this.dataScale(extent[1]);
@@ -528,10 +497,7 @@ export default class MyTfEditor extends React.Component {
         var color = d3.color(d.color);
         color.opacity = d.opacity;
         //grd.addColorStop((d.x - x0) / Math.abs(x1 - x0), color.toString());
-        grd.addColorStop(
-          this.canvasScale(this.dataScale(d.x)),
-          color.toString()
-        );
+        grd.addColorStop(this.canvasScale(this.dataScale(d.x)), color.toString());
       }
       ctx.fillStyle = grd;
       ctx.fillRect(x0c, 0, x1c - x0c + 1, height);
@@ -548,12 +514,8 @@ export default class MyTfEditor extends React.Component {
     var me = this;
     var pos = d3.mouse(me.svg.node());
     var point = {
-      x: me.xScale.invert(
-        Math.max(0, Math.min(pos[0] - me.margin.left, me._width))
-      ),
-      opacity: me.yScale.invert(
-        Math.max(0, Math.min(pos[1] - me.margin.top, me._height))
-      ),
+      x: me.xScale.invert(Math.max(0, Math.min(pos[0] - me.margin.left, me._width))),
+      opacity: me.yScale.invert(Math.max(0, Math.min(pos[1] - me.margin.top, me._height))),
       color: me.last_color,
     };
     me.selected = me.dragged = point;
@@ -580,9 +542,7 @@ export default class MyTfEditor extends React.Component {
 
     const { controlPoints } = this.props;
     function equalPoint(a, index, array) {
-      return (
-        a.x === this.x && a.opacity === this.opacity && a.color === this.color
-      );
+      return a.x === this.x && a.opacity === this.opacity && a.color === this.color;
     }
     var index = controlPoints.findIndex(equalPoint, this.selected);
     if (index === -1) {
@@ -590,12 +550,8 @@ export default class MyTfEditor extends React.Component {
     }
     var m = d3.mouse(d3.select(this.svgElement.current).node());
     this.selected = this.dragged = controlPoints[index];
-    this.dragged.x = this.xScale.invert(
-      Math.max(0, Math.min(this._width, m[0] - this.margin.left))
-    );
-    this.dragged.opacity = this.yScale.invert(
-      Math.max(0, Math.min(this._height, m[1] - this.margin.top))
-    );
+    this.dragged.x = this.xScale.invert(Math.max(0, Math.min(this._width, m[0] - this.margin.left)));
+    this.dragged.opacity = this.yScale.invert(Math.max(0, Math.min(this._height, m[1] - this.margin.top)));
     var bisect = d3.bisector(function (a, b) {
       return a.x - b.x;
     }).left;
@@ -634,10 +590,7 @@ export default class MyTfEditor extends React.Component {
         var i = this.props.controlPoints.indexOf(this.selected);
         let newControlPoints = [...this.props.controlPoints];
         newControlPoints.splice(i, 1);
-        this.selected =
-          newControlPoints.length > 0
-            ? newControlPoints[i > 0 ? i - 1 : 0]
-            : null;
+        this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
         this.props.updateChannelLutControlPoints(newControlPoints);
         break;
       }
@@ -691,10 +644,7 @@ export default class MyTfEditor extends React.Component {
   _auto98XF() {
     const { channelData } = this.props;
 
-    const lutObj = channelData.histogram.lutGenerator_percentiles(
-      LUT_MIN_PERCENTILE,
-      LUT_MAX_PERCENTILE
-    );
+    const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
@@ -757,9 +707,7 @@ export default class MyTfEditor extends React.Component {
 
   setData() {
     if (!this.props.channelData) {
-      throw new Error(
-        "Transfer Function Editor setData called with no channel data."
-      );
+      throw new Error("Transfer Function Editor setData called with no channel data.");
     }
     this._updateScales();
     this._updateAxis();
@@ -771,10 +719,8 @@ export default class MyTfEditor extends React.Component {
   ready() {
     // Access the svg dom element
     this.svg = d3.select(this.svgElement.current);
-    this._width =
-      +this.svg.attr("width") - this.margin.left - this.margin.right;
-    this._height =
-      +this.svg.attr("height") - this.margin.top - this.margin.bottom - 15;
+    this._width = +this.svg.attr("width") - this.margin.left - this.margin.right;
+    this._height = +this.svg.attr("height") - this.margin.top - this.margin.bottom - 15;
     this._initializeElements();
     this._drawChart();
   }
@@ -794,34 +740,22 @@ export default class MyTfEditor extends React.Component {
 
     return (
       <div id="container">
-        <svg
-          id={`svg-${id}`}
-          width={width}
-          height={height}
-          ref={this.svgElement}
-        ></svg>
+        <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
         <div className="aligned">
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <SketchPicker
-                color={this.last_color}
-                onChange={this.handleChangeColor}
-              />
+              <SketchPicker color={this.last_color} onChange={this.handleChangeColor} />
             </div>
           ) : null}
         </div>
         <div className="aligned">
-          <Checkbox
-            checked={colorizeEnabled}
-            onChange={this._handleColorizeCheckbox}
-            id={`colorize-${id}`}
-          >
+          <Checkbox checked={colorizeEnabled} onChange={this._handleColorizeCheckbox} id={`colorize-${id}`}>
             Colorize
           </Checkbox>
           <div style={STYLES.control}>
             <Nouislider
-//                      id={`svg-${id}`}
+              //                      id={`svg-${id}`}
               range={{ min: [0], max: [1] }}
               start={colorizeAlpha}
               connect={true}
@@ -832,35 +766,19 @@ export default class MyTfEditor extends React.Component {
           </div>
         </div>
         <div className="aligned">
-          <Button
-            id={`reset-${id}`}
-            className="ant-btn"
-            onClick={this._resetXF}
-          >
+          <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>
             Reset
           </Button>
           <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>
             Auto
           </Button>
-          <Button
-            id={`bestfit-${id}`}
-            className="ant-btn"
-            onClick={this._bestFitXF}
-          >
+          <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>
             BestFit
           </Button>
-          <Button
-            id={`auto2-${id}`}
-            className="ant-btn"
-            onClick={this._auto2XF}
-          >
+          <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>
             Auto_IJ
           </Button>
-          <Button
-            id={`auto98-${id}`}
-            className="ant-btn"
-            onClick={this._auto98XF}
-          >
+          <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>
             Auto_98
           </Button>
         </div>

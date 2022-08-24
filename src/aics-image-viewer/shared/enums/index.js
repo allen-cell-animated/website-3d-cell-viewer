@@ -1,19 +1,23 @@
-import { reduce } from 'lodash';
+import { reduce } from "lodash";
 
-import thicknessUnit from './thicknessUnit';
-import viewMode from './viewMode';
+import thicknessUnit from "./thicknessUnit";
+import viewMode from "./viewMode";
 
 function makeSymbolStringMap(mapping) {
-    return reduce((mapping), (acc, cur) => {
-        acc[cur.toString()] = cur;
-        return acc;
-    }, {});
+  return reduce(
+    mapping,
+    (acc, cur) => {
+      acc[cur.toString()] = cur;
+      return acc;
+    },
+    {}
+  );
 }
 
 thicknessUnit.STRING_TO_SYMBOL = makeSymbolStringMap(thicknessUnit.mainMapping);
 viewMode.STRING_TO_SYMBOL = makeSymbolStringMap(viewMode.mainMapping);
 
 export default {
-    thicknessUnit,
-    viewMode
+  thicknessUnit,
+  viewMode,
 };

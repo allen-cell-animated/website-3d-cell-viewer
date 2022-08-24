@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default class ErrorMessage extends React.Component {
   constructor(props) {
@@ -8,26 +8,27 @@ export default class ErrorMessage extends React.Component {
   render() {
     return (
       <div className="alert alert-danger" style={STYLES.wrapper}>
-        <i className="material-icons" style={STYLES.warningIcon}>warning</i>
-        <div style={STYLES.message}>
-          {this.props.message}
-        </div>
-      </div>);
+        <i className="material-icons" style={STYLES.warningIcon}>
+          warning
+        </i>
+        <div style={STYLES.message}>{this.props.message}</div>
+      </div>
+    );
   }
 }
 
 const STYLES = {
   wrapper: {
-    display: 'flex'
+    display: "flex",
   },
   warningIcon: {
-    flexBasis: '1em',
-    verticalAlign: 'middle',
-    paddingRight: '0.5em'
+    flexBasis: "1em",
+    verticalAlign: "middle",
+    paddingRight: "0.5em",
   },
   message: {
-    overflowWrap: 'break-word',
+    overflowWrap: "break-word",
     minWidth: 100,
-    fontSize: 16
-  }
+    fontSize: 16,
+  },
 };

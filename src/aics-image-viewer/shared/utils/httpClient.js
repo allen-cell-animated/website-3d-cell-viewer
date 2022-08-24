@@ -1,35 +1,35 @@
 export default class HttpClient {
-
   // fetch response.json() is a promise but we want return the json itself
   parseJSON(response, options) {
-    return response.json()
+    return response
+      .json()
       .then((json) => ({
-        locationHeader: response.headers.get('Location'),
+        locationHeader: response.headers.get("Location"),
         status: response.status,
         ok: response.ok,
         data: json || {
           data: [],
-          total_count: 0
-        }
+          total_count: 0,
+        },
       }))
       .catch(() => ({
         status: response.status,
         ok: response.ok,
         data: {
-          error: 'unknown_error',
-          message: 'error in parsing response json',
-          host: response.headers.get('Location'),
-          time: (new Date()).toISOString()
-        }
+          error: "unknown_error",
+          message: "error in parsing response json",
+          host: response.headers.get("Location"),
+          time: new Date().toISOString(),
+        },
       }));
   }
 
   getJSON(url, options) {
     return fetch(url, options)
-      .then(response => {
+      .then((response) => {
         return this.parseJSON(response, options);
       })
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response;
         } else {
