@@ -4,12 +4,7 @@ import { Radio } from "antd";
 import viewMode from "../../shared/enums/viewMode";
 const viewModeMapping = viewMode.mainMapping;
 
-interface ViewModeRadioButtonsProps {
-  onViewModeChange(newMode: symbol): void;
-  mode: symbol;
-}
-
-export default function ViewModeRadioButtons(props: ViewModeRadioButtonsProps) {
+export default function ViewModeRadioButtons(props: { mode: symbol; onViewModeChange(newMode: symbol): void }) {
   const onChangeButton = ({ target }) => {
     let mode = viewMode.STRING_TO_SYMBOL[target.value];
     if (props.mode !== mode) {
