@@ -5,3 +5,4 @@ environment.txt
 .DS_Store
 es/
 type-declarations/
+.vscode/launch.json
