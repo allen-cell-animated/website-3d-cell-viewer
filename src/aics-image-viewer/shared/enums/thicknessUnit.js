@@ -1,6 +1,6 @@
 export const mainMapping = {
-  slice: Symbol('slice'),
-  percent: Symbol('percent')
+  slice: Symbol("slice"),
+  percent: Symbol("percent"),
 };
 
 export default {

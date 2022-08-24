@@ -1,38 +1,37 @@
 @import "../../assets/styles/variables";
 .channel-rows-list {
-    .ant-list-items {
-        padding: 0;
+  .ant-list-items {
+    padding: 0;
+  }
+  .row-card {
+    min-height: 72px;
+    padding: 24px 0 12px 0;
+    border-bottom: 1px solid $border-color;
+
+    .ant-list-item-content {
+      order: 3;
     }
-    .row-card {
-        min-height: 72px;
-        padding: 24px 0 12px 0;
-        border-bottom: 1px solid $border-color;
-
-        .ant-list-item-content {
-            order: 3;
-        }
-        .ant-list-item-action {
-            order: 1;
-        }
-
-        .ant-row-flex {
-            margin-top: 1em;
-        }
-
-    }
-    .row-card.ant-list-item {
-        flex-flow: row wrap;
+    .ant-list-item-action {
+      order: 1;
     }
 
-    .row-card.controls-closed {
-        padding: 12px 0 12px 0;
-
-        .ant-list-item-action {
-            order: 3
-        }
-
-        .ant-list-item-content {
-            order: 2;
-        }
+    .ant-row-flex {
+      margin-top: 1em;
     }
+  }
+  .row-card.ant-list-item {
+    flex-flow: row wrap;
+  }
+
+  .row-card.controls-closed {
+    padding: 12px 0 12px 0;
+
+    .ant-list-item-action {
+      order: 3;
+    }
+
+    .ant-list-item-content {
+      order: 2;
+    }
+  }
 }

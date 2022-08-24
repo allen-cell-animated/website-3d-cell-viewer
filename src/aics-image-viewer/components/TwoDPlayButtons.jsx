@@ -1,13 +1,8 @@
-import React from 'react';
-import { 
-  Button, 
-  Col,
-  Input,
-  Row,
-} from 'antd';
+import React from "react";
+import { Button, Col, Input, Row } from "antd";
 
-import BoxRadioButtonGroup from './shared/BoxRadioButtonGroup';
-import thicknessUnit from '../shared/enums/thicknessUnit';
+import BoxRadioButtonGroup from "./shared/BoxRadioButtonGroup";
+import thicknessUnit from "../shared/enums/thicknessUnit";
 
 const ThicknessUnit = thicknessUnit.mainMapping;
 
@@ -31,40 +26,33 @@ export default class TwoDPlayButtons extends React.Component {
     const options = [
       {
         id: ThicknessUnit.percent.toString(),
-        label: 'Percent',
+        label: "Percent",
       },
       {
         id: ThicknessUnit.slice.toString(),
-        label: 'Slice(s)',
-      }
+        label: "Slice(s)",
+      },
     ];
 
     const onClick = this.props.showPlay ? this.props.play : this.props.pause;
-    const icon = this.props.showPlay ? 'caret-right' : 'pause';
+    const icon = this.props.showPlay ? "caret-right" : "pause";
     const playButton = <Button type="primary" onClick={onClick} icon={icon} />;
 
     return (
       <div style={STYLES.wrapper}>
-        <Row
-          type="flex"
-          justify="space-around"
-          align="bottom"
-        >
+        <Row type="flex" justify="space-around" align="bottom">
           <Col style={STYLES.rangeContainer}>
             {this.props.min}, {this.props.max}
           </Col>
-          <Row
-            type="flex"
-            justify="space-around"
-          >
-            <Input type="number" value={this.props.width} onChange={this.setWidth} style={STYLES.input}/>
+          <Row type="flex" justify="space-around">
+            <Input type="number" value={this.props.width} onChange={this.setWidth} style={STYLES.input} />
             <BoxRadioButtonGroup
               options={options}
               selectedOption={this.props.unit}
               onChangeButton={this.handleButtonGroupChange}
             />
           </Row>
-          <Col >
+          <Col>
             <Button.Group style={STYLES.playButtons}>
               <Button type="primary" shape="circle" icon="step-backward" onClick={this.props.goBack} />
               {playButton}
@@ -72,10 +60,7 @@ export default class TwoDPlayButtons extends React.Component {
             </Button.Group>
           </Col>
         </Row>
-        <Row type="flex"
-          justify="end"
-        >
-        </Row>
+        <Row type="flex" justify="end"></Row>
       </div>
     );
   }
@@ -86,17 +71,17 @@ const STYLES = {
     marginBottom: 8,
   },
   playButtons: {
-    flex: '1 0 150px'
+    flex: "1 0 150px",
   },
   input: {
     width: 50,
   },
   rangeContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    flexBasis: 80
+    display: "flex",
+    justifyContent: "flex-end",
+    flexBasis: 80,
   },
   icon: {
-    color: 'white'
-  }
+    color: "white",
+  },
 };

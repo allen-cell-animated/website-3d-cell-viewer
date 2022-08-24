@@ -1,35 +1,26 @@
-import React from 'react';
-import {
-  Button,
-  Icon, 
-  List,
-  Col,
-  Row,
-  Checkbox,
-  Slider,
-}
-from 'antd';
-import classNames from 'classnames';
+import React from "react";
+import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
+import classNames from "classnames";
 
-import TfEditor from '../TfEditor';
+import TfEditor from "../TfEditor";
 
-import colorPalette from '../../shared/colorPalette';
+import colorPalette from "../../shared/colorPalette";
 import {
   COLORIZE_ALPHA,
   COLORIZE_ENABLED,
-  ISOSURFACE_OPACITY_SLIDER_MAX, 
-  ISO_VALUE, 
-  ISO_SURFACE_ENABLED, 
+  ISOSURFACE_OPACITY_SLIDER_MAX,
+  ISO_VALUE,
+  ISO_SURFACE_ENABLED,
   LUT_CONTROL_POINTS,
-  OPACITY, 
+  OPACITY,
   SAVE_ISO_SURFACE,
   VOLUME_ENABLED,
-} from '../../shared/constants';
+} from "../../shared/constants";
 
-import ColorPicker from '../ColorPicker';
+import ColorPicker from "../ColorPicker";
 
-import './styles.css';
-import { colorArrayToRgbObject, rgbObjectToArray } from '../../shared/utils/colorObjectArrayConverting';
+import "./styles.css";
+import { colorArrayToRgbObject, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -54,9 +45,9 @@ export default class ChannelsWidgetRow extends React.Component {
   }
 
   volumeCheckHandler({ target }) {
-    const { channelName, index, changeOneChannelSetting, isosurfaceChecked} = this.props;
+    const { channelName, index, changeOneChannelSetting, isosurfaceChecked } = this.props;
     if (!target.checked && !isosurfaceChecked) {
-      this.setState({controlsOpen: false});
+      this.setState({ controlsOpen: false });
     }
     changeOneChannelSetting(channelName, index, VOLUME_ENABLED, target.checked);
   }
@@ -87,7 +78,6 @@ export default class ChannelsWidgetRow extends React.Component {
   updateColorizeMode(newValue) {
     const { channelName, index, changeOneChannelSetting } = this.props;
     changeOneChannelSetting(channelName, index, COLORIZE_ENABLED, newValue);
-
   }
 
   updateColorizeAlpha(newValue) {
@@ -97,12 +87,12 @@ export default class ChannelsWidgetRow extends React.Component {
 
   onSaveIsosurfaceSTL() {
     const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, 'STL', index);
+    handleChangeToImage(SAVE_ISO_SURFACE, "STL", index);
   }
 
   onSaveIsosurfaceGLTF() {
     const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, 'GLTF', index);
+    handleChangeToImage(SAVE_ISO_SURFACE, "GLTF", index);
   }
 
   createIsovalueSlider() {
@@ -112,28 +102,29 @@ export default class ChannelsWidgetRow extends React.Component {
         <Col span={10}>
           <label style={STYLES.controlName}>isovalue</label>
         </Col>
-        <Col span={12}>          
+        <Col span={12}>
           <Slider
-              name="isovalue"
-              disabled={!this.props.isosurfaceChecked}
-              min={isoRange.min || 0}
-              max={isoRange.max || 225}
-              defaultValue={ISOVALUE_DEFAULT}
-              style={STYLES.slider}
-              onChange={this.onIsovalueChange}/>
+            name="isovalue"
+            disabled={!this.props.isosurfaceChecked}
+            min={isoRange.min || 0}
+            max={isoRange.max || 225}
+            defaultValue={ISOVALUE_DEFAULT}
+            style={STYLES.slider}
+            onChange={this.onIsovalueChange}
+          />
         </Col>
       </Row>
     );
   }
 
   createOpacitySlider() {
-    const range = {min:0, max:ISOSURFACE_OPACITY_SLIDER_MAX};
+    const range = { min: 0, max: ISOSURFACE_OPACITY_SLIDER_MAX };
     return (
       <Row>
         <Col span={10}>
           <label style={STYLES.controlName}>opacity</label>
         </Col>
-        <Col span={12}>   
+        <Col span={12}>
           <Slider
             name="opacity"
             disabled={!this.props.isosurfaceChecked}
@@ -141,211 +132,198 @@ export default class ChannelsWidgetRow extends React.Component {
             max={range.max}
             defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
             style={STYLES.slider}
-            onChange={this.onOpacityChange}/>
+            onChange={this.onOpacityChange}
+          />
         </Col>
       </Row>
     );
   }
 
   toggleControlsOpen() {
-    const { 
-      isosurfaceChecked,
-      volumeChecked,
-    } = this.props;
+    const { isosurfaceChecked, volumeChecked } = this.props;
     if (!isosurfaceChecked && !volumeChecked) {
       return;
     }
     this.setState({
-      controlsOpen: !this.state.controlsOpen
+      controlsOpen: !this.state.controlsOpen,
     });
   }
-
 
   createVolumeCheckbox() {
     let id = `vol_checkbox${this.props.index}`;
     return (
-        <Checkbox
-          checked={this.props.volumeChecked}
-          onChange={this.volumeCheckHandler}
-          id={id}
-        >
-          volume
-        </ Checkbox>
+      <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} id={id}>
+        volume
+      </Checkbox>
     );
   }
 
   createIsosurfaceCheckbox() {
     let id = `iso_checkbox${this.props.index}`;
     return (
-        <Checkbox
-          checked={this.props.isosurfaceChecked }
-          onChange={this.isosurfaceCheckHandler}
-          id={id}
-          >
-          surface
-        </Checkbox>
+      <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} id={id}>
+        surface
+      </Checkbox>
     );
   }
 
   onColorChange(newRGB, oldRGB, index) {
     const { channelName } = this.props;
     const color = rgbObjectToArray(newRGB);
-    this.props.changeOneChannelSetting(channelName, index, 'color', color);
+    this.props.changeOneChannelSetting(channelName, index, "color", color);
   }
 
   createColorPicker() {
     const color = colorArrayToRgbObject(this.props.color);
     return (
       <div style={STYLES.colorPicker}>
-        <ColorPicker 
+        <ColorPicker
           color={color}
           onColorChange={this.onColorChange}
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
           width={18}
-          name={this.props.name} />
+          name={this.props.name}
+        />
       </div>
     );
   }
 
   createSaveIsosurfaceGLTFButton() {
     return (
-      <Button
-        disabled={!this.props.isosurfaceChecked}
-        onClick={this.onSaveIsosurfaceGLTF}
-        style={STYLES.raisedButton}
-      >Save GLTF
+      <Button disabled={!this.props.isosurfaceChecked} onClick={this.onSaveIsosurfaceGLTF} style={STYLES.raisedButton}>
+        Save GLTF
       </Button>
     );
   }
 
   createSaveIsosurfaceSTLButton() {
     return (
-      <Button
-        disabled={!this.props.isosurfaceChecked}
-        onClick={this.onSaveIsosurfaceSTL}
-        style={STYLES.raisedButton}
-      >Save STL
+      <Button disabled={!this.props.isosurfaceChecked} onClick={this.onSaveIsosurfaceSTL} style={STYLES.raisedButton}>
+        Save STL
       </Button>
     );
   }
 
   renderActions() {
-    return [this.createVolumeCheckbox(), this.createIsosurfaceCheckbox(), (<Icon
-      key="openSettingsButton"
-      type="setting"
-      theme={this.state.controlsOpen ? 'filled' : 'outlined'}
-      onClick={this.toggleControlsOpen}
-    />)];
+    return [
+      this.createVolumeCheckbox(),
+      this.createIsosurfaceCheckbox(),
+      <Icon
+        key="openSettingsButton"
+        type="setting"
+        theme={this.state.controlsOpen ? "filled" : "outlined"}
+        onClick={this.toggleControlsOpen}
+      />,
+    ];
   }
 
   createTFEditor() {
     const {
       channelControlPoints,
       channelDataForChannel,
-      colorizeEnabled, 
+      colorizeEnabled,
       colorizeAlpha,
       updateChannelTransferFunction,
       index,
       imageName,
     } = this.props;
-    return (<TfEditor 
-          id={'TFEditor'+index}
-          index={index}
-          imageName={imageName}
-          fit-to-data={false}
-          width={250}
-          height={150}
-          volumeData={channelDataForChannel.volumeData}
-          channelData={channelDataForChannel}
-          controlPoints={channelControlPoints}
-          updateChannelTransferFunction={updateChannelTransferFunction}
-          updateChannelLutControlPoints={this.onUpdateLutControlPoints}
-          updateColorizeMode={this.updateColorizeMode}
-          updateColorizeAlpha={this.updateColorizeAlpha}
-          colorizeEnabled={colorizeEnabled}
-          colorizeAlpha={colorizeAlpha}
-    />);
+    return (
+      <TfEditor
+        id={"TFEditor" + index}
+        index={index}
+        imageName={imageName}
+        fit-to-data={false}
+        width={250}
+        height={150}
+        volumeData={channelDataForChannel.volumeData}
+        channelData={channelDataForChannel}
+        controlPoints={channelControlPoints}
+        updateChannelTransferFunction={updateChannelTransferFunction}
+        updateChannelLutControlPoints={this.onUpdateLutControlPoints}
+        updateColorizeMode={this.updateColorizeMode}
+        updateColorizeAlpha={this.updateColorizeAlpha}
+        colorizeEnabled={colorizeEnabled}
+        colorizeAlpha={colorizeAlpha}
+      />
+    );
   }
 
   renderSurfaceControls() {
-     return (
-            <Col span={24}>
-              <h4 className="ant-list-item-meta-title">Surface settings:</h4>
-              {this.createIsovalueSlider()}
-              {this.createOpacitySlider()}
-              {this.createSaveIsosurfaceSTLButton()}
-              {this.createSaveIsosurfaceGLTFButton()}
-            </Col>
-          );
+    return (
+      <Col span={24}>
+        <h4 className="ant-list-item-meta-title">Surface settings:</h4>
+        {this.createIsovalueSlider()}
+        {this.createOpacitySlider()}
+        {this.createSaveIsosurfaceSTLButton()}
+        {this.createSaveIsosurfaceGLTFButton()}
+      </Col>
+    );
   }
 
   renderControls() {
     return (
-      <div style={STYLES.settingsContainer}> 
-      {this.props.volumeChecked && 
-        <Row type="flex" justify="space-between" className="volume-settings">
-          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-          {this.createTFEditor()}
-        </Row>}
-        {this.props.isosurfaceChecked &&
-        <Row type="flex" justify="space-between">
-          {this.renderSurfaceControls()}
-        </Row>}
+      <div style={STYLES.settingsContainer}>
+        {this.props.volumeChecked && (
+          <Row type="flex" justify="space-between" className="volume-settings">
+            <h4 className="ant-list-item-meta-title">Volume settings:</h4>
+            {this.createTFEditor()}
+          </Row>
+        )}
+        {this.props.isosurfaceChecked && (
+          <Row type="flex" justify="space-between">
+            {this.renderSurfaceControls()}
+          </Row>
+        )}
       </div>
     );
   }
 
   render() {
     const rowClass = classNames({
-      'row-card': true,
-      'controls-closed': !this.state.controlsOpen,
+      "row-card": true,
+      "controls-closed": !this.state.controlsOpen,
     });
     return (
-      <List.Item
-        key={this.props.index}
-        className={rowClass}
-        actions={this.renderActions()}
-      >
+      <List.Item key={this.props.index} className={rowClass} actions={this.renderActions()}>
         <List.Item.Meta
           title={<span style={STYLES.channelName}>{this.props.name}</span>}
           avatar={this.createColorPicker()}
         />
         {this.state.controlsOpen && this.renderControls()}
       </List.Item>
-
     );
   }
 }
 
 const STYLES = {
   channelName: {
-    display: 'inline-block',
+    display: "inline-block",
     minWidth: 90,
   },
-  checkedIcon: { 
-    fill: colorPalette.textColor 
+  checkedIcon: {
+    fill: colorPalette.textColor,
   },
   settingsContainer: {
-    width: '100%',
+    width: "100%",
     order: 3,
   },
-  uncheckedIcon: { 
-    fill: colorPalette.accent3Color 
+  uncheckedIcon: {
+    fill: colorPalette.accent3Color,
   },
   raisedButton: {
-    marginLeft: '2px',
-    marginRight: '2px'
+    marginLeft: "2px",
+    marginRight: "2px",
   },
   colorPicker: {
-    margin: 'auto',
-    marginRight: 16
+    margin: "auto",
+    marginRight: 16,
   },
   slider: {
-    marginBottom: '4px',
-    marginTop: '4px'
+    marginBottom: "4px",
+    marginTop: "4px",
   },
   controlName: {
-    whiteSpace: 'nowrap'
-  }
+    whiteSpace: "nowrap",
+  },
 };
