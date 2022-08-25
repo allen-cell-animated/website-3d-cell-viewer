@@ -1,13 +1,11 @@
 import * as _ from "lodash";
-import { Col, Row } from "antd";
+import { Button } from "antd";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import React from "react";
 
 import enums from "../../shared/enums";
-
-import TwoDPlayButtons from "../TwoDPlayButtons";
 
 import "./styles.css";
 
@@ -31,7 +29,6 @@ const DISABLED_SLIDER = {
   disabled: true,
 };
 const MODE_2D_DEFAULT_PLAY_BUTTONS_SETTINGS = Object.freeze({
-  width: 1,
   unit: ThicknessUnit.slice,
   play: false,
   pause: false,
@@ -54,7 +51,6 @@ export default class AxisClipSliders extends React.Component {
     this.state = MODE_3D_DEFAULT_SETTINGS;
 
     this.setWidth = this.setWidth.bind(this);
-    this.setUnit = this.setUnit.bind(this);
     this.goBack = this.goBack.bind(this);
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
@@ -71,19 +67,6 @@ export default class AxisClipSliders extends React.Component {
       const nextUnit = this.state.playButtons.unit;
       const nextMax = this.getMax(this.props, this.state, this.props.activeAxis, nextUnit);
       const nextLeftSliderValue = this.state.sliders[this.props.activeAxis].start[0];
-      this.updateState(nextLeftSliderValue, nextWidth, nextMax, this.props, nextUnit);
-    }
-  }
-
-  // Called when user toggles Percent/Slice radio button group
-  setUnit(nextUnit) {
-    if (this.state.playButtons && nextUnit && nextUnit !== this.state.playButtons.unit) {
-      const nextMax = this.getMax(this.props, this.state, this.props.activeAxis, nextUnit);
-      const currentMax = this.getMax(this.props, this.state, this.props.activeAxis, this.state.playButtons.unit);
-      const nextWidth = this.state.playButtons.width;
-      const currentLeftSliderValue = this.state.sliders[this.props.activeAxis].start[0];
-      // left slider should not appear to move when changing units
-      const nextLeftSliderValue = (currentLeftSliderValue * nextMax) / currentMax;
       this.updateState(nextLeftSliderValue, nextWidth, nextMax, this.props, nextUnit);
     }
   }
@@ -223,8 +206,9 @@ export default class AxisClipSliders extends React.Component {
 
     return (
       <div key={i} className="slider-row">
-        <div className="slider-name">{axis.toUpperCase()}</div>
-        <div className="axis-slider">{slider}</div>
+        <span className="axis-slider">{slider}</span>
+        <span className="slider-name">{axis.toUpperCase()}</span>
+        <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
       </div>
     );
   }
@@ -251,19 +235,16 @@ export default class AxisClipSliders extends React.Component {
   }
 
   makeUpdateFn(i) {
-    let axis = AXES[i];
-    let axisViewMode = VIEWMODES[i];
-    return (values, handle, unencoded, tap, positions) => {
+    const axis = AXES[i];
+    const axisViewMode = VIEWMODES[i];
+    return (values, ..._) => {
       if (this.props.setAxisClip) {
         const step = 1;
         const stepEpsilon = 0.04;
-        const unit = this.state.playButtons ? this.state.playButtons.unit : ThicknessUnit.percent;
+        const unit = ThicknessUnit.slice;
         const max = this.getMax(this.props, this.state, axis, unit);
         const isActiveAxis = this.props.mode === axisViewMode;
-        const thicknessReduce =
-          this.state.playButtons && isActiveAxis && this.state.playButtons.unit === ThicknessUnit.slice
-            ? step - stepEpsilon
-            : 0.0;
+        const thicknessReduce = this.state.playButtons && isActiveAxis ? step - stepEpsilon : 0.0;
 
         const start = values[0] / max - 0.5;
         const end = values[1] / max - 0.5 - thicknessReduce / max;
@@ -294,39 +275,23 @@ export default class AxisClipSliders extends React.Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
-  }
-
   render() {
     const activeSlider = this.props.activeAxis;
+    const showPlay = this.state.playButtons && (this.state.playButtons.stop || this.state.playButtons.pause);
+    const playOnClick = showPlay ? this.play : this.pause;
+    const playIcon = showPlay ? "caret-right" : "pause";
     return (
-      <Row className="clip-sliders">
-        <Col span={20}>
-          <h4 className="sectionSubHeader">Region of interest clipping</h4>
-          <Row type="flex" justify="space-around" align="bottom">
-            <Col span={10}>{this.props.numSlices && this.createSliders()}</Col>
-            <Col span={14}>
-              {this.state.playButtons && (
-                <TwoDPlayButtons
-                  width={this.state.playButtons.width}
-                  unit={this.state.playButtons.unit.toString()}
-                  min={this.state.sliders[activeSlider].start[0]}
-                  max={this.state.sliders[activeSlider].start[1]}
-                  setWidth={this.setWidth}
-                  setUnit={this.setUnit}
-                  goBack={this.goBack}
-                  play={this.play}
-                  pause={this.pause}
-                  stop={this.stop}
-                  goForward={this.goForward}
-                  showPlay={this.state.playButtons.stop || this.state.playButtons.pause}
-                />
-              )}
-            </Col>
-          </Row>
-        </Col>
-      </Row>
+      <div className="clip-sliders">
+        <h4>Region of interest clipping</h4>
+        {this.props.numSlices && this.createSliders()}
+        {this.state.playButtons && (
+          <Button.Group style={{ flex: "1 0 150px" }}>
+            <Button type="primary" shape="circle" icon="step-backward" onClick={this.goBack} />
+            <Button type="primary" onClick={playOnClick} icon={playIcon} />
+            <Button type="primary" shape="circle" icon="step-forward" onClick={this.goForward} />
+          </Button.Group>
+        )}
+      </div>
     );
   }
 

@@ -1,23 +1,9 @@
-@import "../../assets/styles/variables";
-@import "../../assets/styles/axis-style-override";
-
 .cell-viewer-wrapper {
   .cell-canvas {
     z-index: 10;
     transition: width 0.3s;
     height: 100%;
     width: 100%;
-  }
-  .clip-sliders {
-    @extend %axis-override;
-    position: absolute;
-    bottom: 20px;
-    width: 80%;
-    left: 5%;
-    display: flex;
-    .sectionSubHeader {
-      flex: 1;
-    }
   }
 }
 

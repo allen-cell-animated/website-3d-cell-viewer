@@ -1,23 +1,38 @@
+@import "../../assets/styles/axis-style-override";
+
 .clip-sliders {
-  .placeholder {
-    height: 32px;
-  }
+  @extend %axis-override;
+  max-width: 612px;
+  position: absolute;
+  margin: auto;
+  left: 0;
+  right: 0;
+  padding: 0 24px;
 
   .slider-row {
     display: flex;
+    justify-content: center;
+    align-items: center;
     color: gray;
   }
 
   .axis-slider {
-    flex: 7;
+    flex: 1 1 auto;
+    max-width: 480px;
     margin-top: 0.5em;
   }
 
-  .slider-name {
-    flex: 1;
+  .slider-name,
+  .slider-slices {
+    margin-left: 20px;
+    white-space: nowrap;
   }
 
-  .wrapper {
-    min-height: 325px;
+  .slider-name {
+    flex: 0 0 12px;
+  }
+
+  .slider-slices {
+    flex: 0 0 80px;
   }
 }
