@@ -208,7 +208,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.stateKey = "image";
 
     this.openImage = this.openImage.bind(this);
-    this.loadFromJson = this.loadFromJson.bind(this);
     this.loadFromRaw = this.loadFromRaw.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
@@ -345,14 +344,27 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  onNewVolumeCreated(aimg: Volume, stateKey: "image" | "prevImg" | "nextImg") {
+  onNewVolumeCreated(
+    aimg: Volume,
+    stateKey: "image" | "prevImg" | "nextImg",
+    imageDirectory: string,
+    doResetViewMode: boolean
+  ) {
     const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
 
     if (stateKey === "image") {
+      this.setState({
+        image: aimg,
+        currentlyLoadedImagePath: imageDirectory,
+        channelDataReady: {},
+        queryErrorMessage: null,
+        cachingInProgress: false,
+        userSelections: {
+          ...this.state.userSelections,
+          [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+        },
+      });
       this.intializeNewImage(aimg, newChannelSettings);
-    }
-    if (stateKey === "image") {
-      this.setState({ image: aimg });
     } else if (stateKey === "prevImg") {
       this.setState({ prevImg: aimg });
     } else if (stateKey === "nextImg") {
@@ -405,19 +417,7 @@ export default class App extends React.Component<AppProps, AppState> {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
       })
         .then((aimg) => {
-          if (this.stateKey === "image") {
-            this.setState({
-              currentlyLoadedImagePath: imageDirectory,
-              channelDataReady: {},
-              queryErrorMessage: null,
-              cachingInProgress: false,
-              userSelections: {
-                ...this.state.userSelections,
-                [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-              },
-            });
-          }
-          this.onNewVolumeCreated(aimg, stateKey);
+          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
           this.stopPollingForImage();
         })
         .catch((resp) => this.handleOpenImageException(resp));
@@ -430,19 +430,7 @@ export default class App extends React.Component<AppProps, AppState> {
           this.onNewChannelData(url, v, channelIndex, keepLuts);
         })
           .then((aimg) => {
-            if (this.stateKey === "image") {
-              this.setState({
-                currentlyLoadedImagePath: imageDirectory,
-                channelDataReady: {},
-                queryErrorMessage: null,
-                cachingInProgress: false,
-                userSelections: {
-                  ...this.state.userSelections,
-                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-                },
-              });
-            }
-            this.onNewVolumeCreated(aimg, stateKey);
+            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
             this.stopPollingForImage();
           })
           .catch((resp) => this.handleOpenImageException(resp));
@@ -451,19 +439,7 @@ export default class App extends React.Component<AppProps, AppState> {
           this.onNewChannelData(url, v, channelIndex, keepLuts);
         })
           .then((aimg) => {
-            if (this.stateKey === "image") {
-              this.setState({
-                currentlyLoadedImagePath: imageDirectory,
-                channelDataReady: {},
-                queryErrorMessage: null,
-                cachingInProgress: false,
-                userSelections: {
-                  ...this.state.userSelections,
-                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-                },
-              });
-            }
-            this.onNewVolumeCreated(aimg, stateKey);
+            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
             this.stopPollingForImage();
           })
           .catch((resp) => this.handleOpenImageException(resp));
@@ -662,37 +638,6 @@ export default class App extends React.Component<AppProps, AppState> {
     });
     // preload the new "nextImg"
     this.openImage(nextImgPath, true, "nextImg");
-  }
-
-  loadFromJson(obj, title, locationHeader, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
-    const aimg = new Volume(obj);
-
-    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
-    // if we have some url to prepend to the atlas file names, do it now.
-    if (locationHeader) {
-      obj.images = obj.images.map((img) => ({
-        ...img,
-        name: `${locationHeader}${img.name}`,
-      }));
-    }
-    // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, v, channelIndex) => {
-      // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-      const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
-      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, keepLuts);
-    });
-    if (stateKey === "image") {
-      this.intializeNewImage(aimg, newChannelSettings);
-    }
-    if (stateKey === "image") {
-      this.setState({ image: aimg });
-    } else if (stateKey === "prevImg") {
-      this.setState({ prevImg: aimg });
-    } else if (stateKey === "nextImg") {
-      this.setState({ nextImg: aimg });
-    } else {
-      console.error("ERROR invalid or unexpected stateKey");
-    }
   }
 
   initializeOneChannelSetting(aimg, channel, index, defaultColor) {
