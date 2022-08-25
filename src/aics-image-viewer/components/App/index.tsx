@@ -350,6 +350,7 @@ export default class App extends React.Component<AppProps, AppState> {
     imageDirectory: string,
     doResetViewMode: boolean
   ) {
+    // FIXME this calls setState followed almost immediately by another setState... :-(
     const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
 
     if (stateKey === "image") {
@@ -448,19 +449,8 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   intializeNewImage(aimg, newChannelSettings?) {
-    const { userSelections, view3d } = this.state;
-    const { viewerConfig } = this.props;
-    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
-    let alphaLevel = this.getInitialAlphaLevel();
-
-    let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(
-      userSelections[BRIGHTNESS_SLIDER_LEVEL],
-      userSelections[PATH_TRACE]
-    );
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
-    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     // set alpha slider first time image is loaded to something that makes sense
+    let alphaLevel = this.getInitialAlphaLevel();
     this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
 
     // Here is where we officially hand the image to the volume-viewer
@@ -884,10 +874,17 @@ export default class App extends React.Component<AppProps, AppState> {
     let newSelectionState: Partial<UserSelectionState> = {
       [MODE]: newMode,
     };
-    // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-    // if full field, dont mask
+    
+    // TODO the following behavior/logic is very specific to a particular application's needs
+    // and is not necessarily appropriate for a general viewer.
+    // Why should the alpha setting matter whether we are viewing the primary image 
+    // or its parent?
+
+    // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+    // If full field, dont mask
+
     if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching to 2d
+      // Switching from 3D to 2D
       newSelectionState = {
         [MODE]: newMode,
         [PATH_TRACE]: false,
@@ -897,13 +894,12 @@ export default class App extends React.Component<AppProps, AppState> {
       if (userSelections[PATH_TRACE]) {
         this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
       }
-      // switching from 2D to 3D
     } else if (
       userSelections.mode !== ViewMode.threeD &&
       newMode === ViewMode.threeD &&
       this.state.userSelections.imageType === SEGMENTED_CELL
     ) {
-      // switching to 3d
+      // switching from 2D to 3D
       newSelectionState = {
         [MODE]: newMode,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -911,7 +907,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
     this.handleChangeToImage(MODE, newMode);
-    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
+    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL] !== undefined) {
       this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
     }
     this.setUserSelectionsInState(newSelectionState);
