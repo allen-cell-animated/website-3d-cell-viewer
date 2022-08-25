@@ -70,7 +70,6 @@ export default function ControlPanel(props) {
             densitySliderLevel={props.densitySliderLevel}
             gammaSliderLevel={props.gammaSliderLevel}
             maxProjectOn={props.maxProjectOn}
-            canPathTrace={props.canPathTrace}
             pathTraceOn={props.pathTraceOn}
             renderConfig={renderConfig}
           />

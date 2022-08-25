@@ -1121,8 +1121,6 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             renderConfig={renderConfig}
-            // viewer capabilities
-            canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
             // image state
             imageName={this.state.image ? this.state.image.name : false}
             hasImage={!!this.state.image}
