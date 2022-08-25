@@ -451,14 +451,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { userSelections, view3d } = this.state;
     const { viewerConfig } = this.props;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
-    let alphaLevel =
-      userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
-        ? ALPHA_MASK_SLIDER_3D_DEFAULT
-        : ALPHA_MASK_SLIDER_2D_DEFAULT;
-    // if maskAlpha is defined in viewerConfig then it will override the above
-    if (viewerConfig.maskAlpha !== undefined) {
-      alphaLevel = [viewerConfig.maskAlpha];
-    }
+    let alphaLevel = this.getInitialAlphaLevel();
 
     let imageMask = alphaSliderToImageValue(alphaLevel);
     let imageBrightness = brightnessSliderToImageValue(
@@ -471,7 +464,27 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
 
     // Here is where we officially hand the image to the volume-viewer
+    this.placeImageInViewer(aimg, newChannelSettings);
+  }
 
+  private getInitialAlphaLevel(): number[] {
+    const { userSelections } = this.state;
+    const { viewerConfig } = this.props;
+    let alphaLevel =
+      userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
+        ? ALPHA_MASK_SLIDER_3D_DEFAULT
+        : ALPHA_MASK_SLIDER_2D_DEFAULT;
+    // if maskAlpha is defined in viewerConfig then it will override the above
+    if (viewerConfig.maskAlpha !== undefined) {
+      alphaLevel = [viewerConfig.maskAlpha];
+    }
+    return alphaLevel;
+  }
+
+  // set up the Volume into the Viewer using the current initial settings
+  private placeImageInViewer(aimg:Volume, newChannelSettings?):void {
+    const { userSelections, view3d } = this.state;
+    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
@@ -489,11 +502,24 @@ export default class App extends React.Component<AppProps, AppState> {
       }),
     });
 
+    const alphaLevel = this.getInitialAlphaLevel();
+    const imageMask = alphaSliderToImageValue(alphaLevel);
     view3d.updateMaskAlpha(aimg, imageMask);
+
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+    
+    const imageBrightness = brightnessSliderToImageValue(
+      userSelections[BRIGHTNESS_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
     view3d.updateExposure(imageBrightness);
+
+    const imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
     view3d.updateDensity(aimg, imageDensity);
+
+    const imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
@@ -702,54 +728,12 @@ export default class App extends React.Component<AppProps, AppState> {
 
     let channelGroupedByType = this.createChannelGrouping(rawDims.channel_names);
 
-    const { userSelections, view3d } = this.state;
     const channelSetting = newChannelSettings;
-    let alphaLevel =
-      userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
-        ? ALPHA_MASK_SLIDER_3D_DEFAULT
-        : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
-    let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(
-      userSelections[BRIGHTNESS_SLIDER_LEVEL],
-      userSelections[PATH_TRACE]
-    );
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
-    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
+    let alphaLevel = this.getInitialAlphaLevel();
 
     // Here is where we officially hand the image to the volume-viewer
-
-    view3d.removeAllVolumes();
-    view3d.addVolume(aimg, {
-      channels: aimg.channel_names.map((name) => {
-        const ch = find(channelSetting, (channel) => {
-          return channel.name === name;
-        });
-
-        if (!ch) {
-          return {};
-        }
-        return {
-          enabled: ch[VOLUME_ENABLED],
-          isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
-          isovalue: ch.isovalue,
-          isosurfaceOpacity: ch.opacity,
-          color: ch.color,
-        };
-      }),
-    });
-
-    view3d.updateMaskAlpha(aimg, imageMask);
-    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    view3d.updateExposure(imageBrightness);
-    view3d.updateDensity(aimg, imageDensity);
-    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
-    // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
-    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
-    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
-    // tell view that things have changed for this image
-    view3d.updateActiveChannels(aimg);
+    this.placeImageInViewer(aimg, newChannelSettings);
 
     this.setState({
       channelGroupedByType,
