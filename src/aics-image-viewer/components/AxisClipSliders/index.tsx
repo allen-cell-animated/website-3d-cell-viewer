@@ -43,14 +43,23 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       sliders: this.getSliderDefaults(),
     };
 
-    this.goBack = this.goBack.bind(this);
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
-    this.goForward = this.goForward.bind(this);
-    this.makeSliderDragEndFn = this.makeSliderDragEndFn.bind(this);
+    // this.makeSliderDragEndFn = this.makeSliderDragEndFn.bind(this);
     this.moveSection = this.moveSection.bind(this);
     this.createSlider = this.createSlider.bind(this);
   }
+
+  // Reset sliders and pause if mode has changed
+  componentDidUpdate(prevProps: AxisClipSlidersProps) {
+    if (prevProps.mode !== this.props.mode) {
+      window.clearInterval(this.state.intervalId);
+      const newState = { sliders: this.getSliderDefaults(), playing: false };
+      this.setState(newState);
+    }
+  }
+
+  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max]);
 
   getActiveAxis() {
     switch (this.props.mode) {
@@ -64,8 +73,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         return null;
     }
   }
-
-  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max]);
 
   setSliderState(axis: string, newState: number[]) {
     this.setState({
@@ -92,14 +99,14 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  goBack() {
+  step(backward: boolean) {
     this.pause();
-    this.moveSection(true);
+    this.moveSection(backward);
   }
 
   play() {
     if (this.getActiveAxis() && !this.state.playing) {
-      const intervalId = window.setInterval(() => this.moveSection(), PLAY_RATE_MS_PER_STEP);
+      const intervalId = window.setInterval(this.moveSection, PLAY_RATE_MS_PER_STEP);
       this.setState({
         playing: true,
         intervalId,
@@ -114,21 +121,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  goForward() {
-    this.pause();
-    this.moveSection();
-  }
-
-  createSliders() {
-    return AXES.map((axis) => this.createSlider(axis));
-  }
-
   createSlider(axis: string) {
-    const start = this.state.sliders[axis.toLowerCase()];
-    const range = {
-      min: 0,
-      max: this.props.numSlices[axis],
-    };
+    const start = this.state.sliders[axis];
+    const range = { min: 0, max: this.props.numSlices[axis] };
 
     return (
       <div key={axis} className="slider-row">
@@ -149,11 +144,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  // When user finishes dragging the active slider, update slice label
-  makeSliderDragEndFn(axis: string) {
-    return (values: number[]) => this.setSliderState(axis, values);
-  }
-
   makeSliderUpdateFn(axis: string) {
     return (values: number[]) => {
       if (this.props.setAxisClip) {
@@ -172,11 +162,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     };
   }
 
-  // Reset sliders if mode has changed
-  componentDidUpdate(prevProps: AxisClipSlidersProps) {
-    if (prevProps.mode !== this.props.mode) {
-      this.setState({ sliders: this.getSliderDefaults() });
-    }
+  // When user finishes dragging the active slider, update slice label
+  makeSliderDragEndFn(axis: string) {
+    return (values: number[]) => this.setSliderState(axis, values);
   }
 
   render() {
@@ -187,11 +175,11 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       <div className="clip-sliders">
         <h4>Region of interest clipping</h4>
         {activeAxis ? this.createSlider(activeAxis) : AXES.map(this.createSlider)}
-        {this.getActiveAxis() && (
-          <Button.Group style={{ flex: "0 0 150px" }}>
-            <Button type="primary" shape="circle" icon="step-backward" onClick={this.goBack} />
+        {activeAxis && (
+          <Button.Group>
+            <Button type="primary" shape="circle" icon="step-backward" onClick={() => this.step(true)} />
             <Button type="primary" onClick={playOnClick} icon={playIcon} />
-            <Button type="primary" shape="circle" icon="step-forward" onClick={this.goForward} />
+            <Button type="primary" shape="circle" icon="step-forward" onClick={() => this.step(false)} />
           </Button.Group>
         )}
       </div>
