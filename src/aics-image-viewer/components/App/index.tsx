@@ -472,7 +472,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   // set up the Volume into the Viewer using the current initial settings
-  private placeImageInViewer(aimg:Volume, newChannelSettings?):void {
+  private placeImageInViewer(aimg: Volume, newChannelSettings?): void {
     const { userSelections, view3d } = this.state;
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     view3d.removeAllVolumes();
@@ -497,7 +497,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.updateMaskAlpha(aimg, imageMask);
 
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    
+
     const imageBrightness = brightnessSliderToImageValue(
       userSelections[BRIGHTNESS_SLIDER_LEVEL],
       userSelections[PATH_TRACE]
@@ -874,10 +874,10 @@ export default class App extends React.Component<AppProps, AppState> {
     let newSelectionState: Partial<UserSelectionState> = {
       [MODE]: newMode,
     };
-    
+
     // TODO the following behavior/logic is very specific to a particular application's needs
     // and is not necessarily appropriate for a general viewer.
-    // Why should the alpha setting matter whether we are viewing the primary image 
+    // Why should the alpha setting matter whether we are viewing the primary image
     // or its parent?
 
     // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
