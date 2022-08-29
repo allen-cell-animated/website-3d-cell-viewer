@@ -13,7 +13,6 @@ import viewMode from "../../shared/enums/viewMode";
 const ViewMode = enums.viewMode.mainMapping;
 
 const AXES = Object.freeze(["x", "y", "z"]);
-const VIEWMODES = Object.freeze([ViewMode.yz, ViewMode.xz, ViewMode.xy]);
 const PLAY_RATE_MS_PER_STEP = 125;
 
 interface AxisClipSlidersProps {
