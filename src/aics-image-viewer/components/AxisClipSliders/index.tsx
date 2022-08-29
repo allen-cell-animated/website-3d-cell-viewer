@@ -55,14 +55,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
     this.goForward = this.goForward.bind(this);
-    this.onSliderDragEnd = this.onSliderDragEnd.bind(this);
+    this.makeSliderDragEndFn = this.makeSliderDragEndFn.bind(this);
     this.moveSection = this.moveSection.bind(this);
-    this.getActiveAxis = this.getActiveAxis.bind(this);
-    this.threeDMode = this.threeDMode.bind(this);
-    this.setSliderState = this.setSliderState.bind(this);
-    this.makeUpdateFn = this.makeUpdateFn.bind(this);
     this.createSlider = this.createSlider.bind(this);
-    this.createSliders = this.createSliders.bind(this);
   }
 
   getActiveAxis() {
@@ -99,8 +94,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   /**
-   * Updates left and right slider handles of active axis to move forward or backwards
-   * while keeping same distance between the handles
+   * Moves the left handle forwards or backwards based on `backward` and moves the right one on top
+   * of the left. Wraps in both directions.
    * @param backward boolean indicating move direction.
    */
   moveSection(backward: boolean = false) {
@@ -142,58 +137,48 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   createSliders() {
-    return AXES.map((axis, i) => this.createSlider(axis, i));
+    return AXES.map((axis) => this.createSlider(axis));
   }
 
-  createSlider(axis, i) {
-    if (!this.state.sliders) {
-      return;
-    }
-
-    const onUpdate = this.makeUpdateFn(i);
+  createSlider(axis: string) {
     const start = this.state.sliders[axis.toLowerCase()].sliceLabels;
     const range = {
       min: 0,
       max: this.props.numSlices[axis],
     };
 
-    const slider = (
-      <Nouislider
-        connect={true}
-        range={range}
-        start={start}
-        behaviour="drag"
-        format={{ to: Math.round, from: parseInt }}
-        onEnd={this.onSliderDragEnd(axis)}
-        onUpdate={onUpdate}
-      />
-    );
-
     return (
-      <div key={i} className="slider-row">
-        <span className="axis-slider">{slider}</span>
+      <div key={axis} className="slider-row">
+        <span className="axis-slider">
+          <Nouislider
+            connect={true}
+            range={range}
+            start={start}
+            behaviour="drag"
+            format={{ to: Math.round, from: parseInt }}
+            onUpdate={this.makeSliderUpdateFn(axis)}
+            onEnd={this.makeSliderDragEndFn(axis)}
+          />
+        </span>
         <span className="slider-name">{axis.toUpperCase()}</span>
         <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
       </div>
     );
   }
 
-  // When user finishes dragging the active slider, update values of left and right handle positions,
-  // width input value, and range display
-  onSliderDragEnd(axis: string) {
+  // When user finishes dragging the active slider, update slice label
+  makeSliderDragEndFn(axis: string) {
     return (sliceLabels: string[], _handle: number, values: number[]) =>
       this.setSliderState(axis, { sliceLabels, leftValue: values[0] });
   }
 
-  makeUpdateFn(i: number) {
-    const axis = AXES[i];
-    const axisViewMode = VIEWMODES[i];
+  makeSliderUpdateFn(axis: string) {
     return (_fmtValues: string[], _handle: number, values: number[]) => {
       if (this.props.setAxisClip) {
         const step = 1;
         const stepEpsilon = 0.04;
         const max = this.props.numSlices[axis];
-        const isActiveAxis = this.props.mode === axisViewMode;
+        const isActiveAxis = this.getActiveAxis() === axis;
         const thicknessReduce = !this.threeDMode() && isActiveAxis ? step - stepEpsilon : 0.0;
 
         const start = values[0] / max - 0.5;
@@ -206,6 +191,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   // Reset sliders if mode has changed
+  // This may be relaxed if we want some slider changes to persist across modes
   componentDidUpdate(prevProps: AxisClipSlidersProps) {
     if (prevProps.mode !== this.props.mode) {
       this.setState({ sliders: this.getSliderDefaults() });
