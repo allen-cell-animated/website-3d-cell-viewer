@@ -1,6 +1,5 @@
 import { reduce } from "lodash";
 
-import thicknessUnit from "./thicknessUnit";
 import viewMode from "./viewMode";
 
 function makeSymbolStringMap(mapping) {
@@ -14,10 +13,8 @@ function makeSymbolStringMap(mapping) {
   );
 }
 
-thicknessUnit.STRING_TO_SYMBOL = makeSymbolStringMap(thicknessUnit.mainMapping);
 viewMode.STRING_TO_SYMBOL = makeSymbolStringMap(viewMode.mainMapping);
 
 export default {
-  thicknessUnit,
   viewMode,
 };
