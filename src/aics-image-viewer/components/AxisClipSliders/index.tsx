@@ -5,12 +5,10 @@ import "nouislider/distribute/nouislider.css";
 
 import React from "react";
 
-import enums from "../../shared/enums";
-
 import "./styles.css";
-import viewMode from "../../shared/enums/viewMode";
 
-const ViewMode = enums.viewMode.mainMapping;
+import viewMode from "../../shared/enums/viewMode";
+const ViewMode = viewMode.mainMapping;
 
 const AXES = Object.freeze(["x", "y", "z"]);
 const PLAY_RATE_MS_PER_STEP = 125;
@@ -25,18 +23,13 @@ interface AxisClipSlidersProps {
   };
 }
 
-interface SliderState {
-  sliceLabels: string[];
-  leftValue: number;
-}
-
 interface AxisClipSlidersState {
   playing: boolean;
   intervalId: number;
   sliders: {
-    x: SliderState;
-    y: SliderState;
-    z: SliderState;
+    x: [number, number];
+    y: [number, number];
+    z: [number, number];
   };
 }
 
@@ -68,26 +61,17 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       case ViewMode.xy:
         return "z";
       default:
-        return "";
+        return null;
     }
   }
 
-  threeDMode = () => this.props.mode === viewMode.mainMapping.threeD;
+  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max]);
 
-  getSliderDefaults = () =>
-    mapValues(this.props.numSlices, (numSlices: number): SliderState => {
-      return { sliceLabels: ["0", numSlices.toString()], leftValue: 0 };
-    });
-
-  setSliderState(axis: string, newState: Partial<SliderState>) {
-    const currentState = this.state.sliders[axis];
+  setSliderState(axis: string, newState: number[]) {
     this.setState({
       sliders: {
         ...this.state.sliders,
-        [axis]: {
-          ...currentState,
-          ...newState,
-        },
+        [axis]: newState,
       },
     });
   }
@@ -98,13 +82,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
    * @param backward boolean indicating move direction.
    */
   moveSection(backward: boolean = false) {
-    if (!this.threeDMode()) {
+    const activeAxis = this.getActiveAxis();
+    if (activeAxis !== null) {
       const delta = backward ? -1 : 1;
-      const max = this.props.numSlices[this.getActiveAxis()];
-      const currentLeftSliderValue = this.state.sliders[this.getActiveAxis()].leftValue;
+      const max = this.props.numSlices[activeAxis];
+      const currentLeftSliderValue = this.state.sliders[activeAxis][0];
       const leftValue = (currentLeftSliderValue + delta + max) % max;
-      const leftValueStr = leftValue.toString();
-      this.setSliderState(this.getActiveAxis(), { leftValue, sliceLabels: [leftValueStr, leftValueStr] });
+      this.setSliderState(activeAxis, [leftValue, leftValue]);
     }
   }
 
@@ -114,7 +98,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   play() {
-    if (!this.threeDMode() && !this.state.playing) {
+    if (this.getActiveAxis() && !this.state.playing) {
       const intervalId = window.setInterval(() => this.moveSection(), PLAY_RATE_MS_PER_STEP);
       this.setState({
         playing: true,
@@ -140,7 +124,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   createSlider(axis: string) {
-    const start = this.state.sliders[axis.toLowerCase()].sliceLabels;
+    const start = this.state.sliders[axis.toLowerCase()];
     const range = {
       min: 0,
       max: this.props.numSlices[axis],
@@ -167,18 +151,17 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   // When user finishes dragging the active slider, update slice label
   makeSliderDragEndFn(axis: string) {
-    return (sliceLabels: string[], _handle: number, values: number[]) =>
-      this.setSliderState(axis, { sliceLabels, leftValue: values[0] });
+    return (values: number[]) => this.setSliderState(axis, values);
   }
 
   makeSliderUpdateFn(axis: string) {
-    return (_fmtValues: string[], _handle: number, values: number[]) => {
+    return (values: number[]) => {
       if (this.props.setAxisClip) {
         const step = 1;
         const stepEpsilon = 0.04;
         const max = this.props.numSlices[axis];
         const isActiveAxis = this.getActiveAxis() === axis;
-        const thicknessReduce = !this.threeDMode() && isActiveAxis ? step - stepEpsilon : 0.0;
+        const thicknessReduce = isActiveAxis ? step - stepEpsilon : 0.0;
 
         const start = values[0] / max - 0.5;
         const end = values[1] / max - 0.5 - thicknessReduce / max;
@@ -190,7 +173,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   // Reset sliders if mode has changed
-  // This may be relaxed if we want some slider changes to persist across modes
   componentDidUpdate(prevProps: AxisClipSlidersProps) {
     if (prevProps.mode !== this.props.mode) {
       this.setState({ sliders: this.getSliderDefaults() });
@@ -200,12 +182,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   render() {
     const playOnClick = this.state.playing ? this.pause : this.play;
     const playIcon = this.state.playing ? "pause" : "caret-right";
+    const activeAxis = this.getActiveAxis();
     return (
       <div className="clip-sliders">
         <h4>Region of interest clipping</h4>
-        {this.props.numSlices && this.createSliders()}
-        {!this.threeDMode() && (
-          <Button.Group style={{ flex: "1 0 150px" }}>
+        {activeAxis ? this.createSlider(activeAxis) : AXES.map(this.createSlider)}
+        {this.getActiveAxis() && (
+          <Button.Group style={{ flex: "0 0 150px" }}>
             <Button type="primary" shape="circle" icon="step-backward" onClick={this.goBack} />
             <Button type="primary" onClick={playOnClick} icon={playIcon} />
             <Button type="primary" shape="circle" icon="step-forward" onClick={this.goForward} />
