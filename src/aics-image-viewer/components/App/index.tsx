@@ -208,7 +208,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.stateKey = "image";
 
     this.openImage = this.openImage.bind(this);
-    this.loadFromJson = this.loadFromJson.bind(this);
     this.loadFromRaw = this.loadFromRaw.bind(this);
     this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
 
@@ -229,7 +228,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeUserSelection = this.handleChangeUserSelection.bind(this);
     this.handleChangeToImage = this.handleChangeToImage.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
-    this.intializeNewImage = this.intializeNewImage.bind(this);
+    this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
     this.beginRequestImage = this.beginRequestImage.bind(this);
@@ -345,14 +344,28 @@ export default class App extends React.Component<AppProps, AppState> {
     );
   }
 
-  onNewVolumeCreated(aimg: Volume, stateKey: "image" | "prevImg" | "nextImg") {
+  onNewVolumeCreated(
+    aimg: Volume,
+    stateKey: "image" | "prevImg" | "nextImg",
+    imageDirectory: string,
+    doResetViewMode: boolean
+  ) {
+    // FIXME this calls setState followed almost immediately by another setState... :-(
     const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
 
     if (stateKey === "image") {
-      this.intializeNewImage(aimg, newChannelSettings);
-    }
-    if (stateKey === "image") {
-      this.setState({ image: aimg });
+      this.setState({
+        image: aimg,
+        currentlyLoadedImagePath: imageDirectory,
+        channelDataReady: {},
+        queryErrorMessage: null,
+        cachingInProgress: false,
+        userSelections: {
+          ...this.state.userSelections,
+          [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+        },
+      });
+      this.initializeNewImage(aimg, newChannelSettings);
     } else if (stateKey === "prevImg") {
       this.setState({ prevImg: aimg });
     } else if (stateKey === "nextImg") {
@@ -405,19 +418,7 @@ export default class App extends React.Component<AppProps, AppState> {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
       })
         .then((aimg) => {
-          if (this.stateKey === "image") {
-            this.setState({
-              currentlyLoadedImagePath: imageDirectory,
-              channelDataReady: {},
-              queryErrorMessage: null,
-              cachingInProgress: false,
-              userSelections: {
-                ...this.state.userSelections,
-                [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-              },
-            });
-          }
-          this.onNewVolumeCreated(aimg, stateKey);
+          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
           this.stopPollingForImage();
         })
         .catch((resp) => this.handleOpenImageException(resp));
@@ -430,19 +431,7 @@ export default class App extends React.Component<AppProps, AppState> {
           this.onNewChannelData(url, v, channelIndex, keepLuts);
         })
           .then((aimg) => {
-            if (this.stateKey === "image") {
-              this.setState({
-                currentlyLoadedImagePath: imageDirectory,
-                channelDataReady: {},
-                queryErrorMessage: null,
-                cachingInProgress: false,
-                userSelections: {
-                  ...this.state.userSelections,
-                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-                },
-              });
-            }
-            this.onNewVolumeCreated(aimg, stateKey);
+            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
             this.stopPollingForImage();
           })
           .catch((resp) => this.handleOpenImageException(resp));
@@ -451,19 +440,7 @@ export default class App extends React.Component<AppProps, AppState> {
           this.onNewChannelData(url, v, channelIndex, keepLuts);
         })
           .then((aimg) => {
-            if (this.stateKey === "image") {
-              this.setState({
-                currentlyLoadedImagePath: imageDirectory,
-                channelDataReady: {},
-                queryErrorMessage: null,
-                cachingInProgress: false,
-                userSelections: {
-                  ...this.state.userSelections,
-                  [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-                },
-              });
-            }
-            this.onNewVolumeCreated(aimg, stateKey);
+            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
             this.stopPollingForImage();
           })
           .catch((resp) => this.handleOpenImageException(resp));
@@ -471,10 +448,18 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  intializeNewImage(aimg, newChannelSettings?) {
-    const { userSelections, view3d } = this.state;
+  initializeNewImage(aimg: Volume, newChannelSettings?) {
+    // set alpha slider first time image is loaded to something that makes sense
+    let alphaLevel = this.getInitialAlphaLevel();
+    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
+
+    // Here is where we officially hand the image to the volume-viewer
+    this.placeImageInViewer(aimg, newChannelSettings);
+  }
+
+  private getInitialAlphaLevel(): number[] {
+    const { userSelections } = this.state;
     const { viewerConfig } = this.props;
-    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     let alphaLevel =
       userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
         ? ALPHA_MASK_SLIDER_3D_DEFAULT
@@ -483,19 +468,13 @@ export default class App extends React.Component<AppProps, AppState> {
     if (viewerConfig.maskAlpha !== undefined) {
       alphaLevel = [viewerConfig.maskAlpha];
     }
+    return alphaLevel;
+  }
 
-    let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(
-      userSelections[BRIGHTNESS_SLIDER_LEVEL],
-      userSelections[PATH_TRACE]
-    );
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
-    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
-    // set alpha slider first time image is loaded to something that makes sense
-    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
-
-    // Here is where we officially hand the image to the volume-viewer
-
+  // set up the Volume into the Viewer using the current initial settings
+  private placeImageInViewer(aimg: Volume, newChannelSettings?): void {
+    const { userSelections, view3d } = this.state;
+    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
@@ -513,11 +492,24 @@ export default class App extends React.Component<AppProps, AppState> {
       }),
     });
 
+    const alphaLevel = this.getInitialAlphaLevel();
+    const imageMask = alphaSliderToImageValue(alphaLevel);
     view3d.updateMaskAlpha(aimg, imageMask);
+
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+
+    const imageBrightness = brightnessSliderToImageValue(
+      userSelections[BRIGHTNESS_SLIDER_LEVEL],
+      userSelections[PATH_TRACE]
+    );
     view3d.updateExposure(imageBrightness);
+
+    const imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
     view3d.updateDensity(aimg, imageDensity);
+
+    const imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
+
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
@@ -544,7 +536,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return newChannelSettings;
   }
 
-  initializeLut(aimg, channelIndex) {
+  initializeLut(aimg: Volume, channelIndex) {
     const histogram = aimg.getHistogram(channelIndex);
 
     const initViewerSettings = this.props.viewerChannelSettings;
@@ -595,7 +587,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return newControlPoints;
   }
 
-  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, keepLuts) {
+  onChannelDataLoaded(aimg: Volume, thisChannelsSettings, channelIndex, keepLuts) {
     const { image, view3d } = this.state;
     if (aimg !== image) {
       return;
@@ -641,7 +633,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { prevImgPath } = this.props;
 
     // assume prevImg is available to initialize
-    this.intializeNewImage(prevImg);
+    this.initializeNewImage(prevImg);
     this.setState({
       image: prevImg,
       nextImg: image,
@@ -655,7 +647,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { nextImgPath } = this.props;
 
     // assume nextImg is available to initialize
-    this.intializeNewImage(nextImg);
+    this.initializeNewImage(nextImg);
     this.setState({
       image: nextImg,
       prevImg: image,
@@ -664,38 +656,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(nextImgPath, true, "nextImg");
   }
 
-  loadFromJson(obj, title, locationHeader, stateKey: "image" | "prevImg" | "nextImg", keepLuts) {
-    const aimg = new Volume(obj);
-
-    const newChannelSettings = this.updateStateOnLoadImage(obj.channel_names);
-    // if we have some url to prepend to the atlas file names, do it now.
-    if (locationHeader) {
-      obj.images = obj.images.map((img) => ({
-        ...img,
-        name: `${locationHeader}${img.name}`,
-      }));
-    }
-    // GO OUT AND GET THE VOLUME DATA.
-    VolumeLoader.loadVolumeAtlasData(aimg, obj.images, (url, v, channelIndex) => {
-      // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-      const thisChannelSettings = this.getOneChannelSetting(obj.channel_names[channelIndex], newChannelSettings);
-      this.onChannelDataLoaded(aimg, thisChannelSettings, channelIndex, keepLuts);
-    });
-    if (stateKey === "image") {
-      this.intializeNewImage(aimg, newChannelSettings);
-    }
-    if (stateKey === "image") {
-      this.setState({ image: aimg });
-    } else if (stateKey === "prevImg") {
-      this.setState({ prevImg: aimg });
-    } else if (stateKey === "nextImg") {
-      this.setState({ nextImg: aimg });
-    } else {
-      console.error("ERROR invalid or unexpected stateKey");
-    }
-  }
-
-  initializeOneChannelSetting(aimg, channel, index, defaultColor) {
+  initializeOneChannelSetting(aimg: Volume, channel, index, defaultColor) {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
     let volumeEnabled = false;
@@ -757,54 +718,12 @@ export default class App extends React.Component<AppProps, AppState> {
 
     let channelGroupedByType = this.createChannelGrouping(rawDims.channel_names);
 
-    const { userSelections, view3d } = this.state;
     const channelSetting = newChannelSettings;
-    let alphaLevel =
-      userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
-        ? ALPHA_MASK_SLIDER_3D_DEFAULT
-        : ALPHA_MASK_SLIDER_2D_DEFAULT;
 
-    let imageMask = alphaSliderToImageValue(alphaLevel);
-    let imageBrightness = brightnessSliderToImageValue(
-      userSelections[BRIGHTNESS_SLIDER_LEVEL],
-      userSelections[PATH_TRACE]
-    );
-    let imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
-    let imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
+    let alphaLevel = this.getInitialAlphaLevel();
 
     // Here is where we officially hand the image to the volume-viewer
-
-    view3d.removeAllVolumes();
-    view3d.addVolume(aimg, {
-      channels: aimg.channel_names.map((name) => {
-        const ch = find(channelSetting, (channel) => {
-          return channel.name === name;
-        });
-
-        if (!ch) {
-          return {};
-        }
-        return {
-          enabled: ch[VOLUME_ENABLED],
-          isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
-          isovalue: ch.isovalue,
-          isosurfaceOpacity: ch.opacity,
-          color: ch.color,
-        };
-      }),
-    });
-
-    view3d.updateMaskAlpha(aimg, imageMask);
-    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
-    view3d.updateExposure(imageBrightness);
-    view3d.updateDensity(aimg, imageDensity);
-    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
-    // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
-    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
-    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
-    // tell view that things have changed for this image
-    view3d.updateActiveChannels(aimg);
+    this.placeImageInViewer(aimg, newChannelSettings);
 
     this.setState({
       channelGroupedByType,
@@ -955,10 +874,17 @@ export default class App extends React.Component<AppProps, AppState> {
     let newSelectionState: Partial<UserSelectionState> = {
       [MODE]: newMode,
     };
-    // if switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-    // if full field, dont mask
+
+    // TODO the following behavior/logic is very specific to a particular application's needs
+    // and is not necessarily appropriate for a general viewer.
+    // Why should the alpha setting matter whether we are viewing the primary image
+    // or its parent?
+
+    // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+    // If full field, dont mask
+
     if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching to 2d
+      // Switching from 3D to 2D
       newSelectionState = {
         [MODE]: newMode,
         [PATH_TRACE]: false,
@@ -968,13 +894,12 @@ export default class App extends React.Component<AppProps, AppState> {
       if (userSelections[PATH_TRACE]) {
         this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
       }
-      // switching from 2D to 3D
     } else if (
       userSelections.mode !== ViewMode.threeD &&
       newMode === ViewMode.threeD &&
       this.state.userSelections.imageType === SEGMENTED_CELL
     ) {
-      // switching to 3d
+      // switching from 2D to 3D
       newSelectionState = {
         [MODE]: newMode,
         [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -982,7 +907,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
     this.handleChangeToImage(MODE, newMode);
-    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL]) {
+    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL] !== undefined) {
       this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
     }
     this.setUserSelectionsInState(newSelectionState);
@@ -1196,8 +1121,6 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             renderConfig={renderConfig}
-            // viewer capabilities
-            canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
             // image state
             imageName={this.state.image ? this.state.image.name : false}
             hasImage={!!this.state.image}
