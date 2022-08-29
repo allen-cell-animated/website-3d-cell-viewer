@@ -228,7 +228,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeUserSelection = this.handleChangeUserSelection.bind(this);
     this.handleChangeToImage = this.handleChangeToImage.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
-    this.intializeNewImage = this.intializeNewImage.bind(this);
+    this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
     this.beginRequestImage = this.beginRequestImage.bind(this);
@@ -365,7 +365,7 @@ export default class App extends React.Component<AppProps, AppState> {
           [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
         },
       });
-      this.intializeNewImage(aimg, newChannelSettings);
+      this.initializeNewImage(aimg, newChannelSettings);
     } else if (stateKey === "prevImg") {
       this.setState({ prevImg: aimg });
     } else if (stateKey === "nextImg") {
@@ -448,7 +448,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  intializeNewImage(aimg, newChannelSettings?) {
+  initializeNewImage(aimg: Volume, newChannelSettings?) {
     // set alpha slider first time image is loaded to something that makes sense
     let alphaLevel = this.getInitialAlphaLevel();
     this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
@@ -536,7 +536,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return newChannelSettings;
   }
 
-  initializeLut(aimg, channelIndex) {
+  initializeLut(aimg: Volume, channelIndex) {
     const histogram = aimg.getHistogram(channelIndex);
 
     const initViewerSettings = this.props.viewerChannelSettings;
@@ -587,7 +587,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return newControlPoints;
   }
 
-  onChannelDataLoaded(aimg, thisChannelsSettings, channelIndex, keepLuts) {
+  onChannelDataLoaded(aimg: Volume, thisChannelsSettings, channelIndex, keepLuts) {
     const { image, view3d } = this.state;
     if (aimg !== image) {
       return;
@@ -633,7 +633,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { prevImgPath } = this.props;
 
     // assume prevImg is available to initialize
-    this.intializeNewImage(prevImg);
+    this.initializeNewImage(prevImg);
     this.setState({
       image: prevImg,
       nextImg: image,
@@ -647,7 +647,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { nextImgPath } = this.props;
 
     // assume nextImg is available to initialize
-    this.intializeNewImage(nextImg);
+    this.initializeNewImage(nextImg);
     this.setState({
       image: nextImg,
       prevImg: image,
@@ -656,7 +656,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(nextImgPath, true, "nextImg");
   }
 
-  initializeOneChannelSetting(aimg, channel, index, defaultColor) {
+  initializeOneChannelSetting(aimg: Volume, channel, index, defaultColor) {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
     let volumeEnabled = false;
