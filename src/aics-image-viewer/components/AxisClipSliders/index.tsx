@@ -45,7 +45,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
-    this.moveSection = this.moveSection.bind(this);
+    this.moveSlice = this.moveSlice.bind(this);
     this.createSlider = this.createSlider.bind(this);
   }
 
@@ -92,15 +92,15 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   /**
-   * Moves the left handle forwards or backwards and moves the right one on top
-   * of the left. Wraps in both directions.
+   * Moves the left and right handles together one slice forwards or backwards.
+   * Wraps in both directions.
    * @param backward boolean indicating move direction.
    */
-  moveSection(backward: boolean = false) {
+  moveSlice(backward: boolean = false) {
     const activeAxis = this.getActiveAxis();
     if (activeAxis !== null) {
       const delta = backward ? -1 : 1;
-      const max = this.props.numSlices[activeAxis];
+      const max = this.props.numSlices[activeAxis] + 1;
       const currentLeftSliderValue = this.state.sliders[activeAxis][0];
       const leftValue = (currentLeftSliderValue + delta + max) % max;
       this.setSliderState(activeAxis, [leftValue, leftValue]);
@@ -109,12 +109,12 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   step(backward: boolean) {
     this.pause();
-    this.moveSection(backward);
+    this.moveSlice(backward);
   }
 
   play() {
     if (this.getActiveAxis() && !this.state.playing) {
-      const intervalId = window.setInterval(this.moveSection, PLAY_RATE_MS_PER_STEP);
+      const intervalId = window.setInterval(this.moveSlice, PLAY_RATE_MS_PER_STEP);
       this.setState({ playing: true, intervalId });
     }
   }
@@ -138,6 +138,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
             range={range}
             start={start}
             behaviour="drag"
+            // round slider output to nearest slice; assume any string inputs represent ints
             format={{ to: Math.round, from: parseInt }}
             onUpdate={this.makeSliderUpdateFn(axis)}
             onEnd={this.makeSliderDragEndFn(axis)}
