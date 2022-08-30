@@ -1,5 +1,5 @@
 import { mapValues } from "lodash";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
@@ -150,9 +150,15 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
         {playButton && (
           <Button.Group>
-            <Button type="primary" shape="circle" icon="step-backward" onClick={() => this.step(true)} />
-            <Button type="primary" onClick={playOnClick} icon={playIcon} />
-            <Button type="primary" shape="circle" icon="step-forward" onClick={() => this.step(false)} />
+            <Tooltip placement="top" title="Step back">
+              <Button icon="step-backward" onClick={() => this.step(true)} />
+            </Tooltip>
+            <Tooltip placement="top" title="Play through sequence">
+              <Button onClick={playOnClick} icon={playIcon} />
+            </Tooltip>
+            <Tooltip placement="top" title="Step forward">
+              <Button icon="step-forward" onClick={() => this.step(false)} />
+            </Tooltip>
           </Button.Group>
         )}
       </div>
