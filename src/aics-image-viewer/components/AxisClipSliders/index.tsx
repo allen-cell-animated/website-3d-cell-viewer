@@ -45,7 +45,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
-    // this.makeSliderDragEndFn = this.makeSliderDragEndFn.bind(this);
     this.moveSection = this.moveSection.bind(this);
     this.createSlider = this.createSlider.bind(this);
   }
@@ -54,8 +53,17 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   componentDidUpdate(prevProps: AxisClipSlidersProps) {
     if (prevProps.mode !== this.props.mode) {
       window.clearInterval(this.state.intervalId);
-      const newState = { sliders: this.getSliderDefaults(), playing: false };
-      this.setState(newState);
+      this.setState({ sliders: this.getSliderDefaults(), playing: false });
+
+      // Missing sliders in 2D mode won't call an update; do it for them
+      const activeAxis = this.getActiveAxis();
+      if (activeAxis) {
+        AXES.forEach((axis) => {
+          if (axis !== activeAxis) {
+            this.props.setAxisClip(axis, -0.5, 0.5, false);
+          }
+        });
+      }
     }
   }
 
@@ -84,7 +92,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   /**
-   * Moves the left handle forwards or backwards based on `backward` and moves the right one on top
+   * Moves the left handle forwards or backwards and moves the right one on top
    * of the left. Wraps in both directions.
    * @param backward boolean indicating move direction.
    */
@@ -107,10 +115,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   play() {
     if (this.getActiveAxis() && !this.state.playing) {
       const intervalId = window.setInterval(this.moveSection, PLAY_RATE_MS_PER_STEP);
-      this.setState({
-        playing: true,
-        intervalId,
-      });
+      this.setState({ playing: true, intervalId });
     }
   }
 
