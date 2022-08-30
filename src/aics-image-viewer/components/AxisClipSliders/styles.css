@@ -6,7 +6,7 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
-  max-width: 612px;
+  max-width: 665px;
   position: absolute;
   margin: auto;
   left: 0;
@@ -18,46 +18,65 @@
     justify-content: center;
     align-items: center;
     color: gray;
+
+    &.slider-x {
+      .slider-name {
+        color: var(--color-x);
+      }
+      .noUi-handle {
+        background-color: var(--color-x) !important;
+      }
+    }
+
+    &.slider-y {
+      .slider-name {
+        color: var(--color-y);
+      }
+      .noUi-handle {
+        background-color: var(--color-y) !important;
+      }
+    }
+
+    &.slider-z {
+      .slider-name {
+        color: var(--color-z);
+      }
+      .noUi-handle {
+        background-color: var(--color-z) !important;
+      }
+    }
   }
 
   .axis-slider {
-    flex: 1 1 auto;
+    flex: 1 1 480px;
     max-width: 480px;
     margin-top: 0.5em;
   }
 
   .slider-name,
-  .slider-slices {
+  .slider-slices,
+  .ant-btn-group {
     margin-left: 20px;
     white-space: nowrap;
   }
 
   .slider-name {
     flex: 0 0 12px;
+    font-weight: bold;
   }
 
   .slider-slices {
-    flex: 0 0 80px;
+    flex: 0 0 85px;
+    text-align: right;
+    max-width: 85px;
   }
 
-  .slider-x {
-    color: var(--color-x);
-    .noUi-handle {
-      background-color: var(--color-x) !important;
-    }
+  &.clip-sliders-2d {
+    max-width: 800px;
   }
 
-  .slider-y {
-    color: var(--color-y);
-    .noUi-handle {
-      background-color: var(--color-y) !important;
-    }
-  }
-
-  .slider-z {
-    color: var(--color-z);
-    .noUi-handle {
-      background-color: var(--color-z) !important;
-    }
+  .noUi-target {
+    height: 4px;
+    background-color: rgba(160, 160, 160, 0.4) !important;
   }
 }

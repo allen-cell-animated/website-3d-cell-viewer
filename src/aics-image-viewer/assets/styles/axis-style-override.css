@@ -22,18 +22,16 @@
     content: none;
   }
 
+  /* Slider handle arrow */
   .noUi-handle::after {
     background-color: inherit;
     width: 6px;
     height: 6px;
     top: 0;
     left: 0;
+    /* rotate 45deg, skew vertically, translate down */
     transform: matrix(0.5, 1, -0.5, 1, 0, 5);
     content: "";
-  }
-
-  .noUi-connects {
-    border-radius: 0;
   }
 
   .noUi-connect {
@@ -48,11 +46,6 @@
     height: 2px;
   }
 
-  .axis-slider .noUi-horizontal {
-    height: 4px;
-    background: $dimgray;
-  }
-
   .noUi-target {
     border: none;
     box-shadow: none;
@@ -63,5 +56,6 @@
     background-color: transparent;
     color: inherit;
     font-size: 10px;
+    top: calc(100% + 3px);
   }
 }

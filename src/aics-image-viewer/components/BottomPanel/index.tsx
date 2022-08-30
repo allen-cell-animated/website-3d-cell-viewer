@@ -3,13 +3,13 @@ import { Drawer, Button, Icon } from "antd";
 
 import "./styles.css";
 
-export function BottomPanel({ children }: React.PropsWithChildren<{}>) {
+export function BottomPanel({ title, children }: React.PropsWithChildren<{ title?: string }>) {
   const [isVisible, setIsVisible] = useState(false);
   const toggleDrawer = () => setIsVisible(!isVisible);
 
   const optionsButton = (
     <Button className="options-button" size="small" onClick={toggleDrawer}>
-      Options
+      {title || "Options"}
       <Icon type="double-left" className="button-arrow" />
     </Button>
   );
