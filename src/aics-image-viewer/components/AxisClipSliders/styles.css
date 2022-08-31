@@ -82,14 +82,14 @@
   }
 
   .ant-btn {
-    line-height: 1.25;
+    line-height: 1.2;
     height: 20px;
     color: $dimgray;
-    border-color: #d9d9d9 !important;
+    border-color: $dimgray !important;
 
     &:hover,
     &:focus {
-      color: $light-gray;
+      color: white;
     }
 
     &[ant-click-animating-without-extra-node="true"]::after {
