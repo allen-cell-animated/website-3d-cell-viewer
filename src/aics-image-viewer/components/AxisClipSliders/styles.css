@@ -18,7 +18,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    color: gray;
+    color: #bfbfbf;
 
     &.slider-x {
       .slider-name {
@@ -81,11 +81,16 @@
     background-color: rgba(160, 160, 160, 0.4) !important;
   }
 
-  .ant-btn {
+  .slider-play-buttons .ant-btn {
     line-height: 1.2;
-    height: 20px;
+    height: 21px;
     color: $dimgray;
     border-color: $dimgray !important;
+    background-color: transparent;
+
+    &:hover {
+      background-color: rgba(160, 160, 160, 0.4);
+    }
 
     &:hover,
     &:focus {
@@ -94,7 +99,7 @@
 
     &[ant-click-animating-without-extra-node="true"]::after {
       box-shadow: none !important;
-      background-color: $dimgray;
+      background-color: $light-gray;
     }
   }
 }

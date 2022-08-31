@@ -139,6 +139,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
             connect={true}
             range={range}
             start={start}
+            step={1}
             behaviour="drag"
             // round slider output to nearest slice; assume any string inputs represent ints
             format={{ to: Math.round, from: parseInt }}
@@ -149,7 +150,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         <span className="slider-name">{axis.toUpperCase()}</span>
         <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
         {playButton && (
-          <Button.Group>
+          <Button.Group className="slider-play-buttons">
             <Tooltip placement="top" title="Step back">
               <Button icon="step-backward" onClick={() => this.step(true)} />
             </Tooltip>
