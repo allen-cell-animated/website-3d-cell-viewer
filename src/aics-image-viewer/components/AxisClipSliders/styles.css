@@ -56,7 +56,7 @@
 
   .slider-name,
   .slider-slices,
-  .ant-btn-group {
+  .slider-play-buttons {
     margin-left: 20px;
     white-space: nowrap;
   }
@@ -73,7 +73,7 @@
   }
 
   &.clip-sliders-2d {
-    max-width: 800px;
+    max-width: 780px;
   }
 
   .noUi-target {
