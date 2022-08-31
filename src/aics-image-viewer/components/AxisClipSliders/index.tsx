@@ -144,7 +144,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
             // round slider output to nearest slice; assume any string inputs represent ints
             format={{ to: Math.round, from: parseInt }}
             onUpdate={this.makeSliderUpdateFn(axis)}
-            onEnd={this.makeSliderDragEndFn(axis)}
+            onSet={this.makeSliderSetFn(axis)}
           />
         </span>
         <span className="slider-name">{axis.toUpperCase()}</span>
@@ -184,8 +184,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     };
   }
 
-  // When user finishes dragging the active slider, update slice label
-  makeSliderDragEndFn(axis: string) {
+  // When user finishes moving the active slider, update slice label
+  makeSliderSetFn(axis: string) {
     return (values: number[]) => this.setSliderState(axis, values);
   }
 
