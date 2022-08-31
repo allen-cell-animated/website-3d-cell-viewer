@@ -48,7 +48,8 @@
   }
 
   .button-arrow {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
+    transition: transform 0.2s linear;
   }
 
   .drawer-body-wrapper {
@@ -71,7 +72,7 @@
     }
 
     .button-arrow {
-      transform: rotate(90deg);
+      transform: rotate(-90deg);
     }
   }
 }
