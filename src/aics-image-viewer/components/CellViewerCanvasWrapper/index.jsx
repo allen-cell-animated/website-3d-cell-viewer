@@ -55,7 +55,7 @@ export default class ViewerWrapper extends React.Component {
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
-        <BottomPanel>
+        <BottomPanel title="Clipping">
           {renderConfig.axisClipSliders && !!image && (
             <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} />
           )}

@@ -1,5 +1,5 @@
 import { mapValues } from "lodash";
-import { Button } from "antd";
+import { Button, Tooltip } from "antd";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
@@ -126,26 +126,42 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  createSlider(axis: string) {
+  createSlider(axis: string, playButton: boolean) {
     const start = this.state.sliders[axis];
     const range = { min: 0, max: this.props.numSlices[axis] };
+    const playOnClick = this.state.playing ? this.pause : this.play;
+    const playIcon = this.state.playing ? "pause" : "caret-right";
 
     return (
-      <div key={axis} className="slider-row">
+      <div key={axis} className={`slider-row slider-${axis}`}>
         <span className="axis-slider">
           <Nouislider
             connect={true}
             range={range}
             start={start}
+            step={1}
             behaviour="drag"
             // round slider output to nearest slice; assume any string inputs represent ints
             format={{ to: Math.round, from: parseInt }}
             onUpdate={this.makeSliderUpdateFn(axis)}
-            onEnd={this.makeSliderDragEndFn(axis)}
+            onSet={this.makeSliderSetFn(axis)}
           />
         </span>
         <span className="slider-name">{axis.toUpperCase()}</span>
         <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
+        {playButton && (
+          <Button.Group className="slider-play-buttons">
+            <Tooltip placement="top" title="Step back">
+              <Button icon="step-backward" onClick={() => this.step(true)} />
+            </Tooltip>
+            <Tooltip placement="top" title="Play through sequence">
+              <Button onClick={playOnClick} icon={playIcon} />
+            </Tooltip>
+            <Tooltip placement="top" title="Step forward">
+              <Button icon="step-forward" onClick={() => this.step(false)} />
+            </Tooltip>
+          </Button.Group>
+        )}
       </div>
     );
   }
@@ -168,26 +184,17 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     };
   }
 
-  // When user finishes dragging the active slider, update slice label
-  makeSliderDragEndFn(axis: string) {
+  // When user finishes moving the active slider, update slice label
+  makeSliderSetFn(axis: string) {
     return (values: number[]) => this.setSliderState(axis, values);
   }
 
   render() {
-    const playOnClick = this.state.playing ? this.pause : this.play;
-    const playIcon = this.state.playing ? "pause" : "caret-right";
     const activeAxis = this.getActiveAxis();
     return (
-      <div className="clip-sliders">
-        <h4>Region of interest clipping</h4>
-        {activeAxis ? this.createSlider(activeAxis) : AXES.map(this.createSlider)}
-        {activeAxis && (
-          <Button.Group>
-            <Button type="primary" shape="circle" icon="step-backward" onClick={() => this.step(true)} />
-            <Button type="primary" onClick={playOnClick} icon={playIcon} />
-            <Button type="primary" shape="circle" icon="step-forward" onClick={() => this.step(false)} />
-          </Button.Group>
-        )}
+      <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
+        <h4>Region of interest</h4>
+        {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
       </div>
     );
   }
