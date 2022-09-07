@@ -78,15 +78,7 @@ module.exports = {
       },
       {
         test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 10000,
-              name: "imageviewer/font/[name].[ext]",
-            },
-          },
-        ],
+        type: "asset/resource",
       },
     ],
   },
