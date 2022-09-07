@@ -37,10 +37,18 @@
     height: 130px;
   }
 
+  .ant-drawer-title .ant-btn {
+    background-color: #4b4b4b;
+    color: #aeacae;
+
+    &:focus {
+      color: #aeacae;
+    }
+  }
+
   .options-button {
     border: none;
     box-shadow: none;
-    -webkit-box-shadow: none;
     margin-right: 0.8em;
     margin-bottom: 0.2em;
     position: absolute;
@@ -67,8 +75,9 @@
       display: block;
     }
 
-    .ant-drawer-body {
-      background-color: #ffffff;
+    .ant-drawer-body,
+    .ant-drawer-title .ant-btn {
+      background-color: #222222;
     }
 
     .button-arrow {

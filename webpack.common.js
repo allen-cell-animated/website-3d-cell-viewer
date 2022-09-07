@@ -1,10 +1,16 @@
 const path = require("path");
+const fs = require("fs");
 const webpack = require("webpack");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+
+const lessToJs = require("less-vars-to-js");
+const themeVariables = lessToJs(
+  fs.readFileSync(path.join(__dirname, "src/aics-image-viewer/styles/ant-vars.less"), "utf8")
+);
 
 module.exports = {
   entry: ["./public/index.jsx"],
@@ -55,29 +61,24 @@ module.exports = {
           {
             loader: "css-loader",
             options: {
-              camelCase: true,
               importLoaders: 1,
             },
           },
           {
             loader: "less-loader",
             options: {
-              javascriptEnabled: true,
+              lessOptions: {
+                javascriptEnabled: true,
+                modifyVars: themeVariables,
+                math: "always",
+              },
             },
           },
         ],
       },
       {
         test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {
-              limit: 10000,
-              name: "imageviewer/font/[name].[ext]",
-            },
-          },
-        ],
+        type: "asset/resource",
       },
     ],
   },
