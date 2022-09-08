@@ -133,22 +133,24 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     return (
       <div key={axis} className={`slider-row slider-${axis}`}>
-        <span className="axis-slider">
-          <Nouislider
-            connect={true}
-            range={range}
-            start={twoD ? [sliderVals[0]] : sliderVals}
-            step={1}
-            behaviour="drag"
-            // round slider output to nearest slice; assume any string inputs represent ints
-            format={{ to: Math.round, from: parseInt }}
-            onUpdate={this.makeSliderUpdateFn(axis)}
-            onSet={this.makeSliderSetFn(axis)}
-          />
-        </span>
-        <span className="slider-name">{axis.toUpperCase()}</span>
-        <span className="slider-slices">
-          {twoD ? `${sliderVals[0]} (${range.max})` : `${sliderVals[0]}, ${sliderVals[1]} (${range.max})`}
+        <span className="axis-slider-container">
+          <span className="axis-slider">
+            <Nouislider
+              connect={true}
+              range={range}
+              start={twoD ? [sliderVals[0]] : sliderVals}
+              step={1}
+              behaviour="drag"
+              // round slider output to nearest slice; assume any string inputs represent ints
+              format={{ to: Math.round, from: parseInt }}
+              onUpdate={this.makeSliderUpdateFn(axis)}
+              onSet={this.makeSliderSetFn(axis)}
+            />
+          </span>
+          <span className="slider-name">{axis.toUpperCase()}</span>
+          <span className="slider-slices">
+            {twoD ? `${sliderVals[0]} (${range.max})` : `${sliderVals[0]}, ${sliderVals[1]} (${range.max})`}
+          </span>
         </span>
         {twoD && (
           <Button.Group className="slider-play-buttons">
