@@ -208,14 +208,21 @@ if (params) {
 
     db.getAvailableDatasets()
       .then((datasets) => {
-        const selectedDataset = find(datasets, { id: params.dataset });
-        return selectedDataset;
+        for (let i = 0; i < datasets.length; ++i) {
+          const names = Object.keys(datasets[i].datasets);
+          for (let j = 0; j < names.length; ++j) {
+            if (names[j] === params.dataset) {
+              return datasets[i].datasets[names[j]];
+            }
+          }
+        }
+        return undefined;
       })
       .then((dataset) => {
         return db.selectDataset(dataset.manifest);
       })
       .then((datasetData) => {
-        args.baseurl = datasetData.volumeViewerDataRoot;
+        args.baseurl = datasetData.volumeViewerDataRoot + "/";
         args.cellDownloadHref = datasetData.downloadRoot + "/" + params.id;
         //fovDownloadHref = datasetData.downloadRoot + "/" + params.id;
       })
