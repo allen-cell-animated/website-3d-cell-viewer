@@ -7,12 +7,13 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
+  /* .axis-slider (480) + .slider-name (10) + .slider-slices (85) + margins & padding (90) */
   max-width: 665px;
   position: absolute;
   margin: 0 auto;
   left: 0;
   right: 0;
-  padding: 0 24px;
+  padding: 0 25px;
 
   .slider-row {
     display: flex;
@@ -52,7 +53,7 @@
   /* container to keep slider and labels on one line while play buttons wrap */
   .axis-slider-container {
     display: flex;
-    flex: 0 1 617px;
+    flex: 1 1 auto;
     align-items: center;
   }
 
@@ -70,7 +71,7 @@
   }
 
   .slider-name {
-    flex: 0 0 12px;
+    flex: 0 0 10px;
     font-weight: bold;
   }
 
@@ -86,6 +87,7 @@
 
   &.clip-sliders-2d {
     /* Make room for play buttons */
+    /* .axis-slider (480) + .slider-name (10) + .slider-slices (60) + .slider-play-buttons (95) + margins & padding (110) */
     max-width: 755px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
@@ -94,7 +96,8 @@
     }
 
     .axis-slider-container {
-      flex: 0 1 592px;
+      /* .axis-slider (480) + .slider-name (10) + .slider-slices (60) + margins (40) */
+      flex: 0 1 590px;
     }
   }
 
