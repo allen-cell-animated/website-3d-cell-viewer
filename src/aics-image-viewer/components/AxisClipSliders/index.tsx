@@ -177,6 +177,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         const thicknessReduce = isActiveAxis ? step - stepEpsilon : 0.0;
 
         const start = values[0] / max - 0.5;
+        // values.length is the number of handles on this slider:
+        // either one handle (2d mode), or a range with 2 handles (3d mode)
         const end = values[values.length - 1] / max - 0.5 - thicknessReduce / max;
 
         // get a value from -0.5..0.5
@@ -187,6 +189,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   // When user finishes moving the active slider, update slice label
   makeSliderSetFn(axis: string) {
+    // Values may be of length 1 or 2 (see above, in makeSliderUpdateFn); ensure we pass 2 values regardless
     return (values: number[]) => this.setSliderState(axis, [values[0], values[values.length - 1]]);
   }
 
