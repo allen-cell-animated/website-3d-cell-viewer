@@ -10,7 +10,7 @@ import "./styles.css";
 import viewMode from "../../shared/enums/viewMode";
 const ViewMode = viewMode.mainMapping;
 
-const AXES = Object.freeze(["x", "y", "z"]);
+const AXES = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
 interface AxisClipSlidersProps {
@@ -82,7 +82,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  setSliderState(axis: string, newState: number[]) {
+  setSliderState(axis: string, newState: [number, number]) {
     this.setState({
       sliders: {
         ...this.state.sliders,
@@ -126,11 +126,10 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  createSlider(axis: string, playButton: boolean) {
-    const start = this.state.sliders[axis];
+  createSlider(axis: string, twoD: boolean) {
+    const { playing, sliders } = this.state;
+    const sliderVals = sliders[axis];
     const range = { min: 0, max: this.props.numSlices[axis] };
-    const playOnClick = this.state.playing ? this.pause : this.play;
-    const playIcon = this.state.playing ? "pause" : "caret-right";
 
     return (
       <div key={axis} className={`slider-row slider-${axis}`}>
@@ -138,7 +137,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           <Nouislider
             connect={true}
             range={range}
-            start={start}
+            start={twoD ? [sliderVals[0]] : sliderVals}
             step={1}
             behaviour="drag"
             // round slider output to nearest slice; assume any string inputs represent ints
@@ -148,14 +147,16 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           />
         </span>
         <span className="slider-name">{axis.toUpperCase()}</span>
-        <span className="slider-slices">{`${start[0]}, ${start[1]} (${range.max})`}</span>
-        {playButton && (
+        <span className="slider-slices">
+          {twoD ? `${sliderVals[0]} (${range.max})` : `${sliderVals[0]}, ${sliderVals[1]} (${range.max})`}
+        </span>
+        {twoD && (
           <Button.Group className="slider-play-buttons">
             <Tooltip placement="top" title="Step back">
               <Button icon="step-backward" onClick={() => this.step(true)} />
             </Tooltip>
             <Tooltip placement="top" title="Play through sequence">
-              <Button onClick={playOnClick} icon={playIcon} />
+              <Button onClick={playing ? this.pause : this.play} icon={playing ? "pause" : "caret-right"} />
             </Tooltip>
             <Tooltip placement="top" title="Step forward">
               <Button icon="step-forward" onClick={() => this.step(false)} />
@@ -176,7 +177,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         const thicknessReduce = isActiveAxis ? step - stepEpsilon : 0.0;
 
         const start = values[0] / max - 0.5;
-        const end = values[1] / max - 0.5 - thicknessReduce / max;
+        // values.length is the number of handles on this slider:
+        // either one handle (2d mode), or a range with 2 handles (3d mode)
+        const end = values[values.length - 1] / max - 0.5 - thicknessReduce / max;
 
         // get a value from -0.5..0.5
         this.props.setAxisClip(axis, start, end, isActiveAxis);
@@ -186,7 +189,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   // When user finishes moving the active slider, update slice label
   makeSliderSetFn(axis: string) {
-    return (values: number[]) => this.setSliderState(axis, values);
+    // Values may be of length 1 or 2 (see above, in makeSliderUpdateFn); ensure we pass 2 values regardless
+    return (values: number[]) => this.setSliderState(axis, [values[0], values[values.length - 1]]);
   }
 
   render() {
