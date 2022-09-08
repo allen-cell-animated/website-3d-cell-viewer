@@ -103,3 +103,14 @@
     }
   }
 }
+
+@media only screen and (max-width: 500px) {
+  .clip-sliders .slider-row {
+    display: none;
+  }
+
+  .clip-sliders::after {
+    content: "ROI clipping is not available at this size. Please try again with a larger viewport.";
+    font-style: italic;
+  }
+}
