@@ -67,7 +67,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max]);
+  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max - 1]);
 
   getActiveAxis() {
     switch (this.props.mode) {
@@ -100,7 +100,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const activeAxis = this.getActiveAxis();
     if (activeAxis !== null) {
       const delta = backward ? -1 : 1;
-      const max = this.props.numSlices[activeAxis] + 1;
+      const max = this.props.numSlices[activeAxis];
       const currentLeftSliderValue = this.state.sliders[activeAxis][0];
       const leftValue = (currentLeftSliderValue + delta + max) % max;
       this.setSliderState(activeAxis, [leftValue, leftValue]);
@@ -128,8 +128,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   createSlider(axis: string, twoD: boolean) {
     const { playing, sliders } = this.state;
+    const numSlices = this.props.numSlices[axis];
     const sliderVals = sliders[axis];
-    const range = { min: 0, max: this.props.numSlices[axis] };
+    const range = { min: 0, max: numSlices - 1 };
 
     return (
       <div key={axis} className={`slider-row slider-${axis}`}>
@@ -149,7 +150,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           </span>
           <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="slider-slices">
-            {twoD ? `${sliderVals[0]} (${range.max})` : `${sliderVals[0]}, ${sliderVals[1]} (${range.max})`}
+            {twoD
+              ? `${sliderVals[0]} (${numSlices})`
+              : `${sliderVals[0]}, ${sliderVals[1]} (${sliderVals[1] - sliderVals[0] + 1})`}
           </span>
         </span>
         {twoD && (
@@ -172,18 +175,14 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   makeSliderUpdateFn(axis: string) {
     return (values: number[]) => {
       if (this.props.setAxisClip) {
-        const step = 1;
-        const stepEpsilon = 0.04;
+        // get a value from -0.5..0.5
         const max = this.props.numSlices[axis];
-        const isActiveAxis = this.getActiveAxis() === axis;
-        const thicknessReduce = isActiveAxis ? step - stepEpsilon : 0.0;
-
         const start = values[0] / max - 0.5;
         // values.length is the number of handles on this slider:
         // either one handle (2d mode), or a range with 2 handles (3d mode)
-        const end = values[values.length - 1] / max - 0.5 - thicknessReduce / max;
+        const end = (values[values.length - 1] + 1) / max - 0.5;
 
-        // get a value from -0.5..0.5
+        const isActiveAxis = this.getActiveAxis() === axis;
         this.props.setAxisClip(axis, start, end, isActiveAxis);
       }
     };
