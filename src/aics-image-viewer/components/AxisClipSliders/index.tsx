@@ -49,9 +49,16 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.createSlider = this.createSlider.bind(this);
   }
 
-  // Reset sliders and pause if mode has changed
+  // Reset sliders and pause if mode or fov has changed
+  // TODO: this reset-state-on-props-update pattern is somewhat bad practice,
+  //   and indicates some state should potentially be lifted out of this component.
   componentDidUpdate(prevProps: AxisClipSlidersProps) {
-    if (prevProps.mode !== this.props.mode) {
+    const numSlicesChanged = AXES.reduce(
+      (hasChanged, axis) => hasChanged || prevProps.numSlices[axis] !== this.props.numSlices[axis],
+      false
+    );
+
+    if (numSlicesChanged || prevProps.mode !== this.props.mode) {
       window.clearInterval(this.state.intervalId);
       this.setState({ sliders: this.getSliderDefaults(), playing: false });
 
@@ -133,7 +140,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const range = { min: 0, max: numSlices - 1 };
 
     return (
-      <div key={axis} className={`slider-row slider-${axis}`}>
+      <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
           <span className="axis-slider">
             <Nouislider
