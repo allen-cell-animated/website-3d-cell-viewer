@@ -7,7 +7,7 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
-  /* .axis-slider (480) + .slider-name (10) + .slider-slices (85) + margins & padding (90) */
+  /* .axis-slider (480) + .slider-name (10) + .slider-slices (95) + margins & padding (80) */
   max-width: 665px;
   position: absolute;
   margin: 0 auto;
@@ -64,7 +64,6 @@
   }
 
   .slider-name,
-  .slider-slices,
   .slider-play-buttons {
     margin-left: 20px;
     white-space: nowrap;
@@ -76,9 +75,10 @@
   }
 
   .slider-slices {
-    flex: 0 0 85px;
+    flex: 0 0 95px;
+    margin-left: 10px;
     text-align: right;
-    max-width: 85px;
+    max-width: 95px;
   }
 
   .slider-play-buttons {
@@ -87,16 +87,16 @@
 
   &.clip-sliders-2d {
     /* Make room for play buttons */
-    /* .axis-slider (480) + .slider-name (10) + .slider-slices (60) + .slider-play-buttons (95) + margins & padding (110) */
+    /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
     max-width: 755px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
     .slider-slices {
-      flex: 0 0 60px;
+      flex: 0 0 70px;
     }
 
     .axis-slider-container {
-      /* .axis-slider (480) + .slider-name (10) + .slider-slices (60) + margins (40) */
+      /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + margins (30) */
       flex: 0 1 590px;
     }
   }
