@@ -99,7 +99,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   /**
-   * Moves the left and right handles together one slice forwards or backwards.
+   * Moves the single slice viewed on the active axis one step forwards or backwards.
    * Wraps in both directions.
    * @param backward boolean indicating move direction.
    */
