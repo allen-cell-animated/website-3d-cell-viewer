@@ -9,16 +9,11 @@ import AxisClipSliders from "../AxisClipSliders";
 import { BottomPanel } from "../BottomPanel";
 import "./styles.css";
 
-const ViewMode = viewMode.mainMapping;
-
 export default class ViewerWrapper extends React.Component {
   constructor(props) {
     super(props);
     this.view3dviewerRef = React.createRef();
-    this.getActiveAxis = this.getActiveAxis.bind(this);
-    this.setAxisClip = this.setAxisClip.bind(this);
     this.renderOverlay = this.renderOverlay.bind(this);
-    this.renderClipSliders = this.renderClipSliders.bind(this);
   }
 
   componentDidMount() {
@@ -40,24 +35,6 @@ export default class ViewerWrapper extends React.Component {
     this.view3D.resize();
   }
 
-  getActiveAxis() {
-    const { mode } = this.props;
-    switch (mode) {
-      case ViewMode.yz:
-        return "x";
-      case ViewMode.xz:
-        return "y";
-      case ViewMode.xy:
-        return "z";
-      default:
-        return null;
-    }
-  }
-
-  setAxisClip(axis, minval, maxval, isOrthoAxis) {
-    this.props.setAxisClip(axis, minval, maxval, isOrthoAxis);
-  }
-
   renderOverlay() {
     const spinner = this.props.loadingImage ? (
       <div style={STYLES.noImage}>
@@ -73,28 +50,16 @@ export default class ViewerWrapper extends React.Component {
     return noImageText || spinner;
   }
 
-  renderClipSliders() {
-    if (!this.props.image) {
-      return null;
-    }
-
-    const { numSlices, mode } = this.props;
-    return (
-      <AxisClipSliders
-        mode={mode}
-        activeAxis={this.getActiveAxis()}
-        setAxisClip={this.setAxisClip}
-        numSlices={numSlices}
-      />
-    );
-  }
-
   render() {
-    const { appHeight, renderConfig } = this.props;
+    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
-        <BottomPanel>{renderConfig.axisClipSliders && this.renderClipSliders()}</BottomPanel>
+        <BottomPanel title="Clipping">
+          {renderConfig.axisClipSliders && !!image && (
+            <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} />
+          )}
+        </BottomPanel>
         {this.renderOverlay()}
       </div>
     );

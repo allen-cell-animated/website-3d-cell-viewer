@@ -1,4 +1,4 @@
-@import "../../assets/styles/axis-style-override";
+@import "../../assets/styles/noui-slider-override";
 @import "../../assets/styles/variables.css";
 ::-webkit-scrollbar {
   display: none;
@@ -47,6 +47,10 @@
 
   .channel-rows-list {
     border-top: 1px solid $border-color;
+  }
+
+  .ant-collapse {
+    background-color: #313131;
   }
 
   .ant-collapse-content {

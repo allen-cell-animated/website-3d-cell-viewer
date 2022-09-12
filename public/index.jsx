@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { find } from "lodash";
 
-import "antd/dist/antd.css";
+import "antd/dist/antd.less";
 
 // Components
 import "../src/aics-image-viewer/assets/styles/typography.css";

@@ -37,10 +37,18 @@
     height: 130px;
   }
 
+  .ant-drawer-title .ant-btn {
+    background-color: #4b4b4b;
+    color: #aeacae;
+
+    &:focus {
+      color: #aeacae;
+    }
+  }
+
   .options-button {
     border: none;
     box-shadow: none;
-    -webkit-box-shadow: none;
     margin-right: 0.8em;
     margin-bottom: 0.2em;
     position: absolute;
@@ -48,7 +56,8 @@
   }
 
   .button-arrow {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
+    transition: transform 0.2s linear;
   }
 
   .drawer-body-wrapper {
@@ -66,12 +75,13 @@
       display: block;
     }
 
-    .ant-drawer-body {
-      background-color: #ffffff;
+    .ant-drawer-body,
+    .ant-drawer-title .ant-btn {
+      background-color: #222222;
     }
 
     .button-arrow {
-      transform: rotate(90deg);
+      transform: rotate(-90deg);
     }
   }
 }

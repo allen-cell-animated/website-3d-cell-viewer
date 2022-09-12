@@ -1,23 +1,141 @@
+@import "../../assets/styles/noui-slider-override";
+@import "../../assets/styles/variables";
+
 .clip-sliders {
-  .placeholder {
-    height: 32px;
-  }
+  --color-x: #ff4d4d;
+  --color-y: #61d900;
+  --color-z: #0099ff;
+
+  @extend %axis-override;
+  /* .axis-slider (480) + .slider-name (10) + .slider-slices (95) + margins & padding (80) */
+  max-width: 665px;
+  position: absolute;
+  margin: 0 auto;
+  left: 0;
+  right: 0;
+  padding: 0 25px;
 
   .slider-row {
     display: flex;
-    color: gray;
+    justify-content: flex-end;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    color: #bfbfbf;
+
+    &.slider-x {
+      .slider-name {
+        color: var(--color-x);
+      }
+      .noUi-handle {
+        background-color: var(--color-x) !important;
+      }
+    }
+
+    &.slider-y {
+      .slider-name {
+        color: var(--color-y);
+      }
+      .noUi-handle {
+        background-color: var(--color-y) !important;
+      }
+    }
+
+    &.slider-z {
+      .slider-name {
+        color: var(--color-z);
+      }
+      .noUi-handle {
+        background-color: var(--color-z) !important;
+      }
+    }
+  }
+
+  /* container to keep slider and labels on one line while play buttons wrap */
+  .axis-slider-container {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
   }
 
   .axis-slider {
-    flex: 7;
+    flex: 1 1 480px;
+    max-width: 480px;
     margin-top: 0.5em;
   }
 
-  .slider-name {
-    flex: 1;
+  .slider-name,
+  .slider-play-buttons {
+    margin-left: 20px;
+    white-space: nowrap;
   }
 
-  .wrapper {
-    min-height: 325px;
+  .slider-name {
+    flex: 0 0 10px;
+    font-weight: bold;
+  }
+
+  .slider-slices {
+    flex: 0 0 95px;
+    margin-left: 10px;
+    text-align: right;
+    max-width: 95px;
+  }
+
+  .slider-play-buttons {
+    margin-top: 2px;
+  }
+
+  &.clip-sliders-2d {
+    /* Make room for play buttons */
+    /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
+    max-width: 755px;
+
+    /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
+    .slider-slices {
+      flex: 0 0 70px;
+    }
+
+    .axis-slider-container {
+      /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + margins (30) */
+      flex: 0 1 590px;
+    }
+  }
+
+  .noUi-target {
+    height: 4px;
+    background-color: rgba(160, 160, 160, 0.4) !important;
+  }
+
+  .slider-play-buttons .ant-btn {
+    line-height: 1.2;
+    height: 21px;
+    color: $dimgray;
+    border-color: $dimgray !important;
+    background-color: transparent;
+
+    &:hover {
+      background-color: rgba(160, 160, 160, 0.4);
+    }
+
+    &:hover,
+    &:focus {
+      color: white;
+    }
+
+    &[ant-click-animating-without-extra-node="true"]::after {
+      box-shadow: none !important;
+      background-color: $light-gray;
+    }
+  }
+}
+
+@media only screen and (max-width: 500px) {
+  .clip-sliders .slider-row {
+    display: none;
+  }
+
+  .clip-sliders::after {
+    content: "ROI clipping is not available at this size. Please try again with a larger viewport.";
+    font-style: italic;
   }
 }
