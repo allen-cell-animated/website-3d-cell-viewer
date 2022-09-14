@@ -10,12 +10,53 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 
+interface ControlPanelProps {
+  renderConfig: any;
+
+  imageName: string;
+  hasImage: boolean;
+  pixelSize: [number, number, number];
+  channelDataChannels: any; // TODO
+  channelGroupedByType: { [key: string]: number[] };
+  channelDataReady: { [key: string]: boolean };
+
+  maxProjectOn: boolean;
+  pathTraceOn: boolean;
+  channelSettings: any; // TODO
+  mode: symbol;
+  showBoundingBox: boolean;
+  backgroundColor: [number, number, number];
+  boundingBoxColor: [number, number, number];
+
+  alphaMaskSliderLevel: number[];
+  brightnessSliderLevel: number[];
+  densitySliderLevel: number[];
+  gammaSliderLevel: [number, number, number];
+
+  collapsed: boolean;
+
+  setCollapsed: (value: boolean) => void;
+  handleChangeUserSelection: (key: string, newValue: any) => void;
+  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
+  setImageAxisClip: (axis: number, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  onApplyColorPresets: (presets: [number, number, number, number?][]) => void;
+  makeUpdatePixelSizeFn: (i: number) => void;
+  changeChannelSettings: (indices: number[], keyToChange: string, newValue: any) => void;
+  changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
+  changeBackgroundColor: (color: [number, number, number]) => void;
+  changeBoundingBoxColor: (color: [number, number, number]) => void;
+  onColorChangeComplete?: any; // TODO
+  filterFunc?: any; // TODO
+  viewerChannelSettings: any; // TODO
+}
+
 const enum ControlTab {
   Channels,
   Advanced,
 }
 
-export default function ControlPanel(props) {
+export default function ControlPanel(props: ControlPanelProps) {
   const [tab, setTab] = useState(ControlTab.Channels);
 
   const { viewerChannelSettings, renderConfig, hasImage } = props;
