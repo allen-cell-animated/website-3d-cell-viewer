@@ -1,7 +1,7 @@
 {
-  "extends": ["eslint:recommended","plugin:react/recommended"],
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
   "env": {
-    "es6": true, 
+    "es6": true,
     "browser": true
   },
   "parser": "@typescript-eslint/parser",
@@ -24,10 +24,7 @@
     "fetch": true,
     "Promise": true
   },
-  "plugins": [
-    "react",
-    "@typescript-eslint"
-  ],
+  "plugins": ["react", "@typescript-eslint"],
   "rules": {
     "comma-style": [1, "last"],
     "curly": [1, "multi-line"],
@@ -39,7 +36,8 @@
     "no-mixed-spaces-and-tabs": 1,
     "no-new-object": 1,
     "no-shadow-restricted-names": 1,
-    "no-unused-vars": [1, {"args":"none"}],
+    "@typescript-eslint/no-unused-vars": ["error", { "args": "none" }],
+    "no-unused-vars": ["error", { "args": "none" }],
     "radix": 1,
     "react/jsx-uses-vars": 1,
     "react/no-deprecated": 0,
