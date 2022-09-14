@@ -1,7 +1,47 @@
 @import "../../assets/styles/noui-slider-override";
 @import "../../assets/styles/variables.css";
-::-webkit-scrollbar {
-  display: none;
+
+.control-panel-col-container {
+  display: flex;
+  min-height: 100%;
+
+  .control-panel-col {
+    border-right: 1px solid $border-color;
+  }
+
+  .control-panel-col.control-panel-tab-col {
+    text-align: center;
+
+    .btn-borderless {
+      margin-top: 5px;
+
+      &:not(:hover) {
+        background-color: transparent;
+        border: none;
+      }
+
+      &[ant-click-animating-without-extra-node="true"]::after {
+        box-shadow: none !important;
+        background-color: $light-gray;
+      }
+    }
+
+    .btn-collapse {
+      > .anticon {
+        transform: rotate(0deg);
+        transition: transform 0.2s linear;
+      }
+      &.btn-collapse-collapsed > .anticon {
+        transform: rotate(180deg);
+      }
+    }
+
+    .tab-divider {
+      width: 70%;
+      margin: 5px 15% 0;
+      border-bottom: 1px solid $border-color;
+    }
+  }
 }
 
 .control-panel {

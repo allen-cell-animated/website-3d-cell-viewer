@@ -1114,10 +1114,10 @@ export default class App extends React.Component<AppProps, AppState> {
           className="control-panel-holder"
           collapsible={true}
           defaultCollapsed={false}
-          collapsedWidth={0}
+          collapsedWidth={50}
+          trigger={null}
           collapsed={this.state.userSelections.controlPanelClosed}
-          onCollapse={this.toggleControlPanel}
-          width={450}
+          width={500}
         >
           <ControlPanel
             renderConfig={renderConfig}
@@ -1140,7 +1140,9 @@ export default class App extends React.Component<AppProps, AppState> {
             brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
             densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
             gammaSliderLevel={userSelections[LEVELS_SLIDER]}
+            collapsed={this.state.userSelections.controlPanelClosed}
             // functions
+            setCollapsed={this.toggleControlPanel}
             handleChangeUserSelection={this.handleChangeUserSelection}
             handleChangeToImage={this.handleChangeToImage}
             updateChannelTransferFunction={this.updateChannelTransferFunction}

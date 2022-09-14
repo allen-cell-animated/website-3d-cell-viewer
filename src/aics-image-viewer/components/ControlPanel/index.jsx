@@ -33,56 +33,67 @@ export default function ControlPanel(props) {
     );
   };
 
+  const collapseBtnClass = "btn-borderless btn-collapse" + (props.collapsed ? " btn-collapse-collapsed" : "");
+  const toggleCollapsed = () => props.setCollapsed(!props.collapsed);
+
   return (
-    <Card
-      bordered={false}
-      className="control-panel"
-      title={renderConfig.colorPresetsDropdown && renderColorPresetsDropdown()}
-    >
-      {hasImage && (
-        <div className="channel-rows-list">
-          <ChannelsWidget
-            imageName={props.imageName}
-            channelSettings={props.channelSettings}
-            channelDataChannels={props.channelDataChannels}
-            channelGroupedByType={props.channelGroupedByType}
-            changeChannelSettings={props.changeChannelSettings}
-            channelDataReady={props.channelDataReady}
-            handleChangeToImage={props.handleChangeToImage}
-            updateChannelTransferFunction={props.updateChannelTransferFunction}
-            changeOneChannelSetting={props.changeOneChannelSetting}
-            onColorChangeComplete={props.onColorChangeComplete}
-            onApplyColorPresets={props.onApplyColorPresets}
-            style={STYLES.channelsWidget}
-            renderConfig={renderConfig}
-            filterFunc={props.filterFunc}
-            viewerChannelSettings={viewerChannelSettings}
-          />
-          <GlobalVolumeControls
-            mode={props.mode}
-            imageName={props.imageName}
-            pixelSize={props.pixelSize}
-            handleChangeUserSelection={props.handleChangeUserSelection}
-            setImageAxisClip={props.setImageAxisClip}
-            makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
-            alphaMaskSliderLevel={props.alphaMaskSliderLevel}
-            brightnessSliderLevel={props.brightnessSliderLevel}
-            densitySliderLevel={props.densitySliderLevel}
-            gammaSliderLevel={props.gammaSliderLevel}
-            maxProjectOn={props.maxProjectOn}
-            pathTraceOn={props.pathTraceOn}
-            renderConfig={renderConfig}
-          />
-          <CustomizeWidget
-            backgroundColor={props.backgroundColor}
-            boundingBoxColor={props.boundingBoxColor}
-            changeBackgroundColor={props.changeBackgroundColor}
-            changeBoundingBoxColor={props.changeBoundingBoxColor}
-            showBoundingBox={props.showBoundingBox}
-          />
-        </div>
-      )}
-    </Card>
+    <div className="control-panel-col-container">
+      <div className="control-panel-col control-panel-tab-col" style={{ flex: "0 0 50px" }}>
+        <Button icon="vertical-right" size="large" className={collapseBtnClass} onClick={toggleCollapsed} />
+        <div className="tab-divider"></div>
+      </div>
+      <div className="control-panel-col" style={{ flex: "1 1 auto" }}>
+        <Card
+          bordered={false}
+          className="control-panel"
+          title={renderConfig.colorPresetsDropdown && renderColorPresetsDropdown()}
+        >
+          {hasImage && (
+            <div className="channel-rows-list">
+              <ChannelsWidget
+                imageName={props.imageName}
+                channelSettings={props.channelSettings}
+                channelDataChannels={props.channelDataChannels}
+                channelGroupedByType={props.channelGroupedByType}
+                changeChannelSettings={props.changeChannelSettings}
+                channelDataReady={props.channelDataReady}
+                handleChangeToImage={props.handleChangeToImage}
+                updateChannelTransferFunction={props.updateChannelTransferFunction}
+                changeOneChannelSetting={props.changeOneChannelSetting}
+                onColorChangeComplete={props.onColorChangeComplete}
+                onApplyColorPresets={props.onApplyColorPresets}
+                style={STYLES.channelsWidget}
+                renderConfig={renderConfig}
+                filterFunc={props.filterFunc}
+                viewerChannelSettings={viewerChannelSettings}
+              />
+              <GlobalVolumeControls
+                mode={props.mode}
+                imageName={props.imageName}
+                pixelSize={props.pixelSize}
+                handleChangeUserSelection={props.handleChangeUserSelection}
+                setImageAxisClip={props.setImageAxisClip}
+                makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
+                alphaMaskSliderLevel={props.alphaMaskSliderLevel}
+                brightnessSliderLevel={props.brightnessSliderLevel}
+                densitySliderLevel={props.densitySliderLevel}
+                gammaSliderLevel={props.gammaSliderLevel}
+                maxProjectOn={props.maxProjectOn}
+                pathTraceOn={props.pathTraceOn}
+                renderConfig={renderConfig}
+              />
+              <CustomizeWidget
+                backgroundColor={props.backgroundColor}
+                boundingBoxColor={props.boundingBoxColor}
+                changeBackgroundColor={props.changeBackgroundColor}
+                changeBoundingBoxColor={props.changeBoundingBoxColor}
+                showBoundingBox={props.showBoundingBox}
+              />
+            </div>
+          )}
+        </Card>
+      </div>
+    </div>
   );
 }
 
