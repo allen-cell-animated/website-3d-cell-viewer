@@ -2,53 +2,21 @@ import React, { useState } from "react";
 
 import { Card, Button, Dropdown, Icon, Menu } from "antd";
 
-import ChannelsWidget from "../ChannelsWidget";
-import GlobalVolumeControls from "../GlobalVolumeControls";
-import CustomizeWidget from "../CustomizeWidget";
+import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
+import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
+import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
 
 import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 
-interface ControlPanelProps {
-  renderConfig: any;
-
-  imageName: string;
+interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
-  pixelSize: [number, number, number];
-  channelDataChannels: any; // TODO
-  channelGroupedByType: { [key: string]: number[] };
-  channelDataReady: { [key: string]: boolean };
-
-  maxProjectOn: boolean;
-  pathTraceOn: boolean;
-  channelSettings: any; // TODO
-  mode: symbol;
-  showBoundingBox: boolean;
-  backgroundColor: [number, number, number];
-  boundingBoxColor: [number, number, number];
-
-  alphaMaskSliderLevel: number[];
-  brightnessSliderLevel: number[];
-  densitySliderLevel: number[];
-  gammaSliderLevel: [number, number, number];
-
+  renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
+    colorPresetsDropdown: boolean;
+  };
   collapsed: boolean;
-
   setCollapsed: (value: boolean) => void;
-  handleChangeUserSelection: (key: string, newValue: any) => void;
-  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
-  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
-  setImageAxisClip: (axis: number, minval: number, maxval: number, isOrthoAxis: boolean) => void;
-  onApplyColorPresets: (presets: [number, number, number, number?][]) => void;
-  makeUpdatePixelSizeFn: (i: number) => void;
-  changeChannelSettings: (indices: number[], keyToChange: string, newValue: any) => void;
-  changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
-  changeBackgroundColor: (color: [number, number, number]) => void;
-  changeBoundingBoxColor: (color: [number, number, number]) => void;
-  onColorChangeComplete?: any; // TODO
-  filterFunc?: any; // TODO
-  viewerChannelSettings: any; // TODO
 }
 
 const enum ControlTab {
@@ -127,8 +95,6 @@ export default function ControlPanel(props: ControlPanelProps) {
                   changeOneChannelSetting={props.changeOneChannelSetting}
                   onColorChangeComplete={props.onColorChangeComplete}
                   onApplyColorPresets={props.onApplyColorPresets}
-                  style={STYLES.channelsWidget}
-                  renderConfig={renderConfig}
                   filterFunc={props.filterFunc}
                   viewerChannelSettings={viewerChannelSettings}
                 />
@@ -166,19 +132,3 @@ export default function ControlPanel(props: ControlPanelProps) {
     </div>
   );
 }
-
-const STYLES = {
-  channelsWidget: {
-    padding: 0,
-  },
-  noImage: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-    height: "100%",
-  },
-  button: {
-    margin: "auto",
-  },
-};

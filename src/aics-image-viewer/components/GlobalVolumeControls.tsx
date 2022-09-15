@@ -13,7 +13,30 @@ import {
 } from "../shared/constants";
 const Panel = Collapse.Panel;
 
-export default class GlobalVolumeControls extends React.Component {
+export interface GlobalVolumeControlsProps {
+  mode: symbol;
+  imageName: string;
+  pixelSize: [number, number, number];
+  maxProjectOn: boolean;
+  pathTraceOn: boolean;
+  renderConfig: {
+    alphaMask: boolean;
+    brightnessSlider: boolean;
+    densitySlider: boolean;
+    levelsSliders: boolean;
+  };
+
+  alphaMaskSliderLevel: number[];
+  brightnessSliderLevel: number[];
+  densitySliderLevel: number[];
+  gammaSliderLevel: [number, number, number];
+
+  handleChangeUserSelection: (key: string, newValue: any) => void;
+  setImageAxisClip: (axis: number, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  makeUpdatePixelSizeFn: (i: number) => void;
+}
+
+export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
   constructor(props) {
     super(props);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
@@ -141,7 +164,7 @@ export default class GlobalVolumeControls extends React.Component {
 
   createSlider(start, range, onUpdate) {
     return (
-      <Nouislider range={range} start={start} connect={true} tooltips={true} behavior="drag" onUpdate={onUpdate} />
+      <Nouislider range={range} start={start} connect={true} tooltips={true} behaviour="drag" onUpdate={onUpdate} />
     );
   }
 
@@ -154,10 +177,9 @@ export default class GlobalVolumeControls extends React.Component {
         title="Global volume rendering adjustments"
         type="inner"
         className="global-volume-controls"
-        bodyStyle={STYLES.card}
       >
         <Collapse bordered={false}>
-          <Panel key="gobal-volume">
+          <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
               {renderConfig.alphaMask && this.createMaskAlphaSlider()}
               {renderConfig.brightnessSlider && this.createBrightnessSlider()}
@@ -182,7 +204,7 @@ const STYLES = {
   },
   controlName: {
     flex: 2,
-    whiteSpace: "nowrap",
+    "white-space": "nowrap",
   },
   control: {
     flex: 5,

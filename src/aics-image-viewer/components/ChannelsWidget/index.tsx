@@ -20,7 +20,46 @@ import "./styles.css";
 
 const { Panel } = Collapse;
 
-export default class ChannelsWidget extends React.Component {
+import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+
+interface ChannelSettings {
+  name: string;
+  enabled: boolean;
+  volumeEnabled: boolean;
+  isosurfaceEnabled: boolean;
+  isovalue: number;
+  opacity: number;
+  color: [number, number, number];
+  dataReady: boolean;
+  controlPoints: [];
+}
+
+type RGBColor = {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+};
+
+export interface ChannelsWidgetProps {
+  imageName: string;
+  channelSettings: ChannelSettings[];
+  channelDataChannels: any; // volume-viewer Channel type
+  channelGroupedByType: { [key: string]: number[] };
+  channelDataReady: { [key: string]: boolean };
+  viewerChannelSettings?: ViewerChannelSettings;
+
+  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  changeChannelSettings: (indices: number[], keyToChange: string, newValue: any) => void;
+  changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
+  onApplyColorPresets: (presets: [number, number, number, number?][]) => void;
+  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
+
+  filterFunc?: (key: string) => boolean;
+  onColorChangeComplete?: (newRGB: RGBColor, oldRGB: RGBColor, index: number) => void;
+}
+
+export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
   constructor(props) {
     super(props);
     this.renderVisibilityControls = this.renderVisibilityControls.bind(this);
@@ -100,11 +139,11 @@ export default class ChannelsWidget extends React.Component {
           key={key}
         >
           <Collapse bordered={false} defaultActiveKey={key === firstKey ? key : ""}>
-            <Panel key={key}>
+            <Panel key={key} header={null}>
               <List
                 itemLayout="horizontal"
                 dataSource={channelArray}
-                renderItem={(actualIndex) => {
+                renderItem={(actualIndex: number) => {
                   const thisChannelSettings = find(
                     channelSettings,
                     (channel) => channel.name === channelDataChannels[actualIndex].name
