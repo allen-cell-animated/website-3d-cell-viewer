@@ -39,8 +39,8 @@ export interface CustomizeWidgetProps {
 export default function CustomizeWidget(props: CustomizeWidgetProps) {
   return (
     <Card bordered={false} title="Customize" type="inner" className="color-customizer">
-      <Collapse bordered={false}>
-        <Collapse.Panel key={"color-customization"} header={null}>
+      <Collapse bordered={false} defaultActiveKey="color-customization">
+        <Collapse.Panel key="color-customization" header={null}>
           <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
             Background color
           </ColorPickerRow>

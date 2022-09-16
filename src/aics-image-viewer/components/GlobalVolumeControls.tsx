@@ -178,7 +178,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
         type="inner"
         className="global-volume-controls"
       >
-        <Collapse bordered={false}>
+        <Collapse bordered={false} defaultActiveKey="global-volume">
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
               {renderConfig.alphaMask && this.createMaskAlphaSlider()}
