@@ -13,8 +13,31 @@ import {
 } from "../shared/constants";
 const Panel = Collapse.Panel;
 
-export default class GlobalVolumeControls extends React.Component {
-  constructor(props) {
+export interface GlobalVolumeControlsProps {
+  mode: symbol;
+  imageName: string;
+  pixelSize: [number, number, number];
+  maxProjectOn: boolean;
+  pathTraceOn: boolean;
+  renderConfig: {
+    alphaMask: boolean;
+    brightnessSlider: boolean;
+    densitySlider: boolean;
+    levelsSliders: boolean;
+  };
+
+  alphaMaskSliderLevel: number[];
+  brightnessSliderLevel: number[];
+  densitySliderLevel: number[];
+  gammaSliderLevel: [number, number, number];
+
+  handleChangeUserSelection: (key: string, newValue: any) => void;
+  setImageAxisClip: (axis: number, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  makeUpdatePixelSizeFn: (i: number) => void;
+}
+
+export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
+  constructor(props: GlobalVolumeControlsProps) {
     super(props);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
@@ -23,7 +46,7 @@ export default class GlobalVolumeControls extends React.Component {
     this.createMaskAlphaSlider = this.createMaskAlphaSlider.bind(this);
   }
 
-  shouldComponentUpdate(newProps) {
+  shouldComponentUpdate(newProps: GlobalVolumeControlsProps) {
     const { imageName, alphaMaskSliderLevel, pathTraceOn } = this.props;
     const newImage = newProps.imageName !== imageName;
     const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
@@ -31,7 +54,7 @@ export default class GlobalVolumeControls extends React.Component {
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  onAlphaSliderUpdate(values) {
+  onAlphaSliderUpdate(values: [number]) {
     this.props.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -48,7 +71,7 @@ export default class GlobalVolumeControls extends React.Component {
     return this.createSliderRow(config);
   }
 
-  onBrightnessUpdate(values) {
+  onBrightnessUpdate(values: [number]) {
     this.props.handleChangeUserSelection(BRIGHTNESS_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -65,7 +88,7 @@ export default class GlobalVolumeControls extends React.Component {
     return this.createSliderRow(config);
   }
 
-  onDensityUpdate(values) {
+  onDensityUpdate(values: [number]) {
     this.props.handleChangeUserSelection(DENSITY_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -82,7 +105,7 @@ export default class GlobalVolumeControls extends React.Component {
     return this.createSliderRow(config);
   }
 
-  onLevelsUpdate(values) {
+  onLevelsUpdate(values: [number, number, number]) {
     this.props.handleChangeUserSelection(LEVELS_SLIDER, [Number(values[0]), Number(values[1]), Number(values[2])]);
   }
 
@@ -99,6 +122,7 @@ export default class GlobalVolumeControls extends React.Component {
     return this.createSliderRow(config);
   }
 
+  // TODO: `config` object has no type annotation; this component deserves some DRY edits that may reduce it out
   createVolumeAxisScaling(config) {
     const { pixelSize } = this.props;
     const SCALE_UI_MIN_VAL = 0.001;
@@ -139,9 +163,9 @@ export default class GlobalVolumeControls extends React.Component {
     );
   }
 
-  createSlider(start, range, onUpdate) {
+  createSlider(start: number[], range: { min: number; max: number }, onUpdate: (values: number[]) => void) {
     return (
-      <Nouislider range={range} start={start} connect={true} tooltips={true} behavior="drag" onUpdate={onUpdate} />
+      <Nouislider range={range} start={start} connect={true} tooltips={true} behaviour="drag" onUpdate={onUpdate} />
     );
   }
 
@@ -149,15 +173,9 @@ export default class GlobalVolumeControls extends React.Component {
     if (!this.props.imageName) return null;
     const { renderConfig } = this.props;
     return (
-      <Card
-        bordered={false}
-        title="Global volume rendering adjustments"
-        type="inner"
-        className="global-volume-controls"
-        bodyStyle={STYLES.card}
-      >
-        <Collapse bordered={false}>
-          <Panel key="gobal-volume">
+      <Card bordered={false} title="Rendering adjustments" type="inner" className="global-volume-controls">
+        <Collapse bordered={false} defaultActiveKey="global-volume">
+          <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
               {renderConfig.alphaMask && this.createMaskAlphaSlider()}
               {renderConfig.brightnessSlider && this.createBrightnessSlider()}
@@ -175,6 +193,7 @@ const STYLES = {
   slidersWrapper: {
     width: "calc(100% - 20px)",
     margin: "auto",
+    paddingTop: "18px",
   },
   controlRow: {
     height: "3em",
@@ -182,7 +201,7 @@ const STYLES = {
   },
   controlName: {
     flex: 2,
-    whiteSpace: "nowrap",
+    whiteSpace: "nowrap" as "nowrap",
   },
   control: {
     flex: 5,

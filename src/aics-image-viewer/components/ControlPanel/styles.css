@@ -1,7 +1,67 @@
 @import "../../assets/styles/noui-slider-override";
 @import "../../assets/styles/variables.css";
-::-webkit-scrollbar {
-  display: none;
+
+.control-panel-col-container {
+  display: flex;
+  height: 100%;
+
+  .control-panel-tab-col,
+  .control-panel-col {
+    border-right: 1px solid $border-color;
+  }
+
+  .control-panel-tab-col {
+    text-align: center;
+
+    .ant-btn {
+      margin-top: 5px;
+      background-color: transparent;
+      border: none;
+      color: #bfbfbf;
+
+      &:not([disabled]):hover,
+      &:not([disabled]).btn-tabactive {
+        color: white;
+        background-color: #4b4b4b;
+        border: 1px solid #6e6e6e;
+      }
+
+      &[ant-click-animating-without-extra-node="true"]::after {
+        box-shadow: none !important;
+        background-color: $light-gray;
+      }
+    }
+
+    .btn-collapse {
+      svg {
+        transform: rotate(0deg);
+        transition: transform 0.2s linear;
+      }
+      &.btn-collapse-collapsed svg {
+        transform: rotate(180deg);
+      }
+    }
+
+    .tab-divider {
+      width: 70%;
+      margin: 5px 15% 0;
+      border-bottom: 1px solid $border-color;
+    }
+  }
+
+  .control-panel-col {
+    overflow-y: scroll;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .control-panel-title {
+      margin: 16px;
+      font-size: 1.4em;
+    }
+  }
 }
 
 .control-panel {
@@ -14,15 +74,8 @@
     border-bottom: none;
   }
 
-  .ant-card-meta {
-    margin: 0px;
-  }
-
-  .ant-card-meta-title {
-    margin: 0px;
-    padding: 0px 24px 16px 24px;
-    display: flex;
-    justify-content: space-between;
+  .ant-card-head-title {
+    padding-top: 0;
   }
 
   .ant-card-body {
