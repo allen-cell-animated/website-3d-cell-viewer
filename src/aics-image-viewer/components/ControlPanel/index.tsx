@@ -77,7 +77,7 @@ export default function ControlPanel(props: ControlPanelProps) {
           onClick={() => setTab(ControlTab.Advanced)}
         />
       </div>
-      <div className="control-panel-col" style={{ flex: "1 1 auto" }}>
+      <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2>{ControlTabNames[tab]}</h2>
         <Card
           bordered={false}
