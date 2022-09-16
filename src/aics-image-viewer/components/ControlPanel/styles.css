@@ -12,12 +12,17 @@
   .control-panel-col.control-panel-tab-col {
     text-align: center;
 
-    .btn-borderless {
+    .ant-btn {
       margin-top: 5px;
+      background-color: transparent;
+      border: none;
+      color: #bfbfbf;
 
-      &:not(:hover) {
-        background-color: transparent;
-        border: none;
+      &:not([disabled]):hover,
+      &:not([disabled]).btn-tabactive {
+        color: white;
+        background-color: #4b4b4b;
+        border: 1px solid #6e6e6e;
       }
 
       &[ant-click-animating-without-extra-node="true"]::after {

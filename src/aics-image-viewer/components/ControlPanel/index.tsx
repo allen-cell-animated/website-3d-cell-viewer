@@ -55,21 +55,19 @@ export default function ControlPanel(props: ControlPanelProps) {
         <Button
           icon="vertical-right"
           size="large"
-          className={"btn-borderless btn-collapse" + (props.collapsed ? " btn-collapse-collapsed" : "")}
+          className={props.collapsed ? "btn-collapse btn-collapse-collapsed" : "btn-collapse"}
           onClick={() => props.setCollapsed(!props.collapsed)}
         />
         <div className="tab-divider" />
         <Button
           icon="unordered-list"
-          size="large"
-          className={tab === ControlTab.Channels ? "btn-borderless btn-tabactive" : "btn-borderless"}
+          className={tab === ControlTab.Channels ? "btn-tabactive" : ""}
           disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Channels)}
         />
         <Button
           icon="control"
-          size="large"
-          className={tab === ControlTab.Advanced ? "btn-borderless btn-tabactive" : "btn-borderless"}
+          className={tab === ControlTab.Advanced ? "btn-tabactive" : ""}
           disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Advanced)}
         />
