@@ -24,6 +24,11 @@ const enum ControlTab {
   Advanced,
 }
 
+const ControlTabNames = {
+  [ControlTab.Channels]: "Channel Settings",
+  [ControlTab.Advanced]: "Advanced Settings",
+};
+
 export default function ControlPanel(props: ControlPanelProps) {
   const [tab, setTab] = useState(ControlTab.Channels);
 
@@ -73,6 +78,7 @@ export default function ControlPanel(props: ControlPanelProps) {
         />
       </div>
       <div className="control-panel-col" style={{ flex: "1 1 auto" }}>
+        <h2>{ControlTabNames[tab]}</h2>
         <Card
           bordered={false}
           className="control-panel"

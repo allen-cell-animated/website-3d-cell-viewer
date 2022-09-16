@@ -7,6 +7,10 @@
 
   .control-panel-col {
     border-right: 1px solid $border-color;
+
+    > h2 {
+      margin: 16px;
+    }
   }
 
   .control-panel-col.control-panel-tab-col {
@@ -59,15 +63,8 @@
     border-bottom: none;
   }
 
-  .ant-card-meta {
-    margin: 0px;
-  }
-
-  .ant-card-meta-title {
-    margin: 0px;
-    padding: 0px 24px 16px 24px;
-    display: flex;
-    justify-content: space-between;
+  .ant-card-head-title {
+    padding-top: 0;
   }
 
   .ant-card-body {
