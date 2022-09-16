@@ -3,17 +3,14 @@
 
 .control-panel-col-container {
   display: flex;
-  min-height: 100%;
+  height: 100%;
 
+  .control-panel-tab-col,
   .control-panel-col {
     border-right: 1px solid $border-color;
-
-    > h2 {
-      margin: 16px;
-    }
   }
 
-  .control-panel-col.control-panel-tab-col {
+  .control-panel-tab-col {
     text-align: center;
 
     .ant-btn {
@@ -49,6 +46,19 @@
       width: 70%;
       margin: 5px 15% 0;
       border-bottom: 1px solid $border-color;
+    }
+  }
+
+  .control-panel-col {
+    overflow-y: scroll;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    > h2 {
+      margin: 16px;
     }
   }
 }

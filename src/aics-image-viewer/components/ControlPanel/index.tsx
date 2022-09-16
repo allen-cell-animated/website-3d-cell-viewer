@@ -56,7 +56,7 @@ export default function ControlPanel(props: ControlPanelProps) {
 
   return (
     <div className="control-panel-col-container">
-      <div className="control-panel-col control-panel-tab-col" style={{ flex: "0 0 50px" }}>
+      <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
         <Button
           icon="vertical-right"
           size="large"

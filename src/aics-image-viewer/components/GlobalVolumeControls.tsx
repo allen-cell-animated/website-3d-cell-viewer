@@ -172,12 +172,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     if (!this.props.imageName) return null;
     const { renderConfig } = this.props;
     return (
-      <Card
-        bordered={false}
-        title="Global volume rendering adjustments"
-        type="inner"
-        className="global-volume-controls"
-      >
+      <Card bordered={false} title="Rendering adjustments" type="inner" className="global-volume-controls">
         <Collapse bordered={false} defaultActiveKey="global-volume">
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
@@ -197,6 +192,7 @@ const STYLES = {
   slidersWrapper: {
     width: "calc(100% - 20px)",
     margin: "auto",
+    paddingTop: "18px",
   },
   controlRow: {
     height: "3em",
