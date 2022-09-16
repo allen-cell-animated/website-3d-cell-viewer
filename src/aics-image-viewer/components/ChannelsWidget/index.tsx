@@ -44,7 +44,7 @@ type RGBColor = {
 export interface ChannelsWidgetProps {
   imageName: string;
   channelSettings: ChannelSettings[];
-  channelDataChannels: any; // volume-viewer Channel type
+  channelDataChannels: any[]; // volume-viewer Channel type
   channelGroupedByType: { [key: string]: number[] };
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
@@ -60,7 +60,7 @@ export interface ChannelsWidgetProps {
 }
 
 export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
-  constructor(props) {
+  constructor(props: ChannelsWidgetProps) {
     super(props);
     this.renderVisibilityControls = this.renderVisibilityControls.bind(this);
     this.showVolumes = this.showVolumes.bind(this);
@@ -69,31 +69,31 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
     this.hideSurfaces = this.hideSurfaces.bind(this);
   }
 
-  showVolumes(channelArray) {
+  showVolumes(channelArray: number[]) {
     this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, true);
   }
 
-  showSurfaces(channelArray) {
+  showSurfaces(channelArray: number[]) {
     this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, true);
   }
 
-  hideVolumes(channelArray) {
+  hideVolumes(channelArray: number[]) {
     this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, false);
   }
 
-  hideSurfaces(channelArray) {
+  hideSurfaces(channelArray: number[]) {
     this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
   }
 
-  renderVisibilityControls(key, channelArray) {
+  renderVisibilityControls(channelArray: number[]) {
     const { channelSettings, channelDataChannels } = this.props;
 
-    const arrayOfNames = map(channelArray, (channelIndex) => channelDataChannels[channelIndex].name);
-    const volChecked = filter(arrayOfNames, (name) =>
-      find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[VOLUME_ENABLED] : false
+    const arrayOfNames = map(channelArray, (channelIndex: number) => channelDataChannels[channelIndex].name);
+    const volChecked = filter(arrayOfNames, (name: string) =>
+      find(channelSettings, { name }) ? find(channelSettings, { name })[VOLUME_ENABLED] : false
     );
-    const isoChecked = filter(arrayOfNames, (name) =>
-      find(channelSettings, { name: name }) ? find(channelSettings, { name: name })[ISO_SURFACE_ENABLED] : false
+    const isoChecked = filter(arrayOfNames, (name: string) =>
+      find(channelSettings, { name }) ? find(channelSettings, { name })[ISO_SURFACE_ENABLED] : false
     );
     return (
       <div style={STYLES.buttonRow}>
@@ -126,18 +126,12 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
       viewerChannelSettings,
     } = this.props;
     const firstKey = Object.keys(channelGroupedByType)[0];
-    return map(channelGroupedByType, (channelArray, key) => {
+    return map(channelGroupedByType, (channelArray: number[], key: string) => {
       if (!channelArray.length || (filterFunc && !filterFunc(key))) {
         return null;
       }
       return (
-        <Card
-          bordered={false}
-          title={key}
-          extra={this.renderVisibilityControls(key, channelArray)}
-          type="inner"
-          key={key}
-        >
+        <Card bordered={false} title={key} extra={this.renderVisibilityControls(channelArray)} type="inner" key={key}>
           <Collapse bordered={false} defaultActiveKey={key === firstKey ? key : ""}>
             <Panel key={key} header={null}>
               <List
@@ -146,7 +140,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                 renderItem={(actualIndex: number) => {
                   const thisChannelSettings = find(
                     channelSettings,
-                    (channel) => channel.name === channelDataChannels[actualIndex].name
+                    (channel: ChannelSettings) => channel.name === channelDataChannels[actualIndex].name
                   );
 
                   return thisChannelSettings ? (

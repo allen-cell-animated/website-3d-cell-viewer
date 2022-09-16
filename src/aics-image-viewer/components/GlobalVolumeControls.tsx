@@ -37,7 +37,7 @@ export interface GlobalVolumeControlsProps {
 }
 
 export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
-  constructor(props) {
+  constructor(props: GlobalVolumeControlsProps) {
     super(props);
     this.onAlphaSliderUpdate = this.onAlphaSliderUpdate.bind(this);
     this.onBrightnessUpdate = this.onBrightnessUpdate.bind(this);
@@ -46,7 +46,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     this.createMaskAlphaSlider = this.createMaskAlphaSlider.bind(this);
   }
 
-  shouldComponentUpdate(newProps) {
+  shouldComponentUpdate(newProps: GlobalVolumeControlsProps) {
     const { imageName, alphaMaskSliderLevel, pathTraceOn } = this.props;
     const newImage = newProps.imageName !== imageName;
     const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
@@ -54,7 +54,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  onAlphaSliderUpdate(values) {
+  onAlphaSliderUpdate(values: [number]) {
     this.props.handleChangeUserSelection(ALPHA_MASK_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -71,7 +71,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return this.createSliderRow(config);
   }
 
-  onBrightnessUpdate(values) {
+  onBrightnessUpdate(values: [number]) {
     this.props.handleChangeUserSelection(BRIGHTNESS_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -88,7 +88,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return this.createSliderRow(config);
   }
 
-  onDensityUpdate(values) {
+  onDensityUpdate(values: [number]) {
     this.props.handleChangeUserSelection(DENSITY_SLIDER_LEVEL, [Number(values[0])]);
   }
 
@@ -105,7 +105,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return this.createSliderRow(config);
   }
 
-  onLevelsUpdate(values) {
+  onLevelsUpdate(values: [number, number, number]) {
     this.props.handleChangeUserSelection(LEVELS_SLIDER, [Number(values[0]), Number(values[1]), Number(values[2])]);
   }
 
@@ -122,6 +122,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return this.createSliderRow(config);
   }
 
+  // TODO: `config` object has no type annotation; this component deserves some DRY edits that may reduce it out
   createVolumeAxisScaling(config) {
     const { pixelSize } = this.props;
     const SCALE_UI_MIN_VAL = 0.001;
@@ -162,7 +163,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     );
   }
 
-  createSlider(start, range, onUpdate) {
+  createSlider(start: number[], range: { min: number; max: number }, onUpdate: (values: number[]) => void) {
     return (
       <Nouislider range={range} start={start} connect={true} tooltips={true} behaviour="drag" onUpdate={onUpdate} />
     );
