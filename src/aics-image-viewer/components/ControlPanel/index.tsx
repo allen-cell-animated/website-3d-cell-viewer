@@ -78,7 +78,7 @@ export default function ControlPanel(props: ControlPanelProps) {
         />
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
-        <h2>{ControlTabNames[tab]}</h2>
+        <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
         <Card
           bordered={false}
           className="control-panel"

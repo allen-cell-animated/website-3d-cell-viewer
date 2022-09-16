@@ -57,8 +57,9 @@
       display: none;
     }
 
-    > h2 {
+    .control-panel-title {
       margin: 16px;
+      font-size: 1.4em;
     }
   }
 }
