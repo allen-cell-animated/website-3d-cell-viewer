@@ -201,7 +201,7 @@ const STYLES = {
   },
   controlName: {
     flex: 2,
-    "white-space": "nowrap",
+    whiteSpace: "nowrap" as "nowrap",
   },
   control: {
     flex: 5,
