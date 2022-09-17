@@ -44,6 +44,10 @@
     &:focus {
       color: #aeacae;
     }
+
+    &:hover {
+      color: white;
+    }
   }
 
   .options-button {
@@ -57,7 +61,7 @@
 
   .button-arrow {
     transform: rotate(90deg);
-    transition: transform 0.2s linear;
+    transition: transform 0.2s linear !important;
   }
 
   .drawer-body-wrapper {

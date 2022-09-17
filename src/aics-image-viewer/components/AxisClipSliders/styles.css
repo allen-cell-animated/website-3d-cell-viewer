@@ -7,8 +7,8 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
-  /* .axis-slider (480) + .slider-name (10) + .slider-slices (95) + margins & padding (80) */
-  max-width: 665px;
+  /* .axis-slider (480) + .slider-name (10) + .slider-slices (105) + margins & padding (80) */
+  max-width: 675px;
   position: absolute;
   margin: 0 auto;
   left: 0;
@@ -75,10 +75,11 @@
   }
 
   .slider-slices {
-    flex: 0 0 95px;
+    flex: 0 0 105px;
     margin-left: 10px;
+    white-space: nowrap;
     text-align: right;
-    max-width: 95px;
+    max-width: 105px;
   }
 
   .slider-play-buttons {
