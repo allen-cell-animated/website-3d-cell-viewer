@@ -465,9 +465,67 @@ body{
 /*!******************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/ControlPanel/styles.css ***!
   \******************************************************************************************************************************************************/
-::-webkit-scrollbar{
-  display:none;
+.control-panel-col-container{
+  display:flex;
+  height:100%;
 }
+
+  .control-panel-col-container .control-panel-tab-col,
+  .control-panel-col-container .control-panel-col{
+    border-right:1px solid #6e6e6e;
+  }
+
+  .control-panel-col-container .control-panel-tab-col{
+    text-align:center;
+  }
+
+  .control-panel-col-container .control-panel-tab-col .ant-btn{
+      margin-top:5px;
+      background-color:transparent;
+      border:none;
+      color:#bfbfbf;
+    }
+
+  .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]):hover,
+      .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]).btn-tabactive{
+        color:white;
+        background-color:#4b4b4b;
+        border:1px solid #6e6e6e;
+      }
+
+  .control-panel-col-container .control-panel-tab-col .ant-btn[ant-click-animating-without-extra-node="true"]::after{
+        box-shadow:none !important;
+        background-color:#aeacae;
+      }
+
+  .control-panel-col-container .control-panel-tab-col .btn-collapse svg{
+        transform:rotate(0deg);
+        transition:transform 0.2s linear;
+      }
+
+  .control-panel-col-container .control-panel-tab-col .btn-collapse.btn-collapse-collapsed svg{
+        transform:rotate(180deg);
+      }
+
+  .control-panel-col-container .control-panel-tab-col .tab-divider{
+      width:70%;
+      margin:5px 15% 0;
+      border-bottom:1px solid #6e6e6e;
+    }
+
+  .control-panel-col-container .control-panel-col{
+    overflow-y:scroll;
+    scrollbar-width:none;
+  }
+
+  .control-panel-col-container .control-panel-col::-webkit-scrollbar{
+      display:none;
+    }
+
+  .control-panel-col-container .control-panel-col .control-panel-title{
+      margin:16px;
+      font-size:1.4em;
+    }
 .control-panel{
   flex:1 auto;
   order:1;
@@ -477,14 +535,8 @@ body{
     border-radius:0;
     border-bottom:none;
   }
-.control-panel .ant-card-meta{
-    margin:0px;
-  }
-.control-panel .ant-card-meta-title{
-    margin:0px;
-    padding:0px 24px 16px 24px;
-    display:flex;
-    justify-content:space-between;
+.control-panel .ant-card-head-title{
+    padding-top:0;
   }
 .control-panel .ant-card-body{
     padding:0;
@@ -923,9 +975,6 @@ body{
   .cell-viewer-app .control-panel-holder{
     overflow:visible;
   }
-  .cell-viewer-app .control-panel-holder .ant-layout-sider-children{
-      overflow-y:scroll;
-    }
 
 .cell-viewer-wrapper{
   overflow-y:hidden;
