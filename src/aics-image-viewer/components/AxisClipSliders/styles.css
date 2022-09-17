@@ -110,8 +110,8 @@
   .slider-play-buttons .ant-btn {
     line-height: 1.2;
     height: 21px;
-    color: $dimgray;
-    border-color: $dimgray !important;
+    color: $light-gray;
+    border-color: $light-gray !important;
     background-color: transparent;
 
     &:hover {
