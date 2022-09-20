@@ -1,7 +1,7 @@
 import { mapValues } from "lodash";
 import { Button, Tooltip } from "antd";
-import Nouislider from "nouislider-react";
-import "nouislider/distribute/nouislider.css";
+// import Nouislider from "nouislider-react";
+import SliderWrapper from "./SliderWrapper";
 
 import React from "react";
 
@@ -15,7 +15,7 @@ const PLAY_RATE_MS_PER_STEP = 125;
 
 interface AxisClipSlidersProps {
   mode: symbol;
-  setAxisClip(axis: string, minval: number, maxval: number, isOrthoAxis: boolean): void;
+  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   numSlices: {
     x: number;
     y: number;
@@ -143,7 +143,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
           <span className="axis-slider">
-            <Nouislider
+            <SliderWrapper
               connect={true}
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
@@ -151,7 +151,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               behaviour="drag"
               // round slider output to nearest slice; assume any string inputs represent ints
               format={{ to: Math.round, from: parseInt }}
-              onUpdate={this.makeSliderUpdateFn(axis)}
+              onSlide={this.makeSliderSlideFn(axis)}
               onSet={this.makeSliderSetFn(axis)}
             />
           </span>
@@ -179,7 +179,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  makeSliderUpdateFn(axis: string) {
+  makeSliderSlideFn(axis: string) {
     return (values: number[]) => {
       if (this.props.setAxisClip) {
         // get a value from -0.5..0.5
@@ -191,11 +191,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
         const isActiveAxis = this.getActiveAxis() === axis;
         this.props.setAxisClip(axis, start, end, isActiveAxis);
+        this.setSliderState(axis, [values[0], values[values.length - 1]]);
       }
     };
   }
 
   // When user finishes moving the active slider, update slice label
+  // TODO this can likely be removed? unless you find a reason it should stay
   makeSliderSetFn(axis: string) {
     // Values may be of length 1 or 2 (see above, in makeSliderUpdateFn); ensure we pass 2 values regardless
     return (values: number[]) => this.setSliderState(axis, [values[0], values[values.length - 1]]);
