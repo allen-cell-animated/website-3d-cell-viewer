@@ -1,7 +1,6 @@
 import { mapValues } from "lodash";
 import { Button, Tooltip } from "antd";
-import Nouislider from "nouislider-react";
-import "nouislider/distribute/nouislider.css";
+import SmarterSlider from "../shared/SmarterSlider";
 
 import React from "react";
 
@@ -15,7 +14,7 @@ const PLAY_RATE_MS_PER_STEP = 125;
 
 interface AxisClipSlidersProps {
   mode: symbol;
-  setAxisClip(axis: string, minval: number, maxval: number, isOrthoAxis: boolean): void;
+  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   numSlices: {
     x: number;
     y: number;
@@ -61,16 +60,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     if (numSlicesChanged || prevProps.mode !== this.props.mode) {
       window.clearInterval(this.state.intervalId);
       this.setState({ sliders: this.getSliderDefaults(), playing: false });
-
-      // Missing sliders in 2D mode won't call an update; do it for them
-      const activeAxis = this.getActiveAxis();
-      if (activeAxis) {
-        AXES.forEach((axis) => {
-          if (axis !== activeAxis) {
-            this.props.setAxisClip(axis, -0.5, 0.5, false);
-          }
-        });
-      }
+      AXES.forEach((axis) => this.props.setAxisClip(axis, -0.5, 0.5, false));
     }
   }
 
@@ -143,7 +133,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
           <span className="axis-slider">
-            <Nouislider
+            <SmarterSlider
               connect={true}
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
@@ -151,8 +141,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               behaviour="drag"
               // round slider output to nearest slice; assume any string inputs represent ints
               format={{ to: Math.round, from: parseInt }}
-              onUpdate={this.makeSliderUpdateFn(axis)}
-              onSet={this.makeSliderSetFn(axis)}
+              onSlide={this.makeSliderSlideFn(axis)}
             />
           </span>
           <span className="slider-name">{axis.toUpperCase()}</span>
@@ -179,26 +168,20 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  makeSliderUpdateFn(axis: string) {
+  makeSliderSlideFn(axis: string) {
     return (values: number[]) => {
       if (this.props.setAxisClip) {
+        // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
+        this.setSliderState(axis, [values[0], values[values.length - 1]]);
+
         // get a value from -0.5..0.5
         const max = this.props.numSlices[axis];
         const start = values[0] / max - 0.5;
-        // values.length is the number of handles on this slider:
-        // either one handle (2d mode), or a range with 2 handles (3d mode)
-        const end = (values[values.length - 1] + 1) / max - 0.5;
-
+        const end = (values[values.length - 1] + 1) / max - 0.5; // either range max or same handle as start (see above)
         const isActiveAxis = this.getActiveAxis() === axis;
         this.props.setAxisClip(axis, start, end, isActiveAxis);
       }
     };
-  }
-
-  // When user finishes moving the active slider, update slice label
-  makeSliderSetFn(axis: string) {
-    // Values may be of length 1 or 2 (see above, in makeSliderUpdateFn); ensure we pass 2 values regardless
-    return (values: number[]) => this.setSliderState(axis, [values[0], values[values.length - 1]]);
   }
 
   render() {

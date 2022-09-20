@@ -1,8 +1,21 @@
 import React from "react";
 import { Checkbox } from "antd";
 
-export default class SharedCheckbox extends React.Component {
-  constructor(props) {
+type SharedCheckboxProps<T> = React.PropsWithChildren<{
+  allOptions: T[];
+  checkedList: T[];
+  onChecked: (checked: T[]) => void;
+  onUnchecked: (unchecked: T[]) => void;
+}>;
+
+type SharedCheckboxState<T> = {
+  checkedList: T[];
+  indeterminate: boolean;
+  checkAll: boolean;
+};
+
+export default class SharedCheckbox<T> extends React.Component<SharedCheckboxProps<T>, SharedCheckboxState<T>> {
+  constructor(props: SharedCheckboxProps<T>) {
     super(props);
     this.onCheckAllChange = this.onCheckAllChange.bind(this);
     this.state = {
@@ -12,18 +25,19 @@ export default class SharedCheckbox extends React.Component {
     };
   }
 
-  componentWillReceiveProps(newProps) {
+  // TODO: Is this component's derived state strictly necessary? Can some or all of it be removed?
+  static getDerivedStateFromProps(newProps: SharedCheckboxProps<any>) {
     const { checkedList, allOptions } = newProps;
-    this.setState({
+    return {
       checkedList,
       indeterminate: !!checkedList.length && checkedList.length < allOptions.length,
       checkAll: checkedList.length === allOptions.length,
-    });
+    };
   }
 
   onCheckAllChange({ target }) {
-    const { allOptions, onChecked, onUnchecekd } = this.props;
-    target.checked ? onChecked(allOptions) : onUnchecekd(allOptions);
+    const { allOptions, onChecked, onUnchecked } = this.props;
+    target.checked ? onChecked(allOptions) : onUnchecked(allOptions);
     this.setState({
       checkedList: target.checked ? allOptions : [],
       indeterminate: false,
@@ -32,7 +46,6 @@ export default class SharedCheckbox extends React.Component {
   }
 
   render() {
-    const { label } = this.props;
     return (
       <Checkbox
         indeterminate={this.state.indeterminate}
@@ -40,7 +53,7 @@ export default class SharedCheckbox extends React.Component {
         checked={this.state.checkAll}
         style={{ margin: "auto", width: 120 }}
       >
-        {label}
+        {this.props.children}
       </Checkbox>
     );
   }
