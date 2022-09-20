@@ -59,24 +59,23 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     if (numSlicesChanged || prevProps.mode !== this.props.mode) {
       window.clearInterval(this.state.intervalId);
-      this.setState({ sliders: this.getSliderDefaults(), playing: false });
-      AXES.forEach((axis) => this.props.setAxisClip(axis, -0.5, 0.5, false));
+      const sliders = this.getSliderDefaults();
+      this.setState({ sliders, playing: false });
+      AXES.forEach((axis) => this.updateClipping(axis, sliders[axis]));
     }
   }
 
-  getSliderDefaults = () => mapValues(this.props.numSlices, (max: number) => [0, max - 1]);
+  getSliderDefaults = () =>
+    mapValues(this.props.numSlices, (max: number, axis: string) => [0, axis === this.getActiveAxis() ? 0 : max - 1]);
 
   getActiveAxis() {
-    switch (this.props.mode) {
-      case ViewMode.yz:
-        return "x";
-      case ViewMode.xz:
-        return "y";
-      case ViewMode.xy:
-        return "z";
-      default:
-        return null;
-    }
+    const activeAxisMap = {
+      [ViewMode.yz]: "x",
+      [ViewMode.xz]: "y",
+      [ViewMode.xy]: "z",
+      [ViewMode.threeD]: null,
+    };
+    return activeAxisMap[this.props.mode];
   }
 
   setSliderState(axis: string, newState: [number, number]) {
@@ -142,6 +141,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               // round slider output to nearest slice; assume any string inputs represent ints
               format={{ to: Math.round, from: parseInt }}
               onSlide={this.makeSliderSlideFn(axis)}
+              onSet={this.makeSliderSetFn(axis)}
             />
           </span>
           <span className="slider-name">{axis.toUpperCase()}</span>
@@ -168,20 +168,28 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
+  updateClipping(axis: string, values: [number, number]) {
+    if (this.props.setAxisClip) {
+      // get a value from -0.5..0.5
+      const max = this.props.numSlices[axis];
+      const start = values[0] / max - 0.5;
+      const end = (values[1] + 1) / max - 0.5;
+      const isActiveAxis = this.getActiveAxis() === axis;
+      this.props.setAxisClip(axis, start, end, isActiveAxis);
+    }
+  }
+
   makeSliderSlideFn(axis: string) {
     return (values: number[]) => {
-      if (this.props.setAxisClip) {
-        // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
-        this.setSliderState(axis, [values[0], values[values.length - 1]]);
-
-        // get a value from -0.5..0.5
-        const max = this.props.numSlices[axis];
-        const start = values[0] / max - 0.5;
-        const end = (values[values.length - 1] + 1) / max - 0.5; // either range max or same handle as start (see above)
-        const isActiveAxis = this.getActiveAxis() === axis;
-        this.props.setAxisClip(axis, start, end, isActiveAxis);
-      }
+      // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
+      const twoValues: [number, number] = [values[0], values[values.length - 1]];
+      this.setSliderState(axis, twoValues);
+      this.updateClipping(axis, twoValues);
     };
+  }
+
+  makeSliderSetFn(axis: string) {
+    return (values: number[]) => this.updateClipping(axis, [values[0], values[values.length - 1]]);
   }
 
   render() {
