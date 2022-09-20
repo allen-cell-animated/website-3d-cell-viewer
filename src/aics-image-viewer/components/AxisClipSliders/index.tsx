@@ -1,6 +1,6 @@
 import { mapValues } from "lodash";
 import { Button, Tooltip } from "antd";
-import SliderWrapper from "./SliderWrapper";
+import SmarterSlider from "../shared/SmarterSlider";
 
 import React from "react";
 
@@ -142,7 +142,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
           <span className="axis-slider">
-            <SliderWrapper
+            <SmarterSlider
               connect={true}
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
