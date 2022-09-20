@@ -1,5 +1,5 @@
 import React from "react";
-import { map, filter, find } from "lodash";
+import { map, find } from "lodash";
 
 import { Card, Collapse, List } from "antd";
 
@@ -88,13 +88,15 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   renderVisibilityControls(channelArray: number[]) {
     const { channelSettings, channelDataChannels } = this.props;
 
-    const arrayOfNames = map(channelArray, (channelIndex: number) => channelDataChannels[channelIndex].name);
-    const volChecked = filter(arrayOfNames, (name: string) =>
-      find(channelSettings, { name }) ? find(channelSettings, { name })[VOLUME_ENABLED] : false
-    );
-    const isoChecked = filter(arrayOfNames, (name: string) =>
-      find(channelSettings, { name }) ? find(channelSettings, { name })[ISO_SURFACE_ENABLED] : false
-    );
+    const arrayOfNames = channelArray.map((channelIndex: number) => channelDataChannels[channelIndex].name);
+    const volChecked = arrayOfNames.filter((name: string) => {
+      const channelSetting = find(channelSettings, { name });
+      return channelSetting && channelSetting[VOLUME_ENABLED];
+    });
+    const isoChecked = arrayOfNames.filter((name: string) => {
+      const channelSetting = find(channelSettings, { name });
+      return channelSetting && channelSetting[ISO_SURFACE_ENABLED];
+    });
     return (
       <div style={STYLES.buttonRow}>
         <SharedCheckBox

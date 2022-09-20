@@ -65,8 +65,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  getSliderDefaults = () =>
-    mapValues(this.props.numSlices, (max: number, axis: string) => [0, axis === this.getActiveAxis() ? 0 : max - 1]);
+  getSliderDefaults() {
+    const activeAxis = this.getActiveAxis();
+    return mapValues(
+      this.props.numSlices,
+      (max: number, axis: string) => [0, axis === activeAxis ? 0 : max - 1] as [number, number]
+    );
+  }
 
   getActiveAxis() {
     const activeAxisMap = {
