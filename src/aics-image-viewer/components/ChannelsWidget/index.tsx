@@ -100,17 +100,19 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={volChecked}
-          label="All volumes"
           onChecked={this.showVolumes}
-          onUnchecekd={this.hideVolumes}
-        />
+          onUnchecked={this.hideVolumes}
+        >
+          All volumes
+        </SharedCheckBox>
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={isoChecked}
-          label="All surfaces"
           onChecked={this.showSurfaces}
-          onUnchecekd={this.hideSurfaces}
-        />
+          onUnchecked={this.hideSurfaces}
+        >
+          All surfaces
+        </SharedCheckBox>
       </div>
     );
   }

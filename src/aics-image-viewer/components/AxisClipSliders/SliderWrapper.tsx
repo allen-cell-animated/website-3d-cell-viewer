@@ -12,18 +12,18 @@ export default class SliderWrapper extends React.Component<NouisliderProps, { in
 
   shouldComponentUpdate = () => this.state.inactive;
 
-  wrapEventHandler =
-    (handler: ((...args: CallbackArgs) => void) | undefined, inactive: boolean) =>
-    (...args: CallbackArgs) => {
+  wrapEventHandler(inactive: boolean, handler?: (...args: CallbackArgs) => void) {
+    return (...args: CallbackArgs) => {
       this.setState({ inactive });
       if (handler) {
         handler(...args);
       }
     };
+  }
 
   render() {
-    const onStart = this.wrapEventHandler(this.props.onStart, false);
-    const onEnd = this.wrapEventHandler(this.props.onEnd, true);
+    const onStart = this.wrapEventHandler(false, this.props.onStart);
+    const onEnd = this.wrapEventHandler(true, this.props.onEnd);
     return <Nouislider {...{ ...this.props, onStart, onEnd }} />;
   }
 }

@@ -1,6 +1,5 @@
 import { mapValues } from "lodash";
 import { Button, Tooltip } from "antd";
-// import Nouislider from "nouislider-react";
 import SliderWrapper from "./SliderWrapper";
 
 import React from "react";
