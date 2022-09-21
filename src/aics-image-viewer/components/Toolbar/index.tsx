@@ -29,13 +29,14 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
 
-  onViewModeChange(mode: symbol): void;
-  onResetCamera(): void;
-  onAutorotateChange(): void;
-  onSwitchFovCell(value: string): void;
-  onChangeRenderingAlgorithm(newAlgorithm: string): void;
-  changeAxisShowing(showing: boolean): void;
-  changeBoundingBoxShowing(showing: boolean): void;
+  onViewModeChange: (mode: symbol) => void;
+  onResetCamera: () => void;
+  onAutorotateChange: () => void;
+  downloadScreenshot: () => void;
+  onSwitchFovCell: (value: string) => void;
+  onChangeRenderingAlgorithm: (newAlgorithm: string) => void;
+  changeAxisShowing: (showing: boolean) => void;
+  changeBoundingBoxShowing: (showing: boolean) => void;
 
   renderConfig: {
     autoRotateButton: boolean;
@@ -137,12 +138,13 @@ export default function Toolbar(props: ToolbarProps) {
         )}
       </span>
 
-      <span className="toolbar-right">
+      <span className="toolbar-right toolbar-group">
         <DownloadButton
           cellDownloadHref={props.cellDownloadHref}
           fovDownloadHref={props.fovDownloadHref}
           hasFov={props.hasCellId && props.hasParentImage}
         />
+        <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
       </span>
     </div>
   );
