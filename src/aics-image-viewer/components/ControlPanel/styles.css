@@ -16,14 +16,14 @@
     .ant-btn {
       margin-top: 12px;
       background-color: transparent;
-      border: none;
+      border: 1px solid transparent;
       color: #bfbfbf;
 
       &:not([disabled]):hover,
       &:not([disabled]).btn-tabactive {
         color: white;
         background-color: #4b4b4b;
-        border: 1px solid #6e6e6e;
+        border-color: #6e6e6e;
       }
 
       &[ant-click-animating-without-extra-node="true"]::after {
