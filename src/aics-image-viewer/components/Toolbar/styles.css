@@ -1,3 +1,5 @@
+@import "../../assets/styles/variables";
+
 .toolbar {
   position: absolute;
   width: 100%;
@@ -21,23 +23,78 @@
     margin-right: 6px;
   }
 
-  .btn-borderless {
-    color: #bfbfbf;
-  }
-
-  .btn-borderless:not(:hover) {
-    background-color: transparent;
-  }
-
-  .btn-borderless:not(:focus) {
-    border: none;
-  }
-
   .select-render-setting {
     min-width: 110px;
   }
 
   .ant-btn-icon-only {
     padding-bottom: 1px;
+  }
+
+  /* Icon-only buttons */
+
+  .btn-borderless {
+    background-color: transparent;
+    border-color: transparent;
+    color: #bfbfbf;
+
+    > .ant-btn[disabled] {
+      background-color: transparent;
+      border-color: transparent;
+      color: #bfbfbf;
+    }
+
+    &.btn-active,
+    &:hover,
+    &:focus-within {
+      outline: none;
+      box-shadow: none;
+      background-color: #4b4b4b;
+      color: white;
+      border-color: $light-gray;
+    }
+
+    &[ant-click-animating-without-extra-node="true"]::after {
+      box-shadow: none !important;
+      background-color: #222222;
+    }
+  }
+
+  span.btn-borderless {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+
+  /* Radio buttons */
+
+  .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
+    background-color: black;
+
+    &.ant-radio-button-wrapper-checked,
+    &:hover,
+    &:focus-within {
+      outline: none;
+      background-color: #4b4b4b;
+      color: white;
+      border-color: $light-gray;
+
+      &:not(:first-child) {
+        box-shadow: -1px 0px 0px 0px $light-gray;
+      }
+    }
+  }
+
+  /* Dropdown */
+
+  .ant-select-selection {
+    border-color: $light-gray !important;
+    box-shadow: none !important;
+    background-color: black;
+
+    &:hover,
+    &:focus {
+      background-color: #4b4b4b;
+      color: white;
+    }
   }
 }

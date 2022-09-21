@@ -60,6 +60,8 @@ export default function Toolbar(props: ToolbarProps) {
   const toggleAxis = () => props.changeAxisShowing(!props.showAxes);
   const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
+  const classForToggleBtn = (active: boolean) => (active ? "btn-borderless btn-active" : "btn-borderless");
+
   return (
     <div className="toolbar">
       <span className="toolbar-center">
@@ -76,6 +78,7 @@ export default function Toolbar(props: ToolbarProps) {
             {renderConfig.autoRotateButton && (
               <Tooltip placement="bottom" title="Turntable">
                 <Button
+                  className={classForToggleBtn(props.autorotate && !twoDMode)}
                   icon={autorotateIcon}
                   disabled={twoDMode || props.pathTraceOn}
                   onClick={props.onAutorotateChange}
@@ -118,14 +121,14 @@ export default function Toolbar(props: ToolbarProps) {
           <span className="toolbar-group">
             {renderConfig.showAxesButton && (
               <Tooltip placement="bottom" title={showAxes ? "Hide axes" : "Show axes"}>
-                <Button icon="drag" className={showAxes ? "" : "btn-borderless"} onClick={toggleAxis} />
+                <Button icon="drag" className={classForToggleBtn(showAxes)} onClick={toggleAxis} />
               </Tooltip>
             )}
             {renderConfig.showBoundingBoxButton && (
               <Tooltip placement="bottom" title={showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
                 <Button
                   icon="close-square"
-                  className={showBoundingBox ? "" : "btn-borderless"}
+                  className={classForToggleBtn(showBoundingBox)}
                   onClick={toggleBoundingBox}
                 />
               </Tooltip>

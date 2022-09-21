@@ -191,8 +191,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
 
 const STYLES = {
   slidersWrapper: {
-    width: "calc(100% - 20px)",
-    margin: "auto",
+    marginRight: "10px",
     paddingTop: "18px",
   },
   controlRow: {

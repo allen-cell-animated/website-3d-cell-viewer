@@ -59,7 +59,6 @@ export default function ControlPanel(props: ControlPanelProps) {
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
         <Button
           icon="vertical-right"
-          size="large"
           className={props.collapsed ? "btn-collapse btn-collapse-collapsed" : "btn-collapse"}
           onClick={() => props.setCollapsed(!props.collapsed)}
         />

@@ -14,21 +14,21 @@
     text-align: center;
 
     .ant-btn {
-      margin-top: 5px;
+      margin-top: 12px;
       background-color: transparent;
-      border: none;
+      border: 1px solid transparent;
       color: #bfbfbf;
 
       &:not([disabled]):hover,
       &:not([disabled]).btn-tabactive {
         color: white;
         background-color: #4b4b4b;
-        border: 1px solid #6e6e6e;
+        border-color: #6e6e6e;
       }
 
       &[ant-click-animating-without-extra-node="true"]::after {
         box-shadow: none !important;
-        background-color: $light-gray;
+        background-color: #222;
       }
     }
 
@@ -44,7 +44,7 @@
 
     .tab-divider {
       width: 70%;
-      margin: 5px 15% 0;
+      margin: 12px 15% 0;
       border-bottom: 1px solid $border-color;
     }
   }
@@ -72,6 +72,7 @@
   .ant-card-head {
     border-radius: 0;
     border-bottom: none;
+    padding: 0 16px;
   }
 
   .ant-card-head-title {
