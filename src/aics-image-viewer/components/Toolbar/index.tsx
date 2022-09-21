@@ -139,12 +139,12 @@ export default function Toolbar(props: ToolbarProps) {
       </span>
 
       <span className="toolbar-right toolbar-group">
-        <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
         <DownloadButton
           cellDownloadHref={props.cellDownloadHref}
           fovDownloadHref={props.fovDownloadHref}
           hasFov={props.hasCellId && props.hasParentImage}
         />
+        <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
       </span>
     </div>
   );
