@@ -242,6 +242,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onResetCamera = this.onResetCamera.bind(this);
     this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
     this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
+    this.downloadScreenshot = this.downloadScreenshot.bind(this);
   }
 
   componentDidMount() {
@@ -863,6 +864,15 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  downloadScreenshot() {
+    this.state.view3d.capture((dataUrl: string) => {
+      const anchor = document.createElement("a");
+      anchor.href = dataUrl;
+      anchor.download = "screenshot.png";
+      anchor.click();
+    });
+  }
+
   onWindowResize() {
     if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
       this.toggleControlPanel(true);
@@ -1180,6 +1190,7 @@ export default class App extends React.Component<AppProps, AppState> {
               onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
               changeAxisShowing={this.changeAxisShowing}
               changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+              downloadScreenshot={this.downloadScreenshot}
               renderConfig={renderConfig}
             />
             <CellViewerCanvasWrapper
