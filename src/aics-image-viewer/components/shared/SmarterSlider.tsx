@@ -4,17 +4,17 @@ import Nouislider, { NouisliderProps } from "nouislider-react";
 type CallbackArgs = [values: any[], handle: number, unencodedValues: number[], tap: boolean, positions: number[]];
 
 /** A wrapper around `Nouislider` that prevents updates while the slider is being dragged. */
-export default class SmarterSlider extends React.Component<NouisliderProps, { inactive: boolean }> {
+export default class SmarterSlider extends React.Component<NouisliderProps, { shouldUpdate: boolean }> {
   constructor(props: NouisliderProps) {
     super(props);
-    this.state = { inactive: true };
+    this.state = { shouldUpdate: true };
   }
 
-  shouldComponentUpdate = () => this.state.inactive;
+  shouldComponentUpdate = () => this.state.shouldUpdate;
 
   wrapEventHandler(inactive: boolean, handler?: (...args: CallbackArgs) => void) {
     return (...args: CallbackArgs) => {
-      this.setState({ inactive });
+      this.setState({ shouldUpdate: inactive });
       if (handler) {
         handler(...args);
       }

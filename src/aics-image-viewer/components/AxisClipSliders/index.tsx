@@ -12,6 +12,13 @@ const ViewMode = viewMode.mainMapping;
 const AXES = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
+const ACTIVE_AXIS_MAP = {
+  [ViewMode.yz]: "x",
+  [ViewMode.xz]: "y",
+  [ViewMode.xy]: "z",
+  [ViewMode.threeD]: null,
+};
+
 interface AxisClipSlidersProps {
   mode: symbol;
   setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
@@ -73,15 +80,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  getActiveAxis() {
-    const activeAxisMap = {
-      [ViewMode.yz]: "x",
-      [ViewMode.xz]: "y",
-      [ViewMode.xy]: "z",
-      [ViewMode.threeD]: null,
-    };
-    return activeAxisMap[this.props.mode];
-  }
+  getActiveAxis = () => ACTIVE_AXIS_MAP[this.props.mode];
 
   setSliderState(axis: string, newState: [number, number]) {
     this.setState({
