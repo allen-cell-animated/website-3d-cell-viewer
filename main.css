@@ -480,9 +480,9 @@ body{
   }
 
   .control-panel-col-container .control-panel-tab-col .ant-btn{
-      margin-top:5px;
+      margin-top:12px;
       background-color:transparent;
-      border:none;
+      border:1px solid transparent;
       color:#bfbfbf;
     }
 
@@ -490,12 +490,12 @@ body{
       .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]).btn-tabactive{
         color:white;
         background-color:#4b4b4b;
-        border:1px solid #6e6e6e;
+        border-color:#6e6e6e;
       }
 
   .control-panel-col-container .control-panel-tab-col .ant-btn[ant-click-animating-without-extra-node="true"]::after{
         box-shadow:none !important;
-        background-color:#aeacae;
+        background-color:#222;
       }
 
   .control-panel-col-container .control-panel-tab-col .btn-collapse svg{
@@ -509,7 +509,7 @@ body{
 
   .control-panel-col-container .control-panel-tab-col .tab-divider{
       width:70%;
-      margin:5px 15% 0;
+      margin:12px 15% 0;
       border-bottom:1px solid #6e6e6e;
     }
 
@@ -534,6 +534,7 @@ body{
 .control-panel .ant-card-head{
     border-radius:0;
     border-bottom:none;
+    padding:0 16px;
   }
 .control-panel .ant-card-head-title{
     padding-top:0;
@@ -641,18 +642,6 @@ body{
     margin-right:6px;
   }
 
-  .toolbar .btn-borderless{
-    color:#bfbfbf;
-  }
-
-  .toolbar .btn-borderless:not(:hover){
-    background-color:transparent;
-  }
-
-  .toolbar .btn-borderless:not(:focus){
-    border:none;
-  }
-
   .toolbar .select-render-setting{
     min-width:110px;
   }
@@ -660,6 +649,67 @@ body{
   .toolbar .ant-btn-icon-only{
     padding-bottom:1px;
   }
+
+  .toolbar .btn-borderless{
+    background-color:transparent;
+    border-color:transparent;
+    color:#bfbfbf;
+  }
+
+  .toolbar .btn-borderless > .ant-btn[disabled]{
+      background-color:transparent;
+      border-color:transparent;
+      color:#bfbfbf;
+    }
+
+  .toolbar .btn-borderless.btn-active,
+    .toolbar .btn-borderless:hover,
+    .toolbar .btn-borderless:focus-within{
+      outline:none;
+      box-shadow:none;
+      background-color:#4b4b4b;
+      color:white;
+      border-color:#aeacae;
+    }
+
+  .toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
+      box-shadow:none !important;
+      background-color:#222222;
+    }
+
+  .toolbar span.btn-borderless{
+    background-color:transparent !important;
+    border-color:transparent !important;
+  }
+
+  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
+    background-color:black;
+  }
+
+  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
+    .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover,
+    .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+      outline:none;
+      background-color:#4b4b4b;
+      color:white;
+      border-color:#aeacae;
+    }
+
+  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child), .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within:not(:first-child){
+        box-shadow:-1px 0px 0px 0px #aeacae;
+      }
+
+  .toolbar .ant-select-selection{
+    border-color:#aeacae !important;
+    box-shadow:none !important;
+    background-color:black;
+  }
+
+  .toolbar .ant-select-selection:hover,
+    .toolbar .ant-select-selection:focus{
+      background-color:#4b4b4b;
+      color:white;
+    }
 
 /*!*********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/AxisClipSliders/styles.css ***!
@@ -717,7 +767,7 @@ body{
     top:calc(100% + 3px);
   }
 .clip-sliders{
-  max-width:665px;
+  max-width:675px;
   position:absolute;
   margin:0 auto;
   left:0;
@@ -769,10 +819,11 @@ body{
     font-weight:bold;
   }
 .clip-sliders .slider-slices{
-    flex:0 0 95px;
+    flex:0 0 105px;
     margin-left:10px;
+    white-space:nowrap;
     text-align:right;
-    max-width:95px;
+    max-width:105px;
   }
 .clip-sliders .slider-play-buttons{
     margin-top:2px;
@@ -793,8 +844,8 @@ body{
 .clip-sliders .slider-play-buttons .ant-btn{
     line-height:1.2;
     height:21px;
-    color:#6e6e6e;
-    border-color:#6e6e6e !important;
+    color:#aeacae;
+    border-color:#aeacae !important;
     background-color:transparent
   }
 .clip-sliders .slider-play-buttons .ant-btn:hover{
@@ -871,6 +922,10 @@ body{
       color:#aeacae;
     }
 
+  .bottom-panel .ant-drawer-title .ant-btn:hover{
+      color:white;
+    }
+
   .bottom-panel .options-button{
     border:none;
     box-shadow:none;
@@ -882,7 +937,7 @@ body{
 
   .bottom-panel .button-arrow{
     transform:rotate(90deg);
-    transition:transform 0.2s linear;
+    transition:transform 0.2s linear !important;
   }
 
   .bottom-panel .drawer-body-wrapper{
