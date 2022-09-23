@@ -64,10 +64,10 @@ export default function Toolbar(props: ToolbarProps) {
   const classForToggleBtn = (active: boolean) => (active ? "btn-borderless btn-active" : "btn-borderless");
 
   return (
-    <div className="toolbar">
-      <span className="toolbar-center">
+    <div className="viewer-toolbar">
+      <span className="viewer-toolbar-center">
         {renderGroup1 && (
-          <span className="toolbar-group">
+          <span className="viewer-toolbar-group">
             {renderConfig.viewModeRadioButtons && (
               <ViewModeRadioButtons mode={props.mode} onViewModeChange={props.onViewModeChange} />
             )}
@@ -90,7 +90,7 @@ export default function Toolbar(props: ToolbarProps) {
         )}
 
         {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
-          <span className="toolbar-group">
+          <span className="viewer-toolbar-group">
             <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
               <Radio.Button value={SEGMENTED_CELL}>Single cell</Radio.Button>
               <Radio.Button value={FULL_FIELD_IMAGE}>Full field</Radio.Button>
@@ -98,7 +98,7 @@ export default function Toolbar(props: ToolbarProps) {
           </span>
         )}
 
-        <span className="toolbar-group">
+        <span className="viewer-toolbar-group">
           <Select
             className="select-render-setting"
             value={props.renderSetting}
@@ -119,7 +119,7 @@ export default function Toolbar(props: ToolbarProps) {
         </span>
 
         {renderGroup4 && (
-          <span className="toolbar-group">
+          <span className="viewer-toolbar-group">
             {renderConfig.showAxesButton && (
               <Tooltip placement="bottom" title={showAxes ? "Hide axes" : "Show axes"}>
                 <Button icon="drag" className={classForToggleBtn(showAxes)} onClick={toggleAxis} />
@@ -138,7 +138,7 @@ export default function Toolbar(props: ToolbarProps) {
         )}
       </span>
 
-      <span className="toolbar-right toolbar-group">
+      <span className="viewer-toolbar-right viewer-toolbar-group">
         <DownloadButton
           cellDownloadHref={props.cellDownloadHref}
           fovDownloadHref={props.fovDownloadHref}
