@@ -618,7 +618,7 @@ body{
 /*!*************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/Toolbar/styles.css ***!
   \*************************************************************************************************************************************************/
-.toolbar{
+.viewer-toolbar{
   position:absolute;
   width:100%;
   margin-top:12px;
@@ -629,42 +629,42 @@ body{
   padding:0 12px;
 }
 
-  .toolbar .toolbar-right{
+  .viewer-toolbar .viewer-toolbar-right{
     position:absolute;
     right:12px;
   }
 
-  .toolbar .toolbar-group:not(:last-child){
+  .viewer-toolbar .viewer-toolbar-group:not(:last-child){
     margin-right:14px;
   }
 
-  .toolbar .toolbar-group > :not(:last-child){
+  .viewer-toolbar .viewer-toolbar-group > :not(:last-child){
     margin-right:6px;
   }
 
-  .toolbar .select-render-setting{
+  .viewer-toolbar .select-render-setting{
     min-width:110px;
   }
 
-  .toolbar .ant-btn-icon-only{
+  .viewer-toolbar .ant-btn-icon-only{
     padding-bottom:1px;
   }
 
-  .toolbar .btn-borderless{
+  .viewer-toolbar .btn-borderless{
     background-color:transparent;
     border-color:transparent;
     color:#bfbfbf;
   }
 
-  .toolbar .btn-borderless > .ant-btn[disabled]{
+  .viewer-toolbar .btn-borderless > .ant-btn[disabled]{
       background-color:transparent;
       border-color:transparent;
       color:#bfbfbf;
     }
 
-  .toolbar .btn-borderless.btn-active,
-    .toolbar .btn-borderless:hover,
-    .toolbar .btn-borderless:focus-within{
+  .viewer-toolbar .btn-borderless.btn-active,
+    .viewer-toolbar .btn-borderless:hover,
+    .viewer-toolbar .btn-borderless:focus-within{
       outline:none;
       box-shadow:none;
       background-color:#4b4b4b;
@@ -672,41 +672,41 @@ body{
       border-color:#aeacae;
     }
 
-  .toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
+  .viewer-toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
       box-shadow:none !important;
       background-color:#222222;
     }
 
-  .toolbar span.btn-borderless{
+  .viewer-toolbar span.btn-borderless{
     background-color:transparent !important;
     border-color:transparent !important;
   }
 
-  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
     background-color:black;
   }
 
-  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
-    .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover,
-    .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover,
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
       outline:none;
       background-color:#4b4b4b;
       color:white;
       border-color:#aeacae;
     }
 
-  .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child), .toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within:not(:first-child){
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within:not(:first-child){
         box-shadow:-1px 0px 0px 0px #aeacae;
       }
 
-  .toolbar .ant-select-selection{
+  .viewer-toolbar .ant-select-selection{
     border-color:#aeacae !important;
     box-shadow:none !important;
     background-color:black;
   }
 
-  .toolbar .ant-select-selection:hover,
-    .toolbar .ant-select-selection:focus{
+  .viewer-toolbar .ant-select-selection:hover,
+    .viewer-toolbar .ant-select-selection:focus{
       background-color:#4b4b4b;
       color:white;
     }
