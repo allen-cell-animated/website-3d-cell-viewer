@@ -1,5 +1,5 @@
 import React from "react";
-import { View3d } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
@@ -9,7 +9,28 @@ import AxisClipSliders from "../AxisClipSliders";
 import { BottomPanel } from "../BottomPanel";
 import "./styles.css";
 
-export default class ViewerWrapper extends React.Component {
+interface ViewerWrapperProps {
+  autorotate: boolean;
+  loadingImage: boolean;
+  mode: symbol;
+  appHeight: string;
+  image: Volume;
+  numSlices: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  renderConfig: {
+    axisClipSliders: boolean;
+  };
+  onView3DCreated: (view3d: View3d) => void;
+  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+}
+
+export default class ViewerWrapper extends React.Component<ViewerWrapperProps, {}> {
+  private view3dviewerRef: React.RefObject<HTMLDivElement>;
+  private view3D: View3d;
+
   constructor(props) {
     super(props);
     this.view3dviewerRef = React.createRef();
@@ -24,7 +45,7 @@ export default class ViewerWrapper extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, _prevState) {
+  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: {}) {
     if (this.view3D && prevProps.mode && prevProps.mode !== this.props.mode) {
       this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(this.props.mode));
     }
@@ -68,23 +89,23 @@ export default class ViewerWrapper extends React.Component {
 
 const STYLES = {
   viewer: {
-    display: "flex",
-    position: "relative",
+    display: "flex" as "flex",
+    position: "relative" as "relative",
   },
   view3d: {
     width: "100%",
-    display: "flex",
+    display: "flex" as "flex",
   },
   noImage: {
-    position: "absolute",
+    position: "absolute" as "absolute",
     zIndex: 999,
     top: 0,
     left: 0,
     bottom: 0,
     right: 0,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    display: "flex" as "flex",
+    justifyContent: "center" as "center",
+    alignItems: "center" as "center",
     backgroundColor: "#eeeee",
     color: "#9b9b9b",
     fontSize: "2em",

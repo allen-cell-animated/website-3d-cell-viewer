@@ -1112,7 +1112,7 @@ export default class App extends React.Component<AppProps, AppState> {
         z: this.state.image.z,
       };
     }
-    return {};
+    return { x: 0, y: 0, z: 0 };
   }
 
   render() {
