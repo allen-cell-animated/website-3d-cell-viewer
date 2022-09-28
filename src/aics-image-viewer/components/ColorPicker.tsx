@@ -5,8 +5,34 @@ import { map } from "lodash";
 // if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
 const OPEN_ABOVE_MARGIN = 310;
 
-export default class ColorPicker extends React.Component {
-  constructor(props) {
+type Color = {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+};
+
+type ColorChangeHandler = (currentColor: Color, prevColor?: Color, idx?: number) => void;
+
+interface ColorPickerProps {
+  color: Color;
+  width: number;
+  onColorChange?: ColorChangeHandler;
+  onColorChangeComplete?: ColorChangeHandler;
+  idx?: any;
+  disableAlpha?: boolean;
+}
+
+interface ColorPickerState {
+  color: Color;
+  displayColorPicker: boolean;
+  openAboveSwatch: boolean;
+}
+
+export default class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
+  private swatchRef: React.RefObject<HTMLDivElement>;
+
+  constructor(props: ColorPickerProps) {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
@@ -31,7 +57,7 @@ export default class ColorPicker extends React.Component {
   }
 
   handleClick() {
-    const swatchRect = this.swatchRef.current.getBoundingClientRect();
+    const swatchRect = this.swatchRef.current!.getBoundingClientRect();
     const noRoomBelowSwatch = swatchRect.bottom > window.innerHeight - OPEN_ABOVE_MARGIN;
     this.setState({
       displayColorPicker: !this.state.displayColorPicker,
@@ -109,11 +135,11 @@ const STYLES = {
     verticalAlign: "middle",
   },
   popover: {
-    position: "absolute",
+    position: "absolute" as "absolute",
     zIndex: "9999",
   },
   cover: {
-    position: "fixed",
+    position: "fixed" as "fixed",
     top: "0px",
     right: "0px",
     bottom: "0px",

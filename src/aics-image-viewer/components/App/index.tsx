@@ -58,7 +58,7 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { colorArrayToFloatArray, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
+import { colorArrayToFloatArray, rgbObjectToColorArray } from "../../shared/utils/colorObjectArrayConverting";
 
 import "./styles.css";
 
@@ -1001,7 +1001,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   changeBoundingBoxColor(color) {
-    const boundingBoxColor = rgbObjectToArray(color);
+    const boundingBoxColor = rgbObjectToColorArray(color);
     this.setUserSelectionsInState({ boundingBoxColor });
     if (this.state.view3d && this.state.image) {
       const floatColor = colorArrayToFloatArray(boundingBoxColor);
@@ -1010,7 +1010,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   changeBackgroundColor(color) {
-    const backgroundColor = rgbObjectToArray(color);
+    const backgroundColor = rgbObjectToColorArray(color);
     this.setUserSelectionsInState({ backgroundColor });
     if (this.state.view3d) {
       const floatColor = colorArrayToFloatArray(backgroundColor);

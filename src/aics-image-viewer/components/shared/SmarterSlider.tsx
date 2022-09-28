@@ -12,12 +12,10 @@ export default class SmarterSlider extends React.Component<NouisliderProps, { sh
 
   shouldComponentUpdate = () => this.state.shouldUpdate;
 
-  wrapEventHandler(inactive: boolean, handler?: (...args: CallbackArgs) => void) {
+  wrapEventHandler(shouldUpdate: boolean, handler?: (...args: CallbackArgs) => void) {
     return (...args: CallbackArgs) => {
-      this.setState({ shouldUpdate: inactive });
-      if (handler) {
-        handler(...args);
-      }
+      this.setState({ shouldUpdate });
+      if (handler) handler(...args);
     };
   }
 

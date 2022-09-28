@@ -20,7 +20,7 @@ import {
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
-import { colorArrayToRgbObject, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
+import { colorArrayToRgbObject, rgbObjectToColorArray } from "../../shared/utils/colorObjectArrayConverting";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -169,7 +169,7 @@ export default class ChannelsWidgetRow extends React.Component {
 
   onColorChange(newRGB, oldRGB, index) {
     const { channelName } = this.props;
-    const color = rgbObjectToArray(newRGB);
+    const color = rgbObjectToColorArray(newRGB);
     this.props.changeOneChannelSetting(channelName, index, "color", color);
   }
 
