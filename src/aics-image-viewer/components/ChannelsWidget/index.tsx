@@ -31,7 +31,11 @@ interface ChannelSettings {
   opacity: number;
   color: [number, number, number];
   dataReady: boolean;
-  controlPoints: [];
+  controlPoints: {
+    color: string;
+    opacity: number;
+    x: number;
+  }[];
 }
 
 type RGBColor = {
@@ -56,7 +60,7 @@ export interface ChannelsWidgetProps {
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
   filterFunc?: (key: string) => boolean;
-  onColorChangeComplete?: (newRGB: RGBColor, oldRGB: RGBColor, index: number) => void;
+  onColorChangeComplete?: (newRGB: RGBColor, oldRGB?: RGBColor, index?: number) => void;
 }
 
 export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
@@ -120,15 +124,8 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 
   getRows() {
-    const {
-      channelGroupedByType,
-      channelSettings,
-      channelDataReady,
-      channelDataChannels,
-      filterFunc,
-      imageName,
-      viewerChannelSettings,
-    } = this.props;
+    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, imageName, viewerChannelSettings } =
+      this.props;
     const firstKey = Object.keys(channelGroupedByType)[0];
     return map(channelGroupedByType, (channelArray: number[], key: string) => {
       if (!channelArray.length || (filterFunc && !filterFunc(key))) {
@@ -160,10 +157,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
                       colorizeEnabled={thisChannelSettings[COLORIZE_ENABLED]}
                       colorizeAlpha={thisChannelSettings[COLORIZE_ALPHA]}
-                      isovalue={thisChannelSettings.isovalue}
-                      opacity={thisChannelSettings.opacity}
                       color={thisChannelSettings.color}
-                      channelDataReady={channelDataReady[actualIndex]}
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}

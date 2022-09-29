@@ -25,20 +25,46 @@ import { colorArrayToRgbObject, rgbObjectToColorArray } from "../../shared/utils
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
 
-export default class ChannelsWidgetRow extends React.Component {
-  constructor(props) {
+type ColorObject = {
+  r: number;
+  g: number;
+  b: number;
+};
+
+interface ChannelsWidgetRowProps {
+  index: number;
+  imageName: string;
+  channelName: string;
+  name: string;
+  volumeChecked: boolean;
+  isosurfaceChecked: boolean;
+  colorizeEnabled: boolean;
+  colorizeAlpha: number;
+  color: [number, number, number];
+  channelControlPoints: {
+    color: string;
+    opacity: number;
+    x: number;
+  }[];
+  channelDataForChannel: any; // TODO
+
+  changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
+  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
+
+  onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
+}
+
+export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRowProps, { controlsOpen: boolean }> {
+  constructor(props: ChannelsWidgetRowProps) {
     super(props);
     this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
     this.onColorChange = this.onColorChange.bind(this);
     this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
     this.isosurfaceCheckHandler = this.isosurfaceCheckHandler.bind(this);
     this.onIsovalueChange = this.onIsovalueChange.bind(this);
-    this.onOpacityChange = this.onOpacityChange.bind(this);
     this.onSaveIsosurfaceSTL = this.onSaveIsosurfaceSTL.bind(this);
     this.onSaveIsosurfaceGLTF = this.onSaveIsosurfaceGLTF.bind(this);
-    this.onUpdateLutControlPoints = this.onUpdateLutControlPoints.bind(this);
-    this.updateColorizeMode = this.updateColorizeMode.bind(this);
-    this.updateColorizeAlpha = this.updateColorizeAlpha.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -60,30 +86,18 @@ export default class ChannelsWidgetRow extends React.Component {
     changeOneChannelSetting(channelName, index, ISO_SURFACE_ENABLED, target.checked);
   }
 
-  onIsovalueChange(newValue) {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, ISO_VALUE, newValue);
-  }
+  createChannelSettingHandler =
+    (settingKey: string, map = (x: any) => x) =>
+    (newValue: any) => {
+      const { channelName, index, changeOneChannelSetting } = this.props;
+      changeOneChannelSetting(channelName, index, settingKey, newValue);
+    };
 
-  onOpacityChange(newValue) {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, OPACITY, newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
-  }
-
-  onUpdateLutControlPoints(newValue) {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, LUT_CONTROL_POINTS, newValue);
-  }
-
-  updateColorizeMode(newValue) {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, COLORIZE_ENABLED, newValue);
-  }
-
-  updateColorizeAlpha(newValue) {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, COLORIZE_ALPHA, newValue);
-  }
+  onIsovalueChange = this.createChannelSettingHandler(ISO_VALUE);
+  onOpacityChange = this.createChannelSettingHandler(OPACITY, (val) => val / ISOSURFACE_OPACITY_SLIDER_MAX);
+  onUpdateLutControlPoints = this.createChannelSettingHandler(LUT_CONTROL_POINTS);
+  updateColorizeMode = this.createChannelSettingHandler(COLORIZE_ENABLED);
+  updateColorizeAlpha = this.createChannelSettingHandler(COLORIZE_ALPHA);
 
   onSaveIsosurfaceSTL() {
     const { index, handleChangeToImage } = this.props;
@@ -104,7 +118,6 @@ export default class ChannelsWidgetRow extends React.Component {
         </Col>
         <Col span={12}>
           <Slider
-            name="isovalue"
             disabled={!this.props.isosurfaceChecked}
             min={isoRange.min || 0}
             max={isoRange.max || 225}
@@ -126,7 +139,6 @@ export default class ChannelsWidgetRow extends React.Component {
         </Col>
         <Col span={12}>
           <Slider
-            name="opacity"
             disabled={!this.props.isosurfaceChecked}
             min={range.min}
             max={range.max}
@@ -167,10 +179,14 @@ export default class ChannelsWidgetRow extends React.Component {
     );
   }
 
-  onColorChange(newRGB, oldRGB, index) {
+  onColorChange(
+    newRGB: { r: number; g: number; b: number },
+    oldRGB: { r: number; g: number; b: number } | undefined,
+    index?: number
+  ) {
     const { channelName } = this.props;
     const color = rgbObjectToColorArray(newRGB);
-    this.props.changeOneChannelSetting(channelName, index, "color", color);
+    this.props.changeOneChannelSetting(channelName, index!, "color", color);
   }
 
   createColorPicker() {
@@ -183,7 +199,6 @@ export default class ChannelsWidgetRow extends React.Component {
           onColorChangeComplete={this.props.onColorChangeComplete}
           idx={this.props.index}
           width={18}
-          name={this.props.name}
         />
       </div>
     );
@@ -324,6 +339,6 @@ const STYLES = {
     marginTop: "4px",
   },
   controlName: {
-    whiteSpace: "nowrap",
+    whiteSpace: "nowrap" as "nowrap",
   },
 };
