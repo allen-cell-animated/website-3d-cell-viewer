@@ -63,8 +63,6 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
     this.isosurfaceCheckHandler = this.isosurfaceCheckHandler.bind(this);
     this.onIsovalueChange = this.onIsovalueChange.bind(this);
-    this.onSaveIsosurfaceSTL = this.onSaveIsosurfaceSTL.bind(this);
-    this.onSaveIsosurfaceGLTF = this.onSaveIsosurfaceGLTF.bind(this);
     this.state = {
       controlsOpen: false,
     };
@@ -90,7 +88,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     (settingKey: string, map = (x: any) => x) =>
     (newValue: any) => {
       const { channelName, index, changeOneChannelSetting } = this.props;
-      changeOneChannelSetting(channelName, index, settingKey, newValue);
+      changeOneChannelSetting(channelName, index, settingKey, map(newValue));
     };
 
   onIsovalueChange = this.createChannelSettingHandler(ISO_VALUE);
@@ -99,15 +97,10 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   updateColorizeMode = this.createChannelSettingHandler(COLORIZE_ENABLED);
   updateColorizeAlpha = this.createChannelSettingHandler(COLORIZE_ALPHA);
 
-  onSaveIsosurfaceSTL() {
+  createSaveIsosurfaceHandler = (format: string) => () => {
     const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, "STL", index);
-  }
-
-  onSaveIsosurfaceGLTF() {
-    const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, "GLTF", index);
-  }
+    handleChangeToImage(SAVE_ISO_SURFACE, format, index);
+  };
 
   createIsovalueSlider() {
     const isoRange = { min: 0, max: 255 };
@@ -161,24 +154,6 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     });
   }
 
-  createVolumeCheckbox() {
-    let id = `vol_checkbox${this.props.index}`;
-    return (
-      <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} id={id}>
-        volume
-      </Checkbox>
-    );
-  }
-
-  createIsosurfaceCheckbox() {
-    let id = `iso_checkbox${this.props.index}`;
-    return (
-      <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} id={id}>
-        surface
-      </Checkbox>
-    );
-  }
-
   onColorChange(
     newRGB: { r: number; g: number; b: number },
     oldRGB: { r: number; g: number; b: number } | undefined,
@@ -204,34 +179,20 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     );
   }
 
-  createSaveIsosurfaceGLTFButton() {
-    return (
-      <Button disabled={!this.props.isosurfaceChecked} onClick={this.onSaveIsosurfaceGLTF} style={STYLES.raisedButton}>
-        Save GLTF
-      </Button>
-    );
-  }
-
-  createSaveIsosurfaceSTLButton() {
-    return (
-      <Button disabled={!this.props.isosurfaceChecked} onClick={this.onSaveIsosurfaceSTL} style={STYLES.raisedButton}>
-        Save STL
-      </Button>
-    );
-  }
-
-  renderActions() {
-    return [
-      this.createVolumeCheckbox(),
-      this.createIsosurfaceCheckbox(),
-      <Icon
-        key="openSettingsButton"
-        type="setting"
-        theme={this.state.controlsOpen ? "filled" : "outlined"}
-        onClick={this.toggleControlsOpen}
-      />,
-    ];
-  }
+  renderActions = () => [
+    <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
+      volume
+    </Checkbox>,
+    <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
+      surface
+    </Checkbox>,
+    <Icon
+      key="openSettingsButton"
+      type="setting"
+      theme={this.state.controlsOpen ? "filled" : "outlined"}
+      onClick={this.toggleControlsOpen}
+    />,
+  ];
 
   createTFEditor() {
     const {
@@ -264,17 +225,27 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     );
   }
 
-  renderSurfaceControls() {
-    return (
-      <Col span={24}>
-        <h4 className="ant-list-item-meta-title">Surface settings:</h4>
-        {this.createIsovalueSlider()}
-        {this.createOpacitySlider()}
-        {this.createSaveIsosurfaceSTLButton()}
-        {this.createSaveIsosurfaceGLTFButton()}
-      </Col>
-    );
-  }
+  renderSurfaceControls = () => (
+    <Col span={24}>
+      <h4 className="ant-list-item-meta-title">Surface settings:</h4>
+      {this.createIsovalueSlider()}
+      {this.createOpacitySlider()}
+      <Button
+        disabled={!this.props.isosurfaceChecked}
+        onClick={this.createSaveIsosurfaceHandler("GLTF")}
+        style={STYLES.raisedButton}
+      >
+        Save GLTF
+      </Button>
+      <Button
+        disabled={!this.props.isosurfaceChecked}
+        onClick={this.createSaveIsosurfaceHandler("STL")}
+        style={STYLES.raisedButton}
+      >
+        Save STL
+      </Button>
+    </Col>
+  );
 
   renderControls() {
     return (
