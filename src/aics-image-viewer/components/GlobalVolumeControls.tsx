@@ -47,23 +47,21 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow(label: string, start: number[], max: number, propKey: string) {
-    return (
-      <div style={STYLES.controlRow}>
-        <div style={STYLES.controlName}>{label}</div>
-        <div style={STYLES.control}>
-          <Nouislider
-            range={{ min: 0, max }}
-            start={start}
-            connect={true}
-            tooltips={true}
-            behaviour="drag"
-            onUpdate={(values: number[]) => this.props.handleChangeUserSelection(propKey, values)}
-          />
-        </div>
+  createSliderRow = (label: string, start: number[], max: number, propKey: string) => (
+    <div style={STYLES.controlRow}>
+      <div style={STYLES.controlName}>{label}</div>
+      <div style={STYLES.control}>
+        <Nouislider
+          range={{ min: 0, max }}
+          start={start}
+          connect={true}
+          tooltips={true}
+          behaviour="drag"
+          onUpdate={(values: number[]) => this.props.handleChangeUserSelection(propKey, values)}
+        />
       </div>
-    );
-  }
+    </div>
+  );
 
   render() {
     if (!this.props.imageName) return null;

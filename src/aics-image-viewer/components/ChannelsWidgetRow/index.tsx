@@ -39,7 +39,7 @@ interface ChannelsWidgetRowProps {
     opacity: number;
     x: number;
   }[];
-  channelDataForChannel: any; // TODO
+  channelDataForChannel: any; // volume-viewer Channel type
 
   changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
@@ -207,23 +207,21 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     </Col>
   );
 
-  renderControls() {
-    return (
-      <div style={STYLES.settingsContainer}>
-        {this.props.volumeChecked && (
-          <Row type="flex" justify="space-between" className="volume-settings">
-            <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-            {this.createTFEditor()}
-          </Row>
-        )}
-        {this.props.isosurfaceChecked && (
-          <Row type="flex" justify="space-between">
-            {this.renderSurfaceControls()}
-          </Row>
-        )}
-      </div>
-    );
-  }
+  renderControls = () => (
+    <div style={STYLES.settingsContainer}>
+      {this.props.volumeChecked && (
+        <Row type="flex" justify="space-between" className="volume-settings">
+          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
+          {this.createTFEditor()}
+        </Row>
+      )}
+      {this.props.isosurfaceChecked && (
+        <Row type="flex" justify="space-between">
+          {this.renderSurfaceControls()}
+        </Row>
+      )}
+    </div>
+  );
 
   render() {
     const rowClass = this.state.controlsOpen ? "row-card" : "row-card controls-closed";
