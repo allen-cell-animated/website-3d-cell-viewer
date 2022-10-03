@@ -2,10 +2,8 @@ import React from "react";
 import { Card, Collapse } from "antd";
 
 import ColorPicker from "./ColorPicker";
-import { colorArrayToRgbObject } from "../shared/utils/colorObjectArrayConverting";
+import { ColorArray, ColorObject, colorArrayToObject } from "../shared/utils/colorRepresentations";
 
-type ColorArray = [number, number, number];
-type ColorObject = { r: number; g: number; b: number };
 type ColorChangeHandler = (color: ColorObject) => void;
 
 const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: ColorChangeHandler }> = ({
@@ -15,7 +13,7 @@ const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: ColorChangeHa
 }) => (
   <div style={STYLES.colorPickerRow}>
     <span style={STYLES.colorPicker}>
-      <ColorPicker color={colorArrayToRgbObject(color)} onColorChange={onColorChange} width={18} disableAlpha={true} />
+      <ColorPicker color={colorArrayToObject(color)} onColorChange={onColorChange} width={18} disableAlpha={true} />
     </span>
     <span>{children}</span>
   </div>

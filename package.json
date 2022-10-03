@@ -39,7 +39,6 @@
   "license": "ISC",
   "dependencies": {
     "@aics/volume-viewer": "^2.5.1",
-    "classnames": "^2.2.5",
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
     "lodash": "^4.17.20",

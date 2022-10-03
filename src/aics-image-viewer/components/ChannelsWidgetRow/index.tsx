@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
-import classNames from "classnames";
 
 import TfEditor from "../TfEditor";
 
@@ -20,16 +19,10 @@ import {
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
-import { colorArrayToRgbObject, rgbObjectToColorArray } from "../../shared/utils/colorObjectArrayConverting";
+import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
-
-type ColorObject = {
-  r: number;
-  g: number;
-  b: number;
-};
 
 interface ChannelsWidgetRowProps {
   index: number;
@@ -51,7 +44,6 @@ interface ChannelsWidgetRowProps {
   changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
-
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
@@ -93,14 +85,6 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
 
   onIsovalueChange = this.createChannelSettingHandler(ISO_VALUE);
   onOpacityChange = this.createChannelSettingHandler(OPACITY, (val) => val / ISOSURFACE_OPACITY_SLIDER_MAX);
-  onUpdateLutControlPoints = this.createChannelSettingHandler(LUT_CONTROL_POINTS);
-  updateColorizeMode = this.createChannelSettingHandler(COLORIZE_ENABLED);
-  updateColorizeAlpha = this.createChannelSettingHandler(COLORIZE_ALPHA);
-
-  createSaveIsosurfaceHandler = (format: string) => () => {
-    const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, format, index);
-  };
 
   createIsovalueSlider() {
     const isoRange = { min: 0, max: 255 };
@@ -146,26 +130,21 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
 
   toggleControlsOpen() {
     const { isosurfaceChecked, volumeChecked } = this.props;
-    if (!isosurfaceChecked && !volumeChecked) {
-      return;
+    if (isosurfaceChecked || volumeChecked) {
+      this.setState({
+        controlsOpen: !this.state.controlsOpen,
+      });
     }
-    this.setState({
-      controlsOpen: !this.state.controlsOpen,
-    });
   }
 
-  onColorChange(
-    newRGB: { r: number; g: number; b: number },
-    oldRGB: { r: number; g: number; b: number } | undefined,
-    index?: number
-  ) {
+  onColorChange(newRGB: ColorObject, _oldRGB?: ColorObject, index?: number) {
     const { channelName } = this.props;
-    const color = rgbObjectToColorArray(newRGB);
+    const color = colorObjectToArray(newRGB);
     this.props.changeOneChannelSetting(channelName, index!, "color", color);
   }
 
   createColorPicker() {
-    const color = colorArrayToRgbObject(this.props.color);
+    const color = colorArrayToObject(this.props.color);
     return (
       <div style={STYLES.colorPicker}>
         <ColorPicker
@@ -216,14 +195,19 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
         updateChannelTransferFunction={updateChannelTransferFunction}
-        updateChannelLutControlPoints={this.onUpdateLutControlPoints}
-        updateColorizeMode={this.updateColorizeMode}
-        updateColorizeAlpha={this.updateColorizeAlpha}
+        updateChannelLutControlPoints={this.createChannelSettingHandler(LUT_CONTROL_POINTS)}
+        updateColorizeMode={this.createChannelSettingHandler(COLORIZE_ENABLED)}
+        updateColorizeAlpha={this.createChannelSettingHandler(COLORIZE_ALPHA)}
         colorizeEnabled={colorizeEnabled}
         colorizeAlpha={colorizeAlpha}
       />
     );
   }
+
+  createSaveIsosurfaceHandler = (format: string) => () => {
+    const { index, handleChangeToImage } = this.props;
+    handleChangeToImage(SAVE_ISO_SURFACE, format, index);
+  };
 
   renderSurfaceControls = () => (
     <Col span={24}>
@@ -266,10 +250,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 
   render() {
-    const rowClass = classNames({
-      "row-card": true,
-      "controls-closed": !this.state.controlsOpen,
-    });
+    const rowClass = this.state.controlsOpen ? "row-card" : "row-card controls-closed";
     return (
       <List.Item key={this.props.index} className={rowClass} actions={this.renderActions()}>
         <List.Item.Meta
