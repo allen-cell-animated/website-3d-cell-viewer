@@ -2,20 +2,15 @@ import React from "react";
 import { SketchPicker } from "react-color";
 import { map } from "lodash";
 
+import { ColorObject } from "../shared/utils/colorRepresentations";
+
 // if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
 const OPEN_ABOVE_MARGIN = 310;
 
-type Color = {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-};
-
-type ColorChangeHandler = (currentColor: Color, prevColor?: Color, idx?: number) => void;
+type ColorChangeHandler = (currentColor: ColorObject, prevColor?: ColorObject, idx?: number) => void;
 
 interface ColorPickerProps {
-  color: Color;
+  color: ColorObject;
   width: number;
   onColorChange?: ColorChangeHandler;
   onColorChangeComplete?: ColorChangeHandler;
@@ -24,7 +19,7 @@ interface ColorPickerProps {
 }
 
 interface ColorPickerState {
-  color: Color;
+  color: ColorObject;
   displayColorPicker: boolean;
   openAboveSwatch: boolean;
 }

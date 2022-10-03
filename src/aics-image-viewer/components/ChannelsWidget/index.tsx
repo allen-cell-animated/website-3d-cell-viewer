@@ -21,6 +21,7 @@ import "./styles.css";
 const { Panel } = Collapse;
 
 import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ColorObject } from "../../shared/utils/colorRepresentations";
 
 interface ChannelSettings {
   name: string;
@@ -38,13 +39,6 @@ interface ChannelSettings {
   }[];
 }
 
-type RGBColor = {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-};
-
 export interface ChannelsWidgetProps {
   imageName: string;
   channelSettings: ChannelSettings[];
@@ -60,7 +54,7 @@ export interface ChannelsWidgetProps {
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
   filterFunc?: (key: string) => boolean;
-  onColorChangeComplete?: (newRGB: RGBColor, oldRGB?: RGBColor, index?: number) => void;
+  onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
 export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
