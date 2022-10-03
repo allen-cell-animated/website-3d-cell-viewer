@@ -54,13 +54,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     this.onColorChange = this.onColorChange.bind(this);
     this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
     this.isosurfaceCheckHandler = this.isosurfaceCheckHandler.bind(this);
-    this.onIsovalueChange = this.onIsovalueChange.bind(this);
     this.state = {
       controlsOpen: false,
     };
   }
 
-  volumeCheckHandler({ target }) {
+  volumeCheckHandler({ target }: { target: { checked: boolean } }) {
     const { channelName, index, changeOneChannelSetting, isosurfaceChecked } = this.props;
     if (!target.checked && !isosurfaceChecked) {
       this.setState({ controlsOpen: false });
@@ -68,7 +67,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, VOLUME_ENABLED, target.checked);
   }
 
-  isosurfaceCheckHandler({ target }) {
+  isosurfaceCheckHandler({ target }: { target: { checked: boolean } }) {
     const { channelName, index, changeOneChannelSetting, volumeChecked } = this.props;
     if (!target.checked && !volumeChecked) {
       this.setState({ controlsOpen: false });
