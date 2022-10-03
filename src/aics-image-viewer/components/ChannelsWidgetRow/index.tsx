@@ -76,57 +76,32 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, ISO_SURFACE_ENABLED, target.checked);
   }
 
-  createChannelSettingHandler =
-    (settingKey: string, map = (x: any) => x) =>
-    (newValue: any) => {
-      const { channelName, index, changeOneChannelSetting } = this.props;
-      changeOneChannelSetting(channelName, index, settingKey, map(newValue));
-    };
+  createChannelSettingHandler = (settingKey: string) => (newValue: any) => {
+    const { channelName, index, changeOneChannelSetting } = this.props;
+    changeOneChannelSetting(channelName, index, settingKey, newValue);
+  };
 
   onIsovalueChange = this.createChannelSettingHandler(ISO_VALUE);
-  onOpacityChange = this.createChannelSettingHandler(OPACITY, (val) => val / ISOSURFACE_OPACITY_SLIDER_MAX);
+  onOpacityChangeUnwrapped = this.createChannelSettingHandler(OPACITY);
+  onOpacityChange = (newValue: number) => this.onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
-  createIsovalueSlider() {
-    const isoRange = { min: 0, max: 255 };
-    return (
-      <Row>
-        <Col span={10}>
-          <label style={STYLES.controlName}>isovalue</label>
-        </Col>
-        <Col span={12}>
-          <Slider
-            disabled={!this.props.isosurfaceChecked}
-            min={isoRange.min || 0}
-            max={isoRange.max || 225}
-            defaultValue={ISOVALUE_DEFAULT}
-            style={STYLES.slider}
-            onChange={this.onIsovalueChange}
-          />
-        </Col>
-      </Row>
-    );
-  }
-
-  createOpacitySlider() {
-    const range = { min: 0, max: ISOSURFACE_OPACITY_SLIDER_MAX };
-    return (
-      <Row>
-        <Col span={10}>
-          <label style={STYLES.controlName}>opacity</label>
-        </Col>
-        <Col span={12}>
-          <Slider
-            disabled={!this.props.isosurfaceChecked}
-            min={range.min}
-            max={range.max}
-            defaultValue={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
-            style={STYLES.slider}
-            onChange={this.onOpacityChange}
-          />
-        </Col>
-      </Row>
-    );
-  }
+  createSliderRow = (name: string, maxValue: number, defaultValue: number, onChange: (newValue: any) => void) => (
+    <Row>
+      <Col span={10}>
+        <label style={STYLES.controlName}>{name}</label>
+      </Col>
+      <Col span={12}>
+        <Slider // TODO: this is the only remaining place we're using antd's slider rather than Nouislider. Replace it?
+          disabled={!this.props.isosurfaceChecked}
+          min={0}
+          max={maxValue}
+          defaultValue={defaultValue}
+          style={STYLES.slider}
+          onChange={onChange}
+        />
+      </Col>
+    </Row>
+  );
 
   toggleControlsOpen() {
     const { isosurfaceChecked, volumeChecked } = this.props;
@@ -143,20 +118,17 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     this.props.changeOneChannelSetting(channelName, index!, "color", color);
   }
 
-  createColorPicker() {
-    const color = colorArrayToObject(this.props.color);
-    return (
-      <div style={STYLES.colorPicker}>
-        <ColorPicker
-          color={color}
-          onColorChange={this.onColorChange}
-          onColorChangeComplete={this.props.onColorChangeComplete}
-          idx={this.props.index}
-          width={18}
-        />
-      </div>
-    );
-  }
+  createColorPicker = () => (
+    <div style={STYLES.colorPicker}>
+      <ColorPicker
+        color={colorArrayToObject(this.props.color)}
+        onColorChange={this.onColorChange}
+        onColorChangeComplete={this.props.onColorChangeComplete}
+        idx={this.props.index}
+        width={18}
+      />
+    </div>
+  );
 
   renderActions = () => [
     <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
@@ -212,8 +184,13 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   renderSurfaceControls = () => (
     <Col span={24}>
       <h4 className="ant-list-item-meta-title">Surface settings:</h4>
-      {this.createIsovalueSlider()}
-      {this.createOpacitySlider()}
+      {this.createSliderRow("isovalue", 255, ISOVALUE_DEFAULT, this.onIsovalueChange)}
+      {this.createSliderRow(
+        "opacity",
+        ISOSURFACE_OPACITY_SLIDER_MAX,
+        ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
+        this.onOpacityChange
+      )}
       <Button
         disabled={!this.props.isosurfaceChecked}
         onClick={this.createSaveIsosurfaceHandler("GLTF")}
