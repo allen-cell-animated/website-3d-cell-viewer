@@ -39,7 +39,7 @@ interface ChannelsWidgetRowProps {
     opacity: number;
     x: number;
   }[];
-  channelDataForChannel: any; // volume-viewer Channel type
+  channelDataForChannel: any; // TODO: export Channel type from volume-viewer to use here
 
   changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;

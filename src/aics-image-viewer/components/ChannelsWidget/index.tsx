@@ -42,7 +42,7 @@ interface ChannelSettings {
 export interface ChannelsWidgetProps {
   imageName: string;
   channelSettings: ChannelSettings[];
-  channelDataChannels: any[]; // volume-viewer Channel type
+  channelDataChannels: any[]; // TODO: export Channel type from volume-viewer to use here
   channelGroupedByType: { [key: string]: number[] };
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
@@ -60,28 +60,16 @@ export interface ChannelsWidgetProps {
 export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
   constructor(props: ChannelsWidgetProps) {
     super(props);
-    this.renderVisibilityControls = this.renderVisibilityControls.bind(this);
-    this.showVolumes = this.showVolumes.bind(this);
-    this.showSurfaces = this.showSurfaces.bind(this);
-    this.hideVolumes = this.hideVolumes.bind(this);
-    this.hideSurfaces = this.hideSurfaces.bind(this);
   }
 
-  showVolumes(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, true);
-  }
+  createCheckboxHandler = (key: string, value: boolean) => (channelArray: number[]) => {
+    this.props.changeChannelSettings(channelArray, key, value);
+  };
 
-  showSurfaces(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, true);
-  }
-
-  hideVolumes(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, false);
-  }
-
-  hideSurfaces(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
-  }
+  showVolumes = this.createCheckboxHandler(VOLUME_ENABLED, true);
+  showSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, true);
+  hideVolumes = this.createCheckboxHandler(VOLUME_ENABLED, false);
+  hideSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, false);
 
   renderVisibilityControls(channelArray: number[]) {
     const { channelSettings, channelDataChannels } = this.props;
