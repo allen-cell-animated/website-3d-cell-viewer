@@ -27,14 +27,15 @@ interface ViewerWrapperProps {
   setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
 }
 
-export default class ViewerWrapper extends React.Component<ViewerWrapperProps, {}> {
+interface ViewerWrapperState {}
+
+export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
   private view3dviewerRef: React.RefObject<HTMLDivElement>;
   private view3D: View3d;
 
-  constructor(props) {
+  constructor(props: ViewerWrapperProps) {
     super(props);
     this.view3dviewerRef = React.createRef();
-    this.renderOverlay = this.renderOverlay.bind(this);
   }
 
   componentDidMount() {
@@ -45,7 +46,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, {
     }
   }
 
-  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: {}) {
+  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState) {
     if (this.view3D && prevProps.mode && prevProps.mode !== this.props.mode) {
       this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(this.props.mode));
     }
