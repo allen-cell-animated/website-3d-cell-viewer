@@ -87,7 +87,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   slidersWrapper: {
     marginRight: "10px",
     paddingTop: "18px",
@@ -98,7 +98,7 @@ const STYLES = {
   },
   controlName: {
     flex: 2,
-    whiteSpace: "nowrap" as "nowrap",
+    whiteSpace: "nowrap",
   },
   control: {
     flex: 5,

@@ -87,25 +87,25 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, {
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   viewer: {
-    display: "flex" as "flex",
-    position: "relative" as "relative",
+    display: "flex",
+    position: "relative",
   },
   view3d: {
     width: "100%",
-    display: "flex" as "flex",
+    display: "flex",
   },
   noImage: {
-    position: "absolute" as "absolute",
+    position: "absolute",
     zIndex: 999,
     top: 0,
     left: 0,
     bottom: 0,
     right: 0,
-    display: "flex" as "flex",
-    justifyContent: "center" as "center",
-    alignItems: "center" as "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#eeeee",
     color: "#9b9b9b",
     fontSize: "2em",

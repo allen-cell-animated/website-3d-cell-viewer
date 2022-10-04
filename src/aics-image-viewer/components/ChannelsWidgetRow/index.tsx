@@ -237,7 +237,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   channelName: {
     display: "inline-block",
     minWidth: 90,
@@ -265,6 +265,6 @@ const STYLES = {
     marginTop: "4px",
   },
   controlName: {
-    whiteSpace: "nowrap" as "nowrap",
+    whiteSpace: "nowrap",
   },
 };

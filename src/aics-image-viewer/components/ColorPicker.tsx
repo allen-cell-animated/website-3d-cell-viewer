@@ -116,7 +116,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   color: {
     height: "14px",
     borderRadius: "2px",
@@ -130,11 +130,11 @@ const STYLES = {
     verticalAlign: "middle",
   },
   popover: {
-    position: "absolute" as "absolute",
+    position: "absolute",
     zIndex: "9999",
   },
   cover: {
-    position: "fixed" as "fixed",
+    position: "fixed",
     top: "0px",
     right: "0px",
     bottom: "0px",

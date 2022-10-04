@@ -44,7 +44,7 @@ const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
   </Card>
 );
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   colorPickerRow: {
     padding: "14px 0",
     display: "flex",

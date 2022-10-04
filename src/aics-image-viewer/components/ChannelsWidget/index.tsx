@@ -174,7 +174,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   header: {
     textAlign: "left",
     fontWeight: 900,
