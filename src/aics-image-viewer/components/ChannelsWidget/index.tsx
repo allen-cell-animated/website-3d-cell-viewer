@@ -21,6 +21,7 @@ import "./styles.css";
 const { Panel } = Collapse;
 
 import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ColorObject } from "../../shared/utils/colorRepresentations";
 
 interface ChannelSettings {
   name: string;
@@ -31,20 +32,17 @@ interface ChannelSettings {
   opacity: number;
   color: [number, number, number];
   dataReady: boolean;
-  controlPoints: [];
+  controlPoints: {
+    color: string;
+    opacity: number;
+    x: number;
+  }[];
 }
-
-type RGBColor = {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-};
 
 export interface ChannelsWidgetProps {
   imageName: string;
   channelSettings: ChannelSettings[];
-  channelDataChannels: any[]; // volume-viewer Channel type
+  channelDataChannels: any[]; // TODO: export Channel type from volume-viewer to use here
   channelGroupedByType: { [key: string]: number[] };
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
@@ -56,34 +54,22 @@ export interface ChannelsWidgetProps {
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
   filterFunc?: (key: string) => boolean;
-  onColorChangeComplete?: (newRGB: RGBColor, oldRGB: RGBColor, index: number) => void;
+  onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
 export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
   constructor(props: ChannelsWidgetProps) {
     super(props);
-    this.renderVisibilityControls = this.renderVisibilityControls.bind(this);
-    this.showVolumes = this.showVolumes.bind(this);
-    this.showSurfaces = this.showSurfaces.bind(this);
-    this.hideVolumes = this.hideVolumes.bind(this);
-    this.hideSurfaces = this.hideSurfaces.bind(this);
   }
 
-  showVolumes(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, true);
-  }
+  createCheckboxHandler = (key: string, value: boolean) => (channelArray: number[]) => {
+    this.props.changeChannelSettings(channelArray, key, value);
+  };
 
-  showSurfaces(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, true);
-  }
-
-  hideVolumes(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, VOLUME_ENABLED, false);
-  }
-
-  hideSurfaces(channelArray: number[]) {
-    this.props.changeChannelSettings(channelArray, ISO_SURFACE_ENABLED, false);
-  }
+  showVolumes = this.createCheckboxHandler(VOLUME_ENABLED, true);
+  showSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, true);
+  hideVolumes = this.createCheckboxHandler(VOLUME_ENABLED, false);
+  hideSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, false);
 
   renderVisibilityControls(channelArray: number[]) {
     const { channelSettings, channelDataChannels } = this.props;
@@ -120,15 +106,8 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 
   getRows() {
-    const {
-      channelGroupedByType,
-      channelSettings,
-      channelDataReady,
-      channelDataChannels,
-      filterFunc,
-      imageName,
-      viewerChannelSettings,
-    } = this.props;
+    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, imageName, viewerChannelSettings } =
+      this.props;
     const firstKey = Object.keys(channelGroupedByType)[0];
     return map(channelGroupedByType, (channelArray: number[], key: string) => {
       if (!channelArray.length || (filterFunc && !filterFunc(key))) {
@@ -160,10 +139,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
                       colorizeEnabled={thisChannelSettings[COLORIZE_ENABLED]}
                       colorizeAlpha={thisChannelSettings[COLORIZE_ALPHA]}
-                      isovalue={thisChannelSettings.isovalue}
-                      opacity={thisChannelSettings.opacity}
                       color={thisChannelSettings.color}
-                      channelDataReady={channelDataReady[actualIndex]}
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
@@ -186,7 +162,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   header: {
     textAlign: "left",
     fontWeight: 900,

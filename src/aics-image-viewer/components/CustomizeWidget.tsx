@@ -2,30 +2,22 @@ import React from "react";
 import { Card, Collapse } from "antd";
 
 import ColorPicker from "./ColorPicker";
-import { colorArrayToRgbObject } from "../shared/utils/colorObjectArrayConverting";
+import { ColorArray, ColorObject, colorArrayToObject } from "../shared/utils/colorRepresentations";
 
-type ColorArray = [number, number, number];
-type ColorChangeHandler = (color: ColorArray) => void;
+type ColorChangeHandler = (color: ColorObject) => void;
 
-function ColorPickerRow({
+const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: ColorChangeHandler }> = ({
   color,
   onColorChange,
   children,
-}: React.PropsWithChildren<{ color: ColorArray; onColorChange: ColorChangeHandler }>) {
-  return (
-    <div style={STYLES.colorPickerRow}>
-      <span style={STYLES.colorPicker}>
-        <ColorPicker
-          color={colorArrayToRgbObject(color)}
-          onColorChange={onColorChange}
-          width={18}
-          disableAlpha={true}
-        />
-      </span>
-      <span>{children}</span>
-    </div>
-  );
-}
+}) => (
+  <div style={STYLES.colorPickerRow}>
+    <span style={STYLES.colorPicker}>
+      <ColorPicker color={colorArrayToObject(color)} onColorChange={onColorChange} width={18} disableAlpha={true} />
+    </span>
+    <span>{children}</span>
+  </div>
+);
 
 export interface CustomizeWidgetProps {
   showBoundingBox: boolean;
@@ -36,25 +28,23 @@ export interface CustomizeWidgetProps {
   changeBoundingBoxColor: ColorChangeHandler;
 }
 
-export default function CustomizeWidget(props: CustomizeWidgetProps) {
-  return (
-    <Card bordered={false} title="Customize" type="inner" className="color-customizer">
-      <Collapse bordered={false} defaultActiveKey="color-customization">
-        <Collapse.Panel key="color-customization" header={null}>
-          <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
-            Background color
-          </ColorPickerRow>
-          <ColorPickerRow color={props.boundingBoxColor} onColorChange={props.changeBoundingBoxColor}>
-            Bounding box color
-            {!props.showBoundingBox && <i> - bounding box turned off</i>}
-          </ColorPickerRow>
-        </Collapse.Panel>
-      </Collapse>
-    </Card>
-  );
-}
+const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
+  <Card bordered={false} title="Customize" type="inner" className="color-customizer">
+    <Collapse bordered={false} defaultActiveKey="color-customization">
+      <Collapse.Panel key="color-customization" header={null}>
+        <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
+          Background color
+        </ColorPickerRow>
+        <ColorPickerRow color={props.boundingBoxColor} onColorChange={props.changeBoundingBoxColor}>
+          Bounding box color
+          {!props.showBoundingBox && <i> - bounding box turned off</i>}
+        </ColorPickerRow>
+      </Collapse.Panel>
+    </Collapse>
+  </Card>
+);
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   colorPickerRow: {
     padding: "14px 0",
     display: "flex",
@@ -65,3 +55,5 @@ const STYLES = {
     marginRight: "16px",
   },
 };
+
+export default CustomizeWidget;

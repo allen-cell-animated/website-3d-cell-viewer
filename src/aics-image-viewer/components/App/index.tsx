@@ -58,7 +58,7 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { colorArrayToFloatArray, rgbObjectToArray } from "../../shared/utils/colorObjectArrayConverting";
+import { colorArrayToFloats, colorObjectToArray } from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
 
@@ -293,7 +293,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onView3DCreated(view3d) {
     const { userSelections } = this.state;
-    view3d.setBackgroundColor(colorArrayToFloatArray(userSelections.backgroundColor));
+    view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
 
     this.setState({ view3d });
@@ -514,7 +514,7 @@ export default class App extends React.Component<AppProps, AppState> {
     // update current camera mode to make sure the image gets the update
     view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
-    view3d.setBoundingBoxColor(aimg, colorArrayToFloatArray(userSelections.boundingBoxColor));
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -1001,19 +1001,19 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   changeBoundingBoxColor(color) {
-    const boundingBoxColor = rgbObjectToArray(color);
+    const boundingBoxColor = colorObjectToArray(color);
     this.setUserSelectionsInState({ boundingBoxColor });
     if (this.state.view3d && this.state.image) {
-      const floatColor = colorArrayToFloatArray(boundingBoxColor);
+      const floatColor = colorArrayToFloats(boundingBoxColor);
       this.state.view3d.setBoundingBoxColor(this.state.image, floatColor);
     }
   }
 
   changeBackgroundColor(color) {
-    const backgroundColor = rgbObjectToArray(color);
+    const backgroundColor = colorObjectToArray(color);
     this.setUserSelectionsInState({ backgroundColor });
     if (this.state.view3d) {
-      const floatColor = colorArrayToFloatArray(backgroundColor);
+      const floatColor = colorArrayToFloats(backgroundColor);
       this.state.view3d.setBackgroundColor(floatColor);
     }
   }
@@ -1112,7 +1112,7 @@ export default class App extends React.Component<AppProps, AppState> {
         z: this.state.image.z,
       };
     }
-    return {};
+    return { x: 0, y: 0, z: 0 };
   }
 
   render() {

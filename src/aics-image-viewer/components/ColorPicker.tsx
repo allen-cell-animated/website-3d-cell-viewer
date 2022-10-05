@@ -2,11 +2,32 @@ import React from "react";
 import { SketchPicker } from "react-color";
 import { map } from "lodash";
 
+import { ColorObject } from "../shared/utils/colorRepresentations";
+
 // if there are fewer than this many screen pixels below the swatch but more above, open above the swatch
 const OPEN_ABOVE_MARGIN = 310;
 
-export default class ColorPicker extends React.Component {
-  constructor(props) {
+type ColorChangeHandler = (currentColor: ColorObject, prevColor?: ColorObject, idx?: number) => void;
+
+interface ColorPickerProps {
+  color: ColorObject;
+  width: number;
+  onColorChange?: ColorChangeHandler;
+  onColorChangeComplete?: ColorChangeHandler;
+  idx?: any;
+  disableAlpha?: boolean;
+}
+
+interface ColorPickerState {
+  color: ColorObject;
+  displayColorPicker: boolean;
+  openAboveSwatch: boolean;
+}
+
+export default class ColorPicker extends React.Component<ColorPickerProps, ColorPickerState> {
+  private swatchRef: React.RefObject<HTMLDivElement>;
+
+  constructor(props: ColorPickerProps) {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
@@ -31,7 +52,7 @@ export default class ColorPicker extends React.Component {
   }
 
   handleClick() {
-    const swatchRect = this.swatchRef.current.getBoundingClientRect();
+    const swatchRect = this.swatchRef.current!.getBoundingClientRect();
     const noRoomBelowSwatch = swatchRect.bottom > window.innerHeight - OPEN_ABOVE_MARGIN;
     this.setState({
       displayColorPicker: !this.state.displayColorPicker,
@@ -95,7 +116,7 @@ export default class ColorPicker extends React.Component {
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   color: {
     height: "14px",
     borderRadius: "2px",

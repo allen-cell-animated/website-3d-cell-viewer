@@ -1,5 +1,5 @@
 import React from "react";
-import { View3d } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
@@ -9,11 +9,33 @@ import AxisClipSliders from "../AxisClipSliders";
 import { BottomPanel } from "../BottomPanel";
 import "./styles.css";
 
-export default class ViewerWrapper extends React.Component {
-  constructor(props) {
+interface ViewerWrapperProps {
+  autorotate: boolean;
+  loadingImage: boolean;
+  mode: symbol;
+  appHeight: string;
+  image: Volume;
+  numSlices: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  renderConfig: {
+    axisClipSliders: boolean;
+  };
+  onView3DCreated: (view3d: View3d) => void;
+  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+}
+
+interface ViewerWrapperState {}
+
+export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
+  private view3dviewerRef: React.RefObject<HTMLDivElement>;
+  private view3D: View3d;
+
+  constructor(props: ViewerWrapperProps) {
     super(props);
     this.view3dviewerRef = React.createRef();
-    this.renderOverlay = this.renderOverlay.bind(this);
   }
 
   componentDidMount() {
@@ -24,7 +46,7 @@ export default class ViewerWrapper extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps, _prevState) {
+  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState) {
     if (this.view3D && prevProps.mode && prevProps.mode !== this.props.mode) {
       this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(this.props.mode));
     }
@@ -66,7 +88,7 @@ export default class ViewerWrapper extends React.Component {
   }
 }
 
-const STYLES = {
+const STYLES: { [key: string]: React.CSSProperties } = {
   viewer: {
     display: "flex",
     position: "relative",
