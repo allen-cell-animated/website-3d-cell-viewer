@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
+import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
 
@@ -25,8 +26,8 @@ const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
 
 interface ChannelsWidgetRowProps {
+  imageName: string | undefined;
   index: number;
-  imageName: string;
   channelName: string;
   name: string;
   volumeChecked: boolean;
@@ -39,7 +40,7 @@ interface ChannelsWidgetRowProps {
     opacity: number;
     x: number;
   }[];
-  channelDataForChannel: any; // TODO: export Channel type from volume-viewer to use here
+  channelDataForChannel: Channel;
 
   changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;

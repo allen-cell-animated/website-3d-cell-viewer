@@ -2,11 +2,15 @@
 import { Layout } from "antd";
 import React from "react";
 import { includes, isEqual, find, map, debounce } from "lodash";
-import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
+import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
 
 import { AppProps, AppState, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
-import { findFirstChannelMatch, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
+import {
+  findFirstChannelMatch,
+  makeChannelIndexGrouping,
+  ViewerChannelSetting,
+} from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
@@ -58,7 +62,12 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { colorArrayToFloats, colorObjectToArray } from "../../shared/utils/colorRepresentations";
+import {
+  ColorArray,
+  colorArrayToFloats,
+  ColorObject,
+  colorObjectToArray,
+} from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
 
@@ -67,7 +76,7 @@ const { Sider, Content } = Layout;
 
 const INIT_COLORS = PRESET_COLORS_0;
 
-function colorHexToArray(hex) {
+function colorHexToArray(hex: string): ColorArray | null {
   // hex is a xxxxxx string. split it into array of rgb ints
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   if (result) {
@@ -81,7 +90,7 @@ const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
   // rawDims is the volume dims that normally come from a json file
-  rawDims: null,
+  rawDims: undefined,
 
   maskChannelName: "",
 
@@ -135,7 +144,7 @@ export default class App extends React.Component<AppProps, AppState> {
   private stateKey: "image" | "prevImg" | "nextImg";
 
   static defaultProps = defaultProps;
-  constructor(props) {
+  constructor(props: AppProps) {
     super(props);
 
     let viewmode = ViewMode.threeD;
@@ -259,7 +268,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps: AppProps, prevState: AppState) {
     const { cellId, cellPath, rawDims, rawData } = this.props;
     const { userSelections, view3d, image } = this.state;
 
@@ -291,7 +300,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  onView3DCreated(view3d) {
+  onView3DCreated(view3d: View3d) {
     const { userSelections } = this.state;
     view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
     view3d.setShowAxis(userSelections[SHOW_AXES]);
@@ -299,15 +308,15 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({ view3d });
   }
 
-  setInitialChannelConfig(channelNames, channelColors) {
+  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): ViewerChannelSetting[] {
     return channelNames.map((channel, index) => {
-      let color = channelColors[index] ? channelColors[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
+      let color = channelColors[index] ? (channelColors[index].slice() as ColorArray) : ([226, 205, 179] as ColorArray); // guard for unexpectedly longer channel list
 
       return this.initializeOneChannelSetting(null, channel, index, color);
     });
   }
 
-  createChannelGrouping(channels): { [key: string]: number[] } {
+  createChannelGrouping(channels: string[]): { [key: string]: number[] } {
     if (!channels) {
       return {};
     }
@@ -315,9 +324,7 @@ export default class App extends React.Component<AppProps, AppState> {
     if (!viewerChannelSettings) {
       // return all channels
       return {
-        [SINGLE_GROUP_CHANNEL_KEY]: channels.map(function (val, index) {
-          return index;
-        }),
+        [SINGLE_GROUP_CHANNEL_KEY]: channels.map((_val, index) => index),
       };
     }
 
@@ -329,20 +336,6 @@ export default class App extends React.Component<AppProps, AppState> {
       clearInterval(this.openImageInterval);
       this.openImageInterval = null;
     }
-  }
-
-  checkDimensionsMatch(a, b) {
-    return (
-      a.width === b.width ||
-      a.height === b.height ||
-      a.rows === b.rows ||
-      a.cols === b.cols ||
-      a.tiles === b.tiles ||
-      a.tile_width === b.tile_width ||
-      a.tile_height === b.tile_height ||
-      a.atlas_width === b.atlas_width ||
-      a.atlas_height === b.atlas_height
-    );
   }
 
   onNewVolumeCreated(
@@ -375,7 +368,8 @@ export default class App extends React.Component<AppProps, AppState> {
       console.error("ERROR invalid or unexpected stateKey");
     }
   }
-  onNewChannelData(url: string, v: Volume, channelIndex: number, keepLuts: boolean) {
+
+  onNewChannelData(url: string, v: Volume, channelIndex: number, keepLuts: boolean | undefined) {
     // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
     const thisChannelSettings = this.getOneChannelSetting(
       v.imageInfo.channel_names[channelIndex],
@@ -405,7 +399,12 @@ export default class App extends React.Component<AppProps, AppState> {
     this.stopPollingForImage();
   }
 
-  openImage(imageDirectory, doResetViewMode, stateKey, keepLuts?) {
+  openImage(
+    imageDirectory: string,
+    doResetViewMode: boolean,
+    stateKey: "image" | "nextImg" | "prevImg",
+    keepLuts?: boolean
+  ) {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -475,6 +474,9 @@ export default class App extends React.Component<AppProps, AppState> {
   // set up the Volume into the Viewer using the current initial settings
   private placeImageInViewer(aimg: Volume, newChannelSettings?): void {
     const { userSelections, view3d } = this.state;
+    if (!view3d) {
+      return;
+    }
     const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
@@ -519,7 +521,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.updateActiveChannels(aimg);
   }
 
-  updateStateOnLoadImage(channelNames) {
+  updateStateOnLoadImage(channelNames: string[]) {
     const { userSelections } = this.state;
 
     const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => ele.name);
@@ -543,9 +545,8 @@ export default class App extends React.Component<AppProps, AppState> {
     const initViewerSettings = this.props.viewerChannelSettings;
     // find channelIndex among viewerChannelSettings.
     const name = aimg.channel_names[channelIndex];
-    let lutObject: Lut = {};
     // default to percentiles
-    lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+    let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
     // and if init settings dictate, recompute it:
     if (initViewerSettings) {
       const initSettings = findFirstChannelMatch(name, channelIndex, initViewerSettings);
@@ -590,7 +591,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onChannelDataLoaded(aimg: Volume, thisChannelsSettings, channelIndex, keepLuts) {
     const { image, view3d } = this.state;
-    if (aimg !== image) {
+    if (!view3d || aimg !== image) {
       return;
     }
     const volenabled = thisChannelsSettings[VOLUME_ENABLED];
@@ -633,6 +634,10 @@ export default class App extends React.Component<AppProps, AppState> {
     const { image, prevImg } = this.state;
     const { prevImgPath } = this.props;
 
+    if (!prevImg) {
+      return;
+    }
+
     // assume prevImg is available to initialize
     this.initializeNewImage(prevImg);
     this.setState({
@@ -647,6 +652,10 @@ export default class App extends React.Component<AppProps, AppState> {
     const { image, nextImg } = this.state;
     const { nextImgPath } = this.props;
 
+    if (!nextImg) {
+      return;
+    }
+
     // assume nextImg is available to initialize
     this.initializeNewImage(nextImg);
     this.setState({
@@ -657,7 +666,12 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(nextImgPath, true, "nextImg");
   }
 
-  initializeOneChannelSetting(aimg: Volume, channel, index, defaultColor) {
+  initializeOneChannelSetting(
+    aimg: Volume | null,
+    channel: string,
+    index: number,
+    defaultColor: ColorArray
+  ): ViewerChannelSetting {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
     let volumeEnabled = false;
@@ -701,8 +715,8 @@ export default class App extends React.Component<AppProps, AppState> {
 
   loadFromRaw() {
     const { rawDims, rawData } = this.props;
-    if (!rawData) {
-      console.error("ERROR loadFromRaw called without rawData being set");
+    if (!rawData || !rawDims) {
+      console.error("ERROR loadFromRaw called without rawData or rawDims being set");
       return;
     }
 
@@ -712,8 +726,8 @@ export default class App extends React.Component<AppProps, AppState> {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
-      let color = INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]; // guard for unexpectedly longer channel list
+    let newChannelSettings = rawDims.channel_names.map((channel, index: number) => {
+      let color = INIT_COLORS[index] ? (INIT_COLORS[index].slice() as ColorArray) : ([226, 205, 179] as ColorArray); // guard for unexpectedly longer channel list
       return this.initializeOneChannelSetting(aimg, channel, index, color);
     });
 
@@ -737,7 +751,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  handleChangeUserSelection(key, newValue) {
+  handleChangeUserSelection(key: string, newValue: any) {
     this.setUserSelectionsInState({ [key]: newValue });
     this.handleChangeToImage(key, newValue);
   }
@@ -763,7 +777,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
-  setUserSelectionsInState(newState) {
+  setUserSelectionsInState(newState: Partial<UserSelectionState>) {
     this.setState({
       userSelections: {
         ...this.state.userSelections,
@@ -772,26 +786,26 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  handleChangeToImage(keyToChange, newValue, index?) {
+  handleChangeToImage(keyToChange: string, newValue: any, index?: number) {
     const { image, userSelections, view3d } = this.state;
     if (!image || !view3d) {
       return;
     }
     switch (keyToChange) {
       case ISO_VALUE:
-        view3d.setVolumeChannelOptions(image, index, {
+        view3d.setVolumeChannelOptions(image, index!, {
           isovalue: newValue,
         });
         break;
       case OPACITY:
-        view3d.setVolumeChannelOptions(image, index, {
+        view3d.setVolumeChannelOptions(image, index!, {
           isosurfaceOpacity: newValue,
         });
         break;
       case COLOR:
         {
           let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
-          view3d.setVolumeChannelOptions(image, index, {
+          view3d.setVolumeChannelOptions(image, index!, {
             color: newColor,
           });
           view3d.updateMaterial(image);
@@ -807,24 +821,24 @@ export default class App extends React.Component<AppProps, AppState> {
         view3d.setShowBoundingBox(image, newValue);
         break;
       case SAVE_ISO_SURFACE:
-        view3d.saveChannelIsosurface(image, index, newValue);
+        view3d.saveChannelIsosurface(image, index!, newValue);
         break;
       case COLORIZE_ENABLED:
         if (newValue) {
           // TODO get the labelColors from the tf editor component
-          const lut = image.getHistogram(index).lutGenerator_labelColors();
-          image.setColorPalette(index, lut.lut);
-          image.setColorPaletteAlpha(index, userSelections[CHANNEL_SETTINGS][index][COLORIZE_ALPHA]);
+          const lut = image.getHistogram(index!).lutGenerator_labelColors();
+          image.setColorPalette(index!, lut.lut);
+          image.setColorPaletteAlpha(index!, userSelections[CHANNEL_SETTINGS][index!][COLORIZE_ALPHA]);
         } else {
-          image.setColorPaletteAlpha(index, 0);
+          image.setColorPaletteAlpha(index!, 0);
         }
         view3d.updateLuts(image);
         break;
       case COLORIZE_ALPHA:
-        if (userSelections[CHANNEL_SETTINGS][index][COLORIZE_ENABLED]) {
-          image.setColorPaletteAlpha(index, newValue);
+        if (userSelections[CHANNEL_SETTINGS][index!][COLORIZE_ENABLED]) {
+          image.setColorPaletteAlpha(index!, newValue);
         } else {
-          image.setColorPaletteAlpha(index, 0);
+          image.setColorPaletteAlpha(index!, 0);
         }
         view3d.updateLuts(image);
         break;
@@ -865,6 +879,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   downloadScreenshot() {
+    if (!this.state.view3d) {
+      return;
+    }
     this.state.view3d.capture((dataUrl: string) => {
       const anchor = document.createElement("a");
       anchor.href = dataUrl;
@@ -923,7 +940,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState(newSelectionState);
   }
 
-  onUpdateImageMaskAlpha(sliderValue) {
+  onUpdateImageMaskAlpha(sliderValue: any) {
     this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: sliderValue });
   }
 
@@ -933,23 +950,23 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  setImageAxisClip(axis, minval, maxval, isOrthoAxis) {
+  setImageAxisClip(axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) {
     if (this.state.view3d && this.state.image) {
       this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
     }
   }
 
-  makeUpdatePixelSizeFn(i) {
+  makeUpdatePixelSizeFn(i: number) {
     const { pixelSize } = this.props;
     const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
-    return (value) => {
+    return (value: number) => {
       const pixelSize = imagePixelSize.slice();
       pixelSize[i] = value;
-      this.state.image.setVoxelSize(pixelSize);
+      this.state.image?.setVoxelSize(pixelSize);
     };
   }
 
-  onChangeRenderingAlgorithm(newAlgorithm) {
+  onChangeRenderingAlgorithm(newAlgorithm: string) {
     const { userSelections } = this.state;
     // already set
     if (userSelections[newAlgorithm]) {
@@ -977,7 +994,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  onApplyColorPresets(presets) {
+  onApplyColorPresets(presets: ColorArray[]) {
     const { userSelections } = this.state;
     presets.forEach((color, index) => {
       if (index < userSelections[CHANNEL_SETTINGS].length) {
@@ -990,17 +1007,17 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
   }
 
-  changeAxisShowing(showAxes) {
+  changeAxisShowing(showAxes: boolean) {
     this.setUserSelectionsInState({ showAxes });
     this.handleChangeToImage(SHOW_AXES, showAxes);
   }
 
-  changeBoundingBoxShowing(showBoundingBox) {
+  changeBoundingBoxShowing(showBoundingBox: boolean) {
     this.setUserSelectionsInState({ showBoundingBox });
     this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
-  changeBoundingBoxColor(color) {
+  changeBoundingBoxColor(color: ColorObject) {
     const boundingBoxColor = colorObjectToArray(color);
     this.setUserSelectionsInState({ boundingBoxColor });
     if (this.state.view3d && this.state.image) {
@@ -1009,7 +1026,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  changeBackgroundColor(color) {
+  changeBackgroundColor(color: ColorObject) {
     const backgroundColor = colorObjectToArray(color);
     this.setUserSelectionsInState({ backgroundColor });
     if (this.state.view3d) {
@@ -1024,7 +1041,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  updateChannelTransferFunction(index, lut) {
+  updateChannelTransferFunction(index: number, lut: Uint8Array) {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
       if (this.state.view3d) {
@@ -1033,15 +1050,10 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  beginRequestImage(type?) {
+  beginRequestImage(type?: string) {
     const { fovPath, cellPath, cellId, prevImgPath, nextImgPath, preLoad } = this.props;
     let imageType = type || this.state.userSelections.imageType;
-    let path;
-    if (imageType === FULL_FIELD_IMAGE) {
-      path = fovPath;
-    } else if (imageType === SEGMENTED_CELL) {
-      path = cellPath;
-    }
+    let path = imageType === FULL_FIELD_IMAGE ? fovPath : cellPath;
     this.setState({
       cellId,
       path,
@@ -1059,7 +1071,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(path, true, "image");
   }
 
-  getOneChannelSetting(channelName, newSettings?) {
+  getOneChannelSetting(channelName: string, newSettings?) {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
     return find(channelSettings, (channel) => {
@@ -1071,7 +1083,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { image, view3d } = this.state;
     // apply channel settings
     // image.channel_names
-    if (!image) {
+    if (!image || !view3d) {
       return;
     }
     image.channel_names.forEach((channelName, imageIndex) => {
@@ -1096,7 +1108,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.updateActiveChannels(image);
   }
 
-  toggleControlPanel(value) {
+  toggleControlPanel(value: boolean) {
     if (this.props.onControlPanelToggle) {
       this.props.onControlPanelToggle(value);
     }
@@ -1104,13 +1116,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ controlPanelClosed: value });
   }
 
-  getNumberOfSlices() {
+  getNumberOfSlices(): { x: number; y: number; z: number } {
     if (this.state.image) {
-      return {
-        x: this.state.image.x,
-        y: this.state.image.y,
-        z: this.state.image.z,
-      };
+      const { x, y, z } = this.state.image;
+      return { x, y, z };
     }
     return { x: 0, y: 0, z: 0 };
   }
@@ -1132,10 +1141,10 @@ export default class App extends React.Component<AppProps, AppState> {
           <ControlPanel
             renderConfig={renderConfig}
             // image state
-            imageName={this.state.image ? this.state.image.name : false}
+            imageName={this.state.image?.name}
             hasImage={!!this.state.image}
             pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
-            channelDataChannels={this.state.image ? this.state.image.channels : null}
+            channelDataChannels={this.state.image?.channels}
             channelGroupedByType={this.state.channelGroupedByType}
             channelDataReady={this.state.channelDataReady}
             // user selections
@@ -1177,7 +1186,7 @@ export default class App extends React.Component<AppProps, AppState> {
               imageType={userSelections.imageType}
               hasParentImage={!!this.state.fovPath}
               hasCellId={this.state.hasCellId}
-              canPathTrace={this.state.view3d ? this.state.view3d.canvas3d.hasWebGL2 : false}
+              canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
               showAxes={userSelections[SHOW_AXES]}
               showBoundingBox={userSelections.showBoundingBox}
               renderSetting={

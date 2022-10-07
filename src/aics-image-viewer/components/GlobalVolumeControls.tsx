@@ -30,7 +30,7 @@ export interface GlobalVolumeControlsProps {
   gammaSliderLevel: [number, number, number];
 
   handleChangeUserSelection: (key: string, newValue: any) => void;
-  setImageAxisClip: (axis: number, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  setImageAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
 

@@ -9,10 +9,11 @@ import "./styles.css";
 import viewMode from "../../shared/enums/viewMode";
 const ViewMode = viewMode.mainMapping;
 
-const AXES = ["x", "y", "z"];
+type AxisName = "x" | "y" | "z";
+const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-const ACTIVE_AXIS_MAP = {
+const ACTIVE_AXIS_MAP: { [key: number]: AxisName | null } = {
   [ViewMode.yz]: "x",
   [ViewMode.xz]: "y",
   [ViewMode.xy]: "z",
@@ -21,7 +22,7 @@ const ACTIVE_AXIS_MAP = {
 
 interface AxisClipSlidersProps {
   mode: symbol;
-  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   numSlices: {
     x: number;
     y: number;
@@ -126,7 +127,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  createSlider(axis: string, twoD: boolean) {
+  createSlider(axis: AxisName, twoD: boolean) {
     const { playing, sliders } = this.state;
     const numSlices = this.props.numSlices[axis];
     const sliderVals = sliders[axis];
@@ -172,7 +173,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  updateClipping(axis: string, values: [number, number]) {
+  updateClipping(axis: AxisName, values: [number, number]) {
     if (this.props.setAxisClip) {
       // get a value from -0.5..0.5
       const max = this.props.numSlices[axis];
@@ -183,7 +184,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  makeSliderSlideFn(axis: string) {
+  makeSliderSlideFn(axis: AxisName) {
     return (values: number[]) => {
       // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
       const twoValues: [number, number] = [values[0], values[values.length - 1]];
@@ -192,7 +193,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     };
   }
 
-  makeSliderSetFn(axis: string) {
+  makeSliderSetFn(axis: AxisName) {
     return (values: number[]) => this.updateClipping(axis, [values[0], values[values.length - 1]]);
   }
 

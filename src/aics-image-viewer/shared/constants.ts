@@ -1,3 +1,5 @@
+import { ColorArray } from "./utils/colorRepresentations";
+
 // Add all exported constants here to prevent circular dependencies
 export const // Keys accepted as URL search parameters
   CELL_ID_QUERY = "cellId",
@@ -54,41 +56,39 @@ export const // Keys accepted as URL search parameters
   SINGLE_GROUP_CHANNEL_KEY = "Channels",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
 
-type PresetColors = [number, number, number, number?][];
-
-export const PRESET_COLORS_1: PresetColors = [
-  [190, 68, 171, 255],
-  [189, 211, 75, 255],
-  [61, 155, 169, 255],
-  [128, 128, 128, 255],
-  [255, 255, 255, 255],
-  [239, 27, 45, 255],
-  [238, 77, 245, 255],
-  [96, 255, 255, 255],
+export const PRESET_COLORS_1: ColorArray[] = [
+  [190, 68, 171],
+  [189, 211, 75],
+  [61, 155, 169],
+  [128, 128, 128],
+  [255, 255, 255],
+  [239, 27, 45],
+  [238, 77, 245],
+  [96, 255, 255],
 ];
-export const PRESET_COLORS_2: PresetColors = [
-  [128, 0, 0, 255],
-  [0, 128, 0, 255],
-  [0, 0, 128, 255],
-  [32, 32, 32, 255],
-  [255, 255, 0, 255],
-  [255, 0, 255, 255],
-  [0, 255, 0, 255],
-  [0, 0, 255, 255],
+export const PRESET_COLORS_2: ColorArray[] = [
+  [128, 0, 0],
+  [0, 128, 0],
+  [0, 0, 128],
+  [32, 32, 32],
+  [255, 255, 0],
+  [255, 0, 255],
+  [0, 255, 0],
+  [0, 0, 255],
 ];
 
-export const PRESET_COLORS_3: PresetColors = [
-  [128, 0, 128, 255],
-  [128, 128, 128, 255],
-  [0, 128, 128, 255],
-  [128, 128, 0, 255],
-  [255, 255, 255, 255],
-  [255, 0, 0, 255],
-  [255, 0, 255, 255],
-  [0, 255, 255, 255],
+export const PRESET_COLORS_3: ColorArray[] = [
+  [128, 0, 128],
+  [128, 128, 128],
+  [0, 128, 128],
+  [128, 128, 0],
+  [255, 255, 255],
+  [255, 0, 0],
+  [255, 0, 255],
+  [0, 255, 255],
 ];
 
-export const PRESET_COLORS_0: PresetColors = [
+export const PRESET_COLORS_0: ColorArray[] = [
   [226, 205, 179],
   [111, 186, 17],
   [141, 163, 192],

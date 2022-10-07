@@ -12,6 +12,7 @@ import {
   MAX_PROJECT,
   PATH_TRACE,
 } from "../../shared/constants";
+import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 export interface AppProps {
@@ -48,8 +49,8 @@ export interface AppProps {
   viewerConfig: {
     showAxes: boolean;
     showBoundingBox: boolean;
-    boundingBoxColor: [number, number, number];
-    backgroundColor: [number, number, number];
+    boundingBoxColor: ColorArray;
+    backgroundColor: ColorArray;
     autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
@@ -81,8 +82,8 @@ export interface UserSelectionState {
   [PATH_TRACE]: boolean;
   [SHOW_AXES]: boolean;
   showBoundingBox: boolean;
-  boundingBoxColor: [number, number, number];
-  backgroundColor: [number, number, number];
+  boundingBoxColor: ColorArray;
+  backgroundColor: ColorArray;
   [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
   [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -97,7 +98,7 @@ export interface UserSelectionState {
     isosurfaceEnabled: boolean;
     isovalue: number;
     opacity: number;
-    color: [number, number, number];
+    color: ColorArray;
     dataReady: boolean;
     [LUT_CONTROL_POINTS]: [];
   }[];
