@@ -20,29 +20,13 @@ import "./styles.css";
 
 const { Panel } = Collapse;
 
-import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { InternalChannelSetting, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
-
-interface ChannelSettings {
-  name: string;
-  enabled: boolean;
-  volumeEnabled: boolean;
-  isosurfaceEnabled: boolean;
-  isovalue: number;
-  opacity: number;
-  color: [number, number, number];
-  dataReady: boolean;
-  controlPoints: {
-    color: string;
-    opacity: number;
-    x: number;
-  }[];
-}
 
 export interface ChannelsWidgetProps {
   imageName: string | undefined;
   channelDataChannels: Channel[] | undefined;
-  channelSettings: ChannelSettings[];
+  channelSettings: InternalChannelSetting[];
   channelGroupedByType: { [key: string]: number[] };
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
@@ -133,7 +117,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                 renderItem={(actualIndex: number) => {
                   const thisChannelSettings = find(
                     channelSettings,
-                    (channel: ChannelSettings) => channel.name === channelDataChannels[actualIndex].name
+                    (channel: InternalChannelSetting) => channel.name === channelDataChannels[actualIndex].name
                   );
 
                   return thisChannelSettings ? (

@@ -1,7 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import {
   CHANNEL_SETTINGS,
-  LUT_CONTROL_POINTS,
   ALPHA_MASK_SLIDER_LEVEL,
   BRIGHTNESS_SLIDER_LEVEL,
   DENSITY_SLIDER_LEVEL,
@@ -13,7 +12,7 @@ import {
   PATH_TRACE,
 } from "../../shared/constants";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { InternalChannelSetting, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
@@ -70,7 +69,7 @@ export interface AppProps {
   pixelSize?: [number, number, number];
   canvasMargin: string;
 
-  onControlPanelToggle?(collapsed: boolean): void;
+  onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
 export interface UserSelectionState {
@@ -91,17 +90,7 @@ export interface UserSelectionState {
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
-  [CHANNEL_SETTINGS]: {
-    name: string;
-    enabled: boolean;
-    volumeEnabled: boolean;
-    isosurfaceEnabled: boolean;
-    isovalue: number;
-    opacity: number;
-    color: ColorArray;
-    dataReady: boolean;
-    [LUT_CONTROL_POINTS]: [];
-  }[];
+  [CHANNEL_SETTINGS]: InternalChannelSetting[];
 }
 
 export interface AppState {

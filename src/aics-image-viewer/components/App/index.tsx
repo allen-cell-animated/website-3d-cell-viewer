@@ -2,14 +2,14 @@
 import { Layout } from "antd";
 import React from "react";
 import { includes, isEqual, find, map, debounce } from "lodash";
-import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader, Lut } from "@aics/volume-viewer";
+import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader } from "@aics/volume-viewer";
 
 import { AppProps, AppState, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
+  InternalChannelSetting,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
-  ViewerChannelSetting,
 } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
@@ -244,7 +244,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.loadNextImage = this.loadNextImage.bind(this);
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
-    this.setInitialChannelConfig = this.setInitialChannelConfig.bind(this);
     this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
     this.changeAxisShowing = this.changeAxisShowing.bind(this);
     this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
@@ -308,9 +307,9 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({ view3d });
   }
 
-  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): ViewerChannelSetting[] {
+  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): InternalChannelSetting[] {
     return channelNames.map((channel, index) => {
-      let color = channelColors[index] ? (channelColors[index].slice() as ColorArray) : ([226, 205, 179] as ColorArray); // guard for unexpectedly longer channel list
+      let color = (channelColors[index] ? channelColors[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
 
       return this.initializeOneChannelSetting(null, channel, index, color);
     });
@@ -607,7 +606,7 @@ export default class App extends React.Component<AppProps, AppState> {
     // if we want to keep the current control points
     if (thisChannelsSettings[LUT_CONTROL_POINTS] && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
-      aimg.setLut(channelIndex, lut);
+      aimg.setLut(channelIndex, new Uint8Array(lut.buffer));
       view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
@@ -671,7 +670,7 @@ export default class App extends React.Component<AppProps, AppState> {
     channel: string,
     index: number,
     defaultColor: ColorArray
-  ): ViewerChannelSetting {
+  ): InternalChannelSetting {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
     let volumeEnabled = false;
@@ -701,15 +700,15 @@ export default class App extends React.Component<AppProps, AppState> {
 
     return {
       name: channel || "Channel " + index,
-      [VOLUME_ENABLED]: volumeEnabled,
-      [ISO_SURFACE_ENABLED]: surfaceEnabled,
-      [COLORIZE_ENABLED]: false,
-      [COLORIZE_ALPHA]: 1.0,
+      volumeEnabled: volumeEnabled,
+      isosurfaceEnabled: surfaceEnabled,
+      colorizeEnabled: false,
+      colorizeAlpha: 1.0,
       isovalue: 188,
       opacity: 1.0,
       color: color,
       dataReady: false,
-      [LUT_CONTROL_POINTS]: newControlPoints,
+      controlPoints: newControlPoints || [],
     };
   }
 

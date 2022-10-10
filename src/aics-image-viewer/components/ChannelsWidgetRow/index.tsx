@@ -21,6 +21,7 @@ import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
+import { InternalChannelSetting } from "../../shared/utils/viewerChannelSettings";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -76,7 +77,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, ISO_SURFACE_ENABLED, target.checked);
   }
 
-  createChannelSettingHandler = (settingKey: string) => (newValue: any) => {
+  createChannelSettingHandler = (settingKey: keyof InternalChannelSetting) => (newValue: any) => {
     const { channelName, index, changeOneChannelSetting } = this.props;
     changeOneChannelSetting(channelName, index, settingKey, newValue);
   };

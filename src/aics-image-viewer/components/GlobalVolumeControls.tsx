@@ -13,7 +13,7 @@ const Panel = Collapse.Panel;
 
 export interface GlobalVolumeControlsProps {
   mode: symbol;
-  imageName: string;
+  imageName: string | undefined;
   pixelSize: [number, number, number];
   maxProjectOn: boolean;
   pathTraceOn: boolean;
