@@ -795,6 +795,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
+  // TODO make nicer and more strictly type-able
   handleChangeToImage(keyToChange: string, newValue: any, index?: number) {
     const { image, userSelections, view3d } = this.state;
     if (!image || !view3d) {
@@ -813,7 +814,7 @@ export default class App extends React.Component<AppProps, AppState> {
         break;
       case COLOR:
         {
-          let newColor = newValue.r ? [newValue.r, newValue.g, newValue.b, newValue.a] : newValue;
+          let newColor: ColorArray = newValue.r ? colorObjectToArray(newValue) : newValue;
           view3d.setVolumeChannelOptions(image, index!, {
             color: newColor,
           });
