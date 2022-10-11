@@ -11,7 +11,7 @@ import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
-import { ChannelSettingKey } from "../../shared/utils/viewerChannelSettings";
+import { ChannelSettingKey, InternalChannelSetting } from "../../shared/utils/viewerChannelSettings";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -33,11 +33,11 @@ interface ChannelsWidgetRowProps {
   }[];
   channelDataForChannel: Channel;
 
-  changeOneChannelSetting: (
+  changeOneChannelSetting: <K extends ChannelSettingKey>(
     channelName: string,
     channelIndex: number,
-    keyToChange: ChannelSettingKey,
-    newValue: any
+    keyToChange: K,
+    newValue: InternalChannelSetting[K]
   ) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
@@ -120,6 +120,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
         color={colorArrayToObject(this.props.color)}
         onColorChange={this.onColorChange}
         onColorChangeComplete={this.props.onColorChangeComplete}
+        disableAlpha={true}
         idx={this.props.index}
         width={18}
       />

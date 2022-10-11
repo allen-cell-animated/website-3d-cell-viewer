@@ -3,7 +3,7 @@ import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse } from "antd";
-import { UserSelectionKey } from "./App/types";
+import { UserSelectionKey, UserSelectionState } from "./App/types";
 const Panel = Collapse.Panel;
 
 export interface GlobalVolumeControlsProps {
@@ -24,7 +24,7 @@ export interface GlobalVolumeControlsProps {
   densitySliderLevel: number[];
   gammaSliderLevel: [number, number, number];
 
-  handleChangeUserSelection: (key: UserSelectionKey, newValue: any) => void;
+  handleChangeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
   setImageAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }

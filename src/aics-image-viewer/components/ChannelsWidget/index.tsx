@@ -29,12 +29,16 @@ export interface ChannelsWidgetProps {
   viewerChannelSettings?: ViewerChannelSettings;
 
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
-  changeChannelSettings: (indices: number[], keyToChange: ChannelSettingKey, newValue: any) => void;
-  changeOneChannelSetting: (
+  changeChannelSettings: <K extends ChannelSettingKey>(
+    indices: number[],
+    keyToChange: K,
+    newValue: InternalChannelSetting[K]
+  ) => void;
+  changeOneChannelSetting: <K extends ChannelSettingKey>(
     channelName: string,
     channelIndex: number,
-    keyToChange: ChannelSettingKey,
-    newValue: any
+    keyToChange: K,
+    newValue: InternalChannelSetting[K]
   ) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
