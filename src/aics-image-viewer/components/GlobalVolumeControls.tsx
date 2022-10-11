@@ -3,12 +3,7 @@ import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse } from "antd";
-import {
-  ALPHA_MASK_SLIDER_LEVEL,
-  BRIGHTNESS_SLIDER_LEVEL,
-  DENSITY_SLIDER_LEVEL,
-  LEVELS_SLIDER,
-} from "../shared/constants";
+import { UserSelectionKey } from "./App/types";
 const Panel = Collapse.Panel;
 
 export interface GlobalVolumeControlsProps {
@@ -29,7 +24,7 @@ export interface GlobalVolumeControlsProps {
   densitySliderLevel: number[];
   gammaSliderLevel: [number, number, number];
 
-  handleChangeUserSelection: (key: string, newValue: any) => void;
+  handleChangeUserSelection: (key: UserSelectionKey, newValue: any) => void;
   setImageAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
@@ -47,7 +42,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: string) => (
+  createSliderRow = (label: string, start: number[], max: number, propKey: UserSelectionKey) => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
@@ -73,12 +68,12 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
               {renderConfig.alphaMask &&
-                this.createSliderRow("mask cell", alphaMaskSliderLevel, 100, ALPHA_MASK_SLIDER_LEVEL)}
+                this.createSliderRow("mask cell", alphaMaskSliderLevel, 100, "alphaMaskSliderLevel")}
               {renderConfig.brightnessSlider &&
-                this.createSliderRow("brightness", brightnessSliderLevel, 100, BRIGHTNESS_SLIDER_LEVEL)}
+                this.createSliderRow("brightness", brightnessSliderLevel, 100, "brightnessSliderLevel")}
               {renderConfig.densitySlider &&
-                this.createSliderRow("density", densitySliderLevel, 100, DENSITY_SLIDER_LEVEL)}
-              {renderConfig.levelsSliders && this.createSliderRow("levels", gammaSliderLevel, 255, LEVELS_SLIDER)}
+                this.createSliderRow("density", densitySliderLevel, 100, "densitySliderLevel")}
+              {renderConfig.levelsSliders && this.createSliderRow("levels", gammaSliderLevel, 255, "levelsSlider")}
             </div>
           </Panel>
         </Collapse>

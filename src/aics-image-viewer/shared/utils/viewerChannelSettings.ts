@@ -19,6 +19,8 @@ export interface InternalChannelSetting {
   }[];
 }
 
+export type ChannelSettingKey = keyof InternalChannelSetting;
+
 /** Settings for a single channel, as passed in via props by App users */
 export interface ViewerChannelSetting {
   // regex or string or array of regexes or strings or number for raw channel index

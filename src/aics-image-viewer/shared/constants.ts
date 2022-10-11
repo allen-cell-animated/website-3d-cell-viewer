@@ -1,11 +1,7 @@
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
-export const // Keys accepted as URL search parameters
-  CELL_ID_QUERY = "cellId",
-  FOV_ID_QUERY = "fovId",
-  CELL_LINE_QUERY = "cellLine",
-  IMAGE_NAME_QUERY = "name",
+export const 
   // View modes
   YZ_MODE = "YZ",
   XZ_MODE = "XZ",
@@ -14,24 +10,18 @@ export const // Keys accepted as URL search parameters
   // App state values
   SEGMENTED_CELL = "segmented",
   FULL_FIELD_IMAGE = "full field",
-  // Channel setting keys
-  ISO_SURFACE_ENABLED = "isoSurfaceEnabled",
-  VOLUME_ENABLED = "volumeEnabled",
   // App State Keys,
   ALPHA_MASK_SLIDER_LEVEL = "alphaMaskSliderLevel",
   BRIGHTNESS_SLIDER_LEVEL = "brightnessSliderLevel",
   DENSITY_SLIDER_LEVEL = "densitySliderLevel",
   LEVELS_SLIDER = "levelsSlider",
   MODE = "mode",
-  AUTO_ROTATE = "autorotate",
   SHOW_AXES = "showAxes",
   MAX_PROJECT = "maxProject",
   VOLUMETRIC_RENDER = "volume",
   PATH_TRACE = "pathTrace",
-  LUT_CONTROL_POINTS = "controlPoints",
   COLORIZE_ALPHA = "colorizeAlpha",
   COLORIZE_ENABLED = "colorizeEnabled",
-  CHANNEL_SETTINGS = "channelSettings",
   // Volume viewer keys
   ISO_VALUE = "isovalue",
   OPACITY = "opacity",
@@ -39,8 +29,8 @@ export const // Keys accepted as URL search parameters
   SAVE_ISO_SURFACE = "saveIsoSurface",
   // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
-  BACKGROUND_COLOR: [number, number, number] = [0, 0, 0],
-  BOUNDING_BOX_COLOR: [number, number, number] = [255, 255, 255],
+  BACKGROUND_COLOR: ColorArray = [0, 0, 0],
+  BOUNDING_BOX_COLOR: ColorArray = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
@@ -51,7 +41,7 @@ export const // Keys accepted as URL search parameters
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
-  LEVELS_SLIDER_DEFAULT: [number, number, number] = [35.0, 140.0, 255.0],
+  LEVELS_SLIDER_DEFAULT: ColorArray = [35.0, 140.0, 255.0],
   OTHER_CHANNEL_KEY = "Other",
   SINGLE_GROUP_CHANNEL_KEY = "Channels",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";

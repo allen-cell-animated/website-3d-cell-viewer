@@ -4,26 +4,23 @@ import React from "react";
 import { includes, isEqual, find, map, debounce } from "lodash";
 import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader } from "@aics/volume-viewer";
 
-import { AppProps, AppState, UserSelectionState } from "./types";
+import { AppProps, AppState, UserSelectionKey, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   InternalChannelSetting,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
+  ChannelSettingKey,
 } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
-  CHANNEL_SETTINGS,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
   ALPHA_MASK_SLIDER_2D_DEFAULT,
   FULL_FIELD_IMAGE,
   SEGMENTED_CELL,
-  VOLUME_ENABLED,
-  LUT_CONTROL_POINTS,
   COLORIZE_ALPHA,
-  ISO_SURFACE_ENABLED,
   ALPHA_MASK_SLIDER_LEVEL,
   BRIGHTNESS_SLIDER_LEVEL,
   DENSITY_SLIDER_LEVEL,
@@ -36,7 +33,6 @@ import {
   COLOR,
   SAVE_ISO_SURFACE,
   MODE,
-  AUTO_ROTATE,
   SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
@@ -192,21 +188,21 @@ export default class App extends React.Component<AppProps, AppState> {
       userSelections: {
         imageType: SEGMENTED_CELL,
         controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
-        [MODE]: viewmode,
-        [AUTO_ROTATE]: props.viewerConfig.autorotate,
-        [SHOW_AXES]: props.viewerConfig.showAxes,
+        mode: viewmode,
+        autorotate: props.viewerConfig.autorotate,
+        showAxes: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
         boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
         backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR,
-        [MAX_PROJECT]: maxproject,
-        [PATH_TRACE]: pathtrace,
-        [ALPHA_MASK_SLIDER_LEVEL]: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-        [BRIGHTNESS_SLIDER_LEVEL]: [props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        [DENSITY_SLIDER_LEVEL]: [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-        [LEVELS_SLIDER]: props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+        maxProject: maxproject,
+        pathTrace: pathtrace,
+        alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
+        brightnessSliderLevel: [props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+        densitySliderLevel: [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
+        levelsSlider: props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
         // channelSettings is a flat list of objects of this type:
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-        [CHANNEL_SETTINGS]: [],
+        channelSettings: [],
       },
       currentlyLoadedImagePath: "",
       cachingInProgress: false,
@@ -291,7 +287,7 @@ export default class App extends React.Component<AppProps, AppState> {
         this.beginRequestImage();
       }
     }
-    const channelsChanged = !isEqual(userSelections[CHANNEL_SETTINGS], prevState.userSelections[CHANNEL_SETTINGS]);
+    const channelsChanged = !isEqual(userSelections.channelSettings, prevState.userSelections.channelSettings);
     const newImage = this.state.image && !prevState.image;
     const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
@@ -368,14 +364,14 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  onNewChannelData(url: string, v: Volume, channelIndex: number, keepLuts: boolean | undefined) {
+  onNewChannelData(_url: string, v: Volume, channelIndex: number, keepLuts: boolean | undefined) {
     // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
     const thisChannelSettings = this.getOneChannelSetting(
       v.imageInfo.channel_names[channelIndex],
       // race condition with updateStateOnLoadImage below?
-      this.state.userSelections[CHANNEL_SETTINGS]
+      this.state.userSelections.channelSettings
     );
-    this.onChannelDataLoaded(v, thisChannelSettings, channelIndex, keepLuts);
+    this.onChannelDataLoaded(v, thisChannelSettings!, channelIndex, keepLuts);
   }
 
   handleOpenImageException(resp) {
@@ -447,10 +443,10 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  initializeNewImage(aimg: Volume, newChannelSettings?) {
+  initializeNewImage(aimg: Volume, newChannelSettings?: InternalChannelSetting[]) {
     // set alpha slider first time image is loaded to something that makes sense
     let alphaLevel = this.getInitialAlphaLevel();
-    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel });
+    this.setUserSelectionsInState({ alphaMaskSliderLevel: alphaLevel });
 
     // Here is where we officially hand the image to the volume-viewer
     this.placeImageInViewer(aimg, newChannelSettings);
@@ -471,12 +467,12 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   // set up the Volume into the Viewer using the current initial settings
-  private placeImageInViewer(aimg: Volume, newChannelSettings?): void {
+  private placeImageInViewer(aimg: Volume, newChannelSettings?: InternalChannelSetting[]): void {
     const { userSelections, view3d } = this.state;
     if (!view3d) {
       return;
     }
-    const channelSetting = newChannelSettings || userSelections[CHANNEL_SETTINGS];
+    const channelSetting = newChannelSettings || userSelections.channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
@@ -485,8 +481,8 @@ export default class App extends React.Component<AppProps, AppState> {
           return {};
         }
         return {
-          enabled: ch[VOLUME_ENABLED],
-          isosurfaceEnabled: ch[ISO_SURFACE_ENABLED],
+          enabled: ch.volumeEnabled,
+          isosurfaceEnabled: ch.isosurfaceEnabled,
           isovalue: ch.isovalue,
           isosurfaceOpacity: ch.opacity,
           color: ch.color,
@@ -501,15 +497,15 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
 
     const imageBrightness = brightnessSliderToImageValue(
-      userSelections[BRIGHTNESS_SLIDER_LEVEL],
-      userSelections[PATH_TRACE]
+      userSelections.brightnessSliderLevel,
+      userSelections.pathTrace
     );
     view3d.updateExposure(imageBrightness);
 
-    const imageDensity = densitySliderToImageValue(userSelections[DENSITY_SLIDER_LEVEL], userSelections[PATH_TRACE]);
+    const imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel, userSelections.pathTrace);
     view3d.updateDensity(aimg, imageDensity);
 
-    const imageValues = gammaSliderToImageValues(userSelections[LEVELS_SLIDER]);
+    const imageValues = gammaSliderToImageValues(userSelections.levelsSlider);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
 
     // update current camera mode to make sure the image gets the update
@@ -523,14 +519,14 @@ export default class App extends React.Component<AppProps, AppState> {
   updateStateOnLoadImage(channelNames: string[]) {
     const { userSelections } = this.state;
 
-    const prevChannelNames = map(userSelections[CHANNEL_SETTINGS], (ele) => ele.name);
+    const prevChannelNames = map(userSelections.channelSettings, (ele) => ele.name);
     let newChannelSettings = isEqual(prevChannelNames, channelNames)
-      ? userSelections[CHANNEL_SETTINGS]
+      ? userSelections.channelSettings
       : this.setInitialChannelConfig(channelNames, INIT_COLORS);
 
     let channelGroupedByType = this.createChannelGrouping(channelNames);
     this.setUserSelectionsInState({
-      [CHANNEL_SETTINGS]: newChannelSettings,
+      channelSettings: newChannelSettings,
     });
     this.setState({
       channelGroupedByType,
@@ -538,7 +534,7 @@ export default class App extends React.Component<AppProps, AppState> {
     return newChannelSettings;
   }
 
-  initializeLut(aimg: Volume, channelIndex) {
+  initializeLut(aimg: Volume, channelIndex: number) {
     const histogram = aimg.getHistogram(channelIndex);
 
     const initViewerSettings = this.props.viewerChannelSettings;
@@ -588,13 +584,18 @@ export default class App extends React.Component<AppProps, AppState> {
     return newControlPoints;
   }
 
-  onChannelDataLoaded(aimg: Volume, thisChannelsSettings, channelIndex, keepLuts) {
+  onChannelDataLoaded(
+    aimg: Volume,
+    thisChannelsSettings: InternalChannelSetting,
+    channelIndex: number,
+    keepLuts: boolean | undefined
+  ) {
     const { image, view3d } = this.state;
     if (!view3d || aimg !== image) {
       return;
     }
-    const volenabled = thisChannelsSettings[VOLUME_ENABLED];
-    const isoenabled = thisChannelsSettings[ISO_SURFACE_ENABLED];
+    const volenabled = thisChannelsSettings.volumeEnabled;
+    const isoenabled = thisChannelsSettings.isosurfaceEnabled;
     view3d.setVolumeChannelOptions(aimg, channelIndex, {
       enabled: volenabled,
       color: thisChannelsSettings.color,
@@ -604,14 +605,14 @@ export default class App extends React.Component<AppProps, AppState> {
     });
 
     // if we want to keep the current control points
-    if (thisChannelsSettings[LUT_CONTROL_POINTS] && keepLuts) {
-      const lut = controlPointsToLut(thisChannelsSettings[LUT_CONTROL_POINTS]);
+    if (thisChannelsSettings.controlPoints && keepLuts) {
+      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, new Uint8Array(lut.buffer));
       view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
       const newControlPoints = this.initializeLut(aimg, channelIndex);
-      this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, LUT_CONTROL_POINTS, newControlPoints);
+      this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, "controlPoints", newControlPoints);
     }
 
     if (view3d) {
@@ -744,36 +745,45 @@ export default class App extends React.Component<AppProps, AppState> {
       image: aimg,
       userSelections: {
         ...this.state.userSelections,
-        [ALPHA_MASK_SLIDER_LEVEL]: alphaLevel,
-        [CHANNEL_SETTINGS]: channelSetting,
+        alphaMaskSliderLevel: alphaLevel,
+        channelSettings: channelSetting,
       },
     });
   }
 
-  handleChangeUserSelection(key: string, newValue: any) {
+  handleChangeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) {
     this.setUserSelectionsInState({ [key]: newValue });
     this.handleChangeToImage(key, newValue);
   }
 
-  changeOneChannelSetting(channelName, channelIndex, keyToChange, newValue) {
+  changeOneChannelSetting<K extends ChannelSettingKey>(
+    channelName: string,
+    channelIndex: number,
+    keyToChange: K,
+    newValue: InternalChannelSetting[K]
+  ) {
     const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
+    const newChannels = userSelections.channelSettings.map((channel) => {
       return channel.name === channelName ? { ...channel, [keyToChange]: newValue } : channel;
     });
 
-    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+    this.setUserSelectionsInState({ channelSettings: newChannels });
     this.handleChangeToImage(keyToChange, newValue, channelIndex);
   }
 
-  changeChannelSettings(indices, keyToChange, newValue) {
+  changeChannelSettings<K extends ChannelSettingKey>(
+    indices: number[],
+    keyToChange: K,
+    newValue: InternalChannelSetting[K]
+  ) {
     const { userSelections } = this.state;
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, index) => {
+    const newChannels = userSelections.channelSettings.map((channel, index) => {
       return {
         ...channel,
         [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange],
       };
     });
-    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+    this.setUserSelectionsInState({ channelSettings: newChannels });
   }
 
   setUserSelectionsInState(newState: Partial<UserSelectionState>) {
@@ -827,14 +837,14 @@ export default class App extends React.Component<AppProps, AppState> {
           // TODO get the labelColors from the tf editor component
           const lut = image.getHistogram(index!).lutGenerator_labelColors();
           image.setColorPalette(index!, lut.lut);
-          image.setColorPaletteAlpha(index!, userSelections[CHANNEL_SETTINGS][index!][COLORIZE_ALPHA]);
+          image.setColorPaletteAlpha(index!, userSelections.channelSettings[index!][COLORIZE_ALPHA]);
         } else {
           image.setColorPaletteAlpha(index!, 0);
         }
         view3d.updateLuts(image);
         break;
       case COLORIZE_ALPHA:
-        if (userSelections[CHANNEL_SETTINGS][index!][COLORIZE_ENABLED]) {
+        if (userSelections.channelSettings[index!].colorizeEnabled) {
           image.setColorPaletteAlpha(index!, newValue);
         } else {
           image.setColorPaletteAlpha(index!, 0);
@@ -858,13 +868,13 @@ export default class App extends React.Component<AppProps, AppState> {
         break;
       case BRIGHTNESS_SLIDER_LEVEL:
         {
-          let imageBrightness = brightnessSliderToImageValue(newValue, userSelections[PATH_TRACE]);
+          let imageBrightness = brightnessSliderToImageValue(newValue, userSelections.pathTrace);
           view3d.updateExposure(imageBrightness);
         }
         break;
       case DENSITY_SLIDER_LEVEL:
         {
-          let imageDensity = densitySliderToImageValue(newValue, userSelections[PATH_TRACE]);
+          let imageDensity = densitySliderToImageValue(newValue, userSelections.pathTrace);
           view3d.updateDensity(image, imageDensity);
         }
         break;
@@ -895,10 +905,10 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  onViewModeChange(newMode) {
+  onViewModeChange(newMode: symbol) {
     const { userSelections } = this.state;
     let newSelectionState: Partial<UserSelectionState> = {
-      [MODE]: newMode,
+      mode: newMode,
     };
 
     // TODO the following behavior/logic is very specific to a particular application's needs
@@ -912,12 +922,12 @@ export default class App extends React.Component<AppProps, AppState> {
     if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
       // Switching from 3D to 2D
       newSelectionState = {
-        [MODE]: newMode,
-        [PATH_TRACE]: false,
-        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_2D_DEFAULT,
+        mode: newMode,
+        pathTrace: false,
+        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
-      if (userSelections[PATH_TRACE]) {
+      if (userSelections.pathTrace) {
         this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
       }
     } else if (
@@ -927,25 +937,25 @@ export default class App extends React.Component<AppProps, AppState> {
     ) {
       // switching from 2D to 3D
       newSelectionState = {
-        [MODE]: newMode,
-        [ALPHA_MASK_SLIDER_LEVEL]: ALPHA_MASK_SLIDER_3D_DEFAULT,
+        mode: newMode,
+        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
     }
 
     this.handleChangeToImage(MODE, newMode);
-    if (newSelectionState[ALPHA_MASK_SLIDER_LEVEL] !== undefined) {
-      this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState[ALPHA_MASK_SLIDER_LEVEL]);
+    if (newSelectionState.alphaMaskSliderLevel !== undefined) {
+      this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState.alphaMaskSliderLevel);
     }
     this.setUserSelectionsInState(newSelectionState);
   }
 
-  onUpdateImageMaskAlpha(sliderValue: any) {
-    this.setUserSelectionsInState({ [ALPHA_MASK_SLIDER_LEVEL]: sliderValue });
+  onUpdateImageMaskAlpha(sliderValue: number[]) {
+    this.setUserSelectionsInState({ alphaMaskSliderLevel: sliderValue });
   }
 
   onAutorotateChange() {
     this.setUserSelectionsInState({
-      [AUTO_ROTATE]: !this.state.userSelections[AUTO_ROTATE],
+      autorotate: !this.state.userSelections.autorotate,
     });
   }
 
@@ -965,6 +975,7 @@ export default class App extends React.Component<AppProps, AppState> {
     };
   }
 
+  // TODO rendering algorithm should become an enum
   onChangeRenderingAlgorithm(newAlgorithm: string) {
     const { userSelections } = this.state;
     // already set
@@ -972,14 +983,15 @@ export default class App extends React.Component<AppProps, AppState> {
       return;
     }
     this.setUserSelectionsInState({
-      [PATH_TRACE]: newAlgorithm === PATH_TRACE,
-      [MAX_PROJECT]: newAlgorithm === MAX_PROJECT,
+      pathTrace: newAlgorithm === PATH_TRACE,
+      maxProject: newAlgorithm === MAX_PROJECT,
       autorotate: newAlgorithm === PATH_TRACE ? false : userSelections.autorotate,
     });
     this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
     this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
   }
 
+  // TODO FOV should become an enum too
   onSwitchFovCell(value: string) {
     const { cellPath, fovPath } = this.props;
     const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
@@ -996,14 +1008,14 @@ export default class App extends React.Component<AppProps, AppState> {
   onApplyColorPresets(presets: ColorArray[]) {
     const { userSelections } = this.state;
     presets.forEach((color, index) => {
-      if (index < userSelections[CHANNEL_SETTINGS].length) {
+      if (index < userSelections.channelSettings.length) {
         this.handleChangeToImage(COLOR, color, index);
       }
     });
-    const newChannels = userSelections[CHANNEL_SETTINGS].map((channel, channelindex) => {
+    const newChannels = userSelections.channelSettings.map((channel, channelindex) => {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
     });
-    this.setUserSelectionsInState({ [CHANNEL_SETTINGS]: newChannels });
+    this.setUserSelectionsInState({ channelSettings: newChannels });
   }
 
   changeAxisShowing(showAxes: boolean) {
@@ -1049,6 +1061,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
+  // TODO use FOV enum?
   beginRequestImage(type?: string) {
     const { fovPath, cellPath, cellId, prevImgPath, nextImgPath, preLoad } = this.props;
     let imageType = type || this.state.userSelections.imageType;
@@ -1070,9 +1083,12 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(path, true, "image");
   }
 
-  getOneChannelSetting(channelName: string, newSettings?) {
+  getOneChannelSetting(
+    channelName: string,
+    newSettings?: InternalChannelSetting[]
+  ): InternalChannelSetting | undefined {
     const { userSelections } = this.state;
-    const channelSettings = newSettings || userSelections[CHANNEL_SETTINGS];
+    const channelSettings = newSettings || userSelections.channelSettings;
     return find(channelSettings, (channel) => {
       return channel.name === channelName;
     });
@@ -1091,8 +1107,8 @@ export default class App extends React.Component<AppProps, AppState> {
         if (!channelSetting) {
           return;
         }
-        const volenabled = channelSetting[VOLUME_ENABLED];
-        const isoenabled = channelSetting[ISO_SURFACE_ENABLED];
+        const volenabled = channelSetting.volumeEnabled;
+        const isoenabled = channelSetting.isosurfaceEnabled;
 
         view3d.setVolumeChannelOptions(image, imageIndex, {
           enabled: volenabled,
@@ -1147,17 +1163,17 @@ export default class App extends React.Component<AppProps, AppState> {
             channelGroupedByType={this.state.channelGroupedByType}
             channelDataReady={this.state.channelDataReady}
             // user selections
-            maxProjectOn={userSelections[MAX_PROJECT]}
-            pathTraceOn={userSelections[PATH_TRACE]}
-            channelSettings={userSelections[CHANNEL_SETTINGS]}
-            mode={userSelections[MODE]}
+            maxProjectOn={userSelections.maxProject}
+            pathTraceOn={userSelections.pathTrace}
+            channelSettings={userSelections.channelSettings}
+            mode={userSelections.mode}
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
             boundingBoxColor={userSelections.boundingBoxColor}
-            alphaMaskSliderLevel={userSelections[ALPHA_MASK_SLIDER_LEVEL]}
-            brightnessSliderLevel={userSelections[BRIGHTNESS_SLIDER_LEVEL]}
-            densitySliderLevel={userSelections[DENSITY_SLIDER_LEVEL]}
-            gammaSliderLevel={userSelections[LEVELS_SLIDER]}
+            alphaMaskSliderLevel={userSelections.alphaMaskSliderLevel}
+            brightnessSliderLevel={userSelections.brightnessSliderLevel}
+            densitySliderLevel={userSelections.densitySliderLevel}
+            gammaSliderLevel={userSelections.levelsSlider}
             collapsed={this.state.userSelections.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
@@ -1181,16 +1197,14 @@ export default class App extends React.Component<AppProps, AppState> {
               fovDownloadHref={fovDownloadHref}
               cellDownloadHref={cellDownloadHref}
               autorotate={userSelections.autorotate}
-              pathTraceOn={userSelections[PATH_TRACE]}
+              pathTraceOn={userSelections.pathTrace}
               imageType={userSelections.imageType}
               hasParentImage={!!this.state.fovPath}
               hasCellId={this.state.hasCellId}
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
               showAxes={userSelections[SHOW_AXES]}
               showBoundingBox={userSelections.showBoundingBox}
-              renderSetting={
-                userSelections[MAX_PROJECT] ? MAX_PROJECT : userSelections[PATH_TRACE] ? PATH_TRACE : "volume"
-              }
+              renderSetting={userSelections.maxProject ? MAX_PROJECT : userSelections.pathTrace ? PATH_TRACE : "volume"}
               onViewModeChange={this.onViewModeChange}
               onResetCamera={this.onResetCamera}
               onAutorotateChange={this.onAutorotateChange}
@@ -1205,7 +1219,7 @@ export default class App extends React.Component<AppProps, AppState> {
               image={this.state.image}
               setAxisClip={this.setImageAxisClip}
               mode={userSelections.mode}
-              autorotate={userSelections[AUTO_ROTATE]}
+              autorotate={userSelections.autorotate}
               loadingImage={this.state.sendingQueryRequest}
               numSlices={this.getNumberOfSlices()}
               onView3DCreated={this.onView3DCreated}

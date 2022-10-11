@@ -1,16 +1,4 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
-import {
-  CHANNEL_SETTINGS,
-  ALPHA_MASK_SLIDER_LEVEL,
-  BRIGHTNESS_SLIDER_LEVEL,
-  DENSITY_SLIDER_LEVEL,
-  LEVELS_SLIDER,
-  MODE,
-  AUTO_ROTATE,
-  SHOW_AXES,
-  MAX_PROJECT,
-  PATH_TRACE,
-} from "../../shared/constants";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { InternalChannelSetting, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -75,23 +63,25 @@ export interface AppProps {
 export interface UserSelectionState {
   imageType: string; // SEGMENTED_CELL | FULL_FIELD_IMAGE,
   controlPanelClosed: boolean;
-  [MODE]: symbol;
-  [AUTO_ROTATE]: boolean;
-  [MAX_PROJECT]: boolean;
-  [PATH_TRACE]: boolean;
-  [SHOW_AXES]: boolean;
+  mode: symbol;
+  autorotate: boolean;
+  maxProject: boolean;
+  pathTrace: boolean;
+  showAxes: boolean;
   showBoundingBox: boolean;
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
-  [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-  [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-  [LEVELS_SLIDER]: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+  alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
+  brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
+  levelsSlider: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
-  [CHANNEL_SETTINGS]: InternalChannelSetting[];
+  channelSettings: InternalChannelSetting[];
 }
+
+export type UserSelectionKey = keyof UserSelectionState;
 
 export interface AppState {
   view3d: View3d | null;

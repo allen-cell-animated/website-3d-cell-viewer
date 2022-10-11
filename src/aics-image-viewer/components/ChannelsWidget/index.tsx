@@ -4,13 +4,6 @@ import { Card, Collapse, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
 import { getDisplayName } from "../../shared/utils/viewerChannelSettings";
-import {
-  COLORIZE_ALPHA,
-  COLORIZE_ENABLED,
-  ISO_SURFACE_ENABLED,
-  LUT_CONTROL_POINTS,
-  VOLUME_ENABLED,
-} from "../../shared/constants";
 
 import colorPalette from "../../shared/colorPalette";
 import SharedCheckBox from "../shared/SharedCheckBox";
@@ -20,7 +13,11 @@ import "./styles.css";
 
 const { Panel } = Collapse;
 
-import { InternalChannelSetting, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import {
+  InternalChannelSetting,
+  ViewerChannelSettings,
+  ChannelSettingKey,
+} from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
 
 export interface ChannelsWidgetProps {
@@ -32,8 +29,13 @@ export interface ChannelsWidgetProps {
   viewerChannelSettings?: ViewerChannelSettings;
 
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
-  changeChannelSettings: (indices: number[], keyToChange: string, newValue: any) => void;
-  changeOneChannelSetting: (channelName: string, channelIndex: number, keyToChange: string, newValue: any) => void;
+  changeChannelSettings: (indices: number[], keyToChange: ChannelSettingKey, newValue: any) => void;
+  changeOneChannelSetting: (
+    channelName: string,
+    channelIndex: number,
+    keyToChange: ChannelSettingKey,
+    newValue: any
+  ) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
@@ -46,14 +48,14 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
     super(props);
   }
 
-  createCheckboxHandler = (key: string, value: boolean) => (channelArray: number[]) => {
+  createCheckboxHandler = (key: ChannelSettingKey, value: boolean) => (channelArray: number[]) => {
     this.props.changeChannelSettings(channelArray, key, value);
   };
 
-  showVolumes = this.createCheckboxHandler(VOLUME_ENABLED, true);
-  showSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, true);
-  hideVolumes = this.createCheckboxHandler(VOLUME_ENABLED, false);
-  hideSurfaces = this.createCheckboxHandler(ISO_SURFACE_ENABLED, false);
+  showVolumes = this.createCheckboxHandler("volumeEnabled", true);
+  showSurfaces = this.createCheckboxHandler("isosurfaceEnabled", true);
+  hideVolumes = this.createCheckboxHandler("volumeEnabled", false);
+  hideSurfaces = this.createCheckboxHandler("isosurfaceEnabled", false);
 
   renderVisibilityControls(channelArray: number[]) {
     const { channelSettings, channelDataChannels } = this.props;
@@ -64,10 +66,10 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
       const name = channelDataChannels![channelIndex].name;
       const channelSetting = find(channelSettings, { name });
       if (!channelSetting) return;
-      if (channelSetting[VOLUME_ENABLED]) {
+      if (channelSetting.volumeEnabled) {
         volChecked.push(channelIndex);
       }
-      if (channelSetting[ISO_SURFACE_ENABLED]) {
+      if (channelSetting.isosurfaceEnabled) {
         isoChecked.push(channelIndex);
       }
     });
@@ -128,11 +130,11 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
                       name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
-                      volumeChecked={thisChannelSettings[VOLUME_ENABLED]}
-                      isosurfaceChecked={thisChannelSettings[ISO_SURFACE_ENABLED]}
-                      channelControlPoints={thisChannelSettings[LUT_CONTROL_POINTS]}
-                      colorizeEnabled={thisChannelSettings[COLORIZE_ENABLED]}
-                      colorizeAlpha={thisChannelSettings[COLORIZE_ALPHA]}
+                      volumeChecked={thisChannelSettings.volumeEnabled}
+                      isosurfaceChecked={thisChannelSettings.isosurfaceEnabled}
+                      channelControlPoints={thisChannelSettings.controlPoints}
+                      colorizeEnabled={thisChannelSettings.colorizeEnabled}
+                      colorizeAlpha={thisChannelSettings.colorizeAlpha}
                       color={thisChannelSettings.color}
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
