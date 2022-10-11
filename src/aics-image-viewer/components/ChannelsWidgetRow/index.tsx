@@ -11,7 +11,7 @@ import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
-import { ChannelSettingKey, InternalChannelSetting } from "../../shared/utils/viewerChannelSettings";
+import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -33,11 +33,11 @@ interface ChannelsWidgetRowProps {
   }[];
   channelDataForChannel: Channel;
 
-  changeOneChannelSetting: <K extends ChannelSettingKey>(
+  changeOneChannelSetting: <K extends ChannelStateKey>(
     channelName: string,
     channelIndex: number,
     keyToChange: K,
-    newValue: InternalChannelSetting[K]
+    newValue: ChannelState[K]
   ) => void;
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
@@ -72,7 +72,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, "isosurfaceEnabled", target.checked);
   }
 
-  createChannelSettingHandler = (settingKey: ChannelSettingKey) => (newValue: any) => {
+  createChannelSettingHandler = (settingKey: ChannelStateKey) => (newValue: any) => {
     const { channelName, index, changeOneChannelSetting } = this.props;
     changeOneChannelSetting(channelName, index, settingKey, newValue);
   };

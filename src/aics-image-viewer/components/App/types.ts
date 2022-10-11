@@ -1,6 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { InternalChannelSetting, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
@@ -78,7 +78,7 @@ export interface UserSelectionState {
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
-  channelSettings: InternalChannelSetting[];
+  channelSettings: ChannelState[];
 }
 
 export type UserSelectionKey = keyof UserSelectionState;

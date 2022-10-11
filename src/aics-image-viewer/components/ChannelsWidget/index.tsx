@@ -13,32 +13,28 @@ import "./styles.css";
 
 const { Panel } = Collapse;
 
-import {
-  InternalChannelSetting,
-  ViewerChannelSettings,
-  ChannelSettingKey,
-} from "../../shared/utils/viewerChannelSettings";
+import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
 
 export interface ChannelsWidgetProps {
   imageName: string | undefined;
   channelDataChannels: Channel[] | undefined;
-  channelSettings: InternalChannelSetting[];
+  channelSettings: ChannelState[];
   channelGroupedByType: { [key: string]: number[] };
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
   handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
-  changeChannelSettings: <K extends ChannelSettingKey>(
+  changeChannelSettings: <K extends ChannelStateKey>(
     indices: number[],
     keyToChange: K,
-    newValue: InternalChannelSetting[K]
+    newValue: ChannelState[K]
   ) => void;
-  changeOneChannelSetting: <K extends ChannelSettingKey>(
+  changeOneChannelSetting: <K extends ChannelStateKey>(
     channelName: string,
     channelIndex: number,
     keyToChange: K,
-    newValue: InternalChannelSetting[K]
+    newValue: ChannelState[K]
   ) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
@@ -52,7 +48,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
     super(props);
   }
 
-  createCheckboxHandler = (key: ChannelSettingKey, value: boolean) => (channelArray: number[]) => {
+  createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
     this.props.changeChannelSettings(channelArray, key, value);
   };
 
@@ -123,7 +119,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                 renderItem={(actualIndex: number) => {
                   const thisChannelSettings = find(
                     channelSettings,
-                    (channel: InternalChannelSetting) => channel.name === channelDataChannels[actualIndex].name
+                    (channel: ChannelState) => channel.name === channelDataChannels[actualIndex].name
                   );
 
                   return thisChannelSettings ? (

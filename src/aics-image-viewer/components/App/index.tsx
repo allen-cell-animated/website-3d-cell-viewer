@@ -7,10 +7,10 @@ import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader
 import { AppProps, AppState, UserSelectionKey, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
-  InternalChannelSetting,
+  ChannelState,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
-  ChannelSettingKey,
+  ChannelStateKey,
 } from "../../shared/utils/viewerChannelSettings";
 import enums from "../../shared/enums";
 import {
@@ -303,7 +303,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({ view3d });
   }
 
-  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): InternalChannelSetting[] {
+  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): ChannelState[] {
     return channelNames.map((channel, index) => {
       let color = (channelColors[index] ? channelColors[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
 
@@ -443,7 +443,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  initializeNewImage(aimg: Volume, newChannelSettings?: InternalChannelSetting[]) {
+  initializeNewImage(aimg: Volume, newChannelSettings?: ChannelState[]) {
     // set alpha slider first time image is loaded to something that makes sense
     let alphaLevel = this.getInitialAlphaLevel();
     this.setUserSelectionsInState({ alphaMaskSliderLevel: alphaLevel });
@@ -467,7 +467,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   // set up the Volume into the Viewer using the current initial settings
-  private placeImageInViewer(aimg: Volume, newChannelSettings?: InternalChannelSetting[]): void {
+  private placeImageInViewer(aimg: Volume, newChannelSettings?: ChannelState[]): void {
     const { userSelections, view3d } = this.state;
     if (!view3d) {
       return;
@@ -586,7 +586,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onChannelDataLoaded(
     aimg: Volume,
-    thisChannelsSettings: InternalChannelSetting,
+    thisChannelsSettings: ChannelState,
     channelIndex: number,
     keepLuts: boolean | undefined
   ) {
@@ -671,7 +671,7 @@ export default class App extends React.Component<AppProps, AppState> {
     channel: string,
     index: number,
     defaultColor: ColorArray
-  ): InternalChannelSetting {
+  ): ChannelState {
     const { viewerChannelSettings } = this.props;
     let color = defaultColor;
     let volumeEnabled = false;
@@ -756,11 +756,11 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage(key, newValue);
   }
 
-  changeOneChannelSetting<K extends ChannelSettingKey>(
+  changeOneChannelSetting<K extends ChannelStateKey>(
     channelName: string,
     channelIndex: number,
     keyToChange: K,
-    newValue: InternalChannelSetting[K]
+    newValue: ChannelState[K]
   ) {
     const { userSelections } = this.state;
     const newChannels = userSelections.channelSettings.map((channel) => {
@@ -771,11 +771,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeToImage(keyToChange, newValue, channelIndex);
   }
 
-  changeChannelSettings<K extends ChannelSettingKey>(
-    indices: number[],
-    keyToChange: K,
-    newValue: InternalChannelSetting[K]
-  ) {
+  changeChannelSettings<K extends ChannelStateKey>(indices: number[], keyToChange: K, newValue: ChannelState[K]) {
     const { userSelections } = this.state;
     const newChannels = userSelections.channelSettings.map((channel, index) => {
       return {
@@ -1084,10 +1080,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(path, true, "image");
   }
 
-  getOneChannelSetting(
-    channelName: string,
-    newSettings?: InternalChannelSetting[]
-  ): InternalChannelSetting | undefined {
+  getOneChannelSetting(channelName: string, newSettings?: ChannelState[]): ChannelState | undefined {
     const { userSelections } = this.state;
     const channelSettings = newSettings || userSelections.channelSettings;
     return find(channelSettings, (channel) => {
