@@ -726,8 +726,8 @@ export default class App extends React.Component<AppProps, AppState> {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    let newChannelSettings = rawDims.channel_names.map((channel, index: number) => {
-      let color = INIT_COLORS[index] ? (INIT_COLORS[index].slice() as ColorArray) : ([226, 205, 179] as ColorArray); // guard for unexpectedly longer channel list
+    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
+      let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
       return this.initializeOneChannelSetting(aimg, channel, index, color);
     });
 
