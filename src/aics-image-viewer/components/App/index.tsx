@@ -625,7 +625,7 @@ export default class App extends React.Component<AppProps, AppState> {
     if (this.state.sendingQueryRequest) {
       this.setState({ sendingQueryRequest: false });
     }
-    if (aimg.loaded) {
+    if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
     }
   }
