@@ -14,6 +14,7 @@ import {
   THREE_D_MODE,
   VOLUMETRIC_RENDER,
 } from "../../shared/constants";
+import ViewerIcon from "../shared/ViewerIcon";
 
 interface ToolbarProps {
   imageType: string;
@@ -61,7 +62,9 @@ export default function Toolbar(props: ToolbarProps) {
   const toggleAxis = () => props.changeAxisShowing(!props.showAxes);
   const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
-  const classForToggleBtn = (active: boolean) => (active ? "btn-borderless btn-active" : "btn-borderless");
+  // TODO remove ant-btn-icon-only hack when upgrading antd
+  const classForToggleBtn = (active: boolean) =>
+    active ? "btn-borderless ant-btn-icon-only btn-active" : "ant-btn-icon-only btn-borderless";
 
   return (
     <div className="viewer-toolbar">
@@ -73,17 +76,20 @@ export default function Toolbar(props: ToolbarProps) {
             )}
             {renderConfig.resetCameraButton && (
               <Tooltip placement="bottom" title="Reset camera">
-                <Button icon="reload" className="btn-borderless" onClick={props.onResetCamera} />
+                <Button className="ant-btn-icon-only btn-borderless" onClick={props.onResetCamera}>
+                  <ViewerIcon type="resetView" />
+                </Button>
               </Tooltip>
             )}
             {renderConfig.autoRotateButton && (
               <Tooltip placement="bottom" title="Turntable">
                 <Button
                   className={classForToggleBtn(props.autorotate && !twoDMode)}
-                  icon={autorotateIcon}
                   disabled={twoDMode || props.pathTraceOn}
                   onClick={props.onAutorotateChange}
-                />
+                >
+                  <ViewerIcon type="turnTable" />
+                </Button>
               </Tooltip>
             )}
           </span>
@@ -122,16 +128,16 @@ export default function Toolbar(props: ToolbarProps) {
           <span className="viewer-toolbar-group">
             {renderConfig.showAxesButton && (
               <Tooltip placement="bottom" title={showAxes ? "Hide axes" : "Show axes"}>
-                <Button icon="drag" className={classForToggleBtn(showAxes)} onClick={toggleAxis} />
+                <Button className={classForToggleBtn(showAxes)} onClick={toggleAxis}>
+                  <ViewerIcon type="axes" />
+                </Button>
               </Tooltip>
             )}
             {renderConfig.showBoundingBoxButton && (
               <Tooltip placement="bottom" title={showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
-                <Button
-                  icon="close-square"
-                  className={classForToggleBtn(showBoundingBox)}
-                  onClick={toggleBoundingBox}
-                />
+                <Button className={classForToggleBtn(showBoundingBox)} onClick={toggleBoundingBox}>
+                  <ViewerIcon type="boundingBox" />
+                </Button>
               </Tooltip>
             )}
           </span>

@@ -1,8 +1,6 @@
 {
   "extends": "./tsconfig.base",
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*", "src/aics-image-viewer/shared/icons/svg.d.ts"],
   "compilerOptions": {
     "module": "ES6"
   }
