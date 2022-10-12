@@ -7,9 +7,9 @@ import React from "react";
 import "./styles.css";
 
 import viewMode from "../../shared/enums/viewMode";
+import { AxisName } from "../../shared/types";
 const ViewMode = viewMode.mainMapping;
 
-type AxisName = "x" | "y" | "z";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 

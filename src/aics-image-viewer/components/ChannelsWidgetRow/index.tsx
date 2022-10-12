@@ -12,6 +12,7 @@ import ColorPicker from "../ColorPicker";
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
+import { Styles } from "../../shared/types";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -235,7 +236,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   channelName: {
     display: "inline-block",
     minWidth: 90,

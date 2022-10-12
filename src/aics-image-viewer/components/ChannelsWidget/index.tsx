@@ -15,6 +15,7 @@ const { Panel } = Collapse;
 
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
+import { Styles } from "../../shared/types";
 
 export interface ChannelsWidgetProps {
   imageName: string | undefined;
@@ -158,7 +159,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   header: {
     textAlign: "left",
     fontWeight: 900,

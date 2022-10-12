@@ -956,7 +956,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  setImageAxisClip(axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) {
+  setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) {
     if (this.state.view3d && this.state.image) {
       this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
     }

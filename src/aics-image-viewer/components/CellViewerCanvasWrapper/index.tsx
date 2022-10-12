@@ -3,6 +3,7 @@ import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
+import { AxisName, Styles } from "../../shared/types";
 import viewMode from "../../shared/enums/viewMode";
 
 import AxisClipSliders from "../AxisClipSliders";
@@ -24,7 +25,7 @@ interface ViewerWrapperProps {
     axisClipSliders: boolean;
   };
   onView3DCreated: (view3d: View3d) => void;
-  setAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
 }
 
 interface ViewerWrapperState {}
@@ -91,7 +92,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   viewer: {
     display: "flex",
     position: "relative",
