@@ -14,7 +14,7 @@ interface ViewerWrapperProps {
   loadingImage: boolean;
   mode: symbol;
   appHeight: string;
-  image: Volume;
+  image: Volume | null;
   numSlices: {
     x: number;
     y: number;
@@ -24,14 +24,14 @@ interface ViewerWrapperProps {
     axisClipSliders: boolean;
   };
   onView3DCreated: (view3d: View3d) => void;
-  setAxisClip: (axis: string, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  setAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
 }
 
 interface ViewerWrapperState {}
 
 export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
   private view3dviewerRef: React.RefObject<HTMLDivElement>;
-  private view3D: View3d;
+  private view3D?: View3d;
 
   constructor(props: ViewerWrapperProps) {
     super(props);
@@ -40,21 +40,24 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
 
   componentDidMount() {
     if (!this.view3D) {
-      this.view3D = new View3d(this.view3dviewerRef.current);
+      this.view3D = new View3d(this.view3dviewerRef.current!);
       this.props.onView3DCreated(this.view3D);
       this.view3D.setAutoRotate(this.props.autorotate);
     }
   }
 
   componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState) {
-    if (this.view3D && prevProps.mode && prevProps.mode !== this.props.mode) {
+    if (!this.view3D) {
+      return;
+    }
+    if (prevProps.mode && prevProps.mode !== this.props.mode) {
       this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(this.props.mode));
     }
-    if (this.view3D && prevProps.autorotate !== this.props.autorotate) {
+    if (prevProps.autorotate !== this.props.autorotate) {
       this.view3D.setAutoRotate(this.props.autorotate);
     }
 
-    this.view3D.resize();
+    this.view3D.resize(null);
   }
 
   renderOverlay() {

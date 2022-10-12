@@ -1,18 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
-import {
-  CHANNEL_SETTINGS,
-  LUT_CONTROL_POINTS,
-  ALPHA_MASK_SLIDER_LEVEL,
-  BRIGHTNESS_SLIDER_LEVEL,
-  DENSITY_SLIDER_LEVEL,
-  LEVELS_SLIDER,
-  MODE,
-  AUTO_ROTATE,
-  SHOW_AXES,
-  MAX_PROJECT,
-  PATH_TRACE,
-} from "../../shared/constants";
-import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ColorArray } from "../../shared/utils/colorRepresentations";
+import { ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
@@ -48,8 +36,8 @@ export interface AppProps {
   viewerConfig: {
     showAxes: boolean;
     showBoundingBox: boolean;
-    boundingBoxColor: [number, number, number];
-    backgroundColor: [number, number, number];
+    boundingBoxColor: ColorArray;
+    backgroundColor: ColorArray;
     autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
@@ -69,39 +57,31 @@ export interface AppProps {
   pixelSize?: [number, number, number];
   canvasMargin: string;
 
-  onControlPanelToggle?(collapsed: boolean): void;
+  onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
 export interface UserSelectionState {
   imageType: string; // SEGMENTED_CELL | FULL_FIELD_IMAGE,
   controlPanelClosed: boolean;
-  [MODE]: symbol;
-  [AUTO_ROTATE]: boolean;
-  [MAX_PROJECT]: boolean;
-  [PATH_TRACE]: boolean;
-  [SHOW_AXES]: boolean;
+  mode: symbol;
+  autorotate: boolean;
+  maxProject: boolean;
+  pathTrace: boolean;
+  showAxes: boolean;
   showBoundingBox: boolean;
-  boundingBoxColor: [number, number, number];
-  backgroundColor: [number, number, number];
-  [ALPHA_MASK_SLIDER_LEVEL]: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-  [BRIGHTNESS_SLIDER_LEVEL]: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  [DENSITY_SLIDER_LEVEL]: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-  [LEVELS_SLIDER]: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+  boundingBoxColor: ColorArray;
+  backgroundColor: ColorArray;
+  alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
+  brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
+  levelsSlider: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
-  [CHANNEL_SETTINGS]: {
-    name: string;
-    enabled: boolean;
-    volumeEnabled: boolean;
-    isosurfaceEnabled: boolean;
-    isovalue: number;
-    opacity: number;
-    color: [number, number, number];
-    dataReady: boolean;
-    [LUT_CONTROL_POINTS]: [];
-  }[];
+  channelSettings: ChannelState[];
 }
+
+export type UserSelectionKey = keyof UserSelectionState;
 
 export interface AppState {
   view3d: View3d | null;

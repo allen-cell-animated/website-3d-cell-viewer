@@ -1,9 +1,7 @@
+import { ColorArray } from "./utils/colorRepresentations";
+
 // Add all exported constants here to prevent circular dependencies
-export const // Keys accepted as URL search parameters
-  CELL_ID_QUERY = "cellId",
-  FOV_ID_QUERY = "fovId",
-  CELL_LINE_QUERY = "cellLine",
-  IMAGE_NAME_QUERY = "name",
+export const 
   // View modes
   YZ_MODE = "YZ",
   XZ_MODE = "XZ",
@@ -12,24 +10,18 @@ export const // Keys accepted as URL search parameters
   // App state values
   SEGMENTED_CELL = "segmented",
   FULL_FIELD_IMAGE = "full field",
-  // Channel setting keys
-  ISO_SURFACE_ENABLED = "isoSurfaceEnabled",
-  VOLUME_ENABLED = "volumeEnabled",
   // App State Keys,
   ALPHA_MASK_SLIDER_LEVEL = "alphaMaskSliderLevel",
   BRIGHTNESS_SLIDER_LEVEL = "brightnessSliderLevel",
   DENSITY_SLIDER_LEVEL = "densitySliderLevel",
   LEVELS_SLIDER = "levelsSlider",
   MODE = "mode",
-  AUTO_ROTATE = "autorotate",
   SHOW_AXES = "showAxes",
   MAX_PROJECT = "maxProject",
   VOLUMETRIC_RENDER = "volume",
   PATH_TRACE = "pathTrace",
-  LUT_CONTROL_POINTS = "controlPoints",
   COLORIZE_ALPHA = "colorizeAlpha",
   COLORIZE_ENABLED = "colorizeEnabled",
-  CHANNEL_SETTINGS = "channelSettings",
   // Volume viewer keys
   ISO_VALUE = "isovalue",
   OPACITY = "opacity",
@@ -37,8 +29,8 @@ export const // Keys accepted as URL search parameters
   SAVE_ISO_SURFACE = "saveIsoSurface",
   // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
-  BACKGROUND_COLOR: [number, number, number] = [0, 0, 0],
-  BOUNDING_BOX_COLOR: [number, number, number] = [255, 255, 255],
+  BACKGROUND_COLOR: ColorArray = [0, 0, 0],
+  BOUNDING_BOX_COLOR: ColorArray = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.
@@ -49,46 +41,44 @@ export const // Keys accepted as URL search parameters
   ALPHA_MASK_SLIDER_2D_DEFAULT = [0],
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT = [70],
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
-  LEVELS_SLIDER_DEFAULT: [number, number, number] = [35.0, 140.0, 255.0],
+  LEVELS_SLIDER_DEFAULT: ColorArray = [35.0, 140.0, 255.0],
   OTHER_CHANNEL_KEY = "Other",
   SINGLE_GROUP_CHANNEL_KEY = "Channels",
   CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
 
-type PresetColors = [number, number, number, number?][];
-
-export const PRESET_COLORS_1: PresetColors = [
-  [190, 68, 171, 255],
-  [189, 211, 75, 255],
-  [61, 155, 169, 255],
-  [128, 128, 128, 255],
-  [255, 255, 255, 255],
-  [239, 27, 45, 255],
-  [238, 77, 245, 255],
-  [96, 255, 255, 255],
+export const PRESET_COLORS_1: ColorArray[] = [
+  [190, 68, 171],
+  [189, 211, 75],
+  [61, 155, 169],
+  [128, 128, 128],
+  [255, 255, 255],
+  [239, 27, 45],
+  [238, 77, 245],
+  [96, 255, 255],
 ];
-export const PRESET_COLORS_2: PresetColors = [
-  [128, 0, 0, 255],
-  [0, 128, 0, 255],
-  [0, 0, 128, 255],
-  [32, 32, 32, 255],
-  [255, 255, 0, 255],
-  [255, 0, 255, 255],
-  [0, 255, 0, 255],
-  [0, 0, 255, 255],
+export const PRESET_COLORS_2: ColorArray[] = [
+  [128, 0, 0],
+  [0, 128, 0],
+  [0, 0, 128],
+  [32, 32, 32],
+  [255, 255, 0],
+  [255, 0, 255],
+  [0, 255, 0],
+  [0, 0, 255],
 ];
 
-export const PRESET_COLORS_3: PresetColors = [
-  [128, 0, 128, 255],
-  [128, 128, 128, 255],
-  [0, 128, 128, 255],
-  [128, 128, 0, 255],
-  [255, 255, 255, 255],
-  [255, 0, 0, 255],
-  [255, 0, 255, 255],
-  [0, 255, 255, 255],
+export const PRESET_COLORS_3: ColorArray[] = [
+  [128, 0, 128],
+  [128, 128, 128],
+  [0, 128, 128],
+  [128, 128, 0],
+  [255, 255, 255],
+  [255, 0, 0],
+  [255, 0, 255],
+  [0, 255, 255],
 ];
 
-export const PRESET_COLORS_0: PresetColors = [
+export const PRESET_COLORS_0: ColorArray[] = [
   [226, 205, 179],
   [111, 186, 17],
   [141, 163, 192],

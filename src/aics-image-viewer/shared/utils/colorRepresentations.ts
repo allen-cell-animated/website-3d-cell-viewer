@@ -1,4 +1,4 @@
-export type ColorObject = { r: number; g: number; b: number; a?: number };
+export type ColorObject = { r: number; g: number; b: number };
 export type ColorArray = [number, number, number];
 
 export const colorObjectToArray = (obj: ColorObject): ColorArray => [obj.r, obj.g, obj.b];

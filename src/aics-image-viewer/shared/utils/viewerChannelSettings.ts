@@ -1,5 +1,27 @@
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
+import { ColorArray } from "./colorRepresentations";
 
+/** Settings for a single channel, as stored internally by the app */
+export interface ChannelState {
+  name: string;
+  volumeEnabled: boolean;
+  isosurfaceEnabled: boolean;
+  isovalue: number;
+  colorizeEnabled: boolean;
+  colorizeAlpha: number;
+  opacity: number;
+  color: ColorArray;
+  dataReady: boolean;
+  controlPoints: {
+    color: string;
+    opacity: number;
+    x: number;
+  }[];
+}
+
+export type ChannelStateKey = keyof ChannelState;
+
+/** Settings for a single channel, as passed in via props by App users */
 export interface ViewerChannelSetting {
   // regex or string or array of regexes or strings or number for raw channel index
   // if you want to match on channel index, then you must provide the index here.
