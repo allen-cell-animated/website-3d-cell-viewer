@@ -53,7 +53,6 @@ export default function Toolbar(props: ToolbarProps) {
   const { renderConfig, showAxes, showBoundingBox } = props;
 
   const twoDMode = viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(props.mode) !== THREE_D_MODE;
-  const autorotateIcon = props.autorotate && !twoDMode ? "pause-circle" : "play-circle";
 
   const renderGroup1 =
     renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
