@@ -33,12 +33,12 @@
     }
 
     .btn-collapse {
-      img {
-        transform: rotate(0deg);
+      svg {
+        transform: rotate(180deg);
         transition: transform 0.2s linear;
       }
-      &.btn-collapse-collapsed img {
-        transform: rotate(180deg);
+      &.btn-collapse-collapsed svg {
+        transform: rotate(0deg);
       }
     }
 

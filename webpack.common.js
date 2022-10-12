@@ -82,8 +82,15 @@ module.exports = {
       },
       {
         test: /\.svg$/,
-        type: "asset/inline",
-      }
+        use: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+            },
+          },
+        ],
+      },
     ],
   },
 };
