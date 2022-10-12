@@ -9,6 +9,7 @@ import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
 import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
+import ViewerIcon from "../shared/ViewerIcon";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
@@ -58,23 +59,26 @@ export default function ControlPanel(props: ControlPanelProps) {
     <div className="control-panel-col-container">
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
         <Button
-          icon="vertical-right"
-          className={props.collapsed ? "btn-collapse btn-collapse-collapsed" : "btn-collapse"}
+          className={"ant-btn-icon-only btn-collapse" + (props.collapsed ? " btn-collapse-collapsed" : "")}
           onClick={() => props.setCollapsed(!props.collapsed)}
-        />
+        >
+          <ViewerIcon type="closePanel" />
+        </Button>
         <div className="tab-divider" />
         <Button
-          icon="unordered-list"
-          className={tab === ControlTab.Channels ? "btn-tabactive" : ""}
+          className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
           disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Channels)}
-        />
+        >
+          <ViewerIcon type="channels" />
+        </Button>
         <Button
-          icon="control"
-          className={tab === ControlTab.Advanced ? "btn-tabactive" : ""}
+          className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
           disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Advanced)}
-        />
+        >
+          <ViewerIcon type="preferences" />
+        </Button>
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>

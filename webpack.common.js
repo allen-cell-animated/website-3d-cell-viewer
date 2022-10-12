@@ -77,8 +77,19 @@ module.exports = {
         ],
       },
       {
-        test: /\.(woff|woff2|tff|eot|glyph|svg)$/,
+        test: /\.(woff|woff2|tff|eot|glyph)$/,
         type: "asset/resource",
+      },
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              icon: true,
+            },
+          },
+        ],
       },
     ],
   },

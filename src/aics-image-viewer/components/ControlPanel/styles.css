@@ -34,11 +34,11 @@
 
     .btn-collapse {
       svg {
-        transform: rotate(0deg);
+        transform: rotate(180deg);
         transition: transform 0.2s linear;
       }
       &.btn-collapse-collapsed svg {
-        transform: rotate(180deg);
+        transform: rotate(0deg);
       }
     }
 

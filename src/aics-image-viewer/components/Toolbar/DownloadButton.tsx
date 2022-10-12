@@ -1,5 +1,6 @@
 import React from "react";
-import { Menu, Icon, Dropdown, Button } from "antd";
+import { Menu, Dropdown, Button } from "antd";
+import ViewerIcon from "../shared/ViewerIcon";
 
 interface DownloadButtonProps {
   cellDownloadHref: string;
@@ -13,23 +14,29 @@ export default function DownloadButton({ fovDownloadHref, cellDownloadHref, hasF
       <Menu className="download-dropdown">
         <Menu.Item key="1">
           <a href={cellDownloadHref}>
-            <Icon type="download" /> Segmented cell
+            <ViewerIcon type="download" /> Segmented cell
           </a>
         </Menu.Item>
         <Menu.Item key="2">
           <a href={fovDownloadHref}>
-            <Icon type="download" /> Full field image
+            <ViewerIcon type="download" /> Full field image
           </a>
         </Menu.Item>
       </Menu>
     );
     return (
       <Dropdown overlay={menu} placement="bottomRight" trigger={["click"]}>
-        <Button className="btn-borderless" icon="download" />
+        <Button className="ant-btn-icon-only btn-borderless">
+          <ViewerIcon type="download" />
+        </Button>
       </Dropdown>
     );
   } else if (cellDownloadHref) {
-    return <Button className="btn-borderless" icon="download" href={cellDownloadHref} />;
+    return (
+      <Button className="ant-btn-icon-only btn-borderless" href={cellDownloadHref}>
+        <ViewerIcon type="download" />
+      </Button>
+    );
   } else {
     return null;
   }
