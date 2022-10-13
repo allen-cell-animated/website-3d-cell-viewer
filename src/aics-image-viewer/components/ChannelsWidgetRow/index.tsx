@@ -5,7 +5,7 @@ import { Channel } from "@aics/volume-viewer";
 import TfEditor from "../TfEditor";
 
 import colorPalette from "../../shared/colorPalette";
-import { ISOSURFACE_OPACITY_SLIDER_MAX, SAVE_ISO_SURFACE } from "../../shared/constants";
+import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 
 import ColorPicker from "../ColorPicker";
 
@@ -40,7 +40,7 @@ interface ChannelsWidgetRowProps {
     keyToChange: K,
     newValue: ChannelState[K]
   ) => void;
-  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  saveIsosurface: (channelIndex: number, type: "GLTF" | "STL") => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
@@ -174,9 +174,9 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     );
   }
 
-  createSaveIsosurfaceHandler = (format: string) => () => {
-    const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, format, index);
+  createSaveIsosurfaceHandler = (format: "GLTF" | "STL") => () => {
+    const { index, saveIsosurface } = this.props;
+    saveIsosurface(index, format);
   };
 
   renderSurfaceControls = () => (

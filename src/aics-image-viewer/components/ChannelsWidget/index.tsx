@@ -25,7 +25,7 @@ export interface ChannelsWidgetProps {
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
-  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  saveIsosurface: (channelIndex: number, type: "GLTF" | "STL") => void;
   changeChannelSettings: <K extends ChannelStateKey>(
     indices: number[],
     keyToChange: K,
@@ -140,7 +140,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
-                      handleChangeToImage={this.props.handleChangeToImage}
+                      saveIsosurface={this.props.saveIsosurface}
                     />
                   ) : (
                     <div></div>

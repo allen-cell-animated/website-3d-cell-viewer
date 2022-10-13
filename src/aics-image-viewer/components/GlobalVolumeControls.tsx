@@ -25,7 +25,7 @@ export interface GlobalVolumeControlsProps {
   densitySliderLevel: number[];
   gammaSliderLevel: [number, number, number];
 
-  handleChangeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
+  changeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
   setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
@@ -53,7 +53,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]) => this.props.handleChangeUserSelection(propKey, values)}
+          onUpdate={(values: number[]) => this.props.changeUserSelection(propKey, values)}
         />
       </div>
     </div>

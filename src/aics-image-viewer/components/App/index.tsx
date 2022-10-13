@@ -12,6 +12,7 @@ import {
   makeChannelIndexGrouping,
   ChannelStateKey,
 } from "../../shared/utils/viewerChannelSettings";
+import { AxisName } from "../../shared/types";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
@@ -21,17 +22,12 @@ import {
   FULL_FIELD_IMAGE,
   SEGMENTED_CELL,
   COLORIZE_ALPHA,
-  ALPHA_MASK_SLIDER_LEVEL,
-  BRIGHTNESS_SLIDER_LEVEL,
-  DENSITY_SLIDER_LEVEL,
-  LEVELS_SLIDER,
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   DENSITY_SLIDER_LEVEL_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
   ISO_VALUE,
   OPACITY,
   COLOR,
-  SAVE_ISO_SURFACE,
   MODE,
   SHOW_AXES,
   MAX_PROJECT,
@@ -230,7 +226,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState = this.setUserSelectionsInState.bind(this);
     this.changeChannelSettings = this.changeChannelSettings.bind(this);
     this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
-    this.handleChangeUserSelection = this.handleChangeUserSelection.bind(this);
+    this.changeUserSelection = this.changeUserSelection.bind(this);
     this.handleChangeToImage = this.handleChangeToImage.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
@@ -241,12 +237,11 @@ export default class App extends React.Component<AppProps, AppState> {
     this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
-    this.changeAxisShowing = this.changeAxisShowing.bind(this);
-    this.changeBoundingBoxShowing = this.changeBoundingBoxShowing.bind(this);
     this.onResetCamera = this.onResetCamera.bind(this);
     this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
     this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
-    this.downloadScreenshot = this.downloadScreenshot.bind(this);
+    this.saveScreenshot = this.saveScreenshot.bind(this);
+    this.saveIsosurface = this.saveIsosurface.bind(this);
   }
 
   componentDidMount() {
@@ -751,11 +746,6 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  handleChangeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) {
-    this.setUserSelectionsInState({ [key]: newValue });
-    this.handleChangeToImage(key, newValue);
-  }
-
   changeOneChannelSetting<K extends ChannelStateKey>(
     channelName: string,
     channelIndex: number,
@@ -791,100 +781,121 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
+  private userSelectionChangeHandler: {
+    [K in UserSelectionKey]: (value: UserSelectionState[K], view3d: View3d, image: Volume) => void;
+  } = {
+    imageType: () => {},
+    controlPanelClosed: () => {},
+    autorotate: () => {},
+    channelSettings: () => {},
+
+    mode: (mode, view3d) => view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(mode)),
+    maxProject: (value, view3d, image) => {
+      view3d.setMaxProjectMode(image, value);
+      view3d.updateActiveChannels(image);
+    },
+    pathTrace: (enabled, view3d, image) => {
+      view3d.setVolumeRenderMode(enabled ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
+      view3d.updateActiveChannels(image);
+    },
+
+    showAxes: (showing, view3d) => view3d.setShowAxis(showing),
+    showBoundingBox: (showing, view3d, image) => view3d.setShowBoundingBox(image, showing),
+    boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
+    backgroundColor: (color, view3d) => view3d.setBackgroundColor(colorArrayToFloats(color)),
+
+    alphaMaskSliderLevel: (value, view3d, image) => {
+      view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
+      view3d.updateActiveChannels(image);
+    },
+    brightnessSliderLevel: (value, view3d) => {
+      const brightness = brightnessSliderToImageValue(value, this.state.userSelections.pathTrace);
+      view3d.updateExposure(brightness);
+    },
+    densitySliderLevel: (value, view3d, image) => {
+      const density = densitySliderToImageValue(value, this.state.userSelections.pathTrace);
+      view3d.updateDensity(image, density);
+    },
+    levelsSlider: (value, view3d, image) => {
+      const imageValues = gammaSliderToImageValues(value);
+      view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
+    },
+  };
+
+  /**
+   * Should only be called by internal methods that need to change multiple properties at once
+   * without calling multiple `setState`s. Prefer `changeUserSelection` whenever possible.
+   */
+  private handleChangeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) {
+    const { view3d, image } = this.state;
+    if (!view3d || !image) {
+      return;
+    }
+    this.userSelectionChangeHandler[key](newValue, view3d, image);
+  }
+
+  changeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) {
+    this.setUserSelectionsInState({ [key]: newValue });
+    this.handleChangeUserSelection(key, newValue);
+  }
+
   // TODO make nicer and more strictly type-able
-  handleChangeToImage(keyToChange: string, newValue: any, index?: number) {
+  handleChangeToImage(keyToChange: ChannelStateKey, newValue: any, index: number) {
     const { image, userSelections, view3d } = this.state;
     if (!image || !view3d) {
       return;
     }
     switch (keyToChange) {
       case ISO_VALUE:
-        view3d.setVolumeChannelOptions(image, index!, {
+        view3d.setVolumeChannelOptions(image, index, {
           isovalue: newValue,
         });
         break;
       case OPACITY:
-        view3d.setVolumeChannelOptions(image, index!, {
+        view3d.setVolumeChannelOptions(image, index, {
           isosurfaceOpacity: newValue,
         });
         break;
       case COLOR:
         {
           let newColor: ColorArray = newValue.r ? colorObjectToArray(newValue) : newValue;
-          view3d.setVolumeChannelOptions(image, index!, {
+          view3d.setVolumeChannelOptions(image, index, {
             color: newColor,
           });
           view3d.updateMaterial(image);
         }
         break;
-      case MODE:
-        view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(newValue));
-        break;
-      case SHOW_AXES:
-        view3d.setShowAxis(newValue);
-        break;
-      case "showBoundingBox":
-        view3d.setShowBoundingBox(image, newValue);
-        break;
-      case SAVE_ISO_SURFACE:
-        view3d.saveChannelIsosurface(image, index!, newValue);
-        break;
       case COLORIZE_ENABLED:
         if (newValue) {
           // TODO get the labelColors from the tf editor component
-          const lut = image.getHistogram(index!).lutGenerator_labelColors();
-          image.setColorPalette(index!, lut.lut);
-          image.setColorPaletteAlpha(index!, userSelections.channelSettings[index!][COLORIZE_ALPHA]);
+          const lut = image.getHistogram(index).lutGenerator_labelColors();
+          image.setColorPalette(index, lut.lut);
+          image.setColorPaletteAlpha(index, userSelections.channelSettings[index][COLORIZE_ALPHA]);
         } else {
-          image.setColorPaletteAlpha(index!, 0);
+          image.setColorPaletteAlpha(index, 0);
         }
         view3d.updateLuts(image);
         break;
       case COLORIZE_ALPHA:
-        if (userSelections.channelSettings[index!].colorizeEnabled) {
-          image.setColorPaletteAlpha(index!, newValue);
+        if (userSelections.channelSettings[index].colorizeEnabled) {
+          image.setColorPaletteAlpha(index, newValue);
         } else {
-          image.setColorPaletteAlpha(index!, 0);
+          image.setColorPaletteAlpha(index, 0);
         }
         view3d.updateLuts(image);
-        break;
-      case MAX_PROJECT:
-        view3d.setMaxProjectMode(image, newValue ? true : false);
-        view3d.updateActiveChannels(image);
-        break;
-      case PATH_TRACE:
-        view3d.setVolumeRenderMode(newValue ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
-        view3d.updateActiveChannels(image);
-        break;
-      case ALPHA_MASK_SLIDER_LEVEL:
-        {
-          let imageMask = alphaSliderToImageValue(newValue);
-          view3d.updateMaskAlpha(image, imageMask);
-          view3d.updateActiveChannels(image);
-        }
-        break;
-      case BRIGHTNESS_SLIDER_LEVEL:
-        {
-          let imageBrightness = brightnessSliderToImageValue(newValue, userSelections.pathTrace);
-          view3d.updateExposure(imageBrightness);
-        }
-        break;
-      case DENSITY_SLIDER_LEVEL:
-        {
-          let imageDensity = densitySliderToImageValue(newValue, userSelections.pathTrace);
-          view3d.updateDensity(image, imageDensity);
-        }
-        break;
-      case LEVELS_SLIDER:
-        {
-          let imageValues = gammaSliderToImageValues(newValue);
-          view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
-        }
         break;
     }
   }
 
-  downloadScreenshot() {
+  saveIsosurface(channelIndex: number, type: "GLTF" | "STL") {
+    const { view3d, image } = this.state;
+    if (!view3d || !image) {
+      return;
+    }
+    view3d.saveChannelIsosurface(image, channelIndex, type);
+  }
+
+  saveScreenshot() {
     if (!this.state.view3d) {
       return;
     }
@@ -939,9 +950,9 @@ export default class App extends React.Component<AppProps, AppState> {
       };
     }
 
-    this.handleChangeToImage(MODE, newMode);
+    this.handleChangeUserSelection("mode", newMode);
     if (newSelectionState.alphaMaskSliderLevel !== undefined) {
-      this.handleChangeToImage(ALPHA_MASK_SLIDER_LEVEL, newSelectionState.alphaMaskSliderLevel);
+      this.handleChangeUserSelection("alphaMaskSliderLevel", newSelectionState.alphaMaskSliderLevel);
     }
     this.setUserSelectionsInState(newSelectionState);
   }
@@ -984,8 +995,8 @@ export default class App extends React.Component<AppProps, AppState> {
       maxProject: newAlgorithm === MAX_PROJECT,
       autorotate: newAlgorithm === PATH_TRACE ? false : userSelections.autorotate,
     });
-    this.handleChangeToImage(PATH_TRACE, newAlgorithm === PATH_TRACE);
-    this.handleChangeToImage(MAX_PROJECT, newAlgorithm === MAX_PROJECT);
+    this.handleChangeUserSelection("pathTrace", newAlgorithm === PATH_TRACE);
+    this.handleChangeUserSelection("maxProject", newAlgorithm === MAX_PROJECT);
   }
 
   // TODO FOV should become an enum too
@@ -1013,16 +1024,6 @@ export default class App extends React.Component<AppProps, AppState> {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
     });
     this.setUserSelectionsInState({ channelSettings: newChannels });
-  }
-
-  changeAxisShowing(showAxes: boolean) {
-    this.setUserSelectionsInState({ showAxes });
-    this.handleChangeToImage(SHOW_AXES, showAxes);
-  }
-
-  changeBoundingBoxShowing(showBoundingBox: boolean) {
-    this.setUserSelectionsInState({ showBoundingBox });
-    this.handleChangeToImage("showBoundingBox", showBoundingBox);
   }
 
   changeBoundingBoxColor(color: ColorObject) {
@@ -1171,8 +1172,8 @@ export default class App extends React.Component<AppProps, AppState> {
             collapsed={this.state.userSelections.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
-            handleChangeUserSelection={this.handleChangeUserSelection}
-            handleChangeToImage={this.handleChangeToImage}
+            saveIsosurface={this.saveIsosurface}
+            changeUserSelection={this.changeUserSelection}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
             setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
@@ -1204,9 +1205,9 @@ export default class App extends React.Component<AppProps, AppState> {
               onAutorotateChange={this.onAutorotateChange}
               onSwitchFovCell={this.onSwitchFovCell}
               onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
-              changeAxisShowing={this.changeAxisShowing}
-              changeBoundingBoxShowing={this.changeBoundingBoxShowing}
-              downloadScreenshot={this.downloadScreenshot}
+              changeAxisShowing={(showing) => this.handleChangeUserSelection("showAxes", showing)}
+              changeBoundingBoxShowing={(showing) => this.handleChangeUserSelection("showBoundingBox", showing)}
+              downloadScreenshot={this.saveScreenshot}
               renderConfig={renderConfig}
             />
             <CellViewerCanvasWrapper
