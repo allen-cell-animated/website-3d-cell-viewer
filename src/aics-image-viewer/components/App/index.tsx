@@ -1001,23 +1001,14 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState({ channelSettings: newChannels });
   }
 
-  changeBoundingBoxColor(color: ColorObject) {
-    const boundingBoxColor = colorObjectToArray(color);
-    this.setUserSelectionsInState({ boundingBoxColor });
-    if (this.state.view3d && this.state.image) {
-      const floatColor = colorArrayToFloats(boundingBoxColor);
-      this.state.view3d.setBoundingBoxColor(this.state.image, floatColor);
-    }
-  }
+  changeBoundingBoxColor = (color: ColorObject) =>
+    this.changeUserSelection("boundingBoxColor", colorObjectToArray(color));
 
-  changeBackgroundColor(color: ColorObject) {
-    const backgroundColor = colorObjectToArray(color);
-    this.setUserSelectionsInState({ backgroundColor });
-    if (this.state.view3d) {
-      const floatColor = colorArrayToFloats(backgroundColor);
-      this.state.view3d.setBackgroundColor(floatColor);
-    }
-  }
+  changeBackgroundColor = (color: ColorObject) =>
+    this.changeUserSelection("backgroundColor", colorObjectToArray(color));
+
+  changeAxisShowing = (showing: boolean) => this.changeUserSelection("showAxes", showing);
+  changeBoundingBoxShowing = (showing: boolean) => this.changeUserSelection("showBoundingBox", showing);
 
   onResetCamera() {
     if (this.state.view3d) {
@@ -1180,8 +1171,8 @@ export default class App extends React.Component<AppProps, AppState> {
               onAutorotateChange={this.onAutorotateChange}
               onSwitchFovCell={this.onSwitchFovCell}
               onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
-              changeAxisShowing={(showing) => this.handleChangeUserSelection("showAxes", showing)}
-              changeBoundingBoxShowing={(showing) => this.handleChangeUserSelection("showBoundingBox", showing)}
+              changeAxisShowing={this.changeAxisShowing}
+              changeBoundingBoxShowing={this.changeBoundingBoxShowing}
               downloadScreenshot={this.saveScreenshot}
               renderConfig={renderConfig}
             />
