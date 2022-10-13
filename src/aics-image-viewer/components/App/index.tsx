@@ -4,13 +4,14 @@ import React from "react";
 import { includes, isEqual, find, map, debounce } from "lodash";
 import { RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume, VolumeLoader } from "@aics/volume-viewer";
 
-import { AppProps, AppState, UserSelectionKey, UserSelectionState } from "./types";
+import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
   ChannelStateKey,
+  ChannelStateChangeHandlers,
 } from "../../shared/utils/viewerChannelSettings";
 import { AxisName } from "../../shared/types";
 import enums from "../../shared/enums";
@@ -21,25 +22,18 @@ import {
   ALPHA_MASK_SLIDER_2D_DEFAULT,
   FULL_FIELD_IMAGE,
   SEGMENTED_CELL,
-  COLORIZE_ALPHA,
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   DENSITY_SLIDER_LEVEL_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
-  ISO_VALUE,
-  OPACITY,
-  COLOR,
-  MODE,
-  SHOW_AXES,
   MAX_PROJECT,
   PATH_TRACE,
+  VOLUMETRIC_RENDER,
   BACKGROUND_COLOR,
   BOUNDING_BOX_COLOR,
   LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
-  COLORIZE_ENABLED,
   SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
-  VOLUMETRIC_RENDER,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
@@ -227,7 +221,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.changeChannelSettings = this.changeChannelSettings.bind(this);
     this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
     this.changeUserSelection = this.changeUserSelection.bind(this);
-    this.handleChangeToImage = this.handleChangeToImage.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
@@ -293,7 +286,7 @@ export default class App extends React.Component<AppProps, AppState> {
   onView3DCreated(view3d: View3d) {
     const { userSelections } = this.state;
     view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
-    view3d.setShowAxis(userSelections[SHOW_AXES]);
+    view3d.setShowAxis(userSelections.showAxes);
 
     this.setState({ view3d });
   }
@@ -346,7 +339,7 @@ export default class App extends React.Component<AppProps, AppState> {
         cachingInProgress: false,
         userSelections: {
           ...this.state.userSelections,
-          [MODE]: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+          mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
         },
       });
       this.initializeNewImage(aimg, newChannelSettings);
@@ -489,7 +482,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const imageMask = alphaSliderToImageValue(alphaLevel);
     view3d.updateMaskAlpha(aimg, imageMask);
 
-    view3d.setMaxProjectMode(aimg, userSelections[MAX_PROJECT]);
+    view3d.setMaxProjectMode(aimg, userSelections.maxProject);
 
     const imageBrightness = brightnessSliderToImageValue(
       userSelections.brightnessSliderLevel,
@@ -746,6 +739,40 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
+  private channelStateChangeHandlers: ChannelStateChangeHandlers = {
+    isovalue: (isovalue, index, view3d, image) => view3d.setVolumeChannelOptions(image, index, { isovalue }),
+    colorizeEnabled: (enabled, index, view3d, image) => {
+      if (enabled) {
+        // TODO get the labelColors from the tf editor component
+        const lut = image.getHistogram(index).lutGenerator_labelColors();
+        image.setColorPalette(index, lut.lut);
+        image.setColorPaletteAlpha(index, this.state.userSelections.channelSettings[index].colorizeAlpha);
+      } else {
+        image.setColorPaletteAlpha(index, 0);
+      }
+      view3d.updateLuts(image);
+    },
+    colorizeAlpha: (alpha, index, view3d, image) => {
+      const { colorizeEnabled } = this.state.userSelections.channelSettings[index];
+      image.setColorPaletteAlpha(index, colorizeEnabled ? alpha : 0);
+      view3d.updateLuts(image);
+    },
+    opacity: (isosurfaceOpacity, index, view3d, image) =>
+      view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity }),
+    color: (color, index, view3d, image) => view3d.setVolumeChannelOptions(image, index, { color }),
+  };
+
+  private handleChangeChannelSetting<K extends ChannelStateKey>(key: K, newValue: ChannelState[K], index: number) {
+    const { view3d, image } = this.state;
+    if (!view3d || !image) {
+      return;
+    }
+    const handler = this.channelStateChangeHandlers[key];
+    if (handler) {
+      handler(newValue, index, view3d, image);
+    }
+  }
+
   changeOneChannelSetting<K extends ChannelStateKey>(
     channelName: string,
     channelIndex: number,
@@ -758,7 +785,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
 
     this.setUserSelectionsInState({ channelSettings: newChannels });
-    this.handleChangeToImage(keyToChange, newValue, channelIndex);
+    this.handleChangeChannelSetting(keyToChange, newValue, channelIndex);
   }
 
   changeChannelSettings<K extends ChannelStateKey>(indices: number[], keyToChange: K, newValue: ChannelState[K]) {
@@ -781,14 +808,7 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  private userSelectionChangeHandler: {
-    [K in UserSelectionKey]: (value: UserSelectionState[K], view3d: View3d, image: Volume) => void;
-  } = {
-    imageType: () => {},
-    controlPanelClosed: () => {},
-    autorotate: () => {},
-    channelSettings: () => {},
-
+  private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
     mode: (mode, view3d) => view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(mode)),
     maxProject: (value, view3d, image) => {
       view3d.setMaxProjectMode(image, value);
@@ -831,60 +851,15 @@ export default class App extends React.Component<AppProps, AppState> {
     if (!view3d || !image) {
       return;
     }
-    this.userSelectionChangeHandler[key](newValue, view3d, image);
+    const handler = this.userSelectionChangeHandlers[key];
+    if (handler) {
+      handler(newValue, view3d, image);
+    }
   }
 
   changeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) {
     this.setUserSelectionsInState({ [key]: newValue });
     this.handleChangeUserSelection(key, newValue);
-  }
-
-  // TODO make nicer and more strictly type-able
-  handleChangeToImage(keyToChange: ChannelStateKey, newValue: any, index: number) {
-    const { image, userSelections, view3d } = this.state;
-    if (!image || !view3d) {
-      return;
-    }
-    switch (keyToChange) {
-      case ISO_VALUE:
-        view3d.setVolumeChannelOptions(image, index, {
-          isovalue: newValue,
-        });
-        break;
-      case OPACITY:
-        view3d.setVolumeChannelOptions(image, index, {
-          isosurfaceOpacity: newValue,
-        });
-        break;
-      case COLOR:
-        {
-          let newColor: ColorArray = newValue.r ? colorObjectToArray(newValue) : newValue;
-          view3d.setVolumeChannelOptions(image, index, {
-            color: newColor,
-          });
-          view3d.updateMaterial(image);
-        }
-        break;
-      case COLORIZE_ENABLED:
-        if (newValue) {
-          // TODO get the labelColors from the tf editor component
-          const lut = image.getHistogram(index).lutGenerator_labelColors();
-          image.setColorPalette(index, lut.lut);
-          image.setColorPaletteAlpha(index, userSelections.channelSettings[index][COLORIZE_ALPHA]);
-        } else {
-          image.setColorPaletteAlpha(index, 0);
-        }
-        view3d.updateLuts(image);
-        break;
-      case COLORIZE_ALPHA:
-        if (userSelections.channelSettings[index].colorizeEnabled) {
-          image.setColorPaletteAlpha(index, newValue);
-        } else {
-          image.setColorPaletteAlpha(index, 0);
-        }
-        view3d.updateLuts(image);
-        break;
-    }
   }
 
   saveIsosurface(channelIndex: number, type: "GLTF" | "STL") {
@@ -1017,7 +992,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { userSelections } = this.state;
     presets.forEach((color, index) => {
       if (index < userSelections.channelSettings.length) {
-        this.handleChangeToImage(COLOR, color, index);
+        this.handleChangeChannelSetting("color", color, index);
       }
     });
     const newChannels = userSelections.channelSettings.map((channel, channelindex) => {
@@ -1169,7 +1144,7 @@ export default class App extends React.Component<AppProps, AppState> {
             brightnessSliderLevel={userSelections.brightnessSliderLevel}
             densitySliderLevel={userSelections.densitySliderLevel}
             gammaSliderLevel={userSelections.levelsSlider}
-            collapsed={this.state.userSelections.controlPanelClosed}
+            collapsed={userSelections.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
             saveIsosurface={this.saveIsosurface}
@@ -1197,7 +1172,7 @@ export default class App extends React.Component<AppProps, AppState> {
               hasParentImage={!!this.state.fovPath}
               hasCellId={this.state.hasCellId}
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
-              showAxes={userSelections[SHOW_AXES]}
+              showAxes={userSelections.showAxes}
               showBoundingBox={userSelections.showBoundingBox}
               renderSetting={userSelections.maxProject ? MAX_PROJECT : userSelections.pathTrace ? PATH_TRACE : "volume"}
               onViewModeChange={this.onViewModeChange}

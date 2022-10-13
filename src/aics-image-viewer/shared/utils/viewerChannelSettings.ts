@@ -1,3 +1,4 @@
+import { View3d, Volume } from "@aics/volume-viewer";
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 import { ColorArray } from "./colorRepresentations";
 
@@ -20,6 +21,9 @@ export interface ChannelState {
 }
 
 export type ChannelStateKey = keyof ChannelState;
+export type ChannelStateChangeHandlers = {
+  [K in ChannelStateKey]?: (value: ChannelState[K], index: number, view3d: View3d, image: Volume) => void;
+};
 
 /** Settings for a single channel, as passed in via props by App users */
 export interface ViewerChannelSetting {

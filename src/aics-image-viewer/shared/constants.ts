@@ -1,8 +1,7 @@
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
-export const 
-  // View modes
+export const // View modes
   YZ_MODE = "YZ",
   XZ_MODE = "XZ",
   XY_MODE = "XY",
@@ -11,22 +10,9 @@ export const
   SEGMENTED_CELL = "segmented",
   FULL_FIELD_IMAGE = "full field",
   // App State Keys,
-  ALPHA_MASK_SLIDER_LEVEL = "alphaMaskSliderLevel",
-  BRIGHTNESS_SLIDER_LEVEL = "brightnessSliderLevel",
-  DENSITY_SLIDER_LEVEL = "densitySliderLevel",
-  LEVELS_SLIDER = "levelsSlider",
-  MODE = "mode",
-  SHOW_AXES = "showAxes",
   MAX_PROJECT = "maxProject",
   VOLUMETRIC_RENDER = "volume",
   PATH_TRACE = "pathTrace",
-  COLORIZE_ALPHA = "colorizeAlpha",
-  COLORIZE_ENABLED = "colorizeEnabled",
-  // Volume viewer keys
-  ISO_VALUE = "isovalue",
-  OPACITY = "opacity",
-  COLOR = "color",
-  SAVE_ISO_SURFACE = "saveIsoSurface",
   // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
   BACKGROUND_COLOR: ColorArray = [0, 0, 0],

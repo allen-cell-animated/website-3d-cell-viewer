@@ -82,6 +82,9 @@ export interface UserSelectionState {
 }
 
 export type UserSelectionKey = keyof UserSelectionState;
+export type UserSelectionChangeHandlers = {
+  [K in UserSelectionKey]?: (value: UserSelectionState[K], view3d: View3d, image: Volume) => void;
+};
 
 export interface AppState {
   view3d: View3d | null;
