@@ -499,12 +499,12 @@ body{
       }
 
   .control-panel-col-container .control-panel-tab-col .btn-collapse svg{
-        transform:rotate(0deg);
+        transform:rotate(180deg);
         transition:transform 0.2s linear;
       }
 
   .control-panel-col-container .control-panel-tab-col .btn-collapse.btn-collapse-collapsed svg{
-        transform:rotate(180deg);
+        transform:rotate(0deg);
       }
 
   .control-panel-col-container .control-panel-tab-col .tab-divider{
@@ -990,28 +990,28 @@ body{
   font-style:normal;
   font-weight:400;
   src:url(f1356ede478f73d779e2.eot);
-  src:local("Merriweather Sans"), local("MerriweatherSans-Regular"), url(f1356ede478f73d779e2.eot?#iefix) format("embedded-opentype"), url(ac4159d003d0292bc887.woff2) format("woff2"), url(1ac616e6cb1f96beabb0.woff) format("woff"), url(5fbcc1e0b4e9ecce4c10.svg#MerriweatherSans) format("svg");
+  src:local("Merriweather Sans"), local("MerriweatherSans-Regular"), url(f1356ede478f73d779e2.eot?#iefix) format("embedded-opentype"), url(ac4159d003d0292bc887.woff2) format("woff2"), url(1ac616e6cb1f96beabb0.woff) format("woff"), url(2e98d9070ed1c492ca8f.svg#MerriweatherSans) format("svg");
 }
 @font-face{
   font-family:"Merriweather Sans";
   font-style:normal;
   font-weight:700;
   src:url(d1514734083898ba0277.eot);
-  src:local("Merriweather Sans Bold"), local("MerriweatherSans-Bold"), url(d1514734083898ba0277.eot?#iefix) format("embedded-opentype"), url(f5b9974a7a9d3dec14db.woff2) format("woff2"), url(08c59fccbe3960642066.woff) format("woff"), url(efcf3636c6ffb975d1a1.svg#MerriweatherSans) format("svg");
+  src:local("Merriweather Sans Bold"), local("MerriweatherSans-Bold"), url(d1514734083898ba0277.eot?#iefix) format("embedded-opentype"), url(f5b9974a7a9d3dec14db.woff2) format("woff2"), url(08c59fccbe3960642066.woff) format("woff"), url(4891196d5570fa054edf.svg#MerriweatherSans) format("svg");
 }
 @font-face{
   font-family:"Overpass";
   font-style:normal;
   font-weight:300;
   src:url(9740c99ac883363fb2c8.eot);
-  src:local("Overpass Light"), local("Overpass-Light"), url(9740c99ac883363fb2c8.eot?#iefix) format("embedded-opentype"), url(c21289c5b1e0db3094d8.woff2) format("woff2"), url(d8690888bf170af64c0f.woff) format("woff"), url(7fecbfc123c492d5e1fb.svg#Overpass) format("svg");
+  src:local("Overpass Light"), local("Overpass-Light"), url(9740c99ac883363fb2c8.eot?#iefix) format("embedded-opentype"), url(c21289c5b1e0db3094d8.woff2) format("woff2"), url(d8690888bf170af64c0f.woff) format("woff"), url(9c6956a41c6f12b14fc4.svg#Overpass) format("svg");
 }
 @font-face{
   font-family:"Overpass";
   font-style:normal;
   font-weight:600;
   src:url(8684f0322da31d213d65.eot);
-  src:local("Overpass SemiBold"), local("Overpass-SemiBold"), url(8684f0322da31d213d65.eot?#iefix) format("embedded-opentype"), url(552145ac846489eb0e31.woff2) format("woff2"), url(bd696b4af8d65c3e48fa.woff) format("woff"), url(a6155b1c44ec6bf458ca.svg#Overpass) format("svg");
+  src:local("Overpass SemiBold"), local("Overpass-SemiBold"), url(8684f0322da31d213d65.eot?#iefix) format("embedded-opentype"), url(552145ac846489eb0e31.woff2) format("woff2"), url(bd696b4af8d65c3e48fa.woff) format("woff"), url(a7a5f8aea4b9641b6b98.svg#Overpass) format("svg");
 }
 @font-face{
   font-family:"Material Icons";
