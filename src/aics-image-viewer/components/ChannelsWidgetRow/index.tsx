@@ -12,7 +12,7 @@ import ColorPicker from "../ColorPicker";
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
-import { Styles } from "../../shared/types";
+import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -40,7 +40,7 @@ interface ChannelsWidgetRowProps {
     keyToChange: K,
     newValue: ChannelState[K]
   ) => void;
-  saveIsosurface: (channelIndex: number, type: "GLTF" | "STL") => void;
+  saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
@@ -174,7 +174,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     );
   }
 
-  createSaveIsosurfaceHandler = (format: "GLTF" | "STL") => () => {
+  createSaveIsosurfaceHandler = (format: IsosurfaceFormat) => () => {
     const { index, saveIsosurface } = this.props;
     saveIsosurface(index, format);
   };

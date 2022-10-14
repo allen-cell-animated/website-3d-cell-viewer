@@ -15,7 +15,7 @@ const { Panel } = Collapse;
 
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
-import { Styles } from "../../shared/types";
+import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 export interface ChannelsWidgetProps {
   imageName: string | undefined;
@@ -25,7 +25,7 @@ export interface ChannelsWidgetProps {
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
-  saveIsosurface: (channelIndex: number, type: "GLTF" | "STL") => void;
+  saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   changeChannelSettings: <K extends ChannelStateKey>(
     indices: number[],
     keyToChange: K,

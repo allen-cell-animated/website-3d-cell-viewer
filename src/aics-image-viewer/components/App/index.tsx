@@ -13,7 +13,7 @@ import {
   ChannelStateKey,
   ChannelStateChangeHandlers,
 } from "../../shared/utils/viewerChannelSettings";
-import { AxisName } from "../../shared/types";
+import { AxisName, IsosurfaceFormat } from "../../shared/types";
 import enums from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
@@ -862,7 +862,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.handleChangeUserSelection(key, newValue);
   }
 
-  saveIsosurface(channelIndex: number, type: "GLTF" | "STL") {
+  saveIsosurface(channelIndex: number, type: IsosurfaceFormat) {
     const { view3d, image } = this.state;
     if (!view3d || !image) {
       return;
