@@ -40,7 +40,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx)$/,
+        test: /\.(js|jsx|ts|tsx|svg)$/,
         include: [path.resolve(__dirname, "src")],
         exclude: [/node_modules/, /dist/],
         use: "babel-loader",
@@ -79,17 +79,6 @@ module.exports = {
       {
         test: /\.(woff|woff2|tff|eot|glyph)$/,
         type: "asset/resource",
-      },
-      {
-        test: /\.svg$/,
-        use: [
-          {
-            loader: "@svgr/webpack",
-            options: {
-              icon: true,
-            },
-          },
-        ],
       },
     ],
   },
