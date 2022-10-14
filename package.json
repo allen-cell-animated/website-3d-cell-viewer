@@ -6,6 +6,7 @@
   "main": "es/index.js",
   "module": "es/index.js",
   "browser": "es/index.js",
+  "types": "type-declarations",
   "files": [
     "es",
     "type-declarations",
