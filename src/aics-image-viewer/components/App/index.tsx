@@ -14,22 +14,17 @@ import {
   ChannelStateChangeHandlers,
 } from "../../shared/utils/viewerChannelSettings";
 import { AxisName, IsosurfaceFormat } from "../../shared/types";
-import { ViewMode } from "../../shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
   ALPHA_MASK_SLIDER_2D_DEFAULT,
-  FULL_FIELD_IMAGE,
-  SEGMENTED_CELL,
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   DENSITY_SLIDER_LEVEL_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
-  MAX_PROJECT,
-  PATH_TRACE,
-  VOLUMETRIC_RENDER,
-  BACKGROUND_COLOR,
-  BOUNDING_BOX_COLOR,
+  BACKGROUND_COLOR_DEFAULT,
+  BOUNDING_BOX_COLOR_DEFAULT,
   LUT_MIN_PERCENTILE,
   LUT_MAX_PERCENTILE,
   SINGLE_GROUP_CHANNEL_KEY,
@@ -104,8 +99,8 @@ const defaultProps: AppProps = {
     autorotate: false,
     view: "3D", // "XY", "XZ", "YZ"
     mode: "default", // "pathtrace", "maxprojection"
-    backgroundColor: BACKGROUND_COLOR,
-    boundingBoxColor: BOUNDING_BOX_COLOR,
+    backgroundColor: BACKGROUND_COLOR_DEFAULT,
+    boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
     maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
@@ -175,14 +170,14 @@ export default class App extends React.Component<AppProps, AppState> {
       hasCellId: !!props.cellId,
       // state set by the UI:
       userSelections: {
-        imageType: SEGMENTED_CELL,
+        imageType: ImageType.segmentedCell,
         controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
         mode: viewmode,
         autorotate: props.viewerConfig.autorotate,
         showAxes: props.viewerConfig.showAxes,
         showBoundingBox: props.viewerConfig.showBoundingBox,
-        boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR,
-        backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR,
+        boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
+        backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
         maxProject: maxproject,
         pathTrace: pathtrace,
         alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -443,7 +438,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const { userSelections } = this.state;
     const { viewerConfig } = this.props;
     let alphaLevel =
-      userSelections.imageType === SEGMENTED_CELL && userSelections.mode === ViewMode.threeD
+      userSelections.imageType === ImageType.segmentedCell && userSelections.mode === ViewMode.threeD
         ? ALPHA_MASK_SLIDER_3D_DEFAULT
         : ALPHA_MASK_SLIDER_2D_DEFAULT;
     // if maskAlpha is defined in viewerConfig then it will override the above
@@ -910,12 +905,12 @@ export default class App extends React.Component<AppProps, AppState> {
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections.pathTrace) {
-        this.onChangeRenderingAlgorithm(VOLUMETRIC_RENDER);
+        this.onChangeRenderingAlgorithm(RenderMode.volumetric);
       }
     } else if (
       userSelections.mode !== ViewMode.threeD &&
       newMode === ViewMode.threeD &&
-      this.state.userSelections.imageType === SEGMENTED_CELL
+      this.state.userSelections.imageType === ImageType.segmentedCell
     ) {
       // switching from 2D to 3D
       newSelectionState = {
@@ -957,26 +952,24 @@ export default class App extends React.Component<AppProps, AppState> {
     };
   }
 
-  // TODO rendering algorithm should become an enum
-  onChangeRenderingAlgorithm(newAlgorithm: string) {
+  onChangeRenderingAlgorithm(newAlgorithm: RenderMode) {
     const { userSelections } = this.state;
     // already set
     if (userSelections[newAlgorithm]) {
       return;
     }
     this.setUserSelectionsInState({
-      pathTrace: newAlgorithm === PATH_TRACE,
-      maxProject: newAlgorithm === MAX_PROJECT,
-      autorotate: newAlgorithm === PATH_TRACE ? false : userSelections.autorotate,
+      pathTrace: newAlgorithm === RenderMode.pathTrace,
+      maxProject: newAlgorithm === RenderMode.maxProject,
+      autorotate: newAlgorithm === RenderMode.pathTrace ? false : userSelections.autorotate,
     });
-    this.handleChangeUserSelection("pathTrace", newAlgorithm === PATH_TRACE);
-    this.handleChangeUserSelection("maxProject", newAlgorithm === MAX_PROJECT);
+    this.handleChangeUserSelection("pathTrace", newAlgorithm === RenderMode.pathTrace);
+    this.handleChangeUserSelection("maxProject", newAlgorithm === RenderMode.maxProject);
   }
 
-  // TODO FOV should become an enum too
-  onSwitchFovCell(value: string) {
+  onSwitchFovCell(value: ImageType) {
     const { cellPath, fovPath } = this.props;
-    const path = value === FULL_FIELD_IMAGE ? fovPath : cellPath;
+    const path = value === ImageType.fullField ? fovPath : cellPath;
     this.openImage(path, false, "image", false);
     this.setState({
       sendingQueryRequest: true,
@@ -1024,11 +1017,10 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  // TODO use FOV enum?
-  beginRequestImage(type?: string) {
+  beginRequestImage(type?: ImageType) {
     const { fovPath, cellPath, cellId, prevImgPath, nextImgPath, preLoad } = this.props;
     let imageType = type || this.state.userSelections.imageType;
-    let path = imageType === FULL_FIELD_IMAGE ? fovPath : cellPath;
+    let path = imageType === ImageType.fullField ? fovPath : cellPath;
     this.setState({
       cellId,
       path,
@@ -1100,8 +1092,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   render() {
-    const { userSelections } = this.state;
     const { renderConfig, cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
+    const { userSelections } = this.state;
+    const { maxProject, pathTrace } = userSelections;
     return (
       <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
         <Sider
@@ -1163,7 +1156,9 @@ export default class App extends React.Component<AppProps, AppState> {
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
               showAxes={userSelections.showAxes}
               showBoundingBox={userSelections.showBoundingBox}
-              renderSetting={userSelections.maxProject ? MAX_PROJECT : userSelections.pathTrace ? PATH_TRACE : "volume"}
+              renderSetting={
+                maxProject ? RenderMode.maxProject : pathTrace ? RenderMode.pathTrace : RenderMode.volumetric
+              }
               onViewModeChange={this.onViewModeChange}
               onResetCamera={this.onResetCamera}
               onAutorotateChange={this.onAutorotateChange}

@@ -5,13 +5,12 @@ import "./styles.css";
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 
-import { ViewMode } from "../../shared/enums";
-import { FULL_FIELD_IMAGE, MAX_PROJECT, PATH_TRACE, SEGMENTED_CELL, VOLUMETRIC_RENDER } from "../../shared/constants";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
 interface ToolbarProps {
-  imageType: string;
-  renderSetting: string;
+  imageType: ImageType;
+  renderSetting: RenderMode;
   cellDownloadHref: string;
   fovDownloadHref: string;
   mode: ViewMode;
@@ -27,8 +26,8 @@ interface ToolbarProps {
   onResetCamera: () => void;
   onAutorotateChange: () => void;
   downloadScreenshot: () => void;
-  onSwitchFovCell: (value: string) => void;
-  onChangeRenderingAlgorithm: (newAlgorithm: string) => void;
+  onSwitchFovCell: (value: ImageType) => void;
+  onChangeRenderingAlgorithm: (newAlgorithm: RenderMode) => void;
   changeAxisShowing: (showing: boolean) => void;
   changeBoundingBoxShowing: (showing: boolean) => void;
 
@@ -89,8 +88,8 @@ export default function Toolbar(props: ToolbarProps) {
         {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
           <span className="viewer-toolbar-group">
             <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
-              <Radio.Button value={SEGMENTED_CELL}>Single cell</Radio.Button>
-              <Radio.Button value={FULL_FIELD_IMAGE}>Full field</Radio.Button>
+              <Radio.Button value={ImageType.segmentedCell}>Single cell</Radio.Button>
+              <Radio.Button value={ImageType.fullField}>Full field</Radio.Button>
             </Radio.Group>
           </span>
         )}
@@ -101,15 +100,15 @@ export default function Toolbar(props: ToolbarProps) {
             value={props.renderSetting}
             onChange={props.onChangeRenderingAlgorithm}
           >
-            <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
+            <Select.Option value={RenderMode.volumetric} key={RenderMode.volumetric}>
               Volumetric
             </Select.Option>
             {props.canPathTrace && (
-              <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={twoDMode}>
+              <Select.Option value={RenderMode.pathTrace} key={RenderMode.pathTrace} disabled={twoDMode}>
                 Path trace
               </Select.Option>
             )}
-            <Select.Option value={MAX_PROJECT} key={MAX_PROJECT}>
+            <Select.Option value={RenderMode.maxProject} key={RenderMode.maxProject}>
               Max project
             </Select.Option>
           </Select>

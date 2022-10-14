@@ -1,17 +1,10 @@
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
-export const // App state values
-  SEGMENTED_CELL = "segmented",
-  FULL_FIELD_IMAGE = "full field",
-  // App State Keys,
-  MAX_PROJECT = "maxProject",
-  VOLUMETRIC_RENDER = "volume",
-  PATH_TRACE = "pathTrace",
-  // Control panel will automatically close if viewport is less than this width
+export const // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
-  BACKGROUND_COLOR: ColorArray = [0, 0, 0],
-  BOUNDING_BOX_COLOR: ColorArray = [255, 255, 255],
+  BACKGROUND_COLOR_DEFAULT: ColorArray = [0, 0, 0],
+  BOUNDING_BOX_COLOR_DEFAULT: ColorArray = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.

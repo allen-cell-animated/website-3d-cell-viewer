@@ -6,7 +6,12 @@ export const enum ViewMode {
 }
 
 export const enum RenderMode {
+  volumetric,
   maxProject,
-  volume,
   pathTrace,
+}
+
+export const enum ImageType {
+  segmentedCell,
+  fullField,
 }
