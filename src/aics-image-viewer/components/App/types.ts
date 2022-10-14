@@ -1,4 +1,5 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
+import { ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -63,7 +64,7 @@ export interface AppProps {
 export interface UserSelectionState {
   imageType: string; // SEGMENTED_CELL | FULL_FIELD_IMAGE,
   controlPanelClosed: boolean;
-  mode: symbol;
+  mode: ViewMode;
   autorotate: boolean;
   maxProject: boolean;
   pathTrace: boolean;

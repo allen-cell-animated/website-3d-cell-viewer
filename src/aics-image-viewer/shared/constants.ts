@@ -1,12 +1,7 @@
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
-export const // View modes
-  YZ_MODE = "YZ",
-  XZ_MODE = "XZ",
-  XY_MODE = "XY",
-  THREE_D_MODE = "3D",
-  // App state values
+export const // App state values
   SEGMENTED_CELL = "segmented",
   FULL_FIELD_IMAGE = "full field",
   // App State Keys,

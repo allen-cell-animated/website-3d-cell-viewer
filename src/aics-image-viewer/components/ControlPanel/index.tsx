@@ -109,7 +109,6 @@ export default function ControlPanel(props: ControlPanelProps) {
               {tab === ControlTab.Advanced && (
                 <>
                   <GlobalVolumeControls
-                    mode={props.mode}
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
                     changeUserSelection={props.changeUserSelection}

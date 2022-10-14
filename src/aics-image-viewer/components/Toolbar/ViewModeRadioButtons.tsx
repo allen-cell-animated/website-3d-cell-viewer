@@ -1,22 +1,22 @@
 import React from "react";
 import { Radio } from "antd";
 
-import viewMode from "../../shared/enums/viewMode";
-const viewModeMapping = viewMode.mainMapping;
+import { ViewMode } from "../../shared/enums";
+// Hack to allow iterating over const enum
+const viewModes = [ViewMode.threeD, ViewMode.xy, ViewMode.xz, ViewMode.yz];
 
-export default function ViewModeRadioButtons(props: { mode: symbol; onViewModeChange(newMode: symbol): void }) {
+export default function ViewModeRadioButtons(props: { mode: ViewMode; onViewModeChange: (newMode: ViewMode) => void }) {
   const onChangeButton = ({ target }) => {
-    let mode = viewMode.STRING_TO_SYMBOL[target.value];
-    if (props.mode !== mode) {
-      props.onViewModeChange(mode);
+    if (props.mode !== target.value) {
+      props.onViewModeChange(target.value);
     }
   };
 
   return (
     <Radio.Group onChange={onChangeButton} value={props.mode.toString()}>
-      {Object.values(viewModeMapping).map((mode, index) => (
+      {viewModes.map((mode, index) => (
         <Radio.Button key={index} value={mode.toString()}>
-          {viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(mode)}
+          {mode}
         </Radio.Button>
       ))}
     </Radio.Group>

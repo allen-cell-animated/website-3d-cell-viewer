@@ -5,15 +5,8 @@ import "./styles.css";
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 
-import viewMode from "../../shared/enums/viewMode";
-import {
-  FULL_FIELD_IMAGE,
-  MAX_PROJECT,
-  PATH_TRACE,
-  SEGMENTED_CELL,
-  THREE_D_MODE,
-  VOLUMETRIC_RENDER,
-} from "../../shared/constants";
+import { ViewMode } from "../../shared/enums";
+import { FULL_FIELD_IMAGE, MAX_PROJECT, PATH_TRACE, SEGMENTED_CELL, VOLUMETRIC_RENDER } from "../../shared/constants";
 import ViewerIcon from "../shared/ViewerIcon";
 
 interface ToolbarProps {
@@ -21,7 +14,7 @@ interface ToolbarProps {
   renderSetting: string;
   cellDownloadHref: string;
   fovDownloadHref: string;
-  mode: symbol;
+  mode: ViewMode;
   hasCellId: boolean;
   hasParentImage: boolean;
   autorotate: boolean;
@@ -30,7 +23,7 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
 
-  onViewModeChange: (mode: symbol) => void;
+  onViewModeChange: (mode: ViewMode) => void;
   onResetCamera: () => void;
   onAutorotateChange: () => void;
   downloadScreenshot: () => void;
@@ -52,7 +45,7 @@ interface ToolbarProps {
 export default function Toolbar(props: ToolbarProps) {
   const { renderConfig, showAxes, showBoundingBox } = props;
 
-  const twoDMode = viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(props.mode) !== THREE_D_MODE;
+  const twoDMode = props.mode !== ViewMode.threeD;
 
   const renderGroup1 =
     renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
@@ -62,8 +55,7 @@ export default function Toolbar(props: ToolbarProps) {
   const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
   // TODO remove ant-btn-icon-only hack when upgrading antd
-  const classForToggleBtn = (active: boolean) =>
-    active ? "btn-borderless ant-btn-icon-only btn-active" : "ant-btn-icon-only btn-borderless";
+  const classForToggleBtn = (active: boolean) => "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
   return (
     <div className="viewer-toolbar">
@@ -113,7 +105,7 @@ export default function Toolbar(props: ToolbarProps) {
               Volumetric
             </Select.Option>
             {props.canPathTrace && (
-              <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={props.mode !== viewMode.mainMapping.threeD}>
+              <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={twoDMode}>
                 Path trace
               </Select.Option>
             )}

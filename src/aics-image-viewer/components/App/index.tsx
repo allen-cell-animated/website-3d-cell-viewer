@@ -14,7 +14,7 @@ import {
   ChannelStateChangeHandlers,
 } from "../../shared/utils/viewerChannelSettings";
 import { AxisName, IsosurfaceFormat } from "../../shared/types";
-import enums from "../../shared/enums";
+import { ViewMode } from "../../shared/enums";
 import {
   CELL_SEGMENTATION_CHANNEL_NAME,
   PRESET_COLORS_0,
@@ -57,7 +57,6 @@ import {
 
 import "./styles.css";
 
-const ViewMode = enums.viewMode.mainMapping;
 const { Sider, Content } = Layout;
 
 const INIT_COLORS = PRESET_COLORS_0;
@@ -497,7 +496,7 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
 
     // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(userSelections.mode));
+    view3d.setCameraMode(userSelections.mode);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
     // tell view that things have changed for this image
@@ -809,7 +808,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
-    mode: (mode, view3d) => view3d.setCameraMode(enums.viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(mode)),
+    mode: (mode, view3d) => view3d.setCameraMode(mode),
     maxProject: (value, view3d, image) => {
       view3d.setMaxProjectMode(image, value);
       view3d.updateActiveChannels(image);
@@ -888,7 +887,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
   }
 
-  onViewModeChange(newMode: symbol) {
+  onViewModeChange(newMode: ViewMode) {
     const { userSelections } = this.state;
     let newSelectionState: Partial<UserSelectionState> = {
       mode: newMode,
@@ -1127,7 +1126,6 @@ export default class App extends React.Component<AppProps, AppState> {
             maxProjectOn={userSelections.maxProject}
             pathTraceOn={userSelections.pathTrace}
             channelSettings={userSelections.channelSettings}
-            mode={userSelections.mode}
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
             boundingBoxColor={userSelections.boundingBoxColor}

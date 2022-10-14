@@ -8,7 +8,6 @@ import { AxisName, Styles } from "../shared/types";
 const Panel = Collapse.Panel;
 
 export interface GlobalVolumeControlsProps {
-  mode: symbol;
   imageName: string | undefined;
   pixelSize: [number, number, number];
   maxProjectOn: boolean;
