@@ -40,19 +40,13 @@ module.exports = {
   module: {
     rules: [
       {
+        loader: "babel-loader",
+        exclude: /node_modules/,
         test: /\.(js|jsx|ts|tsx|svg)$/,
-        include: [path.resolve(__dirname, "src")],
-        exclude: [/node_modules/, /dist/],
-        use: "babel-loader",
       },
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
-      },
-      {
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        test: /\.(js|jsx|ts|tsx)$/,
       },
       {
         test: /\.less$/,
