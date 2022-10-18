@@ -1,17 +1,13 @@
-var _defs;
-
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 import * as React from "react";
 
-var SvgMerriweatherSansV9Latin700 = function SvgMerriweatherSansV9Latin700(props) {
+var SvgComponent = function SvgComponent(props) {
   return /*#__PURE__*/React.createElement("svg", _extends({
     xmlns: "http://www.w3.org/2000/svg",
-    width: "1em",
-    height: "1em",
     role: "img"
-  }, props), _defs || (_defs = /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("font", {
-    id: "merriweather-sans-v9-latin-700_svg__MerriweatherSans",
+  }, props), /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("font", {
+    id: "MerriweatherSans",
     horizAdvX: 1305
   }, /*#__PURE__*/React.createElement("fontFace", {
     fontFamily: "Merriweather Sans",
@@ -1020,7 +1016,7 @@ var SvgMerriweatherSansV9Latin700 = function SvgMerriweatherSansV9Latin700(props
     glyphName: "guilsinglright",
     horizAdvX: 1214,
     d: "M969 735V492L313 76l-75 214 431 325-431 326 75 216 656-422Z"
-  })))));
+  }))));
 };
 
-export default SvgMerriweatherSansV9Latin700;
+export default SvgComponent;

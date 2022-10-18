@@ -1,17 +1,13 @@
-var _defs;
-
 function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
 import * as React from "react";
 
-var SvgOverpassV2Latin300 = function SvgOverpassV2Latin300(props) {
+var SvgComponent = function SvgComponent(props) {
   return /*#__PURE__*/React.createElement("svg", _extends({
     xmlns: "http://www.w3.org/2000/svg",
-    width: "1em",
-    height: "1em",
     role: "img"
-  }, props), _defs || (_defs = /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("font", {
-    id: "overpass-v2-latin-300_svg__Overpass",
+  }, props), /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("font", {
+    id: "Overpass",
     horizAdvX: 559
   }, /*#__PURE__*/React.createElement("fontFace", {
     fontFamily: "Overpass Light",
@@ -1025,7 +1021,7 @@ var SvgOverpassV2Latin300 = function SvgOverpassV2Latin300(props) {
     glyphName: "guilsinglright",
     horizAdvX: 305,
     d: "m30 0 152 256L30 511h78l152-255L108 0H30Z"
-  })))));
+  }))));
 };
 
-export default SvgOverpassV2Latin300;
+export default SvgComponent;
