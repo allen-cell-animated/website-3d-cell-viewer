@@ -40,19 +40,13 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx|ts|tsx)$/,
-        include: [path.resolve(__dirname, "src")],
-        exclude: [/node_modules/, /dist/],
-        use: "babel-loader",
+        loader: "babel-loader",
+        exclude: /node_modules/,
+        test: /\.(js|jsx|ts|tsx|svg)$/,
       },
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
-      },
-      {
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        test: /\.(js|jsx|ts|tsx)$/,
       },
       {
         test: /\.less$/,
@@ -79,17 +73,6 @@ module.exports = {
       {
         test: /\.(woff|woff2|tff|eot|glyph)$/,
         type: "asset/resource",
-      },
-      {
-        test: /\.svg$/,
-        use: [
-          {
-            loader: "@svgr/webpack",
-            options: {
-              icon: true,
-            },
-          },
-        ],
       },
     ],
   },

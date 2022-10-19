@@ -12,8 +12,6 @@ export interface AppProps {
   // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
   viewerChannelSettings?: ViewerChannelSettings;
 
-  maskChannelName: string;
-
   appHeight: string;
   cellId: string;
   cellPath: string;

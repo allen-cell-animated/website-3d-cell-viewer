@@ -56,7 +56,7 @@ export interface ViewerChannelGroup {
 }
 
 export interface ViewerChannelSettings {
-  maskChannelName: string;
+  maskChannelName?: string;
   groups: ViewerChannelGroup[];
 }
 

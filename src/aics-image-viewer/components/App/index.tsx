@@ -16,7 +16,6 @@ import {
 import { AxisName, IsosurfaceFormat } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
-  CELL_SEGMENTATION_CHANNEL_NAME,
   PRESET_COLORS_0,
   ALPHA_MASK_SLIDER_3D_DEFAULT,
   ALPHA_MASK_SLIDER_2D_DEFAULT,
@@ -71,8 +70,6 @@ const defaultProps: AppProps = {
   rawData: undefined,
   // rawDims is the volume dims that normally come from a json file
   rawDims: undefined,
-
-  maskChannelName: "",
 
   appHeight: "100vh",
   cellPath: "",
@@ -598,7 +595,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
     if (view3d) {
-      if (aimg.channelNames()[channelIndex] === CELL_SEGMENTATION_CHANNEL_NAME) {
+      if (aimg.channelNames()[channelIndex] === this.props.viewerChannelSettings?.maskChannelName) {
         view3d.setVolumeChannelAsMask(aimg, channelIndex);
       }
     }

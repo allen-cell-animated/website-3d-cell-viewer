@@ -17,8 +17,7 @@ export const // Control panel will automatically close if viewport is less than 
   DENSITY_SLIDER_LEVEL_DEFAULT = [50],
   LEVELS_SLIDER_DEFAULT: ColorArray = [35.0, 140.0, 255.0],
   OTHER_CHANNEL_KEY = "Other",
-  SINGLE_GROUP_CHANNEL_KEY = "Channels",
-  CELL_SEGMENTATION_CHANNEL_NAME = "SEG_Memb";
+  SINGLE_GROUP_CHANNEL_KEY = "Channels";
 
 export const PRESET_COLORS_1: ColorArray[] = [
   [190, 68, 171],
