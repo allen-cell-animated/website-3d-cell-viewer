@@ -72,10 +72,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, "isosurfaceEnabled", target.checked);
   }
 
-  createChannelSettingHandler = (settingKey: ChannelStateKey) => (newValue: any) => {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, settingKey, newValue);
-  };
+  createChannelSettingHandler =
+    <K extends ChannelStateKey>(settingKey: K) =>
+    (newValue: ChannelState[K]) => {
+      const { channelName, index, changeOneChannelSetting } = this.props;
+      changeOneChannelSetting(channelName, index, settingKey, newValue);
+    };
 
   onIsovalueChange = this.createChannelSettingHandler("isovalue");
   onOpacityChangeUnwrapped = this.createChannelSettingHandler("opacity");
