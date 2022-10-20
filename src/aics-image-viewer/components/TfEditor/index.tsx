@@ -90,23 +90,23 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
     this.createElements = this.createElements.bind(this);
     this.ready = this.ready.bind(this);
-    this._initializeElements = this._initializeElements.bind(this);
-    this._updateScales = this._updateScales.bind(this);
-    this._drawChart = this._drawChart.bind(this);
-    this._redraw = this._redraw.bind(this);
-    this._capturedMousemove = this._capturedMousemove.bind(this);
-    this._mousemove = this._mousemove.bind(this);
-    this._mouseup = this._mouseup.bind(this);
-    this._drawCanvas = this._drawCanvas.bind(this);
-    this._autoXF = this._autoXF.bind(this);
-    this._resetXF = this._resetXF.bind(this);
-    this._export = this._export.bind(this);
-    this._auto2XF = this._auto2XF.bind(this);
-    this._auto98XF = this._auto98XF.bind(this);
-    this._bestFitXF = this._bestFitXF.bind(this);
-    this._handleColorizeCheckbox = this._handleColorizeCheckbox.bind(this);
-    this._handleColorizeAlpha = this._handleColorizeAlpha.bind(this);
-    this._colorPick = this._colorPick.bind(this);
+    this.initializeElements = this.initializeElements.bind(this);
+    this.updateScales = this.updateScales.bind(this);
+    this.drawChart = this.drawChart.bind(this);
+    this.redraw = this.redraw.bind(this);
+    this.capturedMousemove = this.capturedMousemove.bind(this);
+    this.mousemove = this.mousemove.bind(this);
+    this.mouseup = this.mouseup.bind(this);
+    this.drawCanvas = this.drawCanvas.bind(this);
+    this.autoXF = this.autoXF.bind(this);
+    this.resetXF = this.resetXF.bind(this);
+    this.export = this.export.bind(this);
+    this.auto2XF = this.auto2XF.bind(this);
+    this.auto98XF = this.auto98XF.bind(this);
+    this.bestFitXF = this.bestFitXF.bind(this);
+    this.handleColorizeCheckbox = this.handleColorizeCheckbox.bind(this);
+    this.handleColorizeAlpha = this.handleColorizeAlpha.bind(this);
+    this.colorPick = this.colorPick.bind(this);
     this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
     this.handleChangeColor = this.handleChangeColor.bind(this);
 
@@ -144,15 +144,15 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   componentDidUpdate(prevProps: MyTfEditorProps) {
     const { volumeData } = this.props;
 
-    this._redraw();
+    this.redraw();
     if (!prevProps.volumeData && volumeData) {
-      this._redrawHistogram();
+      this.redrawHistogram();
     }
   }
 
   componentWillUnmount() {
-    document.removeEventListener("mousemove", this._capturedMousemove);
-    document.removeEventListener("mouseup", this._mouseup);
+    document.removeEventListener("mousemove", this.capturedMousemove);
+    document.removeEventListener("mouseup", this.mouseup);
   }
 
   createElements() {
@@ -199,7 +199,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.last_color = TFEDITOR_DEFAULT_COLOR;
   }
 
-  _initializeElements() {
+  private initializeElements() {
     let extent = [0, 255];
     if (this.fitToData && this.props.volumeData && this.props.volumeData.length > 0) {
       extent = d3.extent(this.props.volumeData) as Pair;
@@ -238,7 +238,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // Get the 2D canvas context where the TF will be drawn
-  _canvasContext() {
+  private canvasContext() {
     let canvas_element = this.canvas.current;
     if (canvas_element) {
       return canvas_element.getContext("2d");
@@ -247,11 +247,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // Perform the drawing
-  _drawChart() {
+  private drawChart() {
     const g = this.svg.append("g").attr("transform", `translate(${this.margin.left},${this.margin.top})`);
 
     // Draw initial histogram
-    this._redrawHistogram();
+    this.redrawHistogram();
 
     // Gradient definitions
     g.append("defs")
@@ -271,7 +271,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .attr("class", "line")
       .attr("fill", "url(#tfGradient-" + this.id + ")")
       .attr("stroke", "white")
-      .call(() => this._initDraw());
+      .call(() => this.initDraw());
 
     // Mouse interaction handler
     g.append("rect")
@@ -281,10 +281,10 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .attr("height", this.height + 20)
       .style("opacity", 0)
       .on("mousedown", () => {
-        this._mousedown();
+        this.mousedown();
 
-        document.addEventListener("mousemove", this._capturedMousemove, false);
-        document.addEventListener("mouseup", this._mouseup, false);
+        document.addEventListener("mousemove", this.capturedMousemove, false);
+        document.addEventListener("mouseup", this.mouseup, false);
       });
 
     // Draw axis
@@ -302,7 +302,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // update scales with new data input
-  _updateScales() {
+  private updateScales() {
     if (this.fitToData) {
       var dataExtent = d3.extent(this.props.volumeData);
       // First obtain the index of points to be maintain;
@@ -340,7 +340,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // update the axis with the new data input
-  _updateAxis() {
+  private updateAxis() {
     let svg = d3.select(this.svgElement.current).select("g");
     const xTicks = this.xScale.ticks(this.numberTicks);
     xTicks[xTicks.length - 1] = this.xScale.domain()[1];
@@ -349,7 +349,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // update the chart data
-  _redrawHistogram() {
+  private redrawHistogram() {
     d3.select(this.svgElement.current).select("g").selectAll(".bar").remove();
     if (this.props.volumeData && this.props.volumeData.length > 0) {
       var bins = this.bins(this.props.volumeData);
@@ -373,7 +373,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
   }
 
-  _makeCirclesForControlPoints() {
+  private makeCirclesForControlPoints() {
     const { controlPoints } = this.props;
     if (!controlPoints) {
       return;
@@ -394,16 +394,16 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .on("mousedown", (d) => {
         this.selected = this.dragged = d;
         this.last_color = d.color;
-        this._redraw();
+        this.redraw();
 
-        document.addEventListener("mousemove", this._capturedMousemove, false);
-        document.addEventListener("mouseup", this._mouseup, false);
+        document.addEventListener("mousemove", this.capturedMousemove, false);
+        document.addEventListener("mouseup", this.mouseup, false);
       })
       .on("contextmenu", (d, i) => {
         // react on right-clicking
         d3.event.preventDefault();
-        this._mouseup();
-        this._colorPick();
+        this.mouseup();
+        this.colorPick();
       })
       .transition()
       .duration(750)
@@ -419,7 +419,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     circle.exit().remove();
   }
 
-  _makeGradient() {
+  private makeGradient() {
     const { controlPoints } = this.props;
     if (!controlPoints) {
       return;
@@ -453,24 +453,24 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // create the chart content
-  _initDraw() {
+  private initDraw() {
     // Add circle to connect and interact with the control points
-    this._makeCirclesForControlPoints();
+    this.makeCirclesForControlPoints();
 
     // Create a linear gradient definition of the control points
-    this._makeGradient();
+    this.makeGradient();
 
     // Draw gradient in canvas too
-    this._drawCanvas();
+    this.drawCanvas();
   }
 
   // Update the chart content
-  _redraw() {
+  private redraw() {
     // Add circle to connect and interact with the control points
-    this._makeCirclesForControlPoints();
+    this.makeCirclesForControlPoints();
 
     // Create a linear gradient definition of the control points
-    this._makeGradient();
+    this.makeGradient();
 
     if (d3.event) {
       d3.event.preventDefault();
@@ -478,11 +478,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
 
     // Draw gradient in canvas and update image
-    this._drawCanvas();
-    this._updateImage();
+    this.drawCanvas();
+    this.updateImage();
   }
 
-  _updateImage() {
+  private updateImage() {
     const { controlPoints, index } = this.props;
     const opacityGradient = controlPointsToLut(controlPoints);
     // send update to image rendering
@@ -492,7 +492,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   /**
    * Draw the TF output in the canvas container.
    */
-  _drawCanvas() {
+  private drawCanvas() {
     const { controlPoints } = this.props;
     if (controlPoints && controlPoints.length > 0) {
       const extent = [controlPoints[0].x, controlPoints[controlPoints.length - 1].x];
@@ -504,7 +504,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         return;
       }
       this.canvasScale.domain([x0, x1]);
-      var ctx = this._canvasContext();
+      var ctx = this.canvasContext();
       if (!ctx) {
         return;
       }
@@ -532,11 +532,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   /////// User interaction related event callbacks ////////
 
-  _colorPick() {
+  private colorPick() {
     this.setState({ displayColorPicker: !this.state.displayColorPicker });
   }
 
-  _mousedown() {
+  private mousedown() {
     const pos = d3.mouse(this.svg.node()!);
     const point = {
       x: this.xScale.invert(Math.max(0, Math.min(pos[0] - this.margin.left, this.width))),
@@ -552,13 +552,13 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(newControlPoints);
   }
 
-  _capturedMousemove(event) {
+  private capturedMousemove(event) {
     event.preventDefault();
     event.stopPropagation();
-    d3.customEvent(event, this._mousemove, this);
+    d3.customEvent(event, this.mousemove, this);
   }
 
-  _mousemove(event) {
+  private mousemove(event) {
     if (!this.dragged) {
       return;
     }
@@ -589,16 +589,16 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(newControlPoints);
   }
 
-  _mouseup() {
-    document.removeEventListener("mousemove", this._capturedMousemove);
-    document.removeEventListener("mouseup", this._mouseup);
+  private mouseup() {
+    document.removeEventListener("mousemove", this.capturedMousemove);
+    document.removeEventListener("mouseup", this.mouseup);
     if (!this.dragged) {
       return;
     }
     this.dragged = null;
   }
 
-  _keydown() {
+  private keydown() {
     if (!this.selected) {
       return;
     }
@@ -615,7 +615,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
   }
 
-  _export() {
+  private export() {
     var jsonContent = JSON.stringify(this.props.controlPoints);
     var a = document.createElement("a");
     // TODO test that this function still works without these lines
@@ -646,43 +646,43 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(pts);
   }
 
-  _autoXF() {
+  private autoXF() {
     const { channelData } = this.props;
 
     const lutObj = channelData.histogram.lutGenerator_auto();
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  _auto2XF() {
+  private auto2XF() {
     const { channelData } = this.props;
 
     const lutObj = channelData.histogram.lutGenerator_auto2();
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  _auto98XF() {
+  private auto98XF() {
     const { channelData } = this.props;
 
     const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  _bestFitXF() {
+  private bestFitXF() {
     const { channelData } = this.props;
 
     const lutObj = channelData.histogram.lutGenerator_bestFit();
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  _handleColorizeCheckbox(e) {
+  private handleColorizeCheckbox(e) {
     this.props.updateColorizeMode(e.target.checked);
   }
 
-  _handleColorizeAlpha(values) {
+  private handleColorizeAlpha(values) {
     this.props.updateColorizeAlpha(Number(values[0]));
   }
 
-  _resetXF() {
+  private resetXF() {
     const { channelData } = this.props;
 
     const lutObj = channelData.histogram.lutGenerator_fullRange();
@@ -728,8 +728,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     if (!this.props.channelData) {
       throw new Error("Transfer Function Editor setData called with no channel data.");
     }
-    this._updateScales();
-    this._updateAxis();
+    this.updateScales();
+    this.updateAxis();
   }
 
   /////// Polymer lifecycle callbacks /////////////
@@ -740,8 +740,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.svg = d3.select(this.svgElement.current);
     this.width = +this.svg.attr("width") - this.margin.left - this.margin.right;
     this.height = +this.svg.attr("height") - this.margin.top - this.margin.bottom - 15;
-    this._initializeElements();
-    this._drawChart();
+    this.initializeElements();
+    this.drawChart();
   }
 
   handleCloseColorPicker() {
@@ -752,7 +752,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.last_color = color.hex;
     if (this.selected) {
       this.selected.color = this.last_color;
-      this._redraw();
+      this.redraw();
     }
   }
 
@@ -771,7 +771,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           ) : null}
         </div>
         <div className="aligned">
-          <Checkbox checked={colorizeEnabled} onChange={this._handleColorizeCheckbox} id={`colorize-${id}`}>
+          <Checkbox checked={colorizeEnabled} onChange={this.handleColorizeCheckbox} id={`colorize-${id}`}>
             Colorize
           </Checkbox>
           <div style={STYLES.control}>
@@ -782,24 +782,24 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
               connect={true}
               tooltips={true}
               behaviour="drag"
-              onUpdate={this._handleColorizeAlpha}
+              onUpdate={this.handleColorizeAlpha}
             />
           </div>
         </div>
         <div className="aligned">
-          <Button id={`reset-${id}`} className="ant-btn" onClick={this._resetXF}>
+          <Button id={`reset-${id}`} className="ant-btn" onClick={this.resetXF}>
             Reset
           </Button>
-          <Button id={`auto-${id}`} className="ant-btn" onClick={this._autoXF}>
+          <Button id={`auto-${id}`} className="ant-btn" onClick={this.autoXF}>
             Auto
           </Button>
-          <Button id={`bestfit-${id}`} className="ant-btn" onClick={this._bestFitXF}>
+          <Button id={`bestfit-${id}`} className="ant-btn" onClick={this.bestFitXF}>
             BestFit
           </Button>
-          <Button id={`auto2-${id}`} className="ant-btn" onClick={this._auto2XF}>
+          <Button id={`auto2-${id}`} className="ant-btn" onClick={this.auto2XF}>
             Auto_IJ
           </Button>
-          <Button id={`auto98-${id}`} className="ant-btn" onClick={this._auto98XF}>
+          <Button id={`auto98-${id}`} className="ant-btn" onClick={this.auto98XF}>
             Auto_98
           </Button>
         </div>
