@@ -803,7 +803,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
-    mode: (mode, view3d) => view3d.setCameraMode(mode),
+    mode: (mode, view3d, _image) => view3d.setCameraMode(mode),
     maxProject: (value, view3d, image) => {
       view3d.setMaxProjectMode(image, value);
       view3d.updateActiveChannels(image);
@@ -813,16 +813,16 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.updateActiveChannels(image);
     },
 
-    showAxes: (showing, view3d) => view3d.setShowAxis(showing),
+    showAxes: (showing, view3d, _image) => view3d.setShowAxis(showing),
     showBoundingBox: (showing, view3d, image) => view3d.setShowBoundingBox(image, showing),
     boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
-    backgroundColor: (color, view3d) => view3d.setBackgroundColor(colorArrayToFloats(color)),
+    backgroundColor: (color, view3d, _image) => view3d.setBackgroundColor(colorArrayToFloats(color)),
 
     alphaMaskSliderLevel: (value, view3d, image) => {
       view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
       view3d.updateActiveChannels(image);
     },
-    brightnessSliderLevel: (value, view3d) => {
+    brightnessSliderLevel: (value, view3d, _image) => {
       const brightness = brightnessSliderToImageValue(value, this.state.userSelections.pathTrace);
       view3d.updateExposure(brightness);
     },
