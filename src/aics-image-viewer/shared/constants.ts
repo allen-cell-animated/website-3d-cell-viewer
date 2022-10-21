@@ -1,35 +1,10 @@
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
-export const // View modes
-  YZ_MODE = "YZ",
-  XZ_MODE = "XZ",
-  XY_MODE = "XY",
-  THREE_D_MODE = "3D",
-  // App state values
-  SEGMENTED_CELL = "segmented",
-  FULL_FIELD_IMAGE = "full field",
-  // App State Keys,
-  ALPHA_MASK_SLIDER_LEVEL = "alphaMaskSliderLevel",
-  BRIGHTNESS_SLIDER_LEVEL = "brightnessSliderLevel",
-  DENSITY_SLIDER_LEVEL = "densitySliderLevel",
-  LEVELS_SLIDER = "levelsSlider",
-  MODE = "mode",
-  SHOW_AXES = "showAxes",
-  MAX_PROJECT = "maxProject",
-  VOLUMETRIC_RENDER = "volume",
-  PATH_TRACE = "pathTrace",
-  COLORIZE_ALPHA = "colorizeAlpha",
-  COLORIZE_ENABLED = "colorizeEnabled",
-  // Volume viewer keys
-  ISO_VALUE = "isovalue",
-  OPACITY = "opacity",
-  COLOR = "color",
-  SAVE_ISO_SURFACE = "saveIsoSurface",
-  // Control panel will automatically close if viewport is less than this width
+export const // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
-  BACKGROUND_COLOR: ColorArray = [0, 0, 0],
-  BOUNDING_BOX_COLOR: ColorArray = [255, 255, 255],
+  BACKGROUND_COLOR_DEFAULT: ColorArray = [0, 0, 0],
+  BOUNDING_BOX_COLOR_DEFAULT: ColorArray = [255, 255, 255],
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.

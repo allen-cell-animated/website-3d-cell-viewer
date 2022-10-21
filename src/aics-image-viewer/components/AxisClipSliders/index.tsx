@@ -6,14 +6,13 @@ import React from "react";
 
 import "./styles.css";
 
-import viewMode from "../../shared/enums/viewMode";
-const ViewMode = viewMode.mainMapping;
+import { ViewMode } from "../../shared/enums";
+import { AxisName } from "../../shared/types";
 
-type AxisName = "x" | "y" | "z";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-const ACTIVE_AXIS_MAP: { [key: number]: AxisName | null } = {
+const ACTIVE_AXIS_MAP: { [_ in ViewMode]: AxisName | null } = {
   [ViewMode.yz]: "x",
   [ViewMode.xz]: "y",
   [ViewMode.xy]: "z",
@@ -21,7 +20,7 @@ const ACTIVE_AXIS_MAP: { [key: number]: AxisName | null } = {
 };
 
 interface AxisClipSlidersProps {
-  mode: symbol;
+  mode: ViewMode;
   setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   numSlices: {
     x: number;

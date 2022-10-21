@@ -5,13 +5,14 @@ import { Channel } from "@aics/volume-viewer";
 import TfEditor from "../TfEditor";
 
 import colorPalette from "../../shared/colorPalette";
-import { ISOSURFACE_OPACITY_SLIDER_MAX, SAVE_ISO_SURFACE } from "../../shared/constants";
+import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
+import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -39,7 +40,7 @@ interface ChannelsWidgetRowProps {
     keyToChange: K,
     newValue: ChannelState[K]
   ) => void;
-  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
@@ -173,9 +174,9 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     );
   }
 
-  createSaveIsosurfaceHandler = (format: string) => () => {
-    const { index, handleChangeToImage } = this.props;
-    handleChangeToImage(SAVE_ISO_SURFACE, format, index);
+  createSaveIsosurfaceHandler = (format: IsosurfaceFormat) => () => {
+    const { index, saveIsosurface } = this.props;
+    saveIsosurface(index, format);
   };
 
   renderSurfaceControls = () => (
@@ -235,7 +236,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   channelName: {
     display: "inline-block",
     minWidth: 90,

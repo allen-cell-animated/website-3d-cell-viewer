@@ -97,7 +97,7 @@ export default function ControlPanel(props: ControlPanelProps) {
                   channelGroupedByType={props.channelGroupedByType}
                   changeChannelSettings={props.changeChannelSettings}
                   channelDataReady={props.channelDataReady}
-                  handleChangeToImage={props.handleChangeToImage}
+                  saveIsosurface={props.saveIsosurface}
                   updateChannelTransferFunction={props.updateChannelTransferFunction}
                   changeOneChannelSetting={props.changeOneChannelSetting}
                   onColorChangeComplete={props.onColorChangeComplete}
@@ -109,10 +109,9 @@ export default function ControlPanel(props: ControlPanelProps) {
               {tab === ControlTab.Advanced && (
                 <>
                   <GlobalVolumeControls
-                    mode={props.mode}
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
-                    handleChangeUserSelection={props.handleChangeUserSelection}
+                    changeUserSelection={props.changeUserSelection}
                     setImageAxisClip={props.setImageAxisClip}
                     makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
                     alphaMaskSliderLevel={props.alphaMaskSliderLevel}

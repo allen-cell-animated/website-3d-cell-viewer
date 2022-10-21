@@ -3,7 +3,8 @@ import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import viewMode from "../../shared/enums/viewMode";
+import { AxisName, Styles } from "../../shared/types";
+import { ViewMode } from "../../shared/enums";
 
 import AxisClipSliders from "../AxisClipSliders";
 import { BottomPanel } from "../BottomPanel";
@@ -12,7 +13,7 @@ import "./styles.css";
 interface ViewerWrapperProps {
   autorotate: boolean;
   loadingImage: boolean;
-  mode: symbol;
+  mode: ViewMode;
   appHeight: string;
   image: Volume | null;
   numSlices: {
@@ -24,7 +25,7 @@ interface ViewerWrapperProps {
     axisClipSliders: boolean;
   };
   onView3DCreated: (view3d: View3d) => void;
-  setAxisClip: (axis: "x" | "y" | "z", minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
 }
 
 interface ViewerWrapperState {}
@@ -51,7 +52,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
       return;
     }
     if (prevProps.mode && prevProps.mode !== this.props.mode) {
-      this.view3D.setCameraMode(viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(this.props.mode));
+      this.view3D.setCameraMode(this.props.mode);
     }
     if (prevProps.autorotate !== this.props.autorotate) {
       this.view3D.setAutoRotate(this.props.autorotate);
@@ -91,7 +92,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   viewer: {
     display: "flex",
     position: "relative",
