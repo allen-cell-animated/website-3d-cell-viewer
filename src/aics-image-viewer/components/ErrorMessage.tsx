@@ -1,5 +1,7 @@
 import React from "react";
 
+import { Styles } from "../shared/types";
+
 const ErrorMessage: React.FC = ({ children }) => (
   <div className="alert alert-danger" style={STYLES.wrapper}>
     <i className="material-icons" style={STYLES.warningIcon}>
@@ -11,7 +13,7 @@ const ErrorMessage: React.FC = ({ children }) => (
 
 export default ErrorMessage;
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   wrapper: {
     display: "flex",
   },

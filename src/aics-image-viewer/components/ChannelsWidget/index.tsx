@@ -15,6 +15,7 @@ const { Panel } = Collapse;
 
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
+import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 export interface ChannelsWidgetProps {
   imageName: string | undefined;
@@ -24,7 +25,7 @@ export interface ChannelsWidgetProps {
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
-  handleChangeToImage: (keyToChange: string, newValue: any, index?: number) => void;
+  saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   changeChannelSettings: <K extends ChannelStateKey>(
     indices: number[],
     keyToChange: K,
@@ -139,7 +140,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeOneChannelSetting={this.props.changeOneChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
-                      handleChangeToImage={this.props.handleChangeToImage}
+                      saveIsosurface={this.props.saveIsosurface}
                     />
                   ) : (
                     <div></div>
@@ -158,7 +159,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 }
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   header: {
     textAlign: "left",
     fontWeight: 900,

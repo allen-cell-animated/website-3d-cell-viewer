@@ -42,6 +42,7 @@
       background-color: transparent;
       border-color: transparent;
       color: #bfbfbf;
+      padding: 0;
     }
 
     &.btn-active,

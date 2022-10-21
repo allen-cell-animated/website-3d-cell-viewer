@@ -3,6 +3,7 @@ import { Card, Collapse } from "antd";
 
 import ColorPicker from "./ColorPicker";
 import { ColorArray, ColorObject, colorArrayToObject } from "../shared/utils/colorRepresentations";
+import { Styles } from "../shared/types";
 
 type ColorChangeHandler = (color: ColorObject) => void;
 
@@ -44,7 +45,7 @@ const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
   </Card>
 );
 
-const STYLES: { [key: string]: React.CSSProperties } = {
+const STYLES: Styles = {
   colorPickerRow: {
     padding: "14px 0",
     display: "flex",

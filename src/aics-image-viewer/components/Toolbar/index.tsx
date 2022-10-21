@@ -5,23 +5,15 @@ import "./styles.css";
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 
-import viewMode from "../../shared/enums/viewMode";
-import {
-  FULL_FIELD_IMAGE,
-  MAX_PROJECT,
-  PATH_TRACE,
-  SEGMENTED_CELL,
-  THREE_D_MODE,
-  VOLUMETRIC_RENDER,
-} from "../../shared/constants";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
 interface ToolbarProps {
-  imageType: string;
-  renderSetting: string;
+  imageType: ImageType;
+  renderSetting: RenderMode;
   cellDownloadHref: string;
   fovDownloadHref: string;
-  mode: symbol;
+  mode: ViewMode;
   hasCellId: boolean;
   hasParentImage: boolean;
   autorotate: boolean;
@@ -30,12 +22,12 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
 
-  onViewModeChange: (mode: symbol) => void;
+  onViewModeChange: (mode: ViewMode) => void;
   onResetCamera: () => void;
   onAutorotateChange: () => void;
   downloadScreenshot: () => void;
-  onSwitchFovCell: (value: string) => void;
-  onChangeRenderingAlgorithm: (newAlgorithm: string) => void;
+  onSwitchFovCell: (value: ImageType) => void;
+  onChangeRenderingAlgorithm: (newAlgorithm: RenderMode) => void;
   changeAxisShowing: (showing: boolean) => void;
   changeBoundingBoxShowing: (showing: boolean) => void;
 
@@ -52,7 +44,7 @@ interface ToolbarProps {
 export default function Toolbar(props: ToolbarProps) {
   const { renderConfig, showAxes, showBoundingBox } = props;
 
-  const twoDMode = viewMode.VIEW_MODE_ENUM_TO_LABEL_MAP.get(props.mode) !== THREE_D_MODE;
+  const twoDMode = props.mode !== ViewMode.threeD;
 
   const renderGroup1 =
     renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
@@ -62,8 +54,7 @@ export default function Toolbar(props: ToolbarProps) {
   const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
   // TODO remove ant-btn-icon-only hack when upgrading antd
-  const classForToggleBtn = (active: boolean) =>
-    active ? "btn-borderless ant-btn-icon-only btn-active" : "ant-btn-icon-only btn-borderless";
+  const classForToggleBtn = (active: boolean) => "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
   return (
     <div className="viewer-toolbar">
@@ -97,8 +88,8 @@ export default function Toolbar(props: ToolbarProps) {
         {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
           <span className="viewer-toolbar-group">
             <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
-              <Radio.Button value={SEGMENTED_CELL}>Single cell</Radio.Button>
-              <Radio.Button value={FULL_FIELD_IMAGE}>Full field</Radio.Button>
+              <Radio.Button value={ImageType.segmentedCell}>Single cell</Radio.Button>
+              <Radio.Button value={ImageType.fullField}>Full field</Radio.Button>
             </Radio.Group>
           </span>
         )}
@@ -109,15 +100,15 @@ export default function Toolbar(props: ToolbarProps) {
             value={props.renderSetting}
             onChange={props.onChangeRenderingAlgorithm}
           >
-            <Select.Option value={VOLUMETRIC_RENDER} key={VOLUMETRIC_RENDER}>
+            <Select.Option value={RenderMode.volumetric} key={RenderMode.volumetric}>
               Volumetric
             </Select.Option>
             {props.canPathTrace && (
-              <Select.Option value={PATH_TRACE} key={PATH_TRACE} disabled={props.mode !== viewMode.mainMapping.threeD}>
+              <Select.Option value={RenderMode.pathTrace} key={RenderMode.pathTrace} disabled={twoDMode}>
                 Path trace
               </Select.Option>
             )}
-            <Select.Option value={MAX_PROJECT} key={MAX_PROJECT}>
+            <Select.Option value={RenderMode.maxProject} key={RenderMode.maxProject}>
               Max project
             </Select.Option>
           </Select>
