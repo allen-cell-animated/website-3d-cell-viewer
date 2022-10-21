@@ -13,7 +13,7 @@ export interface ChannelState {
   color: ColorArray;
   dataReady: boolean;
   controlPoints: {
-    color: string;
+    color: ColorArray;
     opacity: number;
     x: number;
   }[];

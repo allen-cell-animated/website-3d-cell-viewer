@@ -1,6 +1,6 @@
 import React from "react";
 import * as d3 from "d3";
-import { SketchPicker } from "react-color";
+import { SketchPicker, ColorResult } from "react-color";
 import { Channel } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
@@ -11,18 +11,25 @@ import { Button, Checkbox } from "antd";
 
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
+import {
+  ColorArray,
+  colorArrayToObject,
+  colorArrayToString,
+  colorObjectToArray,
+} from "../../shared/utils/colorRepresentations";
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
 // TODO swap in this import when shared/types.ts is available on this branch
 // import { Styles } from "../../shared/types";
 type Styles = { [key: string]: React.CSSProperties };
 
 // TODO narrow d3 types packages - we don't need everything that comes with @types/d3
 
-export const TFEDITOR_DEFAULT_COLOR = "rgb(255, 255, 255)";
+export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 
 type Pair = [number, number];
 
 type ControlPoint = {
-  color: string;
+  color: [number, number, number];
   opacity: number;
   x: number;
 };
@@ -76,7 +83,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   dataScale!: d3.ScaleLinear<number, number>;
   dragged!: ControlPoint | null;
   selected!: ControlPoint | null;
-  last_color!: string;
+  last_color!: ColorArray;
 
   canvasSelector!: string; // Set in initializeElements, should also never be undefined
   svg!: d3.Selection<SVGSVGElement | null, unknown, null, undefined>; // Set in ready
@@ -238,7 +245,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // Get the 2D canvas context where the TF will be drawn
-  private canvasContext() {
+  private canvasContext(): CanvasRenderingContext2D | null {
     let canvas_element = this.canvas.current;
     if (canvas_element) {
       return canvas_element.getContext("2d");
@@ -389,7 +396,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .append("circle")
       .attr("cx", (d) => this.xScale(d.x))
       .attr("cy", (d) => this.yScale(d.opacity))
-      .style("fill", (d) => d.color)
+      .style("fill", (d) => colorArrayToString(d.color))
       .attr("r", 1e-6)
       .on("mousedown", (d) => {
         this.selected = this.dragged = d;
@@ -411,7 +418,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
     circle
       .classed("selected", (d) => d === this.selected)
-      .style("fill", (d) => d.color)
+      .style("fill", (d) => colorArrayToString(d.color))
       .attr("cx", (d) => this.xScale(d.x))
       .attr("cy", (d) => this.yScale(d.opacity))
       .raise();
@@ -434,7 +441,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     gradient
       .enter()
       .append("stop")
-      .attr("stop-color", (d) => d.color)
+      .attr("stop-color", (d) => colorArrayToString(d.color))
       .attr("stop-opacity", (d) => Math.min(d.opacity, MAX_DISPLAY_OPACITY))
       .attr("offset", (d) => {
         const l = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
@@ -442,7 +449,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       });
 
     gradient
-      .attr("stop-color", (d) => d.color)
+      .attr("stop-color", (d) => colorArrayToString(d.color))
       .attr("stop-opacity", (d) => Math.min(d.opacity, MAX_DISPLAY_OPACITY))
       .attr("offset", (d) => {
         const l = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
@@ -520,7 +527,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       for (var i = 0; i < controlPoints.length; i++) {
         var d = controlPoints[i];
         //var d = this.get('controlPoints', i);
-        var color = d3.color(d.color);
+        var color = d3.color(colorArrayToString(d.color));
         color!.opacity = d.opacity;
         //grd.addColorStop((d.x - x0) / Math.abs(x1 - x0), color.toString());
         grd.addColorStop(this.canvasScale(this.dataScale(d.x)), color!.toString());
@@ -552,13 +559,13 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(newControlPoints);
   }
 
-  private capturedMousemove(event) {
+  private capturedMousemove(event: MouseEvent) {
     event.preventDefault();
     event.stopPropagation();
     d3.customEvent(event, this.mousemove, this);
   }
 
-  private mousemove(event) {
+  private mousemove(_event: this) {
     if (!this.dragged) {
       return;
     }
@@ -598,6 +605,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.dragged = null;
   }
 
+  // TODO unused
   private keydown() {
     if (!this.selected) {
       return;
@@ -631,16 +639,17 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     window.URL.revokeObjectURL(url);
   }
 
-  updateControlPointsWithoutColor(ptsWithoutColor) {
+  updateControlPointsWithoutColor(ptsWithoutColor: ControlPoint[]) {
     const pts = ptsWithoutColor.map((pt) => ({
       ...pt,
-      color: "rgb(255, 255, 255)",
+      color: TFEDITOR_DEFAULT_COLOR,
     }));
     this.selected = pts[0];
     this.props.updateChannelLutControlPoints(pts);
   }
 
-  updateControlPoints(pts) {
+  // TODO unused
+  updateControlPoints(pts: ControlPoint[]) {
     // TODO do I need to copy the pts here?
     this.selected = pts[0];
     this.props.updateChannelLutControlPoints(pts);
@@ -674,12 +683,12 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  private handleColorizeCheckbox(e) {
+  private handleColorizeCheckbox(e: CheckboxChangeEvent) {
     this.props.updateColorizeMode(e.target.checked);
   }
 
-  private handleColorizeAlpha(values) {
-    this.props.updateColorizeAlpha(Number(values[0]));
+  private handleColorizeAlpha(values: number[]) {
+    this.props.updateColorizeAlpha(values[0]);
   }
 
   private resetXF() {
@@ -694,9 +703,10 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   /**
    * Get the TF output canvas `element`.
    *
-   * @return {HTMLElement} canvas 2D with the TF output.
+   * @return {HTMLCanvasElement} canvas 2D with the TF output.
    */
-  getCanvas() {
+  // TODO unused
+  getCanvas(): HTMLCanvasElement | null {
     return this.canvas.current;
   }
   /**
@@ -704,26 +714,14 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
    *
    * @return {CSSselector}
    */
-  getCanvasSelector() {
+  // TODO unused
+  getCanvasSelector(): string {
     return this.canvasSelector;
   }
 
   /**
-   * TODO: Set the output canvas `element`.
-   *
-   * @param {HTMLElement} element canvas 2D.
-   * @return {bool}
-   */
-  setCanvas(element) {
-    //return this._canvasContext = element.getContext("2d");
-  }
-
-  /**
    * Set the pixel data we are manipulating
-   *
-   * @param {AICSchannel} channel
    */
-
   setData() {
     if (!this.props.channelData) {
       throw new Error("Transfer Function Editor setData called with no channel data.");
@@ -748,8 +746,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.setState({ displayColorPicker: false });
   }
 
-  handleChangeColor(color) {
-    this.last_color = color.hex;
+  handleChangeColor(color: ColorResult) {
+    this.last_color = colorObjectToArray(color.rgb);
     if (this.selected) {
       this.selected.color = this.last_color;
       this.redraw();
@@ -766,7 +764,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <SketchPicker color={this.last_color} onChange={this.handleChangeColor} />
+              <SketchPicker
+                color={colorArrayToObject(this.last_color)}
+                onChange={this.handleChangeColor}
+                disableAlpha={true}
+              />
             </div>
           ) : null}
         </div>

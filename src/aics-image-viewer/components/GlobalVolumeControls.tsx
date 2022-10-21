@@ -6,6 +6,8 @@ import { Card, Collapse } from "antd";
 import { UserSelectionKey, UserSelectionState } from "./App/types";
 const Panel = Collapse.Panel;
 
+type GlobalVolumeControlKey = "alphaMaskSliderLevel" | "brightnessSliderLevel" | "densitySliderLevel" | "levelsSlider";
+
 export interface GlobalVolumeControlsProps {
   mode: symbol;
   imageName: string | undefined;
@@ -42,7 +44,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: UserSelectionKey) => (
+  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey) => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
@@ -52,7 +54,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]) => this.props.handleChangeUserSelection(propKey, values)}
+          onUpdate={(values) => this.props.handleChangeUserSelection(propKey, values)}
         />
       </div>
     </div>

@@ -10,7 +10,12 @@ import { ISOSURFACE_OPACITY_SLIDER_MAX, SAVE_ISO_SURFACE } from "../../shared/co
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
-import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
+import {
+  ColorObject,
+  colorObjectToArray,
+  ColorArray,
+  colorArrayToObject,
+} from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
@@ -25,9 +30,9 @@ interface ChannelsWidgetRowProps {
   isosurfaceChecked: boolean;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
-  color: [number, number, number];
+  color: ColorArray;
   channelControlPoints: {
-    color: string;
+    color: ColorArray;
     opacity: number;
     x: number;
   }[];
