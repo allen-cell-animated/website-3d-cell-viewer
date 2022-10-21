@@ -15,6 +15,7 @@ import {
   ColorArray,
   colorArrayToObject,
   colorArrayToString,
+  ColorObject,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
@@ -55,6 +56,19 @@ interface MyTfEditorProps {
 interface MyTfEditorState {
   displayColorPicker: boolean;
 }
+
+const StatefulColorPicker: React.FC<{
+  color: ColorObject;
+  onChange: (newColor: ColorResult) => void;
+  disableAlpha: boolean;
+}> = ({ color, onChange, disableAlpha }) => {
+  const [colorState, updateColorState] = React.useState(color);
+  const wrappedOnChange = (newColor: ColorResult) => {
+    updateColorState(newColor.rgb);
+    onChange(newColor);
+  };
+  return <SketchPicker color={colorState} onChange={wrappedOnChange} disableAlpha={disableAlpha} />;
+};
 
 export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEditorState> {
   id: string;
@@ -764,7 +778,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <SketchPicker
+              <StatefulColorPicker
                 color={colorArrayToObject(this.last_color)}
                 onChange={this.handleChangeColor}
                 disableAlpha={true}
