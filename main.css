@@ -660,6 +660,7 @@ body{
       background-color:transparent;
       border-color:transparent;
       color:#bfbfbf;
+      padding:0;
     }
 
   .viewer-toolbar .btn-borderless.btn-active,
