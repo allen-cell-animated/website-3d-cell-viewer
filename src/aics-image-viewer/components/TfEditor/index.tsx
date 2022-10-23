@@ -307,7 +307,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       });
 
     // Draw axis
-    var xTicks = this.xScale.ticks(this.numberTicks);
+    const xTicks = this.xScale.ticks(this.numberTicks);
     xTicks[xTicks.length - 1] = this.xScale.domain()[1];
     g.append("g")
       .attr("class", "axis axis--x")
@@ -323,13 +323,13 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   // update scales with new data input
   private updateScales() {
     if (this.fitToData) {
-      var dataExtent = d3.extent(this.props.volumeData);
+      const dataExtent = d3.extent(this.props.volumeData);
       // First obtain the index of points to be maintain;
-      var x0 = -1;
-      var x1 = -1;
+      let x0 = -1;
+      let x1 = -1;
       // Override dirty checking
       let { controlPoints } = this.props;
-      for (var i = controlPoints.length - 1; i >= 0; i--) {
+      for (let i = controlPoints.length - 1; i >= 0; i--) {
         x1 = controlPoints[i].x >= dataExtent[1]! ? i : x1;
         if (controlPoints[i].x <= dataExtent[0]!) {
           x0 = i;
@@ -371,10 +371,10 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   private redrawHistogram() {
     d3.select(this.svgElement.current).select("g").selectAll(".bar").remove();
     if (this.props.volumeData && this.props.volumeData.length > 0) {
-      var bins = this.bins(this.props.volumeData);
+      const bins = this.bins(this.props.volumeData);
       this.binScale.domain([0.1, d3.max(bins, (d) => d.length)!]);
-      var bar = d3.select(this.svgElement.current).select("g").selectAll(".bar").data(bins);
-      var barEnter = bar
+      const bar = d3.select(this.svgElement.current).select("g").selectAll(".bar").data(bins);
+      const barEnter = bar
         .enter()
         .append("g")
         .attr("class", "bar")
@@ -397,11 +397,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     if (!controlPoints) {
       return;
     }
-    var svg = d3.select(this.svgElement.current).select("g");
+    const svg = d3.select(this.svgElement.current).select("g");
     svg.select("path").datum(controlPoints).attr("d", this.area);
 
     // Add circle to connect and interact with the control points
-    var circle = svg.selectAll("circle").data(controlPoints);
+    const circle = svg.selectAll("circle").data(controlPoints);
 
     circle
       .enter()
@@ -523,23 +523,23 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         return;
       }
       this.canvasScale.domain([x0, x1]);
-      var ctx = this.canvasContext();
+      const ctx = this.canvasContext();
       if (!ctx) {
         return;
       }
       // Clear previous result
-      var width = ctx.canvas.clientWidth || 256;
-      var height = ctx.canvas.clientHeight || 10;
+      const width = ctx.canvas.clientWidth || 256;
+      const height = ctx.canvas.clientHeight || 10;
       ctx.clearRect(0, 0, width, height);
       // Draw new result
       //scale to coordinates in case this canvas's width is not 256.
-      var x0c = (x0 * width) / 256;
-      var x1c = (x1 * width) / 256;
-      var grd = ctx.createLinearGradient(x0c, 0, x1c, 0);
-      for (var i = 0; i < controlPoints.length; i++) {
-        var d = controlPoints[i];
-        //var d = this.get('controlPoints', i);
-        var color = d3.color(colorArrayToString(d.color));
+      const x0c = (x0 * width) / 256;
+      const x1c = (x1 * width) / 256;
+      const grd = ctx.createLinearGradient(x0c, 0, x1c, 0);
+      for (let i = 0; i < controlPoints.length; i++) {
+        const d = controlPoints[i];
+        //const d = this.get('controlPoints', i);
+        const color = d3.color(colorArrayToString(d.color));
         color!.opacity = d.opacity;
         //grd.addColorStop((d.x - x0) / Math.abs(x1 - x0), color.toString());
         grd.addColorStop(this.canvasScale(this.dataScale(d.x)), color!.toString());
@@ -563,8 +563,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       color: this.last_color,
     };
     this.selected = this.dragged = point;
-    var bisect = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left;
-    var indexPos = bisect(this.props.controlPoints, point);
+    const bisect = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left;
+    const indexPos = bisect(this.props.controlPoints, point);
 
     let newControlPoints = [...this.props.controlPoints];
     newControlPoints.splice(indexPos, 0, point);
@@ -583,20 +583,20 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
 
     const { controlPoints } = this.props;
-    var index = controlPoints.findIndex(
+    const index = controlPoints.findIndex(
       (a) => a.x === this.selected?.x && a.opacity === this.selected?.opacity && a.color === this.selected?.color
     );
     if (index === -1) {
       return;
     }
-    var m = d3.mouse(d3.select(this.svgElement.current).node()!);
+    const m = d3.mouse(d3.select(this.svgElement.current).node()!);
     this.selected = this.dragged = controlPoints[index];
     this.dragged.x = this.xScale.invert(Math.max(0, Math.min(this.width, m[0] - this.margin.left)));
     this.dragged.opacity = this.yScale.invert(Math.max(0, Math.min(this.height, m[1] - this.margin.top)));
-    var bisect = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left;
-    var bisect2 = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).right;
-    var virtualIndex = bisect(controlPoints, this.dragged);
-    var virtualIndex2 = bisect2(controlPoints, this.dragged);
+    const bisect = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left;
+    const bisect2 = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).right;
+    const virtualIndex = bisect(controlPoints, this.dragged);
+    const virtualIndex2 = bisect2(controlPoints, this.dragged);
     let newControlPoints = [...controlPoints];
     if (virtualIndex < index) {
       newControlPoints.splice(virtualIndex, 1);
@@ -626,7 +626,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
     if (d3.event.keyCode === 46) {
       // delete
-      var i = this.props.controlPoints.indexOf(this.selected);
+      const i = this.props.controlPoints.indexOf(this.selected);
       let newControlPoints = [...this.props.controlPoints];
       newControlPoints.splice(i, 1);
       this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
@@ -635,15 +635,15 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   private export() {
-    var jsonContent = JSON.stringify(this.props.controlPoints);
-    var a = document.createElement("a");
+    const jsonContent = JSON.stringify(this.props.controlPoints);
+    const a = document.createElement("a");
     // TODO test that this function still works without these lines
     // document.body.appendChild(a);
     // a.style = "display: none";
-    var blob = new Blob([jsonContent], {
+    const blob = new Blob([jsonContent], {
       type: "octet/stream",
     });
-    var url = window.URL.createObjectURL(blob);
+    const url = window.URL.createObjectURL(blob);
     a.href = url;
     a.download = "transferFunction.json";
     a.click();
@@ -709,9 +709,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   /////// Public API functions ///////
 
-  /**
-   * Set the pixel data we are manipulating
-   */
+  /** Set the pixel data we are manipulating */
   setData() {
     if (!this.props.channelData) {
       throw new Error("Transfer Function Editor setData called with no channel data.");
