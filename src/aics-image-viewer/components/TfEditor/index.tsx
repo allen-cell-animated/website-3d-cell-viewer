@@ -19,9 +19,7 @@ import {
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-// TODO swap in this import when shared/types.ts is available on this branch
-// import { Styles } from "../../shared/types";
-type Styles = { [key: string]: React.CSSProperties };
+import { Styles } from "../../shared/types";
 
 // TODO narrow d3 types packages - we don't need everything that comes with @types/d3
 
@@ -30,7 +28,7 @@ export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 type Pair = [number, number];
 
 type ControlPoint = {
-  color: [number, number, number];
+  color: ColorArray;
   opacity: number;
   x: number;
 };
@@ -78,7 +76,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   svgElement: React.RefObject<SVGSVGElement>;
   fitToData: boolean;
 
-  // Set in createElements (called in componentDidMount, should never be accessed while undefined)
+  // Properties below are set in createElements (called in componentDidMount, should never be accessed while undefined)
   margin!: {
     top: number;
     right: number;
@@ -620,20 +618,19 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // TODO unused
-  private keydown() {
+  // NOTE none of this component's elements are focusable (required to fire keyboard events).
+  //   The behavior in this function would be a bit awkward to implement properly.
+  private keydown(_e: KeyboardEvent) {
     if (!this.selected) {
       return;
     }
-    switch (d3.event.keyCode) {
-      case 46: {
-        // delete
-        var i = this.props.controlPoints.indexOf(this.selected);
-        let newControlPoints = [...this.props.controlPoints];
-        newControlPoints.splice(i, 1);
-        this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
-        this.props.updateChannelLutControlPoints(newControlPoints);
-        break;
-      }
+    if (d3.event.keyCode === 46) {
+      // delete
+      var i = this.props.controlPoints.indexOf(this.selected);
+      let newControlPoints = [...this.props.controlPoints];
+      newControlPoints.splice(i, 1);
+      this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
+      this.props.updateChannelLutControlPoints(newControlPoints);
     }
   }
 
@@ -658,11 +655,9 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       ...pt,
       color: TFEDITOR_DEFAULT_COLOR,
     }));
-    this.selected = pts[0];
-    this.props.updateChannelLutControlPoints(pts);
+    this.updateControlPoints(pts);
   }
 
-  // TODO unused
   updateControlPoints(pts: ControlPoint[]) {
     // TODO do I need to copy the pts here?
     this.selected = pts[0];
@@ -715,25 +710,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   /////// Public API functions ///////
 
   /**
-   * Get the TF output canvas `element`.
-   *
-   * @return {HTMLCanvasElement} canvas 2D with the TF output.
-   */
-  // TODO unused
-  getCanvas(): HTMLCanvasElement | null {
-    return this.canvas.current;
-  }
-  /**
-   * Get the output canvas `element` query selector.
-   *
-   * @return {CSSselector}
-   */
-  // TODO unused
-  getCanvasSelector(): string {
-    return this.canvasSelector;
-  }
-
-  /**
    * Set the pixel data we are manipulating
    */
   setData() {
@@ -773,7 +749,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
     return (
       <div id="container">
-        <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement}></svg>
+        <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} />
         <div className="aligned">
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
