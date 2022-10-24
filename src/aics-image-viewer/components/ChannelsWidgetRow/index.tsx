@@ -10,7 +10,12 @@ import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
-import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
+import {
+  ColorObject,
+  colorObjectToArray,
+  ColorArray,
+  colorArrayToObject,
+} from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 
@@ -26,9 +31,9 @@ interface ChannelsWidgetRowProps {
   isosurfaceChecked: boolean;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
-  color: [number, number, number];
+  color: ColorArray;
   channelControlPoints: {
-    color: string;
+    color: ColorArray;
     opacity: number;
     x: number;
   }[];
@@ -73,10 +78,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, "isosurfaceEnabled", target.checked);
   }
 
-  createChannelSettingHandler = (settingKey: ChannelStateKey) => (newValue: any) => {
-    const { channelName, index, changeOneChannelSetting } = this.props;
-    changeOneChannelSetting(channelName, index, settingKey, newValue);
-  };
+  createChannelSettingHandler =
+    <K extends ChannelStateKey>(settingKey: K) =>
+    (newValue: ChannelState[K]) => {
+      const { channelName, index, changeOneChannelSetting } = this.props;
+      changeOneChannelSetting(channelName, index, settingKey, newValue);
+    };
 
   onIsovalueChange = this.createChannelSettingHandler("isovalue");
   onOpacityChangeUnwrapped = this.createChannelSettingHandler("opacity");

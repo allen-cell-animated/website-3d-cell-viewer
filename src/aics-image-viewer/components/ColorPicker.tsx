@@ -1,5 +1,5 @@
 import React from "react";
-import { SketchPicker } from "react-color";
+import { ColorResult, SketchPicker } from "react-color";
 import { map } from "lodash";
 
 import { ColorObject } from "../shared/utils/colorRepresentations";
@@ -65,7 +65,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     this.setState({ displayColorPicker: false });
   }
 
-  handleChange(color) {
+  handleChange(color: ColorResult) {
     this.setState({ color: color.rgb });
     // supply onColorChange callback in props.
     if (this.props.onColorChange) {
@@ -73,7 +73,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     }
   }
 
-  handleChangeComplete(color) {
+  handleChangeComplete(color: ColorResult) {
     this.setState({ color: color.rgb });
     // supply onColorChange callback in props.
     if (this.props.onColorChangeComplete) {
@@ -81,7 +81,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     }
   }
 
-  static getDerivedStateFromProps(props, state) {
+  static getDerivedStateFromProps(props: ColorPickerProps, state: ColorPickerState) {
     if (props.color && props.color !== state.color) {
       return { color: props.color };
     }

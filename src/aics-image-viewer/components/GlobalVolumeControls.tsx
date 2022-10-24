@@ -7,6 +7,8 @@ import { UserSelectionKey, UserSelectionState } from "./App/types";
 import { AxisName, Styles } from "../shared/types";
 const Panel = Collapse.Panel;
 
+type GlobalVolumeControlKey = "alphaMaskSliderLevel" | "brightnessSliderLevel" | "densitySliderLevel" | "levelsSlider";
+
 export interface GlobalVolumeControlsProps {
   imageName: string | undefined;
   pixelSize: [number, number, number];
@@ -42,7 +44,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: UserSelectionKey) => (
+  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey) => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
