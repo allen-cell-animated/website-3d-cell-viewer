@@ -714,8 +714,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.updateAxis();
   }
 
-  /////// Polymer lifecycle callbacks /////////////
-
   // Initialize elements and perform the drawing of first drawing
   ready() {
     // Access the svg dom element
