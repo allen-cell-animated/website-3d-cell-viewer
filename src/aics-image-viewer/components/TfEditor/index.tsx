@@ -21,8 +21,6 @@ import {
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Styles } from "../../shared/types";
 
-// TODO narrow d3 types packages - we don't need everything that comes with @types/d3
-
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 
 type Pair = [number, number];
@@ -55,7 +53,8 @@ interface MyTfEditorState {
   displayColorPicker: boolean;
 }
 
-const StatefulColorPicker: React.FC<{
+/** Wrapper to convince color picker interface to update while open */
+const StatefulSketchPicker: React.FC<{
   color: ColorObject;
   onChange: (newColor: ColorResult) => void;
   disableAlpha: boolean;
@@ -119,7 +118,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.drawCanvas = this.drawCanvas.bind(this);
     this.autoXF = this.autoXF.bind(this);
     this.resetXF = this.resetXF.bind(this);
-    this.export = this.export.bind(this);
     this.auto2XF = this.auto2XF.bind(this);
     this.auto98XF = this.auto98XF.bind(this);
     this.bestFitXF = this.bestFitXF.bind(this);
@@ -634,12 +632,10 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     }
   }
 
+  // TODO unused
   private export() {
     const jsonContent = JSON.stringify(this.props.controlPoints);
     const a = document.createElement("a");
-    // TODO test that this function still works without these lines
-    // document.body.appendChild(a);
-    // a.style = "display: none";
     const blob = new Blob([jsonContent], {
       type: "octet/stream",
     });
@@ -752,7 +748,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <StatefulColorPicker
+              <StatefulSketchPicker
                 color={colorArrayToObject(this.last_color)}
                 onChange={this.handleChangeColor}
                 disableAlpha={true}
