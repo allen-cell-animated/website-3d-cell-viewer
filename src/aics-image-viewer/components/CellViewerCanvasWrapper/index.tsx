@@ -39,7 +39,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     this.view3dviewerRef = React.createRef();
   }
 
-  componentDidMount() {
+  componentDidMount(): void {
     if (!this.view3D) {
       this.view3D = new View3d(this.view3dviewerRef.current!);
       this.props.onView3DCreated(this.view3D);
@@ -47,7 +47,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     }
   }
 
-  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState) {
+  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
     if (!this.view3D) {
       return;
     }
@@ -61,7 +61,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     this.view3D.resize(null);
   }
 
-  renderOverlay() {
+  renderOverlay(): React.ReactNode {
     const spinner = this.props.loadingImage ? (
       <div style={STYLES.noImage}>
         <Icon type="loading" theme="outlined" style={{ fontSize: 60, zIndex: 1000 }} />
@@ -76,7 +76,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     return noImageText || spinner;
   }
 
-  render() {
+  render(): React.ReactNode {
     const { appHeight, renderConfig, image, numSlices, mode, setAxisClip } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>

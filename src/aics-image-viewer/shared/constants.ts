@@ -67,21 +67,17 @@ export const PRESET_COLOR_MAP = Object.freeze([
   {
     colors: PRESET_COLORS_0,
     name: "Default",
-    key: 0,
   },
   {
     colors: PRESET_COLORS_1,
     name: "Thumbnail colors",
-    key: 1,
   },
   {
     colors: PRESET_COLORS_2,
     name: "RGB colors",
-    key: 2,
   },
   {
     colors: PRESET_COLORS_3,
     name: "White structure",
-    key: 3,
   },
 ]);

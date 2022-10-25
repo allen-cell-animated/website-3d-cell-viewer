@@ -36,7 +36,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     super(props);
   }
 
-  shouldComponentUpdate(newProps: GlobalVolumeControlsProps) {
+  shouldComponentUpdate(newProps: GlobalVolumeControlsProps): boolean {
     const { imageName, alphaMaskSliderLevel, pathTraceOn } = this.props;
     const newImage = newProps.imageName !== imageName;
     const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
@@ -44,7 +44,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey) => (
+  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey): React.ReactNode => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
@@ -54,13 +54,13 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]) => this.props.changeUserSelection(propKey, values)}
+          onUpdate={(values: number[]): void => this.props.changeUserSelection(propKey, values)}
         />
       </div>
     </div>
   );
 
-  render() {
+  render(): React.ReactNode {
     if (!this.props.imageName) return null;
     const { renderConfig, alphaMaskSliderLevel, brightnessSliderLevel, densitySliderLevel, gammaSliderLevel } =
       this.props;

@@ -12,7 +12,7 @@ const ctx = canv.getContext("2d")!;
 // @param {string} css_str - string representing a color that is css canvas context2d compatible
 // @param {number} opacity_override - number representing an opacity value from 0 to 1
 // @return {string} the new rgba color with the opacity applied to its alpha value as a css color string
-function cssColorWithOpacity(css_str: ColorArray | string, opacity_override: number) {
+function cssColorWithOpacity(css_str: ColorArray | string, opacity_override: number): string {
   if (Array.isArray(css_str)) {
     return colorString.to.rgb([css_str[0], css_str[1], css_str[2], opacity_override]);
   }
@@ -22,13 +22,13 @@ function cssColorWithOpacity(css_str: ColorArray | string, opacity_override: num
 }
 
 // clamp x to the range [0,1]
-function clamp(x: number) {
+function clamp(x: number): number {
   return Math.min(1.0, Math.max(0.0, x));
 }
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
-export function controlPointsToLut(controlPoints: ControlPoint[]) {
+export function controlPointsToLut(controlPoints: ControlPoint[]): Uint8Array {
   const grd = ctx.createLinearGradient(0, 0, 255, 0);
   if (!controlPoints.length || controlPoints.length < 1) {
     console.log("warning: bad control points submitted to makeColorGradient; reverting to linear greyscale gradient");
@@ -48,5 +48,5 @@ export function controlPointsToLut(controlPoints: ControlPoint[]) {
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
-  return imgData.data;
+  return new Uint8Array(imgData.data.buffer);
 }

@@ -52,7 +52,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     };
   }
 
-  handleClick() {
+  handleClick(): void {
     const swatchRect = this.swatchRef.current!.getBoundingClientRect();
     const noRoomBelowSwatch = swatchRect.bottom > window.innerHeight - OPEN_ABOVE_MARGIN;
     this.setState({
@@ -61,11 +61,11 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     });
   }
 
-  handleClose() {
+  handleClose(): void {
     this.setState({ displayColorPicker: false });
   }
 
-  handleChange(color: ColorResult) {
+  handleChange(color: ColorResult): void {
     this.setState({ color: color.rgb });
     // supply onColorChange callback in props.
     if (this.props.onColorChange) {
@@ -73,7 +73,7 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     }
   }
 
-  handleChangeComplete(color: ColorResult) {
+  handleChangeComplete(color: ColorResult): void {
     this.setState({ color: color.rgb });
     // supply onColorChange callback in props.
     if (this.props.onColorChangeComplete) {
@@ -81,14 +81,14 @@ export default class ColorPicker extends React.Component<ColorPickerProps, Color
     }
   }
 
-  static getDerivedStateFromProps(props: ColorPickerProps, state: ColorPickerState) {
+  static getDerivedStateFromProps(props: ColorPickerProps, state: ColorPickerState): Partial<ColorPickerState> | null {
     if (props.color && props.color !== state.color) {
       return { color: props.color };
     }
     return null;
   }
 
-  render() {
+  render(): React.ReactNode {
     const width = this.props.width || 36;
     const popoverDirectionStyle = this.state.openAboveSwatch ? { bottom: "25px" } : { top: "1px" };
 

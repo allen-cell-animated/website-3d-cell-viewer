@@ -1,7 +1,7 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ImageType, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
@@ -100,7 +100,7 @@ export interface AppState {
   channelDataReady: { [key: string]: boolean };
   // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
-  channelGroupedByType: { [key: string]: number[] };
+  channelGroupedByType: ChannelGrouping;
   // did the requested image have a cell id (in queryInput)?
   hasCellId: boolean;
   // state set by the UI:

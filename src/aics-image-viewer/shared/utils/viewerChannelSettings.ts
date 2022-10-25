@@ -56,6 +56,8 @@ export interface ViewerChannelSettings {
   groups: ViewerChannelGroup[];
 }
 
+export type ChannelGrouping = { [key: string]: number[] };
+
 export function matchChannel(channel: string, channelIndex: number, c: ViewerChannelSetting): boolean {
   // c could be a number, an array of (strings or numbers), or a single regex
   if (typeof c.match === "number") {
@@ -131,9 +133,9 @@ export function getDisplayName(name: string, index: number, settings?: ViewerCha
 export function makeChannelIndexGrouping(
   channels: string[],
   settings: ViewerChannelSettings
-): { [key: string]: number[] } {
+): ChannelGrouping {
   const groups = settings.groups;
-  const grouping = {};
+  const grouping: ChannelGrouping = {};
   const channelsMatched: number[] = [];
   // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
   if (groups !== undefined) {

@@ -1,11 +1,17 @@
 import React from "react";
 import { Radio } from "antd";
+import { RadioChangeEvent } from "antd/lib/radio";
 
 import { ViewMode } from "../../shared/enums";
 const viewModes = [ViewMode.threeD, ViewMode.xy, ViewMode.xz, ViewMode.yz];
 
-export default function ViewModeRadioButtons(props: { mode: ViewMode; onViewModeChange: (newMode: ViewMode) => void }) {
-  const onChangeButton = ({ target }) => {
+interface ViewModeRadioButtonsProps {
+  mode: ViewMode;
+  onViewModeChange: (newMode: ViewMode) => void;
+}
+
+const ViewModeRadioButtons: React.FC<ViewModeRadioButtonsProps> = (props) => {
+  const onChangeButton = ({ target }: RadioChangeEvent): void => {
     if (props.mode !== target.value) {
       props.onViewModeChange(target.value);
     }
@@ -20,4 +26,6 @@ export default function ViewModeRadioButtons(props: { mode: ViewMode; onViewMode
       ))}
     </Radio.Group>
   );
-}
+};
+
+export default ViewModeRadioButtons;
