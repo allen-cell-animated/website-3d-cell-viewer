@@ -35,8 +35,8 @@ export interface AppProps {
   viewerConfig: {
     showAxes: boolean;
     showBoundingBox: boolean;
-    boundingBoxColor: ColorArray;
-    backgroundColor: ColorArray;
+    boundingBoxColor?: ColorArray;
+    backgroundColor?: ColorArray;
     autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"

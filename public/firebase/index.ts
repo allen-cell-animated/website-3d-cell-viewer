@@ -1,10 +1,11 @@
-import { DocumentReference, QueryDocumentSnapshot, QuerySnapshot, DocumentData } from "@firebase/firestore-types";
+import { DocumentReference, QuerySnapshot, DocumentData } from "@firebase/firestore-types";
 
 import { firestore } from "./configure-firebase";
 
 interface DatasetMetaData {
   name: string;
   version: string;
+  datasets?: { [key: string]: DatasetMetaData };
   id: string;
   description: string;
   image: string;
@@ -20,23 +21,15 @@ interface DatasetMetaData {
   };
 }
 
-const CELL_ID_KEY = "CellId";
-const FOV_ID_KEY = "FOVId";
-const CELL_LINE_NAME_KEY = "CellLineName";
-const FOV_THUMBNAIL_PATH = "fovThumbnailPath";
-const FOV_VOLUME_VIEWER_PATH = "fovVolumeviewerPath";
-const THUMBNAIL_PATH = "thumbnailPath";
-const VOLUME_VIEWER_PATH = "volumeviewerPath";
-const PROTEIN_NAME_KEY = "structureProteinName";
 interface FileInfo {
-  [CELL_ID_KEY]: string;
-  [CELL_LINE_NAME_KEY]: string;
-  [FOV_ID_KEY]: string;
-  [PROTEIN_NAME_KEY]: string;
-  [FOV_THUMBNAIL_PATH]: string;
-  [FOV_VOLUME_VIEWER_PATH]: string;
-  [THUMBNAIL_PATH]: string;
-  [VOLUME_VIEWER_PATH]: string;
+  CellId: string;
+  CellLineName: string;
+  FOVId: string;
+  structureProteinName: string;
+  fovThumbnailPath: string;
+  fovVolumeviewerPath: string;
+  thumbnailPath: string;
+  volumeviewerPath: string;
 }
 
 function isDevOrStagingSite(host: string): boolean {

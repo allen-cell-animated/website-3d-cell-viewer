@@ -1,4 +1,4 @@
-export const gammaSliderToImageValues = (sliderValues) => {
+export const gammaSliderToImageValues = (sliderValues: [number, number, number]) => {
   let min = Number(sliderValues[0]);
   let mid = Number(sliderValues[1]);
   let max = Number(sliderValues[2]);
@@ -26,8 +26,8 @@ export const gammaSliderToImageValues = (sliderValues) => {
 // Density and brightness are overloaded for the two supported rendering modes in the volume viewer.
 // These formulae are somewhat ad-hoc based on what will subjectively look reasonable in the viewer, and should be considered tweakable.
 // The volume-viewer expects to see numbers from 0..1 for density, brightness, and alpha.
-export const densitySliderToImageValue = (sliderValues, isPathTrace) => +sliderValues[0] / 100.0;
+export const densitySliderToImageValue = (sliderValues: number[], _isPathTrace: boolean) => +sliderValues[0] / 100.0;
 
-export const brightnessSliderToImageValue = (sliderValues, isPathTrace) => +sliderValues[0] / 100.0;
+export const brightnessSliderToImageValue = (sliderValues: number[], _isPathTrace: boolean) => +sliderValues[0] / 100.0;
 
-export const alphaSliderToImageValue = (sliderValues) => 1 - sliderValues[0] / 100.0;
+export const alphaSliderToImageValue = (sliderValues: number[]) => 1 - sliderValues[0] / 100.0;

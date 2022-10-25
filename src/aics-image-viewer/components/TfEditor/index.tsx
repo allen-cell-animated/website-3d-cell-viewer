@@ -1,7 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
-import { Channel } from "@aics/volume-viewer";
+import { Channel, ControlPoint } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
@@ -24,12 +24,6 @@ import { Styles } from "../../shared/types";
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 
 type Pair = [number, number];
-
-type ControlPoint = {
-  color: ColorArray;
-  opacity: number;
-  x: number;
-};
 
 interface MyTfEditorProps {
   id: string;

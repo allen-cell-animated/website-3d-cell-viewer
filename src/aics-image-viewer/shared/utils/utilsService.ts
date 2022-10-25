@@ -7,7 +7,7 @@ export default class UtilsService {
    * If query parameter not found, returns null.
    * If no value provided, returns empty string
    */
-  static getParameterByName(name, url) {
+  static getParameterByName(name: string, url: string): string | null {
     if (!url) url = window.location.href;
     name = name.replace(/[[\]]/g, "\\$&");
     let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -17,12 +17,12 @@ export default class UtilsService {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
   }
 
-  static intersects(arr1, arr2) {
+  static intersects<T>(arr1: T[], arr2: T[]): boolean {
     if (!arr1 || !arr2) {
       return false;
     }
 
-    let smallerArr, largerArr;
+    let smallerArr: T[], largerArr: T[];
     if (arr1.length > arr2.length) {
       smallerArr = arr2;
       largerArr = arr1;

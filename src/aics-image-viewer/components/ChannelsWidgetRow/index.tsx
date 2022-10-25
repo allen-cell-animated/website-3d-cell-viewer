@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
-import { Channel } from "@aics/volume-viewer";
+import { Channel, ControlPoint } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
 
@@ -32,11 +32,7 @@ interface ChannelsWidgetRowProps {
   colorizeEnabled: boolean;
   colorizeAlpha: number;
   color: ColorArray;
-  channelControlPoints: {
-    color: ColorArray;
-    opacity: number;
-    x: number;
-  }[];
+  channelControlPoints: ControlPoint[];
   channelDataForChannel: Channel;
 
   changeOneChannelSetting: <K extends ChannelStateKey>(
