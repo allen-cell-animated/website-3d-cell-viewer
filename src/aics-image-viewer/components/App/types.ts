@@ -31,12 +31,14 @@ export interface AppProps {
     resetCameraButton: boolean;
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
+    showTransformButton?: boolean;
   };
   viewerConfig: {
     showAxes: boolean;
     showBoundingBox: boolean;
     boundingBoxColor?: ColorArray;
     backgroundColor?: ColorArray;
+    transformEnabled?: boolean;
     autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
@@ -55,6 +57,10 @@ export interface AppProps {
   preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
+  transform?: {
+    translate: [number, number, number];
+    rotate: [number, number, number];
+  }
 
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
@@ -68,6 +74,7 @@ export interface UserSelectionState {
   pathTrace: boolean;
   showAxes: boolean;
   showBoundingBox: boolean;
+  transformEnabled: boolean;
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
   alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,

@@ -140,8 +140,8 @@ export default class App extends React.Component<AppProps, AppState> {
         pathtrace = true;
         maxproject = false;
       } else if (props.viewerConfig.mode === "maxprojection") {
-        pathtrace = true;
-        maxproject = false;
+        pathtrace = false;
+        maxproject = true;
       } else {
         pathtrace = false;
         maxproject = false;
@@ -183,6 +183,7 @@ export default class App extends React.Component<AppProps, AppState> {
         showBoundingBox: props.viewerConfig.showBoundingBox,
         boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
         backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
+        transformEnabled: (props.viewerConfig.transformEnabled || false) && !!props.transform,
         maxProject: maxproject,
         pathTrace: pathtrace,
         alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -827,6 +828,15 @@ export default class App extends React.Component<AppProps, AppState> {
     boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
     backgroundColor: (color, view3d, _image) => view3d.setBackgroundColor(colorArrayToFloats(color)),
 
+    transformEnabled: (enabled, view3d, image) => {
+      const { transform } = this.props;
+      if (!transform) {
+        return;
+      }
+      view3d.setVolumeTranslation(image, enabled ? transform.translate : [0, 0, 0]);
+      view3d.setVolumeRotation(image, enabled ? transform.rotate : [0, 0, 0]);
+    },
+
     alphaMaskSliderLevel: (value, view3d, image) => {
       view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
       view3d.updateActiveChannels(image);
@@ -1014,6 +1024,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   changeAxisShowing = (showing: boolean): void => this.changeUserSelection("showAxes", showing);
   changeBoundingBoxShowing = (showing: boolean): void => this.changeUserSelection("showBoundingBox", showing);
+  changeTransformEnabled = (enabled: boolean): void => this.changeUserSelection("transformEnabled", enabled);
 
   onResetCamera(): void {
     if (this.state.view3d) {
@@ -1172,6 +1183,7 @@ export default class App extends React.Component<AppProps, AppState> {
               renderSetting={
                 maxProject ? RenderMode.maxProject : pathTrace ? RenderMode.pathTrace : RenderMode.volumetric
               }
+              transformEnabled={userSelections.transformEnabled}
               onViewModeChange={this.onViewModeChange}
               onResetCamera={this.onResetCamera}
               onAutorotateChange={this.onAutorotateChange}
@@ -1179,6 +1191,7 @@ export default class App extends React.Component<AppProps, AppState> {
               onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
               changeAxisShowing={this.changeAxisShowing}
               changeBoundingBoxShowing={this.changeBoundingBoxShowing}
+              changeTransformEnabled={this.changeTransformEnabled}
               downloadScreenshot={this.saveScreenshot}
               renderConfig={renderConfig}
             />

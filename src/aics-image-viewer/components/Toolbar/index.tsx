@@ -21,6 +21,7 @@ interface ToolbarProps {
   canPathTrace: boolean;
   showAxes: boolean;
   showBoundingBox: boolean;
+  transformEnabled: boolean;
 
   onViewModeChange: (mode: ViewMode) => void;
   onResetCamera: () => void;
@@ -30,6 +31,7 @@ interface ToolbarProps {
   onChangeRenderingAlgorithm: (newAlgorithm: RenderMode) => void;
   changeAxisShowing: (showing: boolean) => void;
   changeBoundingBoxShowing: (showing: boolean) => void;
+  changeTransformEnabled: (enabled: boolean) => void;
 
   renderConfig: {
     autoRotateButton: boolean;
@@ -38,11 +40,12 @@ interface ToolbarProps {
     resetCameraButton: boolean;
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
+    showTransformButton?: boolean;
   };
 }
 
 export default function Toolbar(props: ToolbarProps): React.ReactElement {
-  const { renderConfig, showAxes, showBoundingBox } = props;
+  const { renderConfig, showAxes, showBoundingBox, transformEnabled } = props;
 
   const twoDMode = props.mode !== ViewMode.threeD;
 
@@ -52,6 +55,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
 
   const toggleAxis = (): void => props.changeAxisShowing(!props.showAxes);
   const toggleBoundingBox = (): void => props.changeBoundingBoxShowing(!props.showBoundingBox);
+  const toggleTransform = (): void => props.changeTransformEnabled(!props.transformEnabled);
 
   // TODO remove ant-btn-icon-only hack when upgrading antd
   const classForToggleBtn = (active: boolean): string =>
@@ -132,6 +136,11 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
               </Tooltip>
             )}
           </span>
+        )}
+        {renderConfig.showTransformButton && (
+          <Button className={classForToggleBtn(transformEnabled)} onClick={toggleTransform}>
+            A
+          </Button>
         )}
       </span>
 
