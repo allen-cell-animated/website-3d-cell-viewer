@@ -10,7 +10,7 @@ export default class SmarterSlider extends React.Component<NouisliderProps, { sh
     this.state = { shouldUpdate: true };
   }
 
-  shouldComponentUpdate = () => this.state.shouldUpdate;
+  shouldComponentUpdate = (): boolean => this.state.shouldUpdate;
 
   wrapEventHandler(shouldUpdate: boolean, handler?: (...args: CallbackArgs) => void) {
     return (...args: CallbackArgs) => {
@@ -19,7 +19,7 @@ export default class SmarterSlider extends React.Component<NouisliderProps, { sh
     };
   }
 
-  render() {
+  render(): React.ReactNode {
     const onStart = this.wrapEventHandler(false, this.props.onStart);
     const onEnd = this.wrapEventHandler(true, this.props.onEnd);
     return <Nouislider {...{ ...this.props, onStart, onEnd }} />;

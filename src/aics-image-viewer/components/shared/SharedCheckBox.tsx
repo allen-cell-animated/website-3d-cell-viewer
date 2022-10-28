@@ -1,5 +1,6 @@
 import React from "react";
 import { Checkbox } from "antd";
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
 
 type SharedCheckboxProps<T> = React.PropsWithChildren<{
   allOptions: T[];
@@ -26,7 +27,7 @@ export default class SharedCheckbox<T> extends React.Component<SharedCheckboxPro
   }
 
   // TODO: Is this component's derived state strictly necessary? Can some or all of it be removed?
-  static getDerivedStateFromProps(newProps: SharedCheckboxProps<any>) {
+  static getDerivedStateFromProps<T>(newProps: SharedCheckboxProps<any>): Partial<SharedCheckboxState<T>> {
     const { checkedList, allOptions } = newProps;
     return {
       checkedList,
@@ -35,7 +36,7 @@ export default class SharedCheckbox<T> extends React.Component<SharedCheckboxPro
     };
   }
 
-  onCheckAllChange({ target }) {
+  onCheckAllChange({ target }: CheckboxChangeEvent): void {
     const { allOptions, onChecked, onUnchecked } = this.props;
     target.checked ? onChecked(allOptions) : onUnchecked(allOptions);
     this.setState({
@@ -45,7 +46,7 @@ export default class SharedCheckbox<T> extends React.Component<SharedCheckboxPro
     });
   }
 
-  render() {
+  render(): React.ReactNode {
     return (
       <Checkbox
         indeterminate={this.state.indeterminate}

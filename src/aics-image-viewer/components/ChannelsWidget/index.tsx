@@ -3,7 +3,7 @@ import { map, find } from "lodash";
 import { Card, Collapse, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
-import { getDisplayName } from "../../shared/utils/viewerChannelSettings";
+import { ChannelGrouping, getDisplayName } from "../../shared/utils/viewerChannelSettings";
 
 import colorPalette from "../../shared/colorPalette";
 import SharedCheckBox from "../shared/SharedCheckBox";
@@ -21,7 +21,7 @@ export interface ChannelsWidgetProps {
   imageName: string | undefined;
   channelDataChannels: Channel[] | undefined;
   channelSettings: ChannelState[];
-  channelGroupedByType: { [key: string]: number[] };
+  channelGroupedByType: ChannelGrouping;
   channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
@@ -58,7 +58,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   hideVolumes = this.createCheckboxHandler("volumeEnabled", false);
   hideSurfaces = this.createCheckboxHandler("isosurfaceEnabled", false);
 
-  renderVisibilityControls(channelArray: number[]) {
+  renderVisibilityControls(channelArray: number[]): React.ReactNode {
     const { channelSettings, channelDataChannels } = this.props;
 
     let volChecked: number[] = [];
@@ -97,7 +97,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
     );
   }
 
-  getRows() {
+  getRows(): React.ReactNode {
     const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, imageName, viewerChannelSettings } =
       this.props;
 
@@ -154,7 +154,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
     });
   }
 
-  render() {
+  render(): React.ReactNode {
     return <div>{this.getRows()}</div>;
   }
 }

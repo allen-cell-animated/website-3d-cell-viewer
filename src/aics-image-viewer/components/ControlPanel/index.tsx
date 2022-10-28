@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { Card, Button, Dropdown, Icon, Menu } from "antd";
+import { ClickParam } from "antd/lib/menu";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
@@ -30,18 +31,21 @@ const ControlTabNames = {
   [ControlTab.Advanced]: "Advanced Settings",
 };
 
-export default function ControlPanel(props: ControlPanelProps) {
+export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = useState(ControlTab.Channels);
 
   const { viewerChannelSettings, renderConfig, hasImage } = props;
 
-  const makeTurnOnPresetFn = ({ key }) => props.onApplyColorPresets(PRESET_COLOR_MAP[key].colors);
+  // TODO key is a number, but ClickParam assumes keys will always be strings
+  //   if future versions of antd make this type more permissive, remove ugly double-cast
+  const makeTurnOnPresetFn = ({ key }: ClickParam): void =>
+    props.onApplyColorPresets(PRESET_COLOR_MAP[key as unknown as number].colors);
 
-  const renderColorPresetsDropdown = () => {
+  const renderColorPresetsDropdown = (): React.ReactNode => {
     const dropDownMenuItems = (
       <Menu onClick={makeTurnOnPresetFn}>
-        {PRESET_COLOR_MAP.map((preset, _index) => (
-          <Menu.Item key={preset.key}>{preset.name}</Menu.Item>
+        {PRESET_COLOR_MAP.map((preset, index) => (
+          <Menu.Item key={index}>{preset.name}</Menu.Item>
         ))}
       </Menu>
     );

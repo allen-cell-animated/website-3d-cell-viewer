@@ -1,20 +1,18 @@
 export default class HttpClient {
   // fetch response.json() is a promise but we want return the json itself
-  parseJSON(response, options) {
+  parseJSON(response: Response, _options: Parameters<typeof fetch>[1]): Promise<Response> {
     return response
       .json()
       .then((json) => ({
+        ...response,
         locationHeader: response.headers.get("Location"),
-        status: response.status,
-        ok: response.ok,
         data: json || {
           data: [],
           total_count: 0,
         },
       }))
       .catch(() => ({
-        status: response.status,
-        ok: response.ok,
+        ...response,
         data: {
           error: "unknown_error",
           message: "error in parsing response json",
@@ -24,7 +22,7 @@ export default class HttpClient {
       }));
   }
 
-  getJSON(url, options) {
+  getJSON(url: string, options: Parameters<typeof fetch>[1]): Promise<Response> {
     return fetch(url, options)
       .then((response) => {
         return this.parseJSON(response, options);

@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { find } from "lodash";
 
 import "antd/dist/antd.less";
 
@@ -8,10 +7,10 @@ import "antd/dist/antd.less";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
-import { ImageViewerApp } from "../src";
+import { ImageViewerApp, ViewerChannelSettings } from "../src";
 import FirebaseRequest from "./firebase";
 
-export const VIEWER_3D_SETTINGS = {
+export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   groups: [
     {
       name: "Observed channels",
@@ -54,11 +53,14 @@ export const VIEWER_3D_SETTINGS = {
   maskChannelName: "SEG_Memb",
 };
 
-function parseQueryString() {
+type ParamKeys = "mask" | "ch" | "luts" | "colors" | "image" | "url" | "file" | "dataset" | "id";
+type Params = { [_ in ParamKeys]?: string };
+
+function parseQueryString(): Params {
   var pairs = location.search.slice(1).split("&");
   var result = {};
-  pairs.forEach(function (pair) {
-    pair = pair.split("=");
+  pairs.forEach((pairString) => {
+    const pair = pairString.split("=");
     result[pair[0]] = decodeURIComponent(pair[1] || "");
   });
   return JSON.parse(JSON.stringify(result));
@@ -84,7 +86,9 @@ const viewerConfig = {
   maskAlpha: 50,
   brightness: 70,
   density: 50,
-  levels: [0, 128, 255],
+  levels: [0, 128, 255] as [number, number, number],
+  backgroundColor: [0, 0, 0] as [number, number, number],
+  boundingBoxColor: [255, 255, 255] as [number, number, number],
 };
 
 if (params) {
@@ -95,7 +99,7 @@ if (params) {
     // ?ch=1,2
     // ?luts=0,255,0,255
     // ?colors=ff0000,00ff00
-    const initialChannelSettings = {
+    const initialChannelSettings: ViewerChannelSettings = {
       groups: [{ name: "Channels", channels: [] }],
     };
     const ch = initialChannelSettings.groups[0].channels;
@@ -209,17 +213,18 @@ if (params) {
     db.getAvailableDatasets()
       .then((datasets) => {
         for (let i = 0; i < datasets.length; ++i) {
-          const names = Object.keys(datasets[i].datasets);
+          console.log(datasets);
+          const names = Object.keys(datasets[i].datasets!);
           for (let j = 0; j < names.length; ++j) {
             if (names[j] === params.dataset) {
-              return datasets[i].datasets[names[j]];
+              return datasets[i].datasets![names[j]];
             }
           }
         }
         return undefined;
       })
       .then((dataset) => {
-        return db.selectDataset(dataset.manifest);
+        return db.selectDataset(dataset!.manifest!);
       })
       .then((datasetData) => {
         args.baseurl = datasetData.volumeViewerDataRoot + "/";
@@ -227,11 +232,11 @@ if (params) {
         //fovDownloadHref = datasetData.downloadRoot + "/" + params.id;
       })
       .then(() => {
-        return db.getFileInfoByCellId(params.id);
+        return db.getFileInfoByCellId(params.id!); // guarded above
       })
       .then((fileInfo) => {
-        args.cellPath = fileInfo.volumeviewerPath;
-        args.fovPath = fileInfo.fovVolumeviewerPath;
+        args.cellPath = fileInfo!.volumeviewerPath;
+        args.fovPath = fileInfo!.fovVolumeviewerPath;
         runApp();
 
         // only now do we have all the data needed
@@ -246,7 +251,7 @@ if (params) {
 function runApp() {
   ReactDOM.render(
     <ImageViewerApp
-      cellId={args.cellid}
+      cellId={args.cellid.toString()}
       baseUrl={args.baseurl}
       appHeight="90vh"
       canvasMargin="0 120px 0 0"

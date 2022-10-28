@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
-import { Channel } from "@aics/volume-viewer";
+import { Channel, ControlPoint } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
 
@@ -18,6 +18,7 @@ import {
 } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -32,11 +33,7 @@ interface ChannelsWidgetRowProps {
   colorizeEnabled: boolean;
   colorizeAlpha: number;
   color: ColorArray;
-  channelControlPoints: {
-    color: ColorArray;
-    opacity: number;
-    x: number;
-  }[];
+  channelControlPoints: ControlPoint[];
   channelDataForChannel: Channel;
 
   changeOneChannelSetting: <K extends ChannelStateKey>(
@@ -62,7 +59,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     };
   }
 
-  volumeCheckHandler({ target }: { target: { checked: boolean } }) {
+  volumeCheckHandler({ target }: CheckboxChangeEvent): void {
     const { channelName, index, changeOneChannelSetting, isosurfaceChecked } = this.props;
     if (!target.checked && !isosurfaceChecked) {
       this.setState({ controlsOpen: false });
@@ -70,7 +67,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     changeOneChannelSetting(channelName, index, "volumeEnabled", target.checked);
   }
 
-  isosurfaceCheckHandler({ target }: { target: { checked: boolean } }) {
+  isosurfaceCheckHandler({ target }: CheckboxChangeEvent): void {
     const { channelName, index, changeOneChannelSetting, volumeChecked } = this.props;
     if (!target.checked && !volumeChecked) {
       this.setState({ controlsOpen: false });
@@ -87,9 +84,14 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
 
   onIsovalueChange = this.createChannelSettingHandler("isovalue");
   onOpacityChangeUnwrapped = this.createChannelSettingHandler("opacity");
-  onOpacityChange = (newValue: number) => this.onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+  onOpacityChange = (newValue: number): void => this.onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
-  createSliderRow = (name: string, maxValue: number, defaultValue: number, onChange: (newValue: any) => void) => (
+  createSliderRow = (
+    name: string,
+    maxValue: number,
+    defaultValue: number,
+    onChange: (newValue: any) => void
+  ): React.ReactNode => (
     <Row>
       <Col span={10}>
         <label style={STYLES.controlName}>{name}</label>
@@ -107,7 +109,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     </Row>
   );
 
-  toggleControlsOpen() {
+  toggleControlsOpen(): void {
     const { isosurfaceChecked, volumeChecked } = this.props;
     if (isosurfaceChecked || volumeChecked) {
       this.setState({
@@ -116,13 +118,13 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     }
   }
 
-  onColorChange(newRGB: ColorObject, _oldRGB?: ColorObject, index?: number) {
+  onColorChange(newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void {
     const { channelName } = this.props;
     const color = colorObjectToArray(newRGB);
     this.props.changeOneChannelSetting(channelName, index!, "color", color);
   }
 
-  createColorPicker = () => (
+  createColorPicker = (): React.ReactNode => (
     <div style={STYLES.colorPicker}>
       <ColorPicker
         color={colorArrayToObject(this.props.color)}
@@ -135,7 +137,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     </div>
   );
 
-  renderActions = () => [
+  renderActions = (): React.ReactNode[] => [
     <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
       volume
     </Checkbox>,
@@ -150,7 +152,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     />,
   ];
 
-  createTFEditor() {
+  createTFEditor(): React.ReactNode {
     const {
       channelControlPoints,
       channelDataForChannel,
@@ -186,7 +188,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     saveIsosurface(index, format);
   };
 
-  renderSurfaceControls = () => (
+  renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
       <h4 className="ant-list-item-meta-title">Surface settings:</h4>
       {this.createSliderRow("isovalue", 255, ISOVALUE_DEFAULT, this.onIsovalueChange)}
@@ -213,7 +215,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     </Col>
   );
 
-  renderControls = () => (
+  renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
       {this.props.volumeChecked && (
         <Row type="flex" justify="space-between" className="volume-settings">
@@ -229,7 +231,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     </div>
   );
 
-  render() {
+  render(): React.ReactNode {
     const rowClass = this.state.controlsOpen ? "row-card" : "row-card controls-closed";
     return (
       <List.Item key={this.props.index} className={rowClass} actions={this.renderActions()}>

@@ -41,7 +41,7 @@ interface ToolbarProps {
   };
 }
 
-export default function Toolbar(props: ToolbarProps) {
+export default function Toolbar(props: ToolbarProps): React.ReactElement {
   const { renderConfig, showAxes, showBoundingBox } = props;
 
   const twoDMode = props.mode !== ViewMode.threeD;
@@ -50,11 +50,12 @@ export default function Toolbar(props: ToolbarProps) {
     renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
   const renderGroup4 = renderConfig.showAxesButton || renderConfig.showBoundingBoxButton;
 
-  const toggleAxis = () => props.changeAxisShowing(!props.showAxes);
-  const toggleBoundingBox = () => props.changeBoundingBoxShowing(!props.showBoundingBox);
+  const toggleAxis = (): void => props.changeAxisShowing(!props.showAxes);
+  const toggleBoundingBox = (): void => props.changeBoundingBoxShowing(!props.showBoundingBox);
 
   // TODO remove ant-btn-icon-only hack when upgrading antd
-  const classForToggleBtn = (active: boolean) => "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
+  const classForToggleBtn = (active: boolean): string =>
+    "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
   return (
     <div className="viewer-toolbar">

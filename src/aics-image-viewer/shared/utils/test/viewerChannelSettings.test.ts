@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
+import { ChannelGrouping } from "../viewerChannelSettings";
 
 import {
   matchChannel,
@@ -35,7 +36,7 @@ describe("viewer settings", () => {
         ],
         maskChannelName: "",
       };
-      const expected = { "1": [1], "2": [2], "3": [0] };
+      const expected: ChannelGrouping = { "1": [1], "2": [2], "3": [0] };
       const result = makeChannelIndexGrouping(channelNames, settings);
       expect(Object.keys(result).length).toBe(3);
       for (const i in result) {
@@ -53,7 +54,7 @@ describe("viewer settings", () => {
         ],
         maskChannelName: "",
       };
-      const expected = { "1": [], "2": [], "3": [], Other: [0, 1, 2] };
+      const expected: ChannelGrouping = { "1": [], "2": [], "3": [], Other: [0, 1, 2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
       expect(Object.keys(result).length).toBe(4);
       for (const i in result) {
@@ -70,7 +71,7 @@ describe("viewer settings", () => {
         ],
         maskChannelName: "",
       };
-      const expected = { "1": [0], "2": [1], "3": [], Other: [2] };
+      const expected: ChannelGrouping = { "1": [0], "2": [1], "3": [], Other: [2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
       expect(Object.keys(result).length).toBe(4);
       for (const i in result) {
@@ -83,7 +84,7 @@ describe("viewer settings", () => {
         groups: [],
         maskChannelName: "",
       };
-      const expected = { Channels: [0, 1, 2] };
+      const expected: ChannelGrouping = { Channels: [0, 1, 2] };
       const result = makeChannelIndexGrouping(channelNames, settings);
       expect(Object.keys(result).length).toBe(1);
       for (const i in result) {

@@ -13,7 +13,7 @@ const themeVariables = lessToJs(
 );
 
 module.exports = {
-  entry: ["./public/index.jsx"],
+  entry: ["./public/index.tsx"],
   output: {
     path: path.resolve(__dirname, "imageviewer"),
     filename: "image-viewer-ui.bundle.js",

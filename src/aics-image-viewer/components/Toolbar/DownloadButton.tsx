@@ -8,7 +8,7 @@ interface DownloadButtonProps {
   hasFov: boolean;
 }
 
-export default function DownloadButton({ fovDownloadHref, cellDownloadHref, hasFov }: DownloadButtonProps) {
+const DownloadButton: React.FC<DownloadButtonProps> = ({ fovDownloadHref, cellDownloadHref, hasFov }) => {
   if (hasFov) {
     const menu = (
       <Menu className="download-dropdown">
@@ -40,4 +40,6 @@ export default function DownloadButton({ fovDownloadHref, cellDownloadHref, hasF
   } else {
     return null;
   }
-}
+};
+
+export default DownloadButton;

@@ -1,4 +1,4 @@
-import { View3d, Volume } from "@aics/volume-viewer";
+import { ControlPoint, View3d, Volume } from "@aics/volume-viewer";
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 import { ColorArray } from "./colorRepresentations";
 
@@ -13,11 +13,7 @@ export interface ChannelState {
   opacity: number;
   color: ColorArray;
   dataReady: boolean;
-  controlPoints: {
-    color: ColorArray;
-    opacity: number;
-    x: number;
-  }[];
+  controlPoints: ControlPoint[];
 }
 
 export type ChannelStateKey = keyof ChannelState;
@@ -29,7 +25,7 @@ export type ChannelStateChangeHandlers = {
 export interface ViewerChannelSetting {
   // regex or string or array of regexes or strings or number for raw channel index
   // if you want to match on channel index, then you must provide the index here.
-  match: string[] | string | number;
+  match: (string | number)[] | string | number;
 
   // name is the display name for this channel.
   // if name is not given, use raw data channel name for display
@@ -60,6 +56,8 @@ export interface ViewerChannelSettings {
   groups: ViewerChannelGroup[];
 }
 
+export type ChannelGrouping = { [key: string]: number[] };
+
 export function matchChannel(channel: string, channelIndex: number, c: ViewerChannelSetting): boolean {
   // c could be a number, an array of (strings or numbers), or a single regex
   if (typeof c.match === "number") {
@@ -86,7 +84,7 @@ export function matchChannel(channel: string, channelIndex: number, c: ViewerCha
     }
   } else {
     throw new Error(
-      "match is required for channel settings groups, and must be a string, array of strings, or integer"
+      "match is required for channel settings groups, and must be a string, number, or array of strings or numbers"
     );
   }
   return false;
@@ -135,9 +133,9 @@ export function getDisplayName(name: string, index: number, settings?: ViewerCha
 export function makeChannelIndexGrouping(
   channels: string[],
   settings: ViewerChannelSettings
-): { [key: string]: number[] } {
+): ChannelGrouping {
   const groups = settings.groups;
-  const grouping = {};
+  const grouping: ChannelGrouping = {};
   const channelsMatched: number[] = [];
   // this is kinda inefficient but we want to ensure the order as specified in viewerChannelSettings
   if (groups !== undefined) {

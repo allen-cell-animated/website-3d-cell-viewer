@@ -19,24 +19,18 @@ const ACTIVE_AXIS_MAP: { [_ in ViewMode]: AxisName | null } = {
   [ViewMode.threeD]: null,
 };
 
+type PerAxis<T> = { [_ in AxisName]: T };
+
 interface AxisClipSlidersProps {
   mode: ViewMode;
   setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
-  numSlices: {
-    x: number;
-    y: number;
-    z: number;
-  };
+  numSlices: PerAxis<number>;
 }
 
 interface AxisClipSlidersState {
   playing: boolean;
   intervalId: number;
-  sliders: {
-    x: [number, number];
-    y: [number, number];
-    z: [number, number];
-  };
+  sliders: PerAxis<[number, number]>;
 }
 
 export default class AxisClipSliders extends React.Component<AxisClipSlidersProps, AxisClipSlidersState> {
@@ -58,7 +52,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   // Reset sliders and pause if mode or fov has changed
   // TODO: this reset-state-on-props-update pattern is somewhat bad practice,
   //   and indicates some state should potentially be lifted out of this component.
-  componentDidUpdate(prevProps: AxisClipSlidersProps) {
+  componentDidUpdate(prevProps: AxisClipSlidersProps): void {
     const numSlicesChanged = AXES.reduce(
       (hasChanged, axis) => hasChanged || prevProps.numSlices[axis] !== this.props.numSlices[axis],
       false
@@ -72,7 +66,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  getSliderDefaults() {
+  getSliderDefaults(): PerAxis<[number, number]> {
     const activeAxis = this.getActiveAxis();
     return mapValues(
       this.props.numSlices,
@@ -80,9 +74,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  getActiveAxis = () => ACTIVE_AXIS_MAP[this.props.mode];
+  getActiveAxis = (): AxisName | null => ACTIVE_AXIS_MAP[this.props.mode];
 
-  setSliderState(axis: string, newState: [number, number]) {
+  setSliderState(axis: string, newState: [number, number]): void {
     this.setState({
       sliders: {
         ...this.state.sliders,
@@ -96,7 +90,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
    * Wraps in both directions.
    * @param backward boolean indicating move direction.
    */
-  moveSlice(backward: boolean = false) {
+  moveSlice(backward: boolean = false): void {
     const activeAxis = this.getActiveAxis();
     if (activeAxis !== null) {
       const delta = backward ? -1 : 1;
@@ -107,26 +101,26 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  step(backward: boolean) {
+  step(backward: boolean): void {
     this.pause();
     this.moveSlice(backward);
   }
 
-  play() {
+  play(): void {
     if (this.getActiveAxis() && !this.state.playing) {
       const intervalId = window.setInterval(this.moveSlice, PLAY_RATE_MS_PER_STEP);
       this.setState({ playing: true, intervalId });
     }
   }
 
-  pause() {
+  pause(): void {
     window.clearInterval(this.state.intervalId);
     if (this.state.playing) {
       this.setState({ playing: false });
     }
   }
 
-  createSlider(axis: AxisName, twoD: boolean) {
+  createSlider(axis: AxisName, twoD: boolean): React.ReactNode {
     const { playing, sliders } = this.state;
     const numSlices = this.props.numSlices[axis];
     const sliderVals = sliders[axis];
@@ -172,7 +166,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  updateClipping(axis: AxisName, values: [number, number]) {
+  updateClipping(axis: AxisName, values: [number, number]): void {
     if (this.props.setAxisClip) {
       // get a value from -0.5..0.5
       const max = this.props.numSlices[axis];
@@ -183,7 +177,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  makeSliderSlideFn(axis: AxisName) {
+  makeSliderSlideFn(axis: AxisName): (values: number[]) => void {
     return (values: number[]) => {
       // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
       const twoValues: [number, number] = [values[0], values[values.length - 1]];
@@ -192,11 +186,11 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     };
   }
 
-  makeSliderSetFn(axis: AxisName) {
+  makeSliderSetFn(axis: AxisName): (values: number[]) => void {
     return (values: number[]) => this.updateClipping(axis, [values[0], values[values.length - 1]]);
   }
 
-  render() {
+  render(): React.ReactNode {
     const activeAxis = this.getActiveAxis();
     return (
       <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
