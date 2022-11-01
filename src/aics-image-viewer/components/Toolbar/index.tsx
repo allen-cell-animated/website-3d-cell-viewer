@@ -63,6 +63,16 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
 
   return (
     <div className="viewer-toolbar">
+      {renderConfig.showTransformButton && (
+        <span className="viewer-toolbar-left viewer-toolbar-group">
+          <Button
+            className={transformEnabled ? "btn-borderless btn-active" : "btn-borderless"}
+            onClick={toggleTransform}
+          >
+            {transformEnabled ? "Unalign" : "Align"}
+          </Button>
+        </span>
+      )}
       <span className="viewer-toolbar-center">
         {renderGroup1 && (
           <span className="viewer-toolbar-group">
@@ -136,11 +146,6 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
               </Tooltip>
             )}
           </span>
-        )}
-        {renderConfig.showTransformButton && (
-          <Button className={classForToggleBtn(transformEnabled)} onClick={toggleTransform}>
-            A
-          </Button>
         )}
       </span>
 
