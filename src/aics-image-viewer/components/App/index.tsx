@@ -193,7 +193,7 @@ export default class App extends React.Component<AppProps, AppState> {
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         channelSettings: [],
       },
-      currentlyLoadedImagePath: "",
+      currentlyLoadedImagePath: undefined,
       cachingInProgress: false,
       path: "",
     };

@@ -105,7 +105,7 @@ export interface AppState {
   hasCellId: boolean;
   // state set by the UI:
   userSelections: UserSelectionState;
-  currentlyLoadedImagePath: string;
+  currentlyLoadedImagePath?: string;
   cachingInProgress: boolean;
   path: string;
 }
