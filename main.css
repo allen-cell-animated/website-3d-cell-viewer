@@ -536,7 +536,7 @@ body{
     border-bottom:none;
     padding:0 16px;
   }
-.control-panel .ant-card-head-title{
+.control-panel > .ant-card-head > .ant-card-head-wrapper > .ant-card-head-title{
     padding-top:0;
   }
 .control-panel .ant-card-body{
