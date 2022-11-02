@@ -85,7 +85,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         </Tooltip>
 
         <Tooltip
-          title={ControlTabNames[ControlTab.Channels]}
+          title={ControlTabNames[ControlTab.Advanced]}
           placement="right"
           {...(!props.collapsed && { visible: false })}
         >
