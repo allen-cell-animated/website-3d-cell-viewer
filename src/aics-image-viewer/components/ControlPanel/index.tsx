@@ -71,14 +71,12 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         <div className="tab-divider" />
         <Button
           className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-          disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Channels)}
         >
           <ViewerIcon type="channels" />
         </Button>
         <Button
           className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-          disabled={props.collapsed}
           onClick={() => setTab(ControlTab.Advanced)}
         >
           <ViewerIcon type="preferences" />
