@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Card, Button, Dropdown, Icon, Menu } from "antd";
+import { Card, Button, Dropdown, Icon, Menu, Tooltip } from "antd";
 import { ClickParam } from "antd/lib/menu";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
@@ -68,21 +68,34 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         >
           <ViewerIcon type="closePanel" />
         </Button>
+
         <div className="tab-divider" />
-        <Button
-          className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-          disabled={props.collapsed}
-          onClick={() => setTab(ControlTab.Channels)}
+
+        <Tooltip
+          title={ControlTabNames[ControlTab.Channels]}
+          placement="right"
+          {...(!props.collapsed && { visible: false })}
         >
-          <ViewerIcon type="channels" />
-        </Button>
-        <Button
-          className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-          disabled={props.collapsed}
-          onClick={() => setTab(ControlTab.Advanced)}
+          <Button
+            className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
+            onClick={() => setTab(ControlTab.Channels)}
+          >
+            <ViewerIcon type="channels" />
+          </Button>
+        </Tooltip>
+
+        <Tooltip
+          title={ControlTabNames[ControlTab.Advanced]}
+          placement="right"
+          {...(!props.collapsed && { visible: false })}
         >
-          <ViewerIcon type="preferences" />
-        </Button>
+          <Button
+            className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
+            onClick={() => setTab(ControlTab.Advanced)}
+          >
+            <ViewerIcon type="preferences" />
+          </Button>
+        </Tooltip>
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
