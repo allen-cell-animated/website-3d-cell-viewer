@@ -162,7 +162,7 @@ if (params) {
     } else {
       // image not specified
       if (decodedurl.endsWith(".zarr")) {
-        decodedimage = "0";
+        decodedimage = "";
       } else {
         const spliturl = decodedurl.split("/");
         decodedimage = spliturl[spliturl.length - 1];
