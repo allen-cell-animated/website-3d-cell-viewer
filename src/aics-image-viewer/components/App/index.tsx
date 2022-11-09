@@ -140,8 +140,8 @@ export default class App extends React.Component<AppProps, AppState> {
         pathtrace = true;
         maxproject = false;
       } else if (props.viewerConfig.mode === "maxprojection") {
-        pathtrace = true;
-        maxproject = false;
+        pathtrace = false;
+        maxproject = true;
       } else {
         pathtrace = false;
         maxproject = false;
@@ -274,6 +274,15 @@ export default class App extends React.Component<AppProps, AppState> {
         this.beginRequestImage();
       }
     }
+
+    if (!isEqual(prevProps.transform, this.props.transform)) {
+      const { view3d, image } = this.state;
+      if (view3d && image) {
+        view3d.setVolumeTranslation(image, this.props.transform?.translate || [0, 0, 0]);
+        view3d.setVolumeRotation(image, this.props.transform?.rotate || [0, 0, 0]);
+      }
+    }
+
     const channelsChanged = !isEqual(userSelections.channelSettings, prevState.userSelections.channelSettings);
     const newImage = this.state.image && !prevState.image;
     const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
@@ -499,6 +508,9 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setCameraMode(userSelections.mode);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
+
+    view3d.setVolumeTranslation(aimg, this.props.transform?.translate || [0, 0, 0]);
+    view3d.setVolumeRotation(aimg, this.props.transform?.rotate || [0, 0, 0]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }

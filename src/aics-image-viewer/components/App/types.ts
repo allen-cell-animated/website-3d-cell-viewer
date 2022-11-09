@@ -55,6 +55,10 @@ export interface AppProps {
   preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
+  transform?: {
+    translate: [number, number, number];
+    rotate: [number, number, number];
+  };
 
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
