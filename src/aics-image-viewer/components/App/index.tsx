@@ -183,7 +183,6 @@ export default class App extends React.Component<AppProps, AppState> {
         showBoundingBox: props.viewerConfig.showBoundingBox,
         boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
         backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
-        transformEnabled: (props.viewerConfig.transformEnabled || false) && !!props.transform,
         maxProject: maxproject,
         pathTrace: pathtrace,
         alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
@@ -275,6 +274,15 @@ export default class App extends React.Component<AppProps, AppState> {
         this.beginRequestImage();
       }
     }
+
+    if (!isEqual(prevProps.transform, this.props.transform)) {
+      const { view3d, image } = this.state;
+      if (view3d && image) {
+        view3d.setVolumeTranslation(image, this.props.transform?.translate || [0, 0, 0]);
+        view3d.setVolumeRotation(image, this.props.transform?.rotate || [0, 0, 0]);
+      }
+    }
+
     const channelsChanged = !isEqual(userSelections.channelSettings, prevState.userSelections.channelSettings);
     const newImage = this.state.image && !prevState.image;
     const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
@@ -500,6 +508,9 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setCameraMode(userSelections.mode);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
+
+    view3d.setVolumeTranslation(aimg, this.props.transform?.translate || [0, 0, 0]);
+    view3d.setVolumeRotation(aimg, this.props.transform?.rotate || [0, 0, 0]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -828,15 +839,6 @@ export default class App extends React.Component<AppProps, AppState> {
     boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
     backgroundColor: (color, view3d, _image) => view3d.setBackgroundColor(colorArrayToFloats(color)),
 
-    transformEnabled: (enabled, view3d, image) => {
-      const { transform } = this.props;
-      if (!transform) {
-        return;
-      }
-      view3d.setVolumeTranslation(image, enabled ? transform.translate : [0, 0, 0]);
-      view3d.setVolumeRotation(image, enabled ? transform.rotate : [0, 0, 0]);
-    },
-
     alphaMaskSliderLevel: (value, view3d, image) => {
       view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
       view3d.updateActiveChannels(image);
@@ -1024,7 +1026,6 @@ export default class App extends React.Component<AppProps, AppState> {
 
   changeAxisShowing = (showing: boolean): void => this.changeUserSelection("showAxes", showing);
   changeBoundingBoxShowing = (showing: boolean): void => this.changeUserSelection("showBoundingBox", showing);
-  changeTransformEnabled = (enabled: boolean): void => this.changeUserSelection("transformEnabled", enabled);
 
   onResetCamera(): void {
     if (this.state.view3d) {
@@ -1183,7 +1184,6 @@ export default class App extends React.Component<AppProps, AppState> {
               renderSetting={
                 maxProject ? RenderMode.maxProject : pathTrace ? RenderMode.pathTrace : RenderMode.volumetric
               }
-              transformEnabled={userSelections.transformEnabled}
               onViewModeChange={this.onViewModeChange}
               onResetCamera={this.onResetCamera}
               onAutorotateChange={this.onAutorotateChange}
@@ -1191,7 +1191,6 @@ export default class App extends React.Component<AppProps, AppState> {
               onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
               changeAxisShowing={this.changeAxisShowing}
               changeBoundingBoxShowing={this.changeBoundingBoxShowing}
-              changeTransformEnabled={this.changeTransformEnabled}
               downloadScreenshot={this.saveScreenshot}
               renderConfig={renderConfig}
             />
