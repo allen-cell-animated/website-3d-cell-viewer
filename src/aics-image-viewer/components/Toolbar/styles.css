@@ -51,13 +51,17 @@
     }
 
     &.btn-active,
-    &:hover,
-    &:focus-within {
+    &:hover {
       outline: none;
       box-shadow: none;
       background-color: #4b4b4b;
       color: white;
       border-color: $light-gray;
+    }
+
+    &:focus-within:not(.btn-active):not(:hover) {
+      background-color: transparent;
+      border-color: transparent;
     }
 
     &[ant-click-animating-without-extra-node="true"]::after {
@@ -75,10 +79,11 @@
 
   .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
     background-color: black;
+    box-shadow: -1px 0px 0px 0px transparent;
+    transition-property: color, background-color, border-color, box-shadow;
 
     &.ant-radio-button-wrapper-checked,
-    &:hover,
-    &:focus-within {
+    &:hover {
       outline: none;
       background-color: #4b4b4b;
       color: white;
@@ -87,6 +92,14 @@
       &:not(:first-child) {
         box-shadow: -1px 0px 0px 0px $light-gray;
       }
+    }
+
+    &:focus-within {
+      outline: none;
+    }
+
+    &::before {
+      content: none;
     }
   }
 
