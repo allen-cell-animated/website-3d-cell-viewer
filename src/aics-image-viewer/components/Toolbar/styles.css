@@ -62,6 +62,7 @@
     &:focus-within:not(.btn-active):not(:hover) {
       background-color: transparent;
       border-color: transparent;
+      color: #bfbfbf;
     }
 
     &[ant-click-animating-without-extra-node="true"]::after {
