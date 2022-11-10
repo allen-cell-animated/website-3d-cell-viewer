@@ -42,7 +42,7 @@ interface ToolbarProps {
 }
 
 export default function Toolbar(props: ToolbarProps): React.ReactElement {
-  const { renderConfig, showAxes, showBoundingBox } = props;
+  const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
 
   const twoDMode = props.mode !== ViewMode.threeD;
 
@@ -52,6 +52,9 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
 
   const toggleAxis = (): void => props.changeAxisShowing(!props.showAxes);
   const toggleBoundingBox = (): void => props.changeBoundingBoxShowing(!props.showBoundingBox);
+  const axesToggleTitle = showAxes ? "Hide axes" : "Show axes";
+  const boundingBoxToggleTitle = showBoundingBox ? "Hide bounding box" : "Show bounding box";
+  const turntableToggleTitle = autorotate ? "Turn off turntable" : "Turn on turntable";
 
   // TODO remove ant-btn-icon-only hack when upgrading antd
   const classForToggleBtn = (active: boolean): string =>
@@ -73,9 +76,9 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
               </Tooltip>
             )}
             {renderConfig.autoRotateButton && (
-              <Tooltip placement="bottom" title="Turntable">
+              <Tooltip placement="bottom" title={turntableToggleTitle}>
                 <Button
-                  className={classForToggleBtn(props.autorotate && !twoDMode)}
+                  className={classForToggleBtn(autorotate && !twoDMode)}
                   disabled={twoDMode || props.pathTraceOn}
                   onClick={props.onAutorotateChange}
                 >
@@ -118,14 +121,14 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
         {renderGroup4 && (
           <span className="viewer-toolbar-group">
             {renderConfig.showAxesButton && (
-              <Tooltip placement="bottom" title={showAxes ? "Hide axes" : "Show axes"}>
+              <Tooltip placement="bottom" title={axesToggleTitle}>
                 <Button className={classForToggleBtn(showAxes)} onClick={toggleAxis}>
                   <ViewerIcon type="axes" />
                 </Button>
               </Tooltip>
             )}
             {renderConfig.showBoundingBoxButton && (
-              <Tooltip placement="bottom" title={showBoundingBox ? "Hide bounding box" : "Show bounding box"}>
+              <Tooltip placement="bottom" title={boundingBoxToggleTitle}>
                 <Button className={classForToggleBtn(showBoundingBox)} onClick={toggleBoundingBox}>
                   <ViewerIcon type="boundingBox" />
                 </Button>
@@ -136,12 +139,16 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
       </span>
 
       <span className="viewer-toolbar-right viewer-toolbar-group">
-        <DownloadButton
-          cellDownloadHref={props.cellDownloadHref}
-          fovDownloadHref={props.fovDownloadHref}
-          hasFov={props.hasCellId && props.hasParentImage}
-        />
-        <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
+        <Tooltip placement="bottom" title="Download">
+          <DownloadButton
+            cellDownloadHref={props.cellDownloadHref}
+            fovDownloadHref={props.fovDownloadHref}
+            hasFov={props.hasCellId && props.hasParentImage}
+          />
+        </Tooltip>
+        <Tooltip placement="bottom" title="Screenshot">
+          <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
+        </Tooltip>
       </span>
     </div>
   );
