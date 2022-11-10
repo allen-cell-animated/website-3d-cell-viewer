@@ -109,11 +109,11 @@
     border-color: $light-gray !important;
     box-shadow: none !important;
     background-color: black;
+  }
 
-    &:hover,
-    &:focus {
-      background-color: #4b4b4b;
-      color: white;
-    }
+  .ant-select-selection:hover,
+  .ant-select-open .ant-select-selection {
+    background-color: #4b4b4b;
+    color: white;
   }
 }
