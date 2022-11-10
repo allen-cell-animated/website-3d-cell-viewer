@@ -101,6 +101,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
         <span className="viewer-toolbar-group">
           <Select
             className="select-render-setting"
+            dropdownClassName="viewer-toolbar-dropdown"
             value={props.renderSetting}
             onChange={props.onChangeRenderingAlgorithm}
           >

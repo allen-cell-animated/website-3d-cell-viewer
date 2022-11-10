@@ -117,3 +117,23 @@
     }
   }
 }
+
+.viewer-toolbar-dropdown {
+  .ant-select-dropdown-menu-item-active {
+    transition-property: background-color, color;
+  }
+
+  .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+    background-color: transparent;
+    color: white;
+
+    &.ant-select-dropdown-menu-item-selected {
+      background-color: #4b4b4b;
+    }
+  }
+
+  .ant-select-dropdown-menu-item:hover:not(.ant-select-dropdown-menu-item-disabled) {
+    background-color: #f6f0ff;
+    color: #4b4b4b;
+  }
+}
