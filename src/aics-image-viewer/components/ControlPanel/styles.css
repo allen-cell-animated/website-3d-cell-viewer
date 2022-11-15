@@ -19,11 +19,19 @@
       border: 1px solid transparent;
       color: #bfbfbf;
 
-      &:not([disabled]):hover,
-      &:not([disabled]).btn-tabactive {
-        color: white;
-        background-color: #4b4b4b;
-        border-color: #6e6e6e;
+      &:not([disabled]) {
+        &.btn-tabactive {
+          color: white;
+          background-color: #4b4b4b;
+          border-color: #6e6e6e;
+        }
+
+        &:hover,
+        &:focus-visible {
+          color: white;
+          background-color: #8950d9;
+          border-color: #6e6e6e;
+        }
       }
 
       &[ant-click-animating-without-extra-node="true"]::after {
@@ -115,6 +123,7 @@
   .channel-rows-list > .ant-card:last-child .ant-collapse-content {
     border-bottom: none;
   }
+
   /*slider settings*/
   @extend %axis-override;
 }

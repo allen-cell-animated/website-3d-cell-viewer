@@ -54,9 +54,16 @@
     &:hover {
       outline: none;
       box-shadow: none;
-      background-color: #4b4b4b;
       color: white;
       border-color: $light-gray;
+    }
+
+    &.btn-active {
+      background-color: #4b4b4b;
+    }
+
+    &:hover {
+      background-color: #8950d9;
     }
 
     &:focus-within:not(.btn-active):not(:hover) {
@@ -99,7 +106,7 @@
     }
 
     &:hover {
-      background-color: #9e6aff;
+      background-color: #8950d9;
       color: white;
     }
 
@@ -120,7 +127,7 @@
     background-color: black;
 
     &:hover {
-      background-color: #9e6aff;
+      background-color: #8950d9;
       color: white;
     }
   }
@@ -130,6 +137,11 @@
 .viewer-toolbar-dropdown {
   .ant-select-dropdown-menu-item-active {
     transition-property: background-color, color;
+  }
+
+  .ant-select-dropdown-menu-item-disabled,
+  .ant-select-dropdown-menu-item-disabled:hover {
+    color: #6e6e6e;
   }
 
   .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
@@ -154,7 +166,7 @@
     .ant-select-selection:focus-visible,
     .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible),
     .btn-borderless:focus-visible {
-      background-color: #9e6aff !important;
+      background-color: #8950d9 !important;
       color: white !important;
     }
 
@@ -174,7 +186,7 @@
     .ant-select-selection:focus,
     .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within,
     .btn-borderless:focus {
-      background-color: #9e6aff !important;
+      background-color: #8950d9 !important;
       color: white !important;
     }
 
