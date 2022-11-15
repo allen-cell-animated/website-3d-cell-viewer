@@ -401,9 +401,29 @@ export default class App extends React.Component<AppProps, AppState> {
     }
     const { baseUrl } = this.props;
 
-    // if baseUrl ends with zarr then we have zarr.
-    // otherwise we can combine the baseUrl and imageDirectory to get the url to load.
-    if (baseUrl.endsWith(".zarr")) {
+    const fullUrl = `${baseUrl}${imageDirectory}`;
+    // if this does NOT end with tif or json,
+    // then we assume it's zarr.
+    if (fullUrl.endsWith(".json")) {
+      const urlPrefix = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
+      VolumeLoader.loadJson(fullUrl, urlPrefix, (url, v, channelIndex) => {
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
+      })
+        .then((aimg) => {
+          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
+          this.stopPollingForImage();
+        })
+        .catch((resp) => this.handleOpenImageException(resp));
+    } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
+      VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
+        this.onNewChannelData(url, v, channelIndex, keepLuts);
+      })
+        .then((aimg) => {
+          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
+          this.stopPollingForImage();
+        })
+        .catch((resp) => this.handleOpenImageException(resp));
+    } else {
       const timeIndex = 0;
       VolumeLoader.loadZarr(baseUrl, imageDirectory, timeIndex, (url, v, channelIndex) => {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
@@ -413,29 +433,6 @@ export default class App extends React.Component<AppProps, AppState> {
           this.stopPollingForImage();
         })
         .catch((resp) => this.handleOpenImageException(resp));
-    } else {
-      const fullUrl = `${baseUrl}${imageDirectory}`;
-
-      if (fullUrl.endsWith(".json")) {
-        const urlPrefix = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
-        VolumeLoader.loadJson(fullUrl, urlPrefix, (url, v, channelIndex) => {
-          this.onNewChannelData(url, v, channelIndex, keepLuts);
-        })
-          .then((aimg) => {
-            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-            this.stopPollingForImage();
-          })
-          .catch((resp) => this.handleOpenImageException(resp));
-      } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-        VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
-          this.onNewChannelData(url, v, channelIndex, keepLuts);
-        })
-          .then((aimg) => {
-            this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-            this.stopPollingForImage();
-          })
-          .catch((resp) => this.handleOpenImageException(resp));
-      }
     }
   }
 
