@@ -486,12 +486,18 @@ body{
       color:#bfbfbf;
     }
 
+  .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]).btn-tabactive{
+          color:white;
+          background-color:#4b4b4b;
+          border-color:#6e6e6e;
+        }
+
   .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]):hover,
-      .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]).btn-tabactive{
-        color:white;
-        background-color:#4b4b4b;
-        border-color:#6e6e6e;
-      }
+        .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]):focus-visible{
+          color:white;
+          background-color:#8950d9;
+          border-color:#6e6e6e;
+        }
 
   .control-panel-col-container .control-panel-tab-col .ant-btn[ant-click-animating-without-extra-node="true"]::after{
         box-shadow:none !important;
@@ -669,13 +675,25 @@ body{
     }
 
   .viewer-toolbar .btn-borderless.btn-active,
-    .viewer-toolbar .btn-borderless:hover,
-    .viewer-toolbar .btn-borderless:focus-within{
+    .viewer-toolbar .btn-borderless:hover{
       outline:none;
       box-shadow:none;
-      background-color:#4b4b4b;
       color:white;
       border-color:#aeacae;
+    }
+
+  .viewer-toolbar .btn-borderless.btn-active{
+      background-color:#4b4b4b;
+    }
+
+  .viewer-toolbar .btn-borderless:hover{
+      background-color:#8950d9;
+    }
+
+  .viewer-toolbar .btn-borderless:focus-within:not(.btn-active):not(:hover){
+      background-color:transparent;
+      border-color:transparent;
+      color:#bfbfbf;
     }
 
   .viewer-toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
@@ -690,20 +708,37 @@ body{
 
   .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
     background-color:black;
+    box-shadow:-1px 0px 0px 0px transparent;
+    transition-property:color, background-color, border-color, box-shadow;
   }
 
   .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
-    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover,
-    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover{
       outline:none;
-      background-color:#4b4b4b;
       color:white;
       border-color:#aeacae;
     }
 
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within:not(:first-child){
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child){
         box-shadow:-1px 0px 0px 0px #aeacae;
       }
+
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked{
+      background-color:#4b4b4b;
+    }
+
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover{
+      background-color:#8950d9;
+      color:white;
+    }
+
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+      outline:none;
+    }
+
+  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled)::before{
+      content:none;
+    }
 
   .viewer-toolbar .ant-select-selection{
     border-color:#aeacae !important;
@@ -711,11 +746,62 @@ body{
     background-color:black;
   }
 
-  .viewer-toolbar .ant-select-selection:hover,
-    .viewer-toolbar .ant-select-selection:focus{
-      background-color:#4b4b4b;
+  .viewer-toolbar .ant-select-selection:hover{
+      background-color:#8950d9;
       color:white;
     }
+.viewer-toolbar-dropdown .ant-select-dropdown-menu-item-active{
+    transition-property:background-color, color;
+  }
+.viewer-toolbar-dropdown .ant-select-dropdown-menu-item-disabled,
+  .viewer-toolbar-dropdown .ant-select-dropdown-menu-item-disabled:hover{
+    color:#6e6e6e;
+  }
+.viewer-toolbar-dropdown .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled){
+    background-color:transparent;
+    color:white;
+  }
+.viewer-toolbar-dropdown .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled).ant-select-dropdown-menu-item-selected{
+      background-color:#4b4b4b;
+    }
+.viewer-toolbar-dropdown .ant-select-dropdown-menu-item:hover:not(.ant-select-dropdown-menu-item-disabled){
+    background-color:#f6f0ff;
+    color:#4b4b4b;
+  }
+@supports selector(:has(:focus-visible)){
+    .viewer-toolbar .ant-select-selection:focus-visible,
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible),
+    .viewer-toolbar .btn-borderless:focus-visible{
+      background-color:#8950d9 !important;
+      color:white !important;
+    }
+
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible){
+      outline:none;
+      border-color:#aeacae;
+    }
+
+      .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible):not(:first-child){
+        box-shadow:-1px 0px 0px 0px #aeacae;
+      }
+}
+@supports not (selector(:has(:focus-visible))){
+    .viewer-toolbar .ant-select-selection:focus,
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within,
+    .viewer-toolbar .btn-borderless:focus{
+      background-color:#8950d9 !important;
+      color:white !important;
+    }
+
+    .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+      outline:none;
+      border-color:#aeacae;
+    }
+
+      .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within:not(:first-child){
+        box-shadow:-1px 0px 0px 0px #aeacae;
+      }
+}
 
 /*!*********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/AxisClipSliders/styles.css ***!
