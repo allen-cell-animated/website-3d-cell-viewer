@@ -63,7 +63,7 @@
     }
 
     &:hover {
-      background-color: #8950d9;
+      background-color: $highlight-purple;
     }
 
     &:focus-within:not(.btn-active):not(:hover) {
@@ -106,7 +106,7 @@
     }
 
     &:hover {
-      background-color: #8950d9;
+      background-color: $highlight-purple;
       color: white;
     }
 
@@ -127,7 +127,7 @@
     background-color: black;
 
     &:hover {
-      background-color: #8950d9;
+      background-color: $highlight-purple;
       color: white;
     }
   }
@@ -166,7 +166,7 @@
     .ant-select-selection:focus-visible,
     .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible),
     .btn-borderless:focus-visible {
-      background-color: #8950d9 !important;
+      background-color: $highlight-purple !important;
       color: white !important;
     }
 
@@ -186,7 +186,7 @@
     .ant-select-selection:focus,
     .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within,
     .btn-borderless:focus {
-      background-color: #8950d9 !important;
+      background-color: $highlight-purple !important;
       color: white !important;
     }
 

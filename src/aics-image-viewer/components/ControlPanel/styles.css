@@ -29,7 +29,7 @@
         &:hover,
         &:focus-visible {
           color: white;
-          background-color: #8950d9;
+          background-color: $highlight-purple;
           border-color: #6e6e6e;
         }
       }
