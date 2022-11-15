@@ -32,11 +32,11 @@
     min-width: 110px;
   }
 
+  /* Icon-only buttons */
+
   .ant-btn-icon-only {
     padding-bottom: 1px;
   }
-
-  /* Icon-only buttons */
 
   .btn-borderless {
     background-color: transparent;
@@ -51,13 +51,25 @@
     }
 
     &.btn-active,
-    &:hover,
-    &:focus-within {
+    &:hover {
       outline: none;
       box-shadow: none;
-      background-color: #4b4b4b;
       color: white;
       border-color: $light-gray;
+    }
+
+    &.btn-active {
+      background-color: #4b4b4b;
+    }
+
+    &:hover {
+      background-color: $highlight-purple;
+    }
+
+    &:focus-within:not(.btn-active):not(:hover) {
+      background-color: transparent;
+      border-color: transparent;
+      color: #bfbfbf;
     }
 
     &[ant-click-animating-without-extra-node="true"]::after {
@@ -75,18 +87,35 @@
 
   .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
     background-color: black;
+    box-shadow: -1px 0px 0px 0px transparent;
+    transition-property: color, background-color, border-color, box-shadow;
 
     &.ant-radio-button-wrapper-checked,
-    &:hover,
-    &:focus-within {
+    &:hover {
       outline: none;
-      background-color: #4b4b4b;
       color: white;
       border-color: $light-gray;
 
       &:not(:first-child) {
         box-shadow: -1px 0px 0px 0px $light-gray;
       }
+    }
+
+    &.ant-radio-button-wrapper-checked {
+      background-color: #4b4b4b;
+    }
+
+    &:hover {
+      background-color: $highlight-purple;
+      color: white;
+    }
+
+    &:focus-within {
+      outline: none;
+    }
+
+    &::before {
+      content: none;
     }
   }
 
@@ -97,10 +126,77 @@
     box-shadow: none !important;
     background-color: black;
 
-    &:hover,
-    &:focus {
-      background-color: #4b4b4b;
+    &:hover {
+      background-color: $highlight-purple;
       color: white;
+    }
+  }
+}
+
+/* Dropdown menu contents aren't children of .viewer-toolbar in the DOM */
+.viewer-toolbar-dropdown {
+  .ant-select-dropdown-menu-item-active {
+    transition-property: background-color, color;
+  }
+
+  .ant-select-dropdown-menu-item-disabled,
+  .ant-select-dropdown-menu-item-disabled:hover {
+    color: #6e6e6e;
+  }
+
+  .ant-select-dropdown-menu-item-active:not(.ant-select-dropdown-menu-item-disabled) {
+    background-color: transparent;
+    color: white;
+
+    &.ant-select-dropdown-menu-item-selected {
+      background-color: #4b4b4b;
+    }
+  }
+
+  .ant-select-dropdown-menu-item:hover:not(.ant-select-dropdown-menu-item-disabled) {
+    background-color: #f6f0ff;
+    color: #4b4b4b;
+  }
+}
+
+/* :focus-visible is our ideal focus behavior, but support for the required selectors (namely :has) is spotty. */
+
+@supports selector(:has(:focus-visible)) {
+  .viewer-toolbar {
+    .ant-select-selection:focus-visible,
+    .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible),
+    .btn-borderless:focus-visible {
+      background-color: $highlight-purple !important;
+      color: white !important;
+    }
+
+    .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):has(:focus-visible) {
+      outline: none;
+      border-color: $light-gray;
+
+      &:not(:first-child) {
+        box-shadow: -1px 0px 0px 0px $light-gray;
+      }
+    }
+  }
+}
+
+@supports not (selector(:has(:focus-visible))) {
+  .viewer-toolbar {
+    .ant-select-selection:focus,
+    .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within,
+    .btn-borderless:focus {
+      background-color: $highlight-purple !important;
+      color: white !important;
+    }
+
+    .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within {
+      outline: none;
+      border-color: $light-gray;
+
+      &:not(:first-child) {
+        box-shadow: -1px 0px 0px 0px $light-gray;
+      }
     }
   }
 }
