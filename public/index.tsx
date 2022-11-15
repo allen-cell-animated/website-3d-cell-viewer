@@ -164,6 +164,9 @@ if (params) {
       if (decodedurl.endsWith(".zarr")) {
         decodedimage = "";
       } else {
+        if (decodedurl.endsWith("/")) {
+          decodedurl = decodedurl.slice(0, -1);
+        }
         const spliturl = decodedurl.split("/");
         decodedimage = spliturl[spliturl.length - 1];
         decodedurl = decodedurl.slice(0, -decodedimage.length);
