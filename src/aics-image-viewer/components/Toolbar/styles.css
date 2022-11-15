@@ -32,11 +32,11 @@
     min-width: 110px;
   }
 
+  /* Icon-only buttons */
+
   .ant-btn-icon-only {
     padding-bottom: 1px;
   }
-
-  /* Icon-only buttons */
 
   .btn-borderless {
     background-color: transparent;
@@ -84,15 +84,24 @@
     transition-property: color, background-color, border-color, box-shadow;
 
     &.ant-radio-button-wrapper-checked,
-    &:hover {
+    &:hover,
+    &:has(:focus-visible) {
       outline: none;
-      background-color: #4b4b4b;
       color: white;
       border-color: $light-gray;
 
       &:not(:first-child) {
         box-shadow: -1px 0px 0px 0px $light-gray;
       }
+    }
+
+    &.ant-radio-button-wrapper-checked {
+      background-color: #4b4b4b;
+    }
+
+    &:hover,
+    &:has(:focus-visible) {
+      background-color: #9e6aff;
     }
 
     &:focus-within {
@@ -111,8 +120,9 @@
     box-shadow: none !important;
     background-color: black;
 
-    &:hover {
-      background-color: #4b4b4b;
+    &:hover,
+    &:focus-visible {
+      background-color: #9e6aff;
       color: white;
     }
   }
