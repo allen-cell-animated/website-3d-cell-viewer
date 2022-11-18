@@ -2,7 +2,7 @@ import React from "react";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
-import { Card, Collapse } from "antd";
+import { Card, Collapse, Checkbox } from "antd";
 import { UserSelectionKey, UserSelectionState } from "./App/types";
 import { AxisName, Styles } from "../shared/types";
 const Panel = Collapse.Panel;
@@ -19,12 +19,14 @@ export interface GlobalVolumeControlsProps {
     brightnessSlider: boolean;
     densitySlider: boolean;
     levelsSliders: boolean;
+    interpolationControl: boolean;
   };
 
   alphaMaskSliderLevel: number[];
   brightnessSliderLevel: number[];
   densitySliderLevel: number[];
   gammaSliderLevel: [number, number, number];
+  interpolationEnabled: boolean;
 
   changeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
   setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
@@ -37,11 +39,12 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   }
 
   shouldComponentUpdate(newProps: GlobalVolumeControlsProps): boolean {
-    const { imageName, alphaMaskSliderLevel, pathTraceOn } = this.props;
+    const { imageName, alphaMaskSliderLevel, pathTraceOn, interpolationEnabled } = this.props;
     const newImage = newProps.imageName !== imageName;
     const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
     const newSliderValue = newProps.alphaMaskSliderLevel[0] !== alphaMaskSliderLevel[0];
-    return newImage || newSliderValue || newPathTraceValue;
+    const newInterpolationValue = newProps.interpolationEnabled !== interpolationEnabled;
+    return newImage || newSliderValue || newPathTraceValue || newInterpolationValue;
   }
 
   createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey): React.ReactNode => (
@@ -76,6 +79,17 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
               {renderConfig.densitySlider &&
                 this.createSliderRow("density", densitySliderLevel, 100, "densitySliderLevel")}
               {renderConfig.levelsSliders && this.createSliderRow("levels", gammaSliderLevel, 255, "levelsSlider")}
+              {renderConfig.interpolationControl && (
+                <div style={STYLES.controlRow}>
+                  <div style={STYLES.controlName}>interpolate</div>
+                  <div style={{ flex: 5 }}>
+                    <Checkbox
+                      checked={this.props.interpolationEnabled}
+                      onChange={({ target }) => this.props.changeUserSelection("interpolationEnabled", target.checked)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </Panel>
         </Collapse>
@@ -100,6 +114,6 @@ const STYLES: Styles = {
   control: {
     flex: 5,
     height: 30,
-    marginTop: 15,
+    marginTop: 10,
   },
 };
