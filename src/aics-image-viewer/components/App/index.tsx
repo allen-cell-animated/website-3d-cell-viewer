@@ -97,6 +97,7 @@ const defaultProps: AppProps = {
     resetCameraButton: true,
     showAxesButton: true,
     showBoundingBoxButton: true,
+    metadataViewer: false,
   },
   viewerConfig: {
     showAxes: false,

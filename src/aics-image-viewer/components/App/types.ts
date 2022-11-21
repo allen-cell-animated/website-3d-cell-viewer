@@ -31,6 +31,7 @@ export interface AppProps {
     resetCameraButton: boolean;
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
+    metadataViewer: boolean;
   };
   viewerConfig: {
     showAxes: boolean;

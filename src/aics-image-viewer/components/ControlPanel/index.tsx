@@ -16,6 +16,7 @@ interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsPro
   hasImage: boolean;
   renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
     colorPresetsDropdown: boolean;
+    metadataViewer: boolean;
   };
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
@@ -24,11 +25,13 @@ interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsPro
 const enum ControlTab {
   Channels,
   Advanced,
+  Metadata,
 }
 
 const ControlTabNames = {
   [ControlTab.Channels]: "Channel Settings",
   [ControlTab.Advanced]: "Advanced Settings",
+  [ControlTab.Metadata]: "Image Metadata",
 };
 
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
@@ -59,6 +62,18 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     );
   };
 
+  const renderTab = (thisTab: ControlTab, icon: React.ReactNode | string): React.ReactNode => (
+    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { visible: false })}>
+      <Button
+        className={tab === thisTab ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
+        onClick={() => setTab(thisTab)}
+        icon={typeof icon === "string" ? icon : undefined}
+      >
+        {typeof icon === "object" && icon}
+      </Button>
+    </Tooltip>
+  );
+
   return (
     <div className="control-panel-col-container">
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
@@ -71,31 +86,9 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         <div className="tab-divider" />
 
-        <Tooltip
-          title={ControlTabNames[ControlTab.Channels]}
-          placement="right"
-          {...(!props.collapsed && { visible: false })}
-        >
-          <Button
-            className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-            onClick={() => setTab(ControlTab.Channels)}
-          >
-            <ViewerIcon type="channels" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip
-          title={ControlTabNames[ControlTab.Advanced]}
-          placement="right"
-          {...(!props.collapsed && { visible: false })}
-        >
-          <Button
-            className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-            onClick={() => setTab(ControlTab.Advanced)}
-          >
-            <ViewerIcon type="preferences" />
-          </Button>
-        </Tooltip>
+        {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
+        {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
+        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="unordered-list" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
