@@ -11,6 +11,7 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
+import MetadataViewer from "../MetadataViewer";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
@@ -88,7 +89,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="unordered-list" />)}
+        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="info" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
@@ -141,6 +142,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   />
                 </>
               )}
+              {tab === ControlTab.Metadata && <MetadataViewer data={{}} />}
             </div>
           )}
         </Card>

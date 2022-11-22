@@ -1,0 +1,7 @@
+.channel-rows-list .ant-table {
+  border: none;
+
+  td {
+    border-bottom-color: #6e6e6e;
+  }
+}
