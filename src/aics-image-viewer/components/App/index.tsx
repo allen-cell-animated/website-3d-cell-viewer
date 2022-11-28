@@ -97,7 +97,7 @@ const defaultProps: AppProps = {
     resetCameraButton: true,
     showAxesButton: true,
     showBoundingBoxButton: true,
-    metadataViewer: false,
+    metadataViewer: true,
   },
   viewerConfig: {
     showAxes: false,
@@ -1131,6 +1131,7 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             renderConfig={renderConfig}
+            metadata={this.props.metadata}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}

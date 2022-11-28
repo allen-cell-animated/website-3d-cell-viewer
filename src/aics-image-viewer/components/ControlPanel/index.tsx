@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { Card, Button, Dropdown, Icon, Menu, Tooltip } from "antd";
 import { ClickParam } from "antd/lib/menu";
@@ -6,14 +6,18 @@ import { ClickParam } from "antd/lib/menu";
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
 import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
+import MetadataViewer, { MetadataViewerProps } from "../MetadataViewer";
 
 import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
-import MetadataViewer from "../MetadataViewer";
 
-interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
+interface ControlPanelProps
+  extends ChannelsWidgetProps,
+    GlobalVolumeControlsProps,
+    CustomizeWidgetProps,
+    Partial<MetadataViewerProps> {
   hasImage: boolean;
   renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
     colorPresetsDropdown: boolean;
@@ -36,7 +40,7 @@ const ControlTabNames = {
 };
 
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
-  const [tab, setTab] = useState(ControlTab.Channels);
+  const [tab, setTab] = React.useState(ControlTab.Channels);
 
   const { viewerChannelSettings, renderConfig, hasImage } = props;
 
@@ -142,7 +146,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   />
                 </>
               )}
-              {tab === ControlTab.Metadata && <MetadataViewer data={{}} />}
+              {tab === ControlTab.Metadata && props.metadata && <MetadataViewer metadata={props.metadata} />}
             </div>
           )}
         </Card>

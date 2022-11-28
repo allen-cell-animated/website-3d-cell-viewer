@@ -1,7 +1,24 @@
-.channel-rows-list .ant-table {
-  border: none;
+.viewer-metadata-table {
+  width: 100%;
+
+  tbody {
+    padding: 10px;
+  }
+
+  tr {
+    border-bottom: 1px solid #6e6e6e;
+
+    &:nth-child(odd) {
+      background-color: #4b4b4b;
+    }
+  }
 
   td {
-    border-bottom-color: #6e6e6e;
+    padding: 6px;
+
+    &.metadata-expand {
+      width: 40px;
+      max-width: 40px;
+    }
   }
 }
