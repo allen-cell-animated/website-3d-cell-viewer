@@ -1132,6 +1132,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <ControlPanel
             renderConfig={renderConfig}
             metadata={this.props.metadata}
+            metadataFormat={this.props.metadataFormat}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}

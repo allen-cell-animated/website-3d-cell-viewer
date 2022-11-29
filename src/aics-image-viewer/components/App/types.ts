@@ -1,6 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ImageType, ViewMode } from "../../shared/enums";
-import { MetadataRecord } from "../../shared/types";
+import { MetadataFormatRecord, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -18,6 +18,7 @@ export interface AppProps {
   cellPath: string;
   fovPath: string;
   metadata?: MetadataRecord;
+  metadataFormat?: MetadataFormatRecord;
   renderConfig: {
     alphaMask: boolean;
     autoRotateButton: boolean;
