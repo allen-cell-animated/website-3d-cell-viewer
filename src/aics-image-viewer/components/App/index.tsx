@@ -21,7 +21,7 @@ import {
   ChannelStateChangeHandlers,
   ChannelGrouping,
 } from "../../shared/utils/viewerChannelSettings";
-import { AxisName, IsosurfaceFormat } from "../../shared/types";
+import { AxisName, IsosurfaceFormat, MetadataFormatRecord, MetadataRecord } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
@@ -98,6 +98,7 @@ const defaultProps: AppProps = {
     showAxesButton: true,
     showBoundingBoxButton: true,
     metadataViewer: true,
+    dimensionsInMetadataViewer: true,
   },
   viewerConfig: {
     showAxes: false,
@@ -1114,6 +1115,17 @@ export default class App extends React.Component<AppProps, AppState> {
     return { x: 0, y: 0, z: 0 };
   }
 
+  getExtraMetadata(): { metadata: MetadataRecord; metadataFormat: MetadataFormatRecord } {
+    if (!this.props.renderConfig.dimensionsInMetadataViewer) {
+      return { metadata: {}, metadataFormat: {} };
+    }
+    const dimensionFormat = { unit: "px" };
+    return {
+      metadata: { Dimensions: this.getNumberOfSlices() },
+      metadataFormat: { x: dimensionFormat, y: dimensionFormat, z: dimensionFormat },
+    };
+  }
+
   render(): React.ReactNode {
     const { renderConfig, cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
     const { userSelections } = this.state;
@@ -1132,6 +1144,7 @@ export default class App extends React.Component<AppProps, AppState> {
           <ControlPanel
             renderConfig={renderConfig}
             metadata={this.props.metadata}
+            getExtraMetadata={() => this.getExtraMetadata()}
             metadataFormat={this.props.metadataFormat}
             // image state
             imageName={this.state.image?.name}

@@ -147,7 +147,11 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                 </>
               )}
               {tab === ControlTab.Metadata && props.metadata && (
-                <MetadataViewer metadata={props.metadata} metadataFormat={props.metadataFormat} />
+                <MetadataViewer
+                  metadata={props.metadata}
+                  metadataFormat={props.metadataFormat}
+                  getExtraMetadata={props.getExtraMetadata}
+                />
               )}
             </div>
           )}

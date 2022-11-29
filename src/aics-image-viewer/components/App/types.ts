@@ -35,6 +35,7 @@ export interface AppProps {
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
     metadataViewer: boolean;
+    dimensionsInMetadataViewer: boolean;
   };
   viewerConfig: {
     showAxes: boolean;

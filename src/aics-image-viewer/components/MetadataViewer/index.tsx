@@ -3,14 +3,18 @@ import React from "react";
 import { MetadataFormat, MetadataFormatRecord, MetadataRecord } from "../../shared/types";
 import "./styles.css";
 
-export interface MetadataViewerProps {
+interface MetadataTableProps {
   metadata: MetadataRecord;
   metadataFormat?: MetadataFormatRecord;
 }
 
-interface CollapsibleRowProps extends MetadataViewerProps {
+interface CollapsibleRowProps extends MetadataTableProps {
   title: string;
   titleFormat?: MetadataFormat;
+}
+
+export interface MetadataViewerProps extends MetadataTableProps {
+  getExtraMetadata?: () => MetadataTableProps;
 }
 
 const addTooltipIfPresent = (tooltip: any, component: React.ReactElement): React.ReactElement => {
@@ -38,14 +42,14 @@ const MetadataCollapsibleRow: React.FC<CollapsibleRowProps> = ({ metadata, metad
       </tr>
       <tr className={"metadata-collapse-content-row" + (collapsed ? " metadata-collapse-collapsed" : "")}>
         <td className="metadata-collapse-content" colSpan={4}>
-          <MetadataViewer metadata={metadata} metadataFormat={metadataFormat} />
+          <MetadataTable metadata={metadata} metadataFormat={metadataFormat} />
         </td>
       </tr>
     </>
   );
 };
 
-const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, metadataFormat }) => (
+const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, metadataFormat }) => (
   <table className="viewer-metadata-table">
     <tbody>
       {Object.keys(metadata).map((key, idx) => {
@@ -78,5 +82,16 @@ const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, metadataForma
     </tbody>
   </table>
 );
+
+const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, metadataFormat, getExtraMetadata }) => {
+  const extraMetadata = getExtraMetadata ? getExtraMetadata() : { metadata: {}, metadataFormat: {} };
+  console.log(getExtraMetadata, extraMetadata);
+  return (
+    <MetadataTable
+      metadata={{ ...extraMetadata.metadata, ...metadata }}
+      metadataFormat={{ ...extraMetadata.metadataFormat, ...metadataFormat }}
+    />
+  );
+};
 
 export default MetadataViewer;
