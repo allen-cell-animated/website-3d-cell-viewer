@@ -44,6 +44,11 @@
       text-align: right;
     }
 
+    &.metadata-unit {
+      width: 75px;
+      max-width: 75px;
+    }
+
     &:last-child {
       padding-right: 12px;
     }

@@ -85,7 +85,6 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, metadataFormat 
 
 const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, metadataFormat, getExtraMetadata }) => {
   const extraMetadata = getExtraMetadata ? getExtraMetadata() : { metadata: {}, metadataFormat: {} };
-  console.log(getExtraMetadata, extraMetadata);
   return (
     <MetadataTable
       metadata={{ ...extraMetadata.metadata, ...metadata }}
