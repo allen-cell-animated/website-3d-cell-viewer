@@ -185,6 +185,7 @@ export default class App extends React.Component<AppProps, AppState> {
         backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
         maxProject: maxproject,
         pathTrace: pathtrace,
+        useAlphaMaskSliderDefaults: true,
         alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
         brightnessSliderLevel: [props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
         densitySliderLevel: [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
@@ -211,7 +212,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
     this.handleOpenImageException = this.handleOpenImageException.bind(this);
     this.toggleControlPanel = this.toggleControlPanel.bind(this);
-    this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
+    this.setUseAlphaMaskDefaults = this.setUseAlphaMaskDefaults.bind(this);
     this.setImageAxisClip = this.setImageAxisClip.bind(this);
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
@@ -919,8 +920,10 @@ export default class App extends React.Component<AppProps, AppState> {
       newSelectionState = {
         mode: newMode,
         pathTrace: false,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
+      if (userSelections.useAlphaMaskSliderDefaults) {
+        newSelectionState.alphaMaskSliderLevel = ALPHA_MASK_SLIDER_2D_DEFAULT;
+      }
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections.pathTrace) {
         this.onChangeRenderingAlgorithm(RenderMode.volumetric);
@@ -933,8 +936,10 @@ export default class App extends React.Component<AppProps, AppState> {
       // switching from 2D to 3D
       newSelectionState = {
         mode: newMode,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
+      if (userSelections.useAlphaMaskSliderDefaults) {
+        newSelectionState.alphaMaskSliderLevel = ALPHA_MASK_SLIDER_3D_DEFAULT;
+      }
     }
 
     this.handleChangeUserSelection("mode", newMode);
@@ -944,8 +949,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setUserSelectionsInState(newSelectionState);
   }
 
-  onUpdateImageMaskAlpha(sliderValue: number[]): void {
-    this.setUserSelectionsInState({ alphaMaskSliderLevel: sliderValue });
+  setUseAlphaMaskDefaults(useDefaults: boolean): void {
+    this.setUserSelectionsInState({ useAlphaMaskSliderDefaults: useDefaults });
   }
 
   onAutorotateChange(): void {
@@ -1156,7 +1161,7 @@ export default class App extends React.Component<AppProps, AppState> {
             updateChannelTransferFunction={this.updateChannelTransferFunction}
             setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
-            makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
+            setUseAlphaMaskDefaults={this.setUseAlphaMaskDefaults}
             changeChannelSettings={this.changeChannelSettings}
             changeOneChannelSetting={this.changeOneChannelSetting}
             changeBackgroundColor={this.changeBackgroundColor}

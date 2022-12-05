@@ -28,7 +28,7 @@ export interface GlobalVolumeControlsProps {
 
   changeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
   setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
-  makeUpdatePixelSizeFn: (i: number) => void;
+  setUseAlphaMaskDefaults: (useDefaults: boolean) => void;
 }
 
 export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
@@ -44,7 +44,13 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     return newImage || newSliderValue || newPathTraceValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey): React.ReactNode => (
+  createSliderRow = (
+    label: string,
+    start: number[],
+    max: number,
+    propKey: GlobalVolumeControlKey,
+    onStart?: () => void
+  ): React.ReactNode => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
@@ -54,13 +60,15 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]): void => this.props.changeUserSelection(propKey, values)}
+          onStart={onStart}
+          onUpdate={(_strVals: string[], _handle, values): void => this.props.changeUserSelection(propKey, values)}
         />
       </div>
     </div>
   );
 
   render(): React.ReactNode {
+    const maskDefaultsOff = () => this.props.setUseAlphaMaskDefaults(false);
     if (!this.props.imageName) return null;
     const { renderConfig, alphaMaskSliderLevel, brightnessSliderLevel, densitySliderLevel, gammaSliderLevel } =
       this.props;
@@ -70,7 +78,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
               {renderConfig.alphaMask &&
-                this.createSliderRow("mask cell", alphaMaskSliderLevel, 100, "alphaMaskSliderLevel")}
+                this.createSliderRow("mask cell", alphaMaskSliderLevel, 100, "alphaMaskSliderLevel", maskDefaultsOff)}
               {renderConfig.brightnessSlider &&
                 this.createSliderRow("brightness", brightnessSliderLevel, 100, "brightnessSliderLevel")}
               {renderConfig.densitySlider &&

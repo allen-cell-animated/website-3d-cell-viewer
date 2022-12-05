@@ -130,7 +130,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     pixelSize={props.pixelSize}
                     changeUserSelection={props.changeUserSelection}
                     setImageAxisClip={props.setImageAxisClip}
-                    makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
+                    setUseAlphaMaskDefaults={props.setUseAlphaMaskDefaults}
                     alphaMaskSliderLevel={props.alphaMaskSliderLevel}
                     brightnessSliderLevel={props.brightnessSliderLevel}
                     densitySliderLevel={props.densitySliderLevel}

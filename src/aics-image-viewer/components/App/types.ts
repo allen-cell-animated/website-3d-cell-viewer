@@ -74,6 +74,7 @@ export interface UserSelectionState {
   showBoundingBox: boolean;
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
+  useAlphaMaskSliderDefaults: boolean;
   alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
   brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
