@@ -68,7 +68,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   );
 
   render(): React.ReactNode {
-    const maskDefaultsOff = () => this.props.setUseAlphaMaskDefaults(false);
+    const maskDefaultsOff = (): void => this.props.setUseAlphaMaskDefaults(false);
     if (!this.props.imageName) return null;
     const { renderConfig, alphaMaskSliderLevel, brightnessSliderLevel, densitySliderLevel, gammaSliderLevel } =
       this.props;
