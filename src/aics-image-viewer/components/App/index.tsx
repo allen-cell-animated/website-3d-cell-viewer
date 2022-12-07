@@ -193,7 +193,10 @@ export default class App extends React.Component<AppProps, AppState> {
         brightnessSliderLevel: [viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
         densitySliderLevel: [viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
         levelsSlider: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
-        interpolationEnabled: viewerConfig.interpolationEnabled || INTERPOLATION_ENABLED_DEFAULT,
+        interpolationEnabled:
+          viewerConfig.interpolationEnabled === undefined
+            ? INTERPOLATION_ENABLED_DEFAULT
+            : viewerConfig.interpolationEnabled,
         // channelSettings is a flat list of objects of this type:
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         channelSettings: [],
