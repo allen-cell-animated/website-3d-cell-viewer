@@ -25,6 +25,7 @@ export interface AppProps {
     colorPresetsDropdown: boolean;
     densitySlider: boolean;
     levelsSliders: boolean;
+    interpolationControl: boolean;
     saveSurfaceButtons: boolean;
     fovCellSwitchControls: boolean;
     viewModeRadioButtons: boolean;
@@ -44,6 +45,7 @@ export interface AppProps {
     brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
     levels: [number, number, number]; // LEVELS_SLIDER_DEFAULT,
+    interpolationEnabled?: boolean;
     region?: [number, number, number, number, number, number]; //[0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
     slice?: number; // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   };
@@ -78,6 +80,7 @@ export interface UserSelectionState {
   brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
   levelsSlider: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+  interpolationEnabled: boolean;
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
