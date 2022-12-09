@@ -286,8 +286,8 @@ export default class App extends React.Component<AppProps, AppState> {
     if (!isEqual(prevProps.transform, this.props.transform)) {
       const { view3d, image } = this.state;
       if (view3d && image) {
-        view3d.setVolumeTranslation(image, this.props.transform?.translate || [0, 0, 0]);
-        view3d.setVolumeRotation(image, this.props.transform?.rotate || [0, 0, 0]);
+        view3d.setVolumeTranslation(image, this.props.transform?.translation || [0, 0, 0]);
+        view3d.setVolumeRotation(image, this.props.transform?.rotation || [0, 0, 0]);
       }
     }
 
@@ -518,8 +518,8 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.setInterpolationEnabled(aimg, false);
     }
 
-    view3d.setVolumeTranslation(aimg, this.props.transform?.translate || [0, 0, 0]);
-    view3d.setVolumeRotation(aimg, this.props.transform?.rotate || [0, 0, 0]);
+    view3d.setVolumeTranslation(aimg, this.props.transform?.translation || [0, 0, 0]);
+    view3d.setVolumeRotation(aimg, this.props.transform?.rotation || [0, 0, 0]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
