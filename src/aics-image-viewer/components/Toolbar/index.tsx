@@ -1,12 +1,13 @@
-import React from "react";
+import React, { WheelEventHandler } from "react";
 import { Button, Radio, Select, Tooltip } from "antd";
-import "./styles.css";
+import { debounce } from "lodash";
 
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
+import "./styles.css";
 
 interface ToolbarProps {
   imageType: ImageType;
@@ -44,6 +45,44 @@ interface ToolbarProps {
 export default function Toolbar(props: ToolbarProps): React.ReactElement {
   const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
 
+  // Track if centered buttons overlap left or right buttons... with lots of refs
+  const [scrollMode, _setScrollMode] = React.useState(false);
+  const scrollModeRef = React.useRef(scrollMode);
+  const setScrollMode = (mode: boolean): void => {
+    scrollModeRef.current = mode;
+    _setScrollMode(mode);
+  };
+
+  const barRef = React.useRef<HTMLDivElement>(null);
+  const leftRef = React.useRef<HTMLSpanElement>(null);
+  const centerRef = React.useRef<HTMLSpanElement>(null);
+  const rightRef = React.useRef<HTMLSpanElement>(null);
+
+  const checkSize = debounce((): void => {
+    const leftRect = leftRef.current!.getBoundingClientRect();
+    const centerRect = centerRef.current!.getBoundingClientRect();
+    const rightRect = rightRef.current!.getBoundingClientRect();
+    if (scrollModeRef.current) {
+      const barWidth = barRef.current!.getBoundingClientRect().width;
+      const requiredWidth = Math.max(leftRect.width, rightRect.width) * 2 + centerRect.width + 30;
+      if (barWidth > requiredWidth) {
+        setScrollMode(false);
+      }
+    } else {
+      if (leftRect.right > centerRect.left || centerRect.right > rightRect.left) {
+        setScrollMode(true);
+      }
+    }
+  }, 50);
+
+  React.useEffect((): void => {
+    window.addEventListener("resize", checkSize);
+    checkSize();
+  }, []); // Dependency-free effect will only run on mount
+
+  // Translate vertical scrolling into horizontal scrolling
+  const scrollX: WheelEventHandler<HTMLDivElement> = ({ deltaY }) => barRef.current!.scroll({ left: deltaY });
+
   const twoDMode = props.mode !== ViewMode.threeD;
 
   const renderGroup1 =
@@ -61,8 +100,9 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
     "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
   return (
-    <div className="viewer-toolbar">
-      <span className="viewer-toolbar-center">
+    <div className={`viewer-toolbar${scrollMode ? " viewer-toolbar-scroll" : ""}`} ref={barRef} onWheel={scrollX}>
+      <span className="viewer-toolbar-left" ref={leftRef} />
+      <span className="viewer-toolbar-center" ref={centerRef}>
         {renderGroup1 && (
           <span className="viewer-toolbar-group">
             {renderConfig.viewModeRadioButtons && (
@@ -139,7 +179,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
         )}
       </span>
 
-      <span className="viewer-toolbar-right viewer-toolbar-group">
+      <span className="viewer-toolbar-right viewer-toolbar-group" ref={rightRef}>
         <Tooltip placement="bottom" title="Download">
           <DownloadButton
             cellDownloadHref={props.cellDownloadHref}

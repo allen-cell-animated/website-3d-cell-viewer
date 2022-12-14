@@ -6,22 +6,18 @@
   margin-top: 12px;
   z-index: 1500;
   padding: 0 12px;
+  text-align: center;
 
   .viewer-toolbar-left {
     position: absolute;
-    left: 12px;
-  }
-
-  .viewer-toolbar-center {
-    position: absolute;
+    padding: 0 12px;
     left: 0;
-    right: 0;
-    text-align: center;
   }
 
   .viewer-toolbar-right {
     position: absolute;
-    right: 12px;
+    padding: 0 12px;
+    right: 0;
   }
 
   .viewer-toolbar-group:not(:last-child) {
@@ -41,6 +37,7 @@
     display: static;
     text-align: left;
     white-space: nowrap;
+    scroll-behavior: smooth;
 
     overflow-x: scroll;
     scrollbar-width: none;
@@ -49,10 +46,8 @@
     }
 
     .viewer-toolbar-left,
-    .viewer-toolbar-center,
     .viewer-toolbar-right {
       position: static;
-      margin-left: 6px;
     }
   }
 
