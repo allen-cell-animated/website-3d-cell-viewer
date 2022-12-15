@@ -1,11 +1,63 @@
 @import "../../assets/styles/variables";
 
-.viewer-toolbar {
+/* Provides background and buttons when toolbar is in scroll mode */
+.viewer-toolbar-container {
   position: absolute;
   width: 100%;
-  margin-top: 12px;
-  z-index: 1500;
-  padding: 0 12px;
+  z-index: 250;
+
+  .viewer-toolbar-scroll-btn {
+    height: 100%;
+    width: 15px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(75, 75, 75, 0.85);
+    display: none;
+    position: absolute;
+    top: 0;
+    z-index: 255;
+    transition: color 0.3s;
+
+    &.scroll-btn-left {
+      left: 0;
+    }
+    &.scroll-btn-right {
+      right: 0;
+    }
+    &:hover {
+      color: white;
+    }
+  }
+
+  /* Toolbar scroll mode: collapse all sections to the left and scroll */
+  &.viewer-toolbar-scroll {
+    border-bottom: 1px solid $light-gray;
+
+    .viewer-toolbar-scroll-btn {
+      display: flex;
+    }
+
+    .viewer-toolbar {
+      display: static;
+      text-align: left;
+      white-space: nowrap;
+
+      overflow-x: scroll;
+      scrollbar-width: none;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .viewer-toolbar-left,
+      .viewer-toolbar-right {
+        position: static;
+      }
+    }
+  }
+}
+
+.viewer-toolbar {
+  padding: 12px;
   text-align: center;
 
   .viewer-toolbar-left {
@@ -30,24 +82,6 @@
 
   .select-render-setting {
     min-width: 110px;
-  }
-
-  /* Toolbar scroll mode: collapse all sections to the left and scroll */
-  &.viewer-toolbar-scroll {
-    display: static;
-    text-align: left;
-    white-space: nowrap;
-
-    overflow-x: scroll;
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .viewer-toolbar-left,
-    .viewer-toolbar-right {
-      position: static;
-    }
   }
 
   /* Icon-only buttons */
