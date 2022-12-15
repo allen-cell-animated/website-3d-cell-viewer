@@ -1,4 +1,4 @@
-import React, { WheelEventHandler } from "react";
+import React from "react";
 import { Button, Radio, Select, Tooltip } from "antd";
 import { debounce } from "lodash";
 
@@ -82,16 +82,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
       const requiredWidth = Math.max(leftRect.width, rightRect.width) * 2 + centerRect.width + 30;
       if (barWidth > requiredWidth) {
         this.setState({ scrollMode: false });
-      } else {
-        this.checkScrollBtnVisible();
       }
     } else {
       // Enter scroll mode if centered controls are overlapping either left/right-aligned ones
       if (leftRect.right > centerRect.left || centerRect.right > rightRect.left) {
         this.setState({ scrollMode: true });
-        this.checkScrollBtnVisible();
       }
     }
+    this.checkScrollBtnVisible();
   }, 50);
 
   scrollX = (amount: number): number => (this.barRef.current!.scrollLeft += amount);
@@ -124,7 +122,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
   // TODO remove ant-btn-icon-only hack when upgrading antd
   classForToggleBtn = (active: boolean): string => "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
-  render() {
+  render(): React.ReactElement {
     const { props } = this;
     const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
