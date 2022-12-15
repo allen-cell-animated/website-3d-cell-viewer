@@ -108,7 +108,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
 
   return (
     <div className={`viewer-toolbar-container${scrollMode ? " viewer-toolbar-scroll" : ""}`}>
-      <div className="viewer-toolbar-scroll-btn scroll-btn-left" onClick={() => scrollX(-100)}>
+      <div className="viewer-toolbar-scroll-left" onClick={() => scrollX(-100)}>
         <ViewerIcon type="closePanel" style={{ fontSize: "12px", transform: "rotate(180deg)" }} />
       </div>
       <div className="viewer-toolbar" ref={barRef} onWheel={scrollHandler}>
@@ -203,7 +203,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
           </Tooltip>
         </span>
       </div>
-      <div className="viewer-toolbar-scroll-btn scroll-btn-right" onClick={() => scrollX(100)}>
+      <div className="viewer-toolbar-scroll-right" onClick={() => scrollX(100)}>
         <ViewerIcon type="closePanel" style={{ fontSize: "12px" }} />
       </div>
     </div>

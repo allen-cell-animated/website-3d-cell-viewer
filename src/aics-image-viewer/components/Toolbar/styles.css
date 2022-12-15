@@ -6,7 +6,9 @@
   width: 100%;
   z-index: 250;
 
-  .viewer-toolbar-scroll-btn {
+  /* Scroll buttons */
+  .viewer-toolbar-scroll-left,
+  .viewer-toolbar-scroll-right {
     height: 100%;
     width: 15px;
     justify-content: center;
@@ -17,23 +19,23 @@
     top: 0;
     z-index: 255;
     transition: color 0.3s;
-
-    &.scroll-btn-left {
-      left: 0;
-    }
-    &.scroll-btn-right {
-      right: 0;
-    }
     &:hover {
       color: white;
     }
+  }
+  .viewer-toolbar-scroll-left {
+    left: 0;
+  }
+  .viewer-toolbar-scroll-right {
+    right: 0;
   }
 
   /* Toolbar scroll mode: collapse all sections to the left and scroll */
   &.viewer-toolbar-scroll {
     border-bottom: 1px solid $light-gray;
 
-    .viewer-toolbar-scroll-btn {
+    .viewer-toolbar-scroll-left,
+    .viewer-toolbar-scroll-right {
       display: flex;
     }
 
@@ -48,40 +50,43 @@
         display: none;
       }
 
-      .viewer-toolbar-left,
+      .viewer-toolbar-left {
+        position: static;
+        margin-left: 15px;
+      }
       .viewer-toolbar-right {
         position: static;
+        margin-right: 15px;
       }
     }
   }
 }
 
+/* Alignment and spacing of groups of toolbar controls */
+
 .viewer-toolbar {
   padding: 12px;
   text-align: center;
 
-  .viewer-toolbar-left {
-    position: absolute;
-    padding: 0 12px;
-    left: 0;
-  }
-
+  .viewer-toolbar-left,
   .viewer-toolbar-right {
     position: absolute;
-    padding: 0 12px;
+    &:not(:empty) {
+      padding: 0 12px;
+    }
+  }
+  .viewer-toolbar-left {
+    left: 0;
+  }
+  .viewer-toolbar-right {
     right: 0;
   }
 
   .viewer-toolbar-group:not(:last-child) {
     margin-right: 14px;
   }
-
   .viewer-toolbar-group > :not(:last-child) {
     margin-right: 6px;
-  }
-
-  .select-render-setting {
-    min-width: 110px;
   }
 
   /* Icon-only buttons */
@@ -172,6 +177,10 @@
   }
 
   /* Dropdown */
+
+  .select-render-setting {
+    min-width: 110px;
+  }
 
   .ant-select-selection {
     border-color: $light-gray !important;
