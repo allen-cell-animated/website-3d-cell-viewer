@@ -81,7 +81,13 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
   }, []); // Dependency-free effect will only run on mount
 
   // Translate vertical scrolling into horizontal scrolling
-  const scrollX: WheelEventHandler<HTMLDivElement> = ({ deltaY }) => barRef.current!.scroll({ left: deltaY });
+  const scrollX: WheelEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    if (e.deltaY === 0) {
+      return;
+    }
+    barRef.current!.scrollLeft += e.deltaY;
+  };
 
   const twoDMode = props.mode !== ViewMode.threeD;
 

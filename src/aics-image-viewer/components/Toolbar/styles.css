@@ -37,7 +37,6 @@
     display: static;
     text-align: left;
     white-space: nowrap;
-    scroll-behavior: smooth;
 
     overflow-x: scroll;
     scrollbar-width: none;
