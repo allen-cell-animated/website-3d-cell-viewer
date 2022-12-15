@@ -45,7 +45,7 @@ interface ToolbarProps {
 export default function Toolbar(props: ToolbarProps): React.ReactElement {
   const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
 
-  // Track if centered buttons overlap left or right buttons... with lots of refs
+  // Add a stateful value for whether we're in "scroll mode"
   const [scrollMode, _setScrollMode] = React.useState(false);
   const scrollModeRef = React.useRef(scrollMode);
   const setScrollMode = (mode: boolean): void => {
@@ -53,6 +53,7 @@ export default function Toolbar(props: ToolbarProps): React.ReactElement {
     _setScrollMode(mode);
   };
 
+  // Track if centered buttons overlap left or right buttons... with lots of refs
   const barRef = React.useRef<HTMLDivElement>(null);
   const leftRef = React.useRef<HTMLSpanElement>(null);
   const centerRef = React.useRef<HTMLSpanElement>(null);
