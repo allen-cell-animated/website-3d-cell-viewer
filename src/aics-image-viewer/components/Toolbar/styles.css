@@ -1,35 +1,92 @@
 @import "../../assets/styles/variables";
 
-.viewer-toolbar {
+/* Provides background and buttons when toolbar is in scroll mode */
+.viewer-toolbar-container {
   position: absolute;
   width: 100%;
-  margin-top: 12px;
-  z-index: 1500;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  padding: 0 12px;
+  z-index: 250;
 
-  .viewer-toolbar-left {
+  /* Scroll buttons */
+  .viewer-toolbar-scroll-left,
+  .viewer-toolbar-scroll-right {
+    height: 100%;
+    width: 18px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(75, 75, 75, 0.85);
+    display: none;
     position: absolute;
-    left: 12px;
+    top: 0;
+    z-index: 255;
+    transition: color 0.3s;
+    &:hover {
+      color: white;
+    }
+  }
+  .viewer-toolbar-scroll-left {
+    left: 0;
+  }
+  .viewer-toolbar-scroll-right {
+    right: 0;
   }
 
+  /* Toolbar scroll mode: collapse all sections to the left and scroll */
+  &.viewer-toolbar-scroll {
+    border-bottom: 1px solid $border-color;
+
+    .viewer-toolbar-scroll-left,
+    .viewer-toolbar-scroll-right {
+      display: flex;
+    }
+
+    .viewer-toolbar {
+      display: static;
+      text-align: left;
+      white-space: nowrap;
+
+      overflow-x: scroll;
+      scrollbar-width: none;
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      .viewer-toolbar-left {
+        position: static;
+        margin-left: 15px;
+      }
+      .viewer-toolbar-right {
+        position: static;
+        margin-right: 15px;
+      }
+    }
+  }
+}
+
+/* Alignment and spacing of groups of toolbar controls */
+
+.viewer-toolbar {
+  padding: 12px;
+  text-align: center;
+
+  .viewer-toolbar-left,
   .viewer-toolbar-right {
     position: absolute;
-    right: 12px;
+    &:not(:empty) {
+      padding: 0 12px;
+    }
+  }
+  .viewer-toolbar-left {
+    left: 0;
+  }
+  .viewer-toolbar-right {
+    right: 0;
   }
 
   .viewer-toolbar-group:not(:last-child) {
     margin-right: 14px;
   }
-
   .viewer-toolbar-group > :not(:last-child) {
     margin-right: 6px;
-  }
-
-  .select-render-setting {
-    min-width: 110px;
   }
 
   /* Icon-only buttons */
@@ -120,6 +177,10 @@
   }
 
   /* Dropdown */
+
+  .select-render-setting {
+    min-width: 110px;
+  }
 
   .ant-select-selection {
     border-color: $light-gray !important;
