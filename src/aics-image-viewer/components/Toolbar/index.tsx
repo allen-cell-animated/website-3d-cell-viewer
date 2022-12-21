@@ -48,6 +48,8 @@ interface ToolbarState {
   scrollBtnRight: boolean;
 }
 
+const RESIZE_DEBOUNCE_DELAY = 50;
+
 export default class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
   barRef: React.RefObject<HTMLDivElement>;
   leftRef: React.RefObject<HTMLDivElement>;
@@ -94,7 +96,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
       }
     }
     this.checkScrollBtnVisible();
-  }, 50);
+  }, RESIZE_DEBOUNCE_DELAY);
 
   scrollX = (amount: number): number => (this.barRef.current!.scrollLeft += amount);
 
