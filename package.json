@@ -1,6 +1,6 @@
 {
   "name": "@aics/web-3d-viewer",
-  "version": "2.3.4",
+  "version": "2.4.1",
   "description": "web view of cell volume images",
   "repository": "github:allen-cell-animated/website-3d-cell-viewer",
   "main": "es/index.js",
@@ -38,7 +38,7 @@
   "author": "Megan Riel-Mehan",
   "license": "ISC",
   "dependencies": {
-    "@aics/volume-viewer": "^2.6.1",
+    "@aics/volume-viewer": "^2.7.0",
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
     "lodash": "^4.17.20",

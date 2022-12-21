@@ -133,6 +133,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     brightnessSliderLevel={props.brightnessSliderLevel}
                     densitySliderLevel={props.densitySliderLevel}
                     gammaSliderLevel={props.gammaSliderLevel}
+                    interpolationEnabled={props.interpolationEnabled}
                     maxProjectOn={props.maxProjectOn}
                     pathTraceOn={props.pathTraceOn}
                     renderConfig={renderConfig}

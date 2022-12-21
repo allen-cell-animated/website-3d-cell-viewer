@@ -36,6 +36,7 @@ import {
   LUT_MAX_PERCENTILE,
   SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
+  INTERPOLATION_ENABLED_DEFAULT,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
@@ -91,6 +92,7 @@ const defaultProps: AppProps = {
     colorPresetsDropdown: true,
     densitySlider: true,
     levelsSliders: true,
+    interpolationControl: true,
     saveSurfaceButtons: true,
     fovCellSwitchControls: true,
     viewModeRadioButtons: true,
@@ -134,25 +136,27 @@ export default class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props);
 
+    const { viewerConfig } = props;
+
     let viewmode = ViewMode.threeD;
     let pathtrace = false;
     let maxproject = false;
-    if (props.viewerConfig) {
-      if (props.viewerConfig.mode === "pathtrace") {
+    if (viewerConfig) {
+      if (viewerConfig.mode === "pathtrace") {
         pathtrace = true;
         maxproject = false;
-      } else if (props.viewerConfig.mode === "maxprojection") {
+      } else if (viewerConfig.mode === "maxprojection") {
         pathtrace = false;
         maxproject = true;
       } else {
         pathtrace = false;
         maxproject = false;
       }
-      if (props.viewerConfig.view === "XY") {
+      if (viewerConfig.view === "XY") {
         viewmode = ViewMode.xy;
-      } else if (props.viewerConfig.view === "YZ") {
+      } else if (viewerConfig.view === "YZ") {
         viewmode = ViewMode.yz;
-      } else if (props.viewerConfig.view === "XZ") {
+      } else if (viewerConfig.view === "XZ") {
         viewmode = ViewMode.xz;
       }
     }
@@ -180,17 +184,21 @@ export default class App extends React.Component<AppProps, AppState> {
         imageType: ImageType.segmentedCell,
         controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
         mode: viewmode,
-        autorotate: props.viewerConfig.autorotate,
-        showAxes: props.viewerConfig.showAxes,
-        showBoundingBox: props.viewerConfig.showBoundingBox,
-        boundingBoxColor: props.viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
-        backgroundColor: props.viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
+        autorotate: viewerConfig.autorotate,
+        showAxes: viewerConfig.showAxes,
+        showBoundingBox: viewerConfig.showBoundingBox,
+        boundingBoxColor: viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
+        backgroundColor: viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
         maxProject: maxproject,
         pathTrace: pathtrace,
-        alphaMaskSliderLevel: [props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-        brightnessSliderLevel: [props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        densitySliderLevel: [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-        levelsSlider: props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+        alphaMaskSliderLevel: [viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
+        brightnessSliderLevel: [viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+        densitySliderLevel: [viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
+        levelsSlider: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+        interpolationEnabled:
+          viewerConfig.interpolationEnabled === undefined
+            ? INTERPOLATION_ENABLED_DEFAULT
+            : viewerConfig.interpolationEnabled,
         // channelSettings is a flat list of objects of this type:
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         channelSettings: [],
@@ -280,8 +288,8 @@ export default class App extends React.Component<AppProps, AppState> {
     if (!isEqual(prevProps.transform, this.props.transform)) {
       const { view3d, image } = this.state;
       if (view3d && image) {
-        view3d.setVolumeTranslation(image, this.props.transform?.translate || [0, 0, 0]);
-        view3d.setVolumeRotation(image, this.props.transform?.rotate || [0, 0, 0]);
+        view3d.setVolumeTranslation(image, this.props.transform?.translation || [0, 0, 0]);
+        view3d.setVolumeRotation(image, this.props.transform?.rotation || [0, 0, 0]);
       }
     }
 
@@ -507,9 +515,13 @@ export default class App extends React.Component<AppProps, AppState> {
     view3d.setCameraMode(userSelections.mode);
     view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
     view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
+    // interpolation defaults to enabled in volume-viewer
+    if (!userSelections.interpolationEnabled) {
+      view3d.setInterpolationEnabled(aimg, false);
+    }
 
-    view3d.setVolumeTranslation(aimg, this.props.transform?.translate || [0, 0, 0]);
-    view3d.setVolumeRotation(aimg, this.props.transform?.rotate || [0, 0, 0]);
+    view3d.setVolumeTranslation(aimg, this.props.transform?.translation || [0, 0, 0]);
+    view3d.setVolumeRotation(aimg, this.props.transform?.rotation || [0, 0, 0]);
     // tell view that things have changed for this image
     view3d.updateActiveChannels(aimg);
   }
@@ -854,6 +866,7 @@ export default class App extends React.Component<AppProps, AppState> {
       const imageValues = gammaSliderToImageValues(value);
       view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
     },
+    interpolationEnabled: (enabled, view3d, image) => view3d.setInterpolationEnabled(image, enabled),
   };
 
   /**
@@ -1164,6 +1177,7 @@ export default class App extends React.Component<AppProps, AppState> {
             brightnessSliderLevel={userSelections.brightnessSliderLevel}
             densitySliderLevel={userSelections.densitySliderLevel}
             gammaSliderLevel={userSelections.levelsSlider}
+            interpolationEnabled={userSelections.interpolationEnabled}
             collapsed={userSelections.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
