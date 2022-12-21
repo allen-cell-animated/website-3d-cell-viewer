@@ -13,7 +13,7 @@ interface CollapsibleRowProps extends MetadataTableProps {
   titleFormat?: MetadataFormat;
 }
 
-export interface MetadataViewerProps extends MetadataTableProps {
+export interface MetadataViewerProps extends Partial<MetadataTableProps> {
   getExtraMetadata?: () => MetadataTableProps;
 }
 
