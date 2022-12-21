@@ -76,10 +76,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
     const centerRect = centerRef.current!.getBoundingClientRect();
     const rightRect = rightRef.current!.getBoundingClientRect();
 
+    // when calculating width required to leave scroll mode, add a bit of extra width to ensure that triggers
+    // for entering and leaving scroll mode never overlap (causing toolbar to rapidly switch when resizing)
+    const SCROLL_OFF_EXTRA_WIDTH = 15;
+
     if (this.state.scrollMode) {
       // Leave scroll mode if there is enough space for centered controls not to overlap left/right-aligned ones
       const barWidth = barRef.current!.getBoundingClientRect().width;
-      const requiredWidth = Math.max(leftRect.width, rightRect.width) * 2 + centerRect.width + 30;
+      const requiredWidth = Math.max(leftRect.width, rightRect.width) * 2 + centerRect.width + SCROLL_OFF_EXTRA_WIDTH;
       if (barWidth > requiredWidth) {
         this.setState({ scrollMode: false });
       }
