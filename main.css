@@ -624,129 +624,158 @@ body{
 /*!*************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/Toolbar/styles.css ***!
   \*************************************************************************************************************************************************/
-.viewer-toolbar{
+.viewer-toolbar-container{
   position:absolute;
   width:100%;
-  margin-top:12px;
-  z-index:1500;
-  display:flex;
-  justify-content:center;
-  text-align:center;
-  padding:0 12px;
+  z-index:250;
 }
-
-  .viewer-toolbar .viewer-toolbar-left{
+.viewer-toolbar-container .viewer-toolbar-scroll-left,
+  .viewer-toolbar-container .viewer-toolbar-scroll-right{
+    height:100%;
+    width:18px;
+    justify-content:center;
+    align-items:center;
+    background-color:rgba(75, 75, 75, 0.85);
+    display:none;
     position:absolute;
-    left:12px;
+    top:0;
+    z-index:255;
+    transition:color 0.3s;
   }
+.viewer-toolbar-container .viewer-toolbar-scroll-left:hover, .viewer-toolbar-container .viewer-toolbar-scroll-right:hover{
+      color:white;
+    }
+.viewer-toolbar-container .viewer-toolbar-scroll-left{
+    left:0;
+  }
+.viewer-toolbar-container .viewer-toolbar-scroll-right{
+    right:0;
+  }
+.viewer-toolbar-container.viewer-toolbar-scroll{
+    border-bottom:1px solid #6e6e6e;
+  }
+.viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar-scroll-left,
+    .viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar-scroll-right{
+      display:flex;
+    }
+.viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar{
+      display:static;
+      text-align:left;
+      white-space:nowrap;
 
+      overflow-x:scroll;
+      scrollbar-width:none;
+    }
+.viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar::-webkit-scrollbar{
+        display:none;
+      }
+.viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar .viewer-toolbar-left{
+        position:static;
+        margin-left:15px;
+      }
+.viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar .viewer-toolbar-right{
+        position:static;
+        margin-right:15px;
+      }
+.viewer-toolbar{
+  padding:12px;
+  text-align:center;
+}
+.viewer-toolbar .viewer-toolbar-left,
   .viewer-toolbar .viewer-toolbar-right{
     position:absolute;
-    right:12px;
   }
-
-  .viewer-toolbar .viewer-toolbar-group:not(:last-child){
+.viewer-toolbar .viewer-toolbar-left:not(:empty), .viewer-toolbar .viewer-toolbar-right:not(:empty){
+      padding:0 12px;
+    }
+.viewer-toolbar .viewer-toolbar-left{
+    left:0;
+  }
+.viewer-toolbar .viewer-toolbar-right{
+    right:0;
+  }
+.viewer-toolbar .viewer-toolbar-group:not(:last-child){
     margin-right:14px;
   }
-
-  .viewer-toolbar .viewer-toolbar-group > :not(:last-child){
+.viewer-toolbar .viewer-toolbar-group > :not(:last-child){
     margin-right:6px;
   }
-
-  .viewer-toolbar .select-render-setting{
-    min-width:110px;
-  }
-
-  .viewer-toolbar .ant-btn-icon-only{
+.viewer-toolbar .ant-btn-icon-only{
     padding-bottom:1px;
   }
-
-  .viewer-toolbar .btn-borderless{
+.viewer-toolbar .btn-borderless{
     background-color:transparent;
     border-color:transparent;
     color:#bfbfbf;
   }
-
-  .viewer-toolbar .btn-borderless > .ant-btn[disabled]{
+.viewer-toolbar .btn-borderless > .ant-btn[disabled]{
       background-color:transparent;
       border-color:transparent;
       color:#bfbfbf;
       padding:0;
     }
-
-  .viewer-toolbar .btn-borderless.btn-active,
+.viewer-toolbar .btn-borderless.btn-active,
     .viewer-toolbar .btn-borderless:hover{
       outline:none;
       box-shadow:none;
       color:white;
       border-color:#aeacae;
     }
-
-  .viewer-toolbar .btn-borderless.btn-active{
+.viewer-toolbar .btn-borderless.btn-active{
       background-color:#4b4b4b;
     }
-
-  .viewer-toolbar .btn-borderless:hover{
+.viewer-toolbar .btn-borderless:hover{
       background-color:#8950d9;
     }
-
-  .viewer-toolbar .btn-borderless:focus-within:not(.btn-active):not(:hover){
+.viewer-toolbar .btn-borderless:focus-within:not(.btn-active):not(:hover){
       background-color:transparent;
       border-color:transparent;
       color:#bfbfbf;
     }
-
-  .viewer-toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
+.viewer-toolbar .btn-borderless[ant-click-animating-without-extra-node="true"]::after{
       box-shadow:none !important;
       background-color:#222222;
     }
-
-  .viewer-toolbar span.btn-borderless{
+.viewer-toolbar span.btn-borderless{
     background-color:transparent !important;
     border-color:transparent !important;
   }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled){
     background-color:black;
     box-shadow:-1px 0px 0px 0px transparent;
     transition-property:color, background-color, border-color, box-shadow;
   }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked,
     .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover{
       outline:none;
       color:white;
       border-color:#aeacae;
     }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child){
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked:not(:first-child), .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover:not(:first-child){
         box-shadow:-1px 0px 0px 0px #aeacae;
       }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked{
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled).ant-radio-button-wrapper-checked{
       background-color:#4b4b4b;
     }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover{
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):hover{
       background-color:#8950d9;
       color:white;
     }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled):focus-within{
       outline:none;
     }
-
-  .viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled)::before{
+.viewer-toolbar .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled)::before{
       content:none;
     }
-
-  .viewer-toolbar .ant-select-selection{
+.viewer-toolbar .select-render-setting{
+    min-width:110px;
+  }
+.viewer-toolbar .ant-select-selection{
     border-color:#aeacae !important;
     box-shadow:none !important;
     background-color:black;
   }
-
-  .viewer-toolbar .ant-select-selection:hover{
+.viewer-toolbar .ant-select-selection:hover{
       background-color:#8950d9;
       color:white;
     }
