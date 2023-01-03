@@ -24,6 +24,8 @@
     }
 
     &.metadata-collapse-content-row {
+      background-color: #313131;
+
       &:last-child,
       &:not(:last-child) tr:last-child {
         border-bottom: none;
