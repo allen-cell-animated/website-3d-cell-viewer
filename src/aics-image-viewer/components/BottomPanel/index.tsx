@@ -3,9 +3,19 @@ import { Drawer, Button, Icon } from "antd";
 
 import "./styles.css";
 
-export function BottomPanel({ title, children }: React.PropsWithChildren<{ title?: string }>): React.ReactElement {
+type BottomPanelProps = {
+  title?: string;
+  onVisibilityChange?: (visible: boolean) => void;
+};
+
+const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibilityChange }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const toggleDrawer = (): void => setIsVisible(!isVisible);
+  const toggleDrawer = (): void => {
+    setIsVisible(!isVisible);
+    if (onVisibilityChange) {
+      onVisibilityChange(!isVisible);
+    }
+  };
 
   const optionsButton = (
     <Button className="options-button" size="small" onClick={toggleDrawer}>
@@ -29,4 +39,6 @@ export function BottomPanel({ title, children }: React.PropsWithChildren<{ title
       </Drawer>
     </div>
   );
-}
+};
+
+export default BottomPanel;

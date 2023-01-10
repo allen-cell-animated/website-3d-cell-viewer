@@ -37,6 +37,8 @@ import {
   SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
   INTERPOLATION_ENABLED_DEFAULT,
+  AXIS_MARGIN_DEFAULT,
+  SCALE_BAR_MARGIN_DEFAULT,
 } from "../../shared/constants";
 
 import ControlPanel from "../ControlPanel";
@@ -231,6 +233,7 @@ export default class App extends React.Component<AppProps, AppState> {
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
+    this.onClippingPanelOpen = this.onClippingPanelOpen.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
     this.beginRequestImage = this.beginRequestImage.bind(this);
     this.loadNextImage = this.loadNextImage.bind(this);
@@ -303,6 +306,8 @@ export default class App extends React.Component<AppProps, AppState> {
     const { userSelections } = this.state;
     view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
     view3d.setShowAxis(userSelections.showAxes);
+    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
+    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
 
     this.setState({ view3d });
   }
@@ -1038,8 +1043,32 @@ export default class App extends React.Component<AppProps, AppState> {
   changeBoundingBoxShowing = (showing: boolean): void => this.changeUserSelection("showBoundingBox", showing);
 
   onResetCamera(): void {
-    if (this.state.view3d) {
-      this.state.view3d.resetCamera();
+    this.state.view3d?.resetCamera();
+  }
+
+  onClippingPanelOpen(open: boolean): void {
+    const { view3d, userSelections } = this.state;
+    if (view3d) {
+      let axisY = AXIS_MARGIN_DEFAULT[1];
+      let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
+      if (open) {
+        axisY += 130;
+        scaleBarY += 130;
+      }
+      view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
+      view3d.setScaleBarPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+
+      view3d.setShowScaleBar(false);
+      if (userSelections.showAxes) {
+        view3d.setShowAxis(false);
+      }
+
+      window.setTimeout(() => {
+        view3d.setShowScaleBar(true);
+        if (userSelections.showAxes) {
+          view3d.setShowAxis(true);
+        }
+      }, 300);
     }
   }
 
@@ -1215,6 +1244,7 @@ export default class App extends React.Component<AppProps, AppState> {
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}
+              onClippingPanelOpen={this.onClippingPanelOpen}
             />
           </Content>
         </Layout>
