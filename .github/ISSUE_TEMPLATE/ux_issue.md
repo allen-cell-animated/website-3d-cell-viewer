@@ -1,6 +1,6 @@
 ---
 name: Usability Issue/Improvement
-about: '"Assign to "UX Backlog and Tracking Board" if it is a known committed-to item. Assign to "Feedback and Insights Research Repository" if low priority, an idea or suggestion that warrants investigation before committing to development,"'
+about: '"Assign to "UX Backlog and Tracking Board" if we are commited to its development. Assign to "Feedback and Insights Research Repository" if low priority or suggestion that warrants investigation before committment,"'
 title: ''
 labels: ux
 assignees: ''
