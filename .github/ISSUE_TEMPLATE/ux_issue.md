@@ -1,6 +1,6 @@
 ---
 name: Usability Issue/Improvement
-about: '"For AICS internal team use: User experience design work needed."'
+about: '"Assign to UX Backlog and Tracking if committed to its development. Assign to Feedback and Insights Research Repository if low priority or suggestion that warrants investigation before commitment."'
 title: ''
 labels: ux
 assignees: ''
