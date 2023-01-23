@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Drawer, Button, Icon } from "antd";
+import { Drawer, Button } from "antd";
 
+import ViewerIcon from "../shared/ViewerIcon";
 import "./styles.css";
 
 type BottomPanelProps = {
@@ -20,7 +21,7 @@ const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibility
   const optionsButton = (
     <Button className="options-button" size="small" onClick={toggleDrawer}>
       {title || "Options"}
-      <Icon type="double-left" className="button-arrow" />
+      <ViewerIcon type="closePanel" className="button-arrow" style={{ fontSize: "15px" }} />
     </Button>
   );
 
