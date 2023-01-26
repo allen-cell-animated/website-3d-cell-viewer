@@ -1044,13 +1044,14 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onClippingPanelOpen(open: boolean): void {
+    const CLIPPING_PANEL_HEIGHT = 130;
     const { view3d, userSelections } = this.state;
     if (view3d) {
       let axisY = AXIS_MARGIN_DEFAULT[1];
       let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
       if (open) {
-        axisY += 130;
-        scaleBarY += 130;
+        axisY += CLIPPING_PANEL_HEIGHT;
+        scaleBarY += CLIPPING_PANEL_HEIGHT;
       }
       view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
       view3d.setScaleBarPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
