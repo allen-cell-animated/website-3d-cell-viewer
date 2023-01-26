@@ -1045,6 +1045,8 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onClippingPanelOpen(open: boolean): void {
     const CLIPPING_PANEL_HEIGHT = 130;
+    const CLIPPING_PANEL_OPEN_TIME = 300;
+
     const { view3d, userSelections } = this.state;
     if (view3d) {
       let axisY = AXIS_MARGIN_DEFAULT[1];
@@ -1056,6 +1058,7 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
       view3d.setScaleBarPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
 
+      // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
       if (userSelections.showAxes) {
         view3d.setShowAxis(false);
@@ -1066,7 +1069,7 @@ export default class App extends React.Component<AppProps, AppState> {
         if (userSelections.showAxes) {
           view3d.setShowAxis(true);
         }
-      }, 300);
+      }, CLIPPING_PANEL_OPEN_TIME);
     }
   }
 
