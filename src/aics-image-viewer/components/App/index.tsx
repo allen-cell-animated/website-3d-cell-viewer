@@ -4,11 +4,15 @@ import React from "react";
 import { includes, isEqual, find, map, debounce } from "lodash";
 import {
   ControlPoint,
+  IVolumeLoader,
+  JsonImageInfoLoader,
+  LoadSpec,
+  OMEZarrLoader,
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
+  TiffLoader,
   View3d,
   Volume,
-  VolumeLoader,
 } from "@aics/volume-viewer";
 
 import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
@@ -410,38 +414,31 @@ export default class App extends React.Component<AppProps, AppState> {
     const { baseUrl } = this.props;
 
     const fullUrl = `${baseUrl}${imageDirectory}`;
+
+    const loadSpec = new LoadSpec();
+    loadSpec.url = fullUrl;
+    loadSpec.subpath = imageDirectory;
+
+    let loader: IVolumeLoader;
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
     if (fullUrl.endsWith(".json")) {
-      const urlPrefix = fullUrl.substring(0, fullUrl.lastIndexOf("/") + 1);
-      VolumeLoader.loadJson(fullUrl, urlPrefix, (url, v, channelIndex) => {
-        this.onNewChannelData(url, v, channelIndex, keepLuts);
-      })
-        .then((aimg) => {
-          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-          this.stopPollingForImage();
-        })
-        .catch((resp) => this.handleOpenImageException(resp));
+      loader = new JsonImageInfoLoader();
     } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      VolumeLoader.loadTiff(fullUrl, (url, v, channelIndex) => {
-        this.onNewChannelData(url, v, channelIndex, keepLuts);
-      })
-        .then((aimg) => {
-          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-          this.stopPollingForImage();
-        })
-        .catch((resp) => this.handleOpenImageException(resp));
+      loader = new TiffLoader();
     } else {
-      const timeIndex = 0;
-      VolumeLoader.loadZarr(baseUrl, imageDirectory, timeIndex, (url, v, channelIndex) => {
+      loader = new OMEZarrLoader();
+    }
+
+    loader
+      .createVolume(loadSpec, (url, v, channelIndex) => {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
       })
-        .then((aimg) => {
-          this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-          this.stopPollingForImage();
-        })
-        .catch((resp) => this.handleOpenImageException(resp));
-    }
+      .then((aimg) => {
+        this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
+        this.stopPollingForImage();
+      })
+      .catch((resp) => this.handleOpenImageException(resp));
   }
 
   initializeNewImage(aimg: Volume, newChannelSettings?: ChannelState[]): void {
