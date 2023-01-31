@@ -1,16 +1,28 @@
 import React, { useState } from "react";
-import { Drawer, Button, Icon } from "antd";
+import { Drawer, Button } from "antd";
 
+import ViewerIcon from "../shared/ViewerIcon";
 import "./styles.css";
 
-export function BottomPanel({ title, children }: React.PropsWithChildren<{ title?: string }>): React.ReactElement {
+type BottomPanelProps = {
+  title?: string;
+  onVisibleChange?: (visible: boolean) => void;
+  onVisibleChangeEnd?: (visible: boolean) => void;
+};
+
+const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibleChange, onVisibleChangeEnd }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const toggleDrawer = (): void => setIsVisible(!isVisible);
+  const toggleDrawer = (): void => {
+    setIsVisible(!isVisible);
+    if (onVisibleChange) {
+      onVisibleChange(!isVisible);
+    }
+  };
 
   const optionsButton = (
     <Button className="options-button" size="small" onClick={toggleDrawer}>
       {title || "Options"}
-      <Icon type="double-left" className="button-arrow" />
+      <ViewerIcon type="closePanel" className="button-arrow" style={{ fontSize: "15px" }} />
     </Button>
   );
 
@@ -24,9 +36,12 @@ export function BottomPanel({ title, children }: React.PropsWithChildren<{ title
         visible={isVisible}
         mask={false}
         title={optionsButton}
+        afterVisibleChange={onVisibleChangeEnd}
       >
         <div className="drawer-body-wrapper">{children}</div>
       </Drawer>
     </div>
   );
-}
+};
+
+export default BottomPanel;
