@@ -237,7 +237,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
-    this.onClippingPanelOpen = this.onClippingPanelOpen.bind(this);
+    this.onClippingPanelVisibleChange = this.onClippingPanelVisibleChange.bind(this);
+    this.onClippingPanelVisibleChangeEnd = this.onClippingPanelVisibleChangeEnd.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
     this.beginRequestImage = this.beginRequestImage.bind(this);
     this.loadNextImage = this.loadNextImage.bind(this);
@@ -1043,9 +1044,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.state.view3d?.resetCamera();
   }
 
-  onClippingPanelOpen(open: boolean): void {
+  onClippingPanelVisibleChange(open: boolean): void {
     const CLIPPING_PANEL_HEIGHT = 130;
-    const CLIPPING_PANEL_OPEN_TIME = 300;
 
     const { view3d, userSelections } = this.state;
     if (view3d) {
@@ -1063,13 +1063,16 @@ export default class App extends React.Component<AppProps, AppState> {
       if (userSelections.showAxes) {
         view3d.setShowAxis(false);
       }
+    }
+  }
 
-      window.setTimeout(() => {
-        view3d.setShowScaleBar(true);
-        if (userSelections.showAxes) {
-          view3d.setShowAxis(true);
-        }
-      }, CLIPPING_PANEL_OPEN_TIME);
+  onClippingPanelVisibleChangeEnd(_open: boolean): void {
+    const { view3d, userSelections } = this.state;
+    if (view3d) {
+      view3d.setShowScaleBar(true);
+      if (userSelections.showAxes) {
+        view3d.setShowAxis(true);
+      }
     }
   }
 
@@ -1245,7 +1248,8 @@ export default class App extends React.Component<AppProps, AppState> {
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}
-              onClippingPanelOpen={this.onClippingPanelOpen}
+              onClippingPanelVisibleChange={this.onClippingPanelVisibleChange}
+              onClippingPanelVisibleChangeEnd={this.onClippingPanelVisibleChangeEnd}
             />
           </Content>
         </Layout>

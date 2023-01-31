@@ -6,15 +6,16 @@ import "./styles.css";
 
 type BottomPanelProps = {
   title?: string;
-  onVisibilityChange?: (visible: boolean) => void;
+  onVisibleChange?: (visible: boolean) => void;
+  onVisibleChangeEnd?: (visible: boolean) => void;
 };
 
-const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibilityChange }) => {
+const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibleChange, onVisibleChangeEnd }) => {
   const [isVisible, setIsVisible] = useState(false);
   const toggleDrawer = (): void => {
     setIsVisible(!isVisible);
-    if (onVisibilityChange) {
-      onVisibilityChange(!isVisible);
+    if (onVisibleChange) {
+      onVisibleChange(!isVisible);
     }
   };
 
@@ -35,6 +36,7 @@ const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibility
         visible={isVisible}
         mask={false}
         title={optionsButton}
+        afterVisibleChange={onVisibleChangeEnd}
       >
         <div className="drawer-body-wrapper">{children}</div>
       </Drawer>

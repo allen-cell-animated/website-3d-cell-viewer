@@ -25,8 +25,9 @@ interface ViewerWrapperProps {
     axisClipSliders: boolean;
   };
   onView3DCreated: (view3d: View3d) => void;
-  onClippingPanelOpen?: (open: boolean) => void;
   setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  onClippingPanelVisibleChange?: (open: boolean) => void;
+  onClippingPanelVisibleChangeEnd?: (open: boolean) => void;
 }
 
 interface ViewerWrapperState {}
@@ -78,11 +79,15 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip, onClippingPanelOpen } = this.props;
+    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
-        <BottomPanel title="Clipping" onVisibilityChange={onClippingPanelOpen}>
+        <BottomPanel
+          title="Clipping"
+          onVisibleChange={this.props.onClippingPanelVisibleChange}
+          onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
+        >
           {renderConfig.axisClipSliders && !!image && (
             <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} />
           )}
