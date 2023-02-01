@@ -1057,7 +1057,7 @@ body{
   }
 
   .bottom-panel .button-arrow{
-    transform:rotate(90deg);
+    transform:rotate(270deg);
     transition:transform 0.2s linear !important;
   }
 
@@ -1081,7 +1081,7 @@ body{
     }
 
   .bottom-panel .drawer.ant-drawer-open .button-arrow{
-      transform:rotate(-90deg);
+      transform:rotate(90deg);
     }
 
 /*!*****************************************************************************************************************************************************************!*\
