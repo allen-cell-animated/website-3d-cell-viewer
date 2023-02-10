@@ -5,9 +5,8 @@
     padding: 10px;
   }
 
+  /* Table rows */
   tr {
-    transition: height 0.1s linear;
-
     &:nth-child(odd) {
       background-color: #3a3a3a;
     }
@@ -18,10 +17,12 @@
     }
 
     &.metadata-collapse-title {
-      font-weight: bold;
+      color: white;
       background-color: #4b4b4b;
-      border-top: 1px solid #6e6e6e;
       border-bottom: 1px solid #6e6e6e;
+      &:not(:first-child) {
+        border-top: 1px solid #6e6e6e;
+      }
     }
 
     &.metadata-collapse-content-row {
@@ -29,22 +30,24 @@
     }
   }
 
-  tr.metadata-collapse-title:first-child,
-  tr.metadata-collapse-collapsed + tr.metadata-collapse-title {
-    border-top: none;
-  }
-
+  /* Table cells */
   td {
-    padding: 6px;
+    padding: 6px 0;
 
     &.metadata-collapse-caret {
-      width: 20px;
-      max-width: 20px;
-      padding-right: 0;
+      width: 40px;
+      padding-left: 16px;
+      padding-right: 10px;
+    }
+
+    &.metadata-key {
+      padding-left: 24px;
     }
 
     &.metadata-value {
       text-align: right;
+      padding-left: 20px;
+      padding-right: 16px;
     }
 
     &.metadata-unit {
@@ -53,12 +56,12 @@
     }
 
     &:last-child {
-      padding-right: 12px;
+      padding-right: 16px;
     }
 
     &.metadata-collapse-content {
       padding: 0;
-      padding-left: 15px;
+      padding-left: 16px;
       border-bottom: none;
     }
 

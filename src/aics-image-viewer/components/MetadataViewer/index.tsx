@@ -69,8 +69,12 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, metadataFormat 
         } else {
           return (
             <tr key={idx}>
-              <td className="metadata-collapse-caret"></td>
-              {addTooltipIfPresent(format?.tooltip, <td>{format?.displayName || key}</td>)}
+              {addTooltipIfPresent(
+                format?.tooltip,
+                <td className="metadata-key" colSpan={2}>
+                  {format?.displayName || key}
+                </td>
+              )}
               <td className="metadata-value" colSpan={hasUnit ? 1 : 2}>
                 {metadataValue}
               </td>
