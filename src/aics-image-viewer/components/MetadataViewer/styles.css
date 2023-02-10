@@ -6,7 +6,6 @@
   }
 
   tr {
-    border-bottom: 1px solid #6e6e6e;
     transition: height 0.1s linear;
 
     &:nth-child(odd) {
@@ -21,16 +20,18 @@
     &.metadata-collapse-title {
       font-weight: bold;
       background-color: #4b4b4b;
+      border-top: 1px solid #6e6e6e;
+      border-bottom: 1px solid #6e6e6e;
     }
 
     &.metadata-collapse-content-row {
       background-color: #313131;
-
-      &:last-child,
-      &:not(:last-child) tr:last-child {
-        border-bottom: none;
-      }
     }
+  }
+
+  tr.metadata-collapse-title:first-child,
+  tr.metadata-collapse-collapsed + tr.metadata-collapse-title {
+    border-top: none;
   }
 
   td {

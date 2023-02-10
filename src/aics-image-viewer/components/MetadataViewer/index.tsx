@@ -36,7 +36,7 @@ const MetadataCollapsibleRow: React.FC<CollapsibleRowProps> = ({ metadata, metad
     <>
       <tr className="metadata-collapse-title" onClick={() => setCollapsed(!collapsed)}>
         <td className="metadata-collapse-caret">
-          <Icon type="caret-right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
+          <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
         </td>
         {addTooltipIfPresent(titleFormat?.tooltip, <td colSpan={3}>{titleFormat?.displayName || title}</td>)}
       </tr>
