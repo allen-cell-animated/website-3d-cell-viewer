@@ -1,35 +1,24 @@
 import { Icon, Tooltip } from "antd";
 import React from "react";
-import { MetadataFormat, MetadataFormatRecord, MetadataRecord } from "../../shared/types";
+import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
 
 interface MetadataTableProps {
   metadata: MetadataRecord;
-  metadataFormat?: MetadataFormatRecord;
 }
 
-interface CollapsibleRowProps extends MetadataTableProps {
+interface CollapsibleCategoryProps extends MetadataTableProps {
   title: string;
-  titleFormat?: MetadataFormat;
 }
 
 export interface MetadataViewerProps extends Partial<MetadataTableProps> {
   getExtraMetadata?: () => MetadataTableProps;
 }
 
-const addTooltipIfPresent = (tooltip: any, component: React.ReactElement): React.ReactElement => {
-  if (typeof tooltip === "string" && tooltip.length > 0) {
-    return (
-      <Tooltip title={tooltip} placement="right">
-        {component}
-      </Tooltip>
-    );
-  }
-  return component;
-};
+const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val === "object" && val !== null;
 
 /** Component to hold collapse state */
-const MetadataCollapsibleRow: React.FC<CollapsibleRowProps> = ({ metadata, metadataFormat, title, titleFormat }) => {
+const MetadataCollapsibleCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title }) => {
   const [collapsed, setCollapsed] = React.useState(true);
 
   return (
@@ -38,47 +27,31 @@ const MetadataCollapsibleRow: React.FC<CollapsibleRowProps> = ({ metadata, metad
         <td className="metadata-collapse-caret">
           <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
         </td>
-        {addTooltipIfPresent(titleFormat?.tooltip, <td colSpan={3}>{titleFormat?.displayName || title}</td>)}
+        <td colSpan={2}>{title}</td>
       </tr>
       <tr className={"metadata-collapse-content-row" + (collapsed ? " metadata-collapse-collapsed" : "")}>
-        <td className="metadata-collapse-content" colSpan={4}>
-          <MetadataTable metadata={metadata} metadataFormat={metadataFormat} />
+        <td className="metadata-collapse-content" colSpan={3}>
+          <MetadataTable metadata={metadata} />
         </td>
       </tr>
     </>
   );
 };
 
-const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, metadataFormat }) => (
+const MetadataTable: React.FC<MetadataTableProps> = ({ metadata }) => (
   <table className="viewer-metadata-table">
     <tbody>
       {Object.keys(metadata).map((key, idx) => {
-        const format = metadataFormat && metadataFormat[key];
-        const hasUnit = typeof format?.unit === "string" && format.unit.length > 0;
         const metadataValue = metadata[key];
-        if (typeof metadataValue === "object" && metadataValue !== null) {
-          return (
-            <MetadataCollapsibleRow
-              key={idx}
-              metadata={metadataValue}
-              metadataFormat={metadataFormat}
-              title={key}
-              titleFormat={format}
-            />
-          );
+        if (isCategory(metadataValue)) {
+          return <MetadataCollapsibleCategory key={idx} metadata={metadataValue} title={key} />;
         } else {
           return (
             <tr key={idx}>
-              {addTooltipIfPresent(
-                format?.tooltip,
-                <td className="metadata-key" colSpan={2}>
-                  {format?.displayName || key}
-                </td>
-              )}
-              <td className="metadata-value" colSpan={hasUnit ? 1 : 2}>
-                {metadataValue}
+              <td className="metadata-key" colSpan={2}>
+                {key}
               </td>
-              {hasUnit && <td className="metadata-unit">{format?.unit}</td>}
+              <td className="metadata-value">{metadataValue}</td>
             </tr>
           );
         }
@@ -87,14 +60,9 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, metadataFormat 
   </table>
 );
 
-const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, metadataFormat, getExtraMetadata }) => {
-  const extraMetadata = getExtraMetadata ? getExtraMetadata() : { metadata: {}, metadataFormat: {} };
-  return (
-    <MetadataTable
-      metadata={{ ...extraMetadata.metadata, ...metadata }}
-      metadataFormat={{ ...extraMetadata.metadataFormat, ...metadataFormat }}
-    />
-  );
+const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, getExtraMetadata }) => {
+  const extraMetadata = getExtraMetadata ? getExtraMetadata() : {};
+  return <MetadataTable metadata={{ ...extraMetadata, ...metadata }} />;
 };
 
 export default MetadataViewer;

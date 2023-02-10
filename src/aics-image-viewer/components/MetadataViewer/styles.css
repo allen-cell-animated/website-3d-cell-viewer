@@ -50,11 +50,6 @@
       padding-right: 16px;
     }
 
-    &.metadata-unit {
-      width: 75px;
-      max-width: 75px;
-    }
-
     &:last-child {
       padding-right: 16px;
     }
