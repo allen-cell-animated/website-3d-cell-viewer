@@ -19,7 +19,12 @@
     &.metadata-collapse-title {
       color: white;
       background-color: #4b4b4b;
-      border-bottom: 1px solid #6e6e6e;
+      &:not(.metadata-collapse-no-bottom-border) {
+        border-bottom: 1px solid #6e6e6e;
+      }
+      &.metadata-collapse-no-bottom-border > td {
+        padding-bottom: 5px;
+      }
       &:not(:first-child) {
         border-top: 1px solid #6e6e6e;
       }
