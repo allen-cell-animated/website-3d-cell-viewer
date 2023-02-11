@@ -17,7 +17,7 @@ interface ControlPanelProps
   extends ChannelsWidgetProps,
     GlobalVolumeControlsProps,
     CustomizeWidgetProps,
-    Partial<MetadataViewerProps> {
+    MetadataViewerProps {
   hasImage: boolean;
   renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
     colorPresetsDropdown: boolean;
@@ -148,11 +148,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                 </>
               )}
               {tab === ControlTab.Metadata && (
-                <MetadataViewer
-                  metadata={props.metadata}
-                  metadataFormat={props.metadataFormat}
-                  getExtraMetadata={props.getExtraMetadata}
-                />
+                <MetadataViewer metadata={props.metadata} getExtraMetadata={props.getExtraMetadata} />
               )}
             </div>
           )}

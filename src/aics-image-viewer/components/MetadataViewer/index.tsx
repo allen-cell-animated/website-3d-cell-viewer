@@ -1,4 +1,4 @@
-import { Icon, Tooltip } from "antd";
+import { Icon } from "antd";
 import React from "react";
 import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
@@ -9,10 +9,11 @@ interface MetadataTableProps {
 
 interface CollapsibleCategoryProps extends MetadataTableProps {
   title: string;
+  className?: string;
 }
 
 export interface MetadataViewerProps extends Partial<MetadataTableProps> {
-  getExtraMetadata?: () => MetadataTableProps;
+  getExtraMetadata?: () => MetadataRecord;
 }
 
 const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val === "object" && val !== null;

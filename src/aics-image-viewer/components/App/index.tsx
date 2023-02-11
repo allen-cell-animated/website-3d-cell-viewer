@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from "react";
-import { includes, isEqual, find, map, debounce } from "lodash";
+import { includes, isEqual, find, map, debounce, mapValues } from "lodash";
 import {
   ControlPoint,
   IVolumeLoader,
@@ -25,7 +25,7 @@ import {
   ChannelStateChangeHandlers,
   ChannelGrouping,
 } from "../../shared/utils/viewerChannelSettings";
-import { AxisName, IsosurfaceFormat, MetadataFormatRecord, MetadataRecord } from "../../shared/types";
+import { AxisName, IsosurfaceFormat, MetadataRecord } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
@@ -1161,15 +1161,11 @@ export default class App extends React.Component<AppProps, AppState> {
     return { x: 0, y: 0, z: 0 };
   }
 
-  getExtraMetadata(): { metadata: MetadataRecord; metadataFormat: MetadataFormatRecord } {
+  getExtraMetadata(): MetadataRecord {
     if (!this.props.renderConfig.dimensionsInMetadataViewer) {
-      return { metadata: {}, metadataFormat: {} };
+      return {};
     }
-    const dimensionFormat = { unit: "px" };
-    return {
-      metadata: { Dimensions: this.getNumberOfSlices() },
-      metadataFormat: { x: dimensionFormat, y: dimensionFormat, z: dimensionFormat },
-    };
+    return { Dimensions: mapValues(this.getNumberOfSlices(), (num) => num + "px") };
   }
 
   render(): React.ReactNode {
@@ -1191,7 +1187,6 @@ export default class App extends React.Component<AppProps, AppState> {
             renderConfig={renderConfig}
             metadata={this.props.metadata}
             getExtraMetadata={() => this.getExtraMetadata()}
-            metadataFormat={this.props.metadataFormat}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}
