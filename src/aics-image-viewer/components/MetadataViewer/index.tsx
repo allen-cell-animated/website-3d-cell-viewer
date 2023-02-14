@@ -25,7 +25,7 @@ const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val ===
 /** Component to hold collapse state */
 const MetadataCollapsibleCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title, categoryFollows }) => {
   const [collapsed, setCollapsed] = React.useState(true);
-  const toggleCollapsed = () => setCollapsed(!collapsed);
+  const toggleCollapsed = (): void => setCollapsed(!collapsed);
 
   return (
     <>
