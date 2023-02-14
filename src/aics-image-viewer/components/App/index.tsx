@@ -1185,7 +1185,7 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             renderConfig={renderConfig}
-            metadata={this.props.metadata}
+            metadata={this.props.metadata || {}}
             getExtraMetadata={() => this.getExtraMetadata()}
             // image state
             imageName={this.state.image?.name}

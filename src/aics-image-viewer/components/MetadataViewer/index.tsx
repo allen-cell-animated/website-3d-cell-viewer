@@ -3,12 +3,12 @@ import React from "react";
 import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
 
-interface MetadataProps {
+interface MetadataTableProps {
   metadata: MetadataRecord;
-}
-
-interface MetadataTableProps extends MetadataProps {
-  // track whether categories will abut a category below when closed, for rendering borders properly
+  // Track whether a category title will abut another category title below when in the collapsed state.
+  // If so, this category title should not render a bottom border when collapsed, otherwise the border will double
+  // up with the top border of the lower category and create the appearance of a single thick, uneven border.
+  // (there is not a way to prevent this with pure CSS to my knowledge)
   categoryFollows: boolean;
 }
 
@@ -16,7 +16,8 @@ interface CollapsibleCategoryProps extends MetadataTableProps {
   title: string;
 }
 
-export interface MetadataViewerProps extends Partial<MetadataProps> {
+export interface MetadataViewerProps {
+  metadata: MetadataRecord;
   getExtraMetadata?: () => MetadataRecord;
 }
 
@@ -59,6 +60,9 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
           const metadataValue = metadata[key];
 
           if (isCategory(metadataValue)) {
+            // Determine whether this category is followed by another category, ignoring data hierarchy:
+            // If this is the last element in the table, this category has another category below if the table does.
+            // Otherwise, just check if the next element in this table is a category.
             const nextItem = metadata[metadataKeys[idx + 1]];
             const categoryBelow = nextItem ? isCategory(nextItem) : categoryFollows;
 
