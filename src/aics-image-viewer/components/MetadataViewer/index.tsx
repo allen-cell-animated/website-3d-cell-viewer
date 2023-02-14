@@ -59,13 +59,8 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
           const metadataValue = metadata[key];
 
           if (isCategory(metadataValue)) {
-            let categoryBelow: boolean;
-            if (idx + 1 >= metadataKeys.length) {
-              categoryBelow = categoryFollows;
-            } else {
-              categoryBelow = isCategory(metadata[metadataKeys[idx + 1]]);
-              console.log(key, metadataKeys[idx + 1]);
-            }
+            const nextItem = metadata[metadataKeys[idx + 1]];
+            const categoryBelow = nextItem ? isCategory(nextItem) : categoryFollows;
 
             return (
               <MetadataCollapsibleCategory
