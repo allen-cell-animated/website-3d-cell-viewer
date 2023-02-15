@@ -1,7 +1,7 @@
 // 3rd Party Imports
 import { Layout } from "antd";
 import React from "react";
-import { includes, isEqual, find, map, debounce, mapValues } from "lodash";
+import { includes, isEqual, find, map, debounce } from "lodash";
 import {
   ControlPoint,
   IVolumeLoader,
@@ -1208,7 +1208,7 @@ export default class App extends React.Component<AppProps, AppState> {
       });
     }
 
-    return { ...customMetadata, ...metadata };
+    return { Image: customMetadata, ...metadata };
   }
 
   render(): React.ReactNode {
