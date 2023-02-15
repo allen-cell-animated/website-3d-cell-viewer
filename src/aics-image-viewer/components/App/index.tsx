@@ -15,7 +15,14 @@ import {
   Volume,
 } from "@aics/volume-viewer";
 
-import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
+import {
+  AppProps,
+  AppState,
+  MetadataSelectors,
+  UserSelectionChangeHandlers,
+  UserSelectionKey,
+  UserSelectionState,
+} from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
@@ -106,7 +113,6 @@ const defaultProps: AppProps = {
     showAxesButton: true,
     showBoundingBoxButton: true,
     metadataViewer: true,
-    dimensionsInMetadataViewer: true,
   },
   viewerConfig: {
     showAxes: false,
@@ -1161,11 +1167,48 @@ export default class App extends React.Component<AppProps, AppState> {
     return { x: 0, y: 0, z: 0 };
   }
 
-  getExtraMetadata(): MetadataRecord {
-    if (!this.props.renderConfig.dimensionsInMetadataViewer) {
-      return {};
+  private metadataSelectors: MetadataSelectors = {
+    dimensions: (image) => {
+      const { x, y, z } = image;
+      return { Dimensions: { x: x + "px", y: y + "px", z: z + "px" } };
+    },
+    originalDimensions: (image) => {
+      const { width, height, tiles } = image.imageInfo;
+      return { "Original dimensions": { x: width + "px", y: height + "px", z: tiles + "px" } };
+    },
+    physicalDimensions: (image) => {
+      const { physicalScale, physicalUnitSymbol } = image;
+      const [x, y, z] = image.normalizedPhysicalSize.toArray().map((dim) => dim * physicalScale + physicalUnitSymbol);
+      return { "Physical size": { x, y, z } };
+    },
+    pixelPhysicalSize: (image) => {
+      const { pixel_size, physicalUnitSymbol } = image;
+      const [x, y, z] = pixel_size.map((dim) => dim + physicalUnitSymbol);
+      return { "Physical size per pixel": { x, y, z } };
+    },
+    channels: (image) => ({ Channels: image.num_channels }),
+    timeSeriesFrames: (_image) => ({ "Time series frames": 1 }), // TODO
+    userData: (image) => {
+      const { userData } = image.imageInfo;
+      return userData ? { "User data": userData as MetadataRecord } : {};
+    },
+  };
+
+  getMetadata(): MetadataRecord {
+    let customMetadata = {};
+    const { metadata, metadataConfig } = this.props;
+    const { image } = this.state;
+
+    if (image && metadataConfig) {
+      metadataConfig.forEach((category) => {
+        if (category in this.metadataSelectors) {
+          const newMetadata = this.metadataSelectors[category](image);
+          customMetadata = { ...customMetadata, ...newMetadata };
+        }
+      });
     }
-    return { Dimensions: mapValues(this.getNumberOfSlices(), (num) => num + "px") };
+
+    return { ...customMetadata, ...metadata };
   }
 
   render(): React.ReactNode {
@@ -1185,8 +1228,7 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             renderConfig={renderConfig}
-            metadata={this.props.metadata || {}}
-            getExtraMetadata={() => this.getExtraMetadata()}
+            getMetadata={() => this.getMetadata()}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}

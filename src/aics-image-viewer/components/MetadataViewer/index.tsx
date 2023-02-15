@@ -16,11 +16,6 @@ interface CollapsibleCategoryProps extends MetadataTableProps {
   title: string;
 }
 
-export interface MetadataViewerProps {
-  metadata: MetadataRecord;
-  getExtraMetadata?: () => MetadataRecord;
-}
-
 const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val === "object" && val !== null;
 
 /** Component to hold collapse state */
@@ -90,9 +85,8 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
   );
 };
 
-const MetadataViewer: React.FC<MetadataViewerProps> = ({ metadata, getExtraMetadata }) => {
-  const extraMetadata = getExtraMetadata ? getExtraMetadata() : {};
-  return <MetadataTable metadata={{ ...extraMetadata, ...metadata }} categoryFollows={false} />;
-};
+const MetadataViewer: React.FC<{ metadata: MetadataRecord }> = ({ metadata }) => (
+  <MetadataTable metadata={metadata} categoryFollows={false} />
+);
 
 export default MetadataViewer;

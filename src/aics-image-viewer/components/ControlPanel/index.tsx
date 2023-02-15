@@ -6,23 +6,21 @@ import { ClickParam } from "antd/lib/menu";
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
 import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
-import MetadataViewer, { MetadataViewerProps } from "../MetadataViewer";
+import MetadataViewer from "../MetadataViewer";
 
 import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
+import { MetadataRecord } from "../../shared/types";
 
-interface ControlPanelProps
-  extends ChannelsWidgetProps,
-    GlobalVolumeControlsProps,
-    CustomizeWidgetProps,
-    MetadataViewerProps {
+interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
   renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
     colorPresetsDropdown: boolean;
     metadataViewer: boolean;
   };
+  getMetadata: () => MetadataRecord;
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
 }
@@ -36,7 +34,7 @@ const enum ControlTab {
 const ControlTabNames = {
   [ControlTab.Channels]: "Channel Settings",
   [ControlTab.Advanced]: "Advanced Settings",
-  [ControlTab.Metadata]: "Image Metadata",
+  [ControlTab.Metadata]: "Metadata",
 };
 
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
@@ -147,9 +145,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   />
                 </>
               )}
-              {tab === ControlTab.Metadata && (
-                <MetadataViewer metadata={props.metadata} getExtraMetadata={props.getExtraMetadata} />
-              )}
+              {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
             </div>
           )}
         </Card>
