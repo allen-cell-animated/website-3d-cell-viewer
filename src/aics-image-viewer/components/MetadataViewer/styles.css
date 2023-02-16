@@ -1,5 +1,6 @@
 .viewer-metadata-table {
   width: 100%;
+  table-layout: fixed;
 
   tbody {
     padding: 10px;
@@ -38,6 +39,7 @@
   /* Table cells */
   td {
     padding: 6px 0;
+    overflow-wrap: break-word;
 
     &.metadata-collapse-caret {
       width: 40px;
