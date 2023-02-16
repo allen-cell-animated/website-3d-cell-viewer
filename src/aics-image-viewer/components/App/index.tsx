@@ -1178,7 +1178,7 @@ export default class App extends React.Component<AppProps, AppState> {
     },
     physicalDimensions: (image) => {
       const { physicalScale, physicalUnitSymbol, normalizedPhysicalSize } = image;
-      const [x, y, z] = normalizedPhysicalSize.toArray().map((dim) => dim * physicalScale + physicalUnitSymbol);
+      const [x, y, z] = normalizedPhysicalSize.toArray().map((dim: number) => dim * physicalScale + physicalUnitSymbol);
       return { "Physical size": { x, y, z } };
     },
     pixelPhysicalSize: (image) => {
