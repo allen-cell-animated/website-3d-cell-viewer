@@ -41,7 +41,7 @@
     padding: 6px 0;
     overflow-wrap: break-word;
 
-    &.metadata-collapse-caret {
+    .metadata-collapse-caret {
       width: 40px;
       padding-left: 16px;
       padding-right: 10px;

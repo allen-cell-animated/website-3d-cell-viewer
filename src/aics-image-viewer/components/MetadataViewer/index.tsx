@@ -31,13 +31,15 @@ const MetadataCollapsibleCategory: React.FC<CollapsibleCategoryProps> = ({ metad
         }
         onClick={toggleCollapsed}
       >
-        <td className="metadata-collapse-caret">
-          <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
+        <td colSpan={2}>
+          <span className="metadata-collapse-caret">
+            <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
+          </span>
+          {title}
         </td>
-        <td colSpan={2}>{title}</td>
       </tr>
       <tr className={"metadata-collapse-content-row" + (collapsed ? " metadata-collapse-collapsed" : "")}>
-        <td className="metadata-collapse-content" colSpan={3}>
+        <td className="metadata-collapse-content" colSpan={2}>
           <MetadataTable metadata={metadata} categoryFollows={categoryFollows} />
         </td>
       </tr>
@@ -56,8 +58,8 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
 
           if (isCategory(metadataValue)) {
             // Determine whether this category is followed by another category, ignoring data hierarchy:
-            // If this is the last element in the table, this category has another category below if the table does.
-            // Otherwise, just check if the next element in this table is a category.
+            // - If this is the last element in the table, this category has another category below if the table does.
+            // - Otherwise, just check if the next element in this table is a category.
             const nextItem = metadata[metadataKeys[idx + 1]];
             const categoryBelow = nextItem ? isCategory(nextItem) : categoryFollows;
 
@@ -72,9 +74,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
           } else {
             return (
               <tr key={idx}>
-                <td className="metadata-key" colSpan={2}>
-                  {key}
-                </td>
+                <td className="metadata-key">{key}</td>
                 <td className="metadata-value">{metadataValue}</td>
               </tr>
             );
