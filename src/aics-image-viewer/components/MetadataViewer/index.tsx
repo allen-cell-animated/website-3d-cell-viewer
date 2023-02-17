@@ -75,7 +75,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
             return (
               <tr key={idx}>
                 <td className="metadata-key">{key}</td>
-                <td className="metadata-value">{metadataValue}</td>
+                <td className="metadata-value">{metadataValue + ""}</td>
               </tr>
             );
           }
