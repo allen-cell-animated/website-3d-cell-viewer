@@ -61,7 +61,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
             // - If this is the last element in the table, this category has another category below if the table does.
             // - Otherwise, just check if the next element in this table is a category.
             const nextItem = metadata[metadataKeys[idx + 1]];
-            const categoryBelow = nextItem ? isCategory(nextItem) : categoryFollows;
+            const categoryBelow = idx + 1 >= metadataKeys.length ? isCategory(nextItem) : categoryFollows;
 
             return (
               <MetadataCollapsibleCategory
