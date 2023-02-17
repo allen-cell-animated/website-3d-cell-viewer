@@ -1188,27 +1188,25 @@ export default class App extends React.Component<AppProps, AppState> {
     },
     channels: (image) => ({ Channels: image.num_channels }),
     timeSeriesFrames: (_image) => ({ "Time series frames": 1 }), // TODO
-    userData: (image) => {
-      const { userData } = image.imageInfo;
-      return userData ? { "User data": userData as MetadataRecord } : {};
-    },
+    userData: (image) => image.imageInfo.userData as MetadataRecord,
   };
 
   getMetadata(): MetadataRecord {
-    let customMetadata = {};
     const { metadata, metadataConfig } = this.props;
     const { image } = this.state;
 
-    if (image && metadataConfig) {
+    let customMetadata = {};
+    if (image && metadataConfig && metadataConfig.length > 0) {
       metadataConfig.forEach((category) => {
         if (category in this.metadataSelectors) {
           const newMetadata = this.metadataSelectors[category](image);
           customMetadata = { ...customMetadata, ...newMetadata };
         }
       });
+      return { Image: customMetadata, ...metadata };
+    } else {
+      return metadata || {};
     }
-
-    return { Image: customMetadata, ...metadata };
   }
 
   render(): React.ReactNode {

@@ -42,7 +42,7 @@
     overflow-wrap: break-word;
 
     .metadata-collapse-caret {
-      width: 40px;
+      cursor: pointer;
       padding-left: 16px;
       padding-right: 10px;
     }
