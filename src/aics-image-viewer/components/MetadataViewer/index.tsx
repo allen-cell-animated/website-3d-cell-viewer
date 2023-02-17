@@ -65,7 +65,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
 
             return (
               <MetadataCollapsibleCategory
-                key={idx}
+                key={key}
                 metadata={metadataValue}
                 title={key}
                 categoryFollows={categoryBelow}
@@ -73,7 +73,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
             );
           } else {
             return (
-              <tr key={idx}>
+              <tr key={key}>
                 <td className="metadata-key">{key}</td>
                 <td className="metadata-value">{metadataValue + ""}</td>
               </tr>

@@ -65,7 +65,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     );
   };
 
-  const renderTab = (thisTab: ControlTab, icon: React.ReactNode | string): React.ReactNode => (
+  const renderTab = (thisTab: ControlTab, icon: React.ReactNode): React.ReactNode => (
     <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { visible: false })}>
       <Button
         className={tab === thisTab ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
