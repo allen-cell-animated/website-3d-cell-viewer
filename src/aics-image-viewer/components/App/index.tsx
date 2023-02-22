@@ -162,19 +162,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.state = {
       image: null,
       view3d: null,
-      files: null,
-      cellId: props.cellId,
-      fovPath: props.fovPath,
-      cellPath: props.cellPath,
-      queryErrorMessage: null,
       sendingQueryRequest: false,
-      openFilesOnly: false,
-      channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
-      // did the requested image have a cell id (in queryInput)?
-      hasCellId: !!props.cellId,
       // state set by the UI:
       userSelections: {
         imageType: ImageType.segmentedCell,
@@ -201,7 +192,6 @@ export default class App extends React.Component<AppProps, AppState> {
       },
       currentlyLoadedImagePath: undefined,
       cachingInProgress: false,
-      path: "",
     };
 
     this.openImage = this.openImage.bind(this);
@@ -247,8 +237,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
     window.addEventListener("resize", debouncedResizeHandler);
 
-    const { cellId } = this.props;
-    if (cellId) {
+    if (this.props.cellId) {
       this.beginRequestImage();
     }
   }
@@ -328,8 +317,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({
       image: aimg,
       currentlyLoadedImagePath: imageDirectory,
-      channelDataReady: {},
-      queryErrorMessage: null,
       cachingInProgress: false,
       userSelections: {
         ...this.state.userSelections,
@@ -1004,13 +991,10 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   beginRequestImage(type?: ImageType): void {
-    const { fovPath, cellPath, cellId } = this.props;
+    const { fovPath, cellPath } = this.props;
     let imageType = type || this.state.userSelections.imageType;
     let path = imageType === ImageType.fullField ? fovPath : cellPath;
     this.setState({
-      cellId,
-      path,
-      hasCellId: !!cellId,
       sendingQueryRequest: true,
       userSelections: {
         ...this.state.userSelections,
@@ -1096,7 +1080,6 @@ export default class App extends React.Component<AppProps, AppState> {
             pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
             channelDataChannels={this.state.image?.channels}
             channelGroupedByType={this.state.channelGroupedByType}
-            channelDataReady={this.state.channelDataReady}
             // user selections
             maxProjectOn={userSelections.maxProject}
             pathTraceOn={userSelections.pathTrace}
@@ -1134,8 +1117,8 @@ export default class App extends React.Component<AppProps, AppState> {
               autorotate={userSelections.autorotate}
               pathTraceOn={userSelections.pathTrace}
               imageType={userSelections.imageType}
-              hasParentImage={!!this.state.fovPath}
-              hasCellId={this.state.hasCellId}
+              hasParentImage={!!this.props.fovPath}
+              hasCellId={!!this.props.cellId}
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
               showAxes={userSelections.showAxes}
               showBoundingBox={userSelections.showBoundingBox}

@@ -22,7 +22,6 @@ export interface ChannelsWidgetProps {
   channelDataChannels: Channel[] | undefined;
   channelSettings: ChannelState[];
   channelGroupedByType: ChannelGrouping;
-  channelDataReady: { [key: string]: boolean };
   viewerChannelSettings?: ViewerChannelSettings;
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;

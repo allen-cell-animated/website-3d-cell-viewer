@@ -113,7 +113,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   channelDataChannels={props.channelDataChannels}
                   channelGroupedByType={props.channelGroupedByType}
                   changeChannelSettings={props.changeChannelSettings}
-                  channelDataReady={props.channelDataReady}
                   saveIsosurface={props.saveIsosurface}
                   updateChannelTransferFunction={props.updateChannelTransferFunction}
                   changeOneChannelSetting={props.changeOneChannelSetting}

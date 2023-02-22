@@ -92,22 +92,13 @@ export type UserSelectionChangeHandlers = {
 export interface AppState {
   view3d: View3d | null;
   image: Volume | null;
-  files: null;
-  cellId?: string;
-  fovPath: string;
-  cellPath: string;
-  queryErrorMessage: null | string;
+
   sendingQueryRequest: boolean;
-  openFilesOnly: boolean;
-  channelDataReady: { [key: string]: boolean };
+  currentlyLoadedImagePath?: string;
+  cachingInProgress: boolean;
   // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
   channelGroupedByType: ChannelGrouping;
-  // did the requested image have a cell id (in queryInput)?
-  hasCellId: boolean;
   // state set by the UI:
   userSelections: UserSelectionState;
-  currentlyLoadedImagePath?: string;
-  cachingInProgress: boolean;
-  path: string;
 }
