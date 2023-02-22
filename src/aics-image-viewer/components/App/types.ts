@@ -50,11 +50,8 @@ export interface AppProps {
     slice?: number; // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   };
   baseUrl: string;
-  nextImgPath: string;
-  prevImgPath: string;
   cellDownloadHref: string;
   fovDownloadHref: string;
-  preLoad: boolean;
   pixelSize?: [number, number, number];
   canvasMargin: string;
   transform?: {
@@ -95,8 +92,6 @@ export type UserSelectionChangeHandlers = {
 export interface AppState {
   view3d: View3d | null;
   image: Volume | null;
-  nextImg: Volume | null;
-  prevImg: Volume | null;
   files: null;
   cellId?: string;
   fovPath: string;
