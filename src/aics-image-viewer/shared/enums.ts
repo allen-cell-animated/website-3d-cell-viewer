@@ -12,6 +12,6 @@ export const enum RenderMode {
 }
 
 export const enum ImageType {
-  segmentedCell,
-  fullField,
+  segmentedCell = "cell",
+  fullField = "fov",
 }

@@ -41,6 +41,7 @@ export interface AppProps {
     autorotate: boolean;
     view: string; // "3D", "XY", "XZ", "YZ"
     mode: string; // "default", "pathtrace", "maxprojection"
+    imageType?: string;
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
