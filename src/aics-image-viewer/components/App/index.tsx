@@ -114,9 +114,9 @@ const defaultProps: AppProps = {
     mode: "default", // "pathtrace", "maxprojection"
     backgroundColor: BACKGROUND_COLOR_DEFAULT,
     boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
+    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
+    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+    density: DENSITY_SLIDER_LEVEL_DEFAULT,
     levels: LEVELS_SLIDER_DEFAULT,
     region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
     slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
@@ -178,10 +178,10 @@ export default class App extends React.Component<AppProps, AppState> {
         backgroundColor: viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
         maxProject: maxproject,
         pathTrace: pathtrace,
-        alphaMaskSliderLevel: [viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-        brightnessSliderLevel: [viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        densitySliderLevel: [viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-        levelsSlider: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+        maskAlpha: viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
+        brightness: viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+        density: viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
+        levels: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
         interpolationEnabled:
           viewerConfig.interpolationEnabled === undefined
             ? INTERPOLATION_ENABLED_DEFAULT
@@ -390,14 +390,14 @@ export default class App extends React.Component<AppProps, AppState> {
 
   initializeNewImage(aimg: Volume, newChannelSettings?: ChannelState[]): void {
     // set alpha slider first time image is loaded to something that makes sense
-    let alphaLevel = this.getInitialAlphaLevel();
-    this.setUserSelectionsInState({ alphaMaskSliderLevel: alphaLevel });
+    let maskAlpha = this.getInitialAlphaLevel();
+    this.setUserSelectionsInState({ maskAlpha });
 
     // Here is where we officially hand the image to the volume-viewer
     this.placeImageInViewer(aimg, newChannelSettings);
   }
 
-  private getInitialAlphaLevel(): number[] {
+  private getInitialAlphaLevel(): number {
     const { userSelections } = this.state;
     const { viewerConfig } = this.props;
     let alphaLevel =
@@ -406,7 +406,7 @@ export default class App extends React.Component<AppProps, AppState> {
         : ALPHA_MASK_SLIDER_2D_DEFAULT;
     // if maskAlpha is defined in viewerConfig then it will override the above
     if (viewerConfig.maskAlpha !== undefined) {
-      alphaLevel = [viewerConfig.maskAlpha];
+      alphaLevel = viewerConfig.maskAlpha;
     }
     return alphaLevel;
   }
@@ -441,16 +441,13 @@ export default class App extends React.Component<AppProps, AppState> {
 
     view3d.setMaxProjectMode(aimg, userSelections.maxProject);
 
-    const imageBrightness = brightnessSliderToImageValue(
-      userSelections.brightnessSliderLevel,
-      userSelections.pathTrace
-    );
+    const imageBrightness = brightnessSliderToImageValue(userSelections.brightness, userSelections.pathTrace);
     view3d.updateExposure(imageBrightness);
 
-    const imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel, userSelections.pathTrace);
+    const imageDensity = densitySliderToImageValue(userSelections.density, userSelections.pathTrace);
     view3d.updateDensity(aimg, imageDensity);
 
-    const imageValues = gammaSliderToImageValues(userSelections.levelsSlider);
+    const imageValues = gammaSliderToImageValues(userSelections.levels);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
 
     // update current camera mode to make sure the image gets the update
@@ -661,7 +658,7 @@ export default class App extends React.Component<AppProps, AppState> {
       image: aimg,
       userSelections: {
         ...this.state.userSelections,
-        alphaMaskSliderLevel: alphaLevel,
+        maskAlpha: alphaLevel,
         channelSettings: channelSetting,
       },
     });
@@ -756,19 +753,19 @@ export default class App extends React.Component<AppProps, AppState> {
     boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
     backgroundColor: (color, view3d, _image) => view3d.setBackgroundColor(colorArrayToFloats(color)),
 
-    alphaMaskSliderLevel: (value, view3d, image) => {
+    maskAlpha: (value, view3d, image) => {
       view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
       view3d.updateActiveChannels(image);
     },
-    brightnessSliderLevel: (value, view3d, _image) => {
+    brightness: (value, view3d, _image) => {
       const brightness = brightnessSliderToImageValue(value, this.state.userSelections.pathTrace);
       view3d.updateExposure(brightness);
     },
-    densitySliderLevel: (value, view3d, image) => {
+    density: (value, view3d, image) => {
       const density = densitySliderToImageValue(value, this.state.userSelections.pathTrace);
       view3d.updateDensity(image, density);
     },
-    levelsSlider: (value, view3d, image) => {
+    levels: (value, view3d, image) => {
       const imageValues = gammaSliderToImageValues(value);
       view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
     },
@@ -840,7 +837,7 @@ export default class App extends React.Component<AppProps, AppState> {
       newSelectionState = {
         mode: newMode,
         pathTrace: false,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_2D_DEFAULT,
+        maskAlpha: ALPHA_MASK_SLIDER_2D_DEFAULT,
       };
       // if path trace was enabled in 3D turn it off when switching to 2D.
       if (userSelections.pathTrace) {
@@ -854,19 +851,19 @@ export default class App extends React.Component<AppProps, AppState> {
       // switching from 2D to 3D
       newSelectionState = {
         mode: newMode,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
+        maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
       };
     }
 
     this.handleChangeUserSelection("mode", newMode);
-    if (newSelectionState.alphaMaskSliderLevel !== undefined) {
-      this.handleChangeUserSelection("alphaMaskSliderLevel", newSelectionState.alphaMaskSliderLevel);
+    if (newSelectionState.maskAlpha !== undefined) {
+      this.handleChangeUserSelection("maskAlpha", newSelectionState.maskAlpha);
     }
     this.setUserSelectionsInState(newSelectionState);
   }
 
-  onUpdateImageMaskAlpha(sliderValue: number[]): void {
-    this.setUserSelectionsInState({ alphaMaskSliderLevel: sliderValue });
+  onUpdateImageMaskAlpha(sliderValue: number): void {
+    this.setUserSelectionsInState({ maskAlpha: sliderValue });
   }
 
   onAutorotateChange(): void {
@@ -1087,10 +1084,10 @@ export default class App extends React.Component<AppProps, AppState> {
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
             boundingBoxColor={userSelections.boundingBoxColor}
-            alphaMaskSliderLevel={userSelections.alphaMaskSliderLevel}
-            brightnessSliderLevel={userSelections.brightnessSliderLevel}
-            densitySliderLevel={userSelections.densitySliderLevel}
-            gammaSliderLevel={userSelections.levelsSlider}
+            maskAlpha={userSelections.maskAlpha}
+            brightness={userSelections.brightness}
+            density={userSelections.density}
+            levels={userSelections.levels}
             interpolationEnabled={userSelections.interpolationEnabled}
             collapsed={userSelections.controlPanelClosed}
             // functions

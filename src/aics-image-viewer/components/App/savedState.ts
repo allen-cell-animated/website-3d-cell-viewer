@@ -18,7 +18,7 @@ type RenderConfigKey =
   | "showAxesButton"
   | "showBoundingBoxButton";
 
-export default interface SavedState {
+export interface SavedState {
   stateVersion: number;
 
   baseUrl: string;
@@ -47,5 +47,5 @@ export default interface SavedState {
     interpolationEnabled: boolean;
     // TODO deal with slice
     region: [number, number, number, number, number, number];
-  }
+  };
 }

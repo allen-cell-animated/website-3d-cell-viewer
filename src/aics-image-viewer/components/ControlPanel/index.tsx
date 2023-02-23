@@ -130,10 +130,10 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     changeUserSelection={props.changeUserSelection}
                     setImageAxisClip={props.setImageAxisClip}
                     makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
-                    alphaMaskSliderLevel={props.alphaMaskSliderLevel}
-                    brightnessSliderLevel={props.brightnessSliderLevel}
-                    densitySliderLevel={props.densitySliderLevel}
-                    gammaSliderLevel={props.gammaSliderLevel}
+                    maskAlpha={props.maskAlpha}
+                    brightness={props.brightness}
+                    density={props.density}
+                    levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
                     maxProjectOn={props.maxProjectOn}
                     pathTraceOn={props.pathTraceOn}

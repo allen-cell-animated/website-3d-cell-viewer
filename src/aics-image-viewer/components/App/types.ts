@@ -74,10 +74,10 @@ export interface UserSelectionState {
   showBoundingBox: boolean;
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
-  alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-  brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-  levelsSlider: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+  maskAlpha: number; // props.viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
+  brightness: number; // props.viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  density: number; // props.viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
+  levels: [number, number, number]; // props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: boolean;
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
