@@ -62,7 +62,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]): void => {
+          onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
             const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
             this.props.changeUserSelection(propKey, selectValue);
           }}
