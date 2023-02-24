@@ -150,14 +150,16 @@ export default class App extends React.Component<AppProps, AppState> {
     this.state = {
       image: null,
       view3d: null,
+      currentlyLoadedImagePath: undefined,
+      cachingInProgress: false,
       sendingQueryRequest: false,
+      controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
       // state set by the UI:
       userSelections: {
         imageType: ImageType.segmentedCell,
-        controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
         viewMode: viewmode,
         autorotate: viewerConfig.autorotate,
         showAxes: viewerConfig.showAxes,
@@ -177,8 +179,6 @@ export default class App extends React.Component<AppProps, AppState> {
         // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
         channelSettings: [],
       },
-      currentlyLoadedImagePath: undefined,
-      cachingInProgress: false,
     };
 
     this.openImage = this.openImage.bind(this);
@@ -217,7 +217,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   componentDidMount(): void {
-    if (this.state.userSelections.controlPanelClosed && this.props.onControlPanelToggle) {
+    if (this.state.controlPanelClosed && this.props.onControlPanelToggle) {
       this.props.onControlPanelToggle(true);
     }
 
@@ -238,7 +238,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
 
     // delayed for the animation to finish
-    if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
+    if (prevState.controlPanelClosed !== this.state.controlPanelClosed) {
       setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
       }, 200);
@@ -1032,7 +1032,7 @@ export default class App extends React.Component<AppProps, AppState> {
       this.props.onControlPanelToggle(value);
     }
 
-    this.setUserSelectionsInState({ controlPanelClosed: value });
+    this.setState({ controlPanelClosed: value });
   }
 
   getNumberOfSlices(): { x: number; y: number; z: number } {
@@ -1054,7 +1054,7 @@ export default class App extends React.Component<AppProps, AppState> {
           defaultCollapsed={false}
           collapsedWidth={50}
           trigger={null}
-          collapsed={this.state.userSelections.controlPanelClosed}
+          collapsed={this.state.controlPanelClosed}
           width={500}
         >
           <ControlPanel
@@ -1076,7 +1076,7 @@ export default class App extends React.Component<AppProps, AppState> {
             density={userSelections.density}
             levels={userSelections.levels}
             interpolationEnabled={userSelections.interpolationEnabled}
-            collapsed={userSelections.controlPanelClosed}
+            collapsed={this.state.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
             saveIsosurface={this.saveIsosurface}

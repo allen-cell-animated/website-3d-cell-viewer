@@ -64,7 +64,6 @@ export interface AppProps {
 }
 
 export interface UserSelectionState {
-  controlPanelClosed: boolean;
   viewMode: ViewMode;
   renderMode: RenderMode;
   imageType: ImageType;
@@ -96,6 +95,7 @@ export interface AppState {
   sendingQueryRequest: boolean;
   currentlyLoadedImagePath?: string;
   cachingInProgress: boolean;
+  controlPanelClosed: boolean;
   // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
   channelGroupedByType: ChannelGrouping;
