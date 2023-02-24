@@ -77,10 +77,6 @@ export interface UserSelectionState {
   density: number; // props.viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
   levels: [number, number, number]; // props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: boolean;
-  // channelSettings is a flat list of objects of this type:
-  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-  // the list is in the order they were in the raw data.
-  channelSettings: ChannelState[];
 }
 
 export type UserSelectionKey = keyof UserSelectionState;
@@ -99,6 +95,10 @@ export interface AppState {
   // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
   channelGroupedByType: ChannelGrouping;
-  // state set by the UI:
+  // global (not per-channel) state set by the UI:
   userSelections: UserSelectionState;
+  // channelSettings is a flat list of objects of this type:
+  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
+  // the list is in the order they were in the raw data.
+  channelSettings: ChannelState[];
 }

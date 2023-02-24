@@ -136,17 +136,6 @@ export default class App extends React.Component<AppProps, AppState> {
 
     const { viewerConfig } = props;
 
-    let viewmode = ViewMode.threeD;
-    if (viewerConfig) {
-      if (viewerConfig.viewMode === "XY") {
-        viewmode = ViewMode.xy;
-      } else if (viewerConfig.viewMode === "YZ") {
-        viewmode = ViewMode.yz;
-      } else if (viewerConfig.viewMode === "XZ") {
-        viewmode = ViewMode.xz;
-      }
-    }
-
     this.state = {
       image: null,
       view3d: null,
@@ -157,10 +146,13 @@ export default class App extends React.Component<AppProps, AppState> {
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
-      // state set by the UI:
+      // channelSettings is a flat list of objects of this type:
+      // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
+      channelSettings: [],
+      // global (not per-channel) state set by the UI:
       userSelections: {
         imageType: ImageType.segmentedCell,
-        viewMode: viewmode,
+        viewMode: viewerConfig.viewMode,
         autorotate: viewerConfig.autorotate,
         showAxes: viewerConfig.showAxes,
         showBoundingBox: viewerConfig.showBoundingBox,
@@ -175,9 +167,6 @@ export default class App extends React.Component<AppProps, AppState> {
           viewerConfig.interpolationEnabled === undefined
             ? INTERPOLATION_ENABLED_DEFAULT
             : viewerConfig.interpolationEnabled,
-        // channelSettings is a flat list of objects of this type:
-        // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-        channelSettings: [],
       },
     };
 
@@ -231,7 +220,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
   componentDidUpdate(prevProps: AppProps, prevState: AppState): void {
     const { cellId, rawDims, rawData } = this.props;
-    const { userSelections, view3d, image } = this.state;
+    const { channelSettings, view3d, image } = this.state;
 
     if (rawDims && rawData && view3d && !prevState.view3d && !image) {
       this.loadFromRaw();
@@ -256,7 +245,7 @@ export default class App extends React.Component<AppProps, AppState> {
       }
     }
 
-    const channelsChanged = !isEqual(userSelections.channelSettings, prevState.userSelections.channelSettings);
+    const channelsChanged = !isEqual(channelSettings, prevState.channelSettings);
     const newImage = this.state.image && !prevState.image;
     const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
     if (newImage || channelsChanged || imageChanged) {
@@ -318,7 +307,7 @@ export default class App extends React.Component<AppProps, AppState> {
     const thisChannelSettings = this.getOneChannelSetting(
       v.imageInfo.channel_names[channelIndex],
       // race condition with updateStateOnLoadImage below?
-      this.state.userSelections.channelSettings
+      this.state.channelSettings
     );
     this.onChannelDataLoaded(v, thisChannelSettings!, channelIndex, keepLuts);
   }
@@ -400,11 +389,11 @@ export default class App extends React.Component<AppProps, AppState> {
 
   // set up the Volume into the Viewer using the current initial settings
   private placeImageInViewer(aimg: Volume, newChannelSettings?: ChannelState[]): void {
-    const { userSelections, view3d } = this.state;
+    const { userSelections, channelSettings, view3d } = this.state;
     if (!view3d) {
       return;
     }
-    const channelSetting = newChannelSettings || userSelections.channelSettings;
+    const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
@@ -454,15 +443,15 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   updateStateOnLoadImage(channelNames: string[]): ChannelState[] {
-    const { userSelections } = this.state;
+    const { channelSettings } = this.state;
 
-    const prevChannelNames = map(userSelections.channelSettings, (ele) => ele.name);
+    const prevChannelNames = map(channelSettings, (ele) => ele.name);
     let newChannelSettings = isEqual(prevChannelNames, channelNames)
-      ? userSelections.channelSettings
+      ? channelSettings
       : this.setInitialChannelConfig(channelNames, INIT_COLORS);
 
     let channelGroupedByType = this.createChannelGrouping(channelNames);
-    this.setUserSelectionsInState({
+    this.setState({
       channelSettings: newChannelSettings,
     });
     this.setState({
@@ -644,10 +633,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({
       channelGroupedByType,
       image: aimg,
+      channelSettings: channelSetting,
       userSelections: {
         ...this.state.userSelections,
         maskAlpha: alphaLevel,
-        channelSettings: channelSetting,
       },
     });
   }
@@ -659,14 +648,14 @@ export default class App extends React.Component<AppProps, AppState> {
         // TODO get the labelColors from the tf editor component
         const lut = image.getHistogram(index).lutGenerator_labelColors();
         image.setColorPalette(index, lut.lut);
-        image.setColorPaletteAlpha(index, this.state.userSelections.channelSettings[index].colorizeAlpha);
+        image.setColorPaletteAlpha(index, this.state.channelSettings[index].colorizeAlpha);
       } else {
         image.setColorPaletteAlpha(index, 0);
       }
       view3d.updateLuts(image);
     },
     colorizeAlpha: (alpha, index, view3d, image) => {
-      const { colorizeEnabled } = this.state.userSelections.channelSettings[index];
+      const { colorizeEnabled } = this.state.channelSettings[index];
       image.setColorPaletteAlpha(index, colorizeEnabled ? alpha : 0);
       view3d.updateLuts(image);
     },
@@ -696,24 +685,24 @@ export default class App extends React.Component<AppProps, AppState> {
     keyToChange: K,
     newValue: ChannelState[K]
   ): void {
-    const { userSelections } = this.state;
-    const newChannels = userSelections.channelSettings.map((channel) => {
+    const { channelSettings } = this.state;
+    const newChannels = channelSettings.map((channel) => {
       return channel.name === channelName ? { ...channel, [keyToChange]: newValue } : channel;
     });
 
-    this.setUserSelectionsInState({ channelSettings: newChannels });
+    this.setState({ channelSettings: newChannels });
     this.handleChangeChannelSetting(keyToChange, newValue, channelIndex);
   }
 
   changeChannelSettings<K extends ChannelStateKey>(indices: number[], keyToChange: K, newValue: ChannelState[K]): void {
-    const { userSelections } = this.state;
-    const newChannels = userSelections.channelSettings.map((channel, index) => {
+    const { channelSettings } = this.state;
+    const newChannels = channelSettings.map((channel, index) => {
       return {
         ...channel,
         [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange],
       };
     });
-    this.setUserSelectionsInState({ channelSettings: newChannels });
+    this.setState({ channelSettings: newChannels });
   }
 
   setUserSelectionsInState(newState: Partial<UserSelectionState>): void {
@@ -910,16 +899,16 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onApplyColorPresets(presets: ColorArray[]): void {
-    const { userSelections } = this.state;
+    const { channelSettings } = this.state;
     presets.forEach((color, index) => {
-      if (index < userSelections.channelSettings.length) {
+      if (index < channelSettings.length) {
         this.handleChangeChannelSetting("color", color, index);
       }
     });
-    const newChannels = userSelections.channelSettings.map((channel, channelindex) => {
+    const newChannels = channelSettings.map((channel, channelindex) => {
       return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
     });
-    this.setUserSelectionsInState({ channelSettings: newChannels });
+    this.setState({ channelSettings: newChannels });
   }
 
   changeBoundingBoxColor = (color: ColorObject): void =>
@@ -991,8 +980,7 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   getOneChannelSetting(channelName: string, newSettings?: ChannelState[]): ChannelState | undefined {
-    const { userSelections } = this.state;
-    const channelSettings = newSettings || userSelections.channelSettings;
+    const channelSettings = newSettings || this.state.channelSettings;
     return find(channelSettings, (channel) => {
       return channel.name === channelName;
     });
@@ -1067,7 +1055,7 @@ export default class App extends React.Component<AppProps, AppState> {
             channelGroupedByType={this.state.channelGroupedByType}
             // user selections
             pathTraceOn={userSelections.renderMode === RenderMode.pathTrace}
-            channelSettings={userSelections.channelSettings}
+            channelSettings={this.state.channelSettings}
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
             boundingBoxColor={userSelections.boundingBoxColor}
