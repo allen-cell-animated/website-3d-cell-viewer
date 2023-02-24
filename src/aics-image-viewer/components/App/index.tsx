@@ -151,14 +151,14 @@ export default class App extends React.Component<AppProps, AppState> {
       channelSettings: [],
       // global (not per-channel) state set by the UI:
       userSelections: {
-        imageType: ImageType.segmentedCell,
         viewMode: viewerConfig.viewMode,
-        autorotate: viewerConfig.autorotate,
+        renderMode: viewerConfig.renderMode,
+        imageType: viewerConfig.imageType || ImageType.segmentedCell,
         showAxes: viewerConfig.showAxes,
         showBoundingBox: viewerConfig.showBoundingBox,
         boundingBoxColor: viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
         backgroundColor: viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
-        renderMode: viewerConfig.renderMode,
+        autorotate: viewerConfig.autorotate,
         maskAlpha: viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
         brightness: viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
         density: viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,

@@ -34,14 +34,14 @@ export interface AppProps {
     showBoundingBoxButton: boolean;
   };
   viewerConfig: {
+    viewMode: ViewMode; // "3D", "XY", "XZ", "YZ"
+    renderMode: RenderMode; // "volumetric", "pathtrace", "maxproject"
+    imageType?: ImageType;
     showAxes: boolean;
     showBoundingBox: boolean;
     boundingBoxColor?: ColorArray;
     backgroundColor?: ColorArray;
     autorotate: boolean;
-    viewMode: ViewMode; // "3D", "XY", "XZ", "YZ"
-    renderMode: RenderMode; // "volumetric", "pathtrace", "maxproject"
-    imageType?: string;
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
     density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
@@ -67,11 +67,11 @@ export interface UserSelectionState {
   viewMode: ViewMode;
   renderMode: RenderMode;
   imageType: ImageType;
-  autorotate: boolean;
   showAxes: boolean;
   showBoundingBox: boolean;
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
+  autorotate: boolean;
   maskAlpha: number; // props.viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
   brightness: number; // props.viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   density: number; // props.viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
