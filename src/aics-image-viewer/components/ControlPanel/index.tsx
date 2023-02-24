@@ -135,7 +135,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     density={props.density}
                     levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
-                    maxProjectOn={props.maxProjectOn}
                     pathTraceOn={props.pathTraceOn}
                     renderConfig={renderConfig}
                   />

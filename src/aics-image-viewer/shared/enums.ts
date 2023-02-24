@@ -7,8 +7,8 @@ export const enum ViewMode {
 
 export const enum RenderMode {
   volumetric = "volumetric",
-  maxProject = "maxProject",
-  pathTrace = "pathTrace",
+  maxProject = "maxproject",
+  pathTrace = "pathtrace",
 }
 
 export const enum ImageType {

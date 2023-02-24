@@ -18,7 +18,6 @@ interface ToolbarProps {
   hasCellId: boolean;
   hasParentImage: boolean;
   autorotate: boolean;
-  pathTraceOn: boolean;
   canPathTrace: boolean;
   showAxes: boolean;
   showBoundingBox: boolean;
@@ -175,7 +174,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                   <Tooltip placement="bottom" title={turntableToggleTitle}>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
-                      disabled={twoDMode || props.pathTraceOn}
+                      disabled={twoDMode || props.renderSetting === RenderMode.pathTrace}
                       onClick={props.onAutorotateChange}
                     >
                       <ViewerIcon type="turnTable" />

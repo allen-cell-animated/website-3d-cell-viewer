@@ -7,7 +7,7 @@ import "antd/dist/antd.less";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
-import { ImageViewerApp, ViewerChannelSettings } from "../src";
+import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import FirebaseRequest from "./firebase";
 
 export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
@@ -81,8 +81,8 @@ const viewerConfig = {
   showAxes: false,
   showBoundingBox: false,
   autorotate: false,
-  view: "3D", // "XY", "XZ", "YZ"
-  mode: "default", // "pathtrace", "maxprojection"
+  viewMode: ViewMode.threeD,
+  renderMode: RenderMode.volumetric,
   maskAlpha: 50,
   brightness: 70,
   density: 50,

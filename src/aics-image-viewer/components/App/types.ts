@@ -1,5 +1,5 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
-import { ImageType, ViewMode } from "../../shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -39,8 +39,8 @@ export interface AppProps {
     boundingBoxColor?: ColorArray;
     backgroundColor?: ColorArray;
     autorotate: boolean;
-    view: string; // "3D", "XY", "XZ", "YZ"
-    mode: string; // "default", "pathtrace", "maxprojection"
+    viewMode: ViewMode; // "3D", "XY", "XZ", "YZ"
+    renderMode: RenderMode; // "volumetric", "pathtrace", "maxproject"
     imageType?: string;
     maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
     brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
@@ -64,12 +64,11 @@ export interface AppProps {
 }
 
 export interface UserSelectionState {
-  imageType: ImageType;
   controlPanelClosed: boolean;
-  mode: ViewMode;
+  viewMode: ViewMode;
+  renderMode: RenderMode;
+  imageType: ImageType;
   autorotate: boolean;
-  maxProject: boolean;
-  pathTrace: boolean;
   showAxes: boolean;
   showBoundingBox: boolean;
   boundingBoxColor: ColorArray;

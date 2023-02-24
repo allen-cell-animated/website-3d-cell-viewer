@@ -12,7 +12,6 @@ type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 export interface GlobalVolumeControlsProps {
   imageName: string | undefined;
   pixelSize: [number, number, number];
-  maxProjectOn: boolean;
   pathTraceOn: boolean;
   renderConfig: {
     alphaMask: boolean;
