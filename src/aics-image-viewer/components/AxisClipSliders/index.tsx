@@ -7,7 +7,7 @@ import React from "react";
 import "./styles.css";
 
 import { ViewMode } from "../../shared/enums";
-import { AxisName } from "../../shared/types";
+import { AxisName, PerAxis } from "../../shared/types";
 
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
@@ -18,8 +18,6 @@ const ACTIVE_AXIS_MAP: { [_ in ViewMode]: AxisName | null } = {
   [ViewMode.xy]: "z",
   [ViewMode.threeD]: null,
 };
-
-type PerAxis<T> = { [_ in AxisName]: T };
 
 interface AxisClipSlidersProps {
   mode: ViewMode;
@@ -124,6 +122,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const { playing, sliders } = this.state;
     const numSlices = this.props.numSlices[axis];
     const sliderVals = sliders[axis];
+    // const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
     const range = { min: 0, max: numSlices - 1 };
 
     return (

@@ -1,5 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
+import { PerAxis } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -47,8 +48,7 @@ export interface AppProps {
     density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
     levels: [number, number, number]; // LEVELS_SLIDER_DEFAULT,
     interpolationEnabled?: boolean;
-    region?: [number, number, number, number, number, number]; //[0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
-    slice?: number; // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
+    region?: PerAxis<[number, number]>; // { x: [0,1], y: [0,1], z: [0,1] }
   };
   baseUrl: string;
   cellDownloadHref: string;
@@ -77,6 +77,9 @@ export interface UserSelectionState {
   density: number; // props.viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
   levels: [number, number, number]; // props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: boolean;
+  // `region` values are in the range [0, 1]. We derive from this the format that the sliders expect
+  // (integers between 0 and num_slices - 1) and the format that view3d expects (in [-0.5, 0.5])
+  region: PerAxis<[number, number]>;
 }
 
 export type UserSelectionKey = keyof UserSelectionState;

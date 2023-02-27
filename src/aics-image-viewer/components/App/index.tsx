@@ -118,8 +118,7 @@ const defaultProps: AppProps = {
     brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
     density: DENSITY_SLIDER_LEVEL_DEFAULT,
     levels: LEVELS_SLIDER_DEFAULT,
-    region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
-    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
+    region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   },
   baseUrl: "",
   cellId: "",
@@ -167,6 +166,7 @@ export default class App extends React.Component<AppProps, AppState> {
           viewerConfig.interpolationEnabled === undefined
             ? INTERPOLATION_ENABLED_DEFAULT
             : viewerConfig.interpolationEnabled,
+        region: viewerConfig.region || { x: [0, 1], y: [0, 1], z: [0, 1] },
       },
     };
 
@@ -716,14 +716,6 @@ export default class App extends React.Component<AppProps, AppState> {
 
   private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
     viewMode: (mode, view3d, _image) => view3d.setCameraMode(mode),
-    // maxProject: (value, view3d, image) => {
-    //   view3d.setMaxProjectMode(image, value);
-    //   view3d.updateActiveChannels(image);
-    // },
-    // pathTrace: (enabled, view3d, image) => {
-    //   view3d.setVolumeRenderMode(enabled ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
-    //   view3d.updateActiveChannels(image);
-    // },
     renderMode: (mode, view3d, image) => {
       view3d.setMaxProjectMode(image, mode === RenderMode.maxProject);
       view3d.setVolumeRenderMode(mode === RenderMode.pathTrace ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
@@ -857,9 +849,11 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
-    if (this.state.view3d && this.state.image) {
-      this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
+    const { view3d, image, userSelections } = this.state;
+    if (view3d && image) {
+      view3d.setAxisClip(image, axis, minval, maxval, isOrthoAxis);
     }
+    this.setUserSelectionsInState({ region: { ...userSelections.region, [axis]: [minval, maxval] } });
   }
 
   makeUpdatePixelSizeFn(i: number): (value: number) => void {
