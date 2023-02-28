@@ -80,6 +80,23 @@ function colorHexToArray(hex: string): ColorArray | null {
   }
 }
 
+const defaultUserSelection: UserSelectionState = {
+  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+  imageType: ImageType.segmentedCell,
+  showAxes: false,
+  showBoundingBox: false,
+  backgroundColor: BACKGROUND_COLOR_DEFAULT,
+  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
+  autorotate: false,
+  maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
+  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  density: DENSITY_SLIDER_LEVEL_DEFAULT,
+  levels: LEVELS_SLIDER_DEFAULT,
+  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
+  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+};
+
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
@@ -106,20 +123,7 @@ const defaultProps: AppProps = {
     showAxesButton: true,
     showBoundingBoxButton: true,
   },
-  viewerConfig: {
-    showAxes: false,
-    showBoundingBox: false,
-    autorotate: false,
-    viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-    renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-    backgroundColor: BACKGROUND_COLOR_DEFAULT,
-    boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
-    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-    density: DENSITY_SLIDER_LEVEL_DEFAULT,
-    levels: LEVELS_SLIDER_DEFAULT,
-    region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  },
+  viewerConfig: defaultUserSelection,
   baseUrl: "",
   cellId: "",
   cellDownloadHref: "",
@@ -150,23 +154,8 @@ export default class App extends React.Component<AppProps, AppState> {
       channelSettings: [],
       // global (not per-channel) state set by the UI:
       userSelections: {
-        viewMode: viewerConfig.viewMode,
-        renderMode: viewerConfig.renderMode,
-        imageType: viewerConfig.imageType || ImageType.segmentedCell,
-        showAxes: viewerConfig.showAxes,
-        showBoundingBox: viewerConfig.showBoundingBox,
-        boundingBoxColor: viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
-        backgroundColor: viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
-        autorotate: viewerConfig.autorotate,
-        maskAlpha: viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
-        brightness: viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        density: viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
-        levels: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
-        interpolationEnabled:
-          viewerConfig.interpolationEnabled === undefined
-            ? INTERPOLATION_ENABLED_DEFAULT
-            : viewerConfig.interpolationEnabled,
-        region: viewerConfig.region || { x: [0, 1], y: [0, 1], z: [0, 1] },
+        ...defaultUserSelection,
+        ...viewerConfig,
       },
     };
 

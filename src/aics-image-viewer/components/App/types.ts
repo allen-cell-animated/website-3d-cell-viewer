@@ -34,22 +34,7 @@ export interface AppProps {
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
   };
-  viewerConfig: {
-    viewMode: ViewMode; // "3D", "XY", "XZ", "YZ"
-    renderMode: RenderMode; // "volumetric", "pathtrace", "maxproject"
-    imageType?: ImageType;
-    showAxes: boolean;
-    showBoundingBox: boolean;
-    boundingBoxColor?: ColorArray;
-    backgroundColor?: ColorArray;
-    autorotate: boolean;
-    maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: [number, number, number]; // LEVELS_SLIDER_DEFAULT,
-    interpolationEnabled?: boolean;
-    region?: PerAxis<[number, number]>; // { x: [0,1], y: [0,1], z: [0,1] }
-  };
+  viewerConfig: Partial<UserSelectionState>;
   baseUrl: string;
   cellDownloadHref: string;
   fovDownloadHref: string;
