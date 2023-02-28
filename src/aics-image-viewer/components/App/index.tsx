@@ -122,20 +122,14 @@ const defaultProps: AppProps = {
     slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   },
   baseUrl: "",
-  nextImgPath: "",
-  prevImgPath: "",
   cellId: "",
   cellDownloadHref: "",
   fovDownloadHref: "",
-  preLoad: false,
   pixelSize: undefined,
   canvasMargin: "0 0 0 0",
 };
 
 export default class App extends React.Component<AppProps, AppState> {
-  private openImageInterval: number | null;
-  private stateKey: "image" | "prevImg" | "nextImg";
-
   static defaultProps = defaultProps;
   constructor(props: AppProps) {
     super(props);
@@ -167,22 +161,11 @@ export default class App extends React.Component<AppProps, AppState> {
 
     this.state = {
       image: null,
-      nextImg: null,
-      prevImg: null,
       view3d: null,
-      files: null,
-      cellId: props.cellId,
-      fovPath: props.fovPath,
-      cellPath: props.cellPath,
-      queryErrorMessage: null,
       sendingQueryRequest: false,
-      openFilesOnly: false,
-      channelDataReady: {},
       // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
       // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
       channelGroupedByType: {},
-      // did the requested image have a cell id (in queryInput)?
-      hasCellId: !!props.cellId,
       // state set by the UI:
       userSelections: {
         imageType: ImageType.segmentedCell,
@@ -209,11 +192,7 @@ export default class App extends React.Component<AppProps, AppState> {
       },
       currentlyLoadedImagePath: undefined,
       cachingInProgress: false,
-      path: "",
     };
-
-    this.openImageInterval = null;
-    this.stateKey = "image";
 
     this.openImage = this.openImage.bind(this);
     this.loadFromRaw = this.loadFromRaw.bind(this);
@@ -241,8 +220,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onClippingPanelVisibleChangeEnd = this.onClippingPanelVisibleChangeEnd.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
     this.beginRequestImage = this.beginRequestImage.bind(this);
-    this.loadNextImage = this.loadNextImage.bind(this);
-    this.loadPrevImage = this.loadPrevImage.bind(this);
     this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
     this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
     this.onResetCamera = this.onResetCamera.bind(this);
@@ -260,14 +237,13 @@ export default class App extends React.Component<AppProps, AppState> {
     const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
     window.addEventListener("resize", debouncedResizeHandler);
 
-    const { cellId } = this.props;
-    if (cellId) {
+    if (this.props.cellId) {
       this.beginRequestImage();
     }
   }
 
   componentDidUpdate(prevProps: AppProps, prevState: AppState): void {
-    const { cellId, cellPath, rawDims, rawData } = this.props;
+    const { cellId, rawDims, rawData } = this.props;
     const { userSelections, view3d, image } = this.state;
 
     if (rawDims && rawData && view3d && !prevState.view3d && !image) {
@@ -282,13 +258,7 @@ export default class App extends React.Component<AppProps, AppState> {
     }
     const newRequest = cellId !== prevProps.cellId;
     if (newRequest) {
-      if (cellPath === prevProps.nextImgPath) {
-        this.loadNextImage();
-      } else if (cellPath === prevProps.prevImgPath) {
-        this.loadPrevImage();
-      } else {
-        this.beginRequestImage();
-      }
+      this.beginRequestImage();
     }
 
     if (!isEqual(prevProps.transform, this.props.transform)) {
@@ -340,42 +310,20 @@ export default class App extends React.Component<AppProps, AppState> {
     return makeChannelIndexGrouping(channels, viewerChannelSettings);
   }
 
-  stopPollingForImage(): void {
-    if (this.openImageInterval) {
-      clearInterval(this.openImageInterval);
-      this.openImageInterval = null;
-    }
-  }
-
-  onNewVolumeCreated(
-    aimg: Volume,
-    stateKey: "image" | "prevImg" | "nextImg",
-    imageDirectory: string,
-    doResetViewMode: boolean
-  ): void {
+  onNewVolumeCreated(aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void {
     // FIXME this calls setState followed almost immediately by another setState... :-(
     const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
 
-    if (stateKey === "image") {
-      this.setState({
-        image: aimg,
-        currentlyLoadedImagePath: imageDirectory,
-        channelDataReady: {},
-        queryErrorMessage: null,
-        cachingInProgress: false,
-        userSelections: {
-          ...this.state.userSelections,
-          mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-        },
-      });
-      this.initializeNewImage(aimg, newChannelSettings);
-    } else if (stateKey === "prevImg") {
-      this.setState({ prevImg: aimg });
-    } else if (stateKey === "nextImg") {
-      this.setState({ nextImg: aimg });
-    } else {
-      console.error("ERROR invalid or unexpected stateKey");
-    }
+    this.setState({
+      image: aimg,
+      currentlyLoadedImagePath: imageDirectory,
+      cachingInProgress: false,
+      userSelections: {
+        ...this.state.userSelections,
+        mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
+      },
+    });
+    this.initializeNewImage(aimg, newChannelSettings);
   }
 
   onNewChannelData(_url: string, v: Volume, channelIndex: number, keepLuts: boolean | undefined): void {
@@ -405,15 +353,9 @@ export default class App extends React.Component<AppProps, AppState> {
     }
     **/
     // console.log(message);
-    this.stopPollingForImage();
   }
 
-  openImage(
-    imageDirectory: string,
-    doResetViewMode: boolean,
-    stateKey: "image" | "nextImg" | "prevImg",
-    keepLuts?: boolean
-  ): void {
+  openImage(imageDirectory: string, doResetViewMode: boolean, keepLuts?: boolean): void {
     if (imageDirectory === this.state.currentlyLoadedImagePath) {
       return;
     }
@@ -441,8 +383,7 @@ export default class App extends React.Component<AppProps, AppState> {
         this.onNewChannelData(url, v, channelIndex, keepLuts);
       })
       .then((aimg) => {
-        this.onNewVolumeCreated(aimg, stateKey, imageDirectory, doResetViewMode);
-        this.stopPollingForImage();
+        this.onNewVolumeCreated(aimg, imageDirectory, doResetViewMode);
       })
       .catch((resp) => this.handleOpenImageException(resp));
   }
@@ -639,42 +580,6 @@ export default class App extends React.Component<AppProps, AppState> {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
     }
-  }
-
-  loadPrevImage(): void {
-    const { image, prevImg } = this.state;
-    const { prevImgPath } = this.props;
-
-    if (!prevImg) {
-      return;
-    }
-
-    // assume prevImg is available to initialize
-    this.initializeNewImage(prevImg);
-    this.setState({
-      image: prevImg,
-      nextImg: image,
-    });
-    // preload the new "prevImg"
-    this.openImage(prevImgPath, true, "prevImg");
-  }
-
-  loadNextImage(): void {
-    const { image, nextImg } = this.state;
-    const { nextImgPath } = this.props;
-
-    if (!nextImg) {
-      return;
-    }
-
-    // assume nextImg is available to initialize
-    this.initializeNewImage(nextImg);
-    this.setState({
-      image: nextImg,
-      prevImg: image,
-    });
-    // preload the new "nextImg"
-    this.openImage(nextImgPath, true, "nextImg");
   }
 
   initializeOneChannelSetting(
@@ -1008,7 +913,7 @@ export default class App extends React.Component<AppProps, AppState> {
   onSwitchFovCell(value: ImageType): void {
     const { cellPath, fovPath } = this.props;
     const path = value === ImageType.fullField ? fovPath : cellPath;
-    this.openImage(path, false, "image", false);
+    this.openImage(path, false, false);
     this.setState({
       sendingQueryRequest: true,
       userSelections: {
@@ -1086,24 +991,17 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   beginRequestImage(type?: ImageType): void {
-    const { fovPath, cellPath, cellId, prevImgPath, nextImgPath, preLoad } = this.props;
+    const { fovPath, cellPath } = this.props;
     let imageType = type || this.state.userSelections.imageType;
     let path = imageType === ImageType.fullField ? fovPath : cellPath;
     this.setState({
-      cellId,
-      path,
-      hasCellId: !!cellId,
       sendingQueryRequest: true,
       userSelections: {
         ...this.state.userSelections,
         imageType,
       },
     });
-    if (preLoad) {
-      this.openImage(nextImgPath, true, "nextImg", true);
-      this.openImage(prevImgPath, true, "prevImg", true);
-    }
-    this.openImage(path, true, "image");
+    this.openImage(path, true);
   }
 
   getOneChannelSetting(channelName: string, newSettings?: ChannelState[]): ChannelState | undefined {
@@ -1182,7 +1080,6 @@ export default class App extends React.Component<AppProps, AppState> {
             pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
             channelDataChannels={this.state.image?.channels}
             channelGroupedByType={this.state.channelGroupedByType}
-            channelDataReady={this.state.channelDataReady}
             // user selections
             maxProjectOn={userSelections.maxProject}
             pathTraceOn={userSelections.pathTrace}
@@ -1220,8 +1117,8 @@ export default class App extends React.Component<AppProps, AppState> {
               autorotate={userSelections.autorotate}
               pathTraceOn={userSelections.pathTrace}
               imageType={userSelections.imageType}
-              hasParentImage={!!this.state.fovPath}
-              hasCellId={this.state.hasCellId}
+              hasParentImage={!!this.props.fovPath}
+              hasCellId={!!this.props.cellId}
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
               showAxes={userSelections.showAxes}
               showBoundingBox={userSelections.showBoundingBox}
