@@ -4,50 +4,26 @@ import { PerAxis } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
-export interface AppProps {
-  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
-  rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
-  // rawDims is the volume dims that normally come from a json file
-  rawDims?: ImageInfo;
+type RenderConfigKeys =
+  | "alphaMask"
+  | "autoRotateButton"
+  | "axisClipSliders"
+  | "brightnessSlider"
+  | "colorPicker"
+  | "colorPresetsDropdown"
+  | "densitySlider"
+  | "levelsSliders"
+  | "interpolationControl"
+  | "saveSurfaceButtons"
+  | "fovCellSwitchControls"
+  | "viewModeRadioButtons"
+  | "resetCameraButton"
+  | "showAxesButton"
+  | "showBoundingBoxButton";
+/** Show/hide different elements of the UI */
+export type RenderConfig = { [K in RenderConfigKeys]: boolean };
 
-  // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
-  viewerChannelSettings?: ViewerChannelSettings;
-
-  appHeight: string;
-  cellId: string;
-  cellPath: string;
-  fovPath: string;
-  renderConfig: {
-    alphaMask: boolean;
-    autoRotateButton: boolean;
-    axisClipSliders: boolean;
-    brightnessSlider: boolean;
-    colorPicker: boolean;
-    colorPresetsDropdown: boolean;
-    densitySlider: boolean;
-    levelsSliders: boolean;
-    interpolationControl: boolean;
-    saveSurfaceButtons: boolean;
-    fovCellSwitchControls: boolean;
-    viewModeRadioButtons: boolean;
-    resetCameraButton: boolean;
-    showAxesButton: boolean;
-    showBoundingBoxButton: boolean;
-  };
-  viewerConfig: Partial<UserSelectionState>;
-  baseUrl: string;
-  cellDownloadHref: string;
-  fovDownloadHref: string;
-  pixelSize?: [number, number, number];
-  canvasMargin: string;
-  transform?: {
-    translation: [number, number, number];
-    rotation: [number, number, number];
-  };
-
-  onControlPanelToggle?: (collapsed: boolean) => void;
-}
-
+/** Global (not per-channel) viewer state which may be changed in the UI */
 export interface UserSelectionState {
   viewMode: ViewMode;
   renderMode: RenderMode;
@@ -65,6 +41,34 @@ export interface UserSelectionState {
   // `region` values are in the range [0, 1]. We derive from this the format that the sliders expect
   // (integers between 0 and num_slices - 1) and the format that view3d expects (in [-0.5, 0.5])
   region: PerAxis<[number, number]>;
+}
+
+export interface AppProps {
+  // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
+  rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
+  // rawDims is the volume dims that normally come from a json file
+  rawDims?: ImageInfo;
+
+  // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
+  viewerChannelSettings?: ViewerChannelSettings;
+
+  appHeight: string;
+  cellId: string;
+  cellPath: string;
+  fovPath: string;
+  renderConfig?: Partial<RenderConfig>;
+  viewerConfig?: Partial<UserSelectionState>;
+  baseUrl: string;
+  cellDownloadHref: string;
+  fovDownloadHref: string;
+  pixelSize?: [number, number, number];
+  canvasMargin: string;
+  transform?: {
+    translation: [number, number, number];
+    rotation: [number, number, number];
+  };
+
+  onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
 export type UserSelectionKey = keyof UserSelectionState;

@@ -15,7 +15,14 @@ import {
   Volume,
 } from "@aics/volume-viewer";
 
-import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
+import {
+  AppProps,
+  AppState,
+  RenderConfig,
+  UserSelectionChangeHandlers,
+  UserSelectionKey,
+  UserSelectionState,
+} from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
@@ -80,6 +87,24 @@ function colorHexToArray(hex: string): ColorArray | null {
   }
 }
 
+const defaultRenderConfig: RenderConfig = {
+  alphaMask: true,
+  autoRotateButton: true,
+  axisClipSliders: true,
+  brightnessSlider: true,
+  colorPicker: true,
+  colorPresetsDropdown: true,
+  densitySlider: true,
+  levelsSliders: true,
+  interpolationControl: true,
+  saveSurfaceButtons: true,
+  fovCellSwitchControls: true,
+  viewModeRadioButtons: true,
+  resetCameraButton: true,
+  showAxesButton: true,
+  showBoundingBoxButton: true,
+};
+
 const defaultUserSelection: UserSelectionState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -106,23 +131,7 @@ const defaultProps: AppProps = {
   appHeight: "100vh",
   cellPath: "",
   fovPath: "",
-  renderConfig: {
-    alphaMask: true,
-    autoRotateButton: true,
-    axisClipSliders: true,
-    brightnessSlider: true,
-    colorPicker: true,
-    colorPresetsDropdown: true,
-    densitySlider: true,
-    levelsSliders: true,
-    interpolationControl: true,
-    saveSurfaceButtons: true,
-    fovCellSwitchControls: true,
-    viewModeRadioButtons: true,
-    resetCameraButton: true,
-    showAxesButton: true,
-    showBoundingBoxButton: true,
-  },
+  renderConfig: defaultRenderConfig,
   viewerConfig: defaultUserSelection,
   baseUrl: "",
   cellId: "",
@@ -370,7 +379,7 @@ export default class App extends React.Component<AppProps, AppState> {
         ? ALPHA_MASK_SLIDER_3D_DEFAULT
         : ALPHA_MASK_SLIDER_2D_DEFAULT;
     // if maskAlpha is defined in viewerConfig then it will override the above
-    if (viewerConfig.maskAlpha !== undefined) {
+    if (viewerConfig?.maskAlpha !== undefined) {
       alphaLevel = viewerConfig.maskAlpha;
     }
     return alphaLevel;
@@ -1033,8 +1042,12 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   render(): React.ReactNode {
-    const { renderConfig, cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
+    const { cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
     const { userSelections } = this.state;
+    const renderConfig = {
+      ...defaultRenderConfig,
+      ...this.props.renderConfig,
+    };
     return (
       <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
         <Sider
