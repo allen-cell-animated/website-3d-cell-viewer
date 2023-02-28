@@ -25,7 +25,7 @@ import {
   ChannelStateChangeHandlers,
   ChannelGrouping,
 } from "../../shared/utils/viewerChannelSettings";
-import { AxisName, IsosurfaceFormat } from "../../shared/types";
+import { activeAxisMap, AxisName, IsosurfaceFormat } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
@@ -796,9 +796,14 @@ export default class App extends React.Component<AppProps, AppState> {
 
   onViewModeChange(newMode: ViewMode): void {
     const { userSelections } = this.state;
+    if (newMode === userSelections.viewMode) {
+      return;
+    }
     let newSelectionState: Partial<UserSelectionState> = {
       viewMode: newMode,
+      region: { x: [0, 1], y: [0, 1], z: [0, 1] },
     };
+    const activeAxis = activeAxisMap[newMode] as AxisName;
 
     // TODO the following behavior/logic is very specific to a particular application's needs
     // and is not necessarily appropriate for a general viewer.
@@ -808,33 +813,35 @@ export default class App extends React.Component<AppProps, AppState> {
     // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
     // If full field, dont mask
 
-    if (userSelections.viewMode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching from 3D to 2D
-      newSelectionState = {
-        viewMode: newMode,
-        maskAlpha: ALPHA_MASK_SLIDER_2D_DEFAULT,
-      };
-      // if path trace was enabled in 3D turn it off when switching to 2D.
-      if (userSelections.renderMode === RenderMode.pathTrace) {
-        newSelectionState.renderMode = RenderMode.volumetric;
-        this.onChangeRenderingAlgorithm(RenderMode.volumetric);
+    if (newMode !== ViewMode.threeD) {
+      // Set up single slice in 2d mode
+      newSelectionState.region![activeAxis] = [0, 1 / this.getNumberOfSlices()[activeAxis]];
+
+      if (userSelections.viewMode === ViewMode.threeD) {
+        // Switching from 3D to 2D
+        newSelectionState.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
+        // if path trace was enabled in 3D turn it off when switching to 2D.
+        if (userSelections.renderMode === RenderMode.pathTrace) {
+          newSelectionState.renderMode = RenderMode.volumetric;
+          this.onChangeRenderingAlgorithm(RenderMode.volumetric);
+        }
       }
     } else if (
       userSelections.viewMode !== ViewMode.threeD &&
-      newMode === ViewMode.threeD &&
       this.state.userSelections.imageType === ImageType.segmentedCell
     ) {
       // switching from 2D to 3D
-      newSelectionState = {
-        viewMode: newMode,
-        maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
-      };
+      newSelectionState.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
     }
 
     this.handleChangeUserSelection("viewMode", newMode);
     if (newSelectionState.maskAlpha !== undefined) {
       this.handleChangeUserSelection("maskAlpha", newSelectionState.maskAlpha);
     }
+    Object.keys(newSelectionState.region!).forEach((axis) => {
+      const [minval, maxval] = newSelectionState.region![axis as AxisName];
+      this.handleImageAxisClipUpdate(axis as AxisName, minval, maxval, axis === activeAxis);
+    });
     this.setUserSelectionsInState(newSelectionState);
   }
 
@@ -848,12 +855,17 @@ export default class App extends React.Component<AppProps, AppState> {
     });
   }
 
-  setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
-    const { view3d, image, userSelections } = this.state;
+  private handleImageAxisClipUpdate(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
+    const { view3d, image } = this.state;
     if (view3d && image) {
-      view3d.setAxisClip(image, axis, minval, maxval, isOrthoAxis);
+      view3d.setAxisClip(image, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
     }
-    this.setUserSelectionsInState({ region: { ...userSelections.region, [axis]: [minval, maxval] } });
+  }
+
+  setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
+    const { region } = this.state.userSelections;
+    this.setUserSelectionsInState({ region: { ...region, [axis]: [minval, maxval] } });
+    this.handleImageAxisClipUpdate(axis, minval, maxval, isOrthoAxis);
   }
 
   makeUpdatePixelSizeFn(i: number): (value: number) => void {
@@ -953,9 +965,7 @@ export default class App extends React.Component<AppProps, AppState> {
   updateChannelTransferFunction(index: number, lut: Uint8Array): void {
     if (this.state.image) {
       this.state.image.setLut(index, lut);
-      if (this.state.view3d) {
-        this.state.view3d.updateLuts(this.state.image);
-      }
+      this.state.view3d?.updateLuts(this.state.image);
     }
   }
 
@@ -1105,6 +1115,7 @@ export default class App extends React.Component<AppProps, AppState> {
               autorotate={userSelections.autorotate}
               loadingImage={this.state.sendingQueryRequest}
               numSlices={this.getNumberOfSlices()}
+              region={userSelections.region}
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}

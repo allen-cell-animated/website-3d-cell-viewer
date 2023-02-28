@@ -3,7 +3,7 @@ import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import { AxisName, Styles } from "../../shared/types";
+import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
 
 import AxisClipSliders from "../AxisClipSliders";
@@ -16,11 +16,8 @@ interface ViewerWrapperProps {
   mode: ViewMode;
   appHeight: string;
   image: Volume | null;
-  numSlices: {
-    x: number;
-    y: number;
-    z: number;
-  };
+  numSlices: PerAxis<number>;
+  region: PerAxis<[number, number]>;
   renderConfig: {
     axisClipSliders: boolean;
   };
@@ -79,7 +76,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip } = this.props;
+    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip, region } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
@@ -89,7 +86,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
           {renderConfig.axisClipSliders && !!image && (
-            <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} />
+            <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} region={region} />
           )}
         </BottomPanel>
         {this.renderOverlay()}
