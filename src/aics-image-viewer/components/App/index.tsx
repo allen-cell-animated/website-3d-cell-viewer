@@ -436,6 +436,14 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.setInterpolationEnabled(aimg, false);
     }
 
+    Object.keys(userSelections.region).forEach((axis) => {
+      const [min, max] = userSelections.region[axis as AxisName];
+      if (min > 0 || max < 1) {
+        const isOrthoAxis = activeAxisMap[userSelections.viewMode] === axis;
+        view3d.setAxisClip(aimg, axis as AxisName, min, max, isOrthoAxis);
+      }
+    });
+
     view3d.setVolumeTranslation(aimg, this.props.transform?.translation || [0, 0, 0]);
     view3d.setVolumeRotation(aimg, this.props.transform?.rotation || [0, 0, 0]);
     // tell view that things have changed for this image
