@@ -438,7 +438,7 @@ export default class App extends React.Component<AppProps, AppState> {
       const [min, max] = userSelections.region[axis as AxisName];
       if (min > 0 || max < 1) {
         const isOrthoAxis = activeAxisMap[userSelections.viewMode] === axis;
-        view3d.setAxisClip(aimg, axis as AxisName, min, max, isOrthoAxis);
+        view3d.setAxisClip(aimg, axis as AxisName, min - 0.5, max - 0.5, isOrthoAxis);
       }
     });
 
