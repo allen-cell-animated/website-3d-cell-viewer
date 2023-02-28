@@ -1,23 +1,21 @@
-import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
-import { ColorArray } from "../../shared/utils/colorRepresentations";
+import { RenderConfig, UserSelectionState } from "./types";
 
-type RenderConfigKey =
-  | "alphaMask"
-  | "autoRotateButton"
-  | "axisClipSliders"
-  | "brightnessSlider"
-  | "colorPicker"
-  | "colorPresetsDropdown"
-  | "densitySlider"
-  | "levelsSliders"
-  | "interpolationControl"
-  | "saveSurfaceButtons"
-  | "fovCellSwitchControls"
-  | "viewModeRadioButtons"
-  | "resetCameraButton"
-  | "showAxesButton"
-  | "showBoundingBoxButton";
+interface View3dInternalState {
+  pixelSamplingRate: number;
+  exposure: number;
+  fov: number;
+  flipVolume: [number, number, number];
+  stepSizePrimaryRayVoxels: number;
+  stepSizeSecondaryRayVoxels: number;
+  // wait - is this per-channel?
+  specular: [number, number, number][];
+  emissive: [number, number, number][];
+  glossiness: number[];
+}
 
+// TODO: how to create a type error when one of this type's dependent interfaces
+// (RenderConfig, UserSelectionState, etc.) changes, to signal the need for a
+// new version and a converter from the old version?
 export interface SavedState {
   stateVersion: number;
 
@@ -28,24 +26,11 @@ export interface SavedState {
   fovDownloadHref: string;
   fovPath: string;
 
-  // Which UI elements are rendered in the UI
-  renderConfig: { [K in RenderConfigKey]: boolean };
+  // Which UI elements are rendered
+  renderConfig: RenderConfig;
   // Global (not per-channel) viewer settings which may be changed in the UI
-  viewerConfig: {
-    showAxes: boolean;
-    showBoundingBox: boolean;
-    backgroundColor: ColorArray;
-    boundingBoxColor: ColorArray;
-    autorotate: boolean;
-    view: ViewMode;
-    mode: RenderMode; // TODO make prop consistent with enum
-    imageType: ImageType; // TODO add to props
-    maskAlpha: [number];
-    brightness: [number];
-    density: [number];
-    levels: [number, number, number];
-    interpolationEnabled: boolean;
-    // TODO deal with slice
-    region: [number, number, number, number, number, number];
-  };
+  viewerConfig: UserSelectionState;
+  // State which exists in view3d but is not controlled by this component
+  view3dInternalState: View3dInternalState;
+  // TODO: camera, per-channel settings
 }
