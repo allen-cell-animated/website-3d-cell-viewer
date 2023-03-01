@@ -13,7 +13,7 @@ export interface GlobalVolumeControlsProps {
   imageName: string | undefined;
   pixelSize: [number, number, number];
   pathTraceOn: boolean;
-  renderConfig: {
+  showControls: {
     alphaMask: boolean;
     brightnessSlider: boolean;
     densitySlider: boolean;
@@ -72,17 +72,17 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
 
   render(): React.ReactNode {
     if (!this.props.imageName) return null;
-    const { renderConfig, maskAlpha, brightness, density, levels } = this.props;
+    const { showControls, maskAlpha, brightness, density, levels } = this.props;
     return (
       <Card bordered={false} title="Rendering adjustments" type="inner" className="global-volume-controls">
         <Collapse bordered={false} defaultActiveKey="global-volume">
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
-              {renderConfig.alphaMask && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
-              {renderConfig.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
-              {renderConfig.densitySlider && this.createSliderRow("density", density, 100, "density")}
-              {renderConfig.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
-              {renderConfig.interpolationControl && (
+              {showControls.alphaMask && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
+              {showControls.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
+              {showControls.densitySlider && this.createSliderRow("density", density, 100, "density")}
+              {showControls.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
+              {showControls.interpolationControl && (
                 <div style={STYLES.controlRow}>
                   <div style={STYLES.controlName}>interpolate</div>
                   <div style={{ flex: 5 }}>

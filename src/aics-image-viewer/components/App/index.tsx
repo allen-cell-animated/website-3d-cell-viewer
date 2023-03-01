@@ -1044,7 +1044,7 @@ export default class App extends React.Component<AppProps, AppState> {
   render(): React.ReactNode {
     const { cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
     const { viewerSettings } = this.state;
-    const renderConfig = {
+    const showControls = {
       ...defaultShownControls,
       ...this.props.showControls,
     };
@@ -1060,7 +1060,7 @@ export default class App extends React.Component<AppProps, AppState> {
           width={500}
         >
           <ControlPanel
-            renderConfig={renderConfig}
+            showControls={showControls}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}
@@ -1116,7 +1116,7 @@ export default class App extends React.Component<AppProps, AppState> {
               changeAxisShowing={this.changeAxisShowing}
               changeBoundingBoxShowing={this.changeBoundingBoxShowing}
               downloadScreenshot={this.saveScreenshot}
-              renderConfig={renderConfig}
+              showControls={showControls}
             />
             <CellViewerCanvasWrapper
               image={this.state.image}
@@ -1128,7 +1128,7 @@ export default class App extends React.Component<AppProps, AppState> {
               region={viewerSettings.region}
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
-              renderConfig={renderConfig}
+              showControls={showControls}
               onClippingPanelVisibleChange={this.onClippingPanelVisibleChange}
               onClippingPanelVisibleChangeEnd={this.onClippingPanelVisibleChangeEnd}
             />

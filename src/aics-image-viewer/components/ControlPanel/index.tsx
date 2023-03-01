@@ -14,7 +14,7 @@ import ViewerIcon from "../shared/ViewerIcon";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
-  renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
+  showControls: GlobalVolumeControlsProps["showControls"] & {
     colorPresetsDropdown: boolean;
   };
   collapsed: boolean;
@@ -34,7 +34,7 @@ const ControlTabNames = {
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = useState(ControlTab.Channels);
 
-  const { viewerChannelSettings, renderConfig, hasImage } = props;
+  const { viewerChannelSettings, showControls, hasImage } = props;
 
   // TODO key is a number, but ClickParam assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
@@ -102,7 +102,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         <Card
           bordered={false}
           className="control-panel"
-          title={renderConfig.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+          title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
         >
           {hasImage && (
             <div className="channel-rows-list">
@@ -136,7 +136,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
                     pathTraceOn={props.pathTraceOn}
-                    renderConfig={renderConfig}
+                    showControls={showControls}
                   />
                   <CustomizeWidget
                     backgroundColor={props.backgroundColor}

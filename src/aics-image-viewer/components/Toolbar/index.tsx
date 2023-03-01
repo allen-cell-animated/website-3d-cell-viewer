@@ -31,7 +31,7 @@ interface ToolbarProps {
   changeAxisShowing: (showing: boolean) => void;
   changeBoundingBoxShowing: (showing: boolean) => void;
 
-  renderConfig: {
+  showControls: {
     autoRotateButton: boolean;
     viewModeRadioButtons: boolean;
     fovCellSwitchControls: boolean;
@@ -129,13 +129,13 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
   render(): React.ReactElement {
     const { props } = this;
-    const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
+    const { showControls, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
     const renderGroup1 =
-      renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
-    const renderGroup4 = renderConfig.showAxesButton || renderConfig.showBoundingBoxButton;
+      showControls.viewModeRadioButtons || showControls.resetCameraButton || showControls.autoRotateButton;
+    const renderGroup4 = showControls.showAxesButton || showControls.showBoundingBoxButton;
 
     const axesToggleTitle = showAxes ? "Hide axes" : "Show axes";
     const boundingBoxToggleTitle = showBoundingBox ? "Hide bounding box" : "Show bounding box";
@@ -160,17 +160,17 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
           <span className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <span className="viewer-toolbar-group">
-                {renderConfig.viewModeRadioButtons && (
+                {showControls.viewModeRadioButtons && (
                   <ViewModeRadioButtons mode={props.viewMode} onViewModeChange={props.onViewModeChange} />
                 )}
-                {renderConfig.resetCameraButton && (
+                {showControls.resetCameraButton && (
                   <Tooltip placement="bottom" title="Reset camera">
                     <Button className="ant-btn-icon-only btn-borderless" onClick={props.onResetCamera}>
                       <ViewerIcon type="resetView" />
                     </Button>
                   </Tooltip>
                 )}
-                {renderConfig.autoRotateButton && (
+                {showControls.autoRotateButton && (
                   <Tooltip placement="bottom" title={turntableToggleTitle}>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
@@ -184,7 +184,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
               </span>
             )}
 
-            {renderConfig.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
+            {showControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
               <span className="viewer-toolbar-group">
                 <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
                   <Radio.Button value={ImageType.segmentedCell}>Single cell</Radio.Button>
@@ -216,14 +216,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
             {renderGroup4 && (
               <span className="viewer-toolbar-group">
-                {renderConfig.showAxesButton && (
+                {showControls.showAxesButton && (
                   <Tooltip placement="bottom" title={axesToggleTitle}>
                     <Button className={this.classForToggleBtn(showAxes)} onClick={this.toggleAxis}>
                       <ViewerIcon type="axes" />
                     </Button>
                   </Tooltip>
                 )}
-                {renderConfig.showBoundingBoxButton && (
+                {showControls.showBoundingBoxButton && (
                   <Tooltip placement="bottom" title={boundingBoxToggleTitle}>
                     <Button className={this.classForToggleBtn(showBoundingBox)} onClick={this.toggleBoundingBox}>
                       <ViewerIcon type="boundingBox" />

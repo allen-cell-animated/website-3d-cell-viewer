@@ -19,7 +19,7 @@ interface View3dInternalChannelSettings {
 }
 
 // TODO: how to create a type error when one of this type's dependent interfaces
-// (RenderConfig, UserSelectionState, etc.) changes, to signal the need for a
+// (ShowControls, GlobalViewerSettings, etc.) changes, to signal the need for a
 // new version and a converter from the old version?
 export interface SavedState {
   stateVersion: 1;
