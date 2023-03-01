@@ -127,7 +127,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   <GlobalVolumeControls
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
-                    changeUserSelection={props.changeUserSelection}
+                    changeViewerSetting={props.changeViewerSetting}
                     setImageAxisClip={props.setImageAxisClip}
                     makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
                     maskAlpha={props.maskAlpha}

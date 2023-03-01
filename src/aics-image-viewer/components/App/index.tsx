@@ -18,10 +18,10 @@ import {
 import {
   AppProps,
   AppState,
-  RenderConfig,
-  UserSelectionChangeHandlers,
-  UserSelectionKey,
-  UserSelectionState,
+  ShowControls,
+  ViewerSettingChangeHandlers,
+  ViewerSettingsKey,
+  GlobalViewerSettings,
 } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
@@ -87,7 +87,7 @@ function colorHexToArray(hex: string): ColorArray | null {
   }
 }
 
-const defaultRenderConfig: RenderConfig = {
+const defaultShownControls: ShowControls = {
   alphaMask: true,
   autoRotateButton: true,
   axisClipSliders: true,
@@ -105,7 +105,7 @@ const defaultRenderConfig: RenderConfig = {
   showBoundingBoxButton: true,
 };
 
-const defaultUserSelection: UserSelectionState = {
+const defaultViewerSettings: GlobalViewerSettings = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -131,8 +131,8 @@ const defaultProps: AppProps = {
   appHeight: "100vh",
   cellPath: "",
   fovPath: "",
-  renderConfig: defaultRenderConfig,
-  viewerConfig: defaultUserSelection,
+  showControls: defaultShownControls,
+  viewerSettings: defaultViewerSettings,
   baseUrl: "",
   cellId: "",
   cellDownloadHref: "",
@@ -146,7 +146,7 @@ export default class App extends React.Component<AppProps, AppState> {
   constructor(props: AppProps) {
     super(props);
 
-    const { viewerConfig } = props;
+    const { viewerSettings } = props;
 
     this.state = {
       image: null,
@@ -162,9 +162,9 @@ export default class App extends React.Component<AppProps, AppState> {
       // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
       channelSettings: [],
       // global (not per-channel) state set by the UI:
-      userSelections: {
-        ...defaultUserSelection,
-        ...viewerConfig,
+      viewerSettings: {
+        ...defaultViewerSettings,
+        ...viewerSettings,
       },
     };
 
@@ -183,10 +183,10 @@ export default class App extends React.Component<AppProps, AppState> {
     this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
     this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
     this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
-    this.setUserSelectionsInState = this.setUserSelectionsInState.bind(this);
+    this.setViewerSettingsInState = this.setViewerSettingsInState.bind(this);
     this.changeChannelSettings = this.changeChannelSettings.bind(this);
     this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
-    this.changeUserSelection = this.changeUserSelection.bind(this);
+    this.changeViewerSetting = this.changeViewerSetting.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
     this.onView3DCreated = this.onView3DCreated.bind(this);
@@ -252,9 +252,9 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onView3DCreated(view3d: View3d): void {
-    const { userSelections } = this.state;
-    view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
-    view3d.setShowAxis(userSelections.showAxes);
+    const { viewerSettings } = this.state;
+    view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor));
+    view3d.setShowAxis(viewerSettings.showAxes);
     view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
     view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
 
@@ -292,9 +292,9 @@ export default class App extends React.Component<AppProps, AppState> {
       image: aimg,
       currentlyLoadedImagePath: imageDirectory,
       cachingInProgress: false,
-      userSelections: {
-        ...this.state.userSelections,
-        viewMode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.viewMode,
+      viewerSettings: {
+        ...this.state.viewerSettings,
+        viewMode: doResetViewMode ? ViewMode.threeD : this.state.viewerSettings.viewMode,
       },
     });
     this.initializeNewImage(aimg, newChannelSettings);
@@ -365,29 +365,29 @@ export default class App extends React.Component<AppProps, AppState> {
   initializeNewImage(aimg: Volume, newChannelSettings?: ChannelState[]): void {
     // set alpha slider first time image is loaded to something that makes sense
     let maskAlpha = this.getInitialAlphaLevel();
-    this.setUserSelectionsInState({ maskAlpha });
+    this.setViewerSettingsInState({ maskAlpha });
 
     // Here is where we officially hand the image to the volume-viewer
     this.placeImageInViewer(aimg, newChannelSettings);
   }
 
   private getInitialAlphaLevel(): number {
-    const { userSelections } = this.state;
-    const { viewerConfig } = this.props;
+    const viewerSettingsState = this.state.viewerSettings;
+    const viewerSettingsProps = this.props.viewerSettings;
     let alphaLevel =
-      userSelections.imageType === ImageType.segmentedCell && userSelections.viewMode === ViewMode.threeD
+      viewerSettingsState.imageType === ImageType.segmentedCell && viewerSettingsState.viewMode === ViewMode.threeD
         ? ALPHA_MASK_SLIDER_3D_DEFAULT
         : ALPHA_MASK_SLIDER_2D_DEFAULT;
     // if maskAlpha is defined in viewerConfig then it will override the above
-    if (viewerConfig?.maskAlpha !== undefined) {
-      alphaLevel = viewerConfig.maskAlpha;
+    if (viewerSettingsProps?.maskAlpha !== undefined) {
+      alphaLevel = viewerSettingsProps.maskAlpha;
     }
     return alphaLevel;
   }
 
   // set up the Volume into the Viewer using the current initial settings
   private placeImageInViewer(aimg: Volume, newChannelSettings?: ChannelState[]): void {
-    const { userSelections, channelSettings, view3d } = this.state;
+    const { viewerSettings, channelSettings, view3d } = this.state;
     if (!view3d) {
       return;
     }
@@ -413,31 +413,31 @@ export default class App extends React.Component<AppProps, AppState> {
     const imageMask = alphaSliderToImageValue(alphaLevel);
     view3d.updateMaskAlpha(aimg, imageMask);
 
-    view3d.setMaxProjectMode(aimg, userSelections.renderMode === RenderMode.maxProject);
+    view3d.setMaxProjectMode(aimg, viewerSettings.renderMode === RenderMode.maxProject);
 
-    const isPathTracing = userSelections.renderMode === RenderMode.pathTrace;
-    const imageBrightness = brightnessSliderToImageValue(userSelections.brightness, isPathTracing);
+    const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
+    const imageBrightness = brightnessSliderToImageValue(viewerSettings.brightness, isPathTracing);
     view3d.updateExposure(imageBrightness);
 
-    const imageDensity = densitySliderToImageValue(userSelections.density, isPathTracing);
+    const imageDensity = densitySliderToImageValue(viewerSettings.density, isPathTracing);
     view3d.updateDensity(aimg, imageDensity);
 
-    const imageValues = gammaSliderToImageValues(userSelections.levels);
+    const imageValues = gammaSliderToImageValues(viewerSettings.levels);
     view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
 
     // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(userSelections.viewMode);
-    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
-    view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
+    view3d.setCameraMode(viewerSettings.viewMode);
+    view3d.setShowBoundingBox(aimg, viewerSettings.showBoundingBox);
+    view3d.setBoundingBoxColor(aimg, colorArrayToFloats(viewerSettings.boundingBoxColor));
     // interpolation defaults to enabled in volume-viewer
-    if (!userSelections.interpolationEnabled) {
+    if (!viewerSettings.interpolationEnabled) {
       view3d.setInterpolationEnabled(aimg, false);
     }
 
-    Object.keys(userSelections.region).forEach((axis) => {
-      const [min, max] = userSelections.region[axis as AxisName];
+    Object.keys(viewerSettings.region).forEach((axis) => {
+      const [min, max] = viewerSettings.region[axis as AxisName];
       if (min > 0 || max < 1) {
-        const isOrthoAxis = activeAxisMap[userSelections.viewMode] === axis;
+        const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
         view3d.setAxisClip(aimg, axis as AxisName, min - 0.5, max - 0.5, isOrthoAxis);
       }
     });
@@ -640,8 +640,8 @@ export default class App extends React.Component<AppProps, AppState> {
       channelGroupedByType,
       image: aimg,
       channelSettings: channelSetting,
-      userSelections: {
-        ...this.state.userSelections,
+      viewerSettings: {
+        ...this.state.viewerSettings,
         maskAlpha: alphaLevel,
       },
     });
@@ -711,16 +711,16 @@ export default class App extends React.Component<AppProps, AppState> {
     this.setState({ channelSettings: newChannels });
   }
 
-  setUserSelectionsInState(newState: Partial<UserSelectionState>): void {
+  setViewerSettingsInState(newState: Partial<GlobalViewerSettings>): void {
     this.setState({
-      userSelections: {
-        ...this.state.userSelections,
+      viewerSettings: {
+        ...this.state.viewerSettings,
         ...newState,
       },
     });
   }
 
-  private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
+  private viewerSettingChangeHandlers: ViewerSettingChangeHandlers = {
     viewMode: (mode, view3d, _image) => view3d.setCameraMode(mode),
     renderMode: (mode, view3d, image) => {
       view3d.setMaxProjectMode(image, mode === RenderMode.maxProject);
@@ -738,12 +738,12 @@ export default class App extends React.Component<AppProps, AppState> {
       view3d.updateActiveChannels(image);
     },
     brightness: (value, view3d, _image) => {
-      const isPathTracing = this.state.userSelections.renderMode === RenderMode.pathTrace;
+      const isPathTracing = this.state.viewerSettings.renderMode === RenderMode.pathTrace;
       const brightness = brightnessSliderToImageValue(value, isPathTracing);
       view3d.updateExposure(brightness);
     },
     density: (value, view3d, image) => {
-      const isPathTracing = this.state.userSelections.renderMode === RenderMode.pathTrace;
+      const isPathTracing = this.state.viewerSettings.renderMode === RenderMode.pathTrace;
       const density = densitySliderToImageValue(value, isPathTracing);
       view3d.updateDensity(image, density);
     },
@@ -756,22 +756,22 @@ export default class App extends React.Component<AppProps, AppState> {
 
   /**
    * Should only be called by internal methods that need to change multiple properties at once
-   * without calling multiple `setState`s. Prefer `changeUserSelection` whenever possible.
+   * without calling multiple `setState`s. Prefer `changeViewerSetting` whenever possible.
    */
-  private handleChangeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]): void {
+  private handleChangeViewerSetting<K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]): void {
     const { view3d, image } = this.state;
     if (!view3d || !image) {
       return;
     }
-    const handler = this.userSelectionChangeHandlers[key];
+    const handler = this.viewerSettingChangeHandlers[key];
     if (handler) {
       handler(newValue, view3d, image);
     }
   }
 
-  changeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]): void {
-    this.setUserSelectionsInState({ [key]: newValue });
-    this.handleChangeUserSelection(key, newValue);
+  changeViewerSetting<K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]): void {
+    this.setViewerSettingsInState({ [key]: newValue });
+    this.handleChangeViewerSetting(key, newValue);
   }
 
   saveIsosurface(channelIndex: number, type: IsosurfaceFormat): void {
@@ -801,11 +801,11 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onViewModeChange(newMode: ViewMode): void {
-    const { userSelections } = this.state;
-    if (newMode === userSelections.viewMode) {
+    const { viewerSettings } = this.state;
+    if (newMode === viewerSettings.viewMode) {
       return;
     }
-    let newSelectionState: Partial<UserSelectionState> = {
+    let newSelectionState: Partial<GlobalViewerSettings> = {
       viewMode: newMode,
       region: { x: [0, 1], y: [0, 1], z: [0, 1] },
     };
@@ -823,41 +823,41 @@ export default class App extends React.Component<AppProps, AppState> {
       // Set up single slice in 2d mode
       newSelectionState.region![activeAxis] = [0, 1 / this.getNumberOfSlices()[activeAxis]];
 
-      if (userSelections.viewMode === ViewMode.threeD) {
+      if (viewerSettings.viewMode === ViewMode.threeD) {
         // Switching from 3D to 2D
         newSelectionState.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
         // if path trace was enabled in 3D turn it off when switching to 2D.
-        if (userSelections.renderMode === RenderMode.pathTrace) {
+        if (viewerSettings.renderMode === RenderMode.pathTrace) {
           newSelectionState.renderMode = RenderMode.volumetric;
           this.onChangeRenderingAlgorithm(RenderMode.volumetric);
         }
       }
     } else if (
-      userSelections.viewMode !== ViewMode.threeD &&
-      this.state.userSelections.imageType === ImageType.segmentedCell
+      viewerSettings.viewMode !== ViewMode.threeD &&
+      this.state.viewerSettings.imageType === ImageType.segmentedCell
     ) {
       // switching from 2D to 3D
       newSelectionState.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
     }
 
-    this.handleChangeUserSelection("viewMode", newMode);
+    this.handleChangeViewerSetting("viewMode", newMode);
     if (newSelectionState.maskAlpha !== undefined) {
-      this.handleChangeUserSelection("maskAlpha", newSelectionState.maskAlpha);
+      this.handleChangeViewerSetting("maskAlpha", newSelectionState.maskAlpha);
     }
     Object.keys(newSelectionState.region!).forEach((axis) => {
       const [minval, maxval] = newSelectionState.region![axis as AxisName];
       this.handleImageAxisClipUpdate(axis as AxisName, minval, maxval, axis === activeAxis);
     });
-    this.setUserSelectionsInState(newSelectionState);
+    this.setViewerSettingsInState(newSelectionState);
   }
 
   onUpdateImageMaskAlpha(sliderValue: number): void {
-    this.setUserSelectionsInState({ maskAlpha: sliderValue });
+    this.setViewerSettingsInState({ maskAlpha: sliderValue });
   }
 
   onAutorotateChange(): void {
-    this.setUserSelectionsInState({
-      autorotate: !this.state.userSelections.autorotate,
+    this.setViewerSettingsInState({
+      autorotate: !this.state.viewerSettings.autorotate,
     });
   }
 
@@ -869,8 +869,8 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
-    const { region } = this.state.userSelections;
-    this.setUserSelectionsInState({ region: { ...region, [axis]: [minval, maxval] } });
+    const { region } = this.state.viewerSettings;
+    this.setViewerSettingsInState({ region: { ...region, [axis]: [minval, maxval] } });
     this.handleImageAxisClipUpdate(axis, minval, maxval, isOrthoAxis);
   }
 
@@ -885,16 +885,16 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   onChangeRenderingAlgorithm(newAlgorithm: RenderMode): void {
-    const { userSelections } = this.state;
+    const { viewerSettings } = this.state;
     // already set
-    if (newAlgorithm === userSelections.renderMode) {
+    if (newAlgorithm === viewerSettings.renderMode) {
       return;
     }
-    this.setUserSelectionsInState({
+    this.setViewerSettingsInState({
       renderMode: newAlgorithm,
-      autorotate: newAlgorithm === RenderMode.pathTrace ? false : userSelections.autorotate,
+      autorotate: newAlgorithm === RenderMode.pathTrace ? false : viewerSettings.autorotate,
     });
-    this.handleChangeUserSelection("renderMode", newAlgorithm);
+    this.handleChangeViewerSetting("renderMode", newAlgorithm);
   }
 
   onSwitchFovCell(value: ImageType): void {
@@ -903,8 +903,8 @@ export default class App extends React.Component<AppProps, AppState> {
     this.openImage(path, false, false);
     this.setState({
       sendingQueryRequest: true,
-      userSelections: {
-        ...this.state.userSelections,
+      viewerSettings: {
+        ...this.state.viewerSettings,
         imageType: value,
       },
     });
@@ -924,13 +924,13 @@ export default class App extends React.Component<AppProps, AppState> {
   }
 
   changeBoundingBoxColor = (color: ColorObject): void =>
-    this.changeUserSelection("boundingBoxColor", colorObjectToArray(color));
+    this.changeViewerSetting("boundingBoxColor", colorObjectToArray(color));
 
   changeBackgroundColor = (color: ColorObject): void =>
-    this.changeUserSelection("backgroundColor", colorObjectToArray(color));
+    this.changeViewerSetting("backgroundColor", colorObjectToArray(color));
 
-  changeAxisShowing = (showing: boolean): void => this.changeUserSelection("showAxes", showing);
-  changeBoundingBoxShowing = (showing: boolean): void => this.changeUserSelection("showBoundingBox", showing);
+  changeAxisShowing = (showing: boolean): void => this.changeViewerSetting("showAxes", showing);
+  changeBoundingBoxShowing = (showing: boolean): void => this.changeViewerSetting("showBoundingBox", showing);
 
   onResetCamera(): void {
     this.state.view3d?.resetCamera();
@@ -939,7 +939,7 @@ export default class App extends React.Component<AppProps, AppState> {
   onClippingPanelVisibleChange(open: boolean): void {
     const CLIPPING_PANEL_HEIGHT = 130;
 
-    const { view3d, userSelections } = this.state;
+    const { view3d, viewerSettings } = this.state;
     if (view3d) {
       let axisY = AXIS_MARGIN_DEFAULT[1];
       let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
@@ -952,17 +952,17 @@ export default class App extends React.Component<AppProps, AppState> {
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
-      if (userSelections.showAxes) {
+      if (viewerSettings.showAxes) {
         view3d.setShowAxis(false);
       }
     }
   }
 
   onClippingPanelVisibleChangeEnd(_open: boolean): void {
-    const { view3d, userSelections } = this.state;
+    const { view3d, viewerSettings } = this.state;
     if (view3d) {
       view3d.setShowScaleBar(true);
-      if (userSelections.showAxes) {
+      if (viewerSettings.showAxes) {
         view3d.setShowAxis(true);
       }
     }
@@ -977,12 +977,12 @@ export default class App extends React.Component<AppProps, AppState> {
 
   beginRequestImage(type?: ImageType): void {
     const { fovPath, cellPath } = this.props;
-    let imageType = type || this.state.userSelections.imageType;
+    let imageType = type || this.state.viewerSettings.imageType;
     let path = imageType === ImageType.fullField ? fovPath : cellPath;
     this.setState({
       sendingQueryRequest: true,
-      userSelections: {
-        ...this.state.userSelections,
+      viewerSettings: {
+        ...this.state.viewerSettings,
         imageType,
       },
     });
@@ -1043,10 +1043,10 @@ export default class App extends React.Component<AppProps, AppState> {
 
   render(): React.ReactNode {
     const { cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
-    const { userSelections } = this.state;
+    const { viewerSettings } = this.state;
     const renderConfig = {
-      ...defaultRenderConfig,
-      ...this.props.renderConfig,
+      ...defaultShownControls,
+      ...this.props.showControls,
     };
     return (
       <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
@@ -1068,21 +1068,21 @@ export default class App extends React.Component<AppProps, AppState> {
             channelDataChannels={this.state.image?.channels}
             channelGroupedByType={this.state.channelGroupedByType}
             // user selections
-            pathTraceOn={userSelections.renderMode === RenderMode.pathTrace}
+            pathTraceOn={viewerSettings.renderMode === RenderMode.pathTrace}
             channelSettings={this.state.channelSettings}
-            showBoundingBox={userSelections.showBoundingBox}
-            backgroundColor={userSelections.backgroundColor}
-            boundingBoxColor={userSelections.boundingBoxColor}
-            maskAlpha={userSelections.maskAlpha}
-            brightness={userSelections.brightness}
-            density={userSelections.density}
-            levels={userSelections.levels}
-            interpolationEnabled={userSelections.interpolationEnabled}
+            showBoundingBox={viewerSettings.showBoundingBox}
+            backgroundColor={viewerSettings.backgroundColor}
+            boundingBoxColor={viewerSettings.boundingBoxColor}
+            maskAlpha={viewerSettings.maskAlpha}
+            brightness={viewerSettings.brightness}
+            density={viewerSettings.density}
+            levels={viewerSettings.levels}
+            interpolationEnabled={viewerSettings.interpolationEnabled}
             collapsed={this.state.controlPanelClosed}
             // functions
             setCollapsed={this.toggleControlPanel}
             saveIsosurface={this.saveIsosurface}
-            changeUserSelection={this.changeUserSelection}
+            changeViewerSetting={this.changeViewerSetting}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
             setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
@@ -1097,17 +1097,17 @@ export default class App extends React.Component<AppProps, AppState> {
         <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
           <Content>
             <Toolbar
-              mode={userSelections.viewMode}
+              viewMode={viewerSettings.viewMode}
               fovDownloadHref={fovDownloadHref}
               cellDownloadHref={cellDownloadHref}
-              autorotate={userSelections.autorotate}
-              imageType={userSelections.imageType}
+              autorotate={viewerSettings.autorotate}
+              imageType={viewerSettings.imageType}
               hasParentImage={!!this.props.fovPath}
               hasCellId={!!this.props.cellId}
               canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
-              showAxes={userSelections.showAxes}
-              showBoundingBox={userSelections.showBoundingBox}
-              renderSetting={userSelections.renderMode}
+              showAxes={viewerSettings.showAxes}
+              showBoundingBox={viewerSettings.showBoundingBox}
+              renderMode={viewerSettings.renderMode}
               onViewModeChange={this.onViewModeChange}
               onResetCamera={this.onResetCamera}
               onAutorotateChange={this.onAutorotateChange}
@@ -1121,11 +1121,11 @@ export default class App extends React.Component<AppProps, AppState> {
             <CellViewerCanvasWrapper
               image={this.state.image}
               setAxisClip={this.setImageAxisClip}
-              mode={userSelections.viewMode}
-              autorotate={userSelections.autorotate}
+              viewMode={viewerSettings.viewMode}
+              autorotate={viewerSettings.autorotate}
               loadingImage={this.state.sendingQueryRequest}
               numSlices={this.getNumberOfSlices()}
-              region={userSelections.region}
+              region={viewerSettings.region}
               onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               renderConfig={renderConfig}

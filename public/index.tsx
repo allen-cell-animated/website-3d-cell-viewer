@@ -77,7 +77,7 @@ const args = {
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
 };
-const viewerConfig = {
+const viewerSettings = {
   showAxes: false,
   showBoundingBox: false,
   autorotate: false,
@@ -93,7 +93,7 @@ const viewerConfig = {
 
 if (params) {
   if (params.mask) {
-    viewerConfig.maskAlpha = parseInt(params.mask, 10);
+    viewerSettings.maskAlpha = parseInt(params.mask, 10);
   }
   if (params.ch) {
     // ?ch=1,2
@@ -262,7 +262,7 @@ function runApp() {
       fovPath={args.fovPath}
       fovDownloadHref={args.fovDownloadHref}
       cellDownloadHref={args.cellDownloadHref}
-      viewerConfig={viewerConfig}
+      viewerSettings={viewerSettings}
       viewerChannelSettings={args.initialChannelSettings}
     />,
     document.getElementById("cell-viewer")

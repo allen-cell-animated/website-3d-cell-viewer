@@ -1,14 +1,18 @@
 import { ChannelState } from "../../shared/utils/viewerChannelSettings";
-import { RenderConfig, UserSelectionState } from "./types";
+import { ShowControls, GlobalViewerSettings } from "./types";
 
-interface View3dInternalState {
+/** Global viewer settings that are not currently controlled by any UI */
+// TODO double-check that this is exhaustive
+interface View3dInternalGlobalSettings {
   pixelSamplingRate: number;
   stepSizePrimaryRayVoxels: number;
   stepSizeSecondaryRayVoxels: number;
   flipVolume: [number, number, number];
 }
 
-interface View3dChannelState {
+/** Per-channel settings that are not currently controlled by any UI */
+// TODO double-check that this is exhaustive
+interface View3dInternalChannelSettings {
   specular: [number, number, number];
   emissive: [number, number, number];
   glossiness: number;
@@ -20,6 +24,7 @@ interface View3dChannelState {
 export interface SavedState {
   stateVersion: 1;
 
+  // TODO switch to LoadSpec or similar
   baseUrl: string;
   cellId: string;
   cellDownloadHref: string;
@@ -28,13 +33,11 @@ export interface SavedState {
   fovPath: string;
 
   // Which UI elements are rendered
-  renderConfig: RenderConfig;
+  showControls: ShowControls;
   // Global (not per-channel) viewer settings which may be changed in the UI
-  viewerConfig: UserSelectionState & View3dInternalState;
-  // State which exists in view3d but is not controlled by this component
-  // view3dInternalState: View3dInternalState;
-  // TODO TODO TODO
+  viewerSettings: GlobalViewerSettings & View3dInternalGlobalSettings;
   // Per-channel settings
-  channelSettings: (ChannelState & View3dChannelState)[];
-  // TODO: camera
+  // TODO check if this state needs reorganization
+  channelSettings: (ChannelState & View3dInternalChannelSettings)[];
+  // TODO camera
 }

@@ -11,10 +11,10 @@ import "./styles.css";
 
 interface ToolbarProps {
   imageType: ImageType;
-  renderSetting: RenderMode;
+  renderMode: RenderMode;
   cellDownloadHref: string;
   fovDownloadHref: string;
-  mode: ViewMode;
+  viewMode: ViewMode;
   hasCellId: boolean;
   hasParentImage: boolean;
   autorotate: boolean;
@@ -131,7 +131,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
     const { props } = this;
     const { renderConfig, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
-    const twoDMode = props.mode !== ViewMode.threeD;
+    const twoDMode = props.viewMode !== ViewMode.threeD;
 
     const renderGroup1 =
       renderConfig.viewModeRadioButtons || renderConfig.resetCameraButton || renderConfig.autoRotateButton;
@@ -161,7 +161,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
             {renderGroup1 && (
               <span className="viewer-toolbar-group">
                 {renderConfig.viewModeRadioButtons && (
-                  <ViewModeRadioButtons mode={props.mode} onViewModeChange={props.onViewModeChange} />
+                  <ViewModeRadioButtons mode={props.viewMode} onViewModeChange={props.onViewModeChange} />
                 )}
                 {renderConfig.resetCameraButton && (
                   <Tooltip placement="bottom" title="Reset camera">
@@ -174,7 +174,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                   <Tooltip placement="bottom" title={turntableToggleTitle}>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
-                      disabled={twoDMode || props.renderSetting === RenderMode.pathTrace}
+                      disabled={twoDMode || props.renderMode === RenderMode.pathTrace}
                       onClick={props.onAutorotateChange}
                     >
                       <ViewerIcon type="turnTable" />
@@ -197,7 +197,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
               <Select
                 className="select-render-setting"
                 dropdownClassName="viewer-toolbar-dropdown"
-                value={props.renderSetting}
+                value={props.renderMode}
                 onChange={props.onChangeRenderingAlgorithm}
               >
                 <Select.Option value={RenderMode.volumetric} key={RenderMode.volumetric}>

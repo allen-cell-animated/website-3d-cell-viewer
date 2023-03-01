@@ -3,7 +3,7 @@ import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse, Checkbox } from "antd";
-import { UserSelectionKey, UserSelectionState } from "./App/types";
+import { ViewerSettingsKey, GlobalViewerSettings } from "./App/types";
 import { AxisName, Styles } from "../shared/types";
 const Panel = Collapse.Panel;
 
@@ -27,7 +27,7 @@ export interface GlobalVolumeControlsProps {
   levels: [number, number, number];
   interpolationEnabled: boolean;
 
-  changeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
+  changeViewerSetting: <K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]) => void;
   setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
@@ -63,7 +63,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           behaviour="drag"
           onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
             const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
-            this.props.changeUserSelection(propKey, selectValue);
+            this.props.changeViewerSetting(propKey, selectValue);
           }}
         />
       </div>
@@ -88,7 +88,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
                   <div style={{ flex: 5 }}>
                     <Checkbox
                       checked={this.props.interpolationEnabled}
-                      onChange={({ target }) => this.props.changeUserSelection("interpolationEnabled", target.checked)}
+                      onChange={({ target }) => this.props.changeViewerSetting("interpolationEnabled", target.checked)}
                     />
                   </div>
                 </div>

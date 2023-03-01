@@ -4,7 +4,7 @@ import { PerAxis } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
-type RenderConfigKeys =
+type ControlNames =
   | "alphaMask"
   | "autoRotateButton"
   | "axisClipSliders"
@@ -21,10 +21,10 @@ type RenderConfigKeys =
   | "showAxesButton"
   | "showBoundingBoxButton";
 /** Show/hide different elements of the UI */
-export type RenderConfig = { [K in RenderConfigKeys]: boolean };
+export type ShowControls = { [K in ControlNames]: boolean };
 
 /** Global (not per-channel) viewer state which may be changed in the UI */
-export interface UserSelectionState {
+export interface GlobalViewerSettings {
   viewMode: ViewMode;
   renderMode: RenderMode;
   imageType: ImageType;
@@ -56,8 +56,8 @@ export interface AppProps {
   cellId: string;
   cellPath: string;
   fovPath: string;
-  renderConfig?: Partial<RenderConfig>;
-  viewerConfig?: Partial<UserSelectionState>;
+  showControls?: Partial<ShowControls>;
+  viewerSettings?: Partial<GlobalViewerSettings>;
   baseUrl: string;
   cellDownloadHref: string;
   fovDownloadHref: string;
@@ -71,9 +71,9 @@ export interface AppProps {
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
-export type UserSelectionKey = keyof UserSelectionState;
-export type UserSelectionChangeHandlers = {
-  [K in UserSelectionKey]?: (value: UserSelectionState[K], view3d: View3d, image: Volume) => void;
+export type ViewerSettingsKey = keyof GlobalViewerSettings;
+export type ViewerSettingChangeHandlers = {
+  [K in ViewerSettingsKey]?: (value: GlobalViewerSettings[K], view3d: View3d, image: Volume) => void;
 };
 
 export interface AppState {
@@ -88,7 +88,7 @@ export interface AppState {
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
   channelGroupedByType: ChannelGrouping;
   // global (not per-channel) state set by the UI:
-  userSelections: UserSelectionState;
+  viewerSettings: GlobalViewerSettings;
   // channelSettings is a flat list of objects of this type:
   // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
   // the list is in the order they were in the raw data.
