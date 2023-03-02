@@ -14,9 +14,10 @@ import ViewerIcon from "../shared/ViewerIcon";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
-  showControls: GlobalVolumeControlsProps["showControls"] & {
-    colorPresetsDropdown: boolean;
-  };
+  showControls: GlobalVolumeControlsProps["showControls"] &
+    CustomizeWidgetProps["showControls"] & {
+      colorPresetsDropdown: boolean;
+    };
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
 }
@@ -138,13 +139,16 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     pathTraceOn={props.pathTraceOn}
                     showControls={showControls}
                   />
-                  <CustomizeWidget
-                    backgroundColor={props.backgroundColor}
-                    boundingBoxColor={props.boundingBoxColor}
-                    changeBackgroundColor={props.changeBackgroundColor}
-                    changeBoundingBoxColor={props.changeBoundingBoxColor}
-                    showBoundingBox={props.showBoundingBox}
-                  />
+                  {(showControls.backgroundColorPicker || showControls.boundingBoxColorPicker) && (
+                    <CustomizeWidget
+                      backgroundColor={props.backgroundColor}
+                      boundingBoxColor={props.boundingBoxColor}
+                      changeBackgroundColor={props.changeBackgroundColor}
+                      changeBoundingBoxColor={props.changeBoundingBoxColor}
+                      showBoundingBox={props.showBoundingBox}
+                      showControls={props.showControls}
+                    />
+                  )}
                 </>
               )}
             </div>

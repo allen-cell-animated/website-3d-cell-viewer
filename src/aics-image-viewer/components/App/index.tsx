@@ -1,6 +1,6 @@
 // 3rd Party Imports
-import { Layout } from "antd";
 import React from "react";
+import { Layout } from "antd";
 import { includes, isEqual, find, map, debounce } from "lodash";
 import {
   ControlPoint,
@@ -88,11 +88,12 @@ function colorHexToArray(hex: string): ColorArray | null {
 }
 
 const defaultShownControls: ShowControls = {
-  alphaMask: true,
+  alphaMaskSlider: true,
   autoRotateButton: true,
   axisClipSliders: true,
   brightnessSlider: true,
-  colorPicker: true,
+  backgroundColorPicker: true,
+  boundingBoxColorPicker: true,
   colorPresetsDropdown: true,
   densitySlider: true,
   levelsSliders: true,

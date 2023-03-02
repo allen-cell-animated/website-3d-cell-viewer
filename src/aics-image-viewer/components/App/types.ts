@@ -5,11 +5,12 @@ import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 type ControlNames =
-  | "alphaMask"
+  | "alphaMaskSlider"
   | "autoRotateButton"
   | "axisClipSliders"
   | "brightnessSlider"
-  | "colorPicker"
+  | "backgroundColorPicker"
+  | "boundingBoxColorPicker"
   | "colorPresetsDropdown"
   | "densitySlider"
   | "levelsSliders"
@@ -33,10 +34,10 @@ export interface GlobalViewerSettings {
   boundingBoxColor: ColorArray;
   backgroundColor: ColorArray;
   autorotate: boolean;
-  maskAlpha: number; // props.viewerConfig.maskAlpha || ALPHA_MASK_SLIDER_3D_DEFAULT,
-  brightness: number; // props.viewerConfig.brightness || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  density: number; // props.viewerConfig.density || DENSITY_SLIDER_LEVEL_DEFAULT,
-  levels: [number, number, number]; // props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
+  maskAlpha: number;
+  brightness: number;
+  density: number;
+  levels: [number, number, number];
   interpolationEnabled: boolean;
   // `region` values are in the range [0, 1]. We derive from this the format that the sliders expect
   // (integers between 0 and num_slices - 1) and the format that view3d expects (in [-0.5, 0.5])

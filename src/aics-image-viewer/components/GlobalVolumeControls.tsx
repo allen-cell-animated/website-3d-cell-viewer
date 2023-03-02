@@ -14,7 +14,7 @@ export interface GlobalVolumeControlsProps {
   pixelSize: [number, number, number];
   pathTraceOn: boolean;
   showControls: {
-    alphaMask: boolean;
+    alphaMaskSlider: boolean;
     brightnessSlider: boolean;
     densitySlider: boolean;
     levelsSliders: boolean;
@@ -78,7 +78,7 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
         <Collapse bordered={false} defaultActiveKey="global-volume">
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
-              {showControls.alphaMask && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
+              {showControls.alphaMaskSlider && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
               {showControls.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
               {showControls.densitySlider && this.createSliderRow("density", density, 100, "density")}
               {showControls.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
