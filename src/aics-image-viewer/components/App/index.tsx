@@ -151,7 +151,7 @@ export default class App extends React.Component<AppProps, AppState> {
 
     this.state = {
       image: null,
-      view3d: null,
+      view3d: new View3d(),
       currentlyLoadedImagePath: undefined,
       cachingInProgress: false,
       sendingQueryRequest: false,
@@ -168,6 +168,12 @@ export default class App extends React.Component<AppProps, AppState> {
         ...viewerSettings,
       },
     };
+
+    const { view3d } = this.state;
+    view3d.setBackgroundColor(colorArrayToFloats(this.state.viewerSettings.backgroundColor));
+    view3d.setShowAxis(this.state.viewerSettings.showAxes);
+    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
+    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
 
     this.openImage = this.openImage.bind(this);
     this.loadFromRaw = this.loadFromRaw.bind(this);
@@ -190,7 +196,6 @@ export default class App extends React.Component<AppProps, AppState> {
     this.changeViewerSetting = this.changeViewerSetting.bind(this);
     this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
     this.initializeNewImage = this.initializeNewImage.bind(this);
-    this.onView3DCreated = this.onView3DCreated.bind(this);
     this.onClippingPanelVisibleChange = this.onClippingPanelVisibleChange.bind(this);
     this.onClippingPanelVisibleChangeEnd = this.onClippingPanelVisibleChangeEnd.bind(this);
     this.createChannelGrouping = this.createChannelGrouping.bind(this);
@@ -250,16 +255,6 @@ export default class App extends React.Component<AppProps, AppState> {
     if (newImage || channelsChanged || imageChanged) {
       this.updateImageVolumeAndSurfacesEnabledFromAppState();
     }
-  }
-
-  onView3DCreated(view3d: View3d): void {
-    const { viewerSettings } = this.state;
-    view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor));
-    view3d.setShowAxis(viewerSettings.showAxes);
-    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
-    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
-
-    this.setState({ view3d });
   }
 
   setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): ChannelState[] {
@@ -1120,6 +1115,7 @@ export default class App extends React.Component<AppProps, AppState> {
               showControls={showControls}
             />
             <CellViewerCanvasWrapper
+              view3d={this.state.view3d}
               image={this.state.image}
               setAxisClip={this.setImageAxisClip}
               viewMode={viewerSettings.viewMode}
@@ -1127,7 +1123,6 @@ export default class App extends React.Component<AppProps, AppState> {
               loadingImage={this.state.sendingQueryRequest}
               numSlices={this.getNumberOfSlices()}
               region={viewerSettings.region}
-              onView3DCreated={this.onView3DCreated}
               appHeight={this.props.appHeight}
               showControls={showControls}
               onClippingPanelVisibleChange={this.onClippingPanelVisibleChange}

@@ -11,6 +11,7 @@ import BottomPanel from "../BottomPanel";
 import "./styles.css";
 
 interface ViewerWrapperProps {
+  view3d: View3d;
   autorotate: boolean;
   loadingImage: boolean;
   viewMode: ViewMode;
@@ -21,7 +22,6 @@ interface ViewerWrapperProps {
   showControls: {
     axisClipSliders: boolean;
   };
-  onView3DCreated: (view3d: View3d) => void;
   setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   onClippingPanelVisibleChange?: (open: boolean) => void;
   onClippingPanelVisibleChangeEnd?: (open: boolean) => void;
@@ -31,7 +31,6 @@ interface ViewerWrapperState {}
 
 export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
   private view3dviewerRef: React.RefObject<HTMLDivElement>;
-  private view3D?: View3d;
 
   constructor(props: ViewerWrapperProps) {
     super(props);
@@ -39,25 +38,19 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   componentDidMount(): void {
-    if (!this.view3D) {
-      this.view3D = new View3d(this.view3dviewerRef.current!);
-      this.props.onView3DCreated(this.view3D);
-      this.view3D.setAutoRotate(this.props.autorotate);
-    }
+    this.view3dviewerRef.current!.appendChild(this.props.view3d.getDOMElement());
+    this.props.view3d.setAutoRotate(this.props.autorotate);
   }
 
   componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
-    if (!this.view3D) {
-      return;
-    }
     if (prevProps.viewMode && prevProps.viewMode !== this.props.viewMode) {
-      this.view3D.setCameraMode(this.props.viewMode);
+      this.props.view3d.setCameraMode(this.props.viewMode);
     }
     if (prevProps.autorotate !== this.props.autorotate) {
-      this.view3D.setAutoRotate(this.props.autorotate);
+      this.props.view3d.setAutoRotate(this.props.autorotate);
     }
 
-    this.view3D.resize(null);
+    this.props.view3d.resize(null);
   }
 
   renderOverlay(): React.ReactNode {
@@ -69,8 +62,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
 
     const noImageText =
       !this.props.loadingImage && !this.props.image ? <div style={STYLES.noImage}>No image selected</div> : null;
-    if (!!noImageText && this.view3D) {
-      this.view3D.removeAllVolumes();
+    if (!!noImageText && this.props.view3d) {
+      this.props.view3d.removeAllVolumes();
     }
     return noImageText || spinner;
   }

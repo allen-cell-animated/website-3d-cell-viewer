@@ -78,7 +78,7 @@ export type ViewerSettingChangeHandlers = {
 };
 
 export interface AppState {
-  view3d: View3d | null;
+  view3d: View3d;
   image: Volume | null;
 
   sendingQueryRequest: boolean;
