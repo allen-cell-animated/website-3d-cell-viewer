@@ -27,19 +27,28 @@ export interface CustomizeWidgetProps {
 
   changeBackgroundColor: ColorChangeHandler;
   changeBoundingBoxColor: ColorChangeHandler;
+
+  showControls: {
+    backgroundColorPicker: boolean;
+    boundingBoxColorPicker: boolean;
+  };
 }
 
 const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
   <Card bordered={false} title="Customize" type="inner" className="color-customizer">
     <Collapse bordered={false} defaultActiveKey="color-customization">
       <Collapse.Panel key="color-customization" header={null}>
-        <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
-          Background color
-        </ColorPickerRow>
-        <ColorPickerRow color={props.boundingBoxColor} onColorChange={props.changeBoundingBoxColor}>
-          Bounding box color
-          {!props.showBoundingBox && <i> - bounding box turned off</i>}
-        </ColorPickerRow>
+        {props.showControls.backgroundColorPicker && (
+          <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
+            Background color
+          </ColorPickerRow>
+        )}
+        {props.showControls.boundingBoxColorPicker && (
+          <ColorPickerRow color={props.boundingBoxColor} onColorChange={props.changeBoundingBoxColor}>
+            Bounding box color
+            {!props.showBoundingBox && <i> - bounding box turned off</i>}
+          </ColorPickerRow>
+        )}
       </Collapse.Panel>
     </Collapse>
   </Card>

@@ -1,7 +1,48 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
-import { ImageType, ViewMode } from "../../shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
+import { PerAxis } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+
+type ControlNames =
+  | "alphaMaskSlider"
+  | "autoRotateButton"
+  | "axisClipSliders"
+  | "brightnessSlider"
+  | "backgroundColorPicker"
+  | "boundingBoxColorPicker"
+  | "colorPresetsDropdown"
+  | "densitySlider"
+  | "levelsSliders"
+  | "interpolationControl"
+  | "saveSurfaceButtons"
+  | "fovCellSwitchControls"
+  | "viewModeRadioButtons"
+  | "resetCameraButton"
+  | "showAxesButton"
+  | "showBoundingBoxButton";
+/** Show/hide different elements of the UI */
+export type ShowControls = { [K in ControlNames]: boolean };
+
+/** Global (not per-channel) viewer state which may be changed in the UI */
+export interface GlobalViewerSettings {
+  viewMode: ViewMode;
+  renderMode: RenderMode;
+  imageType: ImageType;
+  showAxes: boolean;
+  showBoundingBox: boolean;
+  boundingBoxColor: ColorArray;
+  backgroundColor: ColorArray;
+  autorotate: boolean;
+  maskAlpha: number;
+  brightness: number;
+  density: number;
+  levels: [number, number, number];
+  interpolationEnabled: boolean;
+  // `region` values are in the range [0, 1]. We derive from this the format that the sliders expect
+  // (integers between 0 and num_slices - 1) and the format that view3d expects (in [-0.5, 0.5])
+  region: PerAxis<[number, number]>;
+}
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
@@ -16,39 +57,8 @@ export interface AppProps {
   cellId: string;
   cellPath: string;
   fovPath: string;
-  renderConfig: {
-    alphaMask: boolean;
-    autoRotateButton: boolean;
-    axisClipSliders: boolean;
-    brightnessSlider: boolean;
-    colorPicker: boolean;
-    colorPresetsDropdown: boolean;
-    densitySlider: boolean;
-    levelsSliders: boolean;
-    interpolationControl: boolean;
-    saveSurfaceButtons: boolean;
-    fovCellSwitchControls: boolean;
-    viewModeRadioButtons: boolean;
-    resetCameraButton: boolean;
-    showAxesButton: boolean;
-    showBoundingBoxButton: boolean;
-  };
-  viewerConfig: {
-    showAxes: boolean;
-    showBoundingBox: boolean;
-    boundingBoxColor?: ColorArray;
-    backgroundColor?: ColorArray;
-    autorotate: boolean;
-    view: string; // "3D", "XY", "XZ", "YZ"
-    mode: string; // "default", "pathtrace", "maxprojection"
-    maskAlpha: number; //ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: number; //BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: number; //DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: [number, number, number]; // LEVELS_SLIDER_DEFAULT,
-    interpolationEnabled?: boolean;
-    region?: [number, number, number, number, number, number]; //[0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
-    slice?: number; // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
-  };
+  showControls?: Partial<ShowControls>;
+  viewerSettings?: Partial<GlobalViewerSettings>;
   baseUrl: string;
   cellDownloadHref: string;
   fovDownloadHref: string;
@@ -62,31 +72,9 @@ export interface AppProps {
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
-export interface UserSelectionState {
-  imageType: ImageType;
-  controlPanelClosed: boolean;
-  mode: ViewMode;
-  autorotate: boolean;
-  maxProject: boolean;
-  pathTrace: boolean;
-  showAxes: boolean;
-  showBoundingBox: boolean;
-  boundingBoxColor: ColorArray;
-  backgroundColor: ColorArray;
-  alphaMaskSliderLevel: number[]; //[props.viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-  brightnessSliderLevel: number[]; //[props.viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  densitySliderLevel: number[]; // [props.viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-  levelsSlider: [number, number, number]; //props.viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
-  interpolationEnabled: boolean;
-  // channelSettings is a flat list of objects of this type:
-  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-  // the list is in the order they were in the raw data.
-  channelSettings: ChannelState[];
-}
-
-export type UserSelectionKey = keyof UserSelectionState;
-export type UserSelectionChangeHandlers = {
-  [K in UserSelectionKey]?: (value: UserSelectionState[K], view3d: View3d, image: Volume) => void;
+export type ViewerSettingsKey = keyof GlobalViewerSettings;
+export type ViewerSettingChangeHandlers = {
+  [K in ViewerSettingsKey]?: (value: GlobalViewerSettings[K], view3d: View3d, image: Volume) => void;
 };
 
 export interface AppState {
@@ -96,9 +84,14 @@ export interface AppState {
   sendingQueryRequest: boolean;
   currentlyLoadedImagePath?: string;
   cachingInProgress: boolean;
+  controlPanelClosed: boolean;
   // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
   // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
   channelGroupedByType: ChannelGrouping;
-  // state set by the UI:
-  userSelections: UserSelectionState;
+  // global (not per-channel) state set by the UI:
+  viewerSettings: GlobalViewerSettings;
+  // channelSettings is a flat list of objects of this type:
+  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
+  // the list is in the order they were in the raw data.
+  channelSettings: ChannelState[];
 }

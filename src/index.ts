@@ -6,4 +6,6 @@ export type {
   ViewerChannelSetting,
 } from "./aics-image-viewer/shared/utils/viewerChannelSettings";
 
+export { ViewMode, RenderMode, ImageType } from "./aics-image-viewer/shared/enums";
+
 export { ImageViewerApp };

@@ -3,32 +3,31 @@ import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse, Checkbox } from "antd";
-import { UserSelectionKey, UserSelectionState } from "./App/types";
+import { ViewerSettingsKey, GlobalViewerSettings } from "./App/types";
 import { AxisName, Styles } from "../shared/types";
 const Panel = Collapse.Panel;
 
-type GlobalVolumeControlKey = "alphaMaskSliderLevel" | "brightnessSliderLevel" | "densitySliderLevel" | "levelsSlider";
+type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
 export interface GlobalVolumeControlsProps {
   imageName: string | undefined;
   pixelSize: [number, number, number];
-  maxProjectOn: boolean;
   pathTraceOn: boolean;
-  renderConfig: {
-    alphaMask: boolean;
+  showControls: {
+    alphaMaskSlider: boolean;
     brightnessSlider: boolean;
     densitySlider: boolean;
     levelsSliders: boolean;
     interpolationControl: boolean;
   };
 
-  alphaMaskSliderLevel: number[];
-  brightnessSliderLevel: number[];
-  densitySliderLevel: number[];
-  gammaSliderLevel: [number, number, number];
+  maskAlpha: number;
+  brightness: number;
+  density: number;
+  levels: [number, number, number];
   interpolationEnabled: boolean;
 
-  changeUserSelection: <K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]) => void;
+  changeViewerSetting: <K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]) => void;
   setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
@@ -39,15 +38,20 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   }
 
   shouldComponentUpdate(newProps: GlobalVolumeControlsProps): boolean {
-    const { imageName, alphaMaskSliderLevel, pathTraceOn, interpolationEnabled } = this.props;
+    const { imageName, maskAlpha, pathTraceOn, interpolationEnabled } = this.props;
     const newImage = newProps.imageName !== imageName;
     const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
-    const newSliderValue = newProps.alphaMaskSliderLevel[0] !== alphaMaskSliderLevel[0];
+    const newSliderValue = newProps.maskAlpha !== maskAlpha;
     const newInterpolationValue = newProps.interpolationEnabled !== interpolationEnabled;
     return newImage || newSliderValue || newPathTraceValue || newInterpolationValue;
   }
 
-  createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey): React.ReactNode => (
+  createSliderRow = (
+    label: string,
+    start: number | number[],
+    max: number,
+    propKey: GlobalVolumeControlKey
+  ): React.ReactNode => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
@@ -57,7 +61,10 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           connect={true}
           tooltips={true}
           behaviour="drag"
-          onUpdate={(values: number[]): void => this.props.changeUserSelection(propKey, values)}
+          onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
+            const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
+            this.props.changeViewerSetting(propKey, selectValue);
+          }}
         />
       </div>
     </div>
@@ -65,27 +72,23 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
 
   render(): React.ReactNode {
     if (!this.props.imageName) return null;
-    const { renderConfig, alphaMaskSliderLevel, brightnessSliderLevel, densitySliderLevel, gammaSliderLevel } =
-      this.props;
+    const { showControls, maskAlpha, brightness, density, levels } = this.props;
     return (
       <Card bordered={false} title="Rendering adjustments" type="inner" className="global-volume-controls">
         <Collapse bordered={false} defaultActiveKey="global-volume">
           <Panel key="global-volume" header={null}>
             <div style={STYLES.slidersWrapper}>
-              {renderConfig.alphaMask &&
-                this.createSliderRow("mask cell", alphaMaskSliderLevel, 100, "alphaMaskSliderLevel")}
-              {renderConfig.brightnessSlider &&
-                this.createSliderRow("brightness", brightnessSliderLevel, 100, "brightnessSliderLevel")}
-              {renderConfig.densitySlider &&
-                this.createSliderRow("density", densitySliderLevel, 100, "densitySliderLevel")}
-              {renderConfig.levelsSliders && this.createSliderRow("levels", gammaSliderLevel, 255, "levelsSlider")}
-              {renderConfig.interpolationControl && (
+              {showControls.alphaMaskSlider && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
+              {showControls.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
+              {showControls.densitySlider && this.createSliderRow("density", density, 100, "density")}
+              {showControls.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
+              {showControls.interpolationControl && (
                 <div style={STYLES.controlRow}>
                   <div style={STYLES.controlName}>interpolate</div>
                   <div style={{ flex: 5 }}>
                     <Checkbox
                       checked={this.props.interpolationEnabled}
-                      onChange={({ target }) => this.props.changeUserSelection("interpolationEnabled", target.checked)}
+                      onChange={({ target }) => this.props.changeViewerSetting("interpolationEnabled", target.checked)}
                     />
                   </div>
                 </div>

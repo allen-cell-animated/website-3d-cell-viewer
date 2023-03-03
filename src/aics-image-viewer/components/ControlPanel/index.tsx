@@ -14,9 +14,10 @@ import ViewerIcon from "../shared/ViewerIcon";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
-  renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
-    colorPresetsDropdown: boolean;
-  };
+  showControls: GlobalVolumeControlsProps["showControls"] &
+    CustomizeWidgetProps["showControls"] & {
+      colorPresetsDropdown: boolean;
+    };
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
 }
@@ -34,7 +35,7 @@ const ControlTabNames = {
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = useState(ControlTab.Channels);
 
-  const { viewerChannelSettings, renderConfig, hasImage } = props;
+  const { viewerChannelSettings, showControls, hasImage } = props;
 
   // TODO key is a number, but ClickParam assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
@@ -102,7 +103,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         <Card
           bordered={false}
           className="control-panel"
-          title={renderConfig.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+          title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
         >
           {hasImage && (
             <div className="channel-rows-list">
@@ -127,25 +128,27 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   <GlobalVolumeControls
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
-                    changeUserSelection={props.changeUserSelection}
+                    changeViewerSetting={props.changeViewerSetting}
                     setImageAxisClip={props.setImageAxisClip}
                     makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
-                    alphaMaskSliderLevel={props.alphaMaskSliderLevel}
-                    brightnessSliderLevel={props.brightnessSliderLevel}
-                    densitySliderLevel={props.densitySliderLevel}
-                    gammaSliderLevel={props.gammaSliderLevel}
+                    maskAlpha={props.maskAlpha}
+                    brightness={props.brightness}
+                    density={props.density}
+                    levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
-                    maxProjectOn={props.maxProjectOn}
                     pathTraceOn={props.pathTraceOn}
-                    renderConfig={renderConfig}
+                    showControls={showControls}
                   />
-                  <CustomizeWidget
-                    backgroundColor={props.backgroundColor}
-                    boundingBoxColor={props.boundingBoxColor}
-                    changeBackgroundColor={props.changeBackgroundColor}
-                    changeBoundingBoxColor={props.changeBoundingBoxColor}
-                    showBoundingBox={props.showBoundingBox}
-                  />
+                  {(showControls.backgroundColorPicker || showControls.boundingBoxColorPicker) && (
+                    <CustomizeWidget
+                      backgroundColor={props.backgroundColor}
+                      boundingBoxColor={props.boundingBoxColor}
+                      changeBackgroundColor={props.changeBackgroundColor}
+                      changeBoundingBoxColor={props.changeBoundingBoxColor}
+                      showBoundingBox={props.showBoundingBox}
+                      showControls={props.showControls}
+                    />
+                  )}
                 </>
               )}
             </div>
