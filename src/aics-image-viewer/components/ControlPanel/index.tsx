@@ -129,7 +129,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
                     changeViewerSetting={props.changeViewerSetting}
-                    setImageAxisClip={props.setImageAxisClip}
                     makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
                     maskAlpha={props.maskAlpha}
                     brightness={props.brightness}

@@ -28,7 +28,6 @@ export interface GlobalVolumeControlsProps {
   interpolationEnabled: boolean;
 
   changeViewerSetting: <K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]) => void;
-  setImageAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
   makeUpdatePixelSizeFn: (i: number) => void;
 }
 

@@ -1080,7 +1080,6 @@ export default class App extends React.Component<AppProps, AppState> {
             saveIsosurface={this.saveIsosurface}
             changeViewerSetting={this.changeViewerSetting}
             updateChannelTransferFunction={this.updateChannelTransferFunction}
-            setImageAxisClip={this.setImageAxisClip}
             onApplyColorPresets={this.onApplyColorPresets}
             makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
             changeChannelSettings={this.changeChannelSettings}
