@@ -264,7 +264,6 @@ function runApp() {
       cellDownloadHref={args.cellDownloadHref}
       viewerConfig={viewerConfig}
       viewerChannelSettings={args.initialChannelSettings}
-      metadataConfig={["dimensions", "pixelPhysicalSize", "physicalDimensions", "channels", "userData"]}
     />,
     document.getElementById("cell-viewer")
   );

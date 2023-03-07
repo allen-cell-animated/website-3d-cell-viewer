@@ -15,14 +15,7 @@ import {
   Volume,
 } from "@aics/volume-viewer";
 
-import {
-  AppProps,
-  AppState,
-  MetadataSelectors,
-  UserSelectionChangeHandlers,
-  UserSelectionKey,
-  UserSelectionState,
-} from "./types";
+import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
@@ -1167,43 +1160,17 @@ export default class App extends React.Component<AppProps, AppState> {
     return { x: 0, y: 0, z: 0 };
   }
 
-  private metadataSelectors: MetadataSelectors = {
-    dimensions: (image) => {
-      const { x, y, z } = image;
-      return { Dimensions: { x: x + "px", y: y + "px", z: z + "px" } };
-    },
-    originalDimensions: (image) => {
-      const { width, height, tiles } = image.imageInfo;
-      return { "Original dimensions": { x: width + "px", y: height + "px", z: tiles + "px" } };
-    },
-    physicalDimensions: (image) => {
-      const { physicalScale, physicalUnitSymbol, normalizedPhysicalSize } = image;
-      const [x, y, z] = normalizedPhysicalSize.toArray().map((dim: number) => dim * physicalScale + physicalUnitSymbol);
-      return { "Physical size": { x, y, z } };
-    },
-    pixelPhysicalSize: (image) => {
-      const { pixel_size, physicalUnitSymbol } = image;
-      const [x, y, z] = pixel_size.map((dim) => dim + physicalUnitSymbol);
-      return { "Physical size per pixel": { x, y, z } };
-    },
-    channels: (image) => ({ Channels: image.num_channels }),
-    timeSeriesFrames: (_image) => ({ "Time series frames": 1 }), // TODO
-    userData: (image) => image.imageInfo.userData as MetadataRecord,
-  };
-
   getMetadata(): MetadataRecord {
-    const { metadata, metadataConfig } = this.props;
+    const { metadata, metadataFormatter } = this.props;
     const { image } = this.state;
 
-    let customMetadata = {};
-    if (image && metadataConfig && metadataConfig.length > 0) {
-      metadataConfig.forEach((category) => {
-        if (category in this.metadataSelectors) {
-          const newMetadata = this.metadataSelectors[category](image);
-          customMetadata = { ...customMetadata, ...newMetadata };
-        }
-      });
-      return { Image: customMetadata, ...metadata };
+    let imageMetadata = image?.imageMetadata as MetadataRecord;
+    if (imageMetadata && metadataFormatter) {
+      imageMetadata = metadataFormatter(imageMetadata);
+    }
+
+    if (imageMetadata && Object.keys(imageMetadata).length > 0) {
+      return { Image: imageMetadata, ...metadata };
     } else {
       return metadata || {};
     }

@@ -4,17 +4,6 @@ import { MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
-export type MetadataCategory =
-  | "dimensions"
-  | "originalDimensions"
-  | "physicalDimensions"
-  | "pixelPhysicalSize"
-  | "channels"
-  | "timeSeriesFrames"
-  | "userData";
-
-export type MetadataSelectors = { [C in MetadataCategory]: (image: Volume) => MetadataRecord };
-
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
@@ -62,8 +51,6 @@ export interface AppProps {
     region?: [number, number, number, number, number, number]; //[0,1,0,1,0,1], // or ignored if slice is specified with a non-3D mode
     slice?: number; // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
   };
-  metadata?: MetadataRecord;
-  metadataConfig?: MetadataCategory[];
   baseUrl: string;
   nextImgPath: string;
   prevImgPath: string;
@@ -76,7 +63,9 @@ export interface AppProps {
     translation: [number, number, number];
     rotation: [number, number, number];
   };
+  metadata?: MetadataRecord;
 
+  metadataFormatter?: (metadata: MetadataRecord) => MetadataRecord;
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
 
