@@ -49,18 +49,19 @@ const MetadataCollapsibleCategory: React.FC<CollapsibleCategoryProps> = ({ metad
 
 const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows }) => {
   const metadataKeys = Object.keys(metadata);
+  const metadataIsArray = Array.isArray(metadata);
 
   return (
     <table className="viewer-metadata-table">
       <tbody>
         {metadataKeys.map((key, idx) => {
-          const metadataValue = metadata[key];
+          const metadataValue = metadataIsArray ? metadata[idx] : metadata[key];
 
           if (isCategory(metadataValue)) {
             // Determine whether this category is followed by another category, ignoring data hierarchy:
             // - If this is the last element in the table, this category has another category below if the table does.
             // - Otherwise, just check if the next element in this table is a category.
-            const nextItem = metadata[metadataKeys[idx + 1]];
+            const nextItem = metadataIsArray ? metadata[idx + 1] : metadata[metadataKeys[idx + 1]];
             const categoryBelow = idx + 1 >= metadataKeys.length ? isCategory(nextItem) : categoryFollows;
 
             return (
