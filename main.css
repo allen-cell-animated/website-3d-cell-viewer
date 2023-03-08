@@ -462,6 +462,83 @@ body{
         padding:0 16px;
       }
 
+/*!********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/MetadataViewer/styles.css ***!
+  \********************************************************************************************************************************************************/
+.viewer-metadata-table{
+  width:100%;
+  table-layout:fixed;
+}
+
+  .viewer-metadata-table tbody{
+    padding:10px;
+  }
+
+  .viewer-metadata-table tr:nth-child(odd){
+      background-color:#3a3a3a;
+    }
+
+  .viewer-metadata-table tr.metadata-collapse-collapsed{
+      visibility:collapse;
+      height:0px;
+    }
+
+  .viewer-metadata-table tr.metadata-collapse-title{
+      color:white;
+      background-color:#4b4b4b;
+    }
+
+  .viewer-metadata-table tr.metadata-collapse-title:not(.metadata-collapse-no-bottom-border){
+        border-bottom:1px solid #6e6e6e;
+      }
+
+  .viewer-metadata-table tr.metadata-collapse-title.metadata-collapse-no-bottom-border > td{
+        padding-bottom:5px;
+      }
+
+  .viewer-metadata-table tr.metadata-collapse-title:not(:first-child){
+        border-top:1px solid #6e6e6e;
+      }
+
+  .viewer-metadata-table tr.metadata-collapse-content-row{
+      background-color:#313131;
+    }
+
+  .viewer-metadata-table td{
+    padding:6px 0;
+    overflow-wrap:break-word;
+  }
+
+  .viewer-metadata-table td .metadata-collapse-caret{
+      cursor:pointer;
+      padding-left:16px;
+      padding-right:10px;
+    }
+
+  .viewer-metadata-table td.metadata-key{
+      padding-left:24px;
+    }
+
+  .viewer-metadata-table td.metadata-value{
+      text-align:right;
+      padding-left:20px;
+      padding-right:16px;
+    }
+
+  .viewer-metadata-table td:last-child{
+      padding-right:16px;
+    }
+
+  .viewer-metadata-table td.metadata-collapse-content{
+      padding:0;
+      padding-left:16px;
+      border-bottom:none;
+    }
+
+  .viewer-metadata-table td i{
+      transition:transform 0.1s linear;
+    }
+
 /*!******************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/ControlPanel/styles.css ***!
   \******************************************************************************************************************************************************/
