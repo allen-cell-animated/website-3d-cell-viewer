@@ -1,5 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ImageType, ViewMode } from "../../shared/enums";
+import { MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -32,6 +33,7 @@ export interface AppProps {
     resetCameraButton: boolean;
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
+    metadataViewer: boolean;
   };
   viewerConfig: {
     showAxes: boolean;
@@ -58,7 +60,9 @@ export interface AppProps {
     translation: [number, number, number];
     rotation: [number, number, number];
   };
+  metadata?: MetadataRecord;
 
+  metadataFormatter?: (metadata: MetadataRecord) => MetadataRecord;
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
 

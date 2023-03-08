@@ -43,7 +43,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
 
   componentDidMount(): void {
     if (!this.view3D) {
-      this.view3D = new View3d(this.view3dviewerRef.current!);
+      this.view3D = new View3d({ parentElement: this.view3dviewerRef.current! });
       this.props.onView3DCreated(this.view3D);
       this.view3D.setAutoRotate(this.props.autorotate);
     }

@@ -64,7 +64,6 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   );
 
   render(): React.ReactNode {
-    if (!this.props.imageName) return null;
     const { renderConfig, alphaMaskSliderLevel, brightnessSliderLevel, densitySliderLevel, gammaSliderLevel } =
       this.props;
     return (
