@@ -13,3 +13,6 @@ export const activeAxisMap: { [A in ViewMode]: AxisName | null } = {
 export type IsosurfaceFormat = "GLTF" | "STL";
 
 export type Styles = { [key: string]: CSSProperties };
+
+export type MetadataEntry = string | number | boolean | MetadataRecord | null | undefined;
+export type MetadataRecord = { [key: string]: MetadataEntry } | MetadataEntry[];

@@ -70,7 +70,6 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
   );
 
   render(): React.ReactNode {
-    if (!this.props.imageName) return null;
     const { showControls, maskAlpha, brightness, density, levels } = this.props;
     return (
       <Card bordered={false} title="Rendering adjustments" type="inner" className="global-volume-controls">

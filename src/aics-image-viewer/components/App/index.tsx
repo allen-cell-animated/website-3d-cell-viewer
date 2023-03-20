@@ -32,7 +32,7 @@ import {
   ChannelStateChangeHandlers,
   ChannelGrouping,
 } from "../../shared/utils/viewerChannelSettings";
-import { activeAxisMap, AxisName, IsosurfaceFormat } from "../../shared/types";
+import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
@@ -104,6 +104,7 @@ const defaultShownControls: ShowControls = {
   resetCameraButton: true,
   showAxesButton: true,
   showBoundingBoxButton: true,
+  metadataViewer: true,
 };
 
 const defaultViewerSettings: GlobalViewerSettings = {
@@ -1037,6 +1038,22 @@ export default class App extends React.Component<AppProps, AppState> {
     return { x: 0, y: 0, z: 0 };
   }
 
+  getMetadata(): MetadataRecord {
+    const { metadata, metadataFormatter } = this.props;
+    const { image } = this.state;
+
+    let imageMetadata = image?.imageMetadata as MetadataRecord;
+    if (imageMetadata && metadataFormatter) {
+      imageMetadata = metadataFormatter(imageMetadata);
+    }
+
+    if (imageMetadata && Object.keys(imageMetadata).length > 0) {
+      return { Image: imageMetadata, ...metadata };
+    } else {
+      return metadata || {};
+    }
+  }
+
   render(): React.ReactNode {
     const { cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
     const { viewerSettings } = this.state;
@@ -1057,6 +1074,7 @@ export default class App extends React.Component<AppProps, AppState> {
         >
           <ControlPanel
             showControls={showControls}
+            getMetadata={() => this.getMetadata()}
             // image state
             imageName={this.state.image?.name}
             hasImage={!!this.state.image}

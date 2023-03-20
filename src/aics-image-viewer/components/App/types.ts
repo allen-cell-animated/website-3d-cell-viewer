@@ -1,6 +1,6 @@
 import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
-import { PerAxis } from "../../shared/types";
+import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
@@ -20,7 +20,8 @@ type ControlNames =
   | "viewModeRadioButtons"
   | "resetCameraButton"
   | "showAxesButton"
-  | "showBoundingBoxButton";
+  | "showBoundingBoxButton"
+  | "metadataViewer";
 /** Show/hide different elements of the UI */
 export type ShowControls = { [K in ControlNames]: boolean };
 
@@ -68,7 +69,9 @@ export interface AppProps {
     translation: [number, number, number];
     rotation: [number, number, number];
   };
+  metadata?: MetadataRecord;
 
+  metadataFormatter?: (metadata: MetadataRecord) => MetadataRecord;
   onControlPanelToggle?: (collapsed: boolean) => void;
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { Card, Button, Dropdown, Icon, Menu, Tooltip } from "antd";
 import { ClickParam } from "antd/lib/menu";
@@ -6,18 +6,22 @@ import { ClickParam } from "antd/lib/menu";
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
 import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
+import MetadataViewer from "../MetadataViewer";
 
 import { PRESET_COLOR_MAP } from "../../shared/constants";
 
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
+import { MetadataRecord } from "../../shared/types";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
   showControls: GlobalVolumeControlsProps["showControls"] &
     CustomizeWidgetProps["showControls"] & {
       colorPresetsDropdown: boolean;
+      metadataViewer: boolean;
     };
+  getMetadata: () => MetadataRecord;
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
 }
@@ -25,15 +29,17 @@ interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsPro
 const enum ControlTab {
   Channels,
   Advanced,
+  Metadata,
 }
 
 const ControlTabNames = {
   [ControlTab.Channels]: "Channel Settings",
   [ControlTab.Advanced]: "Advanced Settings",
+  [ControlTab.Metadata]: "Metadata",
 };
 
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
-  const [tab, setTab] = useState(ControlTab.Channels);
+  const [tab, setTab] = React.useState(ControlTab.Channels);
 
   const { viewerChannelSettings, showControls, hasImage } = props;
 
@@ -60,6 +66,18 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     );
   };
 
+  const renderTab = (thisTab: ControlTab, icon: React.ReactNode): React.ReactNode => (
+    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { visible: false })}>
+      <Button
+        className={tab === thisTab ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
+        onClick={() => setTab(thisTab)}
+        icon={typeof icon === "string" ? icon : undefined}
+      >
+        {typeof icon === "object" && icon}
+      </Button>
+    </Tooltip>
+  );
+
   return (
     <div className="control-panel-col-container">
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
@@ -72,31 +90,9 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         <div className="tab-divider" />
 
-        <Tooltip
-          title={ControlTabNames[ControlTab.Channels]}
-          placement="right"
-          {...(!props.collapsed && { visible: false })}
-        >
-          <Button
-            className={tab === ControlTab.Channels ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-            onClick={() => setTab(ControlTab.Channels)}
-          >
-            <ViewerIcon type="channels" />
-          </Button>
-        </Tooltip>
-
-        <Tooltip
-          title={ControlTabNames[ControlTab.Advanced]}
-          placement="right"
-          {...(!props.collapsed && { visible: false })}
-        >
-          <Button
-            className={tab === ControlTab.Advanced ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
-            onClick={() => setTab(ControlTab.Advanced)}
-          >
-            <ViewerIcon type="preferences" />
-          </Button>
-        </Tooltip>
+        {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
+        {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
+        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="info" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
@@ -150,6 +146,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   )}
                 </>
               )}
+              {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
             </div>
           )}
         </Card>
