@@ -262,7 +262,18 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, i
     }, [...deps, image, imageLoaded]);
   };
 
+  useImageEffect(
+    (image) => {
+      view3d.setVolumeChannelEnabled(image, index, volumeEnabled);
+      view3d.updateLuts(image);
+    },
+    [volumeEnabled]
+  );
+
+  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceEnabled }), [isosurfaceEnabled]);
+
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isovalue }), [isovalue]);
+
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity: opacity }), [opacity]);
 
   useImageEffect(
