@@ -14,7 +14,13 @@ import {
   Volume,
 } from "@aics/volume-viewer";
 
-import { AppProps, ShowControls, ViewerSettingsKey, GlobalViewerSettings, ViewerSettingUpdater } from "./types";
+import {
+  AppProps,
+  ShowControls,
+  GlobalViewerSettings,
+  ViewerSettingUpdater,
+  ViewerSettingChangeHandlers,
+} from "./types";
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
@@ -129,62 +135,6 @@ const defaultProps: AppProps = {
   fovDownloadHref: "",
   pixelSize: undefined,
   canvasMargin: "0 0 0 0",
-};
-
-type ViewerSettingsChangeHandlers = {
-  [K in ViewerSettingsKey]?: (settings: GlobalViewerSettings, value: GlobalViewerSettings[K]) => GlobalViewerSettings;
-};
-
-// Some viewer settings require custom change handlers to guard against entering an illegal state.
-// (e.g. autorotate must not be on in pathtrace mode.) Those handlers go here.
-// TODO should these be in their own file?
-const viewerSettingsChangeHandlers: ViewerSettingsChangeHandlers = {
-  viewMode: (prevSettings, viewMode) => {
-    if (viewMode === prevSettings.viewMode) {
-      return prevSettings;
-    }
-    const newSettings: GlobalViewerSettings = {
-      ...prevSettings,
-      viewMode,
-      region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-    };
-    const activeAxis = activeAxisMap[viewMode];
-
-    // TODO the following behavior/logic is very specific to a particular application's needs
-    // and is not necessarily appropriate for a general viewer.
-    // Why should the alpha setting matter whether we are viewing the primary image
-    // or its parent?
-
-    // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-    // If full field, dont mask
-
-    if (activeAxis) {
-      // switching to 2d
-      // TODO this shows the whole volume and not a single slice
-      newSettings.region[activeAxis] = [0, 1];
-      if (prevSettings.viewMode === ViewMode.threeD) {
-        // Switching from 3D to 2D
-        newSettings.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
-        // if path trace was enabled in 3D turn it off when switching to 2D.
-        if (newSettings.renderMode === RenderMode.pathTrace) {
-          newSettings.renderMode = RenderMode.volumetric;
-        }
-      }
-    } else if (prevSettings.viewMode !== ViewMode.threeD && prevSettings.imageType === ImageType.segmentedCell) {
-      newSettings.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
-    }
-    return newSettings;
-  },
-  renderMode: (prevSettings, renderMode) => ({
-    ...prevSettings,
-    renderMode,
-    autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
-  }),
-  autorotate: (prevSettings, autorotate) => ({
-    ...prevSettings,
-    // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
-    autorotate: prevSettings.renderMode === RenderMode.pathTrace ? false : autorotate,
-  }),
 };
 
 // TODO move to utils file?
@@ -328,6 +278,14 @@ const App: React.FC<AppProps> = (props) => {
   const [view3d, _setView3d] = useState(() => new View3d());
   const [image, setImage] = useState<Volume | null>(null);
 
+  const getNumberOfSlices = (): PerAxis<number> => {
+    if (image) {
+      const { x, y, z } = image;
+      return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  };
+
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
@@ -339,6 +297,57 @@ const App: React.FC<AppProps> = (props) => {
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
   // TODO this is a second application of defaults... which one should remain?
   const [viewerSettings, setViewerSettings] = useState(() => ({ ...defaultViewerSettings, ...props.viewerSettings }));
+
+  // Some viewer settings require custom change handlers to guard against entering an illegal state.
+  // (e.g. autorotate must not be on in pathtrace mode.) Those handlers go here.
+  const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
+    viewMode: (prevSettings, viewMode) => {
+      if (viewMode === prevSettings.viewMode) {
+        return prevSettings;
+      }
+      const newSettings: GlobalViewerSettings = {
+        ...prevSettings,
+        viewMode,
+        region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+      };
+      const activeAxis = activeAxisMap[viewMode];
+
+      // TODO the following behavior/logic is very specific to a particular application's needs
+      // and is not necessarily appropriate for a general viewer.
+      // Why should the alpha setting matter whether we are viewing the primary image
+      // or its parent?
+
+      // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+      // If full field, dont mask
+
+      if (activeAxis) {
+        // switching to 2d
+        newSettings.region[activeAxis] = [0, 1 / getNumberOfSlices()[activeAxis]];
+        if (prevSettings.viewMode === ViewMode.threeD) {
+          // Switching from 3D to 2D
+          newSettings.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
+          // if path trace was enabled in 3D turn it off when switching to 2D.
+          if (newSettings.renderMode === RenderMode.pathTrace) {
+            newSettings.renderMode = RenderMode.volumetric;
+          }
+        }
+      } else if (prevSettings.viewMode !== ViewMode.threeD && prevSettings.imageType === ImageType.segmentedCell) {
+        newSettings.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
+      }
+      return newSettings;
+    },
+    renderMode: (prevSettings, renderMode) => ({
+      ...prevSettings,
+      renderMode,
+      autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
+    }),
+    autorotate: (prevSettings, autorotate) => ({
+      ...prevSettings,
+      // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
+      autorotate: prevSettings.renderMode === RenderMode.pathTrace ? false : autorotate,
+    }),
+  };
+
   const changeViewerSetting = useCallback<ViewerSettingUpdater>(
     (key, value) => {
       const changeHandler = viewerSettingsChangeHandlers[key];
@@ -653,15 +662,6 @@ const App: React.FC<AppProps> = (props) => {
       return metadata || {};
     }
   }, [props.metadata, props.metadataFormatter, image]);
-
-  // TODO wrap in useCallback?
-  const getNumberOfSlices = (): PerAxis<number> => {
-    if (image) {
-      const { x, y, z } = image;
-      return { x, y, z };
-    }
-    return { x: 0, y: 0, z: 0 };
-  };
 
   // Effects //////////////////////////////////////////////////////////////////
 

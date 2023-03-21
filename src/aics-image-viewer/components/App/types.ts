@@ -77,7 +77,7 @@ export interface AppProps {
 
 export type ViewerSettingsKey = keyof GlobalViewerSettings;
 export type ViewerSettingChangeHandlers = {
-  [K in ViewerSettingsKey]?: (value: GlobalViewerSettings[K], view3d: View3d, image: Volume) => void;
+  [K in ViewerSettingsKey]?: (settings: GlobalViewerSettings, value: GlobalViewerSettings[K]) => GlobalViewerSettings;
 };
 export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(type: K, value: GlobalViewerSettings[K]) => void;
 
