@@ -264,7 +264,13 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, i
 
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isovalue }), [isovalue]);
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity: opacity }), [opacity]);
-  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { color }), [color]);
+  useImageEffect(
+    (image) => {
+      view3d.setVolumeChannelOptions(image, index, { color });
+      view3d.updateLuts(image);
+    },
+    [color]
+  );
 
   useImageEffect(
     (image) => {
@@ -574,7 +580,7 @@ const App: React.FC<AppProps> = (props) => {
     (index: number, lut: Uint8Array): void => {
       if (image) {
         image.setLut(index, lut);
-        view3d?.updateLuts(image);
+        view3d.updateLuts(image);
       }
     },
     [image]
