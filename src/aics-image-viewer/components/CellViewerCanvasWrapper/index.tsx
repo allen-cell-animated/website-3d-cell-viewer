@@ -5,6 +5,7 @@ import { Icon } from "antd";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
+import { ViewerSettingUpdater } from "../App/types";
 
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
@@ -22,7 +23,7 @@ interface ViewerWrapperProps {
   showControls: {
     axisClipSliders: boolean;
   };
-  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  changeViewerSetting: ViewerSettingUpdater;
   onClippingPanelVisibleChange?: (open: boolean) => void;
   onClippingPanelVisibleChangeEnd?: (open: boolean) => void;
 }
@@ -42,14 +43,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     this.props.view3d.setAutoRotate(this.props.autorotate);
   }
 
-  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
-    if (prevProps.viewMode && prevProps.viewMode !== this.props.viewMode) {
-      this.props.view3d.setCameraMode(this.props.viewMode);
-    }
-    if (prevProps.autorotate !== this.props.autorotate) {
-      this.props.view3d.setAutoRotate(this.props.autorotate);
-    }
-
+  componentDidUpdate(_prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
     this.props.view3d.resize(null);
   }
 
@@ -69,7 +63,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, showControls, image, numSlices, viewMode, setAxisClip, region } = this.props;
+    const { appHeight, changeViewerSetting, showControls, image, numSlices, viewMode, region } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
@@ -79,7 +73,12 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
           {showControls.axisClipSliders && !!image && (
-            <AxisClipSliders mode={viewMode} setAxisClip={setAxisClip} numSlices={numSlices} region={region} />
+            <AxisClipSliders
+              mode={viewMode}
+              changeViewerSetting={changeViewerSetting}
+              numSlices={numSlices}
+              region={region}
+            />
           )}
         </BottomPanel>
         {this.renderOverlay()}

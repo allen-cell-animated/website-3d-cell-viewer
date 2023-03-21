@@ -6,6 +6,7 @@ import React from "react";
 import "./styles.css";
 
 import { ViewMode } from "../../shared/enums";
+import { ViewerSettingUpdater } from "../App/types";
 import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 
 const AXES: AxisName[] = ["x", "y", "z"];
@@ -13,7 +14,7 @@ const PLAY_RATE_MS_PER_STEP = 125;
 
 interface AxisClipSlidersProps {
   mode: ViewMode;
-  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
 }
@@ -137,14 +138,12 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   updateClipping(axis: AxisName, minval: number, maxval: number): void {
-    if (this.props.setAxisClip) {
-      // get a value from -0.5..0.5
-      const max = this.props.numSlices[axis];
-      const start = minval / max;
-      const end = (maxval + 1) / max;
-      const isActiveAxis = this.getActiveAxis() === axis;
-      this.props.setAxisClip(axis, start, end, isActiveAxis);
-    }
+    const { changeViewerSetting, numSlices, region } = this.props;
+    // get a value from -0.5..0.5
+    const max = numSlices[axis];
+    const start = minval / max;
+    const end = (maxval + 1) / max;
+    changeViewerSetting("region", { ...region, [axis]: [start, end] });
   }
 
   makeSliderCallback(axis: AxisName): (values: number[]) => void {

@@ -28,7 +28,6 @@ type Pair = [number, number];
 interface MyTfEditorProps {
   id: string;
   index: number;
-  imageName: string | undefined;
   width: number;
   height: number;
   volumeData: Uint8Array;

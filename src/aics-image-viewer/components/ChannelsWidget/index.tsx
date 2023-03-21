@@ -3,7 +3,12 @@ import { map, find } from "lodash";
 import { Card, Collapse, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
-import { ChannelGrouping, getDisplayName } from "../../shared/utils/viewerChannelSettings";
+import {
+  ChannelGrouping,
+  ChannelSettingUpdater,
+  getDisplayName,
+  MultipleChannelSettingsUpdater,
+} from "../../shared/utils/viewerChannelSettings";
 
 import colorPalette from "../../shared/colorPalette";
 import SharedCheckBox from "../shared/SharedCheckBox";
@@ -18,24 +23,16 @@ import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 export interface ChannelsWidgetProps {
-  imageName: string | undefined;
+  imageLoaded: boolean;
   channelDataChannels: Channel[] | undefined;
   channelSettings: ChannelState[];
   channelGroupedByType: ChannelGrouping;
   viewerChannelSettings?: ViewerChannelSettings;
 
+  changeChannelSetting: ChannelSettingUpdater;
+  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
+
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
-  changeChannelSettings: <K extends ChannelStateKey>(
-    indices: number[],
-    keyToChange: K,
-    newValue: ChannelState[K]
-  ) => void;
-  changeOneChannelSetting: <K extends ChannelStateKey>(
-    channelName: string,
-    channelIndex: number,
-    keyToChange: K,
-    newValue: ChannelState[K]
-  ) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
   updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
@@ -49,7 +46,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 
   createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
-    this.props.changeChannelSettings(channelArray, key, value);
+    this.props.changeMultipleChannelSettings(channelArray, key, value);
   };
 
   showVolumes = this.createCheckboxHandler("volumeEnabled", true);
@@ -97,7 +94,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
   }
 
   getRows(): React.ReactNode {
-    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, imageName, viewerChannelSettings } =
+    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } =
       this.props;
 
     if (channelDataChannels === undefined) {
@@ -126,8 +123,6 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                     <ChannelsWidgetRow
                       key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
                       index={actualIndex}
-                      imageName={imageName}
-                      channelName={thisChannelSettings.name}
                       channelDataForChannel={channelDataChannels[actualIndex]}
                       name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
                       volumeChecked={thisChannelSettings.volumeEnabled}
@@ -137,7 +132,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       colorizeAlpha={thisChannelSettings.colorizeAlpha}
                       color={thisChannelSettings.color}
                       updateChannelTransferFunction={this.props.updateChannelTransferFunction}
-                      changeOneChannelSetting={this.props.changeOneChannelSetting}
+                      changeChannelSetting={this.props.changeChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
                       saveIsosurface={this.props.saveIsosurface}
                     />
