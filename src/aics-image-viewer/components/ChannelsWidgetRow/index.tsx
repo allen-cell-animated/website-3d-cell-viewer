@@ -37,7 +37,6 @@ interface ChannelsWidgetRowProps {
   changeChannelSetting: ChannelSettingUpdater;
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
-  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
@@ -146,14 +145,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   ];
 
   createTFEditor(): React.ReactNode {
-    const {
-      channelControlPoints,
-      channelDataForChannel,
-      colorizeEnabled,
-      colorizeAlpha,
-      updateChannelTransferFunction,
-      index,
-    } = this.props;
+    const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha, index } = this.props;
     return (
       <TfEditor
         id={"TFEditor" + index}
@@ -164,7 +156,6 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
         volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
-        updateChannelTransferFunction={updateChannelTransferFunction}
         updateChannelLutControlPoints={this.createChannelSettingHandler("controlPoints")}
         updateColorizeMode={this.createChannelSettingHandler("colorizeEnabled")}
         updateColorizeAlpha={this.createChannelSettingHandler("colorizeAlpha")}

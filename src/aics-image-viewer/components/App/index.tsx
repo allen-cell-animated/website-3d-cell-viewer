@@ -264,6 +264,7 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, i
 
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isovalue }), [isovalue]);
   useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity: opacity }), [opacity]);
+
   useImageEffect(
     (image) => {
       view3d.setVolumeChannelOptions(image, index, { color });
@@ -285,6 +286,15 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, i
       view3d.updateLuts(image);
     },
     [colorizeEnabled]
+  );
+
+  useImageEffect(
+    (image) => {
+      const gradient = controlPointsToLut(controlPoints);
+      image.setLut(index, gradient);
+      view3d.updateLuts(image);
+    },
+    [controlPoints]
   );
 
   useImageEffect(
@@ -575,17 +585,6 @@ const App: React.FC<AppProps> = (props) => {
     [image]
   );
 
-  // TODO should this be a per-channel effect?
-  const updateChannelTransferFunction = useCallback(
-    (index: number, lut: Uint8Array): void => {
-      if (image) {
-        image.setLut(index, lut);
-        view3d.updateLuts(image);
-      }
-    },
-    [image]
-  );
-
   const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
   const saveScreenshot = useCallback((): void => {
@@ -814,7 +813,6 @@ const App: React.FC<AppProps> = (props) => {
           changeViewerSetting={changeViewerSetting}
           setCollapsed={setControlPanelClosed}
           saveIsosurface={saveIsosurface}
-          updateChannelTransferFunction={updateChannelTransferFunction}
           onApplyColorPresets={applyColorPresets}
           changeChannelSetting={changeChannelSetting}
           changeMultipleChannelSettings={changeMultipleChannelSettings}

@@ -34,7 +34,6 @@ export interface ChannelsWidgetProps {
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
-  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
 
   filterFunc?: (key: string) => boolean;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
@@ -131,7 +130,6 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       colorizeEnabled={thisChannelSettings.colorizeEnabled}
                       colorizeAlpha={thisChannelSettings.colorizeAlpha}
                       color={thisChannelSettings.color}
-                      updateChannelTransferFunction={this.props.updateChannelTransferFunction}
                       changeChannelSetting={this.props.changeChannelSetting}
                       onColorChangeComplete={this.props.onColorChangeComplete}
                       saveIsosurface={this.props.saveIsosurface}

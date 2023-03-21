@@ -111,7 +111,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   channelGroupedByType={props.channelGroupedByType}
                   changeMultipleChannelSettings={props.changeMultipleChannelSettings}
                   saveIsosurface={props.saveIsosurface}
-                  updateChannelTransferFunction={props.updateChannelTransferFunction}
                   changeChannelSetting={props.changeChannelSetting}
                   onColorChangeComplete={props.onColorChangeComplete}
                   onApplyColorPresets={props.onApplyColorPresets}
