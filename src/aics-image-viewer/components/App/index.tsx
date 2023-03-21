@@ -237,6 +237,61 @@ function initializeLut(aimg: Volume, channelIndex: number, channelSettings?: Vie
   return newControlPoints;
 }
 
+/** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
+type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => void;
+
+interface ChannelUpdaterProps {
+  index: number;
+  state: ChannelState;
+  view3d: View3d;
+  image: Volume | null;
+  imageLoaded: boolean;
+}
+
+// Each channel gets a renderless updater component to sync state to viewer
+const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, image, imageLoaded }) => {
+  const { volumeEnabled, isosurfaceEnabled, isovalue, colorizeEnabled, colorizeAlpha, opacity, color, controlPoints } =
+    state;
+
+  // Effects to update channel settings should check if image is present and loaded first
+  const useImageEffect: UseImageEffectType = (effect, deps) => {
+    useEffect(() => {
+      if (image && imageLoaded) {
+        return effect(image);
+      }
+    }, [...deps, image, imageLoaded]);
+  };
+
+  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isovalue }), [isovalue]);
+  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity: opacity }), [opacity]);
+  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { color }), [color]);
+
+  useImageEffect(
+    (image) => {
+      if (colorizeEnabled) {
+        // TODO get the labelColors from the tf editor component
+        const lut = image.getHistogram(index).lutGenerator_labelColors();
+        image.setColorPalette(index, lut.lut);
+        image.setColorPaletteAlpha(index, colorizeAlpha);
+      } else {
+        image.setColorPaletteAlpha(index, 0);
+      }
+      view3d.updateLuts(image);
+    },
+    [colorizeEnabled]
+  );
+
+  useImageEffect(
+    (image) => {
+      image.setColorPaletteAlpha(index, colorizeEnabled ? colorizeAlpha : 0);
+      view3d.updateLuts(image);
+    },
+    [colorizeAlpha]
+  );
+
+  return null;
+};
+
 const App: React.FC<AppProps> = (props) => {
   props = { ...defaultProps, ...props };
 
@@ -503,7 +558,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   // TODO TODO TODO
-  const loadFromRaw = () => {};
+  const loadFromRaw = (): void => {};
 
   // Imperative callbacks /////////////////////////////////////////////////////
 
@@ -620,7 +675,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   // Another custom hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it
-  const useImageEffect = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => {
+  const useImageEffect: UseImageEffectType = (effect, deps) => {
     useViewerEffect(() => {
       if (image) {
         return effect(image);
@@ -691,7 +746,7 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.interpolationEnabled]
   );
 
-  const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]) => {
+  const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]): void => {
     useImageEffect(
       (image) => {
         const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
@@ -710,6 +765,15 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
+      {channelSettings.map((state, index) => (
+        <ChannelUpdater
+          key={`${index}_${state.name}`}
+          {...{ state, index }}
+          view3d={view3d}
+          image={image}
+          imageLoaded={imageLoaded}
+        />
+      ))}
       <Sider
         className="control-panel-holder"
         collapsible={true}

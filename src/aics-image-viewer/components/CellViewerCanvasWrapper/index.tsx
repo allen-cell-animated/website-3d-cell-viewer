@@ -3,7 +3,7 @@ import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import { AxisName, PerAxis, Styles } from "../../shared/types";
+import { PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
 
