@@ -2,7 +2,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Layout } from "antd";
 import {
-  ControlPoint,
   IVolumeLoader,
   JsonImageInfoLoader,
   LoadSpec,
@@ -28,7 +27,6 @@ import {
   findFirstChannelMatch,
   makeChannelIndexGrouping,
   ChannelGrouping,
-  ViewerChannelSettings,
   ChannelSettingUpdater,
   MultipleChannelSettingsUpdater,
 } from "../../shared/utils/viewerChannelSettings";
@@ -43,9 +41,6 @@ import {
   LEVELS_SLIDER_DEFAULT,
   BACKGROUND_COLOR_DEFAULT,
   BOUNDING_BOX_COLOR_DEFAULT,
-  LUT_MIN_PERCENTILE,
-  LUT_MAX_PERCENTILE,
-  SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
@@ -56,7 +51,6 @@ import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
-import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
 import "../../assets/styles/globals.css";
 import {
@@ -145,6 +139,7 @@ const App: React.FC<AppProps> = (props) => {
   // State management /////////////////////////////////////////////////////////
 
   // TODO is there a better API for values that never change?
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [view3d, _setView3d] = useState(() => new View3d());
   const [image, setImage] = useState<Volume | null>(null);
 

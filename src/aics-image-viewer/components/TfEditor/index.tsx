@@ -10,7 +10,6 @@ import "./styles.css";
 import { Button, Checkbox } from "antd";
 
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
-import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ColorArray,
   colorArrayToObject,
