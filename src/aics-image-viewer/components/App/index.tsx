@@ -453,8 +453,39 @@ const App: React.FC<AppProps> = (props) => {
     settingsRef.current = onNewVolumeCreated(aimg, path, false);
   };
 
-  // TODO TODO TODO
-  const loadFromRaw = (): void => {};
+  const loadFromRaw = (): void => {
+    const { rawData, rawDims } = props;
+    if (!rawData || !rawDims) {
+      console.error("ERROR loadFromRaw called without rawData or rawDims being set");
+      return;
+    }
+
+    const aimg = new Volume(rawDims);
+    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
+    for (var i = 0; i < rawDims.channels; ++i) {
+      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
+    }
+
+    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
+      let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
+      return initializeOneChannelSetting(aimg, channel, index, color);
+    });
+
+    let channelGroupedByType = makeChannelIndexGrouping(rawDims.channel_names);
+
+    const channelSetting = newChannelSettings;
+
+    let alphaLevel =
+      viewerSettings.viewMode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+
+    // Here is where we officially hand the image to the volume-viewer
+    placeImageInViewer(aimg, newChannelSettings);
+
+    setImage(aimg);
+    setChannelGroupedByType(channelGroupedByType);
+    setChannelSettings(channelSetting);
+    changeViewerSetting("maskAlpha", alphaLevel);
+  };
 
   // Imperative callbacks /////////////////////////////////////////////////////
 
@@ -532,8 +563,13 @@ const App: React.FC<AppProps> = (props) => {
   }, []);
 
   // Hook to trigger image load: on mount, when `cellId` changes, when `imageType` changes
-  // TODO this should have some logic to trigger `loadFromRaw`
-  useEffect(() => void openImage(), [props.cellId, viewerSettings.imageType]);
+  useEffect(() => {
+    if (props.rawDims && props.rawData) {
+      loadFromRaw();
+    } else {
+      openImage();
+    }
+  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
