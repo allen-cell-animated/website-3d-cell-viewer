@@ -82,7 +82,7 @@ export type ViewerSettingsKey = keyof GlobalViewerSettings;
 export type ViewerSettingChangeHandlers = {
   [K in ViewerSettingsKey]?: (settings: GlobalViewerSettings, value: GlobalViewerSettings[K]) => GlobalViewerSettings;
 };
-export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(type: K, value: GlobalViewerSettings[K]) => void;
+export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(key: K, value: GlobalViewerSettings[K]) => void;
 
 export interface AppState {
   view3d: View3d;

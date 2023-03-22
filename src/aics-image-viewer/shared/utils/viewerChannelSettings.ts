@@ -1,4 +1,4 @@
-import { ControlPoint, View3d, Volume } from "@aics/volume-viewer";
+import { ControlPoint } from "@aics/volume-viewer";
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 import { ColorArray } from "./colorRepresentations";
 
@@ -16,13 +16,10 @@ export interface ChannelState {
 }
 
 export type ChannelStateKey = keyof ChannelState;
-export type ChannelStateChangeHandlers = {
-  [K in ChannelStateKey]?: (value: ChannelState[K], index: number, view3d: View3d, image: Volume) => void;
-};
-export type ChannelSettingUpdater = <K extends ChannelStateKey>(index: number, type: K, value: ChannelState[K]) => void;
+export type ChannelSettingUpdater = <K extends ChannelStateKey>(index: number, key: K, value: ChannelState[K]) => void;
 export type MultipleChannelSettingsUpdater = <K extends ChannelStateKey>(
   indices: number[],
-  type: K,
+  key: K,
   value: ChannelState[K]
 ) => void;
 

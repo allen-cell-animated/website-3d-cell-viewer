@@ -160,12 +160,14 @@ const App: React.FC<AppProps> = (props) => {
 
   // These are the major parts of `App` state
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
-  // TODO this is a second application of defaults... which one should remain?
-  const [viewerSettings, setViewerSettings] = useState(() => ({ ...defaultViewerSettings, ...props.viewerSettings }));
+  const [viewerSettings, setViewerSettings] = useState<GlobalViewerSettings>(() => ({
+    ...defaultViewerSettings,
+    ...props.viewerSettings,
+  }));
   const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
 
-  // Some viewer settings require custom change handlers to guard against entering an illegal state.
-  // (e.g. autorotate must not be on in pathtrace mode.) Those handlers go here.
+  // Some viewer settings require custom change behaviors to guard against entering an illegal state.
+  // (e.g. autorotate must not be on in pathtrace mode.) Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
     viewMode: (prevSettings, viewMode) => {
       if (viewMode === prevSettings.viewMode) {
@@ -245,6 +247,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [channelSettings]
   );
+
   const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>(
     (indices, key, value) => {
       const newChannelSettings = channelSettings.map((settings, idx) =>
@@ -254,6 +257,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [channelSettings]
   );
+
   const setOneChannelSetting = (
     index: number,
     settings: ChannelState,
@@ -371,13 +375,10 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
-    // TODO old code imperatively set `maskAlpha` to 2D or 3D default.
-    //   I think the reducer should take care of this now, but should test to verify
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       channels: aimg.channel_names.map((name) => {
-        // TODO why this check?
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
           return {};
@@ -579,35 +580,31 @@ const App: React.FC<AppProps> = (props) => {
     }, 200);
   }, [controlPanelClosed]);
 
-  // Custom hook for updating settings to view3d
-  const useViewerEffect: typeof useEffect = (effect, deps) => {
-    useEffect(() => {
-      if (imageLoaded) {
-        return effect();
-      }
-    }, [...deps!, imageLoaded]);
-  };
-
-  // Another custom hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it
+  // Custom effect hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it
   const useImageEffect: UseImageEffectType = (effect, deps) => {
-    useViewerEffect(() => {
-      if (image) {
+    useEffect(() => {
+      if (image && imageLoaded) {
         return effect(image);
       }
-    }, [...deps, image]);
+    }, [...deps, image, imageLoaded]);
   };
 
   // Effects to imperatively sync `viewerSettings` to `view3d`
-  // TODO should all these be ImageEffects, even if not required by the API?
 
-  useViewerEffect(() => {
-    view3d.setCameraMode(viewerSettings.viewMode);
-    view3d.resize(null);
-  }, [viewerSettings.viewMode]);
-  useViewerEffect(() => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
-  useViewerEffect(() => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
-  useViewerEffect(
-    () => view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor)),
+  useImageEffect(
+    (_image) => {
+      view3d.setCameraMode(viewerSettings.viewMode);
+      view3d.resize(null);
+    },
+    [viewerSettings.viewMode]
+  );
+
+  useImageEffect((_image) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
+
+  useImageEffect((_image) => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
+
+  useImageEffect(
+    (_image) => view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor)),
     [viewerSettings.backgroundColor]
   );
 
@@ -615,10 +612,12 @@ const App: React.FC<AppProps> = (props) => {
     (image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(viewerSettings.boundingBoxColor)),
     [viewerSettings.boundingBoxColor]
   );
+
   useImageEffect(
     (image) => view3d.setShowBoundingBox(image, viewerSettings.showBoundingBox),
     [viewerSettings.showBoundingBox]
   );
+
   useImageEffect(
     (image) => {
       const { renderMode } = viewerSettings;
@@ -628,6 +627,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.renderMode]
   );
+
   useImageEffect(
     (image) => {
       view3d.updateMaskAlpha(image, alphaSliderToImageValue(viewerSettings.maskAlpha));
@@ -635,6 +635,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.maskAlpha]
   );
+
   useImageEffect(
     (_image) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
@@ -643,6 +644,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.brightness]
   );
+
   useImageEffect(
     (image) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
@@ -651,6 +653,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.density]
   );
+
   useImageEffect(
     (image) => {
       const imageValues = gammaSliderToImageValues(viewerSettings.levels);
@@ -658,6 +661,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.levels]
   );
+
   useImageEffect(
     (image) => view3d.setInterpolationEnabled(image, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
