@@ -132,7 +132,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     gammaSliderLevel={props.gammaSliderLevel}
                     interpolationEnabled={props.interpolationEnabled}
                     maxProjectOn={props.maxProjectOn}
-                    pathTraceOn={props.pathTraceOn}
                     renderConfig={renderConfig}
                   />
                   <CustomizeWidget

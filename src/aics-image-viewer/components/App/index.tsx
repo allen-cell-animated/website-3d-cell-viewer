@@ -1100,7 +1100,6 @@ export default class App extends React.Component<AppProps, AppState> {
             channelGroupedByType={this.state.channelGroupedByType}
             // user selections
             maxProjectOn={userSelections.maxProject}
-            pathTraceOn={userSelections.pathTrace}
             channelSettings={userSelections.channelSettings}
             showBoundingBox={userSelections.showBoundingBox}
             backgroundColor={userSelections.backgroundColor}
