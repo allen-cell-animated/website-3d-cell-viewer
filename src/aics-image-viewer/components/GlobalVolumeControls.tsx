@@ -1,5 +1,5 @@
 import React from "react";
-import Nouislider from "nouislider-react";
+import SmarterSlider from "./shared/SmarterSlider";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse, Checkbox } from "antd";
@@ -38,20 +38,11 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
     super(props);
   }
 
-  shouldComponentUpdate(newProps: GlobalVolumeControlsProps): boolean {
-    const { imageName, alphaMaskSliderLevel, pathTraceOn, interpolationEnabled } = this.props;
-    const newImage = newProps.imageName !== imageName;
-    const newPathTraceValue = newProps.pathTraceOn !== pathTraceOn;
-    const newSliderValue = newProps.alphaMaskSliderLevel[0] !== alphaMaskSliderLevel[0];
-    const newInterpolationValue = newProps.interpolationEnabled !== interpolationEnabled;
-    return newImage || newSliderValue || newPathTraceValue || newInterpolationValue;
-  }
-
   createSliderRow = (label: string, start: number[], max: number, propKey: GlobalVolumeControlKey): React.ReactNode => (
     <div style={STYLES.controlRow}>
       <div style={STYLES.controlName}>{label}</div>
       <div style={STYLES.control}>
-        <Nouislider
+        <SmarterSlider
           range={{ min: 0, max }}
           start={start}
           connect={true}
