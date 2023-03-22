@@ -4,6 +4,9 @@ import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
+/** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
+export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => void;
+
 type ControlNames =
   | "alphaMaskSlider"
   | "autoRotateButton"
