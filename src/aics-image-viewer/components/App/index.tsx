@@ -297,6 +297,7 @@ const App: React.FC<AppProps> = (props) => {
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
   // TODO this is a second application of defaults... which one should remain?
   const [viewerSettings, setViewerSettings] = useState(() => ({ ...defaultViewerSettings, ...props.viewerSettings }));
+  const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
 
   // Some viewer settings require custom change handlers to guard against entering an illegal state.
   // (e.g. autorotate must not be on in pathtrace mode.) Those handlers go here.
@@ -357,10 +358,9 @@ const App: React.FC<AppProps> = (props) => {
         setViewerSettings({ ...viewerSettings, [key]: value });
       }
     },
-    [viewerSettings]
+    [viewerSettings, image]
   );
 
-  const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
   const changeChannelSetting = useCallback<ChannelSettingUpdater>(
     (index, key, value) => {
       const newChannelSettings = channelSettings.slice();
@@ -414,14 +414,6 @@ const App: React.FC<AppProps> = (props) => {
     keepLuts?: boolean
   ): ChannelState => {
     let updatedChannelSettings = thisChannelsSettings;
-    // TODO necessary?
-    view3d.setVolumeChannelOptions(aimg, channelIndex, {
-      enabled: thisChannelsSettings.volumeEnabled,
-      color: thisChannelsSettings.color,
-      isosurfaceEnabled: thisChannelsSettings.isosurfaceEnabled,
-      isovalue: thisChannelsSettings.isovalue,
-      isosurfaceOpacity: thisChannelsSettings.opacity,
-    });
 
     // if we want to keep the current control points
     if (thisChannelsSettings.controlPoints && keepLuts) {
@@ -665,6 +657,12 @@ const App: React.FC<AppProps> = (props) => {
 
   // Effects //////////////////////////////////////////////////////////////////
 
+  // On mount
+  useEffect(() => {
+    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
+    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
+  }, []);
+
   // Hook to trigger image load: on mount, when `cellId` changes, when `imageType` changes
   // TODO this should have some logic to trigger `loadFromRaw`
   useEffect(() => void openImage(), [props.cellId, viewerSettings.imageType]);
@@ -702,7 +700,10 @@ const App: React.FC<AppProps> = (props) => {
   // Effects to imperatively sync `viewerSettings` to `view3d`
   // TODO should all these be ImageEffects, even if not required by the API?
 
-  useViewerEffect(() => view3d.setCameraMode(viewerSettings.viewMode), [viewerSettings.viewMode]);
+  useViewerEffect(() => {
+    view3d.setCameraMode(viewerSettings.viewMode);
+    view3d.resize(null);
+  }, [viewerSettings.viewMode]);
   useViewerEffect(() => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
   useViewerEffect(() => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
   useViewerEffect(
