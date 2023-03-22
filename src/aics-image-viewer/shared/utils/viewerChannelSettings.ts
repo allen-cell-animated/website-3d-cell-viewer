@@ -135,7 +135,15 @@ export function getDisplayName(name: string, index: number, settings?: ViewerCha
   return name;
 }
 
-export function makeChannelIndexGrouping(channels: string[], settings: ViewerChannelSettings): ChannelGrouping {
+export function makeChannelIndexGrouping(channels: string[], settings?: ViewerChannelSettings): ChannelGrouping {
+  if (!channels) {
+    return {};
+  }
+  if (!settings) {
+    // return all channels
+    return { [SINGLE_GROUP_CHANNEL_KEY]: channels.map((_val, index) => index) };
+  }
+
   const groups = settings.groups;
   const grouping: ChannelGrouping = {};
   const channelsMatched: number[] = [];

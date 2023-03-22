@@ -258,23 +258,21 @@ const App: React.FC<AppProps> = (props) => {
     },
     [channelSettings]
   );
+  const setOneChannelSetting = (
+    index: number,
+    settings: ChannelState,
+    currentChannelSettings?: ChannelState[]
+  ): ChannelState[] => {
+    const newSettings = (currentChannelSettings || channelSettings).slice();
+    newSettings[index] = settings;
+    setChannelSettings(newSettings);
+    return newSettings;
+  };
 
   // Image loading/initialization functions ///////////////////////////////////
 
   const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
     return (settings || channelSettings).find((channel) => channel.name === channelName);
-  };
-
-  // TODO: ...can this be derived? would we want it to be if so?
-  const createChannelGrouping = (channels: string[]): ChannelGrouping => {
-    if (!channels) {
-      return {};
-    }
-    if (!props.viewerChannelSettings) {
-      // return all channels
-      return { [SINGLE_GROUP_CHANNEL_KEY]: channels.map((_val, index) => index) };
-    }
-    return makeChannelIndexGrouping(channels, props.viewerChannelSettings);
   };
 
   const onChannelDataLoaded = (
@@ -359,13 +357,13 @@ const App: React.FC<AppProps> = (props) => {
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
     const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
     if (settingsAreEqual) {
-      return undefined;
+      return channelSettings;
     }
 
     // TODO this function's behavior has changed to not recreate channel groupings on every load
     //   verify that this doesn't impact anything
     //   in fact... should creating channel groupings be its own effect, to change on `viewerChannelSettings`?
-    setChannelGroupedByType(createChannelGrouping(channelNames));
+    setChannelGroupedByType(makeChannelIndexGrouping(channelNames, props.viewerChannelSettings));
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
@@ -437,17 +435,17 @@ const App: React.FC<AppProps> = (props) => {
       loader = new OMEZarrLoader();
     }
 
+    // This keeps hold of the current channel state for the loaded channel callbacks below
+    // (because the closure captures this value at time of creation, subsequent calls wouldn't
+    // receive updates properly otherwise)
     const settingsRef = { current: [] as ChannelState[] };
 
     const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
+      // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex], settingsRef.current);
       const newChannelSettings = onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
-      if (thisChannelSettings !== newChannelSettings) {
-        const newSettings = settingsRef.current!.slice();
-        newSettings[channelIndex] = newChannelSettings;
-        settingsRef.current = newSettings;
-        setChannelSettings(newSettings);
-      }
+      if (thisChannelSettings === newChannelSettings) return;
+      settingsRef.current = setOneChannelSetting(channelIndex, newChannelSettings, settingsRef.current);
       // TODO: original behavior is to reset view mode on completely new image only
       //   add state to enact this behavior
     });
