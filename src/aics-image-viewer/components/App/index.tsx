@@ -188,7 +188,8 @@ const App: React.FC<AppProps> = (props) => {
 
       if (activeAxis) {
         // switching to 2d
-        newSettings.region[activeAxis] = [0, 1 / getNumberOfSlices()[activeAxis]];
+        const slices = Math.max(1, getNumberOfSlices()[activeAxis]);
+        newSettings.region[activeAxis] = [0, 1 / slices];
         if (prevSettings.viewMode === ViewMode.threeD) {
           // Switching from 3D to 2D
           newSettings.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
