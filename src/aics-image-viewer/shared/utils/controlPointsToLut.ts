@@ -1,6 +1,9 @@
 import colorString from "color-string";
-import { ControlPoint } from "@aics/volume-viewer";
+import { ControlPoint, Volume } from "@aics/volume-viewer";
 import { ColorArray } from "./colorRepresentations";
+import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
+import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
+import { TFEDITOR_DEFAULT_COLOR } from "../../components/TfEditor";
 
 const canv = document.createElement("canvas");
 canv.width = 256;
@@ -49,4 +52,57 @@ export function controlPointsToLut(controlPoints: ControlPoint[]): Uint8Array {
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
   return new Uint8Array(imgData.data.buffer);
+}
+
+export function initializeLut(
+  aimg: Volume,
+  channelIndex: number,
+  channelSettings?: ViewerChannelSettings
+): ControlPoint[] {
+  const histogram = aimg.getHistogram(channelIndex);
+
+  // find channelIndex among viewerChannelSettings.
+  const name = aimg.channel_names[channelIndex];
+  // default to percentiles
+  let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+  // and if init settings dictate, recompute it:
+  if (channelSettings) {
+    const initSettings = findFirstChannelMatch(name, channelIndex, channelSettings);
+    if (initSettings) {
+      if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
+        let lutmod = "";
+        let lvalue = 0;
+        let lutvalues = [0, 0];
+        for (let i = 0; i < 2; ++i) {
+          const lstr = initSettings.lut[i];
+          // look at first char of string.
+          let firstchar = lstr.charAt(0);
+          if (firstchar === "m" || firstchar === "p") {
+            lutmod = firstchar;
+            lvalue = parseFloat(lstr.substring(1)) / 100.0;
+          } else {
+            lutmod = "";
+            lvalue = parseFloat(lstr);
+          }
+          if (lutmod === "m") {
+            lutvalues[i] = histogram.maxBin * lvalue;
+          } else if (lutmod === "p") {
+            lutvalues[i] = histogram.findBinOfPercentile(lvalue);
+          }
+        }
+
+        lutObject = histogram.lutGenerator_minMax(
+          Math.min(lutvalues[0], lutvalues[1]),
+          Math.max(lutvalues[0], lutvalues[1])
+        );
+      }
+    }
+  }
+
+  const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
+    ...controlPoint,
+    color: TFEDITOR_DEFAULT_COLOR,
+  }));
+  aimg.setLut(channelIndex, lutObject.lut);
+  return newControlPoints;
 }
