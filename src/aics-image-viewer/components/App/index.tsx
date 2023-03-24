@@ -151,11 +151,19 @@ const App: React.FC<AppProps> = (props) => {
     return { x: 0, y: 0, z: 0 };
   };
 
-  const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
-  const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
+  // State for image loading/reloading
 
+  // `true` when image data has been requested, but no data has been received yet
+  const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
+  // `true` when all channels of the current image are loaded
+  const [imageLoaded, setImageLoaded] = useState(false);
+  // `true` when the image being loaded is related to the previous one, so some settings should be preserved
+  const [switchingFov, setSwitchingFov] = useState(false);
+  // tracks the index of the most recently loaded channel, to trigger settings initialization
+  const [loadedChannel, setLoadedChannel] = useState<number | null>(null);
+  const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
+
+  const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
 
   // These are the major parts of `App` state
@@ -210,6 +218,10 @@ const App: React.FC<AppProps> = (props) => {
       renderMode,
       autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
     }),
+    imageType: (prevSettings, imageType) => {
+      setSwitchingFov(true);
+      return { ...prevSettings, imageType };
+    },
     autorotate: (prevSettings, autorotate) => ({
       ...prevSettings,
       // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
@@ -258,15 +270,10 @@ const App: React.FC<AppProps> = (props) => {
     [channelSettings]
   );
 
-  const setOneChannelSetting = (
-    index: number,
-    settings: ChannelState,
-    currentChannelSettings?: ChannelState[]
-  ): ChannelState[] => {
-    const newSettings = (currentChannelSettings || channelSettings).slice();
+  const resetChannelSetting = (index: number, settings: ChannelState): void => {
+    const newSettings = channelSettings.slice();
     newSettings[index] = settings;
     setChannelSettings(newSettings);
-    return newSettings;
   };
 
   // Image loading/initialization functions ///////////////////////////////////
@@ -278,13 +285,12 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (
     aimg: Volume,
     thisChannelsSettings: ChannelState,
-    channelIndex: number,
-    keepLuts?: boolean
+    channelIndex: number
   ): ChannelState => {
     let updatedChannelSettings = thisChannelsSettings;
 
     // if we want to keep the current control points
-    if (thisChannelsSettings.controlPoints && keepLuts) {
+    if (thisChannelsSettings.controlPoints && switchingFov) {
       const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, lut);
       view3d.updateLuts(aimg);
@@ -300,9 +306,12 @@ const App: React.FC<AppProps> = (props) => {
 
     // when any channel data has arrived:
     setSendingQueryRequest(false);
+
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
+      setLoadedChannel(null);
+      setSwitchingFov(false);
     }
 
     return updatedChannelSettings;
@@ -394,15 +403,14 @@ const App: React.FC<AppProps> = (props) => {
     });
   };
 
-  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): ChannelState[] => {
+  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string) => {
     const newChannelSettings = setChannelStateForNewImage(aimg.imageInfo.channel_names);
 
     setImage(aimg);
     setCurrentlyLoadedImagePath(imageDirectory);
-    changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
+    changeViewerSetting("viewMode", switchingFov ? viewerSettings.viewMode : ViewMode.threeD);
 
     placeImageInViewer(aimg, newChannelSettings);
-    return newChannelSettings!;
   };
 
   const openImage = async (): Promise<void> => {
@@ -432,22 +440,10 @@ const App: React.FC<AppProps> = (props) => {
       loader = new OMEZarrLoader();
     }
 
-    // This keeps hold of the current channel state for the loaded channel callbacks below
-    // (because the closure captures this value at time of creation, subsequent calls wouldn't
-    // receive updates properly otherwise)
-    const settingsRef = { current: [] as ChannelState[] };
+    // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
+    const aimg = await loader.createVolume(loadSpec, (_url, _v, channelIndex) => setLoadedChannel(channelIndex));
 
-    const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
-      // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
-      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex], settingsRef.current);
-      const newChannelSettings = onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
-      if (thisChannelSettings === newChannelSettings) return;
-      settingsRef.current = setOneChannelSetting(channelIndex, newChannelSettings, settingsRef.current);
-      // TODO: original behavior is to reset view mode on completely new image only
-      //   add state to enact this behavior
-    });
-
-    settingsRef.current = onNewVolumeCreated(aimg, path, false);
+    onNewVolumeCreated(aimg, path);
   };
 
   const loadFromRaw = (): void => {
@@ -568,6 +564,16 @@ const App: React.FC<AppProps> = (props) => {
     }
   }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
+  // Triggered when a single channel is loaded during the image load process
+  useEffect(() => {
+    if (image && loadedChannel !== null) {
+      const thisChannelSettings = getOneChannelSetting(image.imageInfo.channel_names[loadedChannel]);
+      const newChannelSettings = onChannelDataLoaded(image, thisChannelSettings!, loadedChannel);
+      if (thisChannelSettings === newChannelSettings) return;
+      resetChannelSetting(loadedChannel, newChannelSettings);
+    }
+  }, [image, loadedChannel]);
+
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
     [controlPanelClosed, props.onControlPanelToggle]
@@ -686,10 +692,10 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
-      {channelSettings.map((state, index) => (
+      {channelSettings.map((channelState, index) => (
         <ChannelUpdater
-          key={`${index}_${state.name}`}
-          {...{ state, index }}
+          key={`${index}_${channelState.name}`}
+          {...{ channelState, index }}
           view3d={view3d}
           image={image}
           imageLoaded={imageLoaded}
