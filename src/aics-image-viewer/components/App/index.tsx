@@ -163,9 +163,17 @@ const App: React.FC<AppProps> = (props) => {
     return { x: 0, y: 0, z: 0 };
   };
 
+  // State for image loading/reloading
+
+  // `true` when image data has been requested, but no data has been received yet
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
+  // `true` when all channels of the current image are loaded
   const [imageLoaded, setImageLoaded] = useState(false);
+  // `true` when the image being loaded is related to the previous one, so some settings should be preserved
+  const [switchingFov, setSwitchingFov] = useState(false);
+  // tracks which channels have been loaded
   const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
+  // tracks the url of the current image, to reloading an image that is already open
   const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
@@ -217,6 +225,10 @@ const App: React.FC<AppProps> = (props) => {
         newSettings.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
       }
       return newSettings;
+    },
+    imageType: (prevSettings, imageType) => {
+      setSwitchingFov(true);
+      return { ...prevSettings, imageType };
     },
     renderMode: (prevSettings, renderMode) => ({
       ...prevSettings,
@@ -299,6 +311,7 @@ const App: React.FC<AppProps> = (props) => {
     let updatedChannelSettings = thisChannelsSettings;
 
     // if we want to keep the current control points
+    // TODO this function is never called with `keepLuts = true`. Should it ever be? On FOV switch e.g.?
     if (thisChannelsSettings.controlPoints && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, lut);
@@ -319,6 +332,7 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
+      setSwitchingFov(false);
     }
 
     return updatedChannelSettings;
@@ -456,11 +470,9 @@ const App: React.FC<AppProps> = (props) => {
       const newChannelSettings = onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
       if (thisChannelSettings === newChannelSettings) return;
       resetOneChannelSetting(channelIndex, newChannelSettings);
-      // TODO: original behavior is to reset view mode on completely new image only
-      //   add state to enact this behavior
     });
 
-    onNewVolumeCreated(aimg, path, false);
+    onNewVolumeCreated(aimg, path, !switchingFov);
   };
 
   const loadFromRaw = (): void => {
