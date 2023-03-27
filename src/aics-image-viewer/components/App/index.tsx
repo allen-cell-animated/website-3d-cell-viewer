@@ -165,10 +165,11 @@ const App: React.FC<AppProps> = (props) => {
 
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
   const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
-  const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
+  const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
 
   // These are the major parts of `App` state
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
@@ -270,7 +271,7 @@ const App: React.FC<AppProps> = (props) => {
     [channelSettings]
   );
 
-  // Only ever used within this component - no need for a `useCallback`
+  // These last state functions are only ever used within this component - no need for a `useCallback`
   const resetOneChannelSetting = (index: number, settings: ChannelState) => {
     const newSettings = getChannelSettings().slice();
     newSettings[index] = settings;
@@ -279,6 +280,12 @@ const App: React.FC<AppProps> = (props) => {
 
   const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
     return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
+  };
+
+  const setOneChannelLoaded = (index: number) => {
+    const newLoadedChannels = getLoadedChannels().slice();
+    newLoadedChannels[index] = true;
+    setLoadedChannels(newLoadedChannels);
   };
 
   // Image loading/initialization functions ///////////////////////////////////
@@ -308,6 +315,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // when any channel data has arrived:
     setSendingQueryRequest(false);
+    setOneChannelLoaded(channelIndex);
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
@@ -403,9 +411,11 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): ChannelState[] => {
-    const newChannelSettings = setChannelStateForNewImage(aimg.imageInfo.channel_names);
+    const channelNames = aimg.imageInfo.channel_names;
+    const newChannelSettings = setChannelStateForNewImage(channelNames);
 
     setImage(aimg);
+    setLoadedChannels(new Array(channelNames.length).fill(false));
     setCurrentlyLoadedImagePath(imageDirectory);
     changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
 
@@ -689,13 +699,13 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
-      {channelSettings.map((state, index) => (
+      {channelSettings.map((channelState, index) => (
         <ChannelUpdater
-          key={`${index}_${state.name}`}
-          {...{ state, index }}
+          key={`${index}_${channelState.name}`}
+          {...{ channelState, index }}
           view3d={view3d}
           image={image}
-          imageLoaded={imageLoaded}
+          channelLoaded={loadedChannels[index]}
         />
       ))}
       <Sider

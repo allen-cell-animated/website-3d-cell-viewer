@@ -8,27 +8,27 @@ import { UseImageEffectType } from "./types";
 
 interface ChannelUpdaterProps {
   index: number;
-  state: ChannelState;
+  channelState: ChannelState;
   view3d: View3d;
   image: Volume | null;
-  imageLoaded: boolean;
+  channelLoaded: boolean;
 }
 
 /**
  * A component that doesn't render anything, but reacts to the provided `ChannelState`
  * and keeps it in sync with the viewer.
  */
-const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, state, view3d, image, imageLoaded }) => {
+const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, view3d, image, channelLoaded }) => {
   const { volumeEnabled, isosurfaceEnabled, isovalue, colorizeEnabled, colorizeAlpha, opacity, color, controlPoints } =
-    state;
+    channelState;
 
-  // Effects to update channel settings should check if image is present and loaded first
+  // Effects to update channel settings should check if image is present and channel is loaded first
   const useImageEffect: UseImageEffectType = (effect, deps) => {
     useEffect(() => {
-      if (image && imageLoaded) {
+      if (image && channelLoaded) {
         return effect(image);
       }
-    }, [...deps, image, imageLoaded]);
+    }, [...deps, image, channelLoaded]);
   };
 
   useImageEffect(
