@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import {
   IVolumeLoader,
@@ -133,6 +133,18 @@ const defaultProps: AppProps = {
   canvasMargin: "0 0 0 0",
 };
 
+/** A `useState` that also creates a getter function for breaking through closures */
+function useStateWithGetter<T>(initialState: T): [T, (value: T) => void, () => T] {
+  const [state, setState] = useState(initialState);
+  const stateRef = useRef(initialState);
+  const wrappedSetState = useCallback((value: T) => {
+    stateRef.current = value;
+    setState(value);
+  }, []);
+  const getState = useCallback(() => stateRef.current, []);
+  return [state, wrappedSetState, getState];
+}
+
 const App: React.FC<AppProps> = (props) => {
   props = { ...defaultProps, ...props };
 
@@ -164,7 +176,7 @@ const App: React.FC<AppProps> = (props) => {
     ...defaultViewerSettings,
     ...props.viewerSettings,
   }));
-  const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
+  const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
   // Some viewer settings require custom change behaviors to guard against entering an illegal state.
   // (e.g. autorotate must not be on in pathtrace mode.) Those behaviors are defined here.
@@ -258,22 +270,18 @@ const App: React.FC<AppProps> = (props) => {
     [channelSettings]
   );
 
-  const setOneChannelSetting = (
-    index: number,
-    settings: ChannelState,
-    currentChannelSettings?: ChannelState[]
-  ): ChannelState[] => {
-    const newSettings = (currentChannelSettings || channelSettings).slice();
+  // Only ever used within this component - no need for a `useCallback`
+  const resetOneChannelSetting = (index: number, settings: ChannelState) => {
+    const newSettings = getChannelSettings().slice();
     newSettings[index] = settings;
     setChannelSettings(newSettings);
-    return newSettings;
+  };
+
+  const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
+    return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
   };
 
   // Image loading/initialization functions ///////////////////////////////////
-
-  const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
-    return (settings || channelSettings).find((channel) => channel.name === channelName);
-  };
 
   const onChannelDataLoaded = (
     aimg: Volume,
@@ -432,22 +440,17 @@ const App: React.FC<AppProps> = (props) => {
       loader = new OMEZarrLoader();
     }
 
-    // This keeps hold of the current channel state for the loaded channel callbacks below
-    // (because the closure captures this value at time of creation, subsequent calls wouldn't
-    // receive updates properly otherwise)
-    const settingsRef = { current: [] as ChannelState[] };
-
     const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
-      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex], settingsRef.current);
+      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
       const newChannelSettings = onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
       if (thisChannelSettings === newChannelSettings) return;
-      settingsRef.current = setOneChannelSetting(channelIndex, newChannelSettings, settingsRef.current);
+      resetOneChannelSetting(channelIndex, newChannelSettings);
       // TODO: original behavior is to reset view mode on completely new image only
       //   add state to enact this behavior
     });
 
-    settingsRef.current = onNewVolumeCreated(aimg, path, false);
+    onNewVolumeCreated(aimg, path, false);
   };
 
   const loadFromRaw = (): void => {
