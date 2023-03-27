@@ -142,7 +142,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     // get a value from -0.5..0.5
     const max = numSlices[axis];
     const start = minval / max;
-    const end = (maxval + 1) / max;
+    const end = maxval / max;
     changeViewerSetting("region", { ...region, [axis]: [start, end] });
   }
 
