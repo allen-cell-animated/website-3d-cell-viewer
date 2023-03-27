@@ -284,7 +284,7 @@ const App: React.FC<AppProps> = (props) => {
   );
 
   // These last state functions are only ever used within this component - no need for a `useCallback`
-  const resetOneChannelSetting = (index: number, settings: ChannelState) => {
+  const resetOneChannelSetting = (index: number, settings: ChannelState): void => {
     const newSettings = getChannelSettings().slice();
     newSettings[index] = settings;
     setChannelSettings(newSettings);
@@ -294,7 +294,7 @@ const App: React.FC<AppProps> = (props) => {
     return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
   };
 
-  const setOneChannelLoaded = (index: number) => {
+  const setOneChannelLoaded = (index: number): void => {
     const newLoadedChannels = getLoadedChannels().slice();
     newLoadedChannels[index] = true;
     setLoadedChannels(newLoadedChannels);
