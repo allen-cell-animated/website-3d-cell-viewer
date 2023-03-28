@@ -173,7 +173,7 @@ const App: React.FC<AppProps> = (props) => {
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
-  // tracks the url of the current image, to reloading an image that is already open
+  // tracks the url of the current image, to keep us from reloading an image that is already open
   const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
@@ -185,6 +185,9 @@ const App: React.FC<AppProps> = (props) => {
     ...defaultViewerSettings,
     ...props.viewerSettings,
   }));
+  // `channelSettings` gets a getter to break through stale closures when loading images.
+  // (`openImage` creates a closure to call back whenever a new channel is loaded, which sets this state.
+  // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
   // Some viewer settings require custom change behaviors to guard against entering an illegal state.
