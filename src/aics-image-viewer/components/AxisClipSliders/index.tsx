@@ -93,8 +93,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const { playing } = this.state;
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
-    const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
-    const range = { min: 0, max: numSlices - 1 };
+    const sliderVals = [Math.floor(clipVals[0] * numSlices), Math.floor(clipVals[1] * numSlices)];
+    const range = { min: 0, max: numSlices };
     const callback = this.makeSliderCallback(axis);
 
     return (
@@ -106,6 +106,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
               step={1}
+              margin={1}
               behaviour="drag"
               // round slider output to nearest slice; assume any string inputs represent ints
               format={{ to: Math.round, from: parseInt }}
@@ -117,7 +118,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           <span className="slider-slices">
             {twoD
               ? `${sliderVals[0]} (${numSlices})`
-              : `${sliderVals[0]}, ${sliderVals[1]} (${sliderVals[1] - sliderVals[0] + 1})`}
+              : `${sliderVals[0]}, ${sliderVals[1]} (${sliderVals[1] - sliderVals[0]})`}
           </span>
         </span>
         {twoD && (
@@ -141,6 +142,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const { changeViewerSetting, numSlices, region } = this.props;
     // get a value from -0.5..0.5
     const max = numSlices[axis];
+    console.log(minval, maxval, max);
     const start = minval / max;
     const end = maxval / max;
     changeViewerSetting("region", { ...region, [axis]: [start, end] });
