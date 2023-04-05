@@ -62,6 +62,7 @@ import {
 import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
+import { debounce } from "lodash";
 
 const { Sider, Content } = Layout;
 
@@ -521,8 +522,6 @@ const App: React.FC<AppProps> = (props) => {
     [image]
   );
 
-  const resetCamera = useCallback((): void => view3d.resetCamera(), []);
-
   const saveScreenshot = useCallback((): void => {
     view3d.capture((dataUrl: string) => {
       const anchor = document.createElement("a");
@@ -531,6 +530,8 @@ const App: React.FC<AppProps> = (props) => {
       anchor.click();
     });
   }, []);
+
+  const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
   const onClippingPanelVisibleChange = useCallback(
     (open: boolean): void => {
@@ -585,6 +586,16 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
     view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
+
+    const onResize = (): void => {
+      if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
+        setControlPanelClosed(true);
+      }
+    };
+    const onResizeDebounced = debounce(onResize, 500);
+
+    window.addEventListener("resize", onResizeDebounced);
+    return () => window.removeEventListener("resize", onResizeDebounced);
   }, []);
 
   // Hook to trigger image load: on mount, when `cellId` changes, when `imageType` changes
