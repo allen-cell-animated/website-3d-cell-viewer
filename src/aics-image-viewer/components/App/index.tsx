@@ -191,8 +191,17 @@ const App: React.FC<AppProps> = (props) => {
   // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
-  // Some viewer settings require custom change behaviors to guard against entering an illegal state.
-  // (e.g. autorotate must not be on in pathtrace mode.) Those behaviors are defined here.
+  const getInitialAlphaLevel = (): number => {
+    if (props.viewerSettings?.maskAlpha !== undefined) {
+      return props.viewerSettings.maskAlpha;
+    }
+    const { imageType, viewMode } = viewerSettings;
+    const is3dChildImage = imageType === ImageType.segmentedCell && viewMode === ViewMode.threeD;
+    return is3dChildImage ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+  };
+
+  // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
+  // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
     viewMode: (prevSettings, viewMode) => {
       if (viewMode === prevSettings.viewMode) {
@@ -232,7 +241,11 @@ const App: React.FC<AppProps> = (props) => {
     },
     imageType: (prevSettings, imageType) => {
       setSwitchingFov(true);
-      return { ...prevSettings, imageType };
+      return {
+        ...prevSettings,
+        imageType,
+        maskAlpha: getInitialAlphaLevel(),
+      };
     },
     renderMode: (prevSettings, renderMode) => ({
       ...prevSettings,
@@ -310,7 +323,7 @@ const App: React.FC<AppProps> = (props) => {
     aimg: Volume,
     thisChannelsSettings: ChannelState,
     channelIndex: number,
-    keepLuts?: boolean
+    keepLuts = false
   ): ChannelState => {
     let updatedChannelSettings = thisChannelsSettings;
 
@@ -492,25 +505,20 @@ const App: React.FC<AppProps> = (props) => {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
+    let channelSetting = rawDims.channel_names.map((channel, index) => {
       let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
       return initializeOneChannelSetting(aimg, channel, index, color);
     });
 
     let channelGroupedByType = makeChannelIndexGrouping(rawDims.channel_names);
 
-    const channelSetting = newChannelSettings;
-
-    let alphaLevel =
-      viewerSettings.viewMode === ViewMode.threeD ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
-
     // Here is where we officially hand the image to the volume-viewer
-    placeImageInViewer(aimg, newChannelSettings);
+    placeImageInViewer(aimg, channelSetting);
 
     setImage(aimg);
     setChannelGroupedByType(channelGroupedByType);
     setChannelSettings(channelSetting);
-    changeViewerSetting("maskAlpha", alphaLevel);
+    changeViewerSetting("maskAlpha", getInitialAlphaLevel());
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
