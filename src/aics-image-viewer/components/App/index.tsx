@@ -614,7 +614,7 @@ const App: React.FC<AppProps> = (props) => {
 
   useEffect(() => {
     // delayed for the animation to finish
-    void setTimeout(() => {
+    window.setTimeout(() => {
       window.dispatchEvent(new Event("resize"));
     }, 200);
   }, [controlPanelClosed]);
@@ -704,6 +704,16 @@ const App: React.FC<AppProps> = (props) => {
   useImageEffect(
     (image) => view3d.setInterpolationEnabled(image, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
+  );
+
+  useImageEffect(
+    (image) => view3d.setVolumeTranslation(image, props.transform?.translation || [0, 0, 0]),
+    [props.transform?.translation]
+  );
+
+  useImageEffect(
+    (image) => view3d.setVolumeRotation(image, props.transform?.rotation || [0, 0, 0]),
+    [props.transform?.rotation]
   );
 
   const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]): void => {
