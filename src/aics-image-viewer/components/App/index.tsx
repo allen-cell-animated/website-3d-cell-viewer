@@ -241,11 +241,7 @@ const App: React.FC<AppProps> = (props) => {
     },
     imageType: (prevSettings, imageType) => {
       setSwitchingFov(true);
-      return {
-        ...prevSettings,
-        imageType,
-        maskAlpha: getInitialAlphaLevel(),
-      };
+      return { ...prevSettings, imageType };
     },
     renderMode: (prevSettings, renderMode) => ({
       ...prevSettings,
@@ -422,9 +418,12 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
+    changeViewerSetting("maskAlpha", getInitialAlphaLevel());
+
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
+      // TODO this initialization may not be necessary, but should be tested against `loadFromRaw` case before removal
       channels: aimg.channel_names.map((name) => {
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
@@ -518,7 +517,6 @@ const App: React.FC<AppProps> = (props) => {
     setImage(aimg);
     setChannelGroupedByType(channelGroupedByType);
     setChannelSettings(channelSetting);
-    changeViewerSetting("maskAlpha", getInitialAlphaLevel());
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
