@@ -93,8 +93,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const { playing } = this.state;
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
-    const sliderVals = [Math.floor(clipVals[0] * numSlices), Math.floor(clipVals[1] * numSlices)];
-    const range = { min: 0, max: numSlices };
+    const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
+    const range = { min: 0, max: numSlices - (twoD ? 1 : 0) };
     const callback = this.makeSliderCallback(axis);
 
     return (
@@ -148,8 +148,10 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
   }
 
   makeSliderCallback(axis: AxisName): (values: number[]) => void {
-    // Values may be of length 1 (2d, single-slice) or 2 (3d, slice range); ensure we pass 2 values regardless
-    return (values: number[]) => this.updateClipping(axis, values[0], values[values.length - 1]);
+    return (values: number[]) => {
+      const max = values.length < 2 ? values[0] + 1 : values[1];
+      this.updateClipping(axis, values[0], max);
+    };
   }
 
   render(): React.ReactNode {
