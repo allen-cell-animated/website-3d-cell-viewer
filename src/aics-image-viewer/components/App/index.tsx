@@ -315,7 +315,7 @@ const App: React.FC<AppProps> = (props) => {
     thisChannelsSettings: ChannelState,
     channelIndex: number,
     keepLuts = false
-  ) => {
+  ): void => {
     // if we want to keep the current control points
     // TODO this function is never called with `keepLuts = true`. Should it ever be? On FOV switch e.g.?
     if (thisChannelsSettings.controlPoints && keepLuts) {
