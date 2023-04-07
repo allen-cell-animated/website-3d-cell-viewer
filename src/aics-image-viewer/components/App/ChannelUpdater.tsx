@@ -70,6 +70,9 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
 
   useImageEffect(
     (image) => {
+      if (controlPoints.length < 2) {
+        return;
+      }
       const gradient = controlPointsToLut(controlPoints);
       image.setLut(index, gradient);
       view3d.updateLuts(image);

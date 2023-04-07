@@ -269,7 +269,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>(
     (index, key, value) => {
-      const newChannelSettings = channelSettings.slice();
+      const newChannelSettings = getChannelSettings().slice();
       newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
       setChannelSettings(newChannelSettings);
     },
@@ -297,11 +297,6 @@ const App: React.FC<AppProps> = (props) => {
   );
 
   // These last state functions are only ever used within this component - no need for a `useCallback`
-  const resetOneChannelSetting = (index: number, settings: ChannelState): void => {
-    const newSettings = getChannelSettings().slice();
-    newSettings[index] = settings;
-    setChannelSettings(newSettings);
-  };
 
   const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
     return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
@@ -320,9 +315,7 @@ const App: React.FC<AppProps> = (props) => {
     thisChannelsSettings: ChannelState,
     channelIndex: number,
     keepLuts = false
-  ): ChannelState => {
-    let updatedChannelSettings = thisChannelsSettings;
-
+  ) => {
     // if we want to keep the current control points
     // TODO this function is never called with `keepLuts = true`. Should it ever be? On FOV switch e.g.?
     if (thisChannelsSettings.controlPoints && keepLuts) {
@@ -332,7 +325,7 @@ const App: React.FC<AppProps> = (props) => {
     } else {
       // need to choose initial LUT
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      updatedChannelSettings = { ...thisChannelsSettings, controlPoints: newControlPoints };
+      changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     }
 
     if (aimg.channelNames()[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
@@ -347,8 +340,6 @@ const App: React.FC<AppProps> = (props) => {
       setImageLoaded(true);
       setSwitchingFov(false);
     }
-
-    return updatedChannelSettings;
   };
 
   const initializeOneChannelSetting = (
@@ -398,21 +389,17 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
+    setChannelGroupedByType(makeChannelIndexGrouping(channelNames, props.viewerChannelSettings));
+
     const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
     if (settingsAreEqual) {
       return channelSettings;
     }
 
-    // TODO this function's behavior has changed to not recreate channel groupings on every load
-    //   verify that this doesn't impact anything
-    //   in fact... should creating channel groupings be its own effect, to change on `viewerChannelSettings`?
-    setChannelGroupedByType(makeChannelIndexGrouping(channelNames, props.viewerChannelSettings));
-
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
       return initializeOneChannelSetting(null, channel, index, color);
     });
-    // TODO could be this shouldn't set state...? leave it to per-channel setters?
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
   };
@@ -423,7 +410,7 @@ const App: React.FC<AppProps> = (props) => {
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
-      // TODO this initialization may not be necessary, but should be tested against `loadFromRaw` case before removal
+      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking saner on load
       channels: aimg.channel_names.map((name) => {
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
@@ -440,7 +427,7 @@ const App: React.FC<AppProps> = (props) => {
     });
   };
 
-  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): ChannelState[] => {
+  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void => {
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
@@ -450,7 +437,6 @@ const App: React.FC<AppProps> = (props) => {
     changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
 
     placeImageInViewer(aimg, newChannelSettings);
-    return newChannelSettings!;
   };
 
   const openImage = async (): Promise<void> => {
@@ -482,10 +468,9 @@ const App: React.FC<AppProps> = (props) => {
 
     const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
+      // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
-      const newChannelSettings = onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
-      if (thisChannelSettings === newChannelSettings) return;
-      resetOneChannelSetting(channelIndex, newChannelSettings);
+      onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
     });
 
     onNewVolumeCreated(aimg, path, !switchingFov);
@@ -509,13 +494,11 @@ const App: React.FC<AppProps> = (props) => {
       return initializeOneChannelSetting(aimg, channel, index, color);
     });
 
-    let channelGroupedByType = makeChannelIndexGrouping(rawDims.channel_names);
-
     // Here is where we officially hand the image to the volume-viewer
     placeImageInViewer(aimg, channelSetting);
 
     setImage(aimg);
-    setChannelGroupedByType(channelGroupedByType);
+    setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channel_names, props.viewerChannelSettings));
     setChannelSettings(channelSetting);
   };
 
