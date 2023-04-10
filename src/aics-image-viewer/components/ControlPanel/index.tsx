@@ -91,7 +91,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="info" />)}
+        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
