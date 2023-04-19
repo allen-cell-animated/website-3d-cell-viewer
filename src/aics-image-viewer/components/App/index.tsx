@@ -316,7 +316,6 @@ const App: React.FC<AppProps> = (props) => {
     keepLuts = false
   ): void => {
     // if we want to keep the current control points
-    // TODO this function is never called with `keepLuts = true`. Should it ever be? On FOV switch e.g.?
     if (thisChannelsSettings.controlPoints && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, lut);
@@ -388,7 +387,8 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
-    setChannelGroupedByType(makeChannelIndexGrouping(channelNames, props.viewerChannelSettings));
+    const grouping = makeChannelIndexGrouping(channelNames, props.viewerChannelSettings);
+    setChannelGroupedByType(grouping);
 
     const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
     if (settingsAreEqual) {
@@ -404,6 +404,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
+    setImage(aimg);
     changeViewerSetting("maskAlpha", getInitialAlphaLevel());
 
     const channelSetting = newChannelSettings || channelSettings;
@@ -430,7 +431,6 @@ const App: React.FC<AppProps> = (props) => {
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
-    setImage(aimg);
     setLoadedChannels(new Array(channelNames.length).fill(false));
     setCurrentlyLoadedImagePath(imageDirectory);
     changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
@@ -493,12 +493,11 @@ const App: React.FC<AppProps> = (props) => {
       return initializeOneChannelSetting(aimg, channel, index, color);
     });
 
-    // Here is where we officially hand the image to the volume-viewer
-    placeImageInViewer(aimg, channelSetting);
-
-    setImage(aimg);
     setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channel_names, props.viewerChannelSettings));
     setChannelSettings(channelSetting);
+
+    // Here is where we officially hand the image to the volume-viewer
+    placeImageInViewer(aimg, channelSetting);
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
