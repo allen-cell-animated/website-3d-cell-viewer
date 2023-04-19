@@ -32,58 +32,64 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
   };
 
   useImageEffect(
-    (image) => {
-      view3d.setVolumeChannelEnabled(image, index, volumeEnabled);
-      view3d.updateLuts(image);
+    (currentImage) => {
+      view3d.setVolumeChannelEnabled(currentImage, index, volumeEnabled);
+      view3d.updateLuts(currentImage);
     },
     [volumeEnabled]
   );
 
-  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceEnabled }), [isosurfaceEnabled]);
+  useImageEffect(
+    (currentImage) => view3d.setVolumeChannelOptions(currentImage, index, { isosurfaceEnabled }),
+    [isosurfaceEnabled]
+  );
 
-  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isovalue }), [isovalue]);
-
-  useImageEffect((image) => view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity: opacity }), [opacity]);
+  useImageEffect((currentImage) => view3d.setVolumeChannelOptions(currentImage, index, { isovalue }), [isovalue]);
 
   useImageEffect(
-    (image) => {
-      view3d.setVolumeChannelOptions(image, index, { color });
-      view3d.updateLuts(image);
+    (currentImage) => view3d.setVolumeChannelOptions(currentImage, index, { isosurfaceOpacity: opacity }),
+    [opacity]
+  );
+
+  useImageEffect(
+    (currentImage) => {
+      view3d.setVolumeChannelOptions(currentImage, index, { color });
+      view3d.updateLuts(currentImage);
     },
     [color]
   );
 
   useImageEffect(
-    (image) => {
+    (currentImage) => {
       if (colorizeEnabled) {
         // TODO get the labelColors from the tf editor component
-        const lut = image.getHistogram(index).lutGenerator_labelColors();
-        image.setColorPalette(index, lut.lut);
-        image.setColorPaletteAlpha(index, colorizeAlpha);
+        const lut = currentImage.getHistogram(index).lutGenerator_labelColors();
+        currentImage.setColorPalette(index, lut.lut);
+        currentImage.setColorPaletteAlpha(index, colorizeAlpha);
       } else {
-        image.setColorPaletteAlpha(index, 0);
+        currentImage.setColorPaletteAlpha(index, 0);
       }
-      view3d.updateLuts(image);
+      view3d.updateLuts(currentImage);
     },
     [colorizeEnabled]
   );
 
   useImageEffect(
-    (image) => {
+    (currentImage) => {
       if (controlPoints.length < 2) {
         return;
       }
       const gradient = controlPointsToLut(controlPoints);
-      image.setLut(index, gradient);
-      view3d.updateLuts(image);
+      currentImage.setLut(index, gradient);
+      view3d.updateLuts(currentImage);
     },
     [controlPoints]
   );
 
   useImageEffect(
-    (image) => {
-      image.setColorPaletteAlpha(index, colorizeEnabled ? colorizeAlpha : 0);
-      view3d.updateLuts(image);
+    (currentImage) => {
+      currentImage.setColorPaletteAlpha(index, colorizeEnabled ? colorizeAlpha : 0);
+      view3d.updateLuts(currentImage);
     },
     [colorizeAlpha]
   );

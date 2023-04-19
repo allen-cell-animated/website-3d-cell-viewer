@@ -152,8 +152,7 @@ const App: React.FC<AppProps> = (props) => {
   // State management /////////////////////////////////////////////////////////
 
   // TODO is there a better API for values that never change?
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [view3d, _setView3d] = useState(() => new View3d());
+  const [view3d] = useState(() => new View3d());
   const [image, setImage] = useState<Volume | null>(null);
 
   const getNumberOfSlices = (): PerAxis<number> => {
@@ -620,52 +619,52 @@ const App: React.FC<AppProps> = (props) => {
   // Effects to imperatively sync `viewerSettings` to `view3d`
 
   useImageEffect(
-    (_image) => {
+    (_loadedImage) => {
       view3d.setCameraMode(viewerSettings.viewMode);
       view3d.resize(null);
     },
     [viewerSettings.viewMode]
   );
 
-  useImageEffect((_image) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
+  useImageEffect((_currentImage) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
 
-  useImageEffect((_image) => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
+  useImageEffect((_currentImage) => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
 
   useImageEffect(
-    (_image) => view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor)),
+    (_currentImage) => view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor)),
     [viewerSettings.backgroundColor]
   );
 
   useImageEffect(
-    (image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(viewerSettings.boundingBoxColor)),
+    (currentImage) => view3d.setBoundingBoxColor(currentImage, colorArrayToFloats(viewerSettings.boundingBoxColor)),
     [viewerSettings.boundingBoxColor]
   );
 
   useImageEffect(
-    (image) => view3d.setShowBoundingBox(image, viewerSettings.showBoundingBox),
+    (currentImage) => view3d.setShowBoundingBox(currentImage, viewerSettings.showBoundingBox),
     [viewerSettings.showBoundingBox]
   );
 
   useImageEffect(
-    (image) => {
+    (currentImage) => {
       const { renderMode } = viewerSettings;
-      view3d.setMaxProjectMode(image, renderMode === RenderMode.maxProject);
+      view3d.setMaxProjectMode(currentImage, renderMode === RenderMode.maxProject);
       view3d.setVolumeRenderMode(renderMode === RenderMode.pathTrace ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
-      view3d.updateActiveChannels(image);
+      view3d.updateActiveChannels(currentImage);
     },
     [viewerSettings.renderMode]
   );
 
   useImageEffect(
-    (image) => {
-      view3d.updateMaskAlpha(image, alphaSliderToImageValue(viewerSettings.maskAlpha));
-      view3d.updateActiveChannels(image);
+    (currentImage) => {
+      view3d.updateMaskAlpha(currentImage, alphaSliderToImageValue(viewerSettings.maskAlpha));
+      view3d.updateActiveChannels(currentImage);
     },
     [viewerSettings.maskAlpha]
   );
 
   useImageEffect(
-    (_image) => {
+    (_currentImage) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
       const brightness = brightnessSliderToImageValue(viewerSettings.brightness, isPathTracing);
       view3d.updateExposure(brightness);
@@ -674,42 +673,42 @@ const App: React.FC<AppProps> = (props) => {
   );
 
   useImageEffect(
-    (image) => {
+    (currentImage) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
       const density = densitySliderToImageValue(viewerSettings.density, isPathTracing);
-      view3d.updateDensity(image, density);
+      view3d.updateDensity(currentImage, density);
     },
     [viewerSettings.density]
   );
 
   useImageEffect(
-    (image) => {
+    (currentImage) => {
       const imageValues = gammaSliderToImageValues(viewerSettings.levels);
-      view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
+      view3d.setGamma(currentImage, imageValues.min, imageValues.scale, imageValues.max);
     },
     [viewerSettings.levels]
   );
 
   useImageEffect(
-    (image) => view3d.setInterpolationEnabled(image, viewerSettings.interpolationEnabled),
+    (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
   );
 
   useImageEffect(
-    (image) => view3d.setVolumeTranslation(image, props.transform?.translation || [0, 0, 0]),
+    (currentImage) => view3d.setVolumeTranslation(currentImage, props.transform?.translation || [0, 0, 0]),
     [props.transform?.translation]
   );
 
   useImageEffect(
-    (image) => view3d.setVolumeRotation(image, props.transform?.rotation || [0, 0, 0]),
+    (currentImage) => view3d.setVolumeRotation(currentImage, props.transform?.rotation || [0, 0, 0]),
     [props.transform?.rotation]
   );
 
   const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]): void => {
     useImageEffect(
-      (image) => {
+      (currentImage) => {
         const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
-        view3d.setAxisClip(image, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
+        view3d.setAxisClip(currentImage, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
       },
       [minval, maxval]
     );
