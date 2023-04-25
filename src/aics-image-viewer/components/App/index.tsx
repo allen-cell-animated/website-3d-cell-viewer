@@ -405,7 +405,6 @@ const App: React.FC<AppProps> = (props) => {
 
   const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
     setImage(aimg);
-    changeViewerSetting("maskAlpha", getInitialAlphaLevel());
 
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
@@ -425,6 +424,10 @@ const App: React.FC<AppProps> = (props) => {
         };
       }),
     });
+
+    const initialAlpha = getInitialAlphaLevel();
+    changeViewerSetting("maskAlpha", initialAlpha);
+    view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
   };
 
   const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void => {
