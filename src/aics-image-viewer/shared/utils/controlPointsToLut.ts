@@ -88,6 +88,8 @@ export function initializeLut(
             lutvalues[i] = histogram.maxBin * lvalue;
           } else if (lutmod === "p") {
             lutvalues[i] = histogram.findBinOfPercentile(lvalue);
+          } else {
+            lutvalues[i] = lvalue;
           }
         }
 
