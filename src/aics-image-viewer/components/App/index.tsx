@@ -319,12 +319,12 @@ const App: React.FC<AppProps> = (props) => {
     if (thisChannelsSettings.controlPoints && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, lut);
-      view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     }
+    view3d.updateLuts(aimg);
 
     if (aimg.channelNames()[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
@@ -425,9 +425,13 @@ const App: React.FC<AppProps> = (props) => {
       }),
     });
 
+    imageLoadHandlers.current.forEach((effect) => effect(aimg));
+
     const initialAlpha = getInitialAlphaLevel();
     changeViewerSetting("maskAlpha", initialAlpha);
     view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
+
+    view3d.updateActiveChannels(aimg);
   };
 
   const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void => {
@@ -609,7 +613,7 @@ const App: React.FC<AppProps> = (props) => {
     }, 200);
   }, [controlPanelClosed]);
 
-  // Custom effect hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it
+  /** Custom effect hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it */
   const useImageEffect: UseImageEffectType = (effect, deps) => {
     useEffect(() => {
       if (image && imageLoaded) {
@@ -618,10 +622,21 @@ const App: React.FC<AppProps> = (props) => {
     }, [...deps, image, imageLoaded]);
   };
 
+  const imageLoadHandlers = useRef<((image: Volume) => void)[]>([]);
+  imageLoadHandlers.current = [];
+  /**
+   * An `ImageEffect` that should also run immediately when a new volume is created,
+   * rather than giving the volume a chance to render with its default settings
+   */
+  const useImageLoadEffect: UseImageEffectType = (effect, deps) => {
+    useImageEffect(effect, deps);
+    imageLoadHandlers.current.push(effect);
+  };
+
   // Effects to imperatively sync `viewerSettings` to `view3d`
 
   useImageEffect(
-    (_loadedImage) => {
+    (_currentImage) => {
       view3d.setCameraMode(viewerSettings.viewMode);
       view3d.resize(null);
     },
@@ -647,7 +662,7 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.showBoundingBox]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => {
       const { renderMode } = viewerSettings;
       view3d.setMaxProjectMode(currentImage, renderMode === RenderMode.maxProject);
@@ -665,7 +680,7 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.maskAlpha]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (_currentImage) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
       const brightness = brightnessSliderToImageValue(viewerSettings.brightness, isPathTracing);
@@ -674,7 +689,7 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.brightness]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => {
       const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
       const density = densitySliderToImageValue(viewerSettings.density, isPathTracing);
@@ -683,7 +698,7 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.density]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => {
       const imageValues = gammaSliderToImageValues(viewerSettings.levels);
       view3d.setGamma(currentImage, imageValues.min, imageValues.scale, imageValues.max);
@@ -691,17 +706,17 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.levels]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => view3d.setVolumeTranslation(currentImage, props.transform?.translation || [0, 0, 0]),
     [props.transform?.translation]
   );
 
-  useImageEffect(
+  useImageLoadEffect(
     (currentImage) => view3d.setVolumeRotation(currentImage, props.transform?.rotation || [0, 0, 0]),
     [props.transform?.rotation]
   );

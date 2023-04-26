@@ -9,6 +9,7 @@ import "./App.css";
 
 import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import FirebaseRequest from "./firebase";
+import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
 export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   groups: [
@@ -77,7 +78,7 @@ const args = {
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
 };
-const viewerSettings = {
+const viewerSettings: Partial<GlobalViewerSettings> = {
   showAxes: false,
   showBoundingBox: false,
   autorotate: false,
