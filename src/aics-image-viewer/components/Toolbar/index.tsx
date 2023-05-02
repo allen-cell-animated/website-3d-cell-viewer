@@ -5,6 +5,7 @@ import { debounce } from "lodash";
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 
+import { ViewerSettingUpdater } from "../App/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 import "./styles.css";
@@ -22,14 +23,9 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
 
-  onViewModeChange: (mode: ViewMode) => void;
-  onResetCamera: () => void;
-  onAutorotateChange: () => void;
+  changeViewerSetting: ViewerSettingUpdater;
+  resetCamera: () => void;
   downloadScreenshot: () => void;
-  onSwitchFovCell: (value: ImageType) => void;
-  onChangeRenderingAlgorithm: (newAlgorithm: RenderMode) => void;
-  changeAxisShowing: (showing: boolean) => void;
-  changeBoundingBoxShowing: (showing: boolean) => void;
 
   showControls: {
     autoRotateButton: boolean;
@@ -122,14 +118,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
     }
   };
 
-  toggleAxis = (): void => this.props.changeAxisShowing(!this.props.showAxes);
-  toggleBoundingBox = (): void => this.props.changeBoundingBoxShowing(!this.props.showBoundingBox);
+  toggleAxis = (): void => this.props.changeViewerSetting("showAxes", !this.props.showAxes);
+  toggleBoundingBox = (): void => this.props.changeViewerSetting("showBoundingBox", !this.props.showBoundingBox);
   // TODO remove ant-btn-icon-only hack when upgrading antd
   classForToggleBtn = (active: boolean): string => "ant-btn-icon-only btn-borderless" + (active ? " btn-active" : "");
 
   render(): React.ReactElement {
     const { props } = this;
-    const { showControls, showAxes, showBoundingBox, autorotate } = props;
+    const { changeViewerSetting, showControls, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
@@ -161,11 +157,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
             {renderGroup1 && (
               <span className="viewer-toolbar-group">
                 {showControls.viewModeRadioButtons && (
-                  <ViewModeRadioButtons mode={props.viewMode} onViewModeChange={props.onViewModeChange} />
+                  <ViewModeRadioButtons
+                    mode={props.viewMode}
+                    onViewModeChange={(newMode) => changeViewerSetting("viewMode", newMode)}
+                  />
                 )}
                 {showControls.resetCameraButton && (
                   <Tooltip placement="bottom" title="Reset camera">
-                    <Button className="ant-btn-icon-only btn-borderless" onClick={props.onResetCamera}>
+                    <Button className="ant-btn-icon-only btn-borderless" onClick={props.resetCamera}>
                       <ViewerIcon type="resetView" />
                     </Button>
                   </Tooltip>
@@ -175,7 +174,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
                       disabled={twoDMode || props.renderMode === RenderMode.pathTrace}
-                      onClick={props.onAutorotateChange}
+                      onClick={() => changeViewerSetting("autorotate", !autorotate)}
                     >
                       <ViewerIcon type="turnTable" />
                     </Button>
@@ -186,7 +185,10 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
             {showControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
               <span className="viewer-toolbar-group">
-                <Radio.Group value={props.imageType} onChange={({ target }) => props.onSwitchFovCell(target.value)}>
+                <Radio.Group
+                  value={props.imageType}
+                  onChange={({ target }) => changeViewerSetting("imageType", target.value)}
+                >
                   <Radio.Button value={ImageType.segmentedCell}>Single cell</Radio.Button>
                   <Radio.Button value={ImageType.fullField}>Full field</Radio.Button>
                 </Radio.Group>
@@ -198,7 +200,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                 className="select-render-setting"
                 dropdownClassName="viewer-toolbar-dropdown"
                 value={props.renderMode}
-                onChange={props.onChangeRenderingAlgorithm}
+                onChange={(value) => changeViewerSetting("renderMode", value)}
               >
                 <Select.Option value={RenderMode.volumetric} key={RenderMode.volumetric}>
                   Volumetric

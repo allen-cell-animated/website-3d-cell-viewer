@@ -4,6 +4,9 @@ import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
+/** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
+export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => void;
+
 type ControlNames =
   | "alphaMaskSlider"
   | "autoRotateButton"
@@ -77,8 +80,9 @@ export interface AppProps {
 
 export type ViewerSettingsKey = keyof GlobalViewerSettings;
 export type ViewerSettingChangeHandlers = {
-  [K in ViewerSettingsKey]?: (value: GlobalViewerSettings[K], view3d: View3d, image: Volume) => void;
+  [K in ViewerSettingsKey]?: (settings: GlobalViewerSettings, value: GlobalViewerSettings[K]) => GlobalViewerSettings;
 };
+export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(key: K, value: GlobalViewerSettings[K]) => void;
 
 export interface AppState {
   view3d: View3d;
@@ -94,7 +98,7 @@ export interface AppState {
   // global (not per-channel) state set by the UI:
   viewerSettings: GlobalViewerSettings;
   // channelSettings is a flat list of objects of this type:
-  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
+  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color}
   // the list is in the order they were in the raw data.
   channelSettings: ChannelState[];
 }

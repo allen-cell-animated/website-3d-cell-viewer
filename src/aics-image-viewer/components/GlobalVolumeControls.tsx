@@ -3,8 +3,8 @@ import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
 import { Card, Collapse, Checkbox } from "antd";
-import { ViewerSettingsKey, GlobalViewerSettings } from "./App/types";
-import { AxisName, Styles } from "../shared/types";
+import { ViewerSettingUpdater } from "./App/types";
+import { Styles } from "../shared/types";
 const Panel = Collapse.Panel;
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
@@ -27,8 +27,7 @@ export interface GlobalVolumeControlsProps {
   levels: [number, number, number];
   interpolationEnabled: boolean;
 
-  changeViewerSetting: <K extends ViewerSettingsKey>(key: K, newValue: GlobalViewerSettings[K]) => void;
-  makeUpdatePixelSizeFn: (i: number) => void;
+  changeViewerSetting: ViewerSettingUpdater;
 }
 
 export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {

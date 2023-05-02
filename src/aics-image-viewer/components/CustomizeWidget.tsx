@@ -2,19 +2,23 @@ import React from "react";
 import { Card, Collapse } from "antd";
 
 import ColorPicker from "./ColorPicker";
-import { ColorArray, ColorObject, colorArrayToObject } from "../shared/utils/colorRepresentations";
+import { ColorArray, colorArrayToObject, colorObjectToArray } from "../shared/utils/colorRepresentations";
 import { Styles } from "../shared/types";
+import { ViewerSettingUpdater } from "./App/types";
 
-type ColorChangeHandler = (color: ColorObject) => void;
-
-const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: ColorChangeHandler }> = ({
+const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: ColorArray) => void }> = ({
   color,
   onColorChange,
   children,
 }) => (
   <div style={STYLES.colorPickerRow}>
     <span style={STYLES.colorPicker}>
-      <ColorPicker color={colorArrayToObject(color)} onColorChange={onColorChange} width={18} disableAlpha={true} />
+      <ColorPicker
+        color={colorArrayToObject(color)}
+        onColorChange={(color) => onColorChange(colorObjectToArray(color))}
+        width={18}
+        disableAlpha={true}
+      />
     </span>
     <span>{children}</span>
   </div>
@@ -25,8 +29,7 @@ export interface CustomizeWidgetProps {
   backgroundColor: ColorArray;
   boundingBoxColor: ColorArray;
 
-  changeBackgroundColor: ColorChangeHandler;
-  changeBoundingBoxColor: ColorChangeHandler;
+  changeViewerSetting: ViewerSettingUpdater;
 
   showControls: {
     backgroundColorPicker: boolean;
@@ -39,12 +42,18 @@ const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
     <Collapse bordered={false} defaultActiveKey="color-customization">
       <Collapse.Panel key="color-customization" header={null}>
         {props.showControls.backgroundColorPicker && (
-          <ColorPickerRow color={props.backgroundColor} onColorChange={props.changeBackgroundColor}>
+          <ColorPickerRow
+            color={props.backgroundColor}
+            onColorChange={(color) => props.changeViewerSetting("backgroundColor", color)}
+          >
             Background color
           </ColorPickerRow>
         )}
         {props.showControls.boundingBoxColorPicker && (
-          <ColorPickerRow color={props.boundingBoxColor} onColorChange={props.changeBoundingBoxColor}>
+          <ColorPickerRow
+            color={props.boundingBoxColor}
+            onColorChange={(color) => props.changeViewerSetting("boundingBoxColor", color)}
+          >
             Bounding box color
             {!props.showBoundingBox && <i> - bounding box turned off</i>}
           </ColorPickerRow>

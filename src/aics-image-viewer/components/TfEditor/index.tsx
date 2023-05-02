@@ -10,7 +10,6 @@ import "./styles.css";
 import { Button, Checkbox } from "antd";
 
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
-import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import {
   ColorArray,
   colorArrayToObject,
@@ -28,13 +27,11 @@ type Pair = [number, number];
 interface MyTfEditorProps {
   id: string;
   index: number;
-  imageName: string | undefined;
   width: number;
   height: number;
   volumeData: Uint8Array;
   channelData: Channel;
   controlPoints: ControlPoint[];
-  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   updateChannelLutControlPoints: (controlPoints: ControlPoint[]) => void;
   updateColorizeMode: (colorizeEnabled: boolean) => void;
   updateColorizeAlpha: (colorizeAlpha: number) => void;
@@ -490,14 +487,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
     // Draw gradient in canvas and update image
     this.drawCanvas();
-    this.updateImage();
-  }
-
-  private updateImage(): void {
-    const { controlPoints, index } = this.props;
-    const opacityGradient = controlPointsToLut(controlPoints);
-    // send update to image rendering
-    this.props.updateChannelTransferFunction(index, opacityGradient);
   }
 
   /**

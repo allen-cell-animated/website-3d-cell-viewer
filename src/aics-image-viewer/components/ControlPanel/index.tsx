@@ -105,14 +105,13 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
             <div className="channel-rows-list">
               {tab === ControlTab.Channels && (
                 <ChannelsWidget
-                  imageName={props.imageName}
+                  imageLoaded={props.imageLoaded}
                   channelSettings={props.channelSettings}
                   channelDataChannels={props.channelDataChannels}
                   channelGroupedByType={props.channelGroupedByType}
-                  changeChannelSettings={props.changeChannelSettings}
+                  changeMultipleChannelSettings={props.changeMultipleChannelSettings}
                   saveIsosurface={props.saveIsosurface}
-                  updateChannelTransferFunction={props.updateChannelTransferFunction}
-                  changeOneChannelSetting={props.changeOneChannelSetting}
+                  changeChannelSetting={props.changeChannelSetting}
                   onColorChangeComplete={props.onColorChangeComplete}
                   onApplyColorPresets={props.onApplyColorPresets}
                   filterFunc={props.filterFunc}
@@ -125,7 +124,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
                     changeViewerSetting={props.changeViewerSetting}
-                    makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
                     maskAlpha={props.maskAlpha}
                     brightness={props.brightness}
                     density={props.density}
@@ -138,8 +136,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     <CustomizeWidget
                       backgroundColor={props.backgroundColor}
                       boundingBoxColor={props.boundingBoxColor}
-                      changeBackgroundColor={props.changeBackgroundColor}
-                      changeBoundingBoxColor={props.changeBoundingBoxColor}
+                      changeViewerSetting={props.changeViewerSetting}
                       showBoundingBox={props.showBoundingBox}
                       showControls={props.showControls}
                     />
