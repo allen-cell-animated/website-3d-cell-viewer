@@ -92,7 +92,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.showControls.metadataViewer && renderTab(ControlTab.Metadata, <Icon type="info" />)}
+        {props.showControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
@@ -129,7 +129,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                     density={props.density}
                     levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
-                    pathTraceOn={props.pathTraceOn}
                     showControls={showControls}
                   />
                   {(showControls.backgroundColorPicker || showControls.boundingBoxColorPicker) && (

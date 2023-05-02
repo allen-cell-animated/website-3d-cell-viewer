@@ -768,7 +768,6 @@ const App: React.FC<AppProps> = (props) => {
           channelDataChannels={image?.channels}
           channelGroupedByType={channelGroupedByType}
           // user selections
-          pathTraceOn={viewerSettings.renderMode === RenderMode.pathTrace}
           channelSettings={channelSettings}
           showBoundingBox={viewerSettings.showBoundingBox}
           backgroundColor={viewerSettings.backgroundColor}

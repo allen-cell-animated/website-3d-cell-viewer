@@ -245,7 +245,9 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
               />
             </Tooltip>
             <Tooltip placement="bottom" title="Screenshot">
-              <Button icon="camera" className="btn-borderless" onClick={props.downloadScreenshot} />
+              <Button className="ant-btn-icon-only btn-borderless" onClick={props.downloadScreenshot}>
+                <ViewerIcon type="camera" />
+              </Button>
             </Tooltip>
           </span>
         </div>
