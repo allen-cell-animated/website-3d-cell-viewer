@@ -1,9 +1,7 @@
 // 3rd Party Imports
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
-import React from "react";
-import { includes, isEqual, find, map, debounce } from "lodash";
 import {
-  ControlPoint,
   IVolumeLoader,
   JsonImageInfoLoader,
   LoadSpec,
@@ -15,17 +13,24 @@ import {
   Volume,
 } from "@aics/volume-viewer";
 
-import { AppProps, AppState, UserSelectionChangeHandlers, UserSelectionKey, UserSelectionState } from "./types";
-import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
+import {
+  AppProps,
+  ShowControls,
+  GlobalViewerSettings,
+  ViewerSettingUpdater,
+  ViewerSettingChangeHandlers,
+  UseImageEffectType,
+} from "./types";
+import { controlPointsToLut, initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
-  ChannelStateKey,
-  ChannelStateChangeHandlers,
   ChannelGrouping,
+  ChannelSettingUpdater,
+  MultipleChannelSettingsUpdater,
 } from "../../shared/utils/viewerChannelSettings";
-import { AxisName, IsosurfaceFormat, MetadataRecord } from "../../shared/types";
+import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
@@ -36,19 +41,16 @@ import {
   LEVELS_SLIDER_DEFAULT,
   BACKGROUND_COLOR_DEFAULT,
   BOUNDING_BOX_COLOR_DEFAULT,
-  LUT_MIN_PERCENTILE,
-  LUT_MAX_PERCENTILE,
-  SINGLE_GROUP_CHANNEL_KEY,
   CONTROL_PANEL_CLOSE_WIDTH,
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
 } from "../../shared/constants";
 
+import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
-import { TFEDITOR_DEFAULT_COLOR } from "../TfEditor";
 
 import "../../assets/styles/globals.css";
 import {
@@ -57,14 +59,10 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import {
-  ColorArray,
-  colorArrayToFloats,
-  ColorObject,
-  colorObjectToArray,
-} from "../../shared/utils/colorRepresentations";
+import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
+import { debounce } from "lodash";
 
 const { Sider, Content } = Layout;
 
@@ -80,6 +78,43 @@ function colorHexToArray(hex: string): ColorArray | null {
   }
 }
 
+const defaultShownControls: ShowControls = {
+  alphaMaskSlider: true,
+  autoRotateButton: true,
+  axisClipSliders: true,
+  brightnessSlider: true,
+  backgroundColorPicker: true,
+  boundingBoxColorPicker: true,
+  colorPresetsDropdown: true,
+  densitySlider: true,
+  levelsSliders: true,
+  interpolationControl: true,
+  saveSurfaceButtons: true,
+  fovCellSwitchControls: true,
+  viewModeRadioButtons: true,
+  resetCameraButton: true,
+  showAxesButton: true,
+  showBoundingBoxButton: true,
+  metadataViewer: true,
+};
+
+const defaultViewerSettings: GlobalViewerSettings = {
+  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+  imageType: ImageType.segmentedCell,
+  showAxes: false,
+  showBoundingBox: false,
+  backgroundColor: BACKGROUND_COLOR_DEFAULT,
+  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
+  autorotate: false,
+  maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
+  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  density: DENSITY_SLIDER_LEVEL_DEFAULT,
+  levels: LEVELS_SLIDER_DEFAULT,
+  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
+  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+};
+
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
@@ -89,39 +124,8 @@ const defaultProps: AppProps = {
   appHeight: "100vh",
   cellPath: "",
   fovPath: "",
-  renderConfig: {
-    alphaMask: true,
-    autoRotateButton: true,
-    axisClipSliders: true,
-    brightnessSlider: true,
-    colorPicker: true,
-    colorPresetsDropdown: true,
-    densitySlider: true,
-    levelsSliders: true,
-    interpolationControl: true,
-    saveSurfaceButtons: true,
-    fovCellSwitchControls: true,
-    viewModeRadioButtons: true,
-    resetCameraButton: true,
-    showAxesButton: true,
-    showBoundingBoxButton: true,
-    metadataViewer: true,
-  },
-  viewerConfig: {
-    showAxes: false,
-    showBoundingBox: false,
-    autorotate: false,
-    view: "3D", // "XY", "XZ", "YZ"
-    mode: "default", // "pathtrace", "maxprojection"
-    backgroundColor: BACKGROUND_COLOR_DEFAULT,
-    boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-    maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT[0],
-    brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT[0],
-    density: DENSITY_SLIDER_LEVEL_DEFAULT[0],
-    levels: LEVELS_SLIDER_DEFAULT,
-    region: [0, 1, 0, 1, 0, 1], // or ignored if slice is specified with a non-3D mode
-    slice: undefined, // or integer slice to show in view mode XY, YZ, or XZ.  mut. ex with region
-  },
+  showControls: defaultShownControls,
+  viewerSettings: defaultViewerSettings,
   baseUrl: "",
   cellId: "",
   cellDownloadHref: "",
@@ -130,472 +134,225 @@ const defaultProps: AppProps = {
   canvasMargin: "0 0 0 0",
 };
 
-export default class App extends React.Component<AppProps, AppState> {
-  static defaultProps = defaultProps;
-  constructor(props: AppProps) {
-    super(props);
+/** A `useState` that also creates a getter function for breaking through closures */
+function useStateWithGetter<T>(initialState: T): [T, (value: T) => void, () => T] {
+  const [state, setState] = useState(initialState);
+  const stateRef = useRef(initialState);
+  const wrappedSetState = useCallback((value: T) => {
+    stateRef.current = value;
+    setState(value);
+  }, []);
+  const getState = useCallback(() => stateRef.current, []);
+  return [state, wrappedSetState, getState];
+}
 
-    const { viewerConfig } = props;
+const App: React.FC<AppProps> = (props) => {
+  props = { ...defaultProps, ...props };
 
-    let viewmode = ViewMode.threeD;
-    let pathtrace = false;
-    let maxproject = false;
-    if (viewerConfig) {
-      if (viewerConfig.mode === "pathtrace") {
-        pathtrace = true;
-        maxproject = false;
-      } else if (viewerConfig.mode === "maxprojection") {
-        pathtrace = false;
-        maxproject = true;
-      } else {
-        pathtrace = false;
-        maxproject = false;
+  // State management /////////////////////////////////////////////////////////
+
+  // TODO is there a better API for values that never change?
+  const [view3d] = useState(() => new View3d());
+  const [image, setImage] = useState<Volume | null>(null);
+
+  const getNumberOfSlices = (): PerAxis<number> => {
+    if (image) {
+      const { x, y, z } = image;
+      return { x, y, z };
+    }
+    return { x: 0, y: 0, z: 0 };
+  };
+
+  // State for image loading/reloading
+
+  // `true` when image data has been requested, but no data has been received yet
+  const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
+  // `true` when all channels of the current image are loaded
+  const [imageLoaded, setImageLoaded] = useState(false);
+  // `true` when the image being loaded is related to the previous one, so some settings should be preserved
+  const [switchingFov, setSwitchingFov] = useState(false);
+  // tracks which channels have been loaded
+  const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
+  // tracks the url of the current image, to keep us from reloading an image that is already open
+  const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
+
+  const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
+  const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
+
+  // These are the major parts of `App` state
+  // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
+  const [viewerSettings, setViewerSettings] = useState<GlobalViewerSettings>(() => ({
+    ...defaultViewerSettings,
+    ...props.viewerSettings,
+  }));
+  // `channelSettings` gets a getter to break through stale closures when loading images.
+  // (`openImage` creates a closure to call back whenever a new channel is loaded, which sets this state.
+  // To do this it requires access to the current state value, not the one it closed over)
+  const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
+
+  const getInitialAlphaLevel = (): number => {
+    if (props.viewerSettings?.maskAlpha !== undefined) {
+      return props.viewerSettings.maskAlpha;
+    }
+    const { imageType, viewMode } = viewerSettings;
+    const is3dChildImage = imageType === ImageType.segmentedCell && viewMode === ViewMode.threeD;
+    return is3dChildImage ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
+  };
+
+  // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
+  // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
+  const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
+    viewMode: (prevSettings, viewMode) => {
+      if (viewMode === prevSettings.viewMode) {
+        return prevSettings;
       }
-      if (viewerConfig.view === "XY") {
-        viewmode = ViewMode.xy;
-      } else if (viewerConfig.view === "YZ") {
-        viewmode = ViewMode.yz;
-      } else if (viewerConfig.view === "XZ") {
-        viewmode = ViewMode.xz;
-      }
-    }
-
-    this.state = {
-      image: null,
-      view3d: null,
-      sendingQueryRequest: false,
-      // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
-      // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
-      channelGroupedByType: {},
-      // state set by the UI:
-      userSelections: {
-        imageType: ImageType.segmentedCell,
-        controlPanelClosed: window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH,
-        mode: viewmode,
-        autorotate: viewerConfig.autorotate,
-        showAxes: viewerConfig.showAxes,
-        showBoundingBox: viewerConfig.showBoundingBox,
-        boundingBoxColor: viewerConfig.boundingBoxColor || BOUNDING_BOX_COLOR_DEFAULT,
-        backgroundColor: viewerConfig.backgroundColor || BACKGROUND_COLOR_DEFAULT,
-        maxProject: maxproject,
-        pathTrace: pathtrace,
-        alphaMaskSliderLevel: [viewerConfig.maskAlpha] || ALPHA_MASK_SLIDER_3D_DEFAULT,
-        brightnessSliderLevel: [viewerConfig.brightness] || BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-        densitySliderLevel: [viewerConfig.density] || DENSITY_SLIDER_LEVEL_DEFAULT,
-        levelsSlider: viewerConfig.levels || LEVELS_SLIDER_DEFAULT,
-        interpolationEnabled:
-          viewerConfig.interpolationEnabled === undefined
-            ? INTERPOLATION_ENABLED_DEFAULT
-            : viewerConfig.interpolationEnabled,
-        // channelSettings is a flat list of objects of this type:
-        // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color, dataReady}
-        channelSettings: [],
-      },
-      currentlyLoadedImagePath: undefined,
-      cachingInProgress: false,
-    };
-
-    this.openImage = this.openImage.bind(this);
-    this.loadFromRaw = this.loadFromRaw.bind(this);
-    this.onChannelDataLoaded = this.onChannelDataLoaded.bind(this);
-
-    this.onViewModeChange = this.onViewModeChange.bind(this);
-    this.updateChannelTransferFunction = this.updateChannelTransferFunction.bind(this);
-    this.onAutorotateChange = this.onAutorotateChange.bind(this);
-    this.onSwitchFovCell = this.onSwitchFovCell.bind(this);
-    this.handleOpenImageException = this.handleOpenImageException.bind(this);
-    this.toggleControlPanel = this.toggleControlPanel.bind(this);
-    this.onUpdateImageMaskAlpha = this.onUpdateImageMaskAlpha.bind(this);
-    this.setImageAxisClip = this.setImageAxisClip.bind(this);
-    this.onApplyColorPresets = this.onApplyColorPresets.bind(this);
-    this.getNumberOfSlices = this.getNumberOfSlices.bind(this);
-    this.makeUpdatePixelSizeFn = this.makeUpdatePixelSizeFn.bind(this);
-    this.setUserSelectionsInState = this.setUserSelectionsInState.bind(this);
-    this.changeChannelSettings = this.changeChannelSettings.bind(this);
-    this.changeOneChannelSetting = this.changeOneChannelSetting.bind(this);
-    this.changeUserSelection = this.changeUserSelection.bind(this);
-    this.updateStateOnLoadImage = this.updateStateOnLoadImage.bind(this);
-    this.initializeNewImage = this.initializeNewImage.bind(this);
-    this.onView3DCreated = this.onView3DCreated.bind(this);
-    this.onClippingPanelVisibleChange = this.onClippingPanelVisibleChange.bind(this);
-    this.onClippingPanelVisibleChangeEnd = this.onClippingPanelVisibleChangeEnd.bind(this);
-    this.createChannelGrouping = this.createChannelGrouping.bind(this);
-    this.beginRequestImage = this.beginRequestImage.bind(this);
-    this.getOneChannelSetting = this.getOneChannelSetting.bind(this);
-    this.onChangeRenderingAlgorithm = this.onChangeRenderingAlgorithm.bind(this);
-    this.onResetCamera = this.onResetCamera.bind(this);
-    this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
-    this.changeBoundingBoxColor = this.changeBoundingBoxColor.bind(this);
-    this.saveScreenshot = this.saveScreenshot.bind(this);
-    this.saveIsosurface = this.saveIsosurface.bind(this);
-  }
-
-  componentDidMount(): void {
-    if (this.state.userSelections.controlPanelClosed && this.props.onControlPanelToggle) {
-      this.props.onControlPanelToggle(true);
-    }
-
-    const debouncedResizeHandler = debounce(() => this.onWindowResize(), 500);
-    window.addEventListener("resize", debouncedResizeHandler);
-
-    if (this.props.cellId) {
-      this.beginRequestImage();
-    }
-  }
-
-  componentDidUpdate(prevProps: AppProps, prevState: AppState): void {
-    const { cellId, rawDims, rawData } = this.props;
-    const { userSelections, view3d, image } = this.state;
-
-    if (rawDims && rawData && view3d && !prevState.view3d && !image) {
-      this.loadFromRaw();
-    }
-
-    // delayed for the animation to finish
-    if (prevState.userSelections.controlPanelClosed !== this.state.userSelections.controlPanelClosed) {
-      setTimeout(() => {
-        window.dispatchEvent(new Event("resize"));
-      }, 200);
-    }
-    const newRequest = cellId !== prevProps.cellId;
-    if (newRequest) {
-      this.beginRequestImage();
-    }
-
-    if (!isEqual(prevProps.transform, this.props.transform)) {
-      const { view3d, image } = this.state;
-      if (view3d && image) {
-        view3d.setVolumeTranslation(image, this.props.transform?.translation || [0, 0, 0]);
-        view3d.setVolumeRotation(image, this.props.transform?.rotation || [0, 0, 0]);
-      }
-    }
-
-    const channelsChanged = !isEqual(userSelections.channelSettings, prevState.userSelections.channelSettings);
-    const newImage = this.state.image && !prevState.image;
-    const imageChanged = this.state.image && prevState.image && this.state.image.name !== prevState.image.name;
-    if (newImage || channelsChanged || imageChanged) {
-      this.updateImageVolumeAndSurfacesEnabledFromAppState();
-    }
-  }
-
-  onView3DCreated(view3d: View3d): void {
-    const { userSelections } = this.state;
-    view3d.setBackgroundColor(colorArrayToFloats(userSelections.backgroundColor));
-    view3d.setShowAxis(userSelections.showAxes);
-    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
-    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
-
-    this.setState({ view3d });
-  }
-
-  setInitialChannelConfig(channelNames: string[], channelColors: ColorArray[]): ChannelState[] {
-    return channelNames.map((channel, index) => {
-      let color = (channelColors[index] ? channelColors[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
-
-      return this.initializeOneChannelSetting(null, channel, index, color);
-    });
-  }
-
-  createChannelGrouping(channels: string[]): ChannelGrouping {
-    if (!channels) {
-      return {};
-    }
-    const { viewerChannelSettings } = this.props;
-    if (!viewerChannelSettings) {
-      // return all channels
-      return {
-        [SINGLE_GROUP_CHANNEL_KEY]: channels.map((_val, index) => index),
+      const newSettings: GlobalViewerSettings = {
+        ...prevSettings,
+        viewMode,
+        region: { x: [0, 1], y: [0, 1], z: [0, 1] },
       };
-    }
+      const activeAxis = activeAxisMap[viewMode];
 
-    return makeChannelIndexGrouping(channels, viewerChannelSettings);
-  }
+      // TODO the following behavior/logic is very specific to a particular application's needs
+      // and is not necessarily appropriate for a general viewer.
+      // Why should the alpha setting matter whether we are viewing the primary image
+      // or its parent?
 
-  onNewVolumeCreated(aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void {
-    // FIXME this calls setState followed almost immediately by another setState... :-(
-    const newChannelSettings = this.updateStateOnLoadImage(aimg.imageInfo.channel_names);
+      // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
+      // If full field, dont mask
 
-    this.setState({
-      image: aimg,
-      currentlyLoadedImagePath: imageDirectory,
-      cachingInProgress: false,
-      userSelections: {
-        ...this.state.userSelections,
-        mode: doResetViewMode ? ViewMode.threeD : this.state.userSelections.mode,
-      },
-    });
-    this.initializeNewImage(aimg, newChannelSettings);
-  }
-
-  onNewChannelData(_url: string, v: Volume, channelIndex: number, keepLuts: boolean | undefined): void {
-    // const thisChannelSettings = this.getOneChannelSetting(channel.name, newChannelSettings, (channel) => channel.name === obj.channel_names[channelIndex].split('_')[0]);
-    const thisChannelSettings = this.getOneChannelSetting(
-      v.imageInfo.channel_names[channelIndex],
-      // race condition with updateStateOnLoadImage below?
-      this.state.userSelections.channelSettings
-    );
-    this.onChannelDataLoaded(v, thisChannelSettings!, channelIndex, keepLuts);
-  }
-
-  handleOpenImageException(_resp: any): void {
-    /** can uncomment when we are actually using this message var
-    let message = "Unknown Error";
-    if (resp.data && resp.data.message) {
-      message = resp.data.message;
-    }
-    else if (resp.stack) {
-      message = resp.stack;
-    }
-    else if (resp.message) {
-      message = resp.message;
-    }
-    else {
-      message = JSON.stringify(resp);
-    }
-    **/
-    // console.log(message);
-  }
-
-  openImage(imageDirectory: string, doResetViewMode: boolean, keepLuts?: boolean): void {
-    if (imageDirectory === this.state.currentlyLoadedImagePath) {
-      return;
-    }
-    const { baseUrl } = this.props;
-
-    const fullUrl = `${baseUrl}${imageDirectory}`;
-
-    const loadSpec = new LoadSpec();
-    loadSpec.url = fullUrl;
-    loadSpec.subpath = imageDirectory;
-
-    let loader: IVolumeLoader;
-    // if this does NOT end with tif or json,
-    // then we assume it's zarr.
-    if (fullUrl.endsWith(".json")) {
-      loader = new JsonImageInfoLoader();
-    } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      loader = new TiffLoader();
-    } else {
-      loader = new OMEZarrLoader();
-    }
-
-    loader
-      .createVolume(loadSpec, (url, v, channelIndex) => {
-        this.onNewChannelData(url, v, channelIndex, keepLuts);
-      })
-      .then((aimg) => {
-        this.onNewVolumeCreated(aimg, imageDirectory, doResetViewMode);
-      })
-      .catch((resp) => this.handleOpenImageException(resp));
-  }
-
-  initializeNewImage(aimg: Volume, newChannelSettings?: ChannelState[]): void {
-    // set alpha slider first time image is loaded to something that makes sense
-    let alphaLevel = this.getInitialAlphaLevel();
-    this.setUserSelectionsInState({ alphaMaskSliderLevel: alphaLevel });
-
-    // Here is where we officially hand the image to the volume-viewer
-    this.placeImageInViewer(aimg, newChannelSettings);
-  }
-
-  private getInitialAlphaLevel(): number[] {
-    const { userSelections } = this.state;
-    const { viewerConfig } = this.props;
-    let alphaLevel =
-      userSelections.imageType === ImageType.segmentedCell && userSelections.mode === ViewMode.threeD
-        ? ALPHA_MASK_SLIDER_3D_DEFAULT
-        : ALPHA_MASK_SLIDER_2D_DEFAULT;
-    // if maskAlpha is defined in viewerConfig then it will override the above
-    if (viewerConfig.maskAlpha !== undefined) {
-      alphaLevel = [viewerConfig.maskAlpha];
-    }
-    return alphaLevel;
-  }
-
-  // set up the Volume into the Viewer using the current initial settings
-  private placeImageInViewer(aimg: Volume, newChannelSettings?: ChannelState[]): void {
-    const { userSelections, view3d } = this.state;
-    if (!view3d) {
-      return;
-    }
-    const channelSetting = newChannelSettings || userSelections.channelSettings;
-    view3d.removeAllVolumes();
-    view3d.addVolume(aimg, {
-      channels: aimg.channel_names.map((name) => {
-        const ch = this.getOneChannelSetting(name, channelSetting);
-        if (!ch) {
-          return {};
-        }
-        return {
-          enabled: ch.volumeEnabled,
-          isosurfaceEnabled: ch.isosurfaceEnabled,
-          isovalue: ch.isovalue,
-          isosurfaceOpacity: ch.opacity,
-          color: ch.color,
-        };
-      }),
-    });
-
-    const alphaLevel = this.getInitialAlphaLevel();
-    const imageMask = alphaSliderToImageValue(alphaLevel);
-    view3d.updateMaskAlpha(aimg, imageMask);
-
-    view3d.setMaxProjectMode(aimg, userSelections.maxProject);
-
-    const imageBrightness = brightnessSliderToImageValue(
-      userSelections.brightnessSliderLevel,
-      userSelections.pathTrace
-    );
-    view3d.updateExposure(imageBrightness);
-
-    const imageDensity = densitySliderToImageValue(userSelections.densitySliderLevel, userSelections.pathTrace);
-    view3d.updateDensity(aimg, imageDensity);
-
-    const imageValues = gammaSliderToImageValues(userSelections.levelsSlider);
-    view3d.setGamma(aimg, imageValues.min, imageValues.scale, imageValues.max);
-
-    // update current camera mode to make sure the image gets the update
-    view3d.setCameraMode(userSelections.mode);
-    view3d.setShowBoundingBox(aimg, userSelections.showBoundingBox);
-    view3d.setBoundingBoxColor(aimg, colorArrayToFloats(userSelections.boundingBoxColor));
-    // interpolation defaults to enabled in volume-viewer
-    if (!userSelections.interpolationEnabled) {
-      view3d.setInterpolationEnabled(aimg, false);
-    }
-
-    view3d.setVolumeTranslation(aimg, this.props.transform?.translation || [0, 0, 0]);
-    view3d.setVolumeRotation(aimg, this.props.transform?.rotation || [0, 0, 0]);
-    // tell view that things have changed for this image
-    view3d.updateActiveChannels(aimg);
-  }
-
-  updateStateOnLoadImage(channelNames: string[]): ChannelState[] {
-    const { userSelections } = this.state;
-
-    const prevChannelNames = map(userSelections.channelSettings, (ele) => ele.name);
-    let newChannelSettings = isEqual(prevChannelNames, channelNames)
-      ? userSelections.channelSettings
-      : this.setInitialChannelConfig(channelNames, INIT_COLORS);
-
-    let channelGroupedByType = this.createChannelGrouping(channelNames);
-    this.setUserSelectionsInState({
-      channelSettings: newChannelSettings,
-    });
-    this.setState({
-      channelGroupedByType,
-    });
-    return newChannelSettings;
-  }
-
-  initializeLut(aimg: Volume, channelIndex: number): ControlPoint[] {
-    const histogram = aimg.getHistogram(channelIndex);
-
-    const initViewerSettings = this.props.viewerChannelSettings;
-    // find channelIndex among viewerChannelSettings.
-    const name = aimg.channel_names[channelIndex];
-    // default to percentiles
-    let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
-    // and if init settings dictate, recompute it:
-    if (initViewerSettings) {
-      const initSettings = findFirstChannelMatch(name, channelIndex, initViewerSettings);
-      if (initSettings) {
-        if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
-          let lutmod = "";
-          let lvalue = 0;
-          let lutvalues = [0, 0];
-          for (let i = 0; i < 2; ++i) {
-            const lstr = initSettings.lut[i];
-            // look at first char of string.
-            let firstchar = lstr.charAt(0);
-            if (firstchar === "m" || firstchar === "p") {
-              lutmod = firstchar;
-              lvalue = parseFloat(lstr.substring(1)) / 100.0;
-            } else {
-              lutmod = "";
-              lvalue = parseFloat(lstr);
-            }
-            if (lutmod === "m") {
-              lutvalues[i] = histogram.maxBin * lvalue;
-            } else if (lutmod === "p") {
-              lutvalues[i] = histogram.findBinOfPercentile(lvalue);
-            }
+      if (activeAxis) {
+        // switching to 2d
+        const slices = Math.max(1, getNumberOfSlices()[activeAxis]);
+        newSettings.region[activeAxis] = [0, 1 / slices];
+        if (prevSettings.viewMode === ViewMode.threeD) {
+          // Switching from 3D to 2D
+          newSettings.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
+          // if path trace was enabled in 3D turn it off when switching to 2D.
+          if (newSettings.renderMode === RenderMode.pathTrace) {
+            newSettings.renderMode = RenderMode.volumetric;
           }
-
-          lutObject = histogram.lutGenerator_minMax(
-            Math.min(lutvalues[0], lutvalues[1]),
-            Math.max(lutvalues[0], lutvalues[1])
-          );
         }
+      } else if (prevSettings.viewMode !== ViewMode.threeD && prevSettings.imageType === ImageType.segmentedCell) {
+        newSettings.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
       }
-    }
+      return newSettings;
+    },
+    imageType: (prevSettings, imageType) => {
+      setSwitchingFov(true);
+      return { ...prevSettings, imageType };
+    },
+    renderMode: (prevSettings, renderMode) => ({
+      ...prevSettings,
+      renderMode,
+      autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
+    }),
+    autorotate: (prevSettings, autorotate) => ({
+      ...prevSettings,
+      // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
+      autorotate: prevSettings.renderMode === RenderMode.pathTrace ? false : autorotate,
+    }),
+  };
 
-    const newControlPoints = lutObject.controlPoints.map((controlPoint) => ({
-      ...controlPoint,
-      color: TFEDITOR_DEFAULT_COLOR,
-    }));
-    aimg.setLut(channelIndex, lutObject.lut);
-    return newControlPoints;
-  }
+  const changeViewerSetting = useCallback<ViewerSettingUpdater>(
+    (key, value) => {
+      const changeHandler = viewerSettingsChangeHandlers[key];
+      if (changeHandler) {
+        setViewerSettings(changeHandler(viewerSettings, value));
+      } else {
+        setViewerSettings({ ...viewerSettings, [key]: value });
+      }
+    },
+    [viewerSettings, image]
+  );
 
-  onChannelDataLoaded(
+  const changeChannelSetting = useCallback<ChannelSettingUpdater>(
+    (index, key, value) => {
+      const newChannelSettings = getChannelSettings().slice();
+      newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
+      setChannelSettings(newChannelSettings);
+    },
+    [channelSettings]
+  );
+
+  const applyColorPresets = useCallback(
+    (presets: ColorArray[]): void => {
+      const newChannelSettings = channelSettings.map((channel, idx) =>
+        presets[idx] ? { ...channel, color: presets[idx] } : channel
+      );
+      setChannelSettings(newChannelSettings);
+    },
+    [channelSettings]
+  );
+
+  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>(
+    (indices, key, value) => {
+      const newChannelSettings = channelSettings.map((settings, idx) =>
+        indices.includes(idx) ? { ...settings, [key]: value } : settings
+      );
+      setChannelSettings(newChannelSettings);
+    },
+    [channelSettings]
+  );
+
+  // These last state functions are only ever used within this component - no need for a `useCallback`
+
+  const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
+    return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
+  };
+
+  const setOneChannelLoaded = (index: number): void => {
+    const newLoadedChannels = getLoadedChannels().slice();
+    newLoadedChannels[index] = true;
+    setLoadedChannels(newLoadedChannels);
+  };
+
+  // Image loading/initialization functions ///////////////////////////////////
+
+  const onChannelDataLoaded = (
     aimg: Volume,
     thisChannelsSettings: ChannelState,
     channelIndex: number,
-    keepLuts: boolean | undefined
-  ): void {
-    const { image, view3d } = this.state;
-    if (!view3d || aimg !== image) {
-      return;
-    }
-    const volenabled = thisChannelsSettings.volumeEnabled;
-    const isoenabled = thisChannelsSettings.isosurfaceEnabled;
-    view3d.setVolumeChannelOptions(aimg, channelIndex, {
-      enabled: volenabled,
-      color: thisChannelsSettings.color,
-      isosurfaceEnabled: isoenabled,
-      isovalue: thisChannelsSettings.isovalue,
-      isosurfaceOpacity: thisChannelsSettings.opacity,
-    });
-
+    keepLuts = false
+  ): void => {
     // if we want to keep the current control points
     if (thisChannelsSettings.controlPoints && keepLuts) {
       const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
       aimg.setLut(channelIndex, lut);
-      view3d.updateLuts(aimg);
     } else {
       // need to choose initial LUT
-      const newControlPoints = this.initializeLut(aimg, channelIndex);
-      this.changeOneChannelSetting(thisChannelsSettings.name, channelIndex, "controlPoints", newControlPoints);
+      const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
+      changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     }
+    view3d.updateLuts(aimg);
 
-    if (view3d) {
-      if (aimg.channelNames()[channelIndex] === this.props.viewerChannelSettings?.maskChannelName) {
-        view3d.setVolumeChannelAsMask(aimg, channelIndex);
-      }
+    if (aimg.channelNames()[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
+      view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
 
     // when any channel data has arrived:
-    if (this.state.sendingQueryRequest) {
-      this.setState({ sendingQueryRequest: false });
-    }
+    setSendingQueryRequest(false);
+    setOneChannelLoaded(channelIndex);
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
+      setImageLoaded(true);
+      setSwitchingFov(false);
     }
-  }
+  };
 
-  initializeOneChannelSetting(
+  const initializeOneChannelSetting = (
     aimg: Volume | null,
     channel: string,
     index: number,
     defaultColor: ColorArray
-  ): ChannelState {
-    const { viewerChannelSettings } = this.props;
+  ): ChannelState => {
+    const { viewerChannelSettings } = props;
     let color = defaultColor;
     let volumeEnabled = false;
     let surfaceEnabled = false;
 
     // note that this modifies aimg also
-    const newControlPoints = aimg ? this.initializeLut(aimg, index) : undefined;
+    const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
 
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
@@ -625,13 +382,108 @@ export default class App extends React.Component<AppProps, AppState> {
       isovalue: 188,
       opacity: 1.0,
       color: color,
-      dataReady: false,
       controlPoints: newControlPoints || [],
     };
-  }
+  };
 
-  loadFromRaw(): void {
-    const { rawDims, rawData } = this.props;
+  const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
+    const grouping = makeChannelIndexGrouping(channelNames, props.viewerChannelSettings);
+    setChannelGroupedByType(grouping);
+
+    const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
+    if (settingsAreEqual) {
+      return channelSettings;
+    }
+
+    const newChannelSettings = channelNames.map((channel, index) => {
+      const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
+      return initializeOneChannelSetting(null, channel, index, color);
+    });
+    setChannelSettings(newChannelSettings);
+    return newChannelSettings;
+  };
+
+  const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
+    setImage(aimg);
+
+    const channelSetting = newChannelSettings || channelSettings;
+    view3d.removeAllVolumes();
+    view3d.addVolume(aimg, {
+      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking saner on load
+      channels: aimg.channel_names.map((name) => {
+        const ch = getOneChannelSetting(name, channelSetting);
+        if (!ch) {
+          return {};
+        }
+        return {
+          enabled: ch.volumeEnabled,
+          isosurfaceEnabled: ch.isosurfaceEnabled,
+          isovalue: ch.isovalue,
+          isosurfaceOpacity: ch.opacity,
+          color: ch.color,
+        };
+      }),
+    });
+
+    imageLoadHandlers.current.forEach((effect) => effect(aimg));
+
+    const initialAlpha = getInitialAlphaLevel();
+    changeViewerSetting("maskAlpha", initialAlpha);
+    view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
+
+    view3d.updateActiveChannels(aimg);
+  };
+
+  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void => {
+    const channelNames = aimg.imageInfo.channel_names;
+    const newChannelSettings = setChannelStateForNewImage(channelNames);
+
+    setLoadedChannels(new Array(channelNames.length).fill(false));
+    setCurrentlyLoadedImagePath(imageDirectory);
+    changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
+
+    placeImageInViewer(aimg, newChannelSettings);
+  };
+
+  const openImage = async (): Promise<void> => {
+    const { fovPath, cellPath, baseUrl } = props;
+    const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
+    const fullUrl = `${baseUrl}${path}`;
+
+    if (path === currentlyLoadedImagePath) {
+      return;
+    }
+
+    setSendingQueryRequest(true);
+    setImageLoaded(false);
+
+    const loadSpec = new LoadSpec();
+    loadSpec.url = fullUrl;
+    loadSpec.subpath = path;
+
+    let loader: IVolumeLoader;
+    // if this does NOT end with tif or json,
+    // then we assume it's zarr.
+    if (fullUrl.endsWith(".json")) {
+      loader = new JsonImageInfoLoader();
+    } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
+      loader = new TiffLoader();
+    } else {
+      loader = new OMEZarrLoader();
+    }
+
+    const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
+      // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
+      // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
+      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
+      onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
+    });
+
+    onNewVolumeCreated(aimg, path, !switchingFov);
+  };
+
+  const loadFromRaw = (): void => {
+    const { rawData, rawDims } = props;
     if (!rawData || !rawDims) {
       console.error("ERROR loadFromRaw called without rawData or rawDims being set");
       return;
@@ -643,318 +495,42 @@ export default class App extends React.Component<AppProps, AppState> {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    let newChannelSettings = rawDims.channel_names.map((channel, index) => {
+    let channelSetting = rawDims.channel_names.map((channel, index) => {
       let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
-      return this.initializeOneChannelSetting(aimg, channel, index, color);
+      return initializeOneChannelSetting(aimg, channel, index, color);
     });
 
-    let channelGroupedByType = this.createChannelGrouping(rawDims.channel_names);
-
-    const channelSetting = newChannelSettings;
-
-    let alphaLevel = this.getInitialAlphaLevel();
+    setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channel_names, props.viewerChannelSettings));
+    setChannelSettings(channelSetting);
 
     // Here is where we officially hand the image to the volume-viewer
-    this.placeImageInViewer(aimg, newChannelSettings);
-
-    this.setState({
-      channelGroupedByType,
-      image: aimg,
-      userSelections: {
-        ...this.state.userSelections,
-        alphaMaskSliderLevel: alphaLevel,
-        channelSettings: channelSetting,
-      },
-    });
-  }
-
-  private channelStateChangeHandlers: ChannelStateChangeHandlers = {
-    isovalue: (isovalue, index, view3d, image) => view3d.setVolumeChannelOptions(image, index, { isovalue }),
-    colorizeEnabled: (enabled, index, view3d, image) => {
-      if (enabled) {
-        // TODO get the labelColors from the tf editor component
-        const lut = image.getHistogram(index).lutGenerator_labelColors();
-        image.setColorPalette(index, lut.lut);
-        image.setColorPaletteAlpha(index, this.state.userSelections.channelSettings[index].colorizeAlpha);
-      } else {
-        image.setColorPaletteAlpha(index, 0);
-      }
-      view3d.updateLuts(image);
-    },
-    colorizeAlpha: (alpha, index, view3d, image) => {
-      const { colorizeEnabled } = this.state.userSelections.channelSettings[index];
-      image.setColorPaletteAlpha(index, colorizeEnabled ? alpha : 0);
-      view3d.updateLuts(image);
-    },
-    opacity: (isosurfaceOpacity, index, view3d, image) =>
-      view3d.setVolumeChannelOptions(image, index, { isosurfaceOpacity }),
-    color: (color, index, view3d, image) => view3d.setVolumeChannelOptions(image, index, { color }),
+    placeImageInViewer(aimg, channelSetting);
   };
 
-  private handleChangeChannelSetting<K extends ChannelStateKey>(
-    key: K,
-    newValue: ChannelState[K],
-    index: number
-  ): void {
-    const { view3d, image } = this.state;
-    if (!view3d || !image) {
-      return;
-    }
-    const handler = this.channelStateChangeHandlers[key];
-    if (handler) {
-      handler(newValue, index, view3d, image);
-    }
-  }
+  // Imperative callbacks /////////////////////////////////////////////////////
 
-  changeOneChannelSetting<K extends ChannelStateKey>(
-    channelName: string,
-    channelIndex: number,
-    keyToChange: K,
-    newValue: ChannelState[K]
-  ): void {
-    const { userSelections } = this.state;
-    const newChannels = userSelections.channelSettings.map((channel) => {
-      return channel.name === channelName ? { ...channel, [keyToChange]: newValue } : channel;
-    });
-
-    this.setUserSelectionsInState({ channelSettings: newChannels });
-    this.handleChangeChannelSetting(keyToChange, newValue, channelIndex);
-  }
-
-  changeChannelSettings<K extends ChannelStateKey>(indices: number[], keyToChange: K, newValue: ChannelState[K]): void {
-    const { userSelections } = this.state;
-    const newChannels = userSelections.channelSettings.map((channel, index) => {
-      return {
-        ...channel,
-        [keyToChange]: includes(indices, index) ? newValue : channel[keyToChange],
-      };
-    });
-    this.setUserSelectionsInState({ channelSettings: newChannels });
-  }
-
-  setUserSelectionsInState(newState: Partial<UserSelectionState>): void {
-    this.setState({
-      userSelections: {
-        ...this.state.userSelections,
-        ...newState,
-      },
-    });
-  }
-
-  private userSelectionChangeHandlers: UserSelectionChangeHandlers = {
-    mode: (mode, view3d, _image) => view3d.setCameraMode(mode),
-    maxProject: (value, view3d, image) => {
-      view3d.setMaxProjectMode(image, value);
-      view3d.updateActiveChannels(image);
+  const saveIsosurface = useCallback(
+    (channelIndex: number, type: IsosurfaceFormat): void => {
+      if (image) view3d.saveChannelIsosurface(image, channelIndex, type);
     },
-    pathTrace: (enabled, view3d, image) => {
-      view3d.setVolumeRenderMode(enabled ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
-      view3d.updateActiveChannels(image);
-    },
+    [image]
+  );
 
-    showAxes: (showing, view3d, _image) => view3d.setShowAxis(showing),
-    showBoundingBox: (showing, view3d, image) => view3d.setShowBoundingBox(image, showing),
-    boundingBoxColor: (color, view3d, image) => view3d.setBoundingBoxColor(image, colorArrayToFloats(color)),
-    backgroundColor: (color, view3d, _image) => view3d.setBackgroundColor(colorArrayToFloats(color)),
-
-    alphaMaskSliderLevel: (value, view3d, image) => {
-      view3d.updateMaskAlpha(image, alphaSliderToImageValue(value));
-      view3d.updateActiveChannels(image);
-    },
-    brightnessSliderLevel: (value, view3d, _image) => {
-      const brightness = brightnessSliderToImageValue(value, this.state.userSelections.pathTrace);
-      view3d.updateExposure(brightness);
-    },
-    densitySliderLevel: (value, view3d, image) => {
-      const density = densitySliderToImageValue(value, this.state.userSelections.pathTrace);
-      view3d.updateDensity(image, density);
-    },
-    levelsSlider: (value, view3d, image) => {
-      const imageValues = gammaSliderToImageValues(value);
-      view3d.setGamma(image, imageValues.min, imageValues.scale, imageValues.max);
-    },
-    interpolationEnabled: (enabled, view3d, image) => view3d.setInterpolationEnabled(image, enabled),
-  };
-
-  /**
-   * Should only be called by internal methods that need to change multiple properties at once
-   * without calling multiple `setState`s. Prefer `changeUserSelection` whenever possible.
-   */
-  private handleChangeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]): void {
-    const { view3d, image } = this.state;
-    if (!view3d || !image) {
-      return;
-    }
-    const handler = this.userSelectionChangeHandlers[key];
-    if (handler) {
-      handler(newValue, view3d, image);
-    }
-  }
-
-  changeUserSelection<K extends UserSelectionKey>(key: K, newValue: UserSelectionState[K]): void {
-    this.setUserSelectionsInState({ [key]: newValue });
-    this.handleChangeUserSelection(key, newValue);
-  }
-
-  saveIsosurface(channelIndex: number, type: IsosurfaceFormat): void {
-    const { view3d, image } = this.state;
-    if (!view3d || !image) {
-      return;
-    }
-    view3d.saveChannelIsosurface(image, channelIndex, type);
-  }
-
-  saveScreenshot(): void {
-    if (!this.state.view3d) {
-      return;
-    }
-    this.state.view3d.capture((dataUrl: string) => {
+  const saveScreenshot = useCallback((): void => {
+    view3d.capture((dataUrl: string) => {
       const anchor = document.createElement("a");
       anchor.href = dataUrl;
       anchor.download = "screenshot.png";
       anchor.click();
     });
-  }
+  }, []);
 
-  onWindowResize(): void {
-    if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
-      this.toggleControlPanel(true);
-    }
-  }
+  const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
-  onViewModeChange(newMode: ViewMode): void {
-    const { userSelections } = this.state;
-    let newSelectionState: Partial<UserSelectionState> = {
-      mode: newMode,
-    };
+  const onClippingPanelVisibleChange = useCallback(
+    (open: boolean): void => {
+      const CLIPPING_PANEL_HEIGHT = 130;
 
-    // TODO the following behavior/logic is very specific to a particular application's needs
-    // and is not necessarily appropriate for a general viewer.
-    // Why should the alpha setting matter whether we are viewing the primary image
-    // or its parent?
-
-    // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-    // If full field, dont mask
-
-    if (userSelections.mode === ViewMode.threeD && newMode !== ViewMode.threeD) {
-      // Switching from 3D to 2D
-      newSelectionState = {
-        mode: newMode,
-        pathTrace: false,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_2D_DEFAULT,
-      };
-      // if path trace was enabled in 3D turn it off when switching to 2D.
-      if (userSelections.pathTrace) {
-        this.onChangeRenderingAlgorithm(RenderMode.volumetric);
-      }
-    } else if (
-      userSelections.mode !== ViewMode.threeD &&
-      newMode === ViewMode.threeD &&
-      this.state.userSelections.imageType === ImageType.segmentedCell
-    ) {
-      // switching from 2D to 3D
-      newSelectionState = {
-        mode: newMode,
-        alphaMaskSliderLevel: ALPHA_MASK_SLIDER_3D_DEFAULT,
-      };
-    }
-
-    this.handleChangeUserSelection("mode", newMode);
-    if (newSelectionState.alphaMaskSliderLevel !== undefined) {
-      this.handleChangeUserSelection("alphaMaskSliderLevel", newSelectionState.alphaMaskSliderLevel);
-    }
-    this.setUserSelectionsInState(newSelectionState);
-  }
-
-  onUpdateImageMaskAlpha(sliderValue: number[]): void {
-    this.setUserSelectionsInState({ alphaMaskSliderLevel: sliderValue });
-  }
-
-  onAutorotateChange(): void {
-    this.setUserSelectionsInState({
-      autorotate: !this.state.userSelections.autorotate,
-    });
-  }
-
-  setImageAxisClip(axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean): void {
-    if (this.state.view3d && this.state.image) {
-      this.state.view3d.setAxisClip(this.state.image, axis, minval, maxval, isOrthoAxis);
-    }
-  }
-
-  makeUpdatePixelSizeFn(i: number): (value: number) => void {
-    const { pixelSize } = this.props;
-    const imagePixelSize = pixelSize ? pixelSize.slice() : [1, 1, 1];
-    return (value: number) => {
-      const pixelSize = imagePixelSize.slice();
-      pixelSize[i] = value;
-      this.state.image?.setVoxelSize(pixelSize);
-    };
-  }
-
-  onChangeRenderingAlgorithm(newAlgorithm: RenderMode): void {
-    const { userSelections } = this.state;
-    // already set
-    if (newAlgorithm === RenderMode.volumetric) {
-      if (!userSelections.pathTrace && !userSelections.maxProject) {
-        return;
-      }
-    } else if (userSelections[newAlgorithm]) {
-      return;
-    }
-    this.setUserSelectionsInState({
-      pathTrace: newAlgorithm === RenderMode.pathTrace,
-      maxProject: newAlgorithm === RenderMode.maxProject,
-      autorotate: newAlgorithm === RenderMode.pathTrace ? false : userSelections.autorotate,
-    });
-    this.handleChangeUserSelection("pathTrace", newAlgorithm === RenderMode.pathTrace);
-    this.handleChangeUserSelection("maxProject", newAlgorithm === RenderMode.maxProject);
-  }
-
-  onSwitchFovCell(value: ImageType): void {
-    const { cellPath, fovPath } = this.props;
-    const path = value === ImageType.fullField ? fovPath : cellPath;
-    this.openImage(path, false, false);
-    this.setState({
-      sendingQueryRequest: true,
-      userSelections: {
-        ...this.state.userSelections,
-        imageType: value,
-      },
-    });
-  }
-
-  onApplyColorPresets(presets: ColorArray[]): void {
-    const { userSelections } = this.state;
-    presets.forEach((color, index) => {
-      if (index < userSelections.channelSettings.length) {
-        this.handleChangeChannelSetting("color", color, index);
-      }
-    });
-    const newChannels = userSelections.channelSettings.map((channel, channelindex) => {
-      return presets[channelindex] ? { ...channel, color: presets[channelindex] } : channel;
-    });
-    this.setUserSelectionsInState({ channelSettings: newChannels });
-  }
-
-  changeBoundingBoxColor = (color: ColorObject): void =>
-    this.changeUserSelection("boundingBoxColor", colorObjectToArray(color));
-
-  changeBackgroundColor = (color: ColorObject): void =>
-    this.changeUserSelection("backgroundColor", colorObjectToArray(color));
-
-  changeAxisShowing = (showing: boolean): void => this.changeUserSelection("showAxes", showing);
-  changeBoundingBoxShowing = (showing: boolean): void => this.changeUserSelection("showBoundingBox", showing);
-
-  onResetCamera(): void {
-    this.state.view3d?.resetCamera();
-  }
-
-  onClippingPanelVisibleChange(open: boolean): void {
-    const CLIPPING_PANEL_HEIGHT = 130;
-
-    const { view3d, userSelections } = this.state;
-    if (view3d) {
       let axisY = AXIS_MARGIN_DEFAULT[1];
       let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
       if (open) {
@@ -966,101 +542,25 @@ export default class App extends React.Component<AppProps, AppState> {
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
-      if (userSelections.showAxes) {
+      if (viewerSettings.showAxes) {
         view3d.setShowAxis(false);
       }
-    }
-  }
+    },
+    [viewerSettings.showAxes]
+  );
 
-  onClippingPanelVisibleChangeEnd(_open: boolean): void {
-    const { view3d, userSelections } = this.state;
-    if (view3d) {
+  const onClippingPanelVisibleChangeEnd = useCallback(
+    (_open: boolean): void => {
       view3d.setShowScaleBar(true);
-      if (userSelections.showAxes) {
+      if (viewerSettings.showAxes) {
         view3d.setShowAxis(true);
       }
-    }
-  }
+    },
+    [viewerSettings.showAxes]
+  );
 
-  updateChannelTransferFunction(index: number, lut: Uint8Array): void {
-    if (this.state.image) {
-      this.state.image.setLut(index, lut);
-      if (this.state.view3d) {
-        this.state.view3d.updateLuts(this.state.image);
-      }
-    }
-  }
-
-  beginRequestImage(type?: ImageType): void {
-    const { fovPath, cellPath } = this.props;
-    let imageType = type || this.state.userSelections.imageType;
-    let path = imageType === ImageType.fullField ? fovPath : cellPath;
-    this.setState({
-      sendingQueryRequest: true,
-      userSelections: {
-        ...this.state.userSelections,
-        imageType,
-      },
-    });
-    this.openImage(path, true);
-  }
-
-  getOneChannelSetting(channelName: string, newSettings?: ChannelState[]): ChannelState | undefined {
-    const { userSelections } = this.state;
-    const channelSettings = newSettings || userSelections.channelSettings;
-    return find(channelSettings, (channel) => {
-      return channel.name === channelName;
-    });
-  }
-
-  updateImageVolumeAndSurfacesEnabledFromAppState(): void {
-    const { image, view3d } = this.state;
-    // apply channel settings
-    // image.channel_names
-    if (!image || !view3d) {
-      return;
-    }
-    image.channel_names.forEach((channelName, imageIndex) => {
-      if (image.getChannel(imageIndex).loaded) {
-        const channelSetting = this.getOneChannelSetting(channelName);
-        if (!channelSetting) {
-          return;
-        }
-        const volenabled = channelSetting.volumeEnabled;
-        const isoenabled = channelSetting.isosurfaceEnabled;
-
-        view3d.setVolumeChannelOptions(image, imageIndex, {
-          enabled: volenabled,
-          color: channelSetting.color,
-          isosurfaceEnabled: isoenabled,
-          isovalue: channelSetting.isovalue,
-          isosurfaceOpacity: channelSetting.opacity,
-        });
-      }
-    });
-
-    view3d.updateActiveChannels(image);
-  }
-
-  toggleControlPanel(value: boolean): void {
-    if (this.props.onControlPanelToggle) {
-      this.props.onControlPanelToggle(value);
-    }
-
-    this.setUserSelectionsInState({ controlPanelClosed: value });
-  }
-
-  getNumberOfSlices(): { x: number; y: number; z: number } {
-    if (this.state.image) {
-      const { x, y, z } = this.state.image;
-      return { x, y, z };
-    }
-    return { x: 0, y: 0, z: 0 };
-  }
-
-  getMetadata(): MetadataRecord {
-    const { metadata, metadataFormatter } = this.props;
-    const { image } = this.state;
+  const getMetadata = useCallback((): MetadataRecord => {
+    const { metadata, metadataFormatter } = props;
 
     let imageMetadata = image?.imageMetadata as MetadataRecord;
     if (imageMetadata && metadataFormatter) {
@@ -1072,102 +572,260 @@ export default class App extends React.Component<AppProps, AppState> {
     } else {
       return metadata || {};
     }
-  }
+  }, [props.metadata, props.metadataFormatter, image]);
 
-  render(): React.ReactNode {
-    const { renderConfig, cellDownloadHref, fovDownloadHref, viewerChannelSettings } = this.props;
-    const { userSelections } = this.state;
-    const { maxProject, pathTrace } = userSelections;
-    return (
-      <Layout className="cell-viewer-app" style={{ height: this.props.appHeight }}>
-        <Sider
-          className="control-panel-holder"
-          collapsible={true}
-          defaultCollapsed={false}
-          collapsedWidth={50}
-          trigger={null}
-          collapsed={this.state.userSelections.controlPanelClosed}
-          width={500}
-        >
-          <ControlPanel
-            renderConfig={renderConfig}
-            getMetadata={() => this.getMetadata()}
-            // image state
-            imageName={this.state.image?.name}
-            hasImage={!!this.state.image}
-            pixelSize={this.state.image ? this.state.image.pixel_size : [1, 1, 1]}
-            channelDataChannels={this.state.image?.channels}
-            channelGroupedByType={this.state.channelGroupedByType}
-            // user selections
-            maxProjectOn={userSelections.maxProject}
-            channelSettings={userSelections.channelSettings}
-            showBoundingBox={userSelections.showBoundingBox}
-            backgroundColor={userSelections.backgroundColor}
-            boundingBoxColor={userSelections.boundingBoxColor}
-            alphaMaskSliderLevel={userSelections.alphaMaskSliderLevel}
-            brightnessSliderLevel={userSelections.brightnessSliderLevel}
-            densitySliderLevel={userSelections.densitySliderLevel}
-            gammaSliderLevel={userSelections.levelsSlider}
-            interpolationEnabled={userSelections.interpolationEnabled}
-            collapsed={userSelections.controlPanelClosed}
-            // functions
-            setCollapsed={this.toggleControlPanel}
-            saveIsosurface={this.saveIsosurface}
-            changeUserSelection={this.changeUserSelection}
-            updateChannelTransferFunction={this.updateChannelTransferFunction}
-            setImageAxisClip={this.setImageAxisClip}
-            onApplyColorPresets={this.onApplyColorPresets}
-            makeUpdatePixelSizeFn={this.makeUpdatePixelSizeFn}
-            changeChannelSettings={this.changeChannelSettings}
-            changeOneChannelSetting={this.changeOneChannelSetting}
-            changeBackgroundColor={this.changeBackgroundColor}
-            changeBoundingBoxColor={this.changeBoundingBoxColor}
-            viewerChannelSettings={viewerChannelSettings}
-          />
-        </Sider>
-        <Layout className="cell-viewer-wrapper" style={{ margin: this.props.canvasMargin }}>
-          <Content>
-            <Toolbar
-              mode={userSelections.mode}
-              fovDownloadHref={fovDownloadHref}
-              cellDownloadHref={cellDownloadHref}
-              autorotate={userSelections.autorotate}
-              pathTraceOn={userSelections.pathTrace}
-              imageType={userSelections.imageType}
-              hasParentImage={!!this.props.fovPath}
-              hasCellId={!!this.props.cellId}
-              canPathTrace={this.state.view3d ? this.state.view3d.hasWebGL2() : false}
-              showAxes={userSelections.showAxes}
-              showBoundingBox={userSelections.showBoundingBox}
-              renderSetting={
-                maxProject ? RenderMode.maxProject : pathTrace ? RenderMode.pathTrace : RenderMode.volumetric
-              }
-              onViewModeChange={this.onViewModeChange}
-              onResetCamera={this.onResetCamera}
-              onAutorotateChange={this.onAutorotateChange}
-              onSwitchFovCell={this.onSwitchFovCell}
-              onChangeRenderingAlgorithm={this.onChangeRenderingAlgorithm}
-              changeAxisShowing={this.changeAxisShowing}
-              changeBoundingBoxShowing={this.changeBoundingBoxShowing}
-              downloadScreenshot={this.saveScreenshot}
-              renderConfig={renderConfig}
-            />
-            <CellViewerCanvasWrapper
-              image={this.state.image}
-              setAxisClip={this.setImageAxisClip}
-              mode={userSelections.mode}
-              autorotate={userSelections.autorotate}
-              loadingImage={this.state.sendingQueryRequest}
-              numSlices={this.getNumberOfSlices()}
-              onView3DCreated={this.onView3DCreated}
-              appHeight={this.props.appHeight}
-              renderConfig={renderConfig}
-              onClippingPanelVisibleChange={this.onClippingPanelVisibleChange}
-              onClippingPanelVisibleChangeEnd={this.onClippingPanelVisibleChangeEnd}
-            />
-          </Content>
-        </Layout>
-      </Layout>
+  // Effects //////////////////////////////////////////////////////////////////
+
+  // On mount
+  useEffect(() => {
+    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
+    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
+
+    const onResize = (): void => {
+      if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
+        setControlPanelClosed(true);
+      }
+    };
+    const onResizeDebounced = debounce(onResize, 500);
+
+    window.addEventListener("resize", onResizeDebounced);
+    return () => window.removeEventListener("resize", onResizeDebounced);
+  }, []);
+
+  // Hook to trigger image load: on mount, when `cellId` changes, when `imageType` changes
+  useEffect(() => {
+    if (props.rawDims && props.rawData) {
+      loadFromRaw();
+    } else {
+      openImage();
+    }
+  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
+
+  useEffect(
+    () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
+    [controlPanelClosed, props.onControlPanelToggle]
+  );
+
+  useEffect(() => {
+    // delayed for the animation to finish
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+    }, 200);
+  }, [controlPanelClosed]);
+
+  /** Custom effect hook for viewer updates that depend on `image`, so we don't have to repeatedly null-check it */
+  const useImageEffect: UseImageEffectType = (effect, deps) => {
+    useEffect(() => {
+      if (image && imageLoaded) {
+        return effect(image);
+      }
+    }, [...deps, image, imageLoaded]);
+  };
+
+  const imageLoadHandlers = useRef<((image: Volume) => void)[]>([]);
+  imageLoadHandlers.current = [];
+  /**
+   * An `ImageEffect` that should also run immediately when a new volume is created,
+   * rather than giving the volume a chance to render with its default settings
+   */
+  const useImageLoadEffect: UseImageEffectType = (effect, deps) => {
+    useImageEffect(effect, deps);
+    imageLoadHandlers.current.push(effect);
+  };
+
+  // Effects to imperatively sync `viewerSettings` to `view3d`
+
+  useImageEffect(
+    (_currentImage) => {
+      view3d.setCameraMode(viewerSettings.viewMode);
+      view3d.resize(null);
+    },
+    [viewerSettings.viewMode]
+  );
+
+  useImageEffect((_currentImage) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
+
+  useImageEffect((_currentImage) => view3d.setShowAxis(viewerSettings.showAxes), [viewerSettings.showAxes]);
+
+  useImageEffect(
+    (_currentImage) => view3d.setBackgroundColor(colorArrayToFloats(viewerSettings.backgroundColor)),
+    [viewerSettings.backgroundColor]
+  );
+
+  useImageEffect(
+    (currentImage) => view3d.setBoundingBoxColor(currentImage, colorArrayToFloats(viewerSettings.boundingBoxColor)),
+    [viewerSettings.boundingBoxColor]
+  );
+
+  useImageEffect(
+    (currentImage) => view3d.setShowBoundingBox(currentImage, viewerSettings.showBoundingBox),
+    [viewerSettings.showBoundingBox]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => {
+      const { renderMode } = viewerSettings;
+      view3d.setMaxProjectMode(currentImage, renderMode === RenderMode.maxProject);
+      view3d.setVolumeRenderMode(renderMode === RenderMode.pathTrace ? RENDERMODE_PATHTRACE : RENDERMODE_RAYMARCH);
+      view3d.updateActiveChannels(currentImage);
+    },
+    [viewerSettings.renderMode]
+  );
+
+  useImageEffect(
+    (currentImage) => {
+      view3d.updateMaskAlpha(currentImage, alphaSliderToImageValue(viewerSettings.maskAlpha));
+      view3d.updateActiveChannels(currentImage);
+    },
+    [viewerSettings.maskAlpha]
+  );
+
+  useImageLoadEffect(
+    (_currentImage) => {
+      const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
+      const brightness = brightnessSliderToImageValue(viewerSettings.brightness, isPathTracing);
+      view3d.updateExposure(brightness);
+    },
+    [viewerSettings.brightness]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => {
+      const isPathTracing = viewerSettings.renderMode === RenderMode.pathTrace;
+      const density = densitySliderToImageValue(viewerSettings.density, isPathTracing);
+      view3d.updateDensity(currentImage, density);
+    },
+    [viewerSettings.density]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => {
+      const imageValues = gammaSliderToImageValues(viewerSettings.levels);
+      view3d.setGamma(currentImage, imageValues.min, imageValues.scale, imageValues.max);
+    },
+    [viewerSettings.levels]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
+    [viewerSettings.interpolationEnabled]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => view3d.setVolumeTranslation(currentImage, props.transform?.translation || [0, 0, 0]),
+    [props.transform?.translation]
+  );
+
+  useImageLoadEffect(
+    (currentImage) => view3d.setVolumeRotation(currentImage, props.transform?.rotation || [0, 0, 0]),
+    [props.transform?.rotation]
+  );
+
+  const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]): void => {
+    useImageEffect(
+      (currentImage) => {
+        const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
+        view3d.setAxisClip(currentImage, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
+      },
+      [minval, maxval]
     );
-  }
-}
+  };
+  usePerAxisClippingUpdater("x", viewerSettings.region.x);
+  usePerAxisClippingUpdater("y", viewerSettings.region.y);
+  usePerAxisClippingUpdater("z", viewerSettings.region.z);
+
+  // Rendering ////////////////////////////////////////////////////////////////
+
+  const showControls = { ...defaultShownControls, ...props.showControls };
+
+  return (
+    <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
+      {channelSettings.map((channelState, index) => (
+        <ChannelUpdater
+          key={`${index}_${channelState.name}`}
+          {...{ channelState, index }}
+          view3d={view3d}
+          image={image}
+          channelLoaded={loadedChannels[index]}
+        />
+      ))}
+      <Sider
+        className="control-panel-holder"
+        collapsible={true}
+        defaultCollapsed={false}
+        collapsedWidth={50}
+        trigger={null}
+        collapsed={controlPanelClosed}
+        width={500}
+      >
+        <ControlPanel
+          showControls={showControls}
+          // image state
+          imageName={image?.name}
+          imageLoaded={imageLoaded}
+          hasImage={!!image}
+          pixelSize={image ? image.pixel_size : [1, 1, 1]}
+          channelDataChannels={image?.channels}
+          channelGroupedByType={channelGroupedByType}
+          // user selections
+          channelSettings={channelSettings}
+          showBoundingBox={viewerSettings.showBoundingBox}
+          backgroundColor={viewerSettings.backgroundColor}
+          boundingBoxColor={viewerSettings.boundingBoxColor}
+          maskAlpha={viewerSettings.maskAlpha}
+          brightness={viewerSettings.brightness}
+          density={viewerSettings.density}
+          levels={viewerSettings.levels}
+          interpolationEnabled={viewerSettings.interpolationEnabled}
+          collapsed={controlPanelClosed}
+          // functions
+          changeViewerSetting={changeViewerSetting}
+          setCollapsed={setControlPanelClosed}
+          saveIsosurface={saveIsosurface}
+          onApplyColorPresets={applyColorPresets}
+          changeChannelSetting={changeChannelSetting}
+          changeMultipleChannelSettings={changeMultipleChannelSettings}
+          viewerChannelSettings={props.viewerChannelSettings}
+          getMetadata={getMetadata}
+        />
+      </Sider>
+      <Layout className="cell-viewer-wrapper" style={{ margin: props.canvasMargin }}>
+        <Content>
+          <Toolbar
+            viewMode={viewerSettings.viewMode}
+            fovDownloadHref={props.fovDownloadHref}
+            cellDownloadHref={props.cellDownloadHref}
+            autorotate={viewerSettings.autorotate}
+            imageType={viewerSettings.imageType}
+            hasParentImage={!!props.fovPath}
+            hasCellId={!!props.cellId}
+            canPathTrace={view3d ? view3d.hasWebGL2() : false}
+            showAxes={viewerSettings.showAxes}
+            showBoundingBox={viewerSettings.showBoundingBox}
+            renderMode={viewerSettings.renderMode}
+            resetCamera={resetCamera}
+            downloadScreenshot={saveScreenshot}
+            changeViewerSetting={changeViewerSetting}
+            showControls={showControls}
+          />
+          <CellViewerCanvasWrapper
+            view3d={view3d}
+            image={image}
+            viewMode={viewerSettings.viewMode}
+            autorotate={viewerSettings.autorotate}
+            loadingImage={sendingQueryRequest}
+            numSlices={getNumberOfSlices()}
+            region={viewerSettings.region}
+            appHeight={props.appHeight}
+            showControls={showControls}
+            changeViewerSetting={changeViewerSetting}
+            onClippingPanelVisibleChange={onClippingPanelVisibleChange}
+            onClippingPanelVisibleChangeEnd={onClippingPanelVisibleChangeEnd}
+          />
+        </Content>
+      </Layout>
+    </Layout>
+  );
+};
+
+export default App;

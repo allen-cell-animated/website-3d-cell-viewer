@@ -3,29 +3,27 @@ import { View3d, Volume } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import { AxisName, Styles } from "../../shared/types";
+import { PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
+import { ViewerSettingUpdater } from "../App/types";
 
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
 import "./styles.css";
 
 interface ViewerWrapperProps {
+  view3d: View3d;
   autorotate: boolean;
   loadingImage: boolean;
-  mode: ViewMode;
+  viewMode: ViewMode;
   appHeight: string;
   image: Volume | null;
-  numSlices: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  renderConfig: {
+  numSlices: PerAxis<number>;
+  region: PerAxis<[number, number]>;
+  showControls: {
     axisClipSliders: boolean;
   };
-  onView3DCreated: (view3d: View3d) => void;
-  setAxisClip: (axis: AxisName, minval: number, maxval: number, isOrthoAxis: boolean) => void;
+  changeViewerSetting: ViewerSettingUpdater;
   onClippingPanelVisibleChange?: (open: boolean) => void;
   onClippingPanelVisibleChangeEnd?: (open: boolean) => void;
 }
@@ -34,7 +32,6 @@ interface ViewerWrapperState {}
 
 export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
   private view3dviewerRef: React.RefObject<HTMLDivElement>;
-  private view3D?: View3d;
 
   constructor(props: ViewerWrapperProps) {
     super(props);
@@ -42,25 +39,12 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   componentDidMount(): void {
-    if (!this.view3D) {
-      this.view3D = new View3d({ parentElement: this.view3dviewerRef.current! });
-      this.props.onView3DCreated(this.view3D);
-      this.view3D.setAutoRotate(this.props.autorotate);
-    }
+    this.view3dviewerRef.current!.appendChild(this.props.view3d.getDOMElement());
+    this.props.view3d.setAutoRotate(this.props.autorotate);
   }
 
-  componentDidUpdate(prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
-    if (!this.view3D) {
-      return;
-    }
-    if (prevProps.mode && prevProps.mode !== this.props.mode) {
-      this.view3D.setCameraMode(this.props.mode);
-    }
-    if (prevProps.autorotate !== this.props.autorotate) {
-      this.view3D.setAutoRotate(this.props.autorotate);
-    }
-
-    this.view3D.resize(null);
+  componentDidUpdate(_prevProps: ViewerWrapperProps, _prevState: ViewerWrapperState): void {
+    this.props.view3d.resize(null);
   }
 
   renderOverlay(): React.ReactNode {
@@ -72,14 +56,14 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
 
     const noImageText =
       !this.props.loadingImage && !this.props.image ? <div style={STYLES.noImage}>No image selected</div> : null;
-    if (!!noImageText && this.view3D) {
-      this.view3D.removeAllVolumes();
+    if (!!noImageText && this.props.view3d) {
+      this.props.view3d.removeAllVolumes();
     }
     return noImageText || spinner;
   }
 
   render(): React.ReactNode {
-    const { appHeight, renderConfig, image, numSlices, mode, setAxisClip } = this.props;
+    const { appHeight, changeViewerSetting, showControls, image, numSlices, viewMode, region } = this.props;
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
@@ -88,8 +72,13 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
           onVisibleChange={this.props.onClippingPanelVisibleChange}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
-          {renderConfig.axisClipSliders && !!image && (
-            <AxisClipSliders mode={mode} setAxisClip={setAxisClip} numSlices={numSlices} />
+          {showControls.axisClipSliders && !!image && (
+            <AxisClipSliders
+              mode={viewMode}
+              changeViewerSetting={changeViewerSetting}
+              numSlices={numSlices}
+              region={region}
+            />
           )}
         </BottomPanel>
         {this.renderOverlay()}

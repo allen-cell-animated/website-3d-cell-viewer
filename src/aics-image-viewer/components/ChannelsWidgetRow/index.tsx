@@ -16,7 +16,7 @@ import {
   ColorArray,
   colorArrayToObject,
 } from "../../shared/utils/colorRepresentations";
-import { ChannelStateKey, ChannelState } from "../../shared/utils/viewerChannelSettings";
+import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 
@@ -24,9 +24,7 @@ const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
 
 interface ChannelsWidgetRowProps {
-  imageName: string | undefined;
   index: number;
-  channelName: string;
   name: string;
   volumeChecked: boolean;
   isosurfaceChecked: boolean;
@@ -36,14 +34,9 @@ interface ChannelsWidgetRowProps {
   channelControlPoints: ControlPoint[];
   channelDataForChannel: Channel;
 
-  changeOneChannelSetting: <K extends ChannelStateKey>(
-    channelName: string,
-    channelIndex: number,
-    keyToChange: K,
-    newValue: ChannelState[K]
-  ) => void;
+  changeChannelSetting: ChannelSettingUpdater;
+
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
-  updateChannelTransferFunction: (index: number, lut: Uint8Array) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
@@ -60,26 +53,26 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 
   volumeCheckHandler({ target }: CheckboxChangeEvent): void {
-    const { channelName, index, changeOneChannelSetting, isosurfaceChecked } = this.props;
+    const { index, changeChannelSetting, isosurfaceChecked } = this.props;
     if (!target.checked && !isosurfaceChecked) {
       this.setState({ controlsOpen: false });
     }
-    changeOneChannelSetting(channelName, index, "volumeEnabled", target.checked);
+    changeChannelSetting(index, "volumeEnabled", target.checked);
   }
 
   isosurfaceCheckHandler({ target }: CheckboxChangeEvent): void {
-    const { channelName, index, changeOneChannelSetting, volumeChecked } = this.props;
+    const { index, changeChannelSetting, volumeChecked } = this.props;
     if (!target.checked && !volumeChecked) {
       this.setState({ controlsOpen: false });
     }
-    changeOneChannelSetting(channelName, index, "isosurfaceEnabled", target.checked);
+    changeChannelSetting(index, "isosurfaceEnabled", target.checked);
   }
 
   createChannelSettingHandler =
     <K extends ChannelStateKey>(settingKey: K) =>
     (newValue: ChannelState[K]) => {
-      const { channelName, index, changeOneChannelSetting } = this.props;
-      changeOneChannelSetting(channelName, index, settingKey, newValue);
+      const { index, changeChannelSetting } = this.props;
+      changeChannelSetting(index, settingKey, newValue);
     };
 
   onIsovalueChange = this.createChannelSettingHandler("isovalue");
@@ -119,9 +112,8 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 
   onColorChange(newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void {
-    const { channelName } = this.props;
     const color = colorObjectToArray(newRGB);
-    this.props.changeOneChannelSetting(channelName, index!, "color", color);
+    this.props.changeChannelSetting(index!, "color", color);
   }
 
   createColorPicker = (): React.ReactNode => (
@@ -153,27 +145,17 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   ];
 
   createTFEditor(): React.ReactNode {
-    const {
-      channelControlPoints,
-      channelDataForChannel,
-      colorizeEnabled,
-      colorizeAlpha,
-      updateChannelTransferFunction,
-      index,
-      imageName,
-    } = this.props;
+    const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha, index } = this.props;
     return (
       <TfEditor
         id={"TFEditor" + index}
         index={index}
-        imageName={imageName}
         fit-to-data={false}
         width={250}
         height={150}
         volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
-        updateChannelTransferFunction={updateChannelTransferFunction}
         updateChannelLutControlPoints={this.createChannelSettingHandler("controlPoints")}
         updateColorizeMode={this.createChannelSettingHandler("colorizeEnabled")}
         updateColorizeAlpha={this.createChannelSettingHandler("colorizeAlpha")}

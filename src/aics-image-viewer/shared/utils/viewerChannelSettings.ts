@@ -1,4 +1,4 @@
-import { ControlPoint, View3d, Volume } from "@aics/volume-viewer";
+import { ControlPoint } from "@aics/volume-viewer";
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 import { ColorArray } from "./colorRepresentations";
 
@@ -12,14 +12,16 @@ export interface ChannelState {
   colorizeAlpha: number;
   opacity: number;
   color: ColorArray;
-  dataReady: boolean;
   controlPoints: ControlPoint[];
 }
 
 export type ChannelStateKey = keyof ChannelState;
-export type ChannelStateChangeHandlers = {
-  [K in ChannelStateKey]?: (value: ChannelState[K], index: number, view3d: View3d, image: Volume) => void;
-};
+export type ChannelSettingUpdater = <K extends ChannelStateKey>(index: number, key: K, value: ChannelState[K]) => void;
+export type MultipleChannelSettingsUpdater = <K extends ChannelStateKey>(
+  indices: number[],
+  key: K,
+  value: ChannelState[K]
+) => void;
 
 /** Settings for a single channel, as passed in via props by App users */
 export interface ViewerChannelSetting {
@@ -130,10 +132,15 @@ export function getDisplayName(name: string, index: number, settings?: ViewerCha
   return name;
 }
 
-export function makeChannelIndexGrouping(
-  channels: string[],
-  settings: ViewerChannelSettings
-): ChannelGrouping {
+export function makeChannelIndexGrouping(channels: string[], settings?: ViewerChannelSettings): ChannelGrouping {
+  if (!channels) {
+    return {};
+  }
+  if (!settings) {
+    // return all channels
+    return { [SINGLE_GROUP_CHANNEL_KEY]: channels.map((_val, index) => index) };
+  }
+
   const groups = settings.groups;
   const grouping: ChannelGrouping = {};
   const channelsMatched: number[] = [];

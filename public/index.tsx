@@ -7,8 +7,9 @@ import "antd/dist/antd.less";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
-import { ImageViewerApp, ViewerChannelSettings } from "../src";
+import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import FirebaseRequest from "./firebase";
+import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
 export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   groups: [
@@ -77,12 +78,12 @@ const args = {
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
 };
-const viewerConfig = {
+const viewerSettings: Partial<GlobalViewerSettings> = {
   showAxes: false,
   showBoundingBox: false,
   autorotate: false,
-  view: "3D", // "XY", "XZ", "YZ"
-  mode: "default", // "pathtrace", "maxprojection"
+  viewMode: ViewMode.threeD,
+  renderMode: RenderMode.volumetric,
   maskAlpha: 50,
   brightness: 70,
   density: 50,
@@ -93,7 +94,7 @@ const viewerConfig = {
 
 if (params) {
   if (params.mask) {
-    viewerConfig.maskAlpha = parseInt(params.mask, 10);
+    viewerSettings.maskAlpha = parseInt(params.mask, 10);
   }
   if (params.ch) {
     // ?ch=1,2
@@ -262,7 +263,7 @@ function runApp() {
       fovPath={args.fovPath}
       fovDownloadHref={args.fovDownloadHref}
       cellDownloadHref={args.cellDownloadHref}
-      viewerConfig={viewerConfig}
+      viewerSettings={viewerSettings}
       viewerChannelSettings={args.initialChannelSettings}
     />,
     document.getElementById("cell-viewer")

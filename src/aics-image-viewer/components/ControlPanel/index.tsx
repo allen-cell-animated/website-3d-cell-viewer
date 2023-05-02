@@ -16,10 +16,11 @@ import { MetadataRecord } from "../../shared/types";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
-  renderConfig: GlobalVolumeControlsProps["renderConfig"] & {
-    colorPresetsDropdown: boolean;
-    metadataViewer: boolean;
-  };
+  showControls: GlobalVolumeControlsProps["showControls"] &
+    CustomizeWidgetProps["showControls"] & {
+      colorPresetsDropdown: boolean;
+      metadataViewer: boolean;
+    };
   getMetadata: () => MetadataRecord;
   collapsed: boolean;
   setCollapsed: (value: boolean) => void;
@@ -40,7 +41,7 @@ const ControlTabNames = {
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = React.useState(ControlTab.Channels);
 
-  const { viewerChannelSettings, renderConfig, hasImage } = props;
+  const { viewerChannelSettings, showControls, hasImage } = props;
 
   // TODO key is a number, but ClickParam assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
@@ -91,27 +92,26 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.renderConfig.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
+        {props.showControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
         <Card
           bordered={false}
           className="control-panel"
-          title={renderConfig.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+          title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
         >
           {hasImage && (
             <div className="channel-rows-list">
               {tab === ControlTab.Channels && (
                 <ChannelsWidget
-                  imageName={props.imageName}
+                  imageLoaded={props.imageLoaded}
                   channelSettings={props.channelSettings}
                   channelDataChannels={props.channelDataChannels}
                   channelGroupedByType={props.channelGroupedByType}
-                  changeChannelSettings={props.changeChannelSettings}
+                  changeMultipleChannelSettings={props.changeMultipleChannelSettings}
                   saveIsosurface={props.saveIsosurface}
-                  updateChannelTransferFunction={props.updateChannelTransferFunction}
-                  changeOneChannelSetting={props.changeOneChannelSetting}
+                  changeChannelSetting={props.changeChannelSetting}
                   onColorChangeComplete={props.onColorChangeComplete}
                   onApplyColorPresets={props.onApplyColorPresets}
                   filterFunc={props.filterFunc}
@@ -123,24 +123,23 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   <GlobalVolumeControls
                     imageName={props.imageName}
                     pixelSize={props.pixelSize}
-                    changeUserSelection={props.changeUserSelection}
-                    setImageAxisClip={props.setImageAxisClip}
-                    makeUpdatePixelSizeFn={props.makeUpdatePixelSizeFn}
-                    alphaMaskSliderLevel={props.alphaMaskSliderLevel}
-                    brightnessSliderLevel={props.brightnessSliderLevel}
-                    densitySliderLevel={props.densitySliderLevel}
-                    gammaSliderLevel={props.gammaSliderLevel}
+                    changeViewerSetting={props.changeViewerSetting}
+                    maskAlpha={props.maskAlpha}
+                    brightness={props.brightness}
+                    density={props.density}
+                    levels={props.levels}
                     interpolationEnabled={props.interpolationEnabled}
-                    maxProjectOn={props.maxProjectOn}
-                    renderConfig={renderConfig}
+                    showControls={showControls}
                   />
-                  <CustomizeWidget
-                    backgroundColor={props.backgroundColor}
-                    boundingBoxColor={props.boundingBoxColor}
-                    changeBackgroundColor={props.changeBackgroundColor}
-                    changeBoundingBoxColor={props.changeBoundingBoxColor}
-                    showBoundingBox={props.showBoundingBox}
-                  />
+                  {(showControls.backgroundColorPicker || showControls.boundingBoxColorPicker) && (
+                    <CustomizeWidget
+                      backgroundColor={props.backgroundColor}
+                      boundingBoxColor={props.boundingBoxColor}
+                      changeViewerSetting={props.changeViewerSetting}
+                      showBoundingBox={props.showBoundingBox}
+                      showControls={props.showControls}
+                    />
+                  )}
                 </>
               )}
               {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
