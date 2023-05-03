@@ -136,9 +136,10 @@ const defaultProps: AppProps = {
 };
 
 /** A `useState` that also creates a getter function for breaking through closures */
-function useStateWithGetter<T>(initialState: T): [T, (value: T) => void, () => T] {
+function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
   const [state, setState] = useState(initialState);
-  const stateRef = useRef(initialState);
+  const isSetterFunction = (val: T | (() => T)): val is () => T => typeof val === "function";
+  const stateRef = useRef(isSetterFunction(initialState) ? initialState() : initialState);
   const wrappedSetState = useCallback((value: T) => {
     stateRef.current = value;
     setState(value);
@@ -182,7 +183,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // These are the major parts of `App` state
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
-  const [viewerSettings, setViewerSettings] = useState<GlobalViewerSettings>(() => ({
+  const [viewerSettings, setViewerSettings, getViewerSettings] = useStateWithGetter<GlobalViewerSettings>(() => ({
     ...defaultViewerSettings,
     ...props.viewerSettings,
   }));
@@ -259,9 +260,9 @@ const App: React.FC<AppProps> = (props) => {
     (key, value) => {
       const changeHandler = viewerSettingsChangeHandlers[key];
       if (changeHandler) {
-        setViewerSettings(changeHandler(viewerSettings, value));
+        setViewerSettings(changeHandler(getViewerSettings(), value));
       } else {
-        setViewerSettings({ ...viewerSettings, [key]: value });
+        setViewerSettings({ ...getViewerSettings(), [key]: value });
       }
     },
     [viewerSettings, image]
