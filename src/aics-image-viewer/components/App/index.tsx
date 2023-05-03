@@ -405,7 +405,7 @@ const App: React.FC<AppProps> = (props) => {
     return newChannelSettings;
   };
 
-  const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
+  const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[], doResetMaskAlpha = true): void => {
     setImage(aimg);
 
     const channelSetting = newChannelSettings || channelSettings;
@@ -429,21 +429,14 @@ const App: React.FC<AppProps> = (props) => {
 
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
-    const initialAlpha = getInitialAlphaLevel();
-    changeViewerSetting("maskAlpha", initialAlpha);
-    view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
+    if (doResetMaskAlpha) {
+      console.log("reset mask alpha");
+      const initialAlpha = getInitialAlphaLevel();
+      changeViewerSetting("maskAlpha", initialAlpha);
+      view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
+    }
 
     view3d.updateActiveChannels(aimg);
-  };
-
-  const onNewVolumeCreated = (aimg: Volume, doResetViewMode: boolean): void => {
-    const channelNames = aimg.imageInfo.channel_names;
-    const newChannelSettings = setChannelStateForNewImage(channelNames);
-
-    setLoadedChannels(new Array(channelNames.length).fill(false));
-    changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
-
-    placeImageInViewer(aimg, newChannelSettings);
   };
 
   const openImage = async (): Promise<void> => {
@@ -484,7 +477,18 @@ const App: React.FC<AppProps> = (props) => {
     });
 
     setCurrentImageLoadSpec(loadSpec);
-    onNewVolumeCreated(aimg, !(switchingFov || samePath));
+
+    const channelNames = aimg.imageInfo.channel_names;
+    const newChannelSettings = setChannelStateForNewImage(channelNames);
+
+    setLoadedChannels(new Array(channelNames.length).fill(false));
+
+    // if this image is completely unrelated to the previous image, switch view mode
+    if (!switchingFov && !samePath) {
+      changeViewerSetting("viewMode", ViewMode.threeD);
+    }
+
+    placeImageInViewer(aimg, newChannelSettings, !samePath);
   };
 
   const loadFromRaw = (): void => {
