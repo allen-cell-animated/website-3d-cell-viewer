@@ -430,7 +430,6 @@ const App: React.FC<AppProps> = (props) => {
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
     if (doResetMaskAlpha) {
-      console.log("reset mask alpha");
       const initialAlpha = getInitialAlphaLevel();
       changeViewerSetting("maskAlpha", initialAlpha);
       view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
