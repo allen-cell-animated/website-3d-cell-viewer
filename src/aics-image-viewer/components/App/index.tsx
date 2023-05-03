@@ -113,6 +113,7 @@ const defaultViewerSettings: GlobalViewerSettings = {
   levels: LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+  time: 0,
 };
 
 const defaultProps: AppProps = {
@@ -173,8 +174,8 @@ const App: React.FC<AppProps> = (props) => {
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
-  // tracks the url of the current image, to keep us from reloading an image that is already open
-  const [currentlyLoadedImagePath, setCurrentlyLoadedImagePath] = useState<string | undefined>(undefined);
+  // tracks the source of the current image, to keep us from reloading an image that is already open
+  const [currentImageLoadSpec, setCurrentImageLoadSpec] = useState<LoadSpec | undefined>(undefined);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
@@ -434,12 +435,11 @@ const App: React.FC<AppProps> = (props) => {
     view3d.updateActiveChannels(aimg);
   };
 
-  const onNewVolumeCreated = (aimg: Volume, imageDirectory: string, doResetViewMode: boolean): void => {
+  const onNewVolumeCreated = (aimg: Volume, doResetViewMode: boolean): void => {
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
     setLoadedChannels(new Array(channelNames.length).fill(false));
-    setCurrentlyLoadedImagePath(imageDirectory);
     changeViewerSetting("viewMode", doResetViewMode ? ViewMode.threeD : viewerSettings.viewMode);
 
     placeImageInViewer(aimg, newChannelSettings);
@@ -450,7 +450,9 @@ const App: React.FC<AppProps> = (props) => {
     const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
     const fullUrl = `${baseUrl}${path}`;
 
-    if (path === currentlyLoadedImagePath) {
+    // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
+    const samePath = path === currentImageLoadSpec?.subpath;
+    if (samePath && viewerSettings.time === currentImageLoadSpec?.time) {
       return;
     }
 
@@ -460,6 +462,7 @@ const App: React.FC<AppProps> = (props) => {
     const loadSpec = new LoadSpec();
     loadSpec.url = fullUrl;
     loadSpec.subpath = path;
+    loadSpec.time = viewerSettings.time;
 
     let loader: IVolumeLoader;
     // if this does NOT end with tif or json,
@@ -476,10 +479,11 @@ const App: React.FC<AppProps> = (props) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
-      onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
+      onChannelDataLoaded(v, thisChannelSettings!, channelIndex, samePath);
     });
 
-    onNewVolumeCreated(aimg, path, !switchingFov);
+    setCurrentImageLoadSpec(loadSpec);
+    onNewVolumeCreated(aimg, !(switchingFov || samePath));
   };
 
   const loadFromRaw = (): void => {
@@ -491,7 +495,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
-    for (var i = 0; i < rawDims.channels; ++i) {
+    for (let i = 0; i < rawDims.channels; ++i) {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
@@ -592,14 +596,14 @@ const App: React.FC<AppProps> = (props) => {
     return () => window.removeEventListener("resize", onResizeDebounced);
   }, []);
 
-  // Hook to trigger image load: on mount, when `cellId` changes, when `imageType` changes
+  // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `time`)
   useEffect(() => {
     if (props.rawDims && props.rawData) {
       loadFromRaw();
     } else {
       openImage();
     }
-  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
+  }, [props.cellId, viewerSettings.imageType, viewerSettings.time, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
@@ -624,10 +628,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const imageLoadHandlers = useRef<((image: Volume) => void)[]>([]);
   imageLoadHandlers.current = [];
-  /**
-   * An `ImageEffect` that should also run immediately when a new volume is created,
-   * rather than giving the volume a chance to render with its default settings
-   */
+  /** `ImageEffect`s that also run right on image creation, so the image doesn't first render with default settings */
   const useImageLoadEffect: UseImageEffectType = (effect, deps) => {
     useImageEffect(effect, deps);
     imageLoadHandlers.current.push(effect);
