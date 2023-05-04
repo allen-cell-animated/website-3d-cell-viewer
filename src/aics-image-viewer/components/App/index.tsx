@@ -138,8 +138,7 @@ const defaultProps: AppProps = {
 /** A `useState` that also creates a getter function for breaking through closures */
 function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
   const [state, setState] = useState(initialState);
-  const isSetterFunction = (val: T | (() => T)): val is () => T => typeof val === "function";
-  const stateRef = useRef(isSetterFunction(initialState) ? initialState() : initialState);
+  const stateRef = useRef(state);
   const wrappedSetState = useCallback((value: T) => {
     stateRef.current = value;
     setState(value);
