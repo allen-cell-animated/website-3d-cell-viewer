@@ -46,6 +46,7 @@ export interface GlobalViewerSettings {
   // `region` values are in the range [0, 1]. We derive from this the format that the sliders expect
   // (integers between 0 and num_slices - 1) and the format that view3d expects (in [-0.5, 0.5])
   region: PerAxis<[number, number]>;
+  time: number;
 }
 
 export interface AppProps {
