@@ -103,6 +103,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="axis-slider">
             <SmarterSlider
+              key={`${twoD}`} // prevents slider from potentially not updating number of handles
               connect={true}
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
