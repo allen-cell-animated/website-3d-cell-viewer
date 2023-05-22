@@ -156,8 +156,12 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const activeAxis = this.getActiveAxis();
     return (
       <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
-        <h4>Region of interest</h4>
-        {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
+        <span className="slider-group">
+          <h4 className="slider-group-title">ROI</h4>
+          <span className="slider-group-rows">
+            {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
+          </span>
+        </span>
       </div>
     );
   }
