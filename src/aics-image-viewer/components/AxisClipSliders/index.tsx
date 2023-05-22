@@ -116,9 +116,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
             />
           </span>
           <span className="slider-slices">
-            {twoD
-              ? `${sliderVals[0]} (${numSlices})`
-              : `${sliderVals[0]}, ${sliderVals[1]} (${sliderVals[1] - sliderVals[0]})`}
+            {twoD ? `${sliderVals[0]} / ${numSlices}` : `${sliderVals[0]}, ${sliderVals[1]} / ${numSlices}`}
           </span>
         </span>
         {twoD && (
