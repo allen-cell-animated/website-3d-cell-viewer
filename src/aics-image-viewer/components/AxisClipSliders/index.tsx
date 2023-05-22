@@ -100,6 +100,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
+          <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="axis-slider">
             <SmarterSlider
               connect={true}
@@ -114,7 +115,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               onEnd={callback}
             />
           </span>
-          <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="slider-slices">
             {twoD
               ? `${sliderVals[0]} (${numSlices})`
