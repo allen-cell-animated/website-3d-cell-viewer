@@ -34,6 +34,7 @@
     align-items: flex-start;
     flex-wrap: wrap;
     color: #bfbfbf;
+    margin-bottom: 6px;
 
     &.slider-x {
       .slider-name {
