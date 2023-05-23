@@ -37,8 +37,8 @@ const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onChang
       />
     </span>
     <span className="slider-slices">
-      {/* {twoD ? `${sliderVals[0]} / ${numSlices}` : `${sliderVals[0]}, ${sliderVals[1]} / ${numSlices}`} */}
-      {vals.reduce((acc, cur) => (acc ? `${acc}, ${cur}` : `${cur}`), "")} / {max}
+      {vals[0]}
+      {vals.length > 1 && `, ${vals[1]}`} / {max}
     </span>
   </span>
 );
