@@ -116,8 +116,20 @@
   }
 
   .noUi-target {
-    height: 4px;
+    height: 3px;
     background-color: rgba(160, 160, 160, 0.4) !important;
+  }
+
+  .noUi-handle {
+    width: 8px;
+    height: 9px;
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+
+  .noUi-handle::after {
+    width: 8px;
+    height: 8px;
+    transform: matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
   }
 
   .slider-play-buttons .ant-btn {
