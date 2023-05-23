@@ -11,7 +11,7 @@ type BottomPanelProps = {
 };
 
 const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibleChange, onVisibleChangeEnd }) => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const toggleDrawer = (): void => {
     setIsVisible(!isVisible);
     if (onVisibleChange) {
