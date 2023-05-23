@@ -12,10 +12,42 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
+interface AxisSliderProps {
+  label: string;
+  vals: number[];
+  max: number;
+  onChange: (values: number[]) => void;
+}
+
+const AxisSlider: React.FC<AxisSliderProps> = ({ label, vals, max, onChange }) => (
+  <span className="axis-slider-container">
+    <span className="slider-name">{label}</span>
+    <span className="axis-slider">
+      <SmarterSlider
+        connect={true}
+        range={{ min: 0, max }}
+        start={vals}
+        step={1}
+        margin={1}
+        behaviour="drag"
+        // round slider output to nearest slice; assume any string inputs represent ints
+        format={{ to: Math.round, from: parseInt }}
+        onSlide={onChange}
+        onEnd={onChange}
+      />
+    </span>
+    <span className="slider-slices">
+      {/* {twoD ? `${sliderVals[0]} / ${numSlices}` : `${sliderVals[0]}, ${sliderVals[1]} / ${numSlices}`} */}
+      {vals.reduce((acc, cur) => (acc ? `${acc}, ${cur}` : `${cur}`), "")} / {max}
+    </span>
+  </span>
+);
+
 interface AxisClipSlidersProps {
   mode: ViewMode;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
+  numTimesteps: number;
   region: PerAxis<[number, number]>;
 }
 
@@ -36,7 +68,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.play = this.play.bind(this);
     this.pause = this.pause.bind(this);
     this.moveSlice = this.moveSlice.bind(this);
-    this.createSlider = this.createSlider.bind(this);
+    this.createAxisSlider = this.createAxisSlider.bind(this);
   }
 
   // Pause if mode or fov has changed
@@ -89,38 +121,23 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  createSlider(axis: AxisName, twoD: boolean): React.ReactNode {
+  createAxisSlider(axis: AxisName, twoD: boolean): React.ReactNode {
     const { playing } = this.state;
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
     const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
-    const range = { min: 0, max: numSlices - (twoD ? 1 : 0) };
     const callback = this.makeSliderCallback(axis);
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
-        <span className="axis-slider-container">
-          <span className="slider-name">{axis.toUpperCase()}</span>
-          <span className="axis-slider">
-            <SmarterSlider
-              // prevents slider from potentially not updating number of handles
-              key={`${twoD}`}
-              connect={true}
-              range={range}
-              start={twoD ? [sliderVals[0]] : sliderVals}
-              step={1}
-              margin={1}
-              behaviour="drag"
-              // round slider output to nearest slice; assume any string inputs represent ints
-              format={{ to: Math.round, from: parseInt }}
-              onSlide={callback}
-              onEnd={callback}
-            />
-          </span>
-          <span className="slider-slices">
-            {twoD ? `${sliderVals[0]} / ${numSlices}` : `${sliderVals[0]}, ${sliderVals[1]} / ${numSlices}`}
-          </span>
-        </span>
+        <AxisSlider
+          // prevents slider from potentially not updating number of handles
+          key={`${twoD}`}
+          label={axis.toUpperCase()}
+          vals={twoD ? [sliderVals[0]] : sliderVals}
+          max={numSlices - (twoD ? 1 : 0)}
+          onChange={callback}
+        />
         {twoD && (
           <Button.Group className="slider-play-buttons">
             <Tooltip placement="top" title="Step back">
@@ -161,9 +178,17 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
         <span className="slider-group">
           <h4 className="slider-group-title">ROI</h4>
           <span className="slider-group-rows">
-            {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
+            {activeAxis
+              ? this.createAxisSlider(activeAxis, true)
+              : AXES.map((axis) => this.createAxisSlider(axis, false))}
           </span>
         </span>
+        {this.props.numTimesteps > 1 && (
+          <span className="slider-group">
+            <h4 className="slider-group-title">Time</h4>
+            <span className="slider-group-rows">{this.createAxisSlider}</span>
+          </span>
+        )}
       </div>
     );
   }

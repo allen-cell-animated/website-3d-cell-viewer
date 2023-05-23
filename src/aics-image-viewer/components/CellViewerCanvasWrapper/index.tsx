@@ -1,5 +1,5 @@
 import React from "react";
-import { View3d, Volume } from "@aics/volume-viewer";
+import { View3d } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
@@ -17,7 +17,8 @@ interface ViewerWrapperProps {
   loadingImage: boolean;
   viewMode: ViewMode;
   appHeight: string;
-  image: Volume | null;
+  hasImage: boolean;
+  numTimesteps: number;
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
   showControls: {
@@ -55,7 +56,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     ) : null;
 
     const noImageText =
-      !this.props.loadingImage && !this.props.image ? <div style={STYLES.noImage}>No image selected</div> : null;
+      !this.props.loadingImage && !this.props.hasImage ? <div style={STYLES.noImage}>No image selected</div> : null;
     if (!!noImageText && this.props.view3d) {
       this.props.view3d.removeAllVolumes();
     }
@@ -63,7 +64,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, changeViewerSetting, showControls, image, numSlices, viewMode, region } = this.props;
+    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region } = this.props;
+
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
@@ -72,10 +74,11 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
           onVisibleChange={this.props.onClippingPanelVisibleChange}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
-          {showControls.axisClipSliders && !!image && (
+          {showControls.axisClipSliders && this.props.hasImage && (
             <AxisClipSliders
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}
+              numTimesteps={numTimesteps}
               numSlices={numSlices}
               region={region}
             />

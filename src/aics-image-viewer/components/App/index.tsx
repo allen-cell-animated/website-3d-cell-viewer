@@ -814,11 +814,12 @@ const App: React.FC<AppProps> = (props) => {
           />
           <CellViewerCanvasWrapper
             view3d={view3d}
-            image={image}
+            hasImage={!!image}
             viewMode={viewerSettings.viewMode}
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
             numSlices={getNumberOfSlices()}
+            numTimesteps={image?.imageInfo.times || 1}
             region={viewerSettings.region}
             appHeight={props.appHeight}
             showControls={showControls}
