@@ -821,6 +821,7 @@ const App: React.FC<AppProps> = (props) => {
             numSlices={getNumberOfSlices()}
             numTimesteps={image?.imageInfo.times || 1}
             region={viewerSettings.region}
+            time={viewerSettings.time}
             appHeight={props.appHeight}
             showControls={showControls}
             changeViewerSetting={changeViewerSetting}

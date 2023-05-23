@@ -12,14 +12,14 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-interface AxisSliderProps {
+interface LabeledSliderProps {
   label: string;
   vals: number[];
   max: number;
   onChange: (values: number[]) => void;
 }
 
-const AxisSlider: React.FC<AxisSliderProps> = ({ label, vals, max, onChange }) => (
+const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onChange }) => (
   <span className="axis-slider-container">
     <span className="slider-name">{label}</span>
     <span className="axis-slider">
@@ -47,8 +47,9 @@ interface AxisClipSlidersProps {
   mode: ViewMode;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
-  numTimesteps: number;
   region: PerAxis<[number, number]>;
+  numTimesteps: number;
+  time: number;
 }
 
 interface AxisClipSlidersState {
@@ -121,6 +122,22 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
+  updateClipping(axis: AxisName, minval: number, maxval: number): void {
+    const { changeViewerSetting, numSlices, region } = this.props;
+    // get a value from -0.5..0.5
+    const max = numSlices[axis];
+    const start = minval / max;
+    const end = maxval / max;
+    changeViewerSetting("region", { ...region, [axis]: [start, end] });
+  }
+
+  makeSliderCallback(axis: AxisName): (values: number[]) => void {
+    return (values: number[]) => {
+      const max = values.length < 2 ? values[0] + 1 : values[1];
+      this.updateClipping(axis, values[0], max);
+    };
+  }
+
   createAxisSlider(axis: AxisName, twoD: boolean): React.ReactNode {
     const { playing } = this.state;
     const numSlices = this.props.numSlices[axis];
@@ -130,7 +147,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
-        <AxisSlider
+        <LabeledSlider
           // prevents slider from potentially not updating number of handles
           key={`${twoD}`}
           label={axis.toUpperCase()}
@@ -155,20 +172,19 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     );
   }
 
-  updateClipping(axis: AxisName, minval: number, maxval: number): void {
-    const { changeViewerSetting, numSlices, region } = this.props;
-    // get a value from -0.5..0.5
-    const max = numSlices[axis];
-    const start = minval / max;
-    const end = maxval / max;
-    changeViewerSetting("region", { ...region, [axis]: [start, end] });
-  }
+  createTimeSlider(): React.ReactNode {
+    const { time, numTimesteps, changeViewerSetting } = this.props;
 
-  makeSliderCallback(axis: AxisName): (values: number[]) => void {
-    return (values: number[]) => {
-      const max = values.length < 2 ? values[0] + 1 : values[1];
-      this.updateClipping(axis, values[0], max);
-    };
+    return (
+      <div className="slider-row">
+        <LabeledSlider
+          label={"t="}
+          vals={[time]}
+          max={numTimesteps}
+          onChange={([time]) => changeViewerSetting("time", time)}
+        />
+      </div>
+    );
   }
 
   render(): React.ReactNode {
@@ -183,10 +199,11 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               : AXES.map((axis) => this.createAxisSlider(axis, false))}
           </span>
         </span>
+
         {this.props.numTimesteps > 1 && (
           <span className="slider-group">
             <h4 className="slider-group-title">Time</h4>
-            <span className="slider-group-rows">{this.createAxisSlider}</span>
+            <span className="slider-group-rows">{this.createTimeSlider()}</span>
           </span>
         )}
       </div>

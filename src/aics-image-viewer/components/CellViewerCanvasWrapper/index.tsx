@@ -18,9 +18,10 @@ interface ViewerWrapperProps {
   viewMode: ViewMode;
   appHeight: string;
   hasImage: boolean;
-  numTimesteps: number;
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
+  numTimesteps: number;
+  time: number;
   showControls: {
     axisClipSliders: boolean;
   };
@@ -64,7 +65,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region } = this.props;
+    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region, time } =
+      this.props;
 
     return (
       <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
@@ -78,9 +80,10 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
             <AxisClipSliders
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}
-              numTimesteps={numTimesteps}
               numSlices={numSlices}
               region={region}
+              numTimesteps={numTimesteps}
+              time={time}
             />
           )}
         </BottomPanel>
