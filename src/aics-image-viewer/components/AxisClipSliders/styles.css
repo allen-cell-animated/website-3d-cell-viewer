@@ -7,13 +7,26 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
-  /* .axis-slider (480) + .slider-name (10) + .slider-slices (105) + margins & padding (80) */
-  max-width: 675px;
+  /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (105) + margins & padding (80) */
+  max-width: 725px;
   position: absolute;
   margin: 0 auto;
   left: 0;
   right: 0;
   padding: 0 25px;
+
+  .slider-group {
+    display: flex;
+    flex-wrap: nowrap;
+
+    .slider-group-title {
+      flex: 0 0 50px;
+    }
+
+    .slider-group-rows {
+      flex: 1 1 auto;
+    }
+  }
 
   .slider-row {
     display: flex;
@@ -21,6 +34,7 @@
     align-items: flex-start;
     flex-wrap: wrap;
     color: #bfbfbf;
+    margin-bottom: 6px;
 
     &.slider-x {
       .slider-name {
@@ -65,7 +79,7 @@
 
   .slider-name,
   .slider-play-buttons {
-    margin-left: 20px;
+    margin-right: 14px;
     white-space: nowrap;
   }
 
@@ -76,9 +90,8 @@
 
   .slider-slices {
     flex: 0 0 105px;
-    margin-left: 10px;
+    margin-left: 18px;
     white-space: nowrap;
-    text-align: right;
     max-width: 105px;
   }
 
@@ -88,8 +101,8 @@
 
   &.clip-sliders-2d {
     /* Make room for play buttons */
-    /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
-    max-width: 755px;
+    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
+    max-width: 805px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
     .slider-slices {
@@ -103,8 +116,20 @@
   }
 
   .noUi-target {
-    height: 4px;
+    height: 3px;
     background-color: rgba(160, 160, 160, 0.4) !important;
+  }
+
+  .noUi-handle {
+    width: 8px;
+    height: 8px;
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+
+  .noUi-handle::after {
+    width: 8px;
+    height: 8px;
+    transform: matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
   }
 
   .slider-play-buttons .ant-btn {
@@ -131,11 +156,12 @@
 }
 
 @media only screen and (max-width: 500px) {
-  .clip-sliders .slider-row {
+  .clip-sliders .slider-group {
     display: none;
   }
 
   .clip-sliders::after {
+    /* TODO this message should be updated to be more general once time slider is added */
     content: "ROI clipping is not available at this size. Please try again with a larger viewport.";
     font-style: italic;
   }

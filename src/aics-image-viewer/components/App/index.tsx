@@ -536,7 +536,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const onClippingPanelVisibleChange = useCallback(
     (open: boolean): void => {
-      const CLIPPING_PANEL_HEIGHT = 130;
+      const CLIPPING_PANEL_HEIGHT = 150;
 
       let axisY = AXIS_MARGIN_DEFAULT[1];
       let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];

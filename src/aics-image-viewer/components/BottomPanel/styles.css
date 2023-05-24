@@ -34,7 +34,8 @@
   }
 
   .ant-drawer-body {
-    height: 130px;
+    padding: 16px 24px;
+    height: 150px;
   }
 
   .ant-drawer-title .ant-btn {

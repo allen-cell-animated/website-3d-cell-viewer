@@ -100,8 +100,11 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
         <span className="axis-slider-container">
+          <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="axis-slider">
             <SmarterSlider
+              // prevents slider from potentially not updating number of handles
+              key={`${twoD}`}
               connect={true}
               range={range}
               start={twoD ? [sliderVals[0]] : sliderVals}
@@ -114,11 +117,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
               onEnd={callback}
             />
           </span>
-          <span className="slider-name">{axis.toUpperCase()}</span>
           <span className="slider-slices">
-            {twoD
-              ? `${sliderVals[0]} (${numSlices})`
-              : `${sliderVals[0]}, ${sliderVals[1]} (${sliderVals[1] - sliderVals[0]})`}
+            {twoD ? `${sliderVals[0]} / ${numSlices}` : `${sliderVals[0]}, ${sliderVals[1]} / ${numSlices}`}
           </span>
         </span>
         {twoD && (
@@ -158,8 +158,12 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const activeAxis = this.getActiveAxis();
     return (
       <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
-        <h4>Region of interest</h4>
-        {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
+        <span className="slider-group">
+          <h4 className="slider-group-title">ROI</h4>
+          <span className="slider-group-rows">
+            {activeAxis ? this.createSlider(activeAxis, true) : AXES.map((axis) => this.createSlider(axis, false))}
+          </span>
+        </span>
       </div>
     );
   }
