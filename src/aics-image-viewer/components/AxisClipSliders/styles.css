@@ -101,7 +101,7 @@
 
   &.clip-sliders-2d {
     /* Make room for play buttons */
-    /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
+    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
     max-width: 805px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
