@@ -191,7 +191,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     return (
       <div className="slider-row">
         <LabeledSlider
-          label={"t="}
+          label={""}
           vals={[time]}
           valsReadout={[timeReadout]}
           max={numTimesteps}
