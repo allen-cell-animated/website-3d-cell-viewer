@@ -1,7 +1,8 @@
-import { Button, Tooltip } from "antd";
-import SmarterSlider from "../shared/SmarterSlider";
-
 import React from "react";
+import { Button, Tooltip } from "antd";
+import { Callback } from "nouislider-react";
+
+import SmarterSlider from "../shared/SmarterSlider";
 
 import "./styles.css";
 
@@ -16,10 +17,11 @@ interface LabeledSliderProps {
   label: string;
   vals: number[];
   max: number;
-  onChange: (values: number[]) => void;
+  onSlide?: Callback;
+  onEnd?: Callback;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onChange }) => (
+const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onSlide, onEnd }) => (
   <span className="axis-slider-container">
     <span className="slider-name">{label}</span>
     <span className="axis-slider">
@@ -32,8 +34,8 @@ const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onChang
         behaviour="drag"
         // round slider output to nearest slice; assume any string inputs represent ints
         format={{ to: Math.round, from: parseInt }}
-        onSlide={onChange}
-        onEnd={onChange}
+        onSlide={onSlide}
+        onEnd={onEnd}
       />
     </span>
     <span className="slider-slices">
@@ -143,7 +145,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
     const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
-    const callback = this.makeSliderCallback(axis);
+    const onChange = this.makeSliderCallback(axis);
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
@@ -153,7 +155,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           label={axis.toUpperCase()}
           vals={twoD ? [sliderVals[0]] : sliderVals}
           max={numSlices - (twoD ? 1 : 0)}
-          onChange={callback}
+          onSlide={onChange}
+          onEnd={onChange}
         />
         {twoD && (
           <Button.Group className="slider-play-buttons">
@@ -181,7 +184,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           label={"t="}
           vals={[time]}
           max={numTimesteps}
-          onChange={([time]) => changeViewerSetting("time", time)}
+          onEnd={([time]) => changeViewerSetting("time", time)}
         />
       </div>
     );
