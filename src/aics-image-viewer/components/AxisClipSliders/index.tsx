@@ -16,12 +16,13 @@ const PLAY_RATE_MS_PER_STEP = 125;
 interface LabeledSliderProps {
   label: string;
   vals: number[];
+  valsReadout?: number[];
   max: number;
   onSlide?: Callback;
   onEnd?: Callback;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onSlide, onEnd }) => (
+const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout = vals, max, onSlide, onEnd }) => (
   <span className="axis-slider-container">
     <span className="slider-name">{label}</span>
     <span className="axis-slider">
@@ -39,8 +40,8 @@ const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, max, onSlide
       />
     </span>
     <span className="slider-slices">
-      {vals[0]}
-      {vals.length > 1 && `, ${vals[1]}`} / {max}
+      {valsReadout[0]}
+      {valsReadout.length > 1 && `, ${valsReadout[1]}`} / {max}
     </span>
   </span>
 );
@@ -57,6 +58,8 @@ interface AxisClipSlidersProps {
 interface AxisClipSlidersState {
   playing: boolean;
   intervalId: number;
+  // shadows `time` prop, but updates while time slider is moving (`time` does not to avoid reloads)
+  timeReadout: number;
 }
 
 export default class AxisClipSliders extends React.Component<AxisClipSlidersProps, AxisClipSlidersState> {
@@ -66,6 +69,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.state = {
       playing: false,
       intervalId: 0,
+      timeReadout: props.time,
     };
 
     this.play = this.play.bind(this);
@@ -177,13 +181,16 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
   createTimeSlider(): React.ReactNode {
     const { time, numTimesteps, changeViewerSetting } = this.props;
+    const { timeReadout } = this.state;
 
     return (
       <div className="slider-row">
         <LabeledSlider
           label={"t="}
           vals={[time]}
+          valsReadout={[timeReadout]}
           max={numTimesteps}
+          onSlide={([time]) => this.setState({ timeReadout: time })}
           onEnd={([time]) => changeViewerSetting("time", time)}
         />
       </div>
