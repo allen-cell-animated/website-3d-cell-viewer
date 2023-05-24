@@ -78,8 +78,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.createAxisSlider = this.createAxisSlider.bind(this);
   }
 
-  // Pause if mode or fov has changed
   componentDidUpdate(prevProps: AxisClipSlidersProps): void {
+    // Make extra sure the number next to the time slider is accurate
+    if (prevProps.time !== this.props.time) {
+      this.setState({ timeReadout: this.props.time });
+    }
+
+    // Pause if mode or fov has changed
     const numSlicesChanged = AXES.reduce(
       (hasChanged, axis) => hasChanged || prevProps.numSlices[axis] !== this.props.numSlices[axis],
       false
