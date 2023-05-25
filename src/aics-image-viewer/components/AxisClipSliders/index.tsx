@@ -111,7 +111,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const max = this.props.numSlices[activeAxis];
     const currentLeftSliderValue = Math.round(this.props.region[activeAxis][0] * max);
     const leftValue = (currentLeftSliderValue + delta + max) % max;
-    this.updateClipping(activeAxis, leftValue, leftValue);
+    this.updateClipping(activeAxis, leftValue, leftValue + 1);
   }
 
   step(backward: boolean): void {
