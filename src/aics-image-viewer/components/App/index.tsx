@@ -585,9 +585,6 @@ const App: React.FC<AppProps> = (props) => {
 
   // On mount
   useEffect(() => {
-    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
-    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
-
     const onResize = (): void => {
       if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
         setControlPanelClosed(true);

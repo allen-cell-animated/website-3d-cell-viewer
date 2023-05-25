@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Drawer, Button } from "antd";
 
 import ViewerIcon from "../shared/ViewerIcon";
@@ -12,6 +12,15 @@ type BottomPanelProps = {
 
 const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibleChange, onVisibleChangeEnd }) => {
   const [isVisible, setIsVisible] = useState(true);
+
+  // Call `onVisibleChange` on mount
+  useEffect(() => {
+    onVisibleChange?.(isVisible);
+    if (!isVisible) {
+      onVisibleChangeEnd?.(isVisible);
+    }
+  }, []);
+
   const toggleDrawer = (): void => {
     setIsVisible(!isVisible);
     if (onVisibleChange) {
