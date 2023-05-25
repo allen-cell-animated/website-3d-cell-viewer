@@ -965,19 +965,30 @@ body{
     top:calc(100% + 3px);
   }
 .clip-sliders{
-  max-width:675px;
+  max-width:725px;
   position:absolute;
   margin:0 auto;
   left:0;
   right:0;
   padding:0 25px;
 }
+.clip-sliders .slider-group{
+    display:flex;
+    flex-wrap:nowrap;
+  }
+.clip-sliders .slider-group .slider-group-title{
+      flex:0 0 50px;
+    }
+.clip-sliders .slider-group .slider-group-rows{
+      flex:1 1 auto;
+    }
 .clip-sliders .slider-row{
     display:flex;
     justify-content:flex-end;
     align-items:flex-start;
     flex-wrap:wrap;
-    color:#bfbfbf
+    color:#bfbfbf;
+    margin-bottom:6px
   }
 .clip-sliders .slider-row.slider-x .slider-name{
         color:var(--color-x);
@@ -1009,7 +1020,7 @@ body{
   }
 .clip-sliders .slider-name,
   .clip-sliders .slider-play-buttons{
-    margin-left:20px;
+    margin-right:14px;
     white-space:nowrap;
   }
 .clip-sliders .slider-name{
@@ -1018,16 +1029,15 @@ body{
   }
 .clip-sliders .slider-slices{
     flex:0 0 105px;
-    margin-left:10px;
+    margin-left:18px;
     white-space:nowrap;
-    text-align:right;
     max-width:105px;
   }
 .clip-sliders .slider-play-buttons{
     margin-top:2px;
   }
 .clip-sliders.clip-sliders-2d{
-    max-width:755px;
+    max-width:805px;
   }
 .clip-sliders.clip-sliders-2d .slider-slices{
       flex:0 0 70px;
@@ -1036,8 +1046,18 @@ body{
       flex:0 1 590px;
     }
 .clip-sliders .noUi-target{
-    height:4px;
+    height:3px;
     background-color:rgba(160, 160, 160, 0.4) !important;
+  }
+.clip-sliders .noUi-handle{
+    width:8px;
+    height:8px;
+    transform:translate(-50%, calc(-100% - 4px));
+  }
+.clip-sliders .noUi-handle::after{
+    width:8px;
+    height:8px;
+    transform:matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
   }
 .clip-sliders .slider-play-buttons .ant-btn{
     line-height:1.2;
@@ -1058,7 +1078,7 @@ body{
       background-color:#aeacae;
     }
 @media only screen and (max-width: 500px){
-  .clip-sliders .slider-row{
+  .clip-sliders .slider-group{
     display:none;
   }
 
@@ -1108,7 +1128,8 @@ body{
   }
 
   .bottom-panel .ant-drawer-body{
-    height:130px;
+    padding:16px 24px;
+    height:150px;
   }
 
   .bottom-panel .ant-drawer-title .ant-btn{
