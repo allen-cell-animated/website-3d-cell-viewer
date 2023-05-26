@@ -585,9 +585,6 @@ const App: React.FC<AppProps> = (props) => {
 
   // On mount
   useEffect(() => {
-    view3d.setAxisPosition(...AXIS_MARGIN_DEFAULT);
-    view3d.setScaleBarPosition(...SCALE_BAR_MARGIN_DEFAULT);
-
     const onResize = (): void => {
       if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
         setControlPanelClosed(true);
@@ -814,12 +811,14 @@ const App: React.FC<AppProps> = (props) => {
           />
           <CellViewerCanvasWrapper
             view3d={view3d}
-            image={image}
+            hasImage={!!image}
             viewMode={viewerSettings.viewMode}
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
             numSlices={getNumberOfSlices()}
+            numTimesteps={image?.imageInfo.times || 1}
             region={viewerSettings.region}
+            time={viewerSettings.time}
             appHeight={props.appHeight}
             showControls={showControls}
             changeViewerSetting={changeViewerSetting}
