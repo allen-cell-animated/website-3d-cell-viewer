@@ -974,8 +974,11 @@ body{
 }
 .clip-sliders .slider-group{
     display:flex;
-    flex-wrap:nowrap;
+    flex-wrap:nowrap
   }
+.clip-sliders .slider-group:not(:last-child){
+      margin-bottom:8px;
+    }
 .clip-sliders .slider-group .slider-group-title{
       flex:0 0 50px;
     }
@@ -984,8 +987,6 @@ body{
     }
 .clip-sliders .slider-row{
     display:flex;
-    justify-content:flex-end;
-    align-items:flex-start;
     flex-wrap:wrap;
     color:#bfbfbf;
     margin-bottom:6px
