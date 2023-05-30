@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Tooltip } from "antd";
+import { Button, InputNumber, Tooltip } from "antd";
 import { Callback } from "nouislider-react";
 
 import SmarterSlider from "../shared/SmarterSlider";
@@ -19,10 +19,10 @@ interface LabeledSliderProps {
   valsReadout?: number[];
   max: number;
   onSlide?: Callback;
-  onEnd?: Callback;
+  onSet?: Callback;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout = vals, max, onSlide, onEnd }) => (
+const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet }) => (
   <span className="axis-slider-container">
     <span className="slider-name">{label}</span>
     <span className="axis-slider">
@@ -36,7 +36,7 @@ const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout 
         // round slider output to nearest slice; assume any string inputs represent ints
         format={{ to: Math.round, from: parseInt }}
         onSlide={onSlide}
-        onEnd={onEnd}
+        onSet={onSet}
       />
     </span>
     <span className="slider-slices">
@@ -165,7 +165,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           vals={twoD ? [sliderVals[0]] : sliderVals}
           max={numSlices - (twoD ? 1 : 0)}
           onSlide={onChange}
-          onEnd={onChange}
+          onSet={onChange}
         />
         {twoD && (
           <Button.Group className="slider-play-buttons">
@@ -196,7 +196,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           valsReadout={[timeReadout]}
           max={numTimesteps}
           onSlide={([time]) => this.setState({ timeReadout: time })}
-          onEnd={([time]) => changeViewerSetting("time", time)}
+          onSet={([time]) => changeViewerSetting("time", time)}
         />
       </div>
     );
