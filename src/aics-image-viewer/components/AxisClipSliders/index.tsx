@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, InputNumber, Tooltip } from "antd";
-import { Callback } from "nouislider-react";
 
 import SmarterSlider from "../shared/SmarterSlider";
 
@@ -18,33 +17,61 @@ interface LabeledSliderProps {
   vals: number[];
   valsReadout?: number[];
   max: number;
-  onSlide?: Callback;
-  onSet?: Callback;
+  onSlide?: (values: number[]) => void;
+  onSet?: (values: number[]) => void;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet }) => (
-  <span className="axis-slider-container">
-    <span className="slider-name">{label}</span>
-    <span className="axis-slider">
-      <SmarterSlider
-        connect={true}
-        range={{ min: 0, max }}
-        start={vals}
-        step={1}
-        margin={1}
-        behaviour="drag"
-        // round slider output to nearest slice; assume any string inputs represent ints
-        format={{ to: Math.round, from: parseInt }}
-        onSlide={onSlide}
-        onSet={onSet}
-      />
+const LabeledSlider: React.FC<LabeledSliderProps> = ({
+  label,
+  vals,
+  valsReadout = vals,
+  max,
+  onSlide,
+  onSet = onSlide,
+}) => {
+  const isRange = vals.length > 1;
+
+  return (
+    <span className="axis-slider-container">
+      <span className="slider-name">{label}</span>
+      <span className="axis-slider">
+        <SmarterSlider
+          connect={true}
+          range={{ min: 0, max }}
+          start={vals}
+          step={1}
+          margin={1}
+          behaviour="drag"
+          // round slider output to nearest slice; assume any string inputs represent ints
+          format={{ to: Math.round, from: parseInt }}
+          onSlide={onSlide}
+          onSet={onSet}
+        />
+      </span>
+      <span className="slider-slices">
+        <InputNumber
+          size="small"
+          step={1}
+          value={valsReadout[0]}
+          onChange={(value?: number) => value !== undefined && onSet?.(isRange ? [value, vals[1]] : [value])}
+        />
+        {isRange && (
+          <>
+            {", "}
+            <InputNumber
+              size="small"
+              step={1}
+              value={valsReadout[1]}
+              onChange={(value?: number) => value !== undefined && onSet?.([vals[0], value])}
+            />
+          </>
+        )}
+        {" / "}
+        {max}
+      </span>
     </span>
-    <span className="slider-slices">
-      {valsReadout[0]}
-      {valsReadout.length > 1 && `, ${valsReadout[1]}`} / {max}
-    </span>
-  </span>
-);
+  );
+};
 
 interface AxisClipSlidersProps {
   mode: ViewMode;
@@ -154,7 +181,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
     const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
-    const onChange = this.makeSliderCallback(axis);
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
@@ -164,8 +190,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           label={axis.toUpperCase()}
           vals={twoD ? [sliderVals[0]] : sliderVals}
           max={numSlices - (twoD ? 1 : 0)}
-          onSlide={onChange}
-          onSet={onChange}
+          onSlide={this.makeSliderCallback(axis)}
         />
         {twoD && (
           <Button.Group className="slider-play-buttons">
