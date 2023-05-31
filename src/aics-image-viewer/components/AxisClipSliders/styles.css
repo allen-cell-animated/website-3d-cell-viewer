@@ -7,7 +7,7 @@
   --color-z: #0099ff;
 
   @extend %axis-override;
-  /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (105) + margins & padding (80) */
+  /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (105) + margins & padding (80) */
   max-width: 725px;
   position: absolute;
   margin: 0 auto;
@@ -90,7 +90,8 @@
     font-weight: bold;
   }
 
-  .slider-slices {
+  /* TODO this will need to be expanded (in 2d too!) */
+  .slider-values {
     flex: 0 0 105px;
     margin-left: 18px;
     white-space: nowrap;
@@ -101,18 +102,42 @@
     margin-top: 2px;
   }
 
+  .slider-number-input {
+    height: 21px;
+    width: 50px;
+    font-size: 12px;
+    background-color: #222222;
+    border: 1px solid #4b4b4b;
+    border-radius: 0;
+
+    input {
+      height: 21px;
+      padding: 0 6px;
+      text-align: right;
+    }
+
+    .ant-input-number-handler-wrap {
+      width: 11px;
+      opacity: 1;
+    }
+
+    .ant-input-number-handler-down-inner {
+      font-size: 6px;
+    }
+  }
+
   &.clip-sliders-2d {
     /* Make room for play buttons */
-    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
+    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (70) + .slider-play-buttons (95) + margins & padding (100) */
     max-width: 805px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
-    .slider-slices {
+    .slider-values {
       flex: 0 0 70px;
     }
 
     .axis-slider-container {
-      /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + margins (30) */
+      /* .axis-slider (480) + .slider-name (10) + .slider-values (70) + margins (30) */
       flex: 0 1 590px;
     }
   }

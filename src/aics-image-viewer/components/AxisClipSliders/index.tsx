@@ -12,7 +12,7 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-interface LabeledSliderProps {
+interface SliderRowProps {
   label: string;
   vals: number[];
   valsReadout?: number[];
@@ -21,14 +21,7 @@ interface LabeledSliderProps {
   onSet?: (values: number[]) => void;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({
-  label,
-  vals,
-  valsReadout = vals,
-  max,
-  onSlide,
-  onSet = onSlide,
-}) => {
+const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet = onSlide }) => {
   const isRange = vals.length > 1;
 
   return (
@@ -48,18 +41,18 @@ const LabeledSlider: React.FC<LabeledSliderProps> = ({
           onSet={onSet}
         />
       </span>
-      <span className="slider-slices">
+      <span className="slider-values">
         <InputNumber
-          size="small"
+          className="slider-number-input"
           step={1}
           value={valsReadout[0]}
           onChange={(value?: number) => value !== undefined && onSet?.(isRange ? [value, vals[1]] : [value])}
         />
         {isRange && (
           <>
-            {", "}
+            {" , "}
             <InputNumber
-              size="small"
+              className="slider-number-input"
               step={1}
               value={valsReadout[1]}
               onChange={(value?: number) => value !== undefined && onSet?.([vals[0], value])}
@@ -184,7 +177,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
-        <LabeledSlider
+        <SliderRow
           // prevents slider from potentially not updating number of handles
           key={`${twoD}`}
           label={axis.toUpperCase()}
@@ -215,7 +208,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     return (
       <div className="slider-row">
-        <LabeledSlider
+        <SliderRow
           label={""}
           vals={[time]}
           valsReadout={[timeReadout]}
