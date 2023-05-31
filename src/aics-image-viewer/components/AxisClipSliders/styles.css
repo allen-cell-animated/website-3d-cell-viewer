@@ -90,7 +90,7 @@
     font-weight: bold;
   }
 
-  /* TODO this will need to be expanded (in 2d too!) */
+  /* TODO this will need to be expanded (here and in 2d!) */
   .slider-values {
     flex: 0 0 105px;
     margin-left: 18px;
@@ -117,12 +117,28 @@
     }
 
     .ant-input-number-handler-wrap {
-      width: 11px;
+      width: 12px;
       opacity: 1;
-    }
+      border-radius: 0;
 
-    .ant-input-number-handler-down-inner {
-      font-size: 6px;
+      /* nest deeply to gain enough specificity to override ant's styles */
+      .ant-input-number-handler {
+        box-sizing: content-box;
+        border-radius: 0;
+
+        .ant-input-number-handler-up-inner,
+        .ant-input-number-handler-down-inner {
+          box-sizing: content-box;
+          font-size: 9px;
+          transform: none;
+          width: 10px;
+          height: 10px;
+          vertical-align: middle;
+          left: 0;
+          line-height: normal;
+          color: #bfbfbf;
+        }
+      }
     }
   }
 
