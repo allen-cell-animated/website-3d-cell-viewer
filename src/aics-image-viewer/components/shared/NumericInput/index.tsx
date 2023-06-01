@@ -74,7 +74,6 @@ const NumericInput: React.FC<NumericInputProps> = ({
       <div className="numinput-controls">
         <div
           className="numinput-controls-button numinput-controls-button-up"
-          unselectable="on"
           role="button"
           aria-label="Increase Value"
           aria-disabled={disabled}
@@ -84,7 +83,6 @@ const NumericInput: React.FC<NumericInputProps> = ({
         </div>
         <div
           className="numinput-controls-button numinput-controls-button-down"
-          unselectable="on"
           role="button"
           aria-label="Decrease Value"
           aria-disabled={disabled}
