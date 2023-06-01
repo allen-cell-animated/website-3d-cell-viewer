@@ -129,11 +129,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.updateClipping(activeAxis, leftValue, leftValue + 1);
   }
 
-  step(backward: boolean): void {
-    this.pause();
-    this.moveSlice(backward);
-  }
-
   play(): void {
     if (this.getActiveAxis() && !this.state.playing) {
       const intervalId = window.setInterval(this.moveSlice, PLAY_RATE_MS_PER_STEP);
