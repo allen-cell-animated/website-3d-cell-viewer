@@ -102,46 +102,6 @@
     margin-top: 2px;
   }
 
-  .slider-number-input {
-    height: 21px;
-    width: 50px;
-    font-size: 12px;
-    background-color: #222222;
-    border: 1px solid #4b4b4b;
-    border-radius: 0;
-
-    input {
-      height: 21px;
-      padding: 0 6px;
-      text-align: right;
-    }
-
-    .ant-input-number-handler-wrap {
-      width: 12px;
-      opacity: 1;
-      border-radius: 0;
-
-      /* nest deeply to gain enough specificity to override ant's styles */
-      .ant-input-number-handler {
-        box-sizing: content-box;
-        border-radius: 0;
-
-        .ant-input-number-handler-up-inner,
-        .ant-input-number-handler-down-inner {
-          box-sizing: content-box;
-          font-size: 9px;
-          transform: none;
-          width: 10px;
-          height: 10px;
-          vertical-align: middle;
-          left: 0;
-          line-height: normal;
-          color: #bfbfbf;
-        }
-      }
-    }
-  }
-
   &.clip-sliders-2d {
     /* Make room for play buttons */
     /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (70) + .slider-play-buttons (95) + margins & padding (100) */
