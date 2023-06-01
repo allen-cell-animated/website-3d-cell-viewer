@@ -6,6 +6,7 @@ import "./styles.css";
 interface NumericInputProps {
   value: number;
   step?: number;
+  precision?: number;
   min?: number;
   max?: number;
   disabled?: boolean;
@@ -20,6 +21,7 @@ interface NumericInputProps {
 const NumericInput: React.FC<NumericInputProps> = ({
   value,
   step = 1,
+  precision = step,
   min = 0,
   max = Number.MAX_SAFE_INTEGER,
   disabled = false,
@@ -30,10 +32,10 @@ const NumericInput: React.FC<NumericInputProps> = ({
   const fullClassName = "numinput" + (disabled ? " numinput-disabled" : "") + (className && ` ${className}`);
 
   const clamp = (newValue: number): number => Math.min(Math.max(newValue, min), max);
-  const roundToStep = (newValue: number): number => clamp(Math.round(newValue * step) / step);
+  const roundToPrecision = (newValue: number): number => clamp(Math.round(newValue * precision) / precision);
 
   const onChangeChecked = (newValue: number): void => {
-    if (newValue !== value && !disabled) {
+    if (newValue !== value && !disabled && !isNaN(newValue)) {
       onChange(newValue);
     }
   };
@@ -66,7 +68,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
         aria-valuemin={min}
         aria-valuemax={max}
         ref={inputRef}
-        onChange={({ target }) => onChangeChecked(roundToStep(parseFloat(target.value)))}
+        onChange={({ target }) => onChangeChecked(roundToPrecision(parseFloat(target.value)))}
       />
       <div className="numinput-controls">
         <div
