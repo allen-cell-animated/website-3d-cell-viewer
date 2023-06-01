@@ -16,7 +16,8 @@ interface NumericInputProps {
 
 /**
  * Fully-controlled numeric input (value must be supplied from state in parent).
- * Changeable with arrow keys, typing, or clickable arrows.
+ * Changeable with arrow keys, typing values, or clickable arrows. Inspired by
+ * ant's `InputNumber`, but conforms to our style and behavior expectations.
  */
 const NumericInput: React.FC<NumericInputProps> = ({
   value,

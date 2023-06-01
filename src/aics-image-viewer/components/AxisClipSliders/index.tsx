@@ -1,6 +1,7 @@
 import React from "react";
-import { Button, InputNumber, Tooltip } from "antd";
+import { Button, Tooltip } from "antd";
 
+import NumericInput from "../shared/NumericInput";
 import SmarterSlider from "../shared/SmarterSlider";
 
 import "./styles.css";
@@ -42,21 +43,15 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
         />
       </span>
       <span className="slider-values">
-        <InputNumber
-          className="slider-number-input"
-          step={1}
+        <NumericInput
+          max={max}
           value={valsReadout[0]}
-          onChange={(value?: number) => value !== undefined && onSet?.(isRange ? [value, vals[1]] : [value])}
+          onChange={(value) => onSet?.(isRange ? [value, vals[1]] : [value])}
         />
         {isRange && (
           <>
             {" , "}
-            <InputNumber
-              className="slider-number-input"
-              step={1}
-              value={valsReadout[1]}
-              onChange={(value?: number) => value !== undefined && onSet?.([vals[0], value])}
-            />
+            <NumericInput max={max} value={valsReadout[1]} onChange={(value) => onSet?.([vals[0], value])} />
           </>
         )}
         {" / "}
