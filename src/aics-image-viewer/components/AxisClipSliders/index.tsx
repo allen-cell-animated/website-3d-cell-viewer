@@ -181,17 +181,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           onSlide={this.makeSliderCallback(axis)}
         />
         {twoD && (
-          <Button.Group className="slider-play-buttons">
-            <Tooltip placement="top" title="Step back">
-              <Button icon="step-backward" onClick={() => this.step(true)} />
-            </Tooltip>
-            <Tooltip placement="top" title="Play through sequence">
-              <Button onClick={playing ? this.pause : this.play} icon={playing ? "pause" : "caret-right"} />
-            </Tooltip>
-            <Tooltip placement="top" title="Step forward">
-              <Button icon="step-forward" onClick={() => this.step(false)} />
-            </Tooltip>
-          </Button.Group>
+          <Tooltip placement="top" title="Play through sequence">
+            <Button
+              className="slider-play-button"
+              onClick={playing ? this.pause : this.play}
+              icon={playing ? "pause" : "caret-right"}
+            />
+          </Tooltip>
         )}
       </div>
     );
