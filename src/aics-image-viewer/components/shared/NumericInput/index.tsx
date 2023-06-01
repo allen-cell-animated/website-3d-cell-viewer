@@ -29,35 +29,68 @@ const NumericInput: React.FC<NumericInputProps> = ({
   className = "",
   onChange,
 }) => {
+  // While the input has focus, allow invalid input, just don't call `onChange` with it
+  const [hasFocus, setHasFocus] = React.useState(false);
+  // Hold the potentially invalid contents of the focused input here
+  const [textContent, setTextContent] = React.useState("");
+
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const fullClassName = "numinput" + (disabled ? " numinput-disabled" : "") + (className && ` ${className}`);
 
   const clamp = (newValue: number): number => Math.min(Math.max(newValue, min), max);
   const roundToPrecision = (newValue: number): number => clamp(Math.round(newValue * precision) / precision);
+  const shouldChange = (newValue: number): boolean => !(isNaN(newValue) || newValue === value || disabled);
 
-  const onChangeChecked = (newValue: number): void => {
-    if (newValue !== value && !disabled && !isNaN(newValue)) {
-      onChange(newValue);
+  const onFocus = (): void => {
+    if (!hasFocus) {
+      // propagate current value to `textContent` on focus
+      setTextContent(value.toString());
+      setHasFocus(true);
     }
   };
 
   const changeByStep = (up: boolean): void => {
     const delta = up ? step : -step;
-    onChangeChecked(clamp(value + delta));
+    const newValue = clamp(value + delta);
+
+    if (shouldChange(newValue)) {
+      onChange(newValue);
+      setTextContent(newValue.toString());
+      // ensure the previous value won't be restored on focus
+      setHasFocus(true);
+    }
+
     inputRef.current?.focus();
   };
 
   const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    if (["Up", "ArrowUp", "Down", "ArrowDown"].includes(event.key)) {
-      changeByStep(event.key === "Up" || event.key === "ArrowUp");
+    const { key } = event;
+
+    if (["Up", "ArrowUp", "Down", "ArrowDown"].includes(key)) {
+      changeByStep(key === "Up" || key === "ArrowUp");
       event.preventDefault();
+    } else if (key === "Enter") {
+      inputRef.current?.blur();
     }
   };
 
+  const handleTyping = (inputStr: string): void => {
+    setTextContent(inputStr);
+
+    // if the user clears all text, assume they mean 0 (or the extremum closest to it)
+    // this is likely not completely general, but should be reasonable for any of our purposes
+    const inputNum = inputStr === "" ? 0 : parseFloat(inputStr);
+    const newValue = roundToPrecision(inputNum);
+
+    if (shouldChange(newValue)) {
+      onChange(newValue);
+    }
+  };
+
+  const fullClassName = "numinput" + (disabled ? " numinput-disabled" : "") + (className && ` ${className}`);
   return (
     <div className={fullClassName} onKeyDown={onKeyDown}>
       <input
-        value={value}
+        value={hasFocus ? textContent : value}
         step={step}
         min={min}
         max={max}
@@ -69,7 +102,9 @@ const NumericInput: React.FC<NumericInputProps> = ({
         aria-valuemin={min}
         aria-valuemax={max}
         ref={inputRef}
-        onChange={({ target }) => onChangeChecked(roundToPrecision(parseFloat(target.value)))}
+        onChange={({ target }) => handleTyping(target.value)}
+        onFocus={onFocus}
+        onBlur={() => setHasFocus(false)}
       />
       <div className="numinput-controls">
         <div

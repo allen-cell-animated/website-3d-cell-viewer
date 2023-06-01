@@ -13,10 +13,10 @@
     width: 40px;
     height: 100%;
     font-size: 12px;
-    background-color: #222222;
     text-align: right;
-    border: 1px solid #4b4b4b;
     padding-right: 6px;
+    background-color: #222222;
+    border: 1px solid #4b4b4b;
 
     &:focus {
       outline: none;
