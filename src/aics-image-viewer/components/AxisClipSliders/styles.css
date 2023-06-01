@@ -8,7 +8,7 @@
 
   @extend %axis-override;
   /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (160) + margins & padding (80) */
-  max-width: 770px;
+  max-width: 780px;
   position: absolute;
   margin: 0 auto;
   left: 0;
@@ -94,7 +94,7 @@
     flex: 0 0 160px;
     margin-left: 18px;
     white-space: nowrap;
-    max-width: 105px;
+    max-width: 160px;
   }
 
   .slider-play-buttons {
@@ -102,9 +102,9 @@
   }
 
   &.clip-sliders-2d {
-    /* Make room for play buttons */
-    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (100) + .slider-play-buttons (95) + margins & padding (100) */
-    max-width: 835px;
+    /* Make room for play button */
+    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-values (100) + .slider-play-button (28) + margins & padding (82) */
+    max-width: 750px;
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
     .slider-values {
