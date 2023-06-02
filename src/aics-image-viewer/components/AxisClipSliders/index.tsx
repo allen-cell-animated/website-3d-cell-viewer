@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Tooltip } from "antd";
-import { Callback } from "nouislider-react";
 
+import NumericInput from "../shared/NumericInput";
 import SmarterSlider from "../shared/SmarterSlider";
 
 import "./styles.css";
@@ -13,38 +13,53 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-interface LabeledSliderProps {
+interface SliderRowProps {
   label: string;
   vals: number[];
   valsReadout?: number[];
   max: number;
-  onSlide?: Callback;
-  onEnd?: Callback;
+  onSlide?: (values: number[]) => void;
+  onSet?: (values: number[]) => void;
 }
 
-const LabeledSlider: React.FC<LabeledSliderProps> = ({ label, vals, valsReadout = vals, max, onSlide, onEnd }) => (
-  <span className="axis-slider-container">
-    <span className="slider-name">{label}</span>
-    <span className="axis-slider">
-      <SmarterSlider
-        connect={true}
-        range={{ min: 0, max }}
-        start={vals}
-        step={1}
-        margin={1}
-        behaviour="drag"
-        // round slider output to nearest slice; assume any string inputs represent ints
-        format={{ to: Math.round, from: parseInt }}
-        onSlide={onSlide}
-        onEnd={onEnd}
-      />
+const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet = onSlide }) => {
+  const isRange = vals.length > 1;
+
+  return (
+    <span className="axis-slider-container">
+      <span className="slider-name">{label}</span>
+      <span className="axis-slider">
+        <SmarterSlider
+          connect={true}
+          range={{ min: 0, max }}
+          start={vals}
+          step={1}
+          margin={1}
+          behaviour="drag"
+          // round slider output to nearest slice; assume any string inputs represent ints
+          format={{ to: Math.round, from: parseInt }}
+          onSlide={onSlide}
+          onSet={onSet}
+        />
+      </span>
+      <span className="slider-values">
+        <NumericInput
+          max={max}
+          value={valsReadout[0]}
+          onChange={(value) => onSet?.(isRange ? [value, vals[1]] : [value])}
+        />
+        {isRange && (
+          <>
+            {" , "}
+            <NumericInput max={max} value={valsReadout[1]} onChange={(value) => onSet?.([vals[0], value])} />
+          </>
+        )}
+        {" / "}
+        {max}
+      </span>
     </span>
-    <span className="slider-slices">
-      {valsReadout[0]}
-      {valsReadout.length > 1 && `, ${valsReadout[1]}`} / {max}
-    </span>
-  </span>
-);
+  );
+};
 
 interface AxisClipSlidersProps {
   mode: ViewMode;
@@ -114,11 +129,6 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     this.updateClipping(activeAxis, leftValue, leftValue + 1);
   }
 
-  step(backward: boolean): void {
-    this.pause();
-    this.moveSlice(backward);
-  }
-
   play(): void {
     if (this.getActiveAxis() && !this.state.playing) {
       const intervalId = window.setInterval(this.moveSlice, PLAY_RATE_MS_PER_STEP);
@@ -154,31 +164,25 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
     const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
-    const onChange = this.makeSliderCallback(axis);
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
-        <LabeledSlider
+        <SliderRow
           // prevents slider from potentially not updating number of handles
           key={`${twoD}`}
           label={axis.toUpperCase()}
           vals={twoD ? [sliderVals[0]] : sliderVals}
           max={numSlices - (twoD ? 1 : 0)}
-          onSlide={onChange}
-          onEnd={onChange}
+          onSlide={this.makeSliderCallback(axis)}
         />
         {twoD && (
-          <Button.Group className="slider-play-buttons">
-            <Tooltip placement="top" title="Step back">
-              <Button icon="step-backward" onClick={() => this.step(true)} />
-            </Tooltip>
-            <Tooltip placement="top" title="Play through sequence">
-              <Button onClick={playing ? this.pause : this.play} icon={playing ? "pause" : "caret-right"} />
-            </Tooltip>
-            <Tooltip placement="top" title="Step forward">
-              <Button icon="step-forward" onClick={() => this.step(false)} />
-            </Tooltip>
-          </Button.Group>
+          <Tooltip placement="top" title="Play through sequence">
+            <Button
+              className="slider-play-button"
+              onClick={playing ? this.pause : this.play}
+              icon={playing ? "pause" : "caret-right"}
+            />
+          </Tooltip>
         )}
       </div>
     );
@@ -190,13 +194,13 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
 
     return (
       <div className="slider-row">
-        <LabeledSlider
+        <SliderRow
           label={""}
           vals={[time]}
           valsReadout={[timeReadout]}
           max={numTimesteps}
           onSlide={([time]) => this.setState({ timeReadout: time })}
-          onEnd={([time]) => changeViewerSetting("time", time)}
+          onSet={([time]) => changeViewerSetting("time", time)}
         />
       </div>
     );

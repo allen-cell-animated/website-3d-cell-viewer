@@ -2,13 +2,19 @@
 @import "../../assets/styles/variables";
 
 .clip-sliders {
+  --w-group-title: 50px;
+  --w-axis-slider: 480px;
+  --w-name: 10px;
+  --w-values-3d: 160px;
+  --w-values-2d: 100px;
+  --w-play-button: 28px;
+
   --color-x: #ff4d4d;
   --color-y: #61d900;
   --color-z: #0099ff;
 
   @extend %axis-override;
-  /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (105) + margins & padding (80) */
-  max-width: 725px;
+  max-width: calc(var(--w-group-title) + var(--w-axis-slider) + var(--w-name) + var(--w-values-3d) + 80px);
   position: absolute;
   margin: 0 auto;
   left: 0;
@@ -24,7 +30,7 @@
     }
 
     .slider-group-title {
-      flex: 0 0 50px;
+      flex: 0 0 var(--w-group-title);
     }
 
     .slider-group-rows {
@@ -74,8 +80,8 @@
   }
 
   .axis-slider {
-    flex: 1 1 480px;
-    max-width: 480px;
+    flex: 1 1 var(--w-axis-slider);
+    max-width: var(--w-axis-slider);
     margin-top: 0.5em;
   }
 
@@ -86,15 +92,15 @@
   }
 
   .slider-name {
-    flex: 0 0 10px;
+    flex: 0 0 var(--w-name);
     font-weight: bold;
   }
 
-  .slider-slices {
-    flex: 0 0 105px;
+  .slider-values {
+    flex: 0 0 var(--w-values-3d);
+    max-width: var(--w-values-3d);
     margin-left: 18px;
     white-space: nowrap;
-    max-width: 105px;
   }
 
   .slider-play-buttons {
@@ -102,18 +108,18 @@
   }
 
   &.clip-sliders-2d {
-    /* Make room for play buttons */
-    /* .slider-group-title (50) + .axis-slider (480) + .slider-name (10) + .slider-slices (70) + .slider-play-buttons (95) + margins & padding (100) */
-    max-width: 805px;
+    /* Make room for play button */
+    max-width: calc(
+      var(--w-group-title) + var(--w-axis-slider) + var(--w-name) + var(--w-values-2d) + var(--w-play-button) + 80px
+    );
 
     /* Slider slice display contains 2 numbers in 2d mode, not 3 - shrink accordingly */
-    .slider-slices {
-      flex: 0 0 70px;
+    .slider-values {
+      flex: 0 0 var(--w-values-2d);
     }
 
     .axis-slider-container {
-      /* .axis-slider (480) + .slider-name (10) + .slider-slices (70) + margins (30) */
-      flex: 0 1 590px;
+      flex: 0 1 calc(var(--w-axis-slider) + var(--w-name) + var(--w-values-2d) + 30px);
     }
   }
 
@@ -134,11 +140,12 @@
     transform: matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
   }
 
-  .slider-play-buttons .ant-btn {
-    line-height: 1.2;
-    height: 21px;
-    color: $light-gray;
-    border-color: $light-gray !important;
+  .ant-btn.slider-play-button {
+    line-height: 1;
+    height: 23px;
+    width: var(--w-play-button);
+    color: #bfbfbf;
+    border-color: #4b4b4b !important;
     background-color: transparent;
 
     &:hover {
