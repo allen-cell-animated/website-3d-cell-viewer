@@ -30,7 +30,14 @@ const NumericInput: React.FC<NumericInputProps> = ({
   onChange,
 }) => {
   // While the input has focus, allow invalid input, just don't call `onChange` with it
-  const [hasFocus, setHasFocus] = React.useState(false);
+  const [hasFocus, _setHasFocus] = React.useState(false);
+  // State doesn't update before focus handler runs - keep a ref following focus state
+  const hasFocusRef = React.useRef(false);
+  const setHasFocus = (focus: boolean): void => {
+    _setHasFocus(focus);
+    hasFocusRef.current = focus;
+  };
+
   // Hold the potentially invalid contents of the focused input here
   const [textContent, setTextContent] = React.useState("");
 
@@ -41,7 +48,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
   const shouldChange = (newValue: number): boolean => !(isNaN(newValue) || newValue === value || disabled);
 
   const onFocus = (): void => {
-    if (!hasFocus) {
+    if (!hasFocusRef.current) {
       // propagate current value to `textContent` on focus
       setTextContent(value.toString());
       setHasFocus(true);
@@ -55,7 +62,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
     if (shouldChange(newValue)) {
       onChange(newValue);
       setTextContent(newValue.toString());
-      // ensure the previous value won't be restored on focus
+      // let the focus handler know we've taken care of things, so it won't restore the previous value
       setHasFocus(true);
     }
 
@@ -74,6 +81,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
   };
 
   const handleTyping = (inputStr: string): void => {
+    console.log("handletyping");
     setTextContent(inputStr);
 
     // if the user clears all text, assume they mean 0 (or the extremum closest to it)
