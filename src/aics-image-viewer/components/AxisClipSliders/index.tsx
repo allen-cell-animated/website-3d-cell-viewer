@@ -36,6 +36,15 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
           step={1}
           margin={1}
           behaviour="drag"
+          pips={{
+            mode: "positions",
+            values: [25, 50, 75],
+            density: 25,
+            format: {
+              // remove labels from pips
+              to: () => "",
+            },
+          }}
           // round slider output to nearest slice; assume any string inputs represent ints
           format={{ to: Math.round, from: parseInt }}
           onSlide={onSlide}

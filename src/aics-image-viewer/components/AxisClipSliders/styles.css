@@ -131,13 +131,29 @@
   .noUi-handle {
     width: 8px;
     height: 8px;
-    transform: translate(-50%, calc(-100% - 4px));
+    transform: translate(-50%, calc(-100% - 3px));
   }
 
   .noUi-handle::after {
     width: 8px;
     height: 8px;
-    transform: matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
+    transform: matrix(0.5, 0.5, -0.5, 0.5, 0, 4);
+  }
+
+  .noUi-pips {
+    padding: 0;
+    height: 0;
+    top: 2px;
+
+    .noUi-marker-normal {
+      display: none;
+    }
+
+    .noUi-marker-large {
+      background-color: #4b4b4b;
+      height: 9px;
+      bottom: -4px;
+    }
   }
 
   .ant-btn.slider-play-button {
