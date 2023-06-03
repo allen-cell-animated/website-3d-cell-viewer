@@ -909,10 +909,81 @@ body{
       }
 }
 
+/*!*************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/shared/NumericInput/styles.css ***!
+  \*************************************************************************************************************************************************************/
+.numinput{
+  height:23px;
+  width:52px;
+  position:relative;
+  display:inline-block;
+  box-sizing:border-box;
+}
+
+  .numinput.numinput-disabled{
+    opacity:0.5;
+  }
+
+  .numinput .numinput-input{
+    width:40px;
+    height:100%;
+    font-size:12px;
+    text-align:right;
+    padding-right:6px;
+    background-color:#222222;
+    border:1px solid #4b4b4b;
+  }
+
+  .numinput .numinput-input:focus{
+      outline:none;
+    }
+
+  .numinput .numinput-controls{
+    width:12px;
+    height:100%;
+    position:absolute;
+    display:inline-block;
+    border:1px solid #4b4b4b;
+    border-left-width:0;
+  }
+
+  .numinput .numinput-controls-button{
+    width:100%;
+    height:50%;
+    line-height:0;
+    transition:all 0.3s linear;
+  }
+
+  .numinput .numinput-controls-button.numinput-controls-button-up{
+      border-bottom:1px solid #4b4b4b;
+    }
+
+  .numinput .numinput-controls-button .numinput-controls-button-icon{
+      font-size:9px;
+      margin:1px;
+    }
+
+  .numinput:not(.numinput-disabled) .numinput-controls-button{
+    cursor:pointer;
+  }
+
+  .numinput:not(.numinput-disabled) .numinput-controls-button:hover,
+    .numinput:not(.numinput-disabled) .numinput-controls-button:focus{
+      background-color:#9e6aff;
+      color:white;
+    }
+
 /*!*********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/AxisClipSliders/styles.css ***!
   \*********************************************************************************************************************************************************/
 .clip-sliders{
+  --w-group-title:50px;
+  --w-axis-slider:480px;
+  --w-name:10px;
+  --w-values-3d:160px;
+  --w-values-2d:100px;
+  --w-play-button:28px;
+
   --color-x:#ff4d4d;
   --color-y:#61d900;
   --color-z:#0099ff
@@ -965,7 +1036,7 @@ body{
     top:calc(100% + 3px);
   }
 .clip-sliders{
-  max-width:725px;
+  max-width:calc(var(--w-group-title) + var(--w-axis-slider) + var(--w-name) + var(--w-values-3d) + 80px);
   position:absolute;
   margin:0 auto;
   left:0;
@@ -980,7 +1051,7 @@ body{
       margin-bottom:8px;
     }
 .clip-sliders .slider-group .slider-group-title{
-      flex:0 0 50px;
+      flex:0 0 var(--w-group-title);
     }
 .clip-sliders .slider-group .slider-group-rows{
       flex:1 1 auto;
@@ -1015,8 +1086,8 @@ body{
     align-items:center;
   }
 .clip-sliders .axis-slider{
-    flex:1 1 480px;
-    max-width:480px;
+    flex:1 1 var(--w-axis-slider);
+    max-width:var(--w-axis-slider);
     margin-top:0.5em;
   }
 .clip-sliders .slider-name,
@@ -1025,26 +1096,28 @@ body{
     white-space:nowrap;
   }
 .clip-sliders .slider-name{
-    flex:0 0 10px;
+    flex:0 0 var(--w-name);
     font-weight:bold;
   }
-.clip-sliders .slider-slices{
-    flex:0 0 105px;
+.clip-sliders .slider-values{
+    flex:0 0 var(--w-values-3d);
+    max-width:var(--w-values-3d);
     margin-left:18px;
     white-space:nowrap;
-    max-width:105px;
   }
 .clip-sliders .slider-play-buttons{
     margin-top:2px;
   }
 .clip-sliders.clip-sliders-2d{
-    max-width:805px;
+    max-width:calc(
+      var(--w-group-title) + var(--w-axis-slider) + var(--w-name) + var(--w-values-2d) + var(--w-play-button) + 80px
+    );
   }
-.clip-sliders.clip-sliders-2d .slider-slices{
-      flex:0 0 70px;
+.clip-sliders.clip-sliders-2d .slider-values{
+      flex:0 0 var(--w-values-2d);
     }
 .clip-sliders.clip-sliders-2d .axis-slider-container{
-      flex:0 1 590px;
+      flex:0 1 calc(var(--w-axis-slider) + var(--w-name) + var(--w-values-2d) + 30px);
     }
 .clip-sliders .noUi-target{
     height:3px;
@@ -1060,21 +1133,22 @@ body{
     height:8px;
     transform:matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
   }
-.clip-sliders .slider-play-buttons .ant-btn{
-    line-height:1.2;
-    height:21px;
-    color:#aeacae;
-    border-color:#aeacae !important;
+.clip-sliders .ant-btn.slider-play-button{
+    line-height:1;
+    height:23px;
+    width:var(--w-play-button);
+    color:#bfbfbf;
+    border-color:#4b4b4b !important;
     background-color:transparent
   }
-.clip-sliders .slider-play-buttons .ant-btn:hover{
+.clip-sliders .ant-btn.slider-play-button:hover{
       background-color:rgba(160, 160, 160, 0.4);
     }
-.clip-sliders .slider-play-buttons .ant-btn:hover,
-    .clip-sliders .slider-play-buttons .ant-btn:focus{
+.clip-sliders .ant-btn.slider-play-button:hover,
+    .clip-sliders .ant-btn.slider-play-button:focus{
       color:white;
     }
-.clip-sliders .slider-play-buttons .ant-btn[ant-click-animating-without-extra-node="true"]::after{
+.clip-sliders .ant-btn.slider-play-button[ant-click-animating-without-extra-node="true"]::after{
       box-shadow:none !important;
       background-color:#aeacae;
     }
