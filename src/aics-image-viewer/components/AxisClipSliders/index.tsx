@@ -30,6 +30,7 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
       <span className="slider-name">{label}</span>
       <span className="axis-slider">
         <SmarterSlider
+          className={isRange ? "" : "slider-single-handle"}
           connect={true}
           range={{ min: 0, max }}
           start={vals}
