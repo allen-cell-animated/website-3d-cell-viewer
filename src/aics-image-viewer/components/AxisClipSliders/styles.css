@@ -134,6 +134,12 @@
     transform: translate(-50%, calc(-100% - 3px));
   }
 
+  .noUi-touch-area {
+    padding: 8px;
+    margin-top: -4px;
+    margin-left: -4px;
+  }
+
   .noUi-handle::after {
     width: 8px;
     height: 8px;
