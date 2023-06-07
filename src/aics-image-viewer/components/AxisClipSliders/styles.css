@@ -132,6 +132,7 @@
     transform: translate(-50%, calc(-100% - 4px));
   }
 
+  /* Dot on the slider track for single-handle sliders */
   .slider-single-handle .noUi-handle::before {
     content: "";
     display: block;
