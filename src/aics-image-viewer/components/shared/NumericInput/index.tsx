@@ -81,7 +81,6 @@ const NumericInput: React.FC<NumericInputProps> = ({
   };
 
   const handleTyping = (inputStr: string): void => {
-    console.log("handletyping");
     setTextContent(inputStr);
 
     // if the user clears all text, assume they mean 0 (or the extremum closest to it)
