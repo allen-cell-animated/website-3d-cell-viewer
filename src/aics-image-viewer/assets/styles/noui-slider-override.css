@@ -10,11 +10,11 @@
     top: 0px;
     left: 100%;
     z-index: 1;
-    width: 6px;
+    width: 8px;
     height: 8px;
     border: none;
     border-radius: 0;
-    transform: translate(-50%, calc(-100% - 5px));
+    transform: translate(-50%, calc(-100% - 4px));
   }
 
   .noUi-handle::before {
@@ -25,13 +25,19 @@
   /* Slider handle arrow */
   .noUi-handle::after {
     background-color: inherit;
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     top: 0;
     left: 0;
-    /* rotate 45deg, skew vertically, translate down */
-    transform: matrix(0.5, 1, -0.5, 1, 0, 5);
+    /* rotate 45deg, translate down */
+    transform: matrix(0.5, 0.5, -0.5, 0.5, 0, 4);
     content: "";
+  }
+
+  .noUi-touch-area {
+    padding: 8px;
+    margin-top: -4px;
+    margin-left: -4px;
   }
 
   .noUi-connect {
