@@ -658,11 +658,11 @@ body{
     top:0px;
     left:100%;
     z-index:1;
-    width:6px;
+    width:8px;
     height:8px;
     border:none;
     border-radius:0;
-    transform:translate(-50%, calc(-100% - 5px));
+    transform:translate(-50%, calc(-100% - 4px));
   }
 .control-panel .noUi-handle::before{
     display:none;
@@ -670,12 +670,17 @@ body{
   }
 .control-panel .noUi-handle::after{
     background-color:inherit;
-    width:6px;
-    height:6px;
+    width:8px;
+    height:8px;
     top:0;
     left:0;
-    transform:matrix(0.5, 1, -0.5, 1, 0, 5);
+    transform:matrix(0.5, 0.5, -0.5, 0.5, 0, 4);
     content:"";
+  }
+.control-panel .noUi-touch-area{
+    padding:8px;
+    margin-top:-4px;
+    margin-left:-4px;
   }
 .control-panel .noUi-connect{
     background-color:#a0a0a0;
@@ -996,11 +1001,11 @@ body{
     top:0px;
     left:100%;
     z-index:1;
-    width:6px;
+    width:8px;
     height:8px;
     border:none;
     border-radius:0;
-    transform:translate(-50%, calc(-100% - 5px));
+    transform:translate(-50%, calc(-100% - 4px));
   }
 .clip-sliders .noUi-handle::before{
     display:none;
@@ -1008,12 +1013,17 @@ body{
   }
 .clip-sliders .noUi-handle::after{
     background-color:inherit;
-    width:6px;
-    height:6px;
+    width:8px;
+    height:8px;
     top:0;
     left:0;
-    transform:matrix(0.5, 1, -0.5, 1, 0, 5);
+    transform:matrix(0.5, 0.5, -0.5, 0.5, 0, 4);
     content:"";
+  }
+.clip-sliders .noUi-touch-area{
+    padding:8px;
+    margin-top:-4px;
+    margin-left:-4px;
   }
 .clip-sliders .noUi-connect{
     background-color:#a0a0a0;
@@ -1124,15 +1134,34 @@ body{
     background-color:rgba(160, 160, 160, 0.4) !important;
   }
 .clip-sliders .noUi-handle{
-    width:8px;
-    height:8px;
     transform:translate(-50%, calc(-100% - 4px));
   }
-.clip-sliders .noUi-handle::after{
-    width:8px;
-    height:8px;
-    transform:matrix(0.5, 0.6, -0.5, 0.6, 0, 5);
+.clip-sliders .slider-single-handle .noUi-handle::before{
+    content:"";
+    display:block;
+    height:4px;
+    width:4px;
+    left:2px;
+    top:11px;
+    border-radius:50%;
+    background-color:#a0a0a0;
   }
+.clip-sliders .noUi-handle::after{
+    box-shadow:4px 4px 3px 0 rgba(0, 0, 0, 0.2);
+  }
+.clip-sliders .noUi-pips{
+    padding:0;
+    height:0;
+    top:2px;
+  }
+.clip-sliders .noUi-pips .noUi-marker-normal{
+      display:none;
+    }
+.clip-sliders .noUi-pips .noUi-marker-large{
+      background-color:#4b4b4b;
+      height:9px;
+      bottom:-4px;
+    }
 .clip-sliders .ant-btn.slider-play-button{
     line-height:1;
     height:23px;
