@@ -45,6 +45,7 @@ import {
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
+  SCALE_BAR_TIME_SERIES_OFFSET,
 } from "../../shared/constants";
 
 import ChannelUpdater from "./ChannelUpdater";
@@ -162,6 +163,12 @@ const App: React.FC<AppProps> = (props) => {
       return { x, y, z };
     }
     return { x: 0, y: 0, z: 0 };
+  };
+  const getNumberOfTimesteps = (): number => {
+    if (image) {
+      return image.imageInfo.times;
+    }
+    return 0;
   };
 
   // State for image loading/reloading
@@ -467,7 +474,8 @@ const App: React.FC<AppProps> = (props) => {
       loader = new OMEZarrLoader();
     }
 
-    const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
+    const aimg = await loader.createVolume(loadSpec);
+    loader.loadVolumeData(aimg, (_url, v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
@@ -539,16 +547,24 @@ const App: React.FC<AppProps> = (props) => {
       const CLIPPING_PANEL_HEIGHT = 150;
 
       let axisY = AXIS_MARGIN_DEFAULT[1];
-      let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
+      let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
       if (open) {
+        // Move indicators up out of the way of the clipping panel
         axisY += CLIPPING_PANEL_HEIGHT;
         scaleBarY += CLIPPING_PANEL_HEIGHT;
       }
+      if (true) {
+        // Move scale bar left out of the way of timestep indicator
+        scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
+      }
+
       view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
-      view3d.setScaleBarPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+      view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+      view3d.setScaleBarPosition(scaleBarX, scaleBarY);
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
+      view3d.setShowTimestepIndicator(false);
       if (viewerSettings.showAxes) {
         view3d.setShowAxis(false);
       }
@@ -559,6 +575,7 @@ const App: React.FC<AppProps> = (props) => {
   const onClippingPanelVisibleChangeEnd = useCallback(
     (_open: boolean): void => {
       view3d.setShowScaleBar(true);
+      view3d.setShowTimestepIndicator(true);
       if (viewerSettings.showAxes) {
         view3d.setShowAxis(true);
       }
