@@ -154,6 +154,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // TODO is there a better API for values that never change?
   const [view3d] = useState(() => new View3d());
+  const loaderRef = useRef<IVolumeLoader | null>(null);
   const [image, setImage] = useState<Volume | null>(null);
 
   const getNumberOfSlices = (): PerAxis<number> => {
@@ -459,19 +460,18 @@ const App: React.FC<AppProps> = (props) => {
     loadSpec.subpath = path;
     loadSpec.time = viewerSettings.time;
 
-    let loader: IVolumeLoader;
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
     if (fullUrl.endsWith(".json")) {
-      loader = new JsonImageInfoLoader();
+      loaderRef.current = new JsonImageInfoLoader();
     } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      loader = new TiffLoader();
+      loaderRef.current = new TiffLoader();
     } else {
-      loader = new OMEZarrLoader();
+      loaderRef.current = new OMEZarrLoader();
     }
 
-    const aimg = await loader.createVolume(loadSpec);
-    loader.loadVolumeData(aimg, (_url, v, channelIndex) => {
+    const aimg = await loaderRef.current.createVolume(loadSpec);
+    loaderRef.current.loadVolumeData(aimg, (_url, v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
