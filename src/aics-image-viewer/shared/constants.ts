@@ -7,8 +7,6 @@ export const // Control panel will automatically close if viewport is less than 
   BOUNDING_BOX_COLOR_DEFAULT: ColorArray = [255, 255, 255],
   AXIS_MARGIN_DEFAULT: [number, number] = [16, 16],
   SCALE_BAR_MARGIN_DEFAULT: [number, number] = [120, 12],
-  // Move scale bars this far to the left when showing time series, to make room for timestep indicator
-  SCALE_BAR_TIME_SERIES_OFFSET = 120,
   // These settings were chosen to work well with most AICS microscopy pipeline images.
   // These numbers mean: remap the bottom LUT_MIN_PERCENTILE fraction of pixels to zero intensity,
   // and linearly increase intensity up to the LUT_MAX_PERCENTILE fraction of pixels.

@@ -26,8 +26,8 @@ interface ViewerWrapperProps {
     axisClipSliders: boolean;
   };
   changeViewerSetting: ViewerSettingUpdater;
-  onClippingPanelVisibleChange?: (open: boolean) => void;
-  onClippingPanelVisibleChangeEnd?: (open: boolean) => void;
+  onClippingPanelVisibleChange?: (panelOpen: boolean, hasTime: boolean) => void;
+  onClippingPanelVisibleChangeEnd?: (panelOpen: boolean) => void;
 }
 
 interface ViewerWrapperState {}
@@ -73,7 +73,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
         <div ref={this.view3dviewerRef} style={STYLES.view3d}></div>
         <BottomPanel
           title="Clipping"
-          onVisibleChange={this.props.onClippingPanelVisibleChange}
+          onVisibleChange={(visible) => this.props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1)}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
           {showControls.axisClipSliders && this.props.hasImage && (

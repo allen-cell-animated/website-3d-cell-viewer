@@ -45,7 +45,6 @@ import {
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
-  SCALE_BAR_TIME_SERIES_OFFSET,
 } from "../../shared/constants";
 
 import ChannelUpdater from "./ChannelUpdater";
@@ -164,12 +163,7 @@ const App: React.FC<AppProps> = (props) => {
     }
     return { x: 0, y: 0, z: 0 };
   };
-  const getNumberOfTimesteps = (): number => {
-    if (image) {
-      return image.imageInfo.times;
-    }
-    return 0;
-  };
+  const numberOfTimesteps = image?.imageInfo.times || 1;
 
   // State for image loading/reloading
 
@@ -181,11 +175,14 @@ const App: React.FC<AppProps> = (props) => {
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
+  // TODO use `loadSpec` held by `Volume` instead
   // tracks the source of the current image, to keep us from reloading an image that is already open
   const [currentImageLoadSpec, setCurrentImageLoadSpec] = useState<LoadSpec | undefined>(undefined);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
+  // Clipping panel state doesn't need to trigger renders on change, so it can go in a ref
+  const clippingPanelOpenRef = useRef(true);
 
   // These are the major parts of `App` state
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
@@ -433,6 +430,7 @@ const App: React.FC<AppProps> = (props) => {
       }),
     });
 
+    setIndicatorPositions(clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
     if (doResetMaskAlpha) {
@@ -542,46 +540,48 @@ const App: React.FC<AppProps> = (props) => {
 
   const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
+  const setIndicatorPositions = (panelOpen: boolean, hasTime: boolean): void => {
+    const CLIPPING_PANEL_HEIGHT = 150;
+    // Move scale bars this far to the left when showing time series, to make room for timestep indicator
+    const SCALE_BAR_TIME_SERIES_OFFSET = 120;
+
+    let axisY = AXIS_MARGIN_DEFAULT[1];
+    let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
+    if (panelOpen) {
+      // Move indicators up out of the way of the clipping panel
+      axisY += CLIPPING_PANEL_HEIGHT;
+      scaleBarY += CLIPPING_PANEL_HEIGHT;
+    }
+    if (hasTime) {
+      // Move scale bar left out of the way of timestep indicator
+      scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
+    }
+
+    view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
+    view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+    view3d.setScaleBarPosition(scaleBarX, scaleBarY);
+  };
+
   const onClippingPanelVisibleChange = useCallback(
-    (open: boolean): void => {
-      const CLIPPING_PANEL_HEIGHT = 150;
-
-      let axisY = AXIS_MARGIN_DEFAULT[1];
-      let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
-      if (open) {
-        // Move indicators up out of the way of the clipping panel
-        axisY += CLIPPING_PANEL_HEIGHT;
-        scaleBarY += CLIPPING_PANEL_HEIGHT;
-      }
-      if (true) {
-        // Move scale bar left out of the way of timestep indicator
-        scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
-      }
-
-      view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
-      view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
-      view3d.setScaleBarPosition(scaleBarX, scaleBarY);
+    (panelOpen: boolean, hasTime: boolean): void => {
+      clippingPanelOpenRef.current = panelOpen;
+      setIndicatorPositions(panelOpen, hasTime);
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
       view3d.setShowTimestepIndicator(false);
-      if (viewerSettings.showAxes) {
-        view3d.setShowAxis(false);
-      }
+      view3d.setShowAxis(false);
     },
-    [viewerSettings.showAxes]
+    [viewerSettings.showAxes, image]
   );
 
-  const onClippingPanelVisibleChangeEnd = useCallback(
-    (_open: boolean): void => {
-      view3d.setShowScaleBar(true);
-      view3d.setShowTimestepIndicator(true);
-      if (viewerSettings.showAxes) {
-        view3d.setShowAxis(true);
-      }
-    },
-    [viewerSettings.showAxes]
-  );
+  const onClippingPanelVisibleChangeEnd = useCallback((): void => {
+    view3d.setShowScaleBar(true);
+    view3d.setShowTimestepIndicator(true);
+    if (viewerSettings.showAxes) {
+      view3d.setShowAxis(true);
+    }
+  }, [viewerSettings.showAxes]);
 
   const getMetadata = useCallback((): MetadataRecord => {
     const { metadata, metadataFormatter } = props;
@@ -833,7 +833,7 @@ const App: React.FC<AppProps> = (props) => {
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
             numSlices={getNumberOfSlices()}
-            numTimesteps={image?.imageInfo.times || 1}
+            numTimesteps={numberOfTimesteps}
             region={viewerSettings.region}
             time={viewerSettings.time}
             appHeight={props.appHeight}
