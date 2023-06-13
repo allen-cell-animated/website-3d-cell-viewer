@@ -175,9 +175,6 @@ const App: React.FC<AppProps> = (props) => {
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
-  // TODO use `loadSpec` held by `Volume` instead
-  // tracks the source of the current image, to keep us from reloading an image that is already open
-  const [currentImageLoadSpec, setCurrentImageLoadSpec] = useState<LoadSpec | undefined>(undefined);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
@@ -448,8 +445,9 @@ const App: React.FC<AppProps> = (props) => {
     const fullUrl = `${baseUrl}${path}`;
 
     // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
-    const samePath = path === currentImageLoadSpec?.subpath;
-    if (samePath && viewerSettings.time === currentImageLoadSpec?.time) {
+    const currentLoadSpec = image?.loadSpec;
+    const samePath = path === currentLoadSpec?.subpath;
+    if (samePath && viewerSettings.time === currentLoadSpec?.time) {
       return;
     }
 
@@ -479,8 +477,6 @@ const App: React.FC<AppProps> = (props) => {
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
       onChannelDataLoaded(v, thisChannelSettings!, channelIndex, samePath);
     });
-
-    setCurrentImageLoadSpec(loadSpec);
 
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
