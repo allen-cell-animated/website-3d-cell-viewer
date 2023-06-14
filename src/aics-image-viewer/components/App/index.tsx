@@ -616,7 +616,7 @@ const App: React.FC<AppProps> = (props) => {
     } else {
       openImage();
     }
-  }, [props.cellId, viewerSettings.imageType, viewerSettings.time, props.rawDims, props.rawData]);
+  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
@@ -719,6 +719,21 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.levels]
   );
+
+  // `time` is special: because syncing it requires a load, it cannot be dependent on `image`
+  useEffect(() => {
+    if (image) {
+      image.loadSpec.time = viewerSettings.time;
+
+      setSendingQueryRequest(true);
+      setLoadedChannels(new Array(image.num_channels).fill(false));
+      view3d.setTime(image, viewerSettings.time, loaderRef.current!, (_url, v, channelIndex) => {
+        // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
+        const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
+        onChannelDataLoaded(v, thisChannelSettings!, channelIndex, true);
+      });
+    }
+  }, [viewerSettings.time]);
 
   useImageLoadEffect(
     (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
