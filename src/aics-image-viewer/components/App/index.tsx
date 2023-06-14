@@ -135,6 +135,28 @@ const defaultProps: AppProps = {
   canvasMargin: "0 0 0 0",
 };
 
+const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
+  const CLIPPING_PANEL_HEIGHT = 150;
+  // Move scale bars this far to the left when showing time series, to make room for timestep indicator
+  const SCALE_BAR_TIME_SERIES_OFFSET = 120;
+
+  let axisY = AXIS_MARGIN_DEFAULT[1];
+  let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
+  if (panelOpen) {
+    // Move indicators up out of the way of the clipping panel
+    axisY += CLIPPING_PANEL_HEIGHT;
+    scaleBarY += CLIPPING_PANEL_HEIGHT;
+  }
+  if (hasTime) {
+    // Move scale bar left out of the way of timestep indicator
+    scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
+  }
+
+  view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
+  view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+  view3d.setScaleBarPosition(scaleBarX, scaleBarY);
+};
+
 /** A `useState` that also creates a getter function for breaking through closures */
 function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
   const [state, setState] = useState(initialState);
@@ -432,7 +454,7 @@ const App: React.FC<AppProps> = (props) => {
       }),
     });
 
-    setIndicatorPositions(clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
+    setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
     if (doResetMaskAlpha) {
@@ -540,32 +562,10 @@ const App: React.FC<AppProps> = (props) => {
 
   const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
-  const setIndicatorPositions = (panelOpen: boolean, hasTime: boolean): void => {
-    const CLIPPING_PANEL_HEIGHT = 150;
-    // Move scale bars this far to the left when showing time series, to make room for timestep indicator
-    const SCALE_BAR_TIME_SERIES_OFFSET = 120;
-
-    let axisY = AXIS_MARGIN_DEFAULT[1];
-    let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
-    if (panelOpen) {
-      // Move indicators up out of the way of the clipping panel
-      axisY += CLIPPING_PANEL_HEIGHT;
-      scaleBarY += CLIPPING_PANEL_HEIGHT;
-    }
-    if (hasTime) {
-      // Move scale bar left out of the way of timestep indicator
-      scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
-    }
-
-    view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
-    view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
-    view3d.setScaleBarPosition(scaleBarX, scaleBarY);
-  };
-
   const onClippingPanelVisibleChange = useCallback(
     (panelOpen: boolean, hasTime: boolean): void => {
       clippingPanelOpenRef.current = panelOpen;
-      setIndicatorPositions(panelOpen, hasTime);
+      setIndicatorPositions(view3d, panelOpen, hasTime);
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
