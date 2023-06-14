@@ -11,24 +11,24 @@ interface ChannelUpdaterProps {
   channelState: ChannelState;
   view3d: View3d;
   image: Volume | null;
-  channelLoaded: boolean;
+  version: number;
 }
 
 /**
  * A component that doesn't render anything, but reacts to the provided `ChannelState`
  * and keeps it in sync with the viewer.
  */
-const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, view3d, image, channelLoaded }) => {
+const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, view3d, image, version }) => {
   const { volumeEnabled, isosurfaceEnabled, isovalue, colorizeEnabled, colorizeAlpha, opacity, color, controlPoints } =
     channelState;
 
   // Effects to update channel settings should check if image is present and channel is loaded first
   const useImageEffect: UseImageEffectType = (effect, deps) => {
     useEffect(() => {
-      if (image && channelLoaded) {
+      if (image && version > 0) {
         return effect(image);
       }
-    }, [...deps, image, channelLoaded]);
+    }, [...deps, image, version]);
   };
 
   useImageEffect(

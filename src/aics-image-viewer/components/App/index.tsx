@@ -135,6 +135,28 @@ const defaultProps: AppProps = {
   canvasMargin: "0 0 0 0",
 };
 
+const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
+  const CLIPPING_PANEL_HEIGHT = 150;
+  // Move scale bars this far to the left when showing time series, to make room for timestep indicator
+  const SCALE_BAR_TIME_SERIES_OFFSET = 120;
+
+  let axisY = AXIS_MARGIN_DEFAULT[1];
+  let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
+  if (panelOpen) {
+    // Move indicators up out of the way of the clipping panel
+    axisY += CLIPPING_PANEL_HEIGHT;
+    scaleBarY += CLIPPING_PANEL_HEIGHT;
+  }
+  if (hasTime) {
+    // Move scale bar left out of the way of timestep indicator
+    scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
+  }
+
+  view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
+  view3d.setTimestepIndicatorPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+  view3d.setScaleBarPosition(scaleBarX, scaleBarY);
+};
+
 /** A `useState` that also creates a getter function for breaking through closures */
 function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
   const [state, setState] = useState(initialState);
@@ -154,6 +176,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // TODO is there a better API for values that never change?
   const [view3d] = useState(() => new View3d());
+  const loaderRef = useRef<IVolumeLoader | null>(null);
   const [image, setImage] = useState<Volume | null>(null);
 
   const getNumberOfSlices = (): PerAxis<number> => {
@@ -163,6 +186,7 @@ const App: React.FC<AppProps> = (props) => {
     }
     return { x: 0, y: 0, z: 0 };
   };
+  const numberOfTimesteps = image?.imageInfo.times || 1;
 
   // State for image loading/reloading
 
@@ -173,12 +197,12 @@ const App: React.FC<AppProps> = (props) => {
   // `true` when the image being loaded is related to the previous one, so some settings should be preserved
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
-  const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
-  // tracks the source of the current image, to keep us from reloading an image that is already open
-  const [currentImageLoadSpec, setCurrentImageLoadSpec] = useState<LoadSpec | undefined>(undefined);
+  const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
+  // Clipping panel state doesn't need to trigger renders on change, so it can go in a ref
+  const clippingPanelOpenRef = useRef(true);
 
   // These are the major parts of `App` state
   // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
@@ -302,10 +326,14 @@ const App: React.FC<AppProps> = (props) => {
     return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
   };
 
+  const setAllChannelsUnloaded = (numberOfChannels: number): void => {
+    setChannelVersions(new Array(numberOfChannels).fill(0));
+  };
+
   const setOneChannelLoaded = (index: number): void => {
-    const newLoadedChannels = getLoadedChannels().slice();
-    newLoadedChannels[index] = true;
-    setLoadedChannels(newLoadedChannels);
+    const newVersions = getChannelVersions().slice();
+    newVersions[index]++;
+    setChannelVersions(newVersions);
   };
 
   // Image loading/initialization functions ///////////////////////////////////
@@ -426,6 +454,7 @@ const App: React.FC<AppProps> = (props) => {
       }),
     });
 
+    setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
     if (doResetMaskAlpha) {
@@ -443,8 +472,9 @@ const App: React.FC<AppProps> = (props) => {
     const fullUrl = `${baseUrl}${path}`;
 
     // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
-    const samePath = path === currentImageLoadSpec?.subpath;
-    if (samePath && viewerSettings.time === currentImageLoadSpec?.time) {
+    const currentLoadSpec = image?.loadSpec;
+    const samePath = path === currentLoadSpec?.subpath;
+    if (samePath && viewerSettings.time === currentLoadSpec?.time) {
       return;
     }
 
@@ -456,30 +486,28 @@ const App: React.FC<AppProps> = (props) => {
     loadSpec.subpath = path;
     loadSpec.time = viewerSettings.time;
 
-    let loader: IVolumeLoader;
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
     if (fullUrl.endsWith(".json")) {
-      loader = new JsonImageInfoLoader();
+      loaderRef.current = new JsonImageInfoLoader();
     } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      loader = new TiffLoader();
+      loaderRef.current = new TiffLoader();
     } else {
-      loader = new OMEZarrLoader();
+      loaderRef.current = new OMEZarrLoader();
     }
 
-    const aimg = await loader.createVolume(loadSpec, (_url, v, channelIndex) => {
+    const aimg = await loaderRef.current.createVolume(loadSpec);
+    loaderRef.current.loadVolumeData(aimg, (_url, v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
       onChannelDataLoaded(v, thisChannelSettings!, channelIndex, samePath);
     });
 
-    setCurrentImageLoadSpec(loadSpec);
-
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
-    setLoadedChannels(new Array(channelNames.length).fill(false));
+    setAllChannelsUnloaded(channelNames.length);
 
     // if this image is completely unrelated to the previous image, switch view mode
     if (!switchingFov && !samePath) {
@@ -535,36 +563,25 @@ const App: React.FC<AppProps> = (props) => {
   const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
   const onClippingPanelVisibleChange = useCallback(
-    (open: boolean): void => {
-      const CLIPPING_PANEL_HEIGHT = 150;
-
-      let axisY = AXIS_MARGIN_DEFAULT[1];
-      let scaleBarY = SCALE_BAR_MARGIN_DEFAULT[1];
-      if (open) {
-        axisY += CLIPPING_PANEL_HEIGHT;
-        scaleBarY += CLIPPING_PANEL_HEIGHT;
-      }
-      view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
-      view3d.setScaleBarPosition(SCALE_BAR_MARGIN_DEFAULT[0], scaleBarY);
+    (panelOpen: boolean, hasTime: boolean): void => {
+      clippingPanelOpenRef.current = panelOpen;
+      setIndicatorPositions(view3d, panelOpen, hasTime);
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
-      if (viewerSettings.showAxes) {
-        view3d.setShowAxis(false);
-      }
+      view3d.setShowTimestepIndicator(false);
+      view3d.setShowAxis(false);
     },
     [viewerSettings.showAxes]
   );
 
-  const onClippingPanelVisibleChangeEnd = useCallback(
-    (_open: boolean): void => {
-      view3d.setShowScaleBar(true);
-      if (viewerSettings.showAxes) {
-        view3d.setShowAxis(true);
-      }
-    },
-    [viewerSettings.showAxes]
-  );
+  const onClippingPanelVisibleChangeEnd = useCallback((): void => {
+    view3d.setShowScaleBar(true);
+    view3d.setShowTimestepIndicator(true);
+    if (viewerSettings.showAxes) {
+      view3d.setShowAxis(true);
+    }
+  }, [viewerSettings.showAxes]);
 
   const getMetadata = useCallback((): MetadataRecord => {
     const { metadata, metadataFormatter } = props;
@@ -603,7 +620,7 @@ const App: React.FC<AppProps> = (props) => {
     } else {
       openImage();
     }
-  }, [props.cellId, viewerSettings.imageType, viewerSettings.time, props.rawDims, props.rawData]);
+  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
@@ -707,6 +724,19 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.levels]
   );
 
+  // `time` is special: because syncing it requires a load, it cannot be dependent on `image`
+  useEffect(() => {
+    if (image) {
+      setSendingQueryRequest(true);
+      setAllChannelsUnloaded(image.num_channels);
+      view3d.setTime(image, viewerSettings.time, loaderRef.current!, (_url, v, channelIndex) => {
+        // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
+        const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
+        onChannelDataLoaded(v, thisChannelSettings!, channelIndex, true);
+      });
+    }
+  }, [viewerSettings.time]);
+
   useImageLoadEffect(
     (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
@@ -747,7 +777,7 @@ const App: React.FC<AppProps> = (props) => {
           {...{ channelState, index }}
           view3d={view3d}
           image={image}
-          channelLoaded={loadedChannels[index]}
+          version={channelVersions[index]}
         />
       ))}
       <Sider
@@ -816,7 +846,7 @@ const App: React.FC<AppProps> = (props) => {
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
             numSlices={getNumberOfSlices()}
-            numTimesteps={image?.imageInfo.times || 1}
+            numTimesteps={numberOfTimesteps}
             region={viewerSettings.region}
             time={viewerSettings.time}
             appHeight={props.appHeight}
