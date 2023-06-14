@@ -175,7 +175,7 @@ const App: React.FC<AppProps> = (props) => {
   // `true` when the image being loaded is related to the previous one, so some settings should be preserved
   const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
-  const [loadedChannels, setLoadedChannels, getLoadedChannels] = useStateWithGetter<boolean[]>([]);
+  const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
@@ -304,10 +304,14 @@ const App: React.FC<AppProps> = (props) => {
     return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
   };
 
+  const setAllChannelsUnloaded = (numberOfChannels: number): void => {
+    setChannelVersions(new Array(numberOfChannels).fill(0));
+  };
+
   const setOneChannelLoaded = (index: number): void => {
-    const newLoadedChannels = getLoadedChannels().slice();
-    newLoadedChannels[index] = true;
-    setLoadedChannels(newLoadedChannels);
+    const newVersions = getChannelVersions().slice();
+    newVersions[index]++;
+    setChannelVersions(newVersions);
   };
 
   // Image loading/initialization functions ///////////////////////////////////
@@ -481,7 +485,7 @@ const App: React.FC<AppProps> = (props) => {
     const channelNames = aimg.imageInfo.channel_names;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
-    setLoadedChannels(new Array(channelNames.length).fill(false));
+    setAllChannelsUnloaded(channelNames.length);
 
     // if this image is completely unrelated to the previous image, switch view mode
     if (!switchingFov && !samePath) {
@@ -723,10 +727,8 @@ const App: React.FC<AppProps> = (props) => {
   // `time` is special: because syncing it requires a load, it cannot be dependent on `image`
   useEffect(() => {
     if (image) {
-      image.loadSpec.time = viewerSettings.time;
-
       setSendingQueryRequest(true);
-      setLoadedChannels(new Array(image.num_channels).fill(false));
+      setAllChannelsUnloaded(image.num_channels);
       view3d.setTime(image, viewerSettings.time, loaderRef.current!, (_url, v, channelIndex) => {
         // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
         const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
@@ -775,7 +777,7 @@ const App: React.FC<AppProps> = (props) => {
           {...{ channelState, index }}
           view3d={view3d}
           image={image}
-          channelLoaded={loadedChannels[index]}
+          version={channelVersions[index]}
         />
       ))}
       <Sider
