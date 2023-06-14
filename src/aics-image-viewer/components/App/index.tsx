@@ -572,7 +572,7 @@ const App: React.FC<AppProps> = (props) => {
       view3d.setShowTimestepIndicator(false);
       view3d.setShowAxis(false);
     },
-    [viewerSettings.showAxes, image]
+    [viewerSettings.showAxes]
   );
 
   const onClippingPanelVisibleChangeEnd = useCallback((): void => {
