@@ -12,68 +12,75 @@ const themeVariables = lessToJs(
   fs.readFileSync(path.join(__dirname, "src/aics-image-viewer/styles/ant-vars.less"), "utf8")
 );
 
-module.exports = {
-  entry: ["./public/index.tsx"],
-  output: {
-    path: path.resolve(__dirname, "imageviewer"),
-    filename: "image-viewer-ui.bundle.js",
-  },
-  resolve: {
-    extensions: [".js", ".jsx", ".ts", ".tsx"],
-  },
-  plugins: [
-    new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({
-      template: "./public/index.html",
-    }),
-    new MiniCssExtractPlugin(),
-    new webpack.DefinePlugin({
-      APP_VERSION: JSON.stringify(require("./package.json").version),
-    }),
-    new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
-    new webpack.ProvidePlugin({
-      THREE: "three",
-      jQuery: "jquery",
-      $: "jquery",
-    }),
-  ],
-  module: {
-    rules: [
-      {
-        loader: "babel-loader",
-        exclude: /node_modules/,
-        test: /\.(js|jsx|ts|tsx|svg)$/,
-      },
-      {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
-      },
-      {
-        test: /\.less$/,
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: {
-              importLoaders: 1,
-            },
-          },
-          {
-            loader: "less-loader",
-            options: {
-              lessOptions: {
-                javascriptEnabled: true,
-                modifyVars: themeVariables,
-                math: "always",
+module.exports = (env) => {
+  return {
+    entry: ["./public/index.tsx"],
+    output: {
+      path: path.resolve(__dirname, "imageviewer"),
+      filename: "image-viewer-ui.bundle.js",
+    },
+    resolve: {
+      extensions: [".js", ".jsx", ".ts", ".tsx"],
+    },
+    plugins: [
+      new CleanWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        template: "./public/index.html",
+      }),
+      new MiniCssExtractPlugin(),
+      new webpack.DefinePlugin({
+        APP_VERSION: JSON.stringify(require("./package.json").version),
+      }),
+      new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
+      new webpack.ProvidePlugin({
+        THREE: "three",
+        jQuery: "jquery",
+        $: "jquery",
+      }),
+      new webpack.DefinePlugin({
+        WEBSITE3DCELLVIEWER_VERSION: JSON.stringify(require("./package.json").version),
+        VOLUMEVIEWER_VERSION: JSON.stringify(require("./node_modules/@aics/volume-viewer/package.json").version),
+        WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT: JSON.stringify(env),
+      }),
+    ],
+    module: {
+      rules: [
+        {
+          loader: "babel-loader",
+          exclude: /node_modules/,
+          test: /\.(js|jsx|ts|tsx|svg)$/,
+        },
+        {
+          test: /\.css$/,
+          use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
+        },
+        {
+          test: /\.less$/,
+          use: [
+            "style-loader",
+            {
+              loader: "css-loader",
+              options: {
+                importLoaders: 1,
               },
             },
-          },
-        ],
-      },
-      {
-        test: /\.(woff|woff2|tff|eot|glyph)$/,
-        type: "asset/resource",
-      },
-    ],
-  },
+            {
+              loader: "less-loader",
+              options: {
+                lessOptions: {
+                  javascriptEnabled: true,
+                  modifyVars: themeVariables,
+                  math: "always",
+                },
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(woff|woff2|tff|eot|glyph)$/,
+          type: "asset/resource",
+        },
+      ],
+    },
+  };
 };

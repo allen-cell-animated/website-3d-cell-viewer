@@ -602,6 +602,11 @@ const App: React.FC<AppProps> = (props) => {
 
   // On mount
   useEffect(() => {
+    // vars filled at build time using webpack DefinePlugin
+    console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
+    console.log(`website-3d-cell-viewer Version ${WEBSITE3DCELLVIEWER_VERSION}`);
+    console.log(`volume-viewer Version ${VOLUMEVIEWER_VERSION}`);
+
     const onResize = (): void => {
       if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
         setControlPanelClosed(true);

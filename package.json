@@ -18,9 +18,9 @@
     "access": "public"
   },
   "scripts": {
-    "start": "webpack serve --config webpack.dev.js",
-    "gh-build": "webpack --config webpack.dev.js",
-    "dev": "webpack --config webpack.dev.js",
+    "start": "webpack serve --config webpack.dev.js  --env env=dev",
+    "gh-build": "webpack --config webpack.dev.js --env env=production",
+    "dev": "webpack --config webpack.dev.js --env env=dev",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore --ext .jsx --ext .js --ext .ts --ext .tsx ./",
     "test": "jest --coverage --passWithNoTests",
     "test:github-action": "jest --silent --passWithNoTests --ci --coverage --coverageReporters=\"text\" --coverageReporters=\"text-summary\" --outputFile=\"report.json\"",
