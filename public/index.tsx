@@ -11,6 +11,11 @@ import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../
 import FirebaseRequest from "./firebase";
 import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
+// vars filled at build time using webpack DefinePlugin
+console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
+console.log(`website-3d-cell-viewer Version ${WEBSITE3DCELLVIEWER_PACKAGE.version}`);
+console.log(`volume-viewer Version ${VOLUMEVIEWER_PACKAGE.version}`);
+
 export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   groups: [
     {
