@@ -58,5 +58,5 @@ jobs:
           external_repository: allen-cell-animated/website-3d-cell-viewer-release
           deploy_key: ${{ secrets.SSH_PRIVATE_KEY }}
           publish_dir: ./imageviewer
-          tag_name: deploy-${{ github.ref_name }}
-          tag_message: "Deployment to website-3d-cell-viewer-release ${{ github.ref_name }}"
+          tag_name: test-deploy-${{ github.ref_name }}
+          tag_message: "TEST Deployment to website-3d-cell-viewer-release ${{ github.ref_name }}"
