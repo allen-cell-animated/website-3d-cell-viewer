@@ -86,7 +86,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           external_repository: allen-cell-animated/website-3d-cell-viewer-release
-          deploy_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
           publish_dir: ./imageviewer
           tag_name: deploy-${{ github.ref_name }}
           tag_message: "Deployment to website-3d-cell-viewer-release ${{ github.ref_name }}"
