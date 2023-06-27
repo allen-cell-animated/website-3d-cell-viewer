@@ -41,3 +41,22 @@ jobs:
           node-version: ${{env.NODE_VERSION}}
       - run: npm ci
       - run: npm run typeCheck --if-present
+  deploy:
+    needs: [typeCheck, test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{env.NODE_VERSION}}
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm run gh-build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          external_repository: allen-cell-animated/website-3d-cell-viewer-release
+          deploy_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          publish_dir: ./imageviewer
+          tag_name: deploy-${{ github.ref_name }}
+          tag_message: "Deployment to website-3d-cell-viewer-release ${{ github.ref_name }}"
