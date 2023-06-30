@@ -34,8 +34,7 @@ import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } fr
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
-  ALPHA_MASK_SLIDER_3D_DEFAULT,
-  ALPHA_MASK_SLIDER_2D_DEFAULT,
+  ALPHA_MASK_SLIDER_DEFAULT,
   BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   DENSITY_SLIDER_LEVEL_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
@@ -107,7 +106,7 @@ const defaultViewerSettings: GlobalViewerSettings = {
   backgroundColor: BACKGROUND_COLOR_DEFAULT,
   boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
   autorotate: false,
-  maskAlpha: ALPHA_MASK_SLIDER_3D_DEFAULT,
+  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
   brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
   density: DENSITY_SLIDER_LEVEL_DEFAULT,
   levels: LEVELS_SLIDER_DEFAULT,
@@ -215,15 +214,6 @@ const App: React.FC<AppProps> = (props) => {
   // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
-  const getInitialAlphaLevel = (): number => {
-    if (props.viewerSettings?.maskAlpha !== undefined) {
-      return props.viewerSettings.maskAlpha;
-    }
-    const { imageType, viewMode } = viewerSettings;
-    const is3dChildImage = imageType === ImageType.segmentedCell && viewMode === ViewMode.threeD;
-    return is3dChildImage ? ALPHA_MASK_SLIDER_3D_DEFAULT : ALPHA_MASK_SLIDER_2D_DEFAULT;
-  };
-
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
@@ -250,16 +240,11 @@ const App: React.FC<AppProps> = (props) => {
         // switching to 2d
         const slices = Math.max(1, getNumberOfSlices()[activeAxis]);
         newSettings.region[activeAxis] = [0, 1 / slices];
-        if (prevSettings.viewMode === ViewMode.threeD) {
+        if (prevSettings.viewMode === ViewMode.threeD && newSettings.renderMode === RenderMode.pathTrace) {
           // Switching from 3D to 2D
-          newSettings.maskAlpha = ALPHA_MASK_SLIDER_2D_DEFAULT;
           // if path trace was enabled in 3D turn it off when switching to 2D.
-          if (newSettings.renderMode === RenderMode.pathTrace) {
-            newSettings.renderMode = RenderMode.volumetric;
-          }
+          newSettings.renderMode = RenderMode.volumetric;
         }
-      } else if (prevSettings.viewMode !== ViewMode.threeD && prevSettings.imageType === ImageType.segmentedCell) {
-        newSettings.maskAlpha = ALPHA_MASK_SLIDER_3D_DEFAULT;
       }
       return newSettings;
     },
@@ -432,7 +417,7 @@ const App: React.FC<AppProps> = (props) => {
     return newChannelSettings;
   };
 
-  const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[], doResetMaskAlpha = true): void => {
+  const placeImageInViewer = (aimg: Volume, newChannelSettings?: ChannelState[]): void => {
     setImage(aimg);
 
     const channelSetting = newChannelSettings || channelSettings;
@@ -456,12 +441,6 @@ const App: React.FC<AppProps> = (props) => {
 
     setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
-
-    if (doResetMaskAlpha) {
-      const initialAlpha = getInitialAlphaLevel();
-      changeViewerSetting("maskAlpha", initialAlpha);
-      view3d.updateMaskAlpha(aimg, alphaSliderToImageValue(initialAlpha));
-    }
 
     view3d.updateActiveChannels(aimg);
   };
@@ -514,7 +493,7 @@ const App: React.FC<AppProps> = (props) => {
       changeViewerSetting("viewMode", ViewMode.threeD);
     }
 
-    placeImageInViewer(aimg, newChannelSettings, !samePath);
+    placeImageInViewer(aimg, newChannelSettings);
   };
 
   const loadFromRaw = (): void => {
