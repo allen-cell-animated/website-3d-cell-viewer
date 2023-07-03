@@ -12,17 +12,8 @@
       "impliedStrict": true
     },
     "ecmaVersion": 2018,
-    "sourceType": "module"
-  },
-  "globals": {
-    "document": true,
-    "clearInterval": true,
-    "setInterval": true,
-    "window": true,
-    "Event": true,
-    "setTimeout": true,
-    "fetch": true,
-    "Promise": true
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
@@ -31,7 +22,7 @@
     "eol-last": 1,
     "eqeqeq": 1,
     "new-cap": 1,
-    "no-undef": "error",
+    "no-undef": "off",
     "no-array-constructor": 1,
     "no-mixed-spaces-and-tabs": 1,
     "no-new-object": 1,
