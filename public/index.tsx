@@ -263,7 +263,7 @@ function runApp() {
       cellId={args.cellid.toString()}
       baseUrl={args.baseurl}
       appHeight="100vh"
-      canvasMargin="0 120px 0 0"
+      canvasMargin="0 0 0 0"
       cellPath={args.cellPath}
       fovPath={args.fovPath}
       fovDownloadHref={args.fovDownloadHref}
