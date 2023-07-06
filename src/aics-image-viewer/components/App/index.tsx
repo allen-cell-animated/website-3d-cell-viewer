@@ -452,7 +452,8 @@ const App: React.FC<AppProps> = (props) => {
 
     // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
     const currentLoadSpec = image?.loadSpec;
-    const samePath = path === currentLoadSpec?.subpath;
+    const samePath = fullUrl === currentLoadSpec?.url;
+    // future TODO: check for whether multiresolution level (subpath) would be different too.
     if (samePath && viewerSettings.time === currentLoadSpec?.time) {
       return;
     }
