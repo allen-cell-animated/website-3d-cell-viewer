@@ -462,7 +462,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const loadSpec = new LoadSpec();
     loadSpec.url = fullUrl;
-    loadSpec.subpath = path;
+    loadSpec.subpath = "";
     loadSpec.time = viewerSettings.time;
 
     // if this does NOT end with tif or json,
