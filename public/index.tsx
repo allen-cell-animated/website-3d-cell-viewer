@@ -137,11 +137,9 @@ if (params) {
   }
   if (params.url) {
     // ZARR:
-    // ?url=zarrstore&image=imagename
-    // ?url=zarrstore will default to image "0"
-    // zarrstore must end with .zarr
-    // put the store url in baseUrl,
-    // and the image name in cellPath
+    // ?url=baseurl/zarr.zarr&image=subpath
+    // ?url=baseurl&image=imagename.zarr (no subpath)
+    // everything except for baseurl will be the cellPath
     // Time 0 will be loaded.
     // TODO specify Pyramid level
 
@@ -157,27 +155,25 @@ if (params) {
     // any split between baseUrl + cellPath is ok
     // as long as (baseUrl+cellPath) ends with .json
 
-    // it is understood that if nextImgPath and/or prevImgPath
-    // are provided, they must be relative to baseUrl in addition to cellPath.
-    // same deal for fovPath
+    // it is understood that if fovPath is provided, 
+    // it must be relative to baseUrl in addition to cellPath.
 
     let decodedurl = decodeURI(params.url);
     let decodedimage = "";
     if (params.image) {
       decodedimage = decodeURIComponent(params.image);
-    } else {
-      // image not specified
-      if (decodedurl.endsWith(".zarr")) {
-        decodedimage = "";
-      } else {
-        if (decodedurl.endsWith("/")) {
-          decodedurl = decodedurl.slice(0, -1);
-        }
-        const spliturl = decodedurl.split("/");
-        decodedimage = spliturl[spliturl.length - 1];
-        decodedurl = decodedurl.slice(0, -decodedimage.length);
-      }
+    } 
+
+    // get the last thing in the url
+    if (decodedurl.endsWith("/")) {
+      decodedurl = decodedurl.slice(0, -1);
     }
+    const spliturl = decodedurl.split("/");
+    const lastpart = spliturl[spliturl.length - 1];
+    const baseUrl = decodedurl.slice(0, -lastpart.length);
+    // any difference for zarr or tiff or json?
+    decodedurl = baseUrl;
+    decodedimage = lastpart+"/"+decodedimage;
 
     args.cellid = 1;
     args.baseurl = decodedurl;
