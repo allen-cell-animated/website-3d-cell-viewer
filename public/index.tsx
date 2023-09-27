@@ -173,7 +173,12 @@ if (params) {
     const baseUrl = decodedurl.slice(0, -lastpart.length);
     // any difference for zarr or tiff or json?
     decodedurl = baseUrl;
-    decodedimage = lastpart+"/"+decodedimage;
+    if (decodedimage !== "") {
+      decodedimage = lastpart+"/"+decodedimage;
+    }
+    else {
+      decodedimage = lastpart;
+    }
 
     args.cellid = 1;
     args.baseurl = decodedurl;
