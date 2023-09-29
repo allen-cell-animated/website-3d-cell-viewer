@@ -730,6 +730,14 @@ const App: React.FC<AppProps> = (props) => {
   usePerAxisClippingUpdater("x", viewerSettings.region.x);
   usePerAxisClippingUpdater("y", viewerSettings.region.y);
   usePerAxisClippingUpdater("z", viewerSettings.region.z);
+  // Z slice is a separate property that also must be updated
+  useImageEffect(
+    (image) => {
+      const slice = Math.floor(viewerSettings.region.z[0] * image.imageInfo.volumeSize.z);
+      view3d.setZSlice(image, slice);
+    },
+    [viewerSettings.region.z[0]]
+  );
 
   // Rendering ////////////////////////////////////////////////////////////////
 
