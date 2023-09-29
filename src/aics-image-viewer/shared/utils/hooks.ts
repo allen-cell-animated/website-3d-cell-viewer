@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 
-/** A `useState` that also creates a getter function for breaking through closures */
+/** A `useState` that also creates a getter function for breaking through closures. */
 export function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
   const [state, setState] = useState(initialState);
   const stateRef = useRef(state);
