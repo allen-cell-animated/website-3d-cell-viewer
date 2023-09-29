@@ -175,12 +175,12 @@ const App: React.FC<AppProps> = (props) => {
 
   // TODO is there a better API for values that never change?
   const [view3d] = useState(() => new View3d());
-  const loaderRef = useRef<IVolumeLoader | null>(null);
   const [image, setImage] = useState<Volume | null>(null);
+  const imageUrlRef = useRef<string>("");
 
   const getNumberOfSlices = (): PerAxis<number> => {
     if (image) {
-      const { x, y, z } = image;
+      const { x, y, z } = image.imageInfo.volumeSize;
       return { x, y, z };
     }
     return { x: 0, y: 0, z: 0 };
@@ -340,7 +340,7 @@ const App: React.FC<AppProps> = (props) => {
     }
     view3d.updateLuts(aimg);
 
-    if (aimg.channelNames()[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
+    if (aimg.channelNames[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
 
@@ -424,7 +424,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
       // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking saner on load
-      channels: aimg.channel_names.map((name) => {
+      channels: aimg.channelNames.map((name) => {
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
           return {};
@@ -451,10 +451,9 @@ const App: React.FC<AppProps> = (props) => {
     const fullUrl = `${baseUrl}${path}`;
 
     // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
-    const currentLoadSpec = image?.loadSpec;
-    const samePath = fullUrl === currentLoadSpec?.url;
+    const samePath = fullUrl === imageUrlRef.current;
     // future TODO: check for whether multiresolution level (subpath) would be different too.
-    if (samePath && viewerSettings.time === currentLoadSpec?.time) {
+    if (samePath && viewerSettings.time === image?.loadSpec.time) {
       return;
     }
 
@@ -462,29 +461,28 @@ const App: React.FC<AppProps> = (props) => {
     setImageLoaded(false);
 
     const loadSpec = new LoadSpec();
-    loadSpec.url = fullUrl;
-    loadSpec.subpath = "";
     loadSpec.time = viewerSettings.time;
 
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
+    let loader: IVolumeLoader;
     if (fullUrl.endsWith(".json")) {
-      loaderRef.current = new JsonImageInfoLoader();
+      loader = new JsonImageInfoLoader(fullUrl);
     } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      loaderRef.current = new TiffLoader();
+      loader = new TiffLoader(fullUrl);
     } else {
-      loaderRef.current = new OMEZarrLoader();
+      loader = new OMEZarrLoader(fullUrl);
     }
 
-    const aimg = await loaderRef.current.createVolume(loadSpec);
-    loaderRef.current.loadVolumeData(aimg, (_url, v, channelIndex) => {
+    const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
-      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
+      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
       onChannelDataLoaded(v, thisChannelSettings!, channelIndex, samePath);
     });
+    loader.loadVolumeData(aimg);
 
-    const channelNames = aimg.imageInfo.channel_names;
+    const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
     setAllChannelsUnloaded(channelNames.length);
@@ -494,6 +492,7 @@ const App: React.FC<AppProps> = (props) => {
       changeViewerSetting("viewMode", ViewMode.threeD);
     }
 
+    imageUrlRef.current = fullUrl;
     placeImageInViewer(aimg, newChannelSettings);
   };
 
@@ -506,16 +505,16 @@ const App: React.FC<AppProps> = (props) => {
 
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
-    for (let i = 0; i < rawDims.channels; ++i) {
+    for (let i = 0; i < rawDims.numChannels; ++i) {
       aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
     }
 
-    let channelSetting = rawDims.channel_names.map((channel, index) => {
+    let channelSetting = rawDims.channelNames.map((channel, index) => {
       let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
       return initializeOneChannelSetting(aimg, channel, index, color);
     });
 
-    setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channel_names, props.viewerChannelSettings));
+    setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channelNames, props.viewerChannelSettings));
     setChannelSettings(channelSetting);
 
     // Here is where we officially hand the image to the volume-viewer
@@ -708,12 +707,8 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     if (image) {
       setSendingQueryRequest(true);
-      setAllChannelsUnloaded(image.num_channels);
-      view3d.setTime(image, viewerSettings.time, loaderRef.current!, (_url, v, channelIndex) => {
-        // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
-        const thisChannelSettings = getOneChannelSetting(v.imageInfo.channel_names[channelIndex]);
-        onChannelDataLoaded(v, thisChannelSettings!, channelIndex, true);
-      });
+      setAllChannelsUnloaded(image.numChannels);
+      view3d.setTime(image, viewerSettings.time);
     }
   }, [viewerSettings.time]);
 
@@ -775,7 +770,7 @@ const App: React.FC<AppProps> = (props) => {
           imageName={image?.name}
           imageLoaded={imageLoaded}
           hasImage={!!image}
-          pixelSize={image ? image.pixel_size : [1, 1, 1]}
+          pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
           channelDataChannels={image?.channels}
           channelGroupedByType={channelGroupedByType}
           // user selections
