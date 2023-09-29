@@ -1,6 +1,7 @@
 // 3rd Party Imports
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
+import { debounce } from "lodash";
 import {
   IVolumeLoader,
   JsonImageInfoLoader,
@@ -11,6 +12,7 @@ import {
   TiffLoader,
   View3d,
   Volume,
+  VolumeCache,
 } from "@aics/volume-viewer";
 
 import {
@@ -21,6 +23,7 @@ import {
   ViewerSettingChangeHandlers,
   UseImageEffectType,
 } from "./types";
+import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import { controlPointsToLut, initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
@@ -61,7 +64,6 @@ import {
 import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
-import { debounce } from "lodash";
 
 const { Sider, Content } = Layout;
 
@@ -156,25 +158,14 @@ const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: bool
   view3d.setScaleBarPosition(scaleBarX, scaleBarY);
 };
 
-/** A `useState` that also creates a getter function for breaking through closures */
-function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
-  const [state, setState] = useState(initialState);
-  const stateRef = useRef(state);
-  const wrappedSetState = useCallback((value: T) => {
-    stateRef.current = value;
-    setState(value);
-  }, []);
-  const getState = useCallback(() => stateRef.current, []);
-  return [state, wrappedSetState, getState];
-}
-
 const App: React.FC<AppProps> = (props) => {
   props = { ...defaultProps, ...props };
 
   // State management /////////////////////////////////////////////////////////
 
   // TODO is there a better API for values that never change?
-  const [view3d] = useState(() => new View3d());
+  const view3d = useConstructor(() => new View3d());
+  const volumeCache = useConstructor(() => new VolumeCache());
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
@@ -467,11 +458,11 @@ const App: React.FC<AppProps> = (props) => {
     // then we assume it's zarr.
     let loader: IVolumeLoader;
     if (fullUrl.endsWith(".json")) {
-      loader = new JsonImageInfoLoader(fullUrl);
+      loader = new JsonImageInfoLoader(fullUrl, volumeCache);
     } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
       loader = new TiffLoader(fullUrl);
     } else {
-      loader = new OMEZarrLoader(fullUrl);
+      loader = new OMEZarrLoader(fullUrl, volumeCache);
     }
 
     const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
