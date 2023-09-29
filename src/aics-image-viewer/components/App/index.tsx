@@ -626,7 +626,6 @@ const App: React.FC<AppProps> = (props) => {
   useImageEffect(
     (_currentImage) => {
       view3d.setCameraMode(viewerSettings.viewMode);
-      view3d.resize(null);
     },
     [viewerSettings.viewMode]
   );
@@ -732,9 +731,9 @@ const App: React.FC<AppProps> = (props) => {
   usePerAxisClippingUpdater("z", viewerSettings.region.z);
   // Z slice is a separate property that also must be updated
   useImageEffect(
-    (image) => {
-      const slice = Math.floor(viewerSettings.region.z[0] * image.imageInfo.volumeSize.z);
-      view3d.setZSlice(image, slice);
+    (currentImage) => {
+      const slice = Math.floor(viewerSettings.region.z[0] * currentImage.imageInfo.volumeSize.z);
+      view3d.setZSlice(currentImage, slice);
     },
     [viewerSettings.region.z[0]]
   );
