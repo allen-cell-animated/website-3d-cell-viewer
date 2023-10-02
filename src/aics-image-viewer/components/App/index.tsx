@@ -626,6 +626,7 @@ const App: React.FC<AppProps> = (props) => {
   useImageEffect(
     (_currentImage) => {
       view3d.setCameraMode(viewerSettings.viewMode);
+      view3d.resize(null);
     },
     [viewerSettings.viewMode]
   );
