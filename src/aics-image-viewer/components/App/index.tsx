@@ -230,7 +230,8 @@ const App: React.FC<AppProps> = (props) => {
       if (activeAxis) {
         // switching to 2d
         const slices = Math.max(1, getNumberOfSlices()[activeAxis]);
-        newSettings.region[activeAxis] = [0, 1 / slices];
+        const middleSlice = Math.floor(slices / 2);
+        newSettings.region[activeAxis] = [middleSlice / slices, (middleSlice + 1) / slices];
         if (prevSettings.viewMode === ViewMode.threeD && newSettings.renderMode === RenderMode.pathTrace) {
           // Switching from 3D to 2D
           // if path trace was enabled in 3D turn it off when switching to 2D.
