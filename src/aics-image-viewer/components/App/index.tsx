@@ -330,6 +330,7 @@ const App: React.FC<AppProps> = (props) => {
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     }
     view3d.updateLuts(aimg);
+    view3d.onVolumeData(aimg, [channelIndex]);
 
     if (aimg.channelNames[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
