@@ -3,13 +3,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import {
-  IVolumeLoader,
-  JsonImageInfoLoader,
+  createVolumeLoader,
   LoadSpec,
-  OMEZarrLoader,
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
-  TiffLoader,
   View3d,
   Volume,
   VolumeCache,
@@ -333,6 +330,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
 
+    view3d.setVolumeChannelEnabled(aimg, channelIndex, thisChannelsSettings.volumeEnabled);
     if (aimg.channelNames[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
@@ -458,14 +456,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
-    let loader: IVolumeLoader;
-    if (fullUrl.endsWith(".json")) {
-      loader = new JsonImageInfoLoader(fullUrl, volumeCache);
-    } else if (fullUrl.endsWith(".tif") || fullUrl.endsWith(".tiff")) {
-      loader = new TiffLoader(fullUrl);
-    } else {
-      loader = new OMEZarrLoader(fullUrl, volumeCache);
-    }
+    const loader = await createVolumeLoader(fullUrl, { cache: volumeCache });
 
     const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
