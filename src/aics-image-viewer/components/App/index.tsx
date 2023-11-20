@@ -699,24 +699,25 @@ const App: React.FC<AppProps> = (props) => {
   const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number], slice: number): void => {
     useImageEffect(
       (currentImage) => {
-        // if (viewerSettings.viewMode === ViewMode.threeD) {
-        //   view3d.setAxisClip(currentImage, axis, -0.5, 0.5, false);
-        // } else {
-        //   const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
-        //   view3d.setAxisClip(currentImage, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
-        // }
-        //view3d.setCameraMode(viewerSettings.viewMode);
+        let isOrthoAxis = false;
+        let axismin = 0.0;
+        let axismax = 1.0;
         if (viewerSettings.viewMode === ViewMode.threeD) {
-          view3d.setAxisClip(currentImage, axis, minval - 0.5, maxval - 0.5, false);
+          axismin = minval;
+          axismax = maxval;
+          isOrthoAxis = false;
         } else {
-          const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis && axis !== "z";
-          const normSlice = slice - 0.5;
+          isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
           const oneSlice = 1 / currentImage.imageInfo.volumeSize[axis];
+          axismin = isOrthoAxis ? slice : 0.0;
+          axismax = isOrthoAxis ? slice + oneSlice : 1.0;
           if (axis === "z" && viewerSettings.viewMode === ViewMode.xy) {
             view3d.setZSlice(currentImage, Math.floor(slice * currentImage.imageInfo.volumeSize.z));
           }
-          view3d.setAxisClip(currentImage, axis, isOrthoAxis ? normSlice : -0.5, isOrthoAxis ? normSlice + oneSlice : 0.5, isOrthoAxis);
         }
+        // view3d wants the coordinates in the -0.5 to 0.5 range
+        view3d.setAxisClip(currentImage, axis, axismin - 0.5, axismax - 0.5, isOrthoAxis);
+        view3d.setCameraMode(viewerSettings.viewMode);
       },
       [minval, maxval, slice, viewerSettings.viewMode]
     );
