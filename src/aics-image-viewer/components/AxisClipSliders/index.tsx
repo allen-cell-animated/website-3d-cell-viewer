@@ -160,10 +160,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const max = numSlices[axis];
     const start = minval / max;
     const end = maxval / max;
-    if (twoD){
+    if (twoD) {
       changeViewerSetting("slice", { ...slices, [axis]: start });
-    }
-    else {
+    } else {
       changeViewerSetting("region", { ...region, [axis]: [start, end] });
     }
   }
@@ -180,7 +179,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
     const slice = this.props.slices[axis];
-    const sliderVals = twoD ? [Math.round(slice*numSlices)] : [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
+    const sliderVals = twoD
+      ? [Math.round(slice * numSlices)]
+      : [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
