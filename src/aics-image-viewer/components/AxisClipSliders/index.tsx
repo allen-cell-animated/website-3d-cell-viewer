@@ -76,6 +76,7 @@ interface AxisClipSlidersProps {
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
+  slices: PerAxis<number>;
   numTimesteps: number;
   time: number;
 }
@@ -136,7 +137,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const max = this.props.numSlices[activeAxis];
     const currentLeftSliderValue = Math.round(this.props.region[activeAxis][0] * max);
     const leftValue = (currentLeftSliderValue + delta + max) % max;
-    this.updateClipping(activeAxis, leftValue, leftValue + 1);
+    this.updateClipping(activeAxis, leftValue, leftValue + 1, true);
   }
 
   play(): void {
@@ -153,19 +154,24 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     }
   }
 
-  updateClipping(axis: AxisName, minval: number, maxval: number): void {
-    const { changeViewerSetting, numSlices, region } = this.props;
+  updateClipping(axis: AxisName, minval: number, maxval: number, twoD: boolean): void {
+    const { changeViewerSetting, numSlices, region, slices } = this.props;
     // get a value from -0.5..0.5
     const max = numSlices[axis];
     const start = minval / max;
     const end = maxval / max;
-    changeViewerSetting("region", { ...region, [axis]: [start, end] });
+    if (twoD){
+      changeViewerSetting("slice", { ...slices, [axis]: start });
+    }
+    else {
+      changeViewerSetting("region", { ...region, [axis]: [start, end] });
+    }
   }
 
-  makeSliderCallback(axis: AxisName): (values: number[]) => void {
+  makeSliderCallback(axis: AxisName, twoD: boolean): (values: number[]) => void {
     return (values: number[]) => {
       const max = values.length < 2 ? values[0] + 1 : values[1];
-      this.updateClipping(axis, values[0], max);
+      this.updateClipping(axis, values[0], max, twoD);
     };
   }
 
@@ -173,7 +179,8 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
     const { playing } = this.state;
     const numSlices = this.props.numSlices[axis];
     const clipVals = this.props.region[axis];
-    const sliderVals = [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
+    const slice = this.props.slices[axis];
+    const sliderVals = twoD ? [Math.round(slice*numSlices)] : [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
 
     return (
       <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
@@ -181,9 +188,9 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           // prevents slider from potentially not updating number of handles
           key={`${twoD}`}
           label={axis.toUpperCase()}
-          vals={twoD ? [sliderVals[0]] : sliderVals}
+          vals={sliderVals}
           max={numSlices - (twoD ? 1 : 0)}
-          onSlide={this.makeSliderCallback(axis)}
+          onSlide={this.makeSliderCallback(axis, twoD)}
         />
         {twoD && (
           <Tooltip placement="top" title="Play through sequence">
