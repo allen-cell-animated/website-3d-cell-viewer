@@ -111,7 +111,7 @@ const defaultViewerSettings: GlobalViewerSettings = {
   levels: LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  slice: {x:0.5, y:0.5, z:0.5},
+  slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
 };
 
@@ -726,7 +726,7 @@ const App: React.FC<AppProps> = (props) => {
   usePerAxisClippingUpdater("x", viewerSettings.region.x, viewerSettings.slice.x);
   usePerAxisClippingUpdater("y", viewerSettings.region.y, viewerSettings.slice.y);
   usePerAxisClippingUpdater("z", viewerSettings.region.z, viewerSettings.slice.z);
-  
+
   // if in X mode:  [viewerSettings.slice.x, viewerSettings.slice.x + 1.0/image!.imageInfo.volumeSize.x]
   // if in 3d mode: viewerSettings.region.x
   // else: [0,1]
