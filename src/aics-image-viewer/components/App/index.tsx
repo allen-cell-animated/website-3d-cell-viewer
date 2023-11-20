@@ -182,8 +182,6 @@ const App: React.FC<AppProps> = (props) => {
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
   const [imageLoaded, setImageLoaded] = useState(false);
-  // `true` when the image being loaded is related to the previous one, so some settings should be preserved
-  const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
 
@@ -223,7 +221,6 @@ const App: React.FC<AppProps> = (props) => {
       return newSettings;
     },
     imageType: (prevSettings, imageType) => {
-      setSwitchingFov(true);
       return { ...prevSettings, imageType };
     },
     renderMode: (prevSettings, renderMode) => ({
@@ -326,7 +323,6 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
-      setSwitchingFov(false);
     }
   };
 
