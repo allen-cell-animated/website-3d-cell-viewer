@@ -452,11 +452,6 @@ const App: React.FC<AppProps> = (props) => {
 
     setAllChannelsUnloaded(channelNames.length);
 
-    // if this image is completely unrelated to the previous image, switch view mode
-    // if (!switchingFov && !samePath) {
-    //   changeViewerSetting("viewMode", ViewMode.threeD);
-    // }
-
     imageUrlRef.current = fullUrl;
     placeImageInViewer(aimg, newChannelSettings);
   };
