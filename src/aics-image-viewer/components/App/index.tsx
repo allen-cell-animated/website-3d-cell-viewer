@@ -689,6 +689,10 @@ const App: React.FC<AppProps> = (props) => {
 
   const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number], slice: number): void => {
     useImageEffect(
+      // Logic to determine axis clipping range, for each of x,y,z,3d slider:
+      // if slider was same as active axis view mode:  [viewerSettings.slice[axis], viewerSettings.slice[axis] + 1.0/volumeSize[axis]]
+      // if in 3d mode: viewerSettings.region[axis]
+      // else: [0,1]
       (currentImage) => {
         let isOrthoAxis = false;
         let axismin = 0.0;
@@ -717,19 +721,6 @@ const App: React.FC<AppProps> = (props) => {
   usePerAxisClippingUpdater("x", viewerSettings.region.x, viewerSettings.slice.x);
   usePerAxisClippingUpdater("y", viewerSettings.region.y, viewerSettings.slice.y);
   usePerAxisClippingUpdater("z", viewerSettings.region.z, viewerSettings.slice.z);
-
-  // if in X mode:  [viewerSettings.slice.x, viewerSettings.slice.x + 1.0/image!.imageInfo.volumeSize.x]
-  // if in 3d mode: viewerSettings.region.x
-  // else: [0,1]
-
-  // Z slice is a separate property that also must be updated
-  // useImageEffect(
-  //   (currentImage) => {
-  //     const slice = Math.floor(viewerSettings.slice.z * currentImage.imageInfo.volumeSize.z);
-  //     view3d.setZSlice(currentImage, slice);
-  //   },
-  //   [viewerSettings.slice.z]
-  // );
 
   // Rendering ////////////////////////////////////////////////////////////////
 
