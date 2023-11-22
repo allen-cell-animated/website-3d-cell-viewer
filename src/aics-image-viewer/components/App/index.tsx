@@ -204,30 +204,22 @@ const App: React.FC<AppProps> = (props) => {
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
+    // View mode: if we're switching to 2d, switch to volumetric rendering
     viewMode: (prevSettings, viewMode) => {
-      if (viewMode === prevSettings.viewMode) {
-        return prevSettings;
-      }
-      const newSettings: GlobalViewerSettings = { ...prevSettings, viewMode };
-
-      if (activeAxisMap[viewMode]) {
-        // switching to 2d
-        if (prevSettings.viewMode === ViewMode.threeD && newSettings.renderMode === RenderMode.pathTrace) {
-          // Switching from 3D to 2D
-          // if path trace was enabled in 3D turn it off when switching to 2D.
-          newSettings.renderMode = RenderMode.volumetric;
-        }
-      }
-      return newSettings;
+      const switchToVolumetric = viewMode !== ViewMode.threeD && prevSettings.renderMode === RenderMode.pathTrace;
+      return {
+        ...prevSettings,
+        viewMode,
+        renderMode: switchToVolumetric ? RenderMode.volumetric : prevSettings.renderMode,
+      };
     },
-    imageType: (prevSettings, imageType) => {
-      return { ...prevSettings, imageType };
-    },
+    // Render mode: if we're switching to pathtrace, turn off autorotate
     renderMode: (prevSettings, renderMode) => ({
       ...prevSettings,
       renderMode,
       autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
     }),
+    // Autorotate: do not enable autorotate while in pathtrace mode
     autorotate: (prevSettings, autorotate) => ({
       ...prevSettings,
       // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
