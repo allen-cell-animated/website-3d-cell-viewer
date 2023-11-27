@@ -194,7 +194,7 @@ export default class AxisClipSliders extends React.Component<AxisClipSlidersProp
           key={`${twoD}`}
           label={axis.toUpperCase()}
           vals={sliderVals}
-          max={numSlices - (twoD ? 1 : 0)}
+          max={numSlices - (twoD && numSlices > 1 ? 1 : 0)}
           onSlide={this.makeSliderCallback(axis)}
         />
         {twoD && (

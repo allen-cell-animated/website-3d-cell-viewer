@@ -163,7 +163,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // TODO is there a better API for values that never change?
   const view3d = useConstructor(() => new View3d());
-  const volumeCache = useConstructor(() => new VolumeCache());
+  const volumeCache = useConstructor(() => new VolumeCache(250_000_000 * 4));
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
