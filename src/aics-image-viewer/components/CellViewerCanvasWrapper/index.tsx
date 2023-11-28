@@ -20,6 +20,7 @@ interface ViewerWrapperProps {
   hasImage: boolean;
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
+  slices: PerAxis<number>;
   numTimesteps: number;
   time: number;
   showControls: {
@@ -65,7 +66,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region, time } =
+    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region, slices, time } =
       this.props;
 
     return (
@@ -82,6 +83,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
               region={region}
+              slices={slices}
               numTimesteps={numTimesteps}
               time={time}
             />

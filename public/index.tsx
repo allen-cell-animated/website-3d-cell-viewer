@@ -59,7 +59,7 @@ export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   maskChannelName: "SEG_Memb",
 };
 
-type ParamKeys = "mask" | "ch" | "luts" | "colors" | "image" | "url" | "file" | "dataset" | "id";
+type ParamKeys = "mask" | "ch" | "luts" | "colors" | "image" | "url" | "file" | "dataset" | "id" | "view";
 type Params = { [_ in ParamKeys]?: string };
 
 function parseQueryString(): Params {
@@ -100,6 +100,19 @@ const viewerSettings: Partial<GlobalViewerSettings> = {
 if (params) {
   if (params.mask) {
     viewerSettings.maskAlpha = parseInt(params.mask, 10);
+  }
+  if (params.view) {
+    const mapping = {
+      "3D": ViewMode.threeD,
+      Z: ViewMode.xy,
+      Y: ViewMode.xz,
+      X: ViewMode.yz,
+    }
+    const allowedViews = Object.keys(mapping);
+    if (!allowedViews.includes(params.view)) {
+      params.view = "3D";
+    }
+    viewerSettings.viewMode = mapping[params.view];
   }
   if (params.ch) {
     // ?ch=1,2

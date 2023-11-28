@@ -111,6 +111,7 @@ const defaultViewerSettings: GlobalViewerSettings = {
   levels: LEVELS_SLIDER_DEFAULT,
   interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+  slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
 };
 
@@ -181,8 +182,6 @@ const App: React.FC<AppProps> = (props) => {
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
   const [imageLoaded, setImageLoaded] = useState(false);
-  // `true` when the image being loaded is related to the previous one, so some settings should be preserved
-  const [switchingFov, setSwitchingFov] = useState(false);
   // tracks which channels have been loaded
   const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
 
@@ -205,47 +204,22 @@ const App: React.FC<AppProps> = (props) => {
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
+    // View mode: if we're switching to 2d, switch to volumetric rendering
     viewMode: (prevSettings, viewMode) => {
-      if (viewMode === prevSettings.viewMode) {
-        return prevSettings;
-      }
-      const newSettings: GlobalViewerSettings = {
+      const switchToVolumetric = viewMode !== ViewMode.threeD && prevSettings.renderMode === RenderMode.pathTrace;
+      return {
         ...prevSettings,
         viewMode,
-        region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+        renderMode: switchToVolumetric ? RenderMode.volumetric : prevSettings.renderMode,
       };
-      const activeAxis = activeAxisMap[viewMode];
-
-      // TODO the following behavior/logic is very specific to a particular application's needs
-      // and is not necessarily appropriate for a general viewer.
-      // Why should the alpha setting matter whether we are viewing the primary image
-      // or its parent?
-
-      // If switching between 2D and 3D reset alpha mask to default (off in in 2D, 50% in 3D)
-      // If full field, dont mask
-
-      if (activeAxis) {
-        // switching to 2d
-        const slices = Math.max(1, getNumberOfSlices()[activeAxis]);
-        const middleSlice = Math.floor(slices / 2);
-        newSettings.region[activeAxis] = [middleSlice / slices, (middleSlice + 1) / slices];
-        if (prevSettings.viewMode === ViewMode.threeD && newSettings.renderMode === RenderMode.pathTrace) {
-          // Switching from 3D to 2D
-          // if path trace was enabled in 3D turn it off when switching to 2D.
-          newSettings.renderMode = RenderMode.volumetric;
-        }
-      }
-      return newSettings;
     },
-    imageType: (prevSettings, imageType) => {
-      setSwitchingFov(true);
-      return { ...prevSettings, imageType };
-    },
+    // Render mode: if we're switching to pathtrace, turn off autorotate
     renderMode: (prevSettings, renderMode) => ({
       ...prevSettings,
       renderMode,
       autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
     }),
+    // Autorotate: do not enable autorotate while in pathtrace mode
     autorotate: (prevSettings, autorotate) => ({
       ...prevSettings,
       // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
@@ -341,7 +315,6 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
-      setSwitchingFov(false);
     }
   };
 
@@ -471,11 +444,6 @@ const App: React.FC<AppProps> = (props) => {
 
     setAllChannelsUnloaded(channelNames.length);
 
-    // if this image is completely unrelated to the previous image, switch view mode
-    if (!switchingFov && !samePath) {
-      changeViewerSetting("viewMode", ViewMode.threeD);
-    }
-
     imageUrlRef.current = fullUrl;
     placeImageInViewer(aimg, newChannelSettings);
   };
@@ -574,6 +542,11 @@ const App: React.FC<AppProps> = (props) => {
 
     window.addEventListener("resize", onResizeDebounced);
     return () => window.removeEventListener("resize", onResizeDebounced);
+  }, []);
+
+  // one-time init after view3d exists and before we start loading images
+  useEffect(() => {
+    view3d.setCameraMode(viewerSettings.viewMode);
   }, []);
 
   // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `time`)
@@ -711,26 +684,40 @@ const App: React.FC<AppProps> = (props) => {
     [props.transform?.rotation]
   );
 
-  const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number]): void => {
+  const usePerAxisClippingUpdater = (axis: AxisName, [minval, maxval]: [number, number], slice: number): void => {
     useImageEffect(
+      // Logic to determine axis clipping range, for each of x,y,z,3d slider:
+      // if slider was same as active axis view mode:  [viewerSettings.slice[axis], viewerSettings.slice[axis] + 1.0/volumeSize[axis]]
+      // if in 3d mode: viewerSettings.region[axis]
+      // else: [0,1]
       (currentImage) => {
-        const isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
-        view3d.setAxisClip(currentImage, axis, minval - 0.5, maxval - 0.5, isOrthoAxis);
+        let isOrthoAxis = false;
+        let axismin = 0.0;
+        let axismax = 1.0;
+        if (viewerSettings.viewMode === ViewMode.threeD) {
+          axismin = minval;
+          axismax = maxval;
+          isOrthoAxis = false;
+        } else {
+          isOrthoAxis = activeAxisMap[viewerSettings.viewMode] === axis;
+          const oneSlice = 1 / currentImage.imageInfo.volumeSize[axis];
+          axismin = isOrthoAxis ? slice : 0.0;
+          axismax = isOrthoAxis ? slice + oneSlice : 1.0;
+          if (axis === "z" && viewerSettings.viewMode === ViewMode.xy) {
+            view3d.setZSlice(currentImage, Math.floor(slice * currentImage.imageInfo.volumeSize.z));
+          }
+        }
+        // view3d wants the coordinates in the -0.5 to 0.5 range
+        view3d.setAxisClip(currentImage, axis, axismin - 0.5, axismax - 0.5, isOrthoAxis);
+        view3d.setCameraMode(viewerSettings.viewMode);
       },
-      [minval, maxval]
+      [minval, maxval, slice, viewerSettings.viewMode]
     );
   };
-  usePerAxisClippingUpdater("x", viewerSettings.region.x);
-  usePerAxisClippingUpdater("y", viewerSettings.region.y);
-  usePerAxisClippingUpdater("z", viewerSettings.region.z);
-  // Z slice is a separate property that also must be updated
-  useImageEffect(
-    (currentImage) => {
-      const slice = Math.floor(viewerSettings.region.z[0] * currentImage.imageInfo.volumeSize.z);
-      view3d.setZSlice(currentImage, slice);
-    },
-    [viewerSettings.region.z[0]]
-  );
+
+  usePerAxisClippingUpdater("x", viewerSettings.region.x, viewerSettings.slice.x);
+  usePerAxisClippingUpdater("y", viewerSettings.region.y, viewerSettings.slice.y);
+  usePerAxisClippingUpdater("z", viewerSettings.region.z, viewerSettings.slice.z);
 
   // Rendering ////////////////////////////////////////////////////////////////
 
@@ -815,6 +802,7 @@ const App: React.FC<AppProps> = (props) => {
             numSlices={getNumberOfSlices()}
             numTimesteps={numberOfTimesteps}
             region={viewerSettings.region}
+            slices={viewerSettings.slice}
             time={viewerSettings.time}
             appHeight={props.appHeight}
             showControls={showControls}
