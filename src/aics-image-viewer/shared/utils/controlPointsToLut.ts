@@ -62,7 +62,7 @@ export function initializeLut(
   const histogram = aimg.getHistogram(channelIndex);
 
   // find channelIndex among viewerChannelSettings.
-  const name = aimg.channel_names[channelIndex];
+  const name = aimg.channelNames[channelIndex];
   // default to percentiles
   let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
   // and if init settings dictate, recompute it:
