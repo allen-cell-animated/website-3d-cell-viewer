@@ -1,0 +1,1022 @@
+function _extends() { _extends = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
+
+import * as React from "react";
+
+var SvgComponent = function SvgComponent(props) {
+  return /*#__PURE__*/React.createElement("svg", _extends({
+    xmlns: "http://www.w3.org/2000/svg",
+    role: "img"
+  }, props), /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("font", {
+    id: "MerriweatherSans",
+    horizAdvX: 1305
+  }, /*#__PURE__*/React.createElement("fontFace", {
+    alphabetic: 0,
+    ascent: 2014,
+    descent: -560,
+    fontFamily: "Merriweather Sans",
+    panose1: "0 0 8 0 0 0 0 0 0 0",
+    unitsPerEm: 2048
+  }), /*#__PURE__*/React.createElement("glyph", {
+    glyphName: "space",
+    horizAdvX: 669
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M498 1780 464 555H197l-46 1225zM126 230l28 48 74 76 101 29q57 0 99-25t65-70 22-99q0-56-27-104T414 7 312-22q-53 0-95 26t-67 71-24 100q0 55 28 103Z",
+    glyphName: "exclam",
+    horizAdvX: 641,
+    unicode: "!"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m521 1685-36-719H254l-38 719zm508 0-36-719H762l-38 719z",
+    glyphName: "quotedbl",
+    horizAdvX: 1245,
+    unicode: "\""
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1226 856-30-320h209V326h-229L1145 0H891l30 326H641L610 0H352l31 326H196v210h206l30 320H234v202h217l30 315h261l-30-315h275l29 315h259l-30-315h204V856zm-257 0H692l-30-320h278z",
+    glyphName: "numbersign",
+    horizAdvX: 1645,
+    unicode: "#"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1216 282-57-91L998 48 754-14l-5-211H565l6 215Q462 1 368 26T236 74l45 255q73-40 176-68t216-28q123 0 173 37t50 118q0 54-25 91t-84 76-186 100q-168 83-273 194t-105 279q0 178 106 276t287 125l7 234h183l-6-226q115-5 208-31t139-56l-52-247q-68 43-148 70t-184 27q-121 0-174-40t-54-116q0-53 26-91t79-72 158-91q144-76 229-136t137-145 52-201q0-126-57-217Z",
+    glyphName: "dollar",
+    horizAdvX: 1410,
+    unicode: "$"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1514 1530 921 0H675l592 1530zM103 1211l60 102 159 156 215 54q131 0 218-58t129-159 42-228q0-140-60-242T708 681t-214-54q-127 0-215 59T147 845t-44 226q0 140 60 242Zm574-23-42 69-119 70q-79 0-121-65t-43-182q0-115 42-185t118-71q79 0 122 65t43 181q0 118-42 187Zm584-591 60 102 159 156 216 54q131 0 218-58t129-159 42-228q0-140-60-242T1867 66t-213-54q-127 0-216 59t-133 159-44 226q0 141 60 243Zm574-24-42 70-118 70q-79 0-122-65t-43-182q0-115 43-185t118-71q79 0 121 65t43 181q0 117-42 187Z",
+    glyphName: "percent",
+    horizAdvX: 2188,
+    unicode: "%"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1308 189 46-10 112-13V-1q-60-15-143-15-87 0-154 18t-125 55Q969 24 890 4T735-16Q415-16 252 91T88 399q0 128 84 225t227 165q-68 92-105 178t-38 201q0 117 54 202t155 131 234 45q124 0 218-49t145-132 51-183q0-121-38-207T967 829 792 714q58-75 138-170t148-167q35 39 53 91t19 109q0 48-5 83t-14 76l-5 21h258q20-83 20-181 0-228-137-363 41-24 87-34ZM625 1337l-45-44-45-120q0-53 13-93t35-76 79-113q95 49 144 117t49 171q0 36-16 72t-51 61-88 25q-75 0-120-44ZM778 217l67 16q-78 85-164 188T529 610q-72-38-109-85t-37-109q0-96 71-147t234-52q90 0 157 16Z",
+    glyphName: "ampersand",
+    horizAdvX: 1542,
+    unicode: "&"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m521 1685-36-719H254l-38 719z",
+    glyphName: "quotesingle",
+    horizAdvX: 737,
+    unicode: "'"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m130 996 85 224 196 363 188 184 181-116q-57-42-144-165t-158-324-71-455q0-266 66-466T625-77t155-167L599-360q-75 45-182 171T220 168t-90 549q0 279 85 503Z",
+    glyphName: "parenleft",
+    horizAdvX: 835,
+    unicode: "("
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m695 428-85-224-196-363-188-184L45-227q57 42 144 165t158 324 71 455q0 266-66 466t-152 318-155 167l181 116q75-45 182-171t197-357 90-549q0-279-85-503Z",
+    glyphName: "parenright",
+    horizAdvX: 835,
+    unicode: ")"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M623 1080 488 942 253 776 136 983l252 135 181 53q-6 3-79 21-85 20-103 27l-257 128 110 208 243-164 137-130q-1 7-8 33t-11 41q-25 89-27 108l-26 293h236l-17-288-43-184q7 6 55 56 64 67 78 78l242 166 112-206-253-131-181-55 183-49 258-123-119-214-233 162-141 130q2-9 19-72 24-86 28-110l27-293-236-1 17 293z",
+    glyphName: "asterisk",
+    horizAdvX: 1348,
+    unicode: "*"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m584 662-162-6H213v237h209l162-7-6 187v217h246v-217l-7-187 151 7h222V656H968l-151 6 7-188V260H578v214z",
+    glyphName: "plus",
+    horizAdvX: 1403,
+    unicode: "+"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m203-366 24 38 38 89 15 103q0 45-18 93t-46 82-53 34v87l222 136q59-22 100-74t63-118 21-126q0-111-38-212T427-407t-145-99l-106 98v26q27 16 51 54Z",
+    glyphName: "comma",
+    horizAdvX: 693,
+    unicode: ","
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1105 889V644H255v245z",
+    glyphName: "hyphen",
+    horizAdvX: 1360,
+    unicode: "-"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m126 228 28 48 75 78 101 29q57 0 99-25t64-71 22-100q0-56-27-104T415 7 313-22q-53 0-96 25t-67 70-24 100q0 55 28 103Z",
+    glyphName: "period",
+    horizAdvX: 641,
+    unicode: "."
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M840 1599 279-363H24l561 1962z",
+    glyphName: "slash",
+    horizAdvX: 864,
+    unicode: "/"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m124 823 76 146 211 224 311 79q568 0 563-637-1-192-73-339T1007 66 697-16q-201 0-329 88T182 305t-58 324q0 194 76 340Zm846-6-66 119-200 119q-128 0-196-107t-69-297q0-121 30-223t92-164 152-63q128 0 192 110t65 315q0 191-66 310Z",
+    glyphName: "zero",
+    horizAdvX: 1409,
+    unicode: 0
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m315 911-162-29-26 185q64 17 151 55t165 81 117 75l154-25L712 0H391v929q-76-18-238-47Z",
+    glyphName: "one",
+    horizAdvX: 1004,
+    unicode: 1
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1209 264V0H186l-43 155q260 145 464 326t204 356q0 93-53 150t-160 57q-93 0-184-39t-146-95l-117 183q46 48 118 93t170 75 210 31q172 0 281-55t159-144 49-198q0-180-126-344T652 243z",
+    glyphName: "two",
+    horizAdvX: 1361,
+    unicode: 2
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m852 521 79-55 116-134 37-162q0-142-85-257T759-269t-355-66q-70 0-125 8t-81 15-75 23l-1 204q107-23 188-23 128 0 228 31t157 94 57 150q0 114-68 182t-218 63l-139-36-42 198q69 15 134 36t110 44q154 87 154 225 0 80-56 118t-151 38q-100 0-170-28t-136-73l-93 195q31 33 100 68t161 60 181 24q159 0 267-45t163-127 55-192q0-133-74-231T734 531q118-10 197-65Z",
+    glyphName: "three",
+    horizAdvX: 1170,
+    unicode: 3
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1361 0h-233v-376H828V0H176l-76 133 560 1201h73l244-123-461-850-76-127h388l38 410h262V234h233z",
+    glyphName: "four",
+    horizAdvX: 1412,
+    unicode: 4
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M193-123q54-2 79-2 163 0 290 45T761 46t71 188q0 111-66 163t-220 54q-58 0-129-17t-168-49l-50 30 66 837h847l-28-267H491l-33-335q80 18 138 26t114 9q138 0 237-54t152-153 52-233q0-167-101-303T761-273t-434-81q-90 0-135 13z",
+    glyphName: "five",
+    horizAdvX: 1293,
+    unicode: 5
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1077 1433q-182-47-321-169T540 983t-79-308q-3-216 58-344t200-129q124 0 187 75t63 206q0 157-52 226t-138 69q-86 0-156-36l-63 181q34 35 111 64t181 30q134 0 232-62t149-168 52-233q0-157-65-286T1020 62 690-16q-172 0-299 81T195 283t-68 303q0 277 136 502t339 363 399 169z",
+    glyphName: "six",
+    horizAdvX: 1414,
+    unicode: 6
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M106 997v274h1001l77-117L582-394l-318 92Q409 1 562 351t274 645z",
+    glyphName: "seven",
+    horizAdvX: 1286,
+    unicode: 7
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1235 271-71-95L969 33 692-16q-165 0-292 45T201 164t-72 221q0 111 69 214t217 180q-110 75-172 169t-63 226q0 116 61 204t175 138 266 49q151 0 262-44t169-124 59-185q0-72-29-147t-90-140-149-109q100-57 171-113t116-131 44-167q0-134-71-229ZM620 1355l-48-20-76-57-28-85q0-80 63-142t184-131q92 38 137 110t43 157q0 48-26 86t-75 60-116 22q-58 0-106-20ZM755 204l53 21 84 60 32 93q0 60-39 108t-98 84-162 90l-22 11q-179-95-179-268 0-89 66-144t203-55q62 0 115 21Z",
+    glyphName: "eight",
+    horizAdvX: 1356,
+    unicode: 8
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m903 1272 126-81 193-218 66-303q0-284-138-515T805-219 403-394l-83 184q188 47 332 178t223 297 81 314q3 219-59 346t-199 127q-118 0-183-71t-66-191q0-161 54-239t146-78q57 0 87 8t67 25l60-178q-32-36-108-65t-185-29q-135 0-233 64T187 470t-52 238q0 162 67 289t201 201 326 74q174 0 300-81Z",
+    glyphName: "nine",
+    horizAdvX: 1427,
+    unicode: 9
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m126 228 28 48 75 78 101 29q57 0 99-25t64-71 22-100q0-56-27-104T415 7 313-22q-53 0-96 25t-67 70-24 100q0 55 28 103Zm0 759 28 48 75 78 101 29q57 0 99-25t64-71 22-100q0-56-27-104t-73-76-102-29q-53 0-96 25t-67 70-24 100q0 55 28 103Z",
+    glyphName: "colon",
+    horizAdvX: 641,
+    unicode: ":"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m433-366 24 38 38 89 15 103q0 45-18 93t-46 82-53 34v87l222 136q59-22 100-74t63-118 21-126q0-111-38-212T657-407t-145-99l-106 98v26q27 16 51 54ZM126 987l28 48 75 78 101 29q57 0 99-25t64-71 22-100q0-56-27-104t-73-76-102-29q-53 0-96 25t-67 70-24 100q0 55 28 103Z",
+    glyphName: "semicolon",
+    horizAdvX: 641,
+    unicode: ";"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1149 1057 552 774l597-263V229L197 698v154l952 479z",
+    glyphName: "less",
+    horizAdvX: 1378,
+    unicode: "<"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1172 1139V923H251v216zm0-512V411H251v216z",
+    glyphName: "equal",
+    horizAdvX: 1423,
+    unicode: "="
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1170 852V698L218 229v282l597 263-597 283v274z",
+    glyphName: "greater",
+    horizAdvX: 1377,
+    unicode: ">"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m259 854 29 57 70 98 111 96q63 50 100 85t63 83 25 107q0 106-79 158t-246 53q-68 0-110-6t-66-12-30-8v232q33 20 106 34t163 15q213 0 346-62t190-164 55-225q0-95-34-168t-84-124-131-117q-66-55-103-91t-64-82-31-103q-1-10-1-28 0-32 6-59t20-77q2-8 11-40H337q-34 52-56 117t-22 157q0 74 29 131Zm47-647 26 44 71 70 94 26q53 0 93-23t61-63 22-91q0-51-26-95T576 5t-94-27q-49 0-89 23t-63 65-24 91q0 50 26 94Z",
+    glyphName: "question",
+    horizAdvX: 1057,
+    unicode: "?"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1266 225 1 33q-71-121-161-192T904-5q-69 0-135 49T660 190t-43 234q0 151 64 302t198 253 330 101q69 0 130-13t102-42l185 31q-25-108-63-297t-65-331q-17-95-17-151 0-44 11-62t37-19q75 0 149 73t121 206 48 300q0 330-169 460t-442 131q-228 0-424-112T499 933 382 448q0-264 98-429t255-238 338-72q118 0 203 16t135 38 111 54l43-159q-210-126-512-126-249 0-448 99T288-66 171 440q0 324 145 575t392 389 546 139q235 0 416-85t283-251 103-402q0-256-85-439T1748 89 1457-5q-90 0-136 47t-53 140q-2 43-1 76Zm-227-3 79 102 140 247 77 258q-19 25-60 39t-98 15q-88 0-160-62T903 662t-43-196q-3-244 114-244 65 0 144 102Z",
+    glyphName: "at",
+    horizAdvX: 2228,
+    unicode: "@"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522z",
+    glyphName: "A",
+    horizAdvX: 1421,
+    unicode: "A"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M342 1522q41 0 143 6 139 9 215 9 188 0 312-48t185-134 60-203q0-83-27-154t-78-120-123-69q90-10 160-55t109-121 40-172q0-225-142-350T715-14Q570-14 349 0H188v1523zm490-638 61 56 61 185q0 93-73 136t-215 43q-40 0-94-3t-69-10V893q27-5 87-7t104-2q138 0 199 56Zm41-678 71 55 72 186q0 117-70 170t-223 54q-58 0-129-2t-91-5V232q19-15 84-20t137-6q149 0 220 55Z",
+    glyphName: "B",
+    horizAdvX: 1422,
+    unicode: "B"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m957 1538 73-11 158-32q61-14 72-16l-46-280q-6 3-52 28t-124 42-172 17q-124 0-223-61t-157-176-58-272q0-158 55-282t160-195 247-70q65 0 136 15t130 38 87 43l1-262q-63-25-111-41T1015-4 860-16q-231 0-403 96T193 352t-93 405q0 245 98 421t268 268 380 92q111 0 184-11Z",
+    glyphName: "C",
+    horizAdvX: 1299,
+    unicode: "C"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M339 1522q32 0 128 6 134 10 241 10 375 0 560-190t186-547q0-255-93-439T1097 81 693-16q-72 0-214 9-87 7-137 7H188v1522zM903 230l107 131 108 406q0 196-47 312t-144 168-249 51q-53 0-129-10l-40-4V246q68-18 204-18 190 2 297 133Z",
+    glyphName: "D",
+    horizAdvX: 1554,
+    unicode: "D"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1116 1522v-244H506V900h468V659H506V251h675V0H188v1522z",
+    glyphName: "E",
+    horizAdvX: 1254,
+    unicode: "E"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1111 1522v-244H510V879h442V634H510V0H188v1522z",
+    glyphName: "F",
+    horizAdvX: 1145,
+    unicode: "F"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1372 820V90q-20-1-43-8t-64-21q-101-35-197-56T827-16q-228 0-392 94T186 346t-86 407q0 264 98 440t270 260 391 85q116 0 186-10t153-30q51-13 91-20l-10-273q-84 40-175 60t-244 21q-132 0-228-60t-149-174-52-272q0-158 42-282t128-197 214-73q153 0 255 38v305l-233 12v237z",
+    glyphName: "G",
+    horizAdvX: 1494,
+    unicode: "G"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M506 1522V890h593v632h314V0h-314v651H506V0H188v1522z",
+    glyphName: "H",
+    horizAdvX: 1601,
+    unicode: "H"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M521 1522V0H201v1522z",
+    glyphName: "I",
+    horizAdvX: 722,
+    unicode: "I"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m81-130 70 68 96 179q19 79 25 195t7 296v914h320V613l1-223q0-95-4-166T580 91Q555-40 468-135T271-279 67-332l-77 168q91 34 161 102Z",
+    glyphName: "J",
+    horizAdvX: 798,
+    unicode: "J"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1411 0h-354q-11 16-29 51-5 10-13 25t-21 37q-75 135-163 277T663 646L506 469V0H188v1522h318V848l535 674h350L877 878q66-98 218-347t251-421z",
+    glyphName: "K",
+    horizAdvX: 1444,
+    unicode: "K"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M506 1522V242h548V0H188v1522z",
+    glyphName: "L",
+    horizAdvX: 1120,
+    unicode: "L"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m679 1522 203-800 77-336 58 336 183 800h434L1816 0h-312l-75 816-27 466-112-466-218-831H820L579 816l-113 466-36-466L365 0 70-1l162 1523z",
+    glyphName: "M",
+    horizAdvX: 1886,
+    unicode: "M"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1432 1522V0h-319L570 861l-120 243 34-363V0H188v1522h295l567-895 115-228-29 366v757z",
+    glyphName: "N",
+    horizAdvX: 1620,
+    unicode: "N"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m103 1025 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271Z",
+    glyphName: "O",
+    horizAdvX: 1595,
+    unicode: "O"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M284 1522q91 0 241 8 140 8 208 8 271 0 413-126t143-399q0-174-70-298t-207-189-332-65q-104 0-174 2V0H188v1522zm522-820 83 71 84 244q0 145-78 220t-226 70q-58-2-94-4t-69-10V710q65-8 166-8 134 0 217 71Z",
+    glyphName: "P",
+    horizAdvX: 1359,
+    unicode: "P"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1392-81 63 7 95 18v-219q-24-17-98-34t-142-17q-240 0-390 70T715-14Q522 0 381 102T167 377 98 769q5 256 97 425t253 254 373 90q204 6 357-87t236-265 83-400q0-220-63-381t-177-259T987 9q30-39 81-58t117-26 163-6q44 0 107 7ZM427 605l41-122 125-192 205-70q175 0 272 137t98 415q0 153-39 271t-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275Z",
+    glyphName: "Q",
+    horizAdvX: 1595,
+    unicode: "Q"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1381 0h-354q-10 14-20 33t-22 47l-14 30q-17 36-31 75t-37 106q-31 95-54 152t-59 97-83 39q-102-4-201-4V0H188v1522h147q51 0 117 6 55 4 128 7t159 3q243 0 395-105t153-355q0-179-64-286t-189-156q53-45 92-118t94-199q58-140 98-209zM506 804q50-6 209-6 135 0 199 77t64 194q0 68-21 118t-83 82-173 32q-119 0-195-18z",
+    glyphName: "R",
+    horizAdvX: 1435,
+    unicode: "R"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M197 329q73-40 176-68t216-28q123 0 173 37t50 118q0 54-25 91t-84 76-186 100q-168 83-273 194t-105 279q0 144 70 235t190 133 271 42q130 0 236-28t157-60l-52-247q-68 43-148 70t-184 27q-121 0-174-40t-54-116q0-53 26-91t79-72 158-91q144-76 229-136t137-145 52-201q0-134-65-229T884 34 609-16q-93 0-187 14T255 34 152 74z",
+    glyphName: "S",
+    horizAdvX: 1207,
+    unicode: "S"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M30 1278v244h1190v-244H786V0H466v1278z",
+    glyphName: "T",
+    horizAdvX: 1250,
+    unicode: "T"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M152 1522h315l-2-852q0-173 33-267t99-129 170-36q101 0 165 38t97 133 34 261v852h313V640q0-321-156-488T758-16q-326 0-467 173T150 653z",
+    glyphName: "U",
+    horizAdvX: 1525,
+    unicode: "U"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m336 1522 284-831 81-290 82 290 269 831h339L831-6H561L-5 1522z",
+    glyphName: "V",
+    horizAdvX: 1386,
+    unicode: "V"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1968 1522 1570-16h-326l-214 850-49 328-45-329L717-16H413L5 1522h319l188-894 53-370 61 370 220 894h284l234-894 62-354 51 354 173 894z",
+    glyphName: "W",
+    horizAdvX: 1973,
+    unicode: "W"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1344 0H991L747 425l-74 131L364 0H32l459 786-448 736 348 1 313-539 74 136 220 402h336L880 752z",
+    glyphName: "X",
+    horizAdvX: 1376,
+    unicode: "X"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M780 533V0H461v535l-511 987h350l280-590 44-113 38 113 288 590h341z",
+    glyphName: "Y",
+    horizAdvX: 1241,
+    unicode: "Y"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m740 1210 58 81H130v231h1067l38-81L563 335l-73-93h706V0H94L54 84z",
+    glyphName: "Z",
+    horizAdvX: 1306,
+    unicode: "Z"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m145 1588 16 52 56 75 118 22q81 0 136-3t132-12l93-9v-163H428V-20l268-2v-145l-44-5q-97-10-158-14t-159-5q-79 0-119 22t-55 74-16 155v1426q0 102 16 154Z",
+    glyphName: "bracketleft",
+    horizAdvX: 799,
+    unicode: "["
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M830-363H575L14 1599h255z",
+    glyphName: "backslash",
+    horizAdvX: 864,
+    unicode: "\\\\\\\\"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M644 60q0-102-15-154t-56-75-119-22q-98 0-159 4t-158 15l-44 5v145l268 2v1570H93v163l93 9q77 8 132 11t136 4q78 0 118-22t56-74 16-155z",
+    glyphName: "bracketright",
+    horizAdvX: 799,
+    unicode: "]"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m939 490-252 674-253-674H153l420 1041h227l420-1041z",
+    glyphName: "asciicircum",
+    horizAdvX: 1373,
+    unicode: "^"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1737-241v-168H-35v168z",
+    glyphName: "underscore",
+    horizAdvX: 1702,
+    unicode: "_"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m416 1273-86 66-165 147-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "grave",
+    horizAdvX: 666,
+    unicode: "`"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20Z",
+    glyphName: "a",
+    horizAdvX: 1223,
+    unicode: "a"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m916 1156 103-60 164-183 62-301q0-187-75-331T960 57 649-23q-96 0-200 15T265 29t-97 35v1597h312v-437l-8-188q54 51 130 85t189 35q125 0 228-60Zm2-380-57 73-166 74q-62 0-119-20t-96-51V232q36-39 176-39 76 0 135 47t93 139 34 216q0 181-57 254Z",
+    glyphName: "b",
+    horizAdvX: 1340,
+    unicode: "b"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m765 1156 82-17 113-41-39-241q-43 23-95 33t-130 11q-72 0-137-30t-108-99-46-177q-3-119 32-200t99-120 148-40q75 0 143 13t105 34l45-185q-53-51-148-82T627-16q-172 0-292 73T155 260 95 556q0 172 63 308t191 214 315 78q101 0 183-17Z",
+    glyphName: "c",
+    horizAdvX: 1048,
+    unicode: "c"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1171 1662V-16H959q-38 0-56 11t-19 47v77q-55-56-133-95T549-16q-125 0-228 61T157 231 95 533q0 187 72 328t204 218 304 77q102 0 187-32l-3 100v438zM422 375l57-74 166-74q61 0 118 17t96 43v615q-28 19-71 25t-104 7q-77 0-136-43t-92-129-34-211q0-176 57-250Z",
+    glyphName: "d",
+    horizAdvX: 1339,
+    unicode: "d"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1093 565-11-70H408q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81T633-16q-172 0-293 70T157 256 95 574q0 168 65 300t189 207 297 75q124 0 224-45t160-145 63-257q0-144-11-214ZM804 683v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44Z",
+    glyphName: "e",
+    horizAdvX: 1190,
+    unicode: "e"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M82 924v182l155 34v109q0 157 62 254t158 138 206 42q59 0 119-7t83-15v-222q-50 24-156 24-73 0-116-53t-44-154v-116h266V924H549V0H237v924z",
+    glyphName: "f",
+    horizAdvX: 858,
+    unicode: "f"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1288 914h-189q20-58 20-130 0-183-132-279t-375-96q-56 0-99 7-21-17-32-41t-11-52q0-48 30-64t105-16h190q252 0 345-97t94-248q0-128-81-222T936-467t-291-49q-265 0-409 85T91-183q0 79 48 140t128 97q-48 25-70 71t-23 99q0 68 42 131t140 103q-109 47-171 130t-63 187q0 196 134 288t376 93q221 0 345-83 33 29 79 48t105 19h127zM715 600l54 38 55 137q0 93-48 140t-145 48q-97 0-152-41t-56-143q0-84 50-131t144-48q98 0 152 38ZM505 0q-22 0-62 2-42-38-42-116 0-94 58-156t186-62q132 0 206 40t75 128q0 59-18 93t-74 53T668 0z",
+    glyphName: "g",
+    unicode: "g"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m939 1163 83-44 125-144 42-265V0H877v648q0 92-15 145t-50 78-96 24q-51 0-118-21t-118-65V0H168v1662h312v-438l-17-202q64 53 161 93t187 44q128 4 211-40Z",
+    glyphName: "h",
+    horizAdvX: 1351,
+    unicode: "h"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M486 1140V0H174v1140zm-350 643 28 43 74 68 97 26q82 0 131-47t49-123q0-50-27-93t-73-69-98-26q-51 0-92 22t-65 61-24 88q0 50 28 93Z",
+    glyphName: "i",
+    horizAdvX: 660,
+    unicode: "i"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m-90-289 39-7 64-8q61 0 95 28t50 95T174 1v1139h312V82q0-308-106-448T71-507q-31 0-94 8t-81 16v201q14-7 53-14Zm225 1817 28 43 74 68 97 26q82 0 131-47t49-123q0-50-27-93t-73-69-98-26q-51 0-92 22t-65 61-24 88q0 50 28 93Z",
+    glyphName: "j",
+    horizAdvX: 644,
+    unicode: "j"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M598 475 476 342l4-129V0H168v1661h312V977l-10-287 385 450h353L801 697 1248 0H893z",
+    glyphName: "k",
+    horizAdvX: 1238,
+    unicode: "k"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M492 1662V0H180v1662z",
+    glyphName: "l",
+    horizAdvX: 672,
+    unicode: "l"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1640 1160 80-43 123-140 42-260V0h-312v649q0 95-13 147t-46 76-98 24q-58 0-122-24t-110-60q4-44 4-105V0H876v648q0 94-13 147t-47 77-96 24q-49 0-117-22t-117-65V0H174v1140h283l6-122q69 52 172 95t199 47q106 4 179-29t115-109q67 52 174 95t218 43q120 0 200-43Z",
+    glyphName: "m",
+    horizAdvX: 2047,
+    unicode: "m"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m457 1140 6-122q69 52 172 95t199 46q123 4 201-38t116-141 39-265V0H878v648q0 97-15 150t-51 77-102 21q-50-1-113-23t-111-64V0H174v1140z",
+    glyphName: "n",
+    horizAdvX: 1352,
+    unicode: "n"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m96 764 72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Z",
+    glyphName: "o",
+    horizAdvX: 1302,
+    unicode: "o"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m916 1156 103-60 164-183 62-301q0-187-72-329T969 62 665-16q-102 0-189 32l4-155v-367H168v1646h291v-116q55 55 133 93t199 39q125 0 228-60Zm2-380-57 73-166 74q-62 0-119-20t-96-51V249q29-26 73-36t103-10q76 0 135 46t93 135 34 211q0 181-57 254Z",
+    glyphName: "p",
+    horizAdvX: 1340,
+    unicode: "p"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1172 1140V-506H860v367l6 241Q741-16 549-16q-125 0-228 61T157 231 95 533q0 187 72 328t204 218 304 77q74 0 149-15t123-35zM422 375l57-74 166-74q62 0 119 17t96 44v613q-28 20-71 26t-105 7q-77 0-136-43t-92-129-34-211q0-176 57-250Z",
+    glyphName: "q",
+    horizAdvX: 1340,
+    unicode: "q"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m837 1159 24-14V844q-23 13-52 20t-85 8q-144 0-254-103V0H158v1140h277l14-156q25 44 74 84t115 65 134 26q65 0 89-14Z",
+    glyphName: "r",
+    horizAdvX: 926,
+    unicode: "r"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m166 289 52-21 120-38 136-16q93-1 136 21t43 74q0 48-59 87t-188 81q-152 50-219 136t-68 212q0 106 58 180t163 113 239 38q109 0 195-21t126-44l-34-240q-34 31-109 54t-147 23q-102 0-147-21t-46-71q0-35 21-59t67-47 135-53q117-40 186-87t102-109 32-147q0-173-118-261T513-16q-79 0-159 13T211 30t-96 42l32 232q19-15 71-36Z",
+    glyphName: "s",
+    horizAdvX: 1048,
+    unicode: "s"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M211 924H74v169q66 19 95 29t53 29 36 50q21 50 75 199h190v-260h309V924H523V466q0-114 12-166t38-66 80-15q42 0 96 14t81 34l38-175q-47-42-140-75T526-16q-115 0-183 35T243 132t-32 207z",
+    glyphName: "t",
+    horizAdvX: 913,
+    unicode: "t"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1152 1140V-16H946q-40 0-58 11t-18 47v52q-65-46-158-78T537-16q-156 0-238 59T190 206t-28 268v666h312V477q0-107 18-161t55-74 102-19q50 0 106 21t85 44v852z",
+    glyphName: "u",
+    horizAdvX: 1326,
+    unicode: "u"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1174 1140 739-16H450L17 1140h337l174-560 73-278 69 278 174 560z",
+    glyphName: "v",
+    horizAdvX: 1191,
+    unicode: "v"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1739 1140 1383-16h-278L923 591l-44 218-45-218L655-16H366L18 1140h312l142-551 52-276 57 275 165 552h291l165-551 52-274 51 271 132 554z",
+    glyphName: "w",
+    horizAdvX: 1757,
+    unicode: "w"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1199 0H842L636 321l-33 52-26-54L393 0H36l401 577-401 563h353l196-297 36-60 30 61 188 296h352L787 583z",
+    glyphName: "x",
+    horizAdvX: 1220,
+    unicode: "x"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1162 1140 807-30q-60-196-160-308T424-486q-26-8-76-14t-76-7q-26 0-85 6t-67 13v253q18-6 57-13t56-7q71 0 122 13t102 68T538 0H404L17 1140h338l173-609 83-329 77 329 139 609z",
+    glyphName: "y",
+    horizAdvX: 1188,
+    unicode: "y"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m572 840 58 83H142l2 217h866l35-95-484-745-61-84h529V0H118L76 83z",
+    glyphName: "z",
+    horizAdvX: 1108,
+    unicode: "z"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m527 855-52-26-126-53q154-54 206-112 39-44 39-102V-20h262v-156q-62-17-144-26t-168-9q-78 0-126 27t-71 86-23 158v487q0 34-41 63t-101 48-114 24v191q57 6 116 22t99 43 41 62v486q0 99 23 158t71 86 126 27q124 0 312-24v-171H594V991q0-60-39-104-28-32-80-58Z",
+    glyphName: "braceleft",
+    horizAdvX: 952,
+    unicode: "{"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M560 1780V-187H305v1967z",
+    glyphName: "bar",
+    horizAdvX: 865,
+    unicode: "|"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m618 965 40-27 100-43 116-22V682q-54-5-114-24t-101-48-41-63V60q0-99-23-158t-71-86-126-27q-85 0-167 9T86-176v156h262v582q0 58 39 102 52 58 206 112-73 27-125 53t-81 58q-39 44-39 104v571H86v171q188 24 312 24 78 0 126-27t71-86 23-158v-486q0-35 40-62Z",
+    glyphName: "braceright",
+    horizAdvX: 952,
+    unicode: "}"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m221 873 48 52 118 88 146 37q53 0 94-12t70-31 67-46q47-35 80-51t78-17q64 0 111 29t90 76l116-138q-15-48-62-97t-118-82-151-32q-51 0-90 12t-65 30-60 46q-45 36-77 53t-82 18q-63 0-107-28t-89-78L208 830q13 43 61 95Z",
+    glyphName: "asciitilde",
+    horizAdvX: 1448,
+    unicode: "~"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    glyphName: "uni00A0",
+    horizAdvX: 669
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m505 1114-28-48-74-76-101-29q-57 0-99 25t-65 70-22 99q0 56 27 104t74 78 102 29q53 0 95-26t67-71 24-100q0-55-28-103ZM133-436l34 1225h267l46-1225z",
+    glyphName: "exclamdown",
+    horizAdvX: 641,
+    unicode: "\\xA1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m981 54-76-29-166-38-3-203H564l4 208Q430 14 335 92T192 289t-48 267q0 153 50 278t152 207 251 106l6 230h171l-5-223q83-4 148-20t92-36l-39-241q-43 23-95 33t-130 11q-72 0-137-30t-108-99-46-177q-3-119 32-200t99-120 148-40q75 0 143 13t105 34l45-185q-45-43-121-72Z",
+    glyphName: "cent",
+    horizAdvX: 1187,
+    unicode: "\\xA2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1369 573 42-57 42-168q0-172-116-269T994-18Q879-18 797 1T619 53q-56 20-89 29t-67 8q-34-38-92-68T256-8q-34 0-66 13t-54 41-22 70q0 53 35 93t96 62 136 25q19 26 27 99t8 140v182H240v181h176v127q0 151 58 267t174 181 286 65q115 0 208-27t159-70l-126-229q-106 82-212 82-67 0-114-20t-80-92-33-219v-65h310V717H736V554q0-121-28-191t-82-118q34-7 85-20 65-17 113-25t114-8q116 0 171 41t55 115q0 50-18 90t-45 58l211 110q57-33 99-90Z",
+    glyphName: "sterling",
+    horizAdvX: 1576,
+    unicode: "\\xA3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1214 702-20-65-58-122 195-199-140-145-203 206q-104-60-224-60t-221 59L341 170 200 314l195 199q-38 56-58 122t-21 138q0 140 77 257l-192 197 139 147 200-206q103 61 224 61 123 0 226-61l213 213 141-147-206-207q76-116 76-254 0-71-20-136ZM827 537l52 32 82 87 31 117q0 62-30 116t-83 87-113 33q-61 0-113-32t-84-87-31-117q0-62 31-116t83-87 114-33q61 0 113 32Z",
+    glyphName: "currency",
+    horizAdvX: 1544,
+    unicode: "\\xA4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1015 851h266V659H934V461h347V269H934V0H644v269H286v192h358v198H286v192h291l-419 671h323l240-420 69-141 67 143 255 418h325z",
+    glyphName: "yen",
+    horizAdvX: 1576,
+    unicode: "\\xA5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M560 1780V964H305v816zm0-1160v-806H305v806z",
+    glyphName: "brokenbar",
+    horizAdvX: 865,
+    unicode: "\\xA6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1211 529-128-130q89-96 89-239 0-120-73-199T913-156t-232-37q-130 0-242 28t-164 65l42 225q48-36 137-65t205-30q99 0 156 31t58 104q0 37-30 66t-78 52-131 57q-134 53-220 100T266 568t-63 199q0 82 44 158t121 139q-114 104-114 258 0 121 71 200t180 115 222 36q128 0 221-21t145-52l-42-225q-42 30-115 52t-185 23q-91 0-144-30t-54-98q0-41 31-74t79-60 135-68q129-60 211-111t142-133 60-198q0-149-128-279ZM471 757l38-42 94-70 158-66q106-40 160-66 28 68 28 114 0 66-39 114t-99 81-162 80q-99 45-128 60-50-85-50-144 0-61 38-103Z",
+    glyphName: "section",
+    horizAdvX: 1402,
+    unicode: "\\xA7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m70 1527 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Z",
+    glyphName: "dieresis",
+    horizAdvX: 974,
+    unicode: "\\xA8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1285 1840 200-117 316-319 116-441q0-240-116-442t-316-320-439-119q-239 0-438 118T292 521 176 963q0 239 116 440t315 319 439 118q239 0 439-117Zm-34-1629 166 101 262 273 95 378q0 205-95 377t-261 273-372 101q-205 0-371-101t-262-273-95-377q0-205 95-377t261-274 372-101q205 0 371 101Zm-72 1238 68-14 102-33-45-206q-33 24-93 41t-119 17q-74 0-131-31t-90-91-33-141q0-164 71-240t195-77q118 0 225 64l48-159q-52-43-142-73t-186-31q-133 0-234 64T659 714t-55 241q0 142 58 254t169 176 268 64q80 0 148-14Z",
+    glyphName: "copyright",
+    horizAdvX: 2093,
+    unicode: "\\xA9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m677 1616 84-29 128-98 44-182V677H803q-52 0-72 2t-33 18-13 55v13q-21-22-64-44t-98-38-110-16q-90 0-156 34t-102 95-35 144q0 100 52 168t140 103q149 55 361 55v35q0 53-17 80t-55 36-103 10q-44 0-104-12t-114-31-77-34l-56 155q20 19 87 45t153 46 159 20q131 0 215-29ZM375 910l35-26 87-26q55 0 106 17t70 32v213q-79 0-130-6t-93-28q-42-24-58-54t-17-74q0-48 35-74Z",
+    glyphName: "ordfeminine",
+    horizAdvX: 1067,
+    unicode: "\\xAA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m535 615 431-325-75-214-656 416v243l656 422 75-216zm783 0 431-325-75-214-656 416v243l656 422 75-216z",
+    glyphName: "guillemotleft",
+    horizAdvX: 1998,
+    unicode: "\\xAB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1235 852V323H991v316H245v213z",
+    glyphName: "logicalnot",
+    horizAdvX: 1480,
+    unicode: "\\xAC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1285 1840 201-118 318-319 117-441q0-240-117-442t-318-320-440-119q-239 0-439 118T289 520 172 962q0 239 117 440t317 320 440 118q239 0 440-118Zm-35-1629 167 101 264 273 97 377q0 204-96 376t-264 273-372 101q-204 0-371-101t-264-273-97-376q0-205 96-377t264-273 372-101q204 0 371 101ZM798 1444q30 0 102 2 123 3 159 3 117 0 196-35t119-97 40-143q0-258-190-317 49-25 81-72t72-128q32-64 39-76 5-8 20-35t46-64h-246q-11 11-20 27t-19 35l-12 24q-7 14-29 66-21 54-38 89t-44 65-64 44q-13-1-89-1V481H709v963zm318-464 39 42 40 123q0 72-38 108t-130 36h-30q-23 0-40-2t-36-9V987q34-7 118-7 77 0 116 42Z",
+    glyphName: "registered",
+    horizAdvX: 2093,
+    unicode: "\\xAE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M646 1626v-206H55v206z",
+    glyphName: "overscore",
+    horizAdvX: 701,
+    unicode: "\\xAF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m577 1634 82-47 131-129 48-180q0-102-46-183T663 967t-185-46q-99 0-181 47t-131 130-48 180q0 101 47 182t129 127 184 47q99 0 181-47Zm-51-537 40 23 62 65 23 93q0 50-23 91t-63 65-87 24q-48 0-87-23t-62-65-23-92q0-50 23-91t62-66 87-24q48 0 88 23Z",
+    glyphName: "degree",
+    horizAdvX: 957,
+    unicode: "\\xB0"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m584 662-162-6H213v237h209l162-7-6 187v217h246v-217l-7-187 151 7h222V656H968l-151 6 7-188V260H578v214zm568-464V0H243v198z",
+    glyphName: "plusminus",
+    horizAdvX: 1403,
+    unicode: "\\xB1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1046 921V680H229l-43 154q89 46 211 138t212 199 91 195q0 153-165 153-81 0-145-37t-126-114l-108 149q32 50 99 97t157 78 190 31q135 0 223-46t128-114 40-139q0-147-102-275T598 901z",
+    glyphName: "uni00B2",
+    horizAdvX: 1234,
+    unicode: "\\xB2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m352 803 48-7 128-8q126 1 183 40t57 115q0 51-41 88t-134 54l-159-33 1 185q70 10 125 23 72 22 116 64t45 95q0 50-41 76t-117 26q-53 0-120-20t-129-58l-66 157q37 31 102 57t136 41 126 15q126 0 208-31t122-87 39-125q0-83-41-150t-148-125q78-4 134-38t86-88 30-113q0-106-51-189T835 636t-264-48q-69 0-121 9t-114 26q-24 7-47 12l-6 184q69-16 117-23Z",
+    glyphName: "uni00B3",
+    horizAdvX: 1234,
+    unicode: "\\xB3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m145 1473 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87L55 1389q90 84 179 192Z",
+    glyphName: "acute",
+    horizAdvX: 665,
+    unicode: "\\xB4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1337 87q-10-15-45-40t-90-45-119-20q-145 0-151 138-38-55-102-95T668-16q-79 0-136 15t-98 53l29-423H181v1511h312V484q0-92 20-147t64-80 120-25q43 0 90 19t82 49v840h312V281q0-76 43-76 13 0 35 6t47 21z",
+    glyphName: "uni00B5",
+    horizAdvX: 1404,
+    unicode: "\\xB5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M284 777 173 891 62 1248q0 226 149 344t447 119q49 0 161-5t147-6q186-8 236-9V0H950v1522H748V0H496v777q-212 0-323 114Z",
+    glyphName: "paragraph",
+    horizAdvX: 1410,
+    unicode: "\\xB6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m126 836 28 48 75 78 101 29q57 0 99-25t64-71 22-100q0-56-27-104t-73-76-102-29q-53 0-96 25t-67 70-24 100q0 55 28 103Z",
+    glyphName: "middot",
+    horizAdvX: 641,
+    unicode: "\\xB7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M75-285h55q51 0 84 38t37 112q1 12 1 34 0 44-8 74t-24 57l137 4 49-4q33-31 49-102t13-149q-4-122-75-182t-180-61q-47 0-104 8t-76 20l20 165q22-14 77-14Z",
+    glyphName: "cedilla",
+    horizAdvX: 518,
+    unicode: "\\xB8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M389 1396q-97-27-174-41l-40 161q56 16 133 52t145 76 92 60l145-25V673H411v729z",
+    glyphName: "uni00B9",
+    horizAdvX: 1066,
+    unicode: "\\xB9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m690 1618 97-59 146-165 49-247q0-164-62-271T756 719t-227-50q-143 0-243 59T135 894t-52 254q0 162 67 267t173 154 229 49q138 0 235-59Zm-60-758 42 64 43 210q0 139-42 216t-129 77q-95 0-144-64t-50-207q0-138 47-217t141-79q92 0 134 64Z",
+    glyphName: "ordmasculine",
+    horizAdvX: 1065,
+    unicode: "\\xBA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m314 1157 656-422V492L314 76l-75 214 431 325-431 326zm1439-422V492L1097 76l-75 214 431 325-431 326 75 216z",
+    glyphName: "guillemotright",
+    horizAdvX: 1998,
+    unicode: "\\xBB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M2360 195h-164V-77h-256l1 272h-546l-52 94 498 889h68l187-92-440-699h285l25 260h230V387h164zM1310 1530h243L1011 0H771zm-889-134q-97-27-174-41l-40 161q56 16 133 52t145 76 92 60l145-25V673H443v729z",
+    glyphName: "onequarter",
+    horizAdvX: 2559,
+    unicode: "\\xBC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M2368 239V-2h-817l-43 154q89 46 211 138t212 199 91 195q0 153-165 153-81 0-145-37t-126-114l-108 149q32 50 99 97t157 78 190 31q135 0 223-46t128-114 40-139q0-147-102-275t-293-248zM422 1396q-97-27-174-41l-40 161q56 16 133 52t145 76 92 60l145-25V673H444v729zm888 134h243L1011 0H771z",
+    glyphName: "onehalf",
+    horizAdvX: 2559,
+    unicode: "\\xBD"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M2360 195h-164V-77h-256l1 272h-546l-52 94 498 889h68l187-92-440-699h285l25 260h230V387h164zM218 803l48-7 128-8q126 1 183 40t57 115q0 51-41 88t-134 54l-159-33 1 185q70 10 125 23 72 22 116 64t45 95q0 50-41 76t-117 26q-53 0-120-20t-129-58l-66 157q37 31 102 57t136 41 126 15q126 0 208-31t122-87 39-125q0-83-41-150t-148-125q78-4 134-38t86-88 30-113q0-106-51-189T701 636t-264-48q-69 0-121 9t-114 26q-24 7-47 12l-6 184q69-16 117-23Zm1092 727h243L1011 0H771z",
+    glyphName: "threequarters",
+    horizAdvX: 2559,
+    unicode: "\\xBE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m741 1317-26-44-71-70-94-26q-53 0-93 23t-61 63-22 91q0 51 26 95t71 70 94 27q49 0 89-23t63-65 24-91q0-50-26-94Zm47-647-29-57-70-98-111-96q-63-50-100-85t-63-83-25-107q0-106 79-158t246-53q68 0 110 6t66 12 30 8v-232q-33-20-106-34t-163-15q-213 0-346 62T116-96 61 129q0 95 34 168t84 124 131 117q66 55 103 91t64 82 31 103q1 10 1 28 0 32-6 59t-20 77q-2 8-11 40h238q34-52 56-117t22-157q0-74-29-131Z",
+    glyphName: "questiondown",
+    horizAdvX: 1057,
+    unicode: "\\xBF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522zM665 1558l-71 52-142 119-109 120 217 131q11-32 94-115t201-197l-146-125q-44 15-115 67Z",
+    glyphName: "Agrave",
+    horizAdvX: 1421,
+    unicode: "\\xC0"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522zM640 1734l106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Z",
+    glyphName: "Aacute",
+    horizAdvX: 1421,
+    unicode: "\\xC1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522zM601 1959h220l276-308-165-92-221 199-222-199-162 90z",
+    glyphName: "Acircumflex",
+    horizAdvX: 1421,
+    unicode: "\\xC2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522zM312 1831l78 63 188 63q60 0 99-19t84-57q34-28 57-41t54-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Z",
+    glyphName: "Atilde",
+    horizAdvX: 1421,
+    unicode: "\\xC3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l562 1538h322L1436 0h-347zm-73 229-165 522-43 157-44-157-163-522zM272 1828l25 42 68 66 94 24q81 0 124-44t44-120q0-51-24-92t-67-66-95-24q-77 0-123 45t-46 119q0 50 25 92Zm524 0 25 42 68 66 94 24q81 0 124-44t43-120q0-51-24-92t-66-66-96-24q-76 0-122 45t-46 119q0 50 25 92Z",
+    glyphName: "Adieresis",
+    horizAdvX: 1421,
+    unicode: "\\xC4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M987 322H428L327 0H-15l530 1451q-72 33-110 94t-38 148q0 98 49 160t128 89 170 27q159 0 247-69t89-203q0-89-40-150t-110-93L1436 0h-347zM633 1823l-41-27-41-98q0-62 43-96t114-35q79-1 119 25t40 99q0 66-45 99t-119 33q-70 0-111-27ZM914 551l-165 522-43 157-44-157-163-522z",
+    glyphName: "Aring",
+    horizAdvX: 1421,
+    unicode: "\\xC5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1853 251V0H860v376H412L234 0h-345l766 1522h1133v-244h-610V904h468V663h-468V251zM860 598v726L517 598z",
+    glyphName: "AE",
+    horizAdvX: 1939,
+    unicode: "\\xC6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1244 64q-80-32-147-51T938-13q18-40 26-95t7-113q-4-122-75-182t-180-61q-47 0-104 8t-76 20l20 165q22-14 77-14 51 0 84 38t37 112q1 12 1 34 0 55-14 92-198 24-342 125T177 383t-77 374q0 245 98 421t268 268 380 92q111 0 184-11t158-32q61-14 72-16l-46-280q-6 3-52 28t-124 42-172 17q-124 0-223-61t-157-176-58-272q0-158 55-282t160-195 247-70q65 0 136 15t130 38 87 43z",
+    glyphName: "Ccedilla",
+    horizAdvX: 1299,
+    unicode: "\\xC7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m654 1558-71 52-142 119-109 120 217 131q11-32 94-115t201-197l-146-125q-44 15-115 67Zm462-36v-244H506V900h468V659H506V251h675V0H188v1522z",
+    glyphName: "Egrave",
+    horizAdvX: 1254,
+    unicode: "\\xC8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m629 1734 106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Zm487-212v-244H506V900h468V659H506V251h675V0H188v1522z",
+    glyphName: "Eacute",
+    horizAdvX: 1254,
+    unicode: "\\xC9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1116 1522v-244H506V900h468V659H506V251h675V0H188v1522zm-526 437h220l276-308-165-92-221 199-222-199-162 90z",
+    glyphName: "Ecircumflex",
+    horizAdvX: 1254,
+    unicode: "\\xCA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m261 1828 25 42 68 66 94 24q81 0 124-44t44-120q0-51-24-92t-67-66-95-24q-77 0-123 45t-46 119q0 50 25 92Zm524 0 25 42 68 66 94 24q81 0 124-44t43-120q0-51-24-92t-66-66-96-24q-76 0-122 45t-46 119q0 50 25 92Zm331-306v-244H506V900h468V659H506V251h675V0H188v1522z",
+    glyphName: "Edieresis",
+    horizAdvX: 1254,
+    unicode: "\\xCB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M521 1522V0H201v1522zm50 36-71 52-142 119-109 120 217 131q11-32 94-115t201-197l-146-125q-44 15-115 67Z",
+    glyphName: "Igrave",
+    horizAdvX: 722,
+    unicode: "\\xCC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M521 1522V0H201v1522zm-231 212 106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Z",
+    glyphName: "Iacute",
+    horizAdvX: 722,
+    unicode: "\\xCD"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M521 1522V0H201v1522zm-14 693h220l276-308-165-92-221 199-222-199-162 90z",
+    glyphName: "Icircumflex",
+    horizAdvX: 722,
+    unicode: "\\xCE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M521 1522V0H201v1522zm-599 306 25 42 68 66 94 24q81 0 124-44t44-120q0-51-24-92t-67-66-95-24q-77 0-123 45t-46 119q0 50 25 92Zm524 0 25 42 68 66 94 24q81 0 124-44t43-120q0-51-24-92t-66-66-96-24q-76 0-122 45t-46 119q0 50 25 92Z",
+    glyphName: "Idieresis",
+    horizAdvX: 722,
+    unicode: "\\xCF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1083 1538 185-190 186-547q0-255-93-439T1097 81 693-16q-72 0-214 9-87 7-137 7H188v694H69v201h119v627h151q32 0 128 6 134 10 241 10 375 0 560-190ZM903 230l107 131 108 406q0 196-47 312t-144 168-249 51q-53 0-129-10l-40-4V895h337V694H509V246q68-18 204-18 190 2 297 133Z",
+    glyphName: "Eth",
+    horizAdvX: 1554,
+    unicode: "\\xD0"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m411 1831 78 63 188 63q60 0 99-19t84-57q34-28 57-41t54-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Zm1021-309V0h-319L570 861l-120 243 34-363V0H188v1522h295l567-895 115-228-29 366v757z",
+    glyphName: "Ntilde",
+    horizAdvX: 1622,
+    unicode: "\\xD1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m777 1558-71 52-142 119-109 120 217 131q11-32 94-115t201-197l-146-125q-44 15-115 67Zm-674-533 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271Z",
+    glyphName: "Ograve",
+    horizAdvX: 1595,
+    unicode: "\\xD2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m752 1770 106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Zm-649-745 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271Z",
+    glyphName: "Oacute",
+    horizAdvX: 1595,
+    unicode: "\\xD3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m103 1025 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271ZM713 1959h220l276-308-165-92-221 199-222-199-162 90z",
+    glyphName: "Ocircumflex",
+    horizAdvX: 1595,
+    unicode: "\\xD4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m424 1831 78 63 188 63q60 0 99-19t84-57q34-28 57-41t54-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Zm-321-806 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271Z",
+    glyphName: "Otilde",
+    horizAdvX: 1595,
+    unicode: "\\xD5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m384 1828 25 42 68 66 94 24q81 0 124-44t44-120q0-51-24-92t-67-66-95-24q-77 0-123 45t-46 119q0 50 25 92Zm524 0 25 42 68 66 94 24q81 0 124-44t43-120q0-51-24-92t-66-66-96-24q-76 0-122 45t-46 119q0 50 25 92Zm-805-803 92 169 253 254 373 90q207 6 362-90t236-274 78-411q-5-260-97-434T1147 69 773-16q-210 0-364 99T174 361 98 769q5 256 97 425Zm1065-99-39 118-119 185-196 67q-111 0-198-55t-138-175-51-308q0-153 41-275t125-192 205-70q175 0 272 137t98 415q0 153-39 271Z",
+    glyphName: "Odieresis",
+    horizAdvX: 1595,
+    unicode: "\\xD6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m168 1160 171 160 354-378 351 378 171-160-359-383 356-369-171-171-351 368-351-368-171 171 359 368z",
+    glyphName: "multiply",
+    horizAdvX: 1380,
+    unicode: "\\xD7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1239 1428 84-100 129-238 45-303q0-268-91-447T1151 72 771-16q-98 0-187 23l-83-227-125 32 88 240q-118 59-201 163T137 461 98 769q5 256 97 425t253 254 373 90q90 3 178-16l94 259 125-32-97-268q118-53 202-153ZM427 620l34-113 101-185 349 960q-47 14-97 14-111 0-198-55t-138-175-51-308q0-138 34-251Zm546-399 97 137 98 415q0 146-36 261t-108 182L670 245q57-24 128-24 175 0 272 137Z",
+    glyphName: "Oslash",
+    horizAdvX: 1595,
+    unicode: "\\xD8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m722 1558-71 52-142 119-109 120 217 131q11-32 94-115t201-197l-146-125q-44 15-115 67Zm-570-36h315l-2-852q0-173 33-267t99-129 170-36q101 0 165 38t97 133 34 261v852h313V640q0-321-156-488T758-16q-326 0-467 173T150 653z",
+    glyphName: "Ugrave",
+    horizAdvX: 1525,
+    unicode: "\\xD9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m697 1734 106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Zm-545-212h315l-2-852q0-173 33-267t99-129 170-36q101 0 165 38t97 133 34 261v852h313V640q0-321-156-488T758-16q-326 0-467 173T150 653z",
+    glyphName: "Uacute",
+    horizAdvX: 1525,
+    unicode: "\\xDA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M152 1522h315l-2-852q0-173 33-267t99-129 170-36q101 0 165 38t97 133 34 261v852h313V640q0-321-156-488T758-16q-326 0-467 173T150 653zm506 437h220l276-308-165-92-221 199-222-199-162 90z",
+    glyphName: "Ucircumflex",
+    horizAdvX: 1525,
+    unicode: "\\xDB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m329 1828 25 42 68 66 94 24q81 0 124-44t44-120q0-51-24-92t-67-66-95-24q-77 0-123 45t-46 119q0 50 25 92Zm524 0 25 42 68 66 94 24q81 0 124-44t43-120q0-51-24-92t-66-66-96-24q-76 0-122 45t-46 119q0 50 25 92Zm-701-306h315l-2-852q0-173 33-267t99-129 170-36q101 0 165 38t97 133 34 261v852h313V640q0-321-156-488T758-16q-326 0-467 173T150 653z",
+    glyphName: "Udieresis",
+    horizAdvX: 1525,
+    unicode: "\\xDC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M780 533V0H461v535l-511 987h350l280-590 44-113 38 113 288 590h341zM568 1734l106 107 118 139 217-131q-44-57-112-122t-137-117-117-67l-146 125q71 66 177 173Z",
+    glyphName: "Yacute",
+    horizAdvX: 1241,
+    unicode: "\\xDD"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1001 1287 140-120 141-362q0-172-67-295t-197-188-316-65q-82 0-135 4t-61 5V0H188v1522h318v-247l65 4q112 8 178 8 252 0 392-120ZM755 500l66 23 106 90 40 189q0 119-72 182t-211 63q-102 0-178-19V510q36-7 72-8t84-2q93 0 159 23Z",
+    glyphName: "Thorn",
+    horizAdvX: 1359,
+    unicode: "\\xDE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m998 859 15-26 40-49 68-60q68-56 112-102t77-118 32-165q0-190-121-272T916-16q-80 0-145 9t-91 24v223q25-16 74-29t107-14q63 0 113 30t51 97q0 44-17 81t-44 66-72 71q-53 49-85 86t-55 89-23 120q0 45 14 81t34 63 53 63q46 50 68 87t23 91q0 73-42 111t-120 39q-121 0-185-96t-64-325V0H193v924H54v195l156 29q46 219 205 325t389 106q134 0 233-38t154-109 54-164q0-62-22-108t-52-77-79-69q-48-37-71-64t-23-61q0-30 15-56Z",
+    glyphName: "germandbls",
+    horizAdvX: 1395,
+    unicode: "\\xDF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20Zm-79 1077-86 66-165 147-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "agrave",
+    horizAdvX: 1223,
+    unicode: "\\xE0"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20Zm-48 1277 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192Z",
+    glyphName: "aacute",
+    horizAdvX: 1223,
+    unicode: "\\xE1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20ZM517 1698h223l283-372-161-90-233 246-242-246-156 89z",
+    glyphName: "acircumflex",
+    horizAdvX: 1223,
+    unicode: "\\xE2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20ZM215 1572l78 63 188 63q64 0 104-20t83-57q32-27 54-40t53-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Z",
+    glyphName: "atilde",
+    horizAdvX: 1223,
+    unicode: "\\xE3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20ZM209 1526l25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Z",
+    glyphName: "adieresis",
+    horizAdvX: 1223,
+    unicode: "\\xE4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m773 1162 99-36 149-127 49-254V-16H888q-45 0-68 6t-36 28-13 70v8q-52-48-128-80T474-16q-110 0-194 47T149 163t-47 192q0 100 51 171t148 114q149 66 457 66v72q0 64-16 94t-63 41-147 11q-48 0-146-24t-168-57l-69 200q40 24 116 52t167 47 175 20q166 0 265-36ZM631 195l55 20 72 43v272q-57 0-128-12t-107-29q-45-17-72-46t-27-86q0-80 43-121t114-41q50 0 105 20ZM284 1700l49 64 128 93 170 30q157 0 246-73t90-209q0-98-47-163t-126-97-172-32q-105 0-181 35t-116 99-41 154q0 99 49 163Zm500-35-45 38-118 38q-67 0-110-32t-43-103q0-63 44-102t113-39q77-1 118 29t41 105q0 66-45 104Z",
+    glyphName: "aring",
+    horizAdvX: 1223,
+    unicode: "\\xE5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1754 565-11-70h-674q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81t-246-33q-137 0-242 45T879 159Q797 65 695 25T475-16q-104 0-189 39T152 141t-50 189q0 104 57 183t156 124q81 36 201 52t235 17v61q0 59-19 93t-62 49-116 15q-55 0-120-13t-121-32-85-36l-69 200q35 20 102 47t165 49 201 23q125 0 206-26t127-88q139 108 347 108 124 0 224-45t160-145 63-257q0-144-11-214Zm-289 118v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44ZM644 195l62 31 95 72q-38 99-44 232-68 1-128-11t-101-30q-33-14-54-28t-36-41-16-73q0-75 44-113t115-39q63 0 125 31Z",
+    glyphName: "ae",
+    horizAdvX: 1851,
+    unicode: "\\xE6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m936 57-69-28-152-39q19-39 27-96t7-115q-4-122-75-182t-180-61q-47 0-104 8t-76 20l20 165q22-14 77-14 51 0 84 38t37 112q1 12 1 35 0 56-14 92Q381 14 286 92T143 289 95 556q0 172 63 308t191 214 315 78q101 0 183-17t113-41l-39-241q-43 23-95 33t-130 11q-72 0-137-30t-108-99-46-177q-3-119 32-200t99-120 148-40q75 0 143 13t105 34l45-185q-41-40-110-68Z",
+    glyphName: "ccedilla",
+    horizAdvX: 1048,
+    unicode: "\\xE7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1093 565-11-70H408q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81T633-16q-172 0-293 70T157 256 95 574q0 168 65 300t189 207 297 75q124 0 224-45t160-145 63-257q0-144-11-214ZM804 683v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44Zm-244 590-86 66-165 147-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "egrave",
+    horizAdvX: 1190,
+    unicode: "\\xE8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m591 1473 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192Zm502-908-11-70H408q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81T633-16q-172 0-293 70T157 256 95 574q0 168 65 300t189 207 297 75q124 0 224-45t160-145 63-257q0-144-11-214ZM804 683v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44Z",
+    glyphName: "eacute",
+    horizAdvX: 1190,
+    unicode: "\\xE9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M525 1699h223l283-372-161-90-233 246-242-246-156 89zm568-1134-11-70H408q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81T633-16q-172 0-293 70T157 256 95 574q0 168 65 300t189 207 297 75q124 0 224-45t160-145 63-257q0-144-11-214ZM804 683v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44Z",
+    glyphName: "ecircumflex",
+    horizAdvX: 1190,
+    unicode: "\\xEA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m217 1527 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm391-962-11-70H408q9-141 88-210t216-69q65 0 157 17t136 42l51-177q-59-48-177-81T633-16q-172 0-293 70T157 256 95 574q0 168 65 300t189 207 297 75q124 0 224-45t160-145 63-257q0-144-11-214ZM804 683v29q0 109-41 165t-133 57q-92 0-146-60t-71-206h390q1 15 1 44Z",
+    glyphName: "edieresis",
+    horizAdvX: 1190,
+    unicode: "\\xEB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M486 1140V0H174v1140zm-230 132-86 66L5 1485l-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "igrave",
+    horizAdvX: 660,
+    unicode: "\\xEC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m287 1472 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192Zm199-332V0H174v1140z",
+    glyphName: "iacute",
+    horizAdvX: 660,
+    unicode: "\\xED"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M477 1954h223l283-372-161-90-233 246-242-246-156 89zm9-814V0H174v1140z",
+    glyphName: "icircumflex",
+    horizAdvX: 660,
+    unicode: "\\xEE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m-75 1526 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm461 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm100-386V0H174v1140z",
+    glyphName: "idieresis",
+    horizAdvX: 660,
+    unicode: "\\xEF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m857 1508 116-147 179-332 63-378q0-218-74-371T938 50 650-27q-167 0-293 72T163 248 95 550q0 182 62 317t181 208 286 74q108 0 192-52-31 92-96 176t-152 147l-117-158-149 99 122 158q-101 62-204 92l53 176q90-26 154-51t122-56q35 46 74 100t51 72l152-100q-11-15-49-64t-74-93q154-87 270-234ZM726 202l52 43 83 128 31 201q0 166-6 242-27 46-87 81t-139 35q-75 0-129-45t-83-132-29-208q0-168 63-256t178-89q66 0 118 43Z",
+    glyphName: "eth",
+    horizAdvX: 1294,
+    unicode: "\\xF0"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m457 1140 6-122q69 52 172 95t199 46q123 4 201-38t116-141 39-265V0H878v648q0 97-15 150t-51 77-102 21q-50-1-113-23t-111-64V0H174v1140zm-107 432 78 63 188 63q64 0 104-20t83-57q32-27 54-40t53-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Z",
+    glyphName: "ntilde",
+    horizAdvX: 1352,
+    unicode: "\\xF1"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m96 764 72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Zm-297 551-86 66-165 147-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "ograve",
+    horizAdvX: 1302,
+    unicode: "\\xF2"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m617 1472 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192ZM96 764l72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Z",
+    glyphName: "oacute",
+    horizAdvX: 1302,
+    unicode: "\\xF3"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M551 1698h223l283-372-161-90-233 246-242-246-156 89zM96 764l72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Z",
+    glyphName: "ocircumflex",
+    horizAdvX: 1302,
+    unicode: "\\xF4"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m96 764 72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Zm-634 851 78 63 188 63q64 0 104-20t83-57q32-27 54-40t53-13q45 0 82 31t73 80l126-108q-36-104-111-166t-187-62q-58 0-95 19t-82 56q-37 30-62 44t-60 14q-39 0-79-30t-75-72l-125 98q35 100 113 163Z",
+    glyphName: "otilde",
+    horizAdvX: 1302,
+    unicode: "\\xF5"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m243 1526 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91ZM96 764l72 129 200 196 294 67q189 0 311-79t177-213 56-302q0-184-72-314T934 51 641-16q-190 0-312 80T152 278 96 581q0 183 72 312Zm787-43-57 106-173 107q-234 0-234-348 0-105 24-191t77-139 132-52q231 0 231 357 0 160-57 266Z",
+    glyphName: "odieresis",
+    horizAdvX: 1302,
+    unicode: "\\xF6"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m527 1268 28 47 75 75 102 29q86 0 135-52t49-135q0-56-27-103t-75-76-102-28q-53 0-95 24t-66 67-24 97q0 55 28 102Zm673-379V655H203v234zM523 380l28 47 76 75 102 29q85 0 134-52t49-135q0-56-27-103t-75-76-102-28q-53 0-95 24t-66 67-24 97q0 55 28 102Z",
+    glyphName: "divide",
+    horizAdvX: 1403,
+    unicode: "\\xF7"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m1064 1044 72-150 70-348q-2-179-75-305T931 49 641-16q-65 0-128 11l-76-215-125 32 78 220Q240 98 168 243T96 581q0 183 72 312t200 196 294 67q69 0 123-10l78 221 125-32-80-225q156-66 228-216ZM419 500l16-74 50-126 222 627q-30 7-54 7-234 0-234-348 0-86 16-160Zm464-296v357q0 86-17 160t-51 125L590 213q28-9 62-9 231 0 231 357Z",
+    glyphName: "oslash",
+    horizAdvX: 1302,
+    unicode: "\\xF8"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1152 1140V-16H946q-40 0-58 11t-18 47v52q-65-46-158-78T537-16q-156 0-238 59T190 206t-28 268v666h312V477q0-107 18-161t55-74 102-19q50 0 106 21t85 44v852zm-552 132-86 66-165 147-110 148 215 174q61-104 156-220t185-199l-149-137q-46 21-132 87Z",
+    glyphName: "ugrave",
+    horizAdvX: 1326,
+    unicode: "\\xF9"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m631 1472 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192Zm521-332V-16H946q-40 0-58 11t-18 47v52q-65-46-158-78T537-16q-156 0-238 59T190 206t-28 268v666h312V477q0-107 18-161t55-74 102-19q50 0 106 21t85 44v852z",
+    glyphName: "uacute",
+    horizAdvX: 1326,
+    unicode: "\\xFA"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M565 1698h223l283-372-161-90-233 246-242-246-156 89zm587-558V-16H946q-40 0-58 11t-18 47v52q-65-46-158-78T537-16q-156 0-238 59T190 206t-28 268v666h312V477q0-107 18-161t55-74 102-19q50 0 106 21t85 44v852z",
+    glyphName: "ucircumflex",
+    horizAdvX: 1326,
+    unicode: "\\xFB"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m257 1526 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm410-386V-16H946q-40 0-58 11t-18 47v52q-65-46-158-78T537-16q-156 0-238 59T190 206t-28 268v666h312V477q0-107 18-161t55-74 102-19q50 0 106 21t85 44v852z",
+    glyphName: "udieresis",
+    horizAdvX: 1326,
+    unicode: "\\xFC"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1162 1140 807-30q-60-196-160-308T424-486q-26-8-76-14t-76-7q-26 0-85 6t-67 13v253q18-6 57-13t56-7q71 0 122 13t102 68T538 0H404L17 1140h338l173-609 83-329 77 329 139 609zm-593 332 89 108 162 227 214-174q-27-63-106-145t-168-150-132-87l-149 137q90 84 179 192Z",
+    glyphName: "yacute",
+    horizAdvX: 1188,
+    unicode: "\\xFD"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m916 1156 103-60 164-183 62-301q0-187-75-331T960 57 649-23q-81 0-167 11l4-157v-338H168v2168h312v-437l-8-188q54 51 130 85t189 35q125 0 228-60Zm2-380-57 73-166 74q-62 0-119-20t-96-51V232q36-39 176-39 76 0 135 47t93 139 34 216q0 181-57 254Z",
+    glyphName: "thorn",
+    horizAdvX: 1340,
+    unicode: "\\xFE"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1162 1140 807-30q-60-196-160-308T424-486q-26-8-76-14t-76-7q-26 0-85 6t-67 13v253q18-6 57-13t56-7q71 0 122 13t102 68T538 0H404L17 1140h338l173-609 83-329 77 329 139 609zm-967 642 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Zm485 0 25 42 67 68 93 26q80 0 122-46t42-122q0-50-24-92t-66-68-93-25q-75 0-120 47t-46 121q0 49 25 91Z",
+    glyphName: "ydieresis",
+    horizAdvX: 1188,
+    unicode: "\\xFF"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M1457 889V644H245v245z",
+    glyphName: "endash",
+    horizAdvX: 1702,
+    unicode: "\\u2013"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M2168 889V644H245v245z",
+    glyphName: "emdash",
+    horizAdvX: 2413,
+    unicode: "\\u2014"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m94 1397 34 92 82 154 88 93 130-83v-28q-31-36-50-115t-20-152q0-53 13-100t35-80 42-43v-71L279 940q-50 18-92 65t-68 120-25 161q0 111 34 203Z",
+    glyphName: "quoteleft",
+    horizAdvX: 560,
+    unicode: "\\u2018"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M114 1051q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83z",
+    glyphName: "quoteright",
+    horizAdvX: 560,
+    unicode: "\\u2019"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M114-422q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83z",
+    glyphName: "quotesinglbase",
+    horizAdvX: 560,
+    unicode: "\\u201A"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m94 1397 34 92 82 154 88 93 130-83v-28q-31-36-50-115t-20-152q0-53 13-100t35-80 42-43v-71L279 940q-50 18-92 65t-68 120-25 161q0 111 34 203Zm548 0 34 92 82 154 88 93 130-83v-28q-31-36-50-115t-20-152q0-53 13-100t35-80 42-43v-71L827 940q-50 18-92 65t-68 120-25 161q0 111 34 203Z",
+    glyphName: "quotedblleft",
+    horizAdvX: 1108,
+    unicode: "\\u201C"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M114 1051q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83zm548 0q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83z",
+    glyphName: "quotedblright",
+    horizAdvX: 1108,
+    unicode: "\\u201D"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M114-410q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83zm548 0q31 36 50 115t19 153q0 53-13 100t-35 79-41 43v71l169 124q50-18 92-65t67-120 26-161q0-111-34-203t-82-153-88-94l-130 83z",
+    glyphName: "quotedblbase",
+    horizAdvX: 1108,
+    unicode: "\\u201E"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m187 792 38 63 102 102 137 38q72 0 130-32t91-90 33-129q0-73-37-137T580 505t-137-38q-72 0-130 33t-92 91-34 128q0 73 38 136Z",
+    glyphName: "bullet",
+    horizAdvX: 905,
+    unicode: "\\u2022"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "m535 615 431-325-75-214-656 416v243l656 422 75-216z",
+    glyphName: "guilsinglleft",
+    horizAdvX: 1214,
+    unicode: "\\u2039"
+  }), /*#__PURE__*/React.createElement("glyph", {
+    d: "M969 735V492L313 76l-75 214 431 325-431 326 75 216z",
+    glyphName: "guilsinglright",
+    horizAdvX: 1214,
+    unicode: "\\u203A"
+  }))));
+};
+
+export default SvgComponent;
