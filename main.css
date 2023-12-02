@@ -481,6 +481,7 @@ body{
   .viewer-metadata-table tr.metadata-collapse-collapsed{
       visibility:collapse;
       height:0px;
+      display:none;
     }
 
   .viewer-metadata-table tr.metadata-collapse-title{
