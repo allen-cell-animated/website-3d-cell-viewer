@@ -1,4 +1,6 @@
-import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/volume-viewer";
+import type { RawArrayInfo, RawArrayData } from "@aics/volume-viewer";
+
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
@@ -55,9 +57,9 @@ export interface GlobalViewerSettings {
 
 export interface AppProps {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
-  rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
+  rawData?: RawArrayData;
   // rawDims is the volume dims that normally come from a json file
-  rawDims?: ImageInfo;
+  rawDims?: RawArrayInfo;
 
   // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
   viewerChannelSettings?: ViewerChannelSettings;

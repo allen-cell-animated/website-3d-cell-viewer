@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import {
+  CreateLoaderOptions,
   createVolumeLoader,
   LoadSpec,
   RENDERMODE_PATHTRACE,
@@ -10,6 +11,7 @@ import {
   View3d,
   Volume,
   VolumeCache,
+  VolumeFileFormat,
 } from "@aics/volume-viewer";
 
 import {
@@ -410,7 +412,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const openImage = async (): Promise<void> => {
-    const { fovPath, cellPath, baseUrl } = props;
+    const { fovPath, cellPath, baseUrl, rawDims, rawData } = props;
     const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
     const fullUrl = `${baseUrl}${path}`;
 
@@ -427,9 +429,16 @@ const App: React.FC<AppProps> = (props) => {
     const loadSpec = new LoadSpec();
     loadSpec.time = viewerSettings.time;
 
+    const options: CreateLoaderOptions = { cache: volumeCache };
+    if (rawDims && rawData) {
+      options.fileType = VolumeFileFormat.DATA;
+      options.imageData = rawData;
+      options.imageDataInfo = rawDims;
+    }
+
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
-    const loader = await createVolumeLoader(fullUrl, { cache: volumeCache });
+    const loader = await createVolumeLoader(fullUrl, options);
 
     const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
@@ -448,30 +457,31 @@ const App: React.FC<AppProps> = (props) => {
     placeImageInViewer(aimg, newChannelSettings);
   };
 
-  const loadFromRaw = (): void => {
-    const { rawData, rawDims } = props;
-    if (!rawData || !rawDims) {
-      console.error("ERROR loadFromRaw called without rawData or rawDims being set");
-      return;
-    }
+  // const loadFromRaw = (): void => {
+  //   const { rawData, rawDims } = props;
+  //   if (!rawData || !rawDims) {
+  //     console.error("ERROR loadFromRaw called without rawData or rawDims being set");
+  //     return;
+  //   }
 
-    const aimg = new Volume(rawDims);
-    const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
-    for (let i = 0; i < rawDims.numChannels; ++i) {
-      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
-    }
+  //   const imageInfo: ImageInfo = rawDimsToImageInfo(rawDims);
+  //   const aimg = new Volume(imageInfo);
+  //   const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
+  //   for (let i = 0; i < imageInfo.numChannels; ++i) {
+  //     aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
+  //   }
 
-    let channelSetting = rawDims.channelNames.map((channel, index) => {
-      let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
-      return initializeOneChannelSetting(aimg, channel, index, color);
-    });
+  //   let channelSetting = imageInfo.channelNames.map((channel, index) => {
+  //     let color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray; // guard for unexpectedly longer channel list
+  //     return initializeOneChannelSetting(aimg, channel, index, color);
+  //   });
 
-    setChannelGroupedByType(makeChannelIndexGrouping(rawDims.channelNames, props.viewerChannelSettings));
-    setChannelSettings(channelSetting);
+  //   setChannelGroupedByType(makeChannelIndexGrouping(imageInfo.channelNames, props.viewerChannelSettings));
+  //   setChannelSettings(channelSetting);
 
-    // Here is where we officially hand the image to the volume-viewer
-    placeImageInViewer(aimg, channelSetting);
-  };
+  //   // Here is where we officially hand the image to the volume-viewer
+  //   placeImageInViewer(aimg, channelSetting);
+  // };
 
   // Imperative callbacks /////////////////////////////////////////////////////
 
@@ -551,11 +561,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `time`)
   useEffect(() => {
-    if (props.rawDims && props.rawData) {
-      loadFromRaw();
-    } else {
-      openImage();
-    }
+    openImage();
   }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
