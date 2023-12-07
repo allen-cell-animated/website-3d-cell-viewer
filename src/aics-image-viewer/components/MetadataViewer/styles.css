@@ -49,7 +49,7 @@
     }
 
     &.metadata-key {
-      padding-left: 24px;
+      padding-left: 16px;
     }
 
     &.metadata-value {
@@ -59,12 +59,12 @@
     }
 
     &:last-child {
-      padding-right: 16px;
+      padding-right: 8px;
     }
 
     &.metadata-collapse-content {
       padding: 0;
-      padding-left: 16px;
+      padding-left: 24px;
       border-bottom: none;
     }
 
