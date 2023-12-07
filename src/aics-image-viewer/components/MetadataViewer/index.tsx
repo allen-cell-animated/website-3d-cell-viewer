@@ -19,7 +19,7 @@ interface CollapsibleCategoryProps extends MetadataTableProps {
 const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val === "object" && val !== null;
 
 /** Component to hold collapse state */
-const MetadataCollapsibleCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title, categoryFollows }) => {
+const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title, categoryFollows }) => {
   const [collapsed, setCollapsed] = React.useState(true);
   const toggleCollapsed = (): void => setCollapsed(!collapsed);
 
@@ -64,14 +64,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
             const nextItem = metadataIsArray ? metadata[idx + 1] : metadata[metadataKeys[idx + 1]];
             const categoryBelow = idx + 1 >= metadataKeys.length ? isCategory(nextItem) : categoryFollows;
 
-            return (
-              <MetadataCollapsibleCategory
-                key={key}
-                metadata={metadataValue}
-                title={key}
-                categoryFollows={categoryBelow}
-              />
-            );
+            return <MetadataCategory key={key} metadata={metadataValue} title={key} categoryFollows={categoryBelow} />;
           } else {
             return (
               <tr key={key}>
