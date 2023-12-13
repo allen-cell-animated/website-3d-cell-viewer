@@ -5,8 +5,10 @@
   &.metadata-top-level {
     border-bottom: 1px solid #6e6e6e;
 
-    > tbody > tr.metadata-collapse-title:first-child {
-      border-top: none;
+    > tbody {
+      > tr.metadata-collapse-title:first-child {
+        border-top: none;
+      }
     }
   }
 
@@ -24,9 +26,15 @@
       color: white;
       background-color: #4b4b4b;
       border-top: 1px solid #6e6e6e;
+      > td {
+        padding-bottom: 5px;
+      }
 
       &.metadata-collapse-collapsed.metadata-collapse-bottom-border:not(:nth-last-child(2)) {
         border-bottom: 1px solid #6e6e6e;
+        > td {
+          padding-bottom: 6px;
+        }
       }
     }
 
