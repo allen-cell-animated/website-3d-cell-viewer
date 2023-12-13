@@ -2,65 +2,47 @@
   width: 100%;
   table-layout: fixed;
 
-  /* On the top nest level, the top border is given by the panel header, and the bottom by the containing table */
-  &.metadata-top-level {
-    border-bottom: 1px solid #6e6e6e;
-
-    > tbody > tr.metadata-collapse-title {
-      &:first-child {
-        border-top: none;
-      }
-
-      &:nth-last-child(2).metadata-collapse-collapsed > td {
-        padding-bottom: 6px;
-      }
-    }
-  }
-
   tbody {
     padding: 10px;
   }
 
+  /* On the top nest level, the top border is given by the panel header, and the bottom by the containing table */
+  &.metadata-top-level {
+    border-bottom: 1px solid #6e6e6e;
+
+    > tbody > tr.metadata-row-collapse-title:first-child {
+      border-top: none;
+    }
+  }
+
   /* ----- TABLE ROWS ----- */
   tr {
-    &:nth-child(odd) {
+    &:nth-child(odd):not(.metadata-row-collapse-content) {
       background-color: #3a3a3a;
     }
 
-    &.metadata-collapse-title {
+    /* CATEGORY TITLE */
+    &.metadata-row-collapse-title {
       color: white;
-      background-color: #4b4b4b;
-      border-top: 1px solid #6e6e6e;
-      > td {
-        padding-bottom: 5px;
-      }
+      background-color: #4b4b4b !important;
 
-      /* This complex rule decides if the title should have its own bottom border, or if a line is already drawn below:
-      - If the category is not collapsed, the bottom border is the responsibility of the content row
-      - If the next sibling is a category (React determines this), they are separated by the sibling's top border
-      - If this is the last entry in its category, the parent category's longer bottom border is below
-      */
-      &.metadata-collapse-collapsed.metadata-collapse-bottom-border:not(:nth-last-child(2)) {
-        border-bottom: 1px solid #6e6e6e;
-        > td {
-          padding-bottom: 6px;
-        }
+      /* Keeps borders aligned when this category opens and closes */
+      &:not(.metadata-collapse-collapsed) > td {
+        padding-bottom: 5px;
       }
     }
 
-    &.metadata-collapse-content-row {
-      background-color: #313131;
+    /* CATEGORY CONTENT */
+    &.metadata-row-collapse-content.metadata-collapse-collapsed {
+      visibility: collapse;
+      height: 0px;
+      display: none;
+    }
 
-      &.metadata-collapse-collapsed {
-        visibility: collapse;
-        height: 0px;
-        display: none;
-      }
-
-      /* Same as above, but the content takes the bottom border when this category is NOT collapsed. */
-      &:not(.metadata-collapse-collapsed).metadata-collapse-bottom-border:not(:last-child) {
-        border-bottom: 1px solid #6e6e6e;
-      }
+    /* ROW BORDERS: all categories have top borders; any row which follows a category provides its bottom border */
+    tr.metadata-row-collapse-title,
+    &.metadata-row-collapse-content + tr {
+      border-top: 1px solid #6e6e6e;
     }
   }
 
@@ -92,7 +74,6 @@
     &.metadata-collapse-content {
       padding: 0;
       padding-left: 24px;
-      border-bottom: none;
     }
 
     i {
