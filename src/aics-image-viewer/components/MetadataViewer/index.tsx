@@ -10,6 +10,7 @@ interface MetadataTableProps {
   // up with the top border of the lower category and create the appearance of a single thick, uneven border.
   // (there is not a way to prevent this with pure CSS to my knowledge)
   categoryFollows: boolean;
+  topLevel?: boolean;
 }
 
 interface CollapsibleCategoryProps extends MetadataTableProps {
@@ -23,14 +24,12 @@ const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title,
   const [collapsed, setCollapsed] = React.useState(true);
   const toggleCollapsed = (): void => setCollapsed(!collapsed);
 
+  const rowClass =
+    (collapsed ? " metadata-collapse-collapsed" : "") + (!categoryFollows ? " metadata-collapse-bottom-border" : "");
+
   return (
     <>
-      <tr
-        className={
-          "metadata-collapse-title" + (categoryFollows && collapsed ? " metadata-collapse-no-bottom-border" : "")
-        }
-        onClick={toggleCollapsed}
-      >
+      <tr className={"metadata-collapse-title" + rowClass} onClick={toggleCollapsed}>
         <td colSpan={2}>
           <span className="metadata-collapse-caret">
             <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
@@ -38,7 +37,7 @@ const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title,
           {title}
         </td>
       </tr>
-      <tr className={"metadata-collapse-content-row" + (collapsed ? " metadata-collapse-collapsed" : "")}>
+      <tr className={"metadata-collapse-content-row" + rowClass}>
         <td className="metadata-collapse-content" colSpan={2}>
           <MetadataTable metadata={metadata} categoryFollows={categoryFollows} />
         </td>
@@ -47,12 +46,12 @@ const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title,
   );
 };
 
-const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows }) => {
+const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows, topLevel }) => {
   const metadataKeys = Object.keys(metadata);
   const metadataIsArray = Array.isArray(metadata);
 
   return (
-    <table className="viewer-metadata-table">
+    <table className={"viewer-metadata-table" + (topLevel ? " metadata-top-level" : "")}>
       <tbody>
         {metadataKeys.map((key, idx) => {
           const metadataValue = metadataIsArray ? metadata[idx] : metadata[key];
@@ -80,7 +79,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
 };
 
 const MetadataViewer: React.FC<{ metadata: MetadataRecord }> = ({ metadata }) => (
-  <MetadataTable metadata={metadata} categoryFollows={false} />
+  <MetadataTable metadata={metadata} categoryFollows={false} topLevel={true} />
 );
 
 export default MetadataViewer;
