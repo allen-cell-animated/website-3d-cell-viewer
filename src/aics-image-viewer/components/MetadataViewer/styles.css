@@ -5,9 +5,13 @@
   &.metadata-top-level {
     border-bottom: 1px solid #6e6e6e;
 
-    > tbody {
-      > tr.metadata-collapse-title:first-child {
+    > tbody > tr.metadata-collapse-title {
+      &:first-child {
         border-top: none;
+      }
+
+      &:nth-last-child(2).metadata-collapse-collapsed > td {
+        padding-bottom: 6px;
       }
     }
   }
