@@ -3,14 +3,15 @@ import React from "react";
 import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
 
-interface MetadataTableProps {
+type MetadataTableProps = {
   metadata: MetadataRecord;
   topLevel?: boolean;
-}
+};
 
-interface CollapsibleCategoryProps extends MetadataTableProps {
+type CollapsibleCategoryProps = {
+  metadata: MetadataRecord;
   title: string;
-}
+};
 
 const isCategory = (entry: MetadataEntry): entry is MetadataRecord => typeof entry === "object" && entry !== null;
 
