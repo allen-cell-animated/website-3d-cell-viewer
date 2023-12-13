@@ -2,6 +2,7 @@
   width: 100%;
   table-layout: fixed;
 
+  /* On the top nest level, the top border is given by the panel header, and the bottom by the containing table */
   &.metadata-top-level {
     border-bottom: 1px solid #6e6e6e;
 
@@ -20,7 +21,7 @@
     padding: 10px;
   }
 
-  /* Table rows */
+  /* ----- TABLE ROWS ----- */
   tr {
     &:nth-child(odd) {
       background-color: #3a3a3a;
@@ -34,6 +35,11 @@
         padding-bottom: 5px;
       }
 
+      /* This complex rule decides if the title should have its own bottom border, or if a line is already drawn below:
+      - If the category is not collapsed, the bottom border is the responsibility of the content row
+      - If the next sibling is a category (React determines this), they are separated by the sibling's top border
+      - If this is the last entry in its category, the parent category's longer bottom border is below
+      */
       &.metadata-collapse-collapsed.metadata-collapse-bottom-border:not(:nth-last-child(2)) {
         border-bottom: 1px solid #6e6e6e;
         > td {
@@ -51,13 +57,14 @@
         display: none;
       }
 
+      /* Same as above, but the content takes the bottom border when this category is NOT collapsed. */
       &:not(.metadata-collapse-collapsed).metadata-collapse-bottom-border:not(:last-child) {
         border-bottom: 1px solid #6e6e6e;
       }
     }
   }
 
-  /* Table cells */
+  /* ----- TABLE CELLS ----- */
   td {
     padding: 6px 0;
     overflow-wrap: break-word;
