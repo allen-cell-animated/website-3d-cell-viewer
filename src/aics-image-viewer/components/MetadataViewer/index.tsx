@@ -17,7 +17,25 @@ interface CollapsibleCategoryProps extends MetadataTableProps {
   title: string;
 }
 
-const isCategory = (val: MetadataEntry): val is MetadataRecord => typeof val === "object" && val !== null;
+const isCategory = (entry: MetadataEntry): entry is MetadataRecord => typeof entry === "object" && entry !== null;
+
+const sortCategoriesFirst = (entry: MetadataEntry): MetadataEntry => {
+  if (!isCategory(entry) || Array.isArray(entry)) {
+    return entry;
+  }
+
+  const cats: MetadataRecord = {};
+  const vals: MetadataRecord = {};
+  for (const key in entry) {
+    if (isCategory(entry[key])) {
+      cats[key] = entry[key];
+    } else {
+      vals[key] = entry[key];
+    }
+  }
+
+  return { ...cats, ...vals };
+};
 
 /** Component to hold collapse state */
 const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title, categoryFollows }) => {
@@ -54,7 +72,7 @@ const MetadataTable: React.FC<MetadataTableProps> = ({ metadata, categoryFollows
     <table className={"viewer-metadata-table" + (topLevel ? " metadata-top-level" : "")}>
       <tbody>
         {metadataKeys.map((key, idx) => {
-          const metadataValue = metadataIsArray ? metadata[idx] : metadata[key];
+          const metadataValue = sortCategoriesFirst(metadataIsArray ? metadata[idx] : metadata[key]);
 
           if (isCategory(metadataValue)) {
             // Determine whether this category is followed by another category, ignoring data hierarchy:
