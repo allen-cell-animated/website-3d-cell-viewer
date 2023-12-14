@@ -6,38 +6,47 @@
     padding: 10px;
   }
 
-  /* Table rows */
+  /* On the top nest level, the top border is given by the panel header, and the bottom by the containing table */
+  &.metadata-top-level {
+    border-bottom: 1px solid #6e6e6e;
+
+    > tbody > tr.metadata-row-collapse-title:first-child {
+      border-top: none;
+    }
+  }
+
+  /* ----- TABLE ROWS ----- */
   tr {
-    &:nth-child(odd) {
+    &:nth-child(odd):not(.metadata-row-collapse-content) {
       background-color: #3a3a3a;
     }
 
-    &.metadata-collapse-collapsed {
+    /* CATEGORY TITLE */
+    &.metadata-row-collapse-title {
+      color: white;
+      background-color: #4b4b4b !important;
+
+      /* Keeps borders aligned when this category opens and closes */
+      &:not(.metadata-collapse-collapsed) > td {
+        padding-bottom: 5px;
+      }
+    }
+
+    /* CATEGORY CONTENT */
+    &.metadata-row-collapse-content.metadata-collapse-collapsed {
       visibility: collapse;
       height: 0px;
       display: none;
     }
 
-    &.metadata-collapse-title {
-      color: white;
-      background-color: #4b4b4b;
-      &:not(.metadata-collapse-no-bottom-border) {
-        border-bottom: 1px solid #6e6e6e;
-      }
-      &.metadata-collapse-no-bottom-border > td {
-        padding-bottom: 5px;
-      }
-      &:not(:first-child) {
-        border-top: 1px solid #6e6e6e;
-      }
-    }
-
-    &.metadata-collapse-content-row {
-      background-color: #313131;
+    /* ROW BORDERS: all categories have top borders; any row which follows a category provides its bottom border */
+    tr.metadata-row-collapse-title,
+    &.metadata-row-collapse-content + tr {
+      border-top: 1px solid #6e6e6e;
     }
   }
 
-  /* Table cells */
+  /* ----- TABLE CELLS ----- */
   td {
     padding: 6px 0;
     overflow-wrap: break-word;
@@ -49,7 +58,7 @@
     }
 
     &.metadata-key {
-      padding-left: 24px;
+      padding-left: 16px;
     }
 
     &.metadata-value {
@@ -59,13 +68,12 @@
     }
 
     &:last-child {
-      padding-right: 16px;
+      padding-right: 8px;
     }
 
     &.metadata-collapse-content {
       padding: 0;
-      padding-left: 16px;
-      border-bottom: none;
+      padding-left: 24px;
     }
 
     i {
