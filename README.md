@@ -1,5 +1,7 @@
 # AICS Image Viewer
 
+For the latest stable release, please visit https://allen-cell-animated.github.io/website-3d-cell-viewer-release/
+
 This is a browser based volume viewer built with React and WebGL (Three.js).
 Volume data is provided to the core 3d viewer via a json file containing dimensions and other metadata, and texture atlases (png files containing volume slices tiled across the 2d image).
 Therefore the texture atlases must be prepared in advance before loading into this viewer.
