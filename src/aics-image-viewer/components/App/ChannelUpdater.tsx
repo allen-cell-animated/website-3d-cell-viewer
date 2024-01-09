@@ -31,18 +31,19 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
     }, [...deps, image, version]);
   };
 
-  useImageEffect(
-    (currentImage) => {
-      view3d.setVolumeChannelEnabled(currentImage, index, volumeEnabled);
-      view3d.updateLuts(currentImage);
-    },
-    [volumeEnabled]
-  );
+  // enable/disable channel can't be dependent on channel load state because it may trigger the channel to load
+  useEffect(() => {
+    if (image) {
+      view3d.setVolumeChannelEnabled(image, index, volumeEnabled);
+      view3d.updateLuts(image);
+    }
+  }, [image, volumeEnabled]);
 
-  useImageEffect(
-    (currentImage) => view3d.setVolumeChannelOptions(currentImage, index, { isosurfaceEnabled }),
-    [isosurfaceEnabled]
-  );
+  useEffect(() => {
+    if (image) {
+      view3d.setVolumeChannelOptions(image, index, { isosurfaceEnabled });
+    }
+  }, [image, isosurfaceEnabled]);
 
   useImageEffect((currentImage) => view3d.setVolumeChannelOptions(currentImage, index, { isovalue }), [isovalue]);
 
