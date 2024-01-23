@@ -2,15 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
-import {
-  createVolumeLoader,
-  LoadSpec,
-  RENDERMODE_PATHTRACE,
-  RENDERMODE_RAYMARCH,
-  View3d,
-  Volume,
-  VolumeCache,
-} from "@aics/volume-viewer";
+import { LoadSpec, LoadWorker, RENDERMODE_PATHTRACE, RENDERMODE_RAYMARCH, View3d, Volume } from "@aics/volume-viewer";
 
 import {
   AppProps,
@@ -161,9 +153,8 @@ const App: React.FC<AppProps> = (props) => {
 
   // State management /////////////////////////////////////////////////////////
 
-  // TODO is there a better API for values that never change?
   const view3d = useConstructor(() => new View3d());
-  const volumeCache = useConstructor(() => new VolumeCache(250_000_000 * 4));
+  const loadWorker = useConstructor(() => new LoadWorker(250_000_000 * 4, 8, 3));
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
@@ -429,7 +420,8 @@ const App: React.FC<AppProps> = (props) => {
 
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
-    const loader = await createVolumeLoader(fullUrl, { cache: volumeCache });
+    await loadWorker.onOpen();
+    const loader = await loadWorker.createLoader(fullUrl);
 
     const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
