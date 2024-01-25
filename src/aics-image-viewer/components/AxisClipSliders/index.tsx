@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Button, Tooltip } from "antd";
 
 import NumericInput from "../shared/NumericInput";
@@ -13,14 +13,14 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-interface SliderRowProps {
+type SliderRowProps = {
   label: string;
   vals: number[];
   valsReadout?: number[];
   max: number;
   onSlide?: (values: number[]) => void;
   onSet?: (values: number[]) => void;
-}
+};
 
 const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet = onSlide }) => {
   const isRange = vals.length > 1;
@@ -68,6 +68,63 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
         {max}
       </span>
     </span>
+  );
+};
+
+type PlaySliderRowProps = {
+  label: string;
+  val: number;
+  max: number;
+  onChange?: (values: number) => void;
+  hasEntireDimension?: boolean;
+};
+
+const PlaySliderRow: React.FC<PlaySliderRowProps> = ({ label, val, max, onChange, hasEntireDimension = false }) => {
+  const [playing, setPlaying] = useState(false);
+  const timeoutRef = useRef(0);
+  const lastStepRef = useRef(0);
+  const [valReadout, setValReadout] = useState(val);
+
+  const wrappedOnChange = useCallback(([val]: number[]) => onChange?.(val), [onChange]);
+  const wrappedSetValReadout = useCallback(([val]: number[]) => setValReadout(val), []);
+
+  const step = (): void => {
+    if (timeoutRef.current === 0) {
+      return;
+    }
+    const nextVal = val === max ? 0 : val + 1;
+    onChange?.(nextVal);
+
+    const now = Date.now();
+    window.setTimeout(step, PLAY_RATE_MS_PER_STEP - (now - lastStepRef.current));
+    lastStepRef.current = now;
+  };
+
+  const togglePlaying = (): void => {
+    setPlaying(!playing);
+    if (playing) {
+      lastStepRef.current = Date.now() - PLAY_RATE_MS_PER_STEP;
+      timeoutRef.current = window.setTimeout(step, 0);
+    } else {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = 0;
+    }
+  };
+
+  return (
+    <>
+      <SliderRow
+        label={label}
+        vals={[val]}
+        valsReadout={hasEntireDimension ? [valReadout] : undefined}
+        max={max}
+        onSlide={hasEntireDimension ? wrappedOnChange : wrappedSetValReadout}
+        onSet={hasEntireDimension ? undefined : wrappedOnChange}
+      />
+      <Tooltip placement="top" title="Play through sequence">
+        <Button className="slider-play-button" onClick={togglePlaying} icon={playing ? "pause" : "caret-right"} />
+      </Tooltip>
+    </>
   );
 };
 
