@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Button, Tooltip } from "antd";
 
 import NumericInput from "../shared/NumericInput";
@@ -13,16 +13,27 @@ import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 const AXES: AxisName[] = ["x", "y", "z"];
 const PLAY_RATE_MS_PER_STEP = 125;
 
-interface SliderRowProps {
+type SliderRowProps = {
   label: string;
   vals: number[];
   valsReadout?: number[];
   max: number;
   onSlide?: (values: number[]) => void;
   onSet?: (values: number[]) => void;
-}
+  onStart?: () => void;
+  onEnd?: () => void;
+};
 
-const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet = onSlide }) => {
+const SliderRow: React.FC<SliderRowProps> = ({
+  label,
+  vals,
+  valsReadout = vals,
+  max,
+  onSlide,
+  onSet = onSlide,
+  onStart,
+  onEnd,
+}) => {
   const isRange = vals.length > 1;
 
   return (
@@ -50,6 +61,8 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
           format={{ to: Math.round, from: parseInt }}
           onSlide={onSlide}
           onSet={onSet}
+          onStart={onStart}
+          onEnd={onEnd}
         />
       </span>
       <span className="slider-values">
@@ -68,6 +81,56 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
         {max}
       </span>
     </span>
+  );
+};
+
+type PlaySliderRowProps = {
+  label: string;
+  val: number;
+  max: number;
+  playing: boolean;
+  entireAxisLoaded?: boolean;
+  onPlayPause: (play: boolean) => void;
+  onChange?: (values: number) => void;
+  onStart?: () => void;
+  onEnd?: () => void;
+};
+
+const PlaySliderRow: React.FC<PlaySliderRowProps> = ({
+  label,
+  val,
+  max,
+  playing,
+  entireAxisLoaded,
+  onChange,
+  onPlayPause,
+  onStart,
+  onEnd,
+}) => {
+  const [valReadout, setValReadout] = useState(val);
+
+  const wrappedOnChange = useCallback(([val]: number[]) => onChange?.(val), [onChange]);
+  const wrappedSetValReadout = useCallback(([val]: number[]) => setValReadout(val), []);
+  return (
+    <>
+      <SliderRow
+        label={label}
+        vals={[val]}
+        valsReadout={entireAxisLoaded ? [valReadout] : undefined}
+        max={max}
+        onSlide={entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
+        onSet={entireAxisLoaded ? undefined : wrappedOnChange}
+        onStart={onStart}
+        onEnd={onEnd}
+      />
+      <Tooltip placement="top" title="Play through sequence">
+        <Button
+          className="slider-play-button"
+          onClick={() => onPlayPause(!playing)}
+          icon={playing ? "pause" : "caret-right"}
+        />
+      </Tooltip>
+    </>
   );
 };
 
