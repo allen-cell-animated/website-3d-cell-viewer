@@ -705,6 +705,9 @@ const App: React.FC<AppProps> = (props) => {
           axismax = isOrthoAxis ? slice + oneSlice : 1.0;
           if (axis === "z" && viewerSettings.viewMode === ViewMode.xy) {
             view3d.setZSlice(currentImage, Math.floor(slice * currentImage.imageInfo.volumeSize.z));
+            if (!currentImage.isLoaded()) {
+              setImageLoaded(false);
+            }
           }
         }
         // view3d wants the coordinates in the -0.5 to 0.5 range
@@ -747,7 +750,6 @@ const App: React.FC<AppProps> = (props) => {
           showControls={showControls}
           // image state
           imageName={image?.name}
-          imageLoaded={imageLoaded}
           hasImage={!!image}
           pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
           channelDataChannels={image?.channels}
