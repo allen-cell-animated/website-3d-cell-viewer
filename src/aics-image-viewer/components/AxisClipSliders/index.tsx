@@ -96,38 +96,28 @@ type PlaySliderRowProps = {
   onEnd?: () => void;
 };
 
-const PlaySliderRow: React.FC<PlaySliderRowProps> = ({
-  label,
-  val,
-  max,
-  playing,
-  entireAxisLoaded,
-  onChange,
-  onPlayPause,
-  onStart,
-  onEnd,
-}) => {
-  const [valReadout, setValReadout] = useState(val);
+const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
+  const [valReadout, setValReadout] = useState(props.val);
 
-  const wrappedOnChange = useCallback(([val]: number[]) => onChange?.(val), [onChange]);
+  const wrappedOnChange = useCallback(([val]: number[]) => props.onChange?.(val), [props.onChange]);
   const wrappedSetValReadout = useCallback(([val]: number[]) => setValReadout(val), []);
   return (
     <>
       <SliderRow
-        label={label}
-        vals={[val]}
-        valsReadout={entireAxisLoaded ? [valReadout] : undefined}
-        max={max}
-        onSlide={entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
-        onSet={entireAxisLoaded ? undefined : wrappedOnChange}
-        onStart={onStart}
-        onEnd={onEnd}
+        label={props.label}
+        vals={[props.val]}
+        valsReadout={props.entireAxisLoaded ? [valReadout] : undefined}
+        max={props.max}
+        onSlide={props.entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
+        onSet={props.entireAxisLoaded ? undefined : wrappedOnChange}
+        onStart={props.onStart}
+        onEnd={props.onEnd}
       />
       <Tooltip placement="top" title="Play through sequence">
         <Button
           className="slider-play-button"
-          onClick={() => onPlayPause(!playing)}
-          icon={playing ? "pause" : "caret-right"}
+          onClick={() => props.onPlayPause(!props.playing)}
+          icon={props.playing ? "pause" : "caret-right"}
         />
       </Tooltip>
     </>
