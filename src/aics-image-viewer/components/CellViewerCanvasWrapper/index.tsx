@@ -21,6 +21,8 @@ interface ViewerWrapperProps {
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
+  imageLoaded: boolean;
+  checkImageLoaded?: () => boolean;
   numTimesteps: number;
   time: number;
   showControls: {
@@ -86,6 +88,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
               slices={slices}
               numTimesteps={numTimesteps}
               time={time}
+              imageLoaded={this.props.imageLoaded}
+              checkImageLoaded={this.props.checkImageLoaded}
             />
           )}
         </BottomPanel>

@@ -806,6 +806,8 @@ const App: React.FC<AppProps> = (props) => {
             region={viewerSettings.region}
             slices={viewerSettings.slice}
             time={viewerSettings.time}
+            checkImageLoaded={image?.isLoaded}
+            imageLoaded={imageLoaded}
             appHeight={props.appHeight}
             showControls={showControls}
             changeViewerSetting={changeViewerSetting}
