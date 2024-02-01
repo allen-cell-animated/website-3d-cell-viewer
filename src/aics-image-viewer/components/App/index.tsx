@@ -3,13 +3,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import {
-  createVolumeLoader,
   LoadSpec,
+  VolumeLoaderContext,
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
   View3d,
   Volume,
-  VolumeCache,
 } from "@aics/volume-viewer";
 
 import {
@@ -44,6 +43,9 @@ import {
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
+  CACHE_MAX_SIZE,
+  QUEUE_MAX_SIZE,
+  QUEUE_MAX_LOW_PRIORITY_SIZE,
 } from "../../shared/constants";
 
 import ChannelUpdater from "./ChannelUpdater";
@@ -161,9 +163,10 @@ const App: React.FC<AppProps> = (props) => {
 
   // State management /////////////////////////////////////////////////////////
 
-  // TODO is there a better API for values that never change?
   const view3d = useConstructor(() => new View3d());
-  const volumeCache = useConstructor(() => new VolumeCache(250_000_000 * 4));
+  const loadContext = useConstructor(
+    () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
+  );
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
@@ -429,7 +432,8 @@ const App: React.FC<AppProps> = (props) => {
 
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
-    const loader = await createVolumeLoader(fullUrl, { cache: volumeCache });
+    await loadContext.onOpen();
+    const loader = await loadContext.createLoader(fullUrl);
 
     const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel

@@ -21,6 +21,10 @@ export const // Control panel will automatically close if viewport is less than 
   OTHER_CHANNEL_KEY = "Other",
   SINGLE_GROUP_CHANNEL_KEY = "Channels";
 
+export const CACHE_MAX_SIZE = 1_000_000_000;
+export const QUEUE_MAX_SIZE = 10;
+export const QUEUE_MAX_LOW_PRIORITY_SIZE = 4;
+
 export const PRESET_COLORS_1: ColorArray[] = [
   [190, 68, 171],
   [189, 211, 75],
