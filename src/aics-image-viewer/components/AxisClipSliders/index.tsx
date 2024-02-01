@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Tooltip } from "antd";
 
 import NumericInput from "../shared/NumericInput";
@@ -9,9 +9,9 @@ import "./styles.css";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
 import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
+import PlayControls from "../../shared/utils/PlayControls";
 
 const AXES: AxisName[] = ["x", "y", "z"];
-const PLAY_RATE_MS_PER_STEP = 125;
 
 type SliderRowProps = {
   label: string;
@@ -132,8 +132,8 @@ type AxisClipSlidersProps = {
   slices: PerAxis<number>;
   numTimesteps: number;
   time: number;
-  checkImageLoaded?: () => boolean;
-  imageLoaded: boolean;
+  playingAxis: AxisName | "t" | null;
+  playControls: PlayControls;
 };
 
 // interface AxisClipSlidersState {
@@ -308,17 +308,17 @@ type AxisClipSlidersProps = {
 // }
 
 const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
-  const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
+  // const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
 
-  const playTimeoutIdRef = useRef<number>(0);
-  const playWaitingForLoadRef = useRef(false);
-  const handleHeldRef = useRef(false);
+  // const playTimeoutIdRef = useRef<number>(0);
+  // const playWaitingForLoadRef = useRef(false);
+  // const handleHeldRef = useRef(false);
 
   const activeAxis = activeAxisMap[props.mode];
 
   const updateRegion = (axis: AxisName, minval: number, maxval: number): void => {
-    if (!handleHeldRef.current || playingAxis !== axis) {
-      pause();
+    if (!props.playControls.playHolding || props.playingAxis !== axis) {
+      props.playControls.pause();
     }
 
     const { changeViewerSetting, numSlices, region } = props;
@@ -330,83 +330,83 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   const updateSlice = (axis: AxisName, val: number): void => {
-    if (!handleHeldRef.current || playingAxis !== axis) {
-      pause();
+    if (!props.playControls.playHolding || props.playingAxis !== axis) {
+      props.playControls.pause();
     }
 
     props.changeViewerSetting("slice", { ...props.slices, [axis]: val / props.numSlices[axis] });
   };
 
-  const pause = (willResume = false): void => {
-    console.log("pause");
-    window.clearTimeout(playTimeoutIdRef.current);
-    playTimeoutIdRef.current = 0;
-    playWaitingForLoadRef.current = false;
-    if (playingAxis !== null && !willResume) {
-      setPlayingAxis(null);
-    }
-  };
-  useEffect(pause, [props.mode, ...Object.values(props.numSlices)]);
+  // const pause = (willResume = false): void => {
+  //   console.log("pause");
+  //   window.clearTimeout(playTimeoutIdRef.current);
+  //   playTimeoutIdRef.current = 0;
+  //   playWaitingForLoadRef.current = false;
+  //   if (playingAxis !== null && !willResume) {
+  //     setPlayingAxis(null);
+  //   }
+  // };
+  useEffect(() => props.playControls.pause(), [props.mode, ...Object.values(props.numSlices)]);
 
-  const playStep = (axis: AxisName | "t", lastVal?: number): void => {
-    console.log(props.checkImageLoaded?.());
-    if (!props.checkImageLoaded?.()) {
-      playWaitingForLoadRef.current = true;
-      return;
-    }
+  // const playStep = (axis: AxisName | "t", lastVal?: number): void => {
+  //   console.log(props.checkImageLoaded?.());
+  //   if (!props.checkImageLoaded?.()) {
+  //     playWaitingForLoadRef.current = true;
+  //     return;
+  //   }
 
-    let current: number;
-    if (axis === "t") {
-      current = lastVal ?? props.time;
-      props.changeViewerSetting("time", (current + 1) % props.numTimesteps);
-    } else {
-      const max = props.numSlices[axis];
-      current = lastVal ?? props.slices[axis] * max;
-      props.changeViewerSetting("slice", { ...props.slices, [axis]: ((current + 1) % max) / max });
-    }
+  //   let current: number;
+  //   if (axis === "t") {
+  //     current = lastVal ?? props.time;
+  //     props.changeViewerSetting("time", (current + 1) % props.numTimesteps);
+  //   } else {
+  //     const max = props.numSlices[axis];
+  //     current = lastVal ?? props.slices[axis] * max;
+  //     props.changeViewerSetting("slice", { ...props.slices, [axis]: ((current + 1) % max) / max });
+  //   }
 
-    playTimeoutIdRef.current = window.setTimeout(() => playStep(axis, current + 1), PLAY_RATE_MS_PER_STEP);
-  };
+  //   playTimeoutIdRef.current = window.setTimeout(() => playStep(axis, current + 1), PLAY_RATE_MS_PER_STEP);
+  // };
 
-  useEffect(() => {
-    console.log("effect");
-    if (props.imageLoaded && playWaitingForLoadRef.current) {
-      playWaitingForLoadRef.current = false;
-      if (playingAxis) {
-        playStep(playingAxis);
-      }
-    }
-  }, [props.imageLoaded]);
+  // useEffect(() => {
+  //   console.log("effect");
+  //   if (props.imageLoaded && playWaitingForLoadRef.current) {
+  //     playWaitingForLoadRef.current = false;
+  //     if (playingAxis) {
+  //       playStep(playingAxis);
+  //     }
+  //   }
+  // }, [props.imageLoaded]);
 
-  const play = (axis: AxisName | "t"): void => {
-    if (playingAxis !== null) {
-      pause(true);
-    }
-    setPlayingAxis(axis);
-    playStep(axis);
-  };
+  // const play = (axis: AxisName | "t"): void => {
+  //   if (playingAxis !== null) {
+  //     pause(true);
+  //   }
+  //   setPlayingAxis(axis);
+  //   playStep(axis);
+  // };
 
   const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
     if (willPlay) {
       console.log("play from button click");
-      play(axis);
+      props.playControls.play(axis);
     } else {
-      pause();
+      props.playControls.pause();
     }
   };
 
-  const handleSlideStart = (axis: AxisName | "t"): void => {
-    handleHeldRef.current = true;
-    pause(axis !== playingAxis);
-  };
+  // const handleSlideStart = (axis: AxisName | "t"): void => {
+  //   handleHeldRef.current = true;
+  //   pause(axis !== playingAxis);
+  // };
 
-  const handleSlideEnd = (): void => {
-    handleHeldRef.current = false;
-    if (playingAxis) {
-      console.log("play from slide end");
-      play(playingAxis);
-    }
-  };
+  // const handleSlideEnd = (): void => {
+  //   handleHeldRef.current = false;
+  //   if (playingAxis) {
+  //     console.log("play from slide end");
+  //     play(playingAxis);
+  //   }
+  // };
 
   const create2dAxisSlider = (axis: AxisName): React.ReactNode => (
     <div key={axis + props.numSlices[axis]} className={`slider-row slider-${axis}`}>
@@ -415,8 +415,9 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
         val={Math.round(props.slices[axis] * props.numSlices[axis])}
         max={props.numSlices[axis] - 1}
         onChange={(val) => updateSlice(axis, val)}
-        onEnd={handleSlideEnd}
-        playing={playingAxis === axis}
+        onStart={() => props.playControls.startHold(axis)}
+        onEnd={() => props.playControls.endHold()}
+        playing={props.playingAxis === axis}
         onPlayPause={(willPlay) => handlePlayPause(axis, willPlay)}
       />
     </div>
@@ -433,8 +434,8 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
           vals={[Math.round(region[0] * numSlices), Math.round(region[1] * numSlices)]}
           max={numSlices - 1}
           onSlide={(values) => updateRegion(axis, values[0], values[1])}
-          onStart={() => handleSlideStart(axis)}
-          onEnd={handleSlideEnd}
+          onStart={() => props.playControls.startHold(axis)}
+          onEnd={() => props.playControls.endHold()}
         />
       </div>
     );
@@ -458,11 +459,11 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
                 label={""}
                 val={props.time}
                 max={props.numTimesteps}
-                playing={playingAxis === "t"}
+                playing={props.playingAxis === "t"}
                 onPlayPause={(willPlay) => handlePlayPause("t", willPlay)}
                 onChange={(time) => props.changeViewerSetting("time", time)}
-                onStart={() => handleSlideStart("t")}
-                onEnd={handleSlideEnd}
+                onStart={() => props.playControls.startHold("t")}
+                onEnd={() => props.playControls.endHold()}
               />
             </div>
           </span>

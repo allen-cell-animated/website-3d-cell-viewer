@@ -45,6 +45,7 @@ import {
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
 } from "../../shared/constants";
+import PlayControls from "../../shared/utils/PlayControls";
 
 import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
@@ -201,6 +202,10 @@ const App: React.FC<AppProps> = (props) => {
   // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
+  const playControls = useConstructor(() => new PlayControls());
+  const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
+  playControls.onPlayingAxisChanged = setPlayingAxis;
+
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
   const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
@@ -315,6 +320,7 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
+      playControls.onImageLoaded();
     }
   };
 
@@ -405,6 +411,18 @@ const App: React.FC<AppProps> = (props) => {
 
     setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
+
+    playControls.stepAxis = (axis: AxisName | "t") => {
+      if (axis === "t") {
+        changeViewerSetting("time", (getViewerSettings().time + 1) % aimg.imageInfo.times);
+      } else {
+        const max = aimg.imageInfo.volumeSize[axis];
+        const current = getViewerSettings().slice[axis] * max;
+        console.log(max, current);
+        changeViewerSetting("slice", { ...getViewerSettings().slice, [axis]: ((current + 1) % max) / max });
+      }
+    };
+    playControls.getVolumeIsLoaded = () => aimg.isLoaded();
 
     view3d.updateActiveChannels(aimg);
   };
@@ -806,8 +824,8 @@ const App: React.FC<AppProps> = (props) => {
             region={viewerSettings.region}
             slices={viewerSettings.slice}
             time={viewerSettings.time}
-            checkImageLoaded={image?.isLoaded}
-            imageLoaded={imageLoaded}
+            playControls={playControls}
+            playingAxis={playingAxis}
             appHeight={props.appHeight}
             showControls={showControls}
             changeViewerSetting={changeViewerSetting}

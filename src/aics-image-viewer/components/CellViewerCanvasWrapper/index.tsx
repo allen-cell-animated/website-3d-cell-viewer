@@ -3,9 +3,10 @@ import { View3d } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import { PerAxis, Styles } from "../../shared/types";
+import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
+import PlayControls from "../../shared/utils/PlayControls";
 
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
@@ -21,8 +22,8 @@ interface ViewerWrapperProps {
   numSlices: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
-  imageLoaded: boolean;
-  checkImageLoaded?: () => boolean;
+  playControls: PlayControls;
+  playingAxis: AxisName | "t" | null;
   numTimesteps: number;
   time: number;
   showControls: {
@@ -88,8 +89,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
               slices={slices}
               numTimesteps={numTimesteps}
               time={time}
-              imageLoaded={this.props.imageLoaded}
-              checkImageLoaded={this.props.checkImageLoaded}
+              playControls={this.props.playControls}
+              playingAxis={this.props.playingAxis}
             />
           )}
         </BottomPanel>
