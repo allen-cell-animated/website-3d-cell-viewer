@@ -54,7 +54,8 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   renderOverlay(): React.ReactNode {
-    const spinner = this.props.loadingImage ? (
+    const showSpinner = this.props.loadingImage && !this.props.playingAxis;
+    const spinner = showSpinner ? (
       <div style={STYLES.noImage}>
         <Icon type="loading" theme="outlined" style={{ fontSize: 60, zIndex: 1000 }} />
       </div>

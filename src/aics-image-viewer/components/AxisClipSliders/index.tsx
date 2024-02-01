@@ -388,7 +388,6 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
 
   const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
     if (willPlay) {
-      console.log("play from button click");
       props.playControls.play(axis);
     } else {
       props.playControls.pause();
@@ -454,7 +453,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
         <span className="slider-group">
           <h4 className="slider-group-title">Time</h4>
           <span className="slider-group-rows">
-            <div className="slider-row">
+            <div className="slider-row slider-t">
               <PlaySliderRow
                 label={""}
                 val={props.time}

@@ -421,7 +421,6 @@ const App: React.FC<AppProps> = (props) => {
       } else {
         const max = aimg.imageInfo.volumeSize[axis];
         const current = getViewerSettings().slice[axis] * max;
-        console.log(max, current);
         changeViewerSetting("slice", { ...getViewerSettings().slice, [axis]: ((current + 1) % max) / max });
       }
     };

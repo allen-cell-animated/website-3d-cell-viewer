@@ -6,7 +6,7 @@
   --w-axis-slider: 480px;
   --w-name: 10px;
   --w-values-3d: 160px;
-  --w-values-2d: 100px;
+  --w-values-2d: 101px;
   --w-play-button: 28px;
 
   --color-x: #ff4d4d;
@@ -70,6 +70,12 @@
       }
       .noUi-handle {
         background-color: var(--color-z) !important;
+      }
+    }
+
+    &.slider-t {
+      .slider-values {
+        flex: 0 0 var(--w-values-2d);
       }
     }
   }
