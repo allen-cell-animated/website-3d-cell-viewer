@@ -43,6 +43,9 @@ import {
   INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
+  CACHE_MAX_SIZE,
+  QUEUE_MAX_SIZE,
+  QUEUE_MAX_LOW_PRIORITY_SIZE,
 } from "../../shared/constants";
 
 import ChannelUpdater from "./ChannelUpdater";
@@ -161,7 +164,9 @@ const App: React.FC<AppProps> = (props) => {
   // State management /////////////////////////////////////////////////////////
 
   const view3d = useConstructor(() => new View3d());
-  const loadContext = useConstructor(() => new VolumeLoaderContext(250_000_000 * 4, 8, 3));
+  const loadContext = useConstructor(
+    () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
+  );
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
