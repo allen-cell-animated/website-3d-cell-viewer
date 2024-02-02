@@ -82,7 +82,7 @@
 /******/ 	__webpack_require__.x = () => {
 /******/ 		// Load entry module and return exports
 /******/ 		// This entry module depends on other loaded chunks and execution need to be delayed
-/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_aics_volume-viewer_es_workers_FetchTiffWorker_js"], () => (__webpack_require__("./node_modules/@aics/volume-viewer/es/workers/FetchTiffWorker.js")))
+/******/ 		var __webpack_exports__ = __webpack_require__.O(undefined, ["vendors-node_modules_babel_runtime_regenerator_index_js-node_modules_babel_runtime_helpers_es-31f4f7","vendors-node_modules_aics_volume-viewer_es_workers_VolumeLoadWorker_js"], () => (__webpack_require__("./node_modules/@aics/volume-viewer/es/workers/VolumeLoadWorker.js")))
 /******/ 		__webpack_exports__ = __webpack_require__.O(__webpack_exports__);
 /******/ 		return __webpack_exports__;
 /******/ 	};
@@ -228,7 +228,7 @@
 /******/ 	
 /******/ 	/* webpack/runtime/importScripts chunk loading */
 /******/ 	(() => {
-/******/ 		// no baseURI
+/******/ 		__webpack_require__.b = self.location + "";
 /******/ 		
 /******/ 		// object to store loaded chunks
 /******/ 		// "1" means "already loaded"
@@ -271,7 +271,10 @@
 /******/ 	(() => {
 /******/ 		var next = __webpack_require__.x;
 /******/ 		__webpack_require__.x = () => {
-/******/ 			return __webpack_require__.e("vendors-node_modules_aics_volume-viewer_es_workers_FetchTiffWorker_js").then(next);
+/******/ 			return Promise.all([
+/******/ 				__webpack_require__.e("vendors-node_modules_babel_runtime_regenerator_index_js-node_modules_babel_runtime_helpers_es-31f4f7"),
+/******/ 				__webpack_require__.e("vendors-node_modules_aics_volume-viewer_es_workers_VolumeLoadWorker_js")
+/******/ 			]).then(next);
 /******/ 		};
 /******/ 	})();
 /******/ 	
