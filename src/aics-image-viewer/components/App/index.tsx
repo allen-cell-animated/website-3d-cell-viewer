@@ -171,14 +171,9 @@ const App: React.FC<AppProps> = (props) => {
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
-  const getNumberOfSlices = (): PerAxis<number> => {
-    if (image) {
-      const { x, y, z } = image.imageInfo.volumeSize;
-      return { x, y, z };
-    }
-    return { x: 0, y: 0, z: 0 };
-  };
-  const numberOfTimesteps = image?.imageInfo.times || 1;
+  const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
+  const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
+  const numTimesteps = image?.imageInfo.times ?? 1;
 
   // State for image loading/reloading
 
@@ -824,8 +819,9 @@ const App: React.FC<AppProps> = (props) => {
             viewMode={viewerSettings.viewMode}
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
-            numSlices={getNumberOfSlices()}
-            numTimesteps={numberOfTimesteps}
+            numSlices={numSlices}
+            numSlicesLoaded={numSlicesLoaded}
+            numTimesteps={numTimesteps}
             region={viewerSettings.region}
             slices={viewerSettings.slice}
             time={viewerSettings.time}

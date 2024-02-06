@@ -112,7 +112,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
       <SliderRow
         label={props.label}
         vals={[props.val]}
-        valsReadout={props.entireAxisLoaded ? [valReadout] : undefined}
+        valsReadout={props.entireAxisLoaded ? undefined : [valReadout]}
         max={props.max}
         onSlide={props.entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
         onChange={props.entireAxisLoaded ? undefined : wrappedOnChange}
@@ -134,6 +134,7 @@ type AxisClipSlidersProps = {
   mode: ViewMode;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
+  numSlicesLoaded: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
   numTimesteps: number;
@@ -184,27 +185,33 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
     }
   };
 
-  const create2dAxisSlider = (axis: AxisName): React.ReactNode => (
-    <div key={axis + props.numSlices[axis]} className={`slider-row slider-${axis}`}>
-      <PlaySliderRow
-        label={axis.toUpperCase()}
-        val={Math.round(props.slices[axis] * props.numSlices[axis])}
-        max={props.numSlices[axis]}
-        onChange={(val) => updateSlice(axis, val)}
-        onStart={() => props.playControls.startHold(axis)}
-        onEnd={() => props.playControls.endHold()}
-        playing={props.playingAxis === axis}
-        onPlayPause={(willPlay) => handlePlayPause(axis, willPlay)}
-      />
-    </div>
-  );
+  const create2dAxisSlider = (axis: AxisName): React.ReactNode => {
+    const numSlices = props.numSlices[axis];
+    const numSlicesLoaded = props.numSlicesLoaded[axis];
+
+    return (
+      <div key={axis + numSlices + numSlicesLoaded} className={`slider-row slider-${axis}`}>
+        <PlaySliderRow
+          label={axis.toUpperCase()}
+          val={Math.round(props.slices[axis] * numSlices)}
+          max={numSlices}
+          onChange={(val) => updateSlice(axis, val)}
+          onStart={() => props.playControls.startHold(axis)}
+          onEnd={() => props.playControls.endHold()}
+          playing={props.playingAxis === axis}
+          onPlayPause={(willPlay) => handlePlayPause(axis, willPlay)}
+          entireAxisLoaded={numSlices === numSlicesLoaded}
+        />
+      </div>
+    );
+  };
 
   const create3dAxisSlider = (axis: AxisName): React.ReactNode => {
     const numSlices = props.numSlices[axis];
     const region = props.region[axis];
 
     return (
-      <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
+      <div key={axis + numSlices + "3d"} className={`slider-row slider-${axis}`}>
         <SliderRow
           label={axis.toUpperCase()}
           vals={[Math.round(region[0] * numSlices), Math.round(region[1] * numSlices)]}

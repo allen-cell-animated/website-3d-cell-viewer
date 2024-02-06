@@ -20,6 +20,7 @@ interface ViewerWrapperProps {
   appHeight: string;
   hasImage: boolean;
   numSlices: PerAxis<number>;
+  numSlicesLoaded: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
   playControls: PlayControls;
@@ -87,6 +88,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
+              numSlicesLoaded={this.props.numSlicesLoaded}
               region={region}
               slices={slices}
               numTimesteps={numTimesteps}
