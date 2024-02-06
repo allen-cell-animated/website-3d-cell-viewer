@@ -104,20 +104,30 @@ type PlaySliderRowProps = {
 const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
   // In partially-loaded axes, stores the displayed value of the slider while the user is sliding it
   const [valReadout, setValReadout] = useState(props.val);
+  const [sliderHeld, setSliderHeld] = useState(false);
 
   const wrappedOnChange = useCallback(([val]: number[]) => props.onChange?.(val), [props.onChange]);
   const wrappedSetValReadout = useCallback(([val]: number[]) => setValReadout(val), []);
+  const wrappedOnStart = useCallback((): void => {
+    setValReadout(props.val);
+    setSliderHeld(true);
+    props.onStart?.();
+  }, [props.onStart]);
+  const wrappedOnEnd = useCallback((): void => {
+    setSliderHeld(false);
+    props.onEnd?.();
+  }, [props.onEnd]);
   return (
     <>
       <SliderRow
         label={props.label}
         vals={[props.val]}
-        valsReadout={props.entireAxisLoaded ? undefined : [valReadout]}
+        valsReadout={props.entireAxisLoaded || !sliderHeld ? undefined : [valReadout]}
         max={props.max}
         onSlide={props.entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
         onChange={props.entireAxisLoaded ? undefined : wrappedOnChange}
-        onStart={props.onStart}
-        onEnd={props.onEnd}
+        onStart={wrappedOnStart}
+        onEnd={wrappedOnEnd}
       />
       <Tooltip placement="top" title="Play through sequence">
         <Button
