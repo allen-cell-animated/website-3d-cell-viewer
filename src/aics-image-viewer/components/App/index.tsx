@@ -47,7 +47,7 @@ import {
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
 } from "../../shared/constants";
-import PlayControls from "../../shared/utils/layControls";
+import PlayControls from "../../shared/utils/playControls";
 
 import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";

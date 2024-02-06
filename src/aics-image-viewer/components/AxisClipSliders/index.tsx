@@ -9,7 +9,7 @@ import "./styles.css";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
 import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
-import PlayControls from "../../shared/utils/layControls";
+import PlayControls from "../../shared/utils/playControls";
 
 const AXES: AxisName[] = ["x", "y", "z"];
 
