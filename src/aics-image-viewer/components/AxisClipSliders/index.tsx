@@ -24,6 +24,7 @@ type SliderRowProps = {
   onEnd?: () => void;
 };
 
+/** A single slider row, with a slider, one or two spinbox inputs, and a max value */
 const SliderRow: React.FC<SliderRowProps> = ({
   label,
   vals,
@@ -99,7 +100,9 @@ type PlaySliderRowProps = {
   onEnd?: () => void;
 };
 
+/** Wrapper around `SliderRow` that adds a play button and accounts for the case where not all of an axis is loaded */
 const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
+  // In partially-loaded axes, stores the displayed value of the slider while the user is sliding it
   const [valReadout, setValReadout] = useState(props.val);
 
   const wrappedOnChange = useCallback(([val]: number[]) => props.onChange?.(val), [props.onChange]);
