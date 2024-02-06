@@ -142,10 +142,15 @@ type AxisClipSlidersProps = {
 const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   const activeAxis = activeAxisMap[props.mode];
 
-  const updateRegion = (axis: AxisName, minval: number, maxval: number): void => {
+  const pauseOnInput = (axis: AxisName | "t"): void => {
+    // Pause on slider input unless user is scrubbing along the playing axis (playback is held while this is happening)
     if (!props.playControls.playHolding || props.playingAxis !== axis) {
       props.playControls.pause();
     }
+  };
+
+  const updateRegion = (axis: AxisName, minval: number, maxval: number): void => {
+    pauseOnInput(axis);
 
     const { changeViewerSetting, numSlices, region } = props;
     // get a value from 0-1
@@ -156,20 +161,12 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   const updateSlice = (axis: AxisName, slice: number): void => {
-    // Do not pause if the user is scrubbing along the currently playing axis (play is held while this is happening)
-    if (!props.playControls.playHolding || props.playingAxis !== axis) {
-      props.playControls.pause();
-    }
-
+    pauseOnInput(axis);
     props.changeViewerSetting("slice", { ...props.slices, [axis]: slice / props.numSlices[axis] });
   };
 
   const updateTime = (time: number): void => {
-    // Do not pause if time is being scrubbed while playing (play is held)
-    if (!props.playControls.playHolding || props.playingAxis !== "t") {
-      props.playControls.pause();
-    }
-
+    pauseOnInput("t");
     props.changeViewerSetting("time", time);
   };
 
