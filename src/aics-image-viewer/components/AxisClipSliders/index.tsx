@@ -155,13 +155,22 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
     changeViewerSetting("region", { ...region, [axis]: [start, end] });
   };
 
-  const updateSlice = (axis: AxisName, val: number): void => {
-    // Do not pause if the user is scrubbing along the currently playing axis (play controls are temporarily paused)
+  const updateSlice = (axis: AxisName, slice: number): void => {
+    // Do not pause if the user is scrubbing along the currently playing axis (play is held while this is happening)
     if (!props.playControls.playHolding || props.playingAxis !== axis) {
       props.playControls.pause();
     }
 
-    props.changeViewerSetting("slice", { ...props.slices, [axis]: val / props.numSlices[axis] });
+    props.changeViewerSetting("slice", { ...props.slices, [axis]: slice / props.numSlices[axis] });
+  };
+
+  const updateTime = (time: number): void => {
+    // Do not pause if time is being scrubbed while playing (play is held)
+    if (!props.playControls.playHolding || props.playingAxis !== "t") {
+      props.playControls.pause();
+    }
+
+    props.changeViewerSetting("time", time);
   };
 
   // Pause when view mode or volume size has changed
@@ -228,7 +237,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
                 max={props.numTimesteps}
                 playing={props.playingAxis === "t"}
                 onPlayPause={(willPlay) => handlePlayPause("t", willPlay)}
-                onChange={(time) => props.changeViewerSetting("time", time)}
+                onChange={(time) => updateTime(time)}
                 onStart={() => props.playControls.startHold("t")}
                 onEnd={() => props.playControls.endHold()}
               />
