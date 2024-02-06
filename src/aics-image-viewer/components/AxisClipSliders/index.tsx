@@ -104,6 +104,7 @@ type PlaySliderRowProps = {
 const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
   // In partially-loaded axes, stores the displayed value of the slider while the user is sliding it
   const [valReadout, setValReadout] = useState(props.val);
+  // Tracks when the user is sliding the slider and `valReadout` may have to sub in for props
   const [sliderHeld, setSliderHeld] = useState(false);
 
   const wrappedOnChange = useCallback(([val]: number[]) => props.onChange?.(val), [props.onChange]);
@@ -117,6 +118,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
     setSliderHeld(false);
     props.onEnd?.();
   }, [props.onEnd]);
+
   return (
     <>
       <SliderRow
