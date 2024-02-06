@@ -59,7 +59,7 @@ export default class PlayControls {
 
   startHold(axis: PlayAxisName): void {
     this.playHolding = true;
-    this.pause(axis !== this.playingAxis);
+    this.pause(axis === this.playingAxis);
   }
 
   endHold(): void {
