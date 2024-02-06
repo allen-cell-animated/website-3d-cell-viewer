@@ -205,6 +205,8 @@ const App: React.FC<AppProps> = (props) => {
   // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
 
+  // `PlayControls` manages playing through time and spatial axes, which isn't practical with "pure" React
+  // Playback state goes here, but the play/pause buttons that mainly control this class are down in `AxisClipSliders`
   const playControls = useConstructor(() => new PlayControls());
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = setPlayingAxis;

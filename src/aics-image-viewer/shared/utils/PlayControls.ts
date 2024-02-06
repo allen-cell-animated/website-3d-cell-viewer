@@ -33,6 +33,7 @@ export default class PlayControls {
     this.playTimeoutId = window.setTimeout(this.playStep.bind(this), PLAY_STEP_INTERVAL);
   }
 
+  /** Call whenever new data is loaded to resume playback if it was paused for data loading. */
   onImageLoaded(): void {
     if (this.playWaitingForLoad) {
       this.playWaitingForLoad = false;
@@ -40,6 +41,10 @@ export default class PlayControls {
     }
   }
 
+  /**
+   * Pause playback on the currently playing axis.
+   * `willResume` marks this as a temporary suspension, e.g. while the user is scrubbing along the playing axis.
+   */
   pause(willResume = false): void {
     window.clearTimeout(this.playTimeoutId);
     this.playTimeoutId = 0;
@@ -50,6 +55,7 @@ export default class PlayControls {
     }
   }
 
+  /** Begin playback on `axis`. */
   play(axis: PlayAxisName): void {
     if (this.playingAxis !== null) {
       this.pause(true);
@@ -58,11 +64,13 @@ export default class PlayControls {
     this.playStep();
   }
 
+  /** If `axis` is currently playing, begin a temporary hold on playback while other input is pending. */
   startHold(axis: PlayAxisName): void {
     this.playHolding = true;
     this.pause(axis === this.playingAxis);
   }
 
+  /** If a playback hold is active, end it. */
   endHold(): void {
     if (this.playHolding) {
       this.playHolding = false;

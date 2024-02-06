@@ -54,6 +54,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   renderOverlay(): React.ReactNode {
+    // Don't show spinner during playback - we may be constantly loading new data, it'll block the view!
     const showSpinner = this.props.loadingImage && !this.props.playingAxis;
     const spinner = showSpinner ? (
       <div style={STYLES.noImage}>
