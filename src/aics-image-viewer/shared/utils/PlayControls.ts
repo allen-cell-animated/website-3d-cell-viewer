@@ -45,6 +45,7 @@ export default class PlayControls {
     this.playTimeoutId = 0;
     this.playWaitingForLoad = false;
     if (this.playingAxis !== null && !willResume) {
+      this.playHolding = false;
       this.setPlayingAxis(null);
     }
   }

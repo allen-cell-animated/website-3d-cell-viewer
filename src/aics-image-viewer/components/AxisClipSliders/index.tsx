@@ -35,6 +35,9 @@ const SliderRow: React.FC<SliderRowProps> = ({
   onEnd,
 }) => {
   const isRange = vals.length > 1;
+  // If slider is a range, handles represent slice *edges*: the range around only the max slice is [max-1, max], e.g.
+  // If slider is not a range, handle represents 0-indexed slices: last slice is at max-1
+  const inputMax = isRange ? max : max - 1;
 
   return (
     <span className="axis-slider-container">
@@ -43,7 +46,7 @@ const SliderRow: React.FC<SliderRowProps> = ({
         <SmarterSlider
           className={isRange ? "" : "slider-single-handle"}
           connect={true}
-          range={{ min: 0, max }}
+          range={{ min: 0, max: inputMax }}
           start={vals}
           step={1}
           margin={1}
@@ -67,14 +70,14 @@ const SliderRow: React.FC<SliderRowProps> = ({
       </span>
       <span className="slider-values">
         <NumericInput
-          max={max}
+          max={inputMax}
           value={valsReadout[0]}
           onChange={(value) => onChange?.(isRange ? [value, vals[1]] : [value])}
         />
         {isRange && (
           <>
             {" , "}
-            <NumericInput max={max} value={valsReadout[1]} onChange={(value) => onChange?.([vals[0], value])} />
+            <NumericInput max={inputMax} value={valsReadout[1]} onChange={(value) => onChange?.([vals[0], value])} />
           </>
         )}
         {" / "}
@@ -153,6 +156,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   const updateSlice = (axis: AxisName, val: number): void => {
+    // Do not pause if the user is scrubbing along the currently playing axis (play controls are temporarily paused)
     if (!props.playControls.playHolding || props.playingAxis !== axis) {
       props.playControls.pause();
     }
@@ -176,7 +180,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
       <PlaySliderRow
         label={axis.toUpperCase()}
         val={Math.round(props.slices[axis] * props.numSlices[axis])}
-        max={props.numSlices[axis] - 1}
+        max={props.numSlices[axis]}
         onChange={(val) => updateSlice(axis, val)}
         onStart={() => props.playControls.startHold(axis)}
         onEnd={() => props.playControls.endHold()}
@@ -195,7 +199,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
         <SliderRow
           label={axis.toUpperCase()}
           vals={[Math.round(region[0] * numSlices), Math.round(region[1] * numSlices)]}
-          max={numSlices - 1}
+          max={numSlices}
           onSlide={(values) => updateRegion(axis, values[0], values[1])}
           onStart={() => props.playControls.startHold(axis)}
           onEnd={() => props.playControls.endHold()}
