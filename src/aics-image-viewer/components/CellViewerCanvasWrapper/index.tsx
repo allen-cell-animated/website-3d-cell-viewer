@@ -6,7 +6,7 @@ import { Icon } from "antd";
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
-import PlayControls from "../../shared/utils/PlayControls";
+import PlayControls from "../../shared/utils/layControls";
 
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
