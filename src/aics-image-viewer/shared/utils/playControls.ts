@@ -2,7 +2,7 @@ import { AxisName } from "../types";
 
 type PlayAxisName = AxisName | "t";
 
-const PLAY_STEP_INTERVAL = 125;
+const PLAY_STEP_INTERVAL_MS = 125;
 
 export default class PlayControls {
   playingAxis: PlayAxisName | null = null;
@@ -20,6 +20,7 @@ export default class PlayControls {
   }
 
   private playStep(): void {
+    console.log(this);
     if (!this.playingAxis || this.playHolding || !this.stepAxis) {
       return;
     }
@@ -30,7 +31,7 @@ export default class PlayControls {
     }
 
     this.stepAxis(this.playingAxis);
-    this.playTimeoutId = window.setTimeout(this.playStep.bind(this), PLAY_STEP_INTERVAL);
+    this.playTimeoutId = window.setTimeout(this.playStep.bind(this), PLAY_STEP_INTERVAL_MS);
   }
 
   /** Call whenever new data is loaded to resume playback if it was paused for data loading. */

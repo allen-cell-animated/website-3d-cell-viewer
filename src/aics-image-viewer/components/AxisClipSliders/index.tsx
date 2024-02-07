@@ -93,8 +93,8 @@ type PlaySliderRowProps = {
   val: number;
   max: number;
   playing: boolean;
-  entireAxisLoaded?: boolean;
-  onPlayPause: (play: boolean) => void;
+  updateWhileSliding?: boolean;
+  onTogglePlayback: (play: boolean) => void;
   onChange?: (values: number) => void;
   onStart?: () => void;
   onEnd?: () => void;
@@ -124,17 +124,17 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
       <SliderRow
         label={props.label}
         vals={[props.val]}
-        valsReadout={props.entireAxisLoaded || !sliderHeld ? undefined : [valReadout]}
+        valsReadout={props.updateWhileSliding || !sliderHeld ? undefined : [valReadout]}
         max={props.max}
-        onSlide={props.entireAxisLoaded ? wrappedOnChange : wrappedSetValReadout}
-        onChange={props.entireAxisLoaded ? undefined : wrappedOnChange}
+        onSlide={props.updateWhileSliding ? wrappedOnChange : wrappedSetValReadout}
+        onChange={props.updateWhileSliding ? undefined : wrappedOnChange}
         onStart={wrappedOnStart}
         onEnd={wrappedOnEnd}
       />
       <Tooltip placement="top" title="Play through sequence">
         <Button
           className="slider-play-button"
-          onClick={() => props.onPlayPause(!props.playing)}
+          onClick={() => props.onTogglePlayback(!props.playing)}
           icon={props.playing ? "pause" : "caret-right"}
         />
       </Tooltip>
@@ -211,8 +211,8 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
           onStart={() => props.playControls.startHold(axis)}
           onEnd={() => props.playControls.endHold()}
           playing={props.playingAxis === axis}
-          onPlayPause={(willPlay) => handlePlayPause(axis, willPlay)}
-          entireAxisLoaded={numSlices === numSlicesLoaded}
+          onTogglePlayback={(willPlay) => handlePlayPause(axis, willPlay)}
+          updateWhileSliding={numSlices === numSlicesLoaded}
         />
       </div>
     );
@@ -255,7 +255,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
                 val={props.time}
                 max={props.numTimesteps}
                 playing={props.playingAxis === "t"}
-                onPlayPause={(willPlay) => handlePlayPause("t", willPlay)}
+                onTogglePlayback={(willPlay) => handlePlayPause("t", willPlay)}
                 onChange={(time) => updateTime(time)}
                 onStart={() => props.playControls.startHold("t")}
                 onEnd={() => props.playControls.endHold()}
