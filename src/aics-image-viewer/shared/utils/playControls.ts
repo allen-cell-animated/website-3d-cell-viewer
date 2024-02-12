@@ -20,7 +20,6 @@ export default class PlayControls {
   }
 
   private playStep(): void {
-    console.log(this);
     if (!this.playingAxis || this.playHolding || !this.stepAxis) {
       return;
     }
