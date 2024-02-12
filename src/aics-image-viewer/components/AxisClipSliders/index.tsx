@@ -18,7 +18,10 @@ type SliderRowProps = {
   vals: number[];
   valsReadout?: number[];
   max: number;
+  // These event handlers attach to the events of the same names provided by noUiSlider.
+  // Their behavior is documented at https://refreshless.com/nouislider/events-callbacks/
   onSlide?: (values: number[]) => void;
+  /** `onChange` is called on the corresponding noUiSlider event AND on interaction with a spinbox. */
   onChange?: (values: number[]) => void;
   onStart?: () => void;
   onEnd?: () => void;
@@ -95,6 +98,12 @@ type PlaySliderRowProps = {
   playing: boolean;
   updateWhileSliding?: boolean;
   onTogglePlayback: (play: boolean) => void;
+  // These event handlers attach to the events of the same names provided by noUiSlider.
+  // Their behavior is documented at https://refreshless.com/nouislider/events-callbacks/
+  /**
+   * `onChange`'s behavior dependends on `updateWhileSliding`: if true, it's called on slide and on release;
+   * if false, it's called only on slide.
+   */
   onChange?: (values: number) => void;
   onStart?: () => void;
   onEnd?: () => void;
