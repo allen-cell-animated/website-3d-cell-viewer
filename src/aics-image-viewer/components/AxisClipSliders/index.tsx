@@ -136,6 +136,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
           className="slider-play-button"
           onClick={() => props.onTogglePlayback(!props.playing)}
           icon={props.playing ? "pause" : "caret-right"}
+          aria-label={(props.playing ? "Pause " : "Play ") + props.label}
         />
       </Tooltip>
     </>
