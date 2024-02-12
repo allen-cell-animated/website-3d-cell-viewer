@@ -105,7 +105,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
             <div className="channel-rows-list">
               {tab === ControlTab.Channels && (
                 <ChannelsWidget
-                  imageLoaded={props.imageLoaded}
                   channelSettings={props.channelSettings}
                   channelDataChannels={props.channelDataChannels}
                   channelGroupedByType={props.channelGroupedByType}

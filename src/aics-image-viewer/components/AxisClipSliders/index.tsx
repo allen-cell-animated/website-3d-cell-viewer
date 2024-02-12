@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button, Tooltip } from "antd";
 
 import NumericInput from "../shared/NumericInput";
@@ -9,21 +9,39 @@ import "./styles.css";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
 import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
+import PlayControls from "../../shared/utils/playControls";
 
 const AXES: AxisName[] = ["x", "y", "z"];
-const PLAY_RATE_MS_PER_STEP = 125;
 
-interface SliderRowProps {
+type SliderRowProps = {
   label: string;
   vals: number[];
   valsReadout?: number[];
   max: number;
+  // These event handlers attach to the events of the same names provided by noUiSlider.
+  // Their behavior is documented at https://refreshless.com/nouislider/events-callbacks/
   onSlide?: (values: number[]) => void;
-  onSet?: (values: number[]) => void;
-}
+  /** `onChange` is called on the corresponding noUiSlider event AND on interaction with a spinbox. */
+  onChange?: (values: number[]) => void;
+  onStart?: () => void;
+  onEnd?: () => void;
+};
 
-const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, max, onSlide, onSet = onSlide }) => {
+/** A single slider row, with a slider, one or two spinbox inputs, and a max value */
+const SliderRow: React.FC<SliderRowProps> = ({
+  label,
+  vals,
+  valsReadout = vals,
+  max,
+  onSlide,
+  onChange = onSlide,
+  onStart,
+  onEnd,
+}) => {
   const isRange = vals.length > 1;
+  // If slider is a range, handles represent slice *edges*: the range around only the max slice is [max-1, max], e.g.
+  // If slider is not a range, handle represents 0-indexed slices: last slice is at max-1
+  const inputMax = isRange ? max : max - 1;
 
   return (
     <span className="axis-slider-container">
@@ -32,7 +50,7 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
         <SmarterSlider
           className={isRange ? "" : "slider-single-handle"}
           connect={true}
-          range={{ min: 0, max }}
+          range={{ min: 0, max: inputMax }}
           start={vals}
           step={1}
           margin={1}
@@ -49,19 +67,21 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
           // round slider output to nearest slice; assume any string inputs represent ints
           format={{ to: Math.round, from: parseInt }}
           onSlide={onSlide}
-          onSet={onSet}
+          onChange={onChange}
+          onStart={onStart}
+          onEnd={onEnd}
         />
       </span>
       <span className="slider-values">
         <NumericInput
-          max={max}
+          max={inputMax}
           value={valsReadout[0]}
-          onChange={(value) => onSet?.(isRange ? [value, vals[1]] : [value])}
+          onChange={(value) => onChange?.(isRange ? [value, vals[1]] : [value])}
         />
         {isRange && (
           <>
             {" , "}
-            <NumericInput max={max} value={valsReadout[1]} onChange={(value) => onSet?.([vals[0], value])} />
+            <NumericInput max={inputMax} value={valsReadout[1]} onChange={(value) => onChange?.([vals[0], value])} />
           </>
         )}
         {" / "}
@@ -71,183 +91,192 @@ const SliderRow: React.FC<SliderRowProps> = ({ label, vals, valsReadout = vals, 
   );
 };
 
-interface AxisClipSlidersProps {
+type PlaySliderRowProps = {
+  label: string;
+  val: number;
+  max: number;
+  playing: boolean;
+  updateWhileSliding?: boolean;
+  onTogglePlayback: (play: boolean) => void;
+  // These event handlers attach to the events of the same names provided by noUiSlider.
+  // Their behavior is documented at https://refreshless.com/nouislider/events-callbacks/
+  /**
+   * `onChange`'s behavior depends on `updateWhileSliding`: if true, it's called on slide and on release;
+   * if false, it's called only on slide.
+   */
+  onChange?: (values: number) => void;
+  onStart?: () => void;
+  onEnd?: () => void;
+};
+
+/** Wrapper around `SliderRow` that adds a play button and accounts for the case where not all of an axis is loaded */
+const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
+  // In partially-loaded axes, stores the displayed value of the slider while the user is sliding it
+  const [valReadout, setValReadout] = useState(props.val);
+  // Tracks when the user is sliding the slider and `valReadout` may have to sub in for props
+  const [sliderHeld, setSliderHeld] = useState(false);
+
+  const wrappedOnChange = useCallback(([val]: number[]) => props.onChange?.(val), [props.onChange]);
+  const wrappedSetValReadout = useCallback(([val]: number[]) => setValReadout(val), []);
+  const wrappedOnStart = useCallback((): void => {
+    setValReadout(props.val);
+    setSliderHeld(true);
+    props.onStart?.();
+  }, [props.onStart]);
+  const wrappedOnEnd = useCallback((): void => {
+    setSliderHeld(false);
+    props.onEnd?.();
+  }, [props.onEnd]);
+
+  return (
+    <>
+      <SliderRow
+        label={props.label}
+        vals={[props.val]}
+        valsReadout={props.updateWhileSliding || !sliderHeld ? undefined : [valReadout]}
+        max={props.max}
+        onSlide={props.updateWhileSliding ? wrappedOnChange : wrappedSetValReadout}
+        onChange={props.updateWhileSliding ? undefined : wrappedOnChange}
+        onStart={wrappedOnStart}
+        onEnd={wrappedOnEnd}
+      />
+      {/* @ts-ignore antd 3.x thinks the type of `trigger` below is bad, but it works. TODO remove this on update. */}
+      <Tooltip placement="top" title="Play through sequence" trigger={["hover", "focus"]}>
+        <Button
+          className="slider-play-button"
+          onClick={() => props.onTogglePlayback(!props.playing)}
+          icon={props.playing ? "pause" : "caret-right"}
+          aria-label={(props.playing ? "Pause " : "Play ") + props.label}
+        />
+      </Tooltip>
+    </>
+  );
+};
+
+type AxisClipSlidersProps = {
   mode: ViewMode;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
+  numSlicesLoaded: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
   numTimesteps: number;
   time: number;
-}
+  playingAxis: AxisName | "t" | null;
+  playControls: PlayControls;
+};
 
-interface AxisClipSlidersState {
-  playing: boolean;
-  intervalId: number;
-  // shadows `time` prop, but updates while time slider is moving (`time` does not to avoid reloads)
-  timeReadout: number;
-}
+const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
+  const activeAxis = activeAxisMap[props.mode];
 
-export default class AxisClipSliders extends React.Component<AxisClipSlidersProps, AxisClipSlidersState> {
-  constructor(props: AxisClipSlidersProps) {
-    super(props);
-
-    this.state = {
-      playing: false,
-      intervalId: 0,
-      timeReadout: props.time,
-    };
-
-    this.play = this.play.bind(this);
-    this.pause = this.pause.bind(this);
-    this.moveSlice = this.moveSlice.bind(this);
-    this.createAxisSlider = this.createAxisSlider.bind(this);
-  }
-
-  componentDidUpdate(prevProps: AxisClipSlidersProps): void {
-    // Make extra sure the number next to the time slider is accurate
-    if (prevProps.time !== this.props.time) {
-      this.setState({ timeReadout: this.props.time });
+  const pauseOnInput = (axis: AxisName | "t"): void => {
+    // Pause on slider input unless user is scrubbing along the playing axis (playback is held while this is happening)
+    if (!props.playControls.playHolding || props.playingAxis !== axis) {
+      props.playControls.pause();
     }
+  };
 
-    // Pause if mode or fov has changed
-    const numSlicesChanged = AXES.reduce(
-      (hasChanged, axis) => hasChanged || prevProps.numSlices[axis] !== this.props.numSlices[axis],
-      false
-    );
+  const updateRegion = (axis: AxisName, minval: number, maxval: number): void => {
+    pauseOnInput(axis);
 
-    if (numSlicesChanged || prevProps.mode !== this.props.mode) {
-      this.pause();
-    }
-  }
-
-  getActiveAxis = (): AxisName | null => activeAxisMap[this.props.mode];
-
-  /**
-   * Moves the single slice viewed on the active axis one step forwards or backwards.
-   * Wraps in both directions.
-   * @param backward boolean indicating move direction.
-   */
-  moveSlice(backward: boolean = false): void {
-    const activeAxis = this.getActiveAxis();
-    if (activeAxis === null) {
-      return;
-    }
-    const delta = backward ? -1 : 1;
-    const max = this.props.numSlices[activeAxis];
-    const currentLeftSliderValue = Math.round(this.props.slices[activeAxis] * max);
-    const leftValue = (currentLeftSliderValue + delta + max) % max;
-    this.updateSlice(activeAxis, leftValue);
-  }
-
-  play(): void {
-    if (this.getActiveAxis() && !this.state.playing) {
-      const intervalId = window.setInterval(this.moveSlice, PLAY_RATE_MS_PER_STEP);
-      this.setState({ playing: true, intervalId });
-    }
-  }
-
-  pause(): void {
-    window.clearInterval(this.state.intervalId);
-    if (this.state.playing) {
-      this.setState({ playing: false });
-    }
-  }
-
-  updateRegion(axis: AxisName, minval: number, maxval: number): void {
-    const { changeViewerSetting, numSlices, region } = this.props;
+    const { changeViewerSetting, numSlices, region } = props;
     // get a value from 0-1
     const max = numSlices[axis];
     const start = minval / max;
     const end = maxval / max;
     changeViewerSetting("region", { ...region, [axis]: [start, end] });
-  }
+  };
 
-  updateSlice(axis: AxisName, val: number): void {
-    const { changeViewerSetting, numSlices, slices } = this.props;
-    changeViewerSetting("slice", { ...slices, [axis]: val / numSlices[axis] });
-  }
+  const updateSlice = (axis: AxisName, slice: number): void => {
+    pauseOnInput(axis);
+    props.changeViewerSetting("slice", { ...props.slices, [axis]: slice / props.numSlices[axis] });
+  };
 
-  makeSliderCallback(axis: AxisName): (values: number[]) => void {
-    return (values: number[]) => {
-      if (values.length < 2) {
-        this.updateSlice(axis, values[0]);
-      } else {
-        this.updateRegion(axis, values[0], values[1]);
-      }
-    };
-  }
+  const updateTime = (time: number): void => {
+    pauseOnInput("t");
+    props.changeViewerSetting("time", time);
+  };
 
-  createAxisSlider(axis: AxisName, twoD: boolean): React.ReactNode {
-    const { playing } = this.state;
-    const numSlices = this.props.numSlices[axis];
-    const clipVals = this.props.region[axis];
-    const slice = this.props.slices[axis];
-    const sliderVals = twoD
-      ? [Math.round(slice * numSlices)]
-      : [Math.round(clipVals[0] * numSlices), Math.round(clipVals[1] * numSlices)];
+  // Pause when view mode or volume size has changed
+  useEffect(() => props.playControls.pause(), [props.mode, ...Object.values(props.numSlices)]);
+
+  const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
+    if (willPlay) {
+      props.playControls.play(axis);
+    } else {
+      props.playControls.pause();
+    }
+  };
+
+  const create2dAxisSlider = (axis: AxisName): React.ReactNode => {
+    const numSlices = props.numSlices[axis];
+    const numSlicesLoaded = props.numSlicesLoaded[axis];
 
     return (
-      <div key={axis + numSlices} className={`slider-row slider-${axis}`}>
-        <SliderRow
-          // prevents slider from potentially not updating number of handles
-          key={`${twoD}`}
+      <div key={axis + numSlices + numSlicesLoaded} className={`slider-row slider-${axis}`}>
+        <PlaySliderRow
           label={axis.toUpperCase()}
-          vals={sliderVals}
-          max={numSlices - (twoD && numSlices > 1 ? 1 : 0)}
-          onSlide={this.makeSliderCallback(axis)}
+          val={Math.round(props.slices[axis] * numSlices)}
+          max={numSlices}
+          onChange={(val) => updateSlice(axis, val)}
+          onStart={() => props.playControls.startHold(axis)}
+          onEnd={() => props.playControls.endHold()}
+          playing={props.playingAxis === axis}
+          onTogglePlayback={(willPlay) => handlePlayPause(axis, willPlay)}
+          updateWhileSliding={numSlices === numSlicesLoaded}
         />
-        {twoD && (
-          <Tooltip placement="top" title="Play through sequence">
-            <Button
-              className="slider-play-button"
-              onClick={playing ? this.pause : this.play}
-              icon={playing ? "pause" : "caret-right"}
-            />
-          </Tooltip>
-        )}
       </div>
     );
-  }
+  };
 
-  createTimeSlider(): React.ReactNode {
-    const { time, numTimesteps, changeViewerSetting } = this.props;
-    const { timeReadout } = this.state;
+  const create3dAxisSlider = (axis: AxisName): React.ReactNode => {
+    const numSlices = props.numSlices[axis];
+    const region = props.region[axis];
 
     return (
-      <div className="slider-row">
+      <div key={axis + numSlices + "3d"} className={`slider-row slider-${axis}`}>
         <SliderRow
-          label={""}
-          vals={[time]}
-          valsReadout={[timeReadout]}
-          max={numTimesteps}
-          onSlide={([time]) => this.setState({ timeReadout: time })}
-          onSet={([time]) => changeViewerSetting("time", time)}
+          label={axis.toUpperCase()}
+          vals={[Math.round(region[0] * numSlices), Math.round(region[1] * numSlices)]}
+          max={numSlices}
+          onSlide={(values) => updateRegion(axis, values[0], values[1])}
+          onStart={() => props.playControls.startHold(axis)}
+          onEnd={() => props.playControls.endHold()}
         />
       </div>
     );
-  }
+  };
 
-  render(): React.ReactNode {
-    const activeAxis = this.getActiveAxis();
-    return (
-      <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
+  return (
+    <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
+      <span className="slider-group">
+        <h4 className="slider-group-title">ROI</h4>
+        <span className="slider-group-rows">
+          {activeAxis ? create2dAxisSlider(activeAxis) : AXES.map(create3dAxisSlider)}
+        </span>
+      </span>
+
+      {props.numTimesteps > 1 && (
         <span className="slider-group">
-          <h4 className="slider-group-title">ROI</h4>
+          <h4 className="slider-group-title">Time</h4>
           <span className="slider-group-rows">
-            {activeAxis
-              ? this.createAxisSlider(activeAxis, true)
-              : AXES.map((axis) => this.createAxisSlider(axis, false))}
+            <div className="slider-row slider-t">
+              <PlaySliderRow
+                label={""}
+                val={props.time}
+                max={props.numTimesteps}
+                playing={props.playingAxis === "t"}
+                onTogglePlayback={(willPlay) => handlePlayPause("t", willPlay)}
+                onChange={(time) => updateTime(time)}
+                onStart={() => props.playControls.startHold("t")}
+                onEnd={() => props.playControls.endHold()}
+              />
+            </div>
           </span>
         </span>
+      )}
+    </div>
+  );
+};
 
-        {this.props.numTimesteps > 1 && (
-          <span className="slider-group">
-            <h4 className="slider-group-title">Time</h4>
-            <span className="slider-group-rows">{this.createTimeSlider()}</span>
-          </span>
-        )}
-      </div>
-    );
-  }
-}
+export default AxisClipSliders;

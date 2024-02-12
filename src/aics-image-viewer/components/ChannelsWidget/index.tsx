@@ -23,7 +23,6 @@ import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 
 export interface ChannelsWidgetProps {
-  imageLoaded: boolean;
   channelDataChannels: Channel[] | undefined;
   channelSettings: ChannelState[];
   channelGroupedByType: ChannelGrouping;

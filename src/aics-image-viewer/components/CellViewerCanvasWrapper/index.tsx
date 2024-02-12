@@ -3,9 +3,10 @@ import { View3d } from "@aics/volume-viewer";
 
 import { Icon } from "antd";
 
-import { PerAxis, Styles } from "../../shared/types";
+import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
 import { ViewerSettingUpdater } from "../App/types";
+import PlayControls from "../../shared/utils/playControls";
 
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
@@ -19,8 +20,11 @@ interface ViewerWrapperProps {
   appHeight: string;
   hasImage: boolean;
   numSlices: PerAxis<number>;
+  numSlicesLoaded: PerAxis<number>;
   region: PerAxis<[number, number]>;
   slices: PerAxis<number>;
+  playControls: PlayControls;
+  playingAxis: AxisName | "t" | null;
   numTimesteps: number;
   time: number;
   showControls: {
@@ -51,7 +55,9 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   renderOverlay(): React.ReactNode {
-    const spinner = this.props.loadingImage ? (
+    // Don't show spinner during playback - we may be constantly loading new data, it'll block the view!
+    const showSpinner = this.props.loadingImage && !this.props.playingAxis;
+    const spinner = showSpinner ? (
       <div style={STYLES.noImage}>
         <Icon type="loading" theme="outlined" style={{ fontSize: 60, zIndex: 1000 }} />
       </div>
@@ -82,10 +88,13 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
+              numSlicesLoaded={this.props.numSlicesLoaded}
               region={region}
               slices={slices}
               numTimesteps={numTimesteps}
               time={time}
+              playControls={this.props.playControls}
+              playingAxis={this.props.playingAxis}
             />
           )}
         </BottomPanel>

@@ -47,6 +47,7 @@ import {
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
 } from "../../shared/constants";
+import PlayControls from "../../shared/utils/playControls";
 
 import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
@@ -170,14 +171,9 @@ const App: React.FC<AppProps> = (props) => {
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
-  const getNumberOfSlices = (): PerAxis<number> => {
-    if (image) {
-      const { x, y, z } = image.imageInfo.volumeSize;
-      return { x, y, z };
-    }
-    return { x: 0, y: 0, z: 0 };
-  };
-  const numberOfTimesteps = image?.imageInfo.times || 1;
+  const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
+  const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
+  const numTimesteps = image?.imageInfo.times ?? 1;
 
   // State for image loading/reloading
 
@@ -203,6 +199,12 @@ const App: React.FC<AppProps> = (props) => {
   // (`openImage` creates a closure to call back whenever a new channel is loaded, which sets this state.
   // To do this it requires access to the current state value, not the one it closed over)
   const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
+
+  // `PlayControls` manages playing through time and spatial axes, which isn't practical with "pure" React
+  // Playback state goes here, but the play/pause buttons that mainly control this class are down in `AxisClipSliders`
+  const playControls = useConstructor(() => new PlayControls());
+  const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
+  playControls.onPlayingAxisChanged = setPlayingAxis;
 
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
@@ -318,6 +320,7 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
+      playControls.onImageLoaded();
     }
   };
 
@@ -408,6 +411,17 @@ const App: React.FC<AppProps> = (props) => {
 
     setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
+
+    playControls.stepAxis = (axis: AxisName | "t") => {
+      if (axis === "t") {
+        changeViewerSetting("time", (getViewerSettings().time + 1) % aimg.imageInfo.times);
+      } else {
+        const max = aimg.imageInfo.volumeSize[axis];
+        const current = getViewerSettings().slice[axis] * max;
+        changeViewerSetting("slice", { ...getViewerSettings().slice, [axis]: ((current + 1) % max) / max });
+      }
+    };
+    playControls.getVolumeIsLoaded = () => aimg.isLoaded();
 
     view3d.updateActiveChannels(aimg);
   };
@@ -709,6 +723,9 @@ const App: React.FC<AppProps> = (props) => {
           axismax = isOrthoAxis ? slice + oneSlice : 1.0;
           if (axis === "z" && viewerSettings.viewMode === ViewMode.xy) {
             view3d.setZSlice(currentImage, Math.floor(slice * currentImage.imageInfo.volumeSize.z));
+            if (!currentImage.isLoaded()) {
+              setImageLoaded(false);
+            }
           }
         }
         // view3d wants the coordinates in the -0.5 to 0.5 range
@@ -751,7 +768,6 @@ const App: React.FC<AppProps> = (props) => {
           showControls={showControls}
           // image state
           imageName={image?.name}
-          imageLoaded={imageLoaded}
           hasImage={!!image}
           pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
           channelDataChannels={image?.channels}
@@ -803,11 +819,14 @@ const App: React.FC<AppProps> = (props) => {
             viewMode={viewerSettings.viewMode}
             autorotate={viewerSettings.autorotate}
             loadingImage={sendingQueryRequest}
-            numSlices={getNumberOfSlices()}
-            numTimesteps={numberOfTimesteps}
+            numSlices={numSlices}
+            numSlicesLoaded={numSlicesLoaded}
+            numTimesteps={numTimesteps}
             region={viewerSettings.region}
             slices={viewerSettings.slice}
             time={viewerSettings.time}
+            playControls={playControls}
+            playingAxis={playingAxis}
             appHeight={props.appHeight}
             showControls={showControls}
             changeViewerSetting={changeViewerSetting}

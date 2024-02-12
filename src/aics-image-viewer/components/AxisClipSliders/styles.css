@@ -72,6 +72,12 @@
         background-color: var(--color-z) !important;
       }
     }
+
+    &.slider-t {
+      .slider-values {
+        flex: 0 0 var(--w-values-2d);
+      }
+    }
   }
 
   /* container to keep slider and labels on one line while play button wraps */
