@@ -101,7 +101,7 @@ type PlaySliderRowProps = {
   // These event handlers attach to the events of the same names provided by noUiSlider.
   // Their behavior is documented at https://refreshless.com/nouislider/events-callbacks/
   /**
-   * `onChange`'s behavior dependends on `updateWhileSliding`: if true, it's called on slide and on release;
+   * `onChange`'s behavior depends on `updateWhileSliding`: if true, it's called on slide and on release;
    * if false, it's called only on slide.
    */
   onChange?: (values: number) => void;
