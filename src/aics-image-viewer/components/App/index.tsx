@@ -152,6 +152,8 @@ const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: bool
   if (hasTime) {
     // Move scale bar left out of the way of timestep indicator
     scaleBarX += SCALE_BAR_TIME_SERIES_OFFSET;
+    // Make sure the timestep indicator is showing
+    view3d.setShowTimestepIndicator(true);
   }
 
   view3d.setAxisPosition(AXIS_MARGIN_DEFAULT[0], axisY);
