@@ -1093,6 +1093,9 @@ body{
 .clip-sliders .slider-row.slider-z .noUi-handle{
         background-color:var(--color-z) !important;
       }
+.clip-sliders .slider-row.slider-t .slider-values{
+        flex:0 0 var(--w-values-2d);
+      }
 .clip-sliders .axis-slider-container{
     display:flex;
     flex:1 1 auto;
