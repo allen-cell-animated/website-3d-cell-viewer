@@ -426,11 +426,10 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const openImage = async (): Promise<void> => {
+    // Don't reload if we're already looking at this image
     const { fovPath, cellPath, baseUrl } = props;
     const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
-    const fullUrl = `${baseUrl}${path}`;
-    // Don't reload if we're already looking at this image
-    if (fullUrl === imageUrlRef.current) {
+    if (baseUrl + path === imageUrlRef.current) {
       return;
     }
 
