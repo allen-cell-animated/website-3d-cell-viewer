@@ -10,7 +10,6 @@ import {
   View3d,
   Volume,
   IVolumeLoader,
-  WorkerLoader,
   PrefetchDirection,
 } from "@aics/volume-viewer";
 
@@ -216,7 +215,7 @@ const App: React.FC<AppProps> = (props) => {
   const playControls = useConstructor(() => new PlayControls());
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
-    (loader.current as WorkerLoader)?.setPrefetchPriorityDirections?.(axis ? [axisToLoaderPriority[axis]] : []);
+    loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
     setPlayingAxis(axis);
   };
 
