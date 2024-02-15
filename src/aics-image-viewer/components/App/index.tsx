@@ -429,11 +429,8 @@ const App: React.FC<AppProps> = (props) => {
     const { fovPath, cellPath, baseUrl } = props;
     const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
     const fullUrl = `${baseUrl}${path}`;
-
-    // If this is the same image at a different time, keep luts. If same image at same time, don't bother reloading.
-    const samePath = fullUrl === imageUrlRef.current;
-    // future TODO: check for whether multiresolution level (subpath) would be different too.
-    if (samePath && viewerSettings.time === image?.loadSpec.time) {
+    // Don't reload if we're already looking at this image
+    if (fullUrl === imageUrlRef.current) {
       return;
     }
 
