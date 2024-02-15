@@ -179,6 +179,8 @@ const App: React.FC<AppProps> = (props) => {
 
   // State for image loading/reloading
 
+  // `true` when this is the initial load of an image
+  const initialLoadRef = useRef(true);
   // `true` when image data has been requested, but no data has been received yet
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
@@ -293,20 +295,14 @@ const App: React.FC<AppProps> = (props) => {
 
   // Image loading/initialization functions ///////////////////////////////////
 
-  const onChannelDataLoaded = (
-    aimg: Volume,
-    thisChannelsSettings: ChannelState,
-    channelIndex: number,
-    keepLuts = false
-  ): void => {
-    // if we want to keep the current control points
-    if (thisChannelsSettings.controlPoints && keepLuts) {
-      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-      aimg.setLut(channelIndex, lut);
-    } else {
-      // need to choose initial LUT
+  const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+    // If this is the first load of this image, auto-generate initial LUTs
+    if (initialLoadRef.current || !thisChannelsSettings.controlPoints) {
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
+    } else {
+      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
+      aimg.setLut(channelIndex, lut);
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
@@ -322,6 +318,7 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
+      initialLoadRef.current = false;
       playControls.onImageLoaded();
     }
   };
@@ -442,6 +439,7 @@ const App: React.FC<AppProps> = (props) => {
 
     setSendingQueryRequest(true);
     setImageLoaded(false);
+    initialLoadRef.current = true;
 
     const loadSpec = new LoadSpec();
     loadSpec.time = viewerSettings.time;
@@ -455,7 +453,7 @@ const App: React.FC<AppProps> = (props) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
-      onChannelDataLoaded(v, thisChannelSettings!, channelIndex, samePath);
+      onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
     });
     loader.loadVolumeData(aimg);
 
@@ -475,6 +473,7 @@ const App: React.FC<AppProps> = (props) => {
       return;
     }
 
+    // TODO: swap to using raw loader, when available
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
     for (let i = 0; i < rawDims.numChannels; ++i) {
