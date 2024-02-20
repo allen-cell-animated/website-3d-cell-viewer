@@ -9,6 +9,8 @@ import {
   RENDERMODE_RAYMARCH,
   View3d,
   Volume,
+  IVolumeLoader,
+  PrefetchDirection,
 } from "@aics/volume-viewer";
 
 import {
@@ -137,6 +139,13 @@ const defaultProps: AppProps = {
   canvasMargin: "0 0 0 0",
 };
 
+const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
+  t: PrefetchDirection.T_PLUS,
+  z: PrefetchDirection.Z_PLUS,
+  y: PrefetchDirection.Y_PLUS,
+  x: PrefetchDirection.X_PLUS,
+};
+
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
   const CLIPPING_PANEL_HEIGHT = 150;
   // Move scale bars this far to the left when showing time series, to make room for timestep indicator
@@ -170,6 +179,7 @@ const App: React.FC<AppProps> = (props) => {
   const loadContext = useConstructor(
     () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
   );
+  const loader = useRef<IVolumeLoader>();
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string>("");
 
@@ -208,7 +218,10 @@ const App: React.FC<AppProps> = (props) => {
   // Playback state goes here, but the play/pause buttons that mainly control this class are down in `AxisClipSliders`
   const playControls = useConstructor(() => new PlayControls());
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
-  playControls.onPlayingAxisChanged = setPlayingAxis;
+  playControls.onPlayingAxisChanged = (axis) => {
+    loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
+    setPlayingAxis(axis);
+  };
 
   // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
   // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
@@ -444,15 +457,15 @@ const App: React.FC<AppProps> = (props) => {
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
     await loadContext.onOpen();
-    const loader = await loadContext.createLoader(fullUrl);
+    loader.current = await loadContext.createLoader(fullUrl);
 
-    const aimg = await loader.createVolume(loadSpec, (v, channelIndex) => {
+    const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
       // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
       onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
     });
-    loader.loadVolumeData(aimg);
+    loader.current.loadVolumeData(aimg);
 
     const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
