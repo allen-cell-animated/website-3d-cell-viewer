@@ -220,6 +220,7 @@ const App: React.FC<AppProps> = (props) => {
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
+    loader.current?.syncMultichannelLoading(axis ? true : false);
     setPlayingAxis(axis);
   };
 
