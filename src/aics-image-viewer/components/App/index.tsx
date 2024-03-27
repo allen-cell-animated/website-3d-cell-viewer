@@ -315,8 +315,18 @@ const App: React.FC<AppProps> = (props) => {
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     } else {
-      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-      aimg.setLut(channelIndex, lut);
+      // try not to update lut from here if we are in play mode
+      if (playingAxis !== null) {
+        // do nothing here.
+        // TODO: if the lut was remapped due to intensity range changes, we need to remap the control points to update the gui
+        //thisChannelsSettings.controlPoints = aimg.getChannel(channelIndex).lut.controlPoints;
+        const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
+        aimg.setLut(channelIndex, lut);
+      }
+      else {
+        const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
+        aimg.setLut(channelIndex, lut);
+      }
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
@@ -488,7 +498,7 @@ const App: React.FC<AppProps> = (props) => {
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
     for (let i = 0; i < rawDims.numChannels; ++i) {
-      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
+      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize), [0, 255]);
     }
 
     let channelSetting = rawDims.channelNames.map((channel, index) => {
