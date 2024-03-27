@@ -1,5 +1,5 @@
 import colorString from "color-string";
-import { ControlPoint, Volume } from "@aics/volume-viewer";
+import { ControlPoint, Lut, Volume } from "@aics/volume-viewer";
 import { ColorArray } from "./colorRepresentations";
 import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
@@ -64,7 +64,9 @@ export function initializeLut(
   // find channelIndex among viewerChannelSettings.
   const name = aimg.channelNames[channelIndex];
   // default to percentiles
-  let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+  const hmin = histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
+  const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
+  let lutObject = new Lut().createFromMinMax(hmin, hmax);
   // and if init settings dictate, recompute it:
   if (channelSettings) {
     const initSettings = findFirstChannelMatch(name, channelIndex, channelSettings);
@@ -93,7 +95,7 @@ export function initializeLut(
           }
         }
 
-        lutObject = histogram.lutGenerator_minMax(
+        lutObject = new Lut().createFromMinMax(
           Math.min(lutvalues[0], lutvalues[1]),
           Math.max(lutvalues[0], lutvalues[1])
         );

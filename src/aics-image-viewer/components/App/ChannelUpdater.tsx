@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { View3d, Volume } from "@aics/volume-viewer";
+import { Lut, View3d, Volume } from "@aics/volume-viewer";
 
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
 import { ChannelState } from "../../shared/utils/viewerChannelSettings";
@@ -64,7 +64,7 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
     (currentImage) => {
       if (colorizeEnabled) {
         // TODO get the labelColors from the tf editor component
-        const lut = currentImage.getHistogram(index).lutGenerator_labelColors();
+        const lut = new Lut().createLabelColors(currentImage.getHistogram(index));
         currentImage.setColorPalette(index, lut.lut);
         currentImage.setColorPaletteAlpha(index, colorizeAlpha);
       } else {
