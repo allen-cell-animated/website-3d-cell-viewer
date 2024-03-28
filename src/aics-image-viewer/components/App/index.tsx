@@ -317,16 +317,14 @@ const App: React.FC<AppProps> = (props) => {
     } else {
       // try not to update lut from here if we are in play mode
       if (playingAxis !== null) {
-        // do nothing here.
-        // TODO: if the lut was remapped due to intensity range changes, we need to remap the control points to update the gui
-        //thisChannelsSettings.controlPoints = aimg.getChannel(channelIndex).lut.controlPoints;
-        const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-        aimg.setLut(channelIndex, lut);
+        // do nothing here?
+        // tell gui that we have updated control pts?
+        //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
       }
       else {
-        const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-        aimg.setLut(channelIndex, lut);
       }
+      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
+      aimg.setLut(channelIndex, lut);
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
