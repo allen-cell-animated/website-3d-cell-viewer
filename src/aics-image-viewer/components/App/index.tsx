@@ -22,7 +22,7 @@ import {
   UseImageEffectType,
 } from "./types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
-import { controlPointsToLut, initializeLut } from "../../shared/utils/controlPointsToLut";
+import { initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
   findFirstChannelMatch,
@@ -320,10 +320,7 @@ const App: React.FC<AppProps> = (props) => {
         // do nothing here?
         // tell gui that we have updated control pts?
         //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
-      } else {
       }
-      //const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-      //aimg.setLut(channelIndex, lut);
       changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
     }
     view3d.updateLuts(aimg);
