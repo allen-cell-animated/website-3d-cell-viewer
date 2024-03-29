@@ -320,11 +320,11 @@ const App: React.FC<AppProps> = (props) => {
         // do nothing here?
         // tell gui that we have updated control pts?
         //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      } else {
       }
-      else {
-      }
-      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-      aimg.setLut(channelIndex, lut);
+      //const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
+      //aimg.setLut(channelIndex, lut);
+      changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
