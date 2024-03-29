@@ -67,7 +67,7 @@ jobs:
                 aws-region: ${{ env.AWS_REGION }}
 
           # Setup variables based on the staging or production environment
-          - name: Set ECS variables based on environment
+          - name: Set deployment variables based on environment
             run: |
               if [ "${{ github.event.inputs.environment }}" == "production" ]; then
                 echo "S3_BUCKET=${{ env.PRODUCTION_S3_BUCKET }}" >> $GITHUB_ENV
