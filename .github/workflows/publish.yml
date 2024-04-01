@@ -83,7 +83,7 @@ jobs:
       - run: npm ci
       - run: npm run gh-build
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@4eb285e828117bca26638192c3ed309c622e7bad
+        uses: peaceiris/actions-gh-pages@4c82c7262fae7c69e985454e2c815482877cc12a
         with:
           external_repository: allen-cell-animated/website-3d-cell-viewer-release
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
