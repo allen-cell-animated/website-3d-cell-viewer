@@ -3,7 +3,7 @@
 
 name: NPM Package
 env:
-  NODE_VERSION: "14.x"
+  NODE_VERSION: "18"
 
 on:
   push:
@@ -16,9 +16,9 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
       - run: npm ci
@@ -27,9 +27,9 @@ jobs:
     name: Unit Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
       - run: npm ci
@@ -38,9 +38,9 @@ jobs:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Setup Node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
       - run: npm ci
@@ -49,8 +49,8 @@ jobs:
     needs: [lint, typeCheck, test]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
       - run: npm ci
@@ -60,8 +60,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
           registry-url: https://registry.npmjs.org/
@@ -75,15 +75,15 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: ${{env.NODE_VERSION}}
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm run gh-build
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847
         with:
           external_repository: allen-cell-animated/website-3d-cell-viewer-release
           deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
