@@ -22,7 +22,7 @@ import {
   UseImageEffectType,
 } from "./types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
-import { controlPointsToLut, initializeLut } from "../../shared/utils/controlPointsToLut";
+import { initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
   ChannelState,
   findFirstChannelMatch,
@@ -220,6 +220,7 @@ const App: React.FC<AppProps> = (props) => {
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
+    loader.current?.syncMultichannelLoading(axis ? true : false);
     setPlayingAxis(axis);
   };
 
@@ -314,8 +315,13 @@ const App: React.FC<AppProps> = (props) => {
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     } else {
-      const lut = controlPointsToLut(thisChannelsSettings.controlPoints);
-      aimg.setLut(channelIndex, lut);
+      // try not to update lut from here if we are in play mode
+      if (playingAxis !== null) {
+        // do nothing here?
+        // tell gui that we have updated control pts?
+        //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      }
+      changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
@@ -487,7 +493,7 @@ const App: React.FC<AppProps> = (props) => {
     const aimg = new Volume(rawDims);
     const volsize = rawData.shape[1] * rawData.shape[2] * rawData.shape[3];
     for (let i = 0; i < rawDims.numChannels; ++i) {
-      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize));
+      aimg.setChannelDataFromVolume(i, new Uint8Array(rawData.buffer.buffer, i * volsize, volsize), [0, 255]);
     }
 
     let channelSetting = rawDims.channelNames.map((channel, index) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
-import { Channel, ControlPoint } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Lut } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
@@ -646,28 +646,33 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   private autoXF(): void {
     const { channelData } = this.props;
 
-    const lutObj = channelData.histogram.lutGenerator_auto();
+    const [b, e] = channelData.histogram.findAutoMinMax();
+    const lutObj = new Lut().createFromMinMax(b, e);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
   private auto2XF(): void {
     const { channelData } = this.props;
 
-    const lutObj = channelData.histogram.lutGenerator_auto2();
+    const [hmin, hmax] = channelData.histogram.findAutoIJBins();
+    const lutObj = new Lut().createFromMinMax(hmin, hmax);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
   private auto98XF(): void {
     const { channelData } = this.props;
 
-    const lutObj = channelData.histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+    const hmin = channelData.histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
+    const hmax = channelData.histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
+    const lutObj = new Lut().createFromMinMax(hmin, hmax);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
   private bestFitXF(): void {
     const { channelData } = this.props;
 
-    const lutObj = channelData.histogram.lutGenerator_bestFit();
+    const [hmin, hmax] = channelData.histogram.findBestFitBins();
+    const lutObj = new Lut().createFromMinMax(hmin, hmax);
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
@@ -680,9 +685,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   private resetXF(): void {
-    const { channelData } = this.props;
-
-    const lutObj = channelData.histogram.lutGenerator_fullRange();
+    const lutObj = new Lut().createFullRange();
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 

@@ -1,5 +1,5 @@
 import colorString from "color-string";
-import { ControlPoint, Volume } from "@aics/volume-viewer";
+import { ControlPoint, Lut, Volume } from "@aics/volume-viewer";
 import { ColorArray } from "./colorRepresentations";
 import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
@@ -31,7 +31,7 @@ function clamp(x: number): number {
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
-export function controlPointsToLut(controlPoints: ControlPoint[]): Uint8Array {
+export function controlPointsToLut(controlPoints: ControlPoint[]): Lut {
   const grd = ctx.createLinearGradient(0, 0, 255, 0);
   if (!controlPoints.length || controlPoints.length < 1) {
     console.log("warning: bad control points submitted to makeColorGradient; reverting to linear greyscale gradient");
@@ -51,7 +51,14 @@ export function controlPointsToLut(controlPoints: ControlPoint[]): Uint8Array {
   ctx.fillStyle = grd;
   ctx.fillRect(0, 0, 256, 1);
   const imgData = ctx.getImageData(0, 0, 256, 1);
-  return new Uint8Array(imgData.data.buffer);
+
+  const lut = new Lut();
+  lut.lut = new Uint8Array(imgData.data.buffer);
+  lut.controlPoints = controlPoints;
+
+  // TODO Replace this whole function with new Lut().createFromControlPoints(controlPoints) ?
+
+  return lut;
 }
 
 export function initializeLut(
@@ -64,7 +71,9 @@ export function initializeLut(
   // find channelIndex among viewerChannelSettings.
   const name = aimg.channelNames[channelIndex];
   // default to percentiles
-  let lutObject = histogram.lutGenerator_percentiles(LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE);
+  const hmin = histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
+  const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
+  let lutObject = new Lut().createFromMinMax(hmin, hmax);
   // and if init settings dictate, recompute it:
   if (channelSettings) {
     const initSettings = findFirstChannelMatch(name, channelIndex, channelSettings);
@@ -93,7 +102,7 @@ export function initializeLut(
           }
         }
 
-        lutObject = histogram.lutGenerator_minMax(
+        lutObject = new Lut().createFromMinMax(
           Math.min(lutvalues[0], lutvalues[1]),
           Math.max(lutvalues[0], lutvalues[1])
         );
@@ -105,6 +114,6 @@ export function initializeLut(
     ...controlPoint,
     color: TFEDITOR_DEFAULT_COLOR,
   }));
-  aimg.setLut(channelIndex, lutObject.lut);
+  aimg.setLut(channelIndex, lutObject);
   return newControlPoints;
 }
