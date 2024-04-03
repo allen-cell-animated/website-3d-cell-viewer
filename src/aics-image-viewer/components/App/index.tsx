@@ -819,7 +819,7 @@ const App: React.FC<AppProps> = (props) => {
             cellDownloadHref={props.cellDownloadHref}
             autorotate={viewerSettings.autorotate}
             imageType={viewerSettings.imageType}
-            hasParentImage={!!props.fovPath}
+            hasParentImage={!!props.parentImageUrl}
             hasCellId={!!props.cellId}
             canPathTrace={view3d ? view3d.hasWebGL2() : false}
             showAxes={viewerSettings.showAxes}
