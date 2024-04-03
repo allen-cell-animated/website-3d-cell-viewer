@@ -59,7 +59,7 @@ export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   maskChannelName: "SEG_Memb",
 };
 
-type ParamKeys = "mask" | "ch" | "luts" | "colors" | "image" | "url" | "file" | "dataset" | "id" | "view";
+type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "url2" | "file" | "dataset" | "id" | "view";
 type Params = { [_ in ParamKeys]?: string };
 
 function parseQueryString(): Params {
@@ -73,12 +73,16 @@ function parseQueryString(): Params {
 }
 const params = parseQueryString();
 
+const decodeUrl = (url: string) => {
+  const decodedUrl = decodeURI(url);
+  return decodedUrl.endsWith("/") ? decodedUrl.slice(0, -1) : decodedUrl;
+};
+
+const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
 const args = {
-  //baseurl: "http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/",
-  baseurl: "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/",
   cellid: 2025,
-  cellPath: "AICS-22/AICS-22_8319_2025_atlas.json",
-  fovPath: "AICS-22/AICS-22_8319_atlas.json",
+  imageUrl: BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json",
+  parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
   fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
@@ -97,6 +101,42 @@ const viewerSettings: Partial<GlobalViewerSettings> = {
   boundingBoxColor: [255, 255, 255] as [number, number, number],
 };
 
+async function loadDataset(dataset: string, id: string) {
+  const db = new FirebaseRequest();
+
+  db.getAvailableDatasets()
+    .then((datasets) => {
+      for (let i = 0; i < datasets.length; ++i) {
+        console.log(datasets);
+        const names = Object.keys(datasets[i].datasets!);
+        for (let j = 0; j < names.length; ++j) {
+          if (names[j] === dataset) {
+            return datasets[i].datasets![names[j]];
+          }
+        }
+      }
+      return undefined;
+    })
+    .then((dataset) => {
+      return db.selectDataset(dataset!.manifest!);
+    })
+    .then((datasetData) => {
+      args.baseurl = datasetData.volumeViewerDataRoot + "/";
+      args.cellDownloadHref = datasetData.downloadRoot + "/" + id;
+      //fovDownloadHref = datasetData.downloadRoot + "/" + id;
+    })
+    .then(() => {
+      return db.getFileInfoByCellId(id);
+    })
+    .then((fileInfo) => {
+      args.cellPath = fileInfo!.volumeviewerPath;
+      args.fovPath = fileInfo!.fovVolumeviewerPath;
+      runApp();
+
+      // only now do we have all the data needed
+    });
+}
+
 if (params) {
   if (params.mask) {
     viewerSettings.maskAlpha = parseInt(params.mask, 10);
@@ -107,7 +147,7 @@ if (params) {
       Z: ViewMode.xy,
       Y: ViewMode.xz,
       X: ViewMode.yz,
-    }
+    };
     const allowedViews = Object.keys(mapping);
     if (!allowedViews.includes(params.view)) {
       params.view = "3D";
@@ -149,61 +189,18 @@ if (params) {
     args.initialChannelSettings = initialChannelSettings;
   }
   if (params.url) {
-    // ZARR:
-    // ?url=baseurl/zarr.zarr&image=subpath
-    // ?url=baseurl&image=imagename.zarr (no subpath)
-    // everything except for baseurl will be the cellPath
-    // Time 0 will be loaded.
-    // TODO specify Pyramid level
-
-    // OME-TIFF:
-    // ?url=imageurl&image=imagename
-    // ?url=fullimageurl
-    // any split between baseUrl + cellPath is ok
-    // as long as (baseUrl+cellPath) ends with .tif or tiff
-
-    // JSON ATLAS:
-    // ?url=imageurl&image=imagename
-    // ?url=fullimageurl
-    // any split between baseUrl + cellPath is ok
-    // as long as (baseUrl+cellPath) ends with .json
-
-    // it is understood that if fovPath is provided, 
-    // it must be relative to baseUrl in addition to cellPath.
-
-    let decodedurl = decodeURI(params.url);
-    let decodedimage = "";
-    if (params.image) {
-      decodedimage = decodeURIComponent(params.image);
-    } 
-
-    // get the last thing in the url
-    if (decodedurl.endsWith("/")) {
-      decodedurl = decodedurl.slice(0, -1);
-    }
-    const spliturl = decodedurl.split("/");
-    const lastpart = spliturl[spliturl.length - 1];
-    const baseUrl = decodedurl.slice(0, -lastpart.length);
-    // any difference for zarr or tiff or json?
-    decodedurl = baseUrl;
-    if (decodedimage !== "") {
-      decodedimage = lastpart+"/"+decodedimage;
-    }
-    else {
-      decodedimage = lastpart;
-    }
+    let decodedUrl = decodeUrl(params.url);
 
     args.cellid = 1;
-    args.baseurl = decodedurl;
-    args.cellPath = decodedimage;
+    args.imageUrl = decodedUrl;
     // this is invalid for zarr?
-    args.cellDownloadHref = decodedurl + decodedimage;
-    args.fovPath = "";
+    args.cellDownloadHref = decodedUrl;
+    args.parentImageUrl = "";
     args.fovDownloadHref = "";
     // if json, then use the CFE settings for now.
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
-    if (!decodedimage.endsWith("json") && !params.ch) {
+    if (!decodedUrl.endsWith("json") && !params.ch) {
       args.initialChannelSettings = {
         groups: [
           // first 3 channels on by default!
@@ -223,47 +220,15 @@ if (params) {
     //
     // ?file=relative-path-to-atlas-on-isilon
     args.cellid = 1;
-    args.baseurl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
-    args.cellPath = params.file;
-    args.fovPath = params.file;
+    const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
+    args.imageUrl = baseUrl + params.file;
+    args.parentImageUrl = baseUrl + params.file;
     args.fovDownloadHref = "";
     args.cellDownloadHref = "";
     runApp();
   } else if (params.dataset && params.id) {
     // ?dataset=aics_hipsc_v2020.1&id=232265
-    const db = new FirebaseRequest();
-
-    db.getAvailableDatasets()
-      .then((datasets) => {
-        for (let i = 0; i < datasets.length; ++i) {
-          console.log(datasets);
-          const names = Object.keys(datasets[i].datasets!);
-          for (let j = 0; j < names.length; ++j) {
-            if (names[j] === params.dataset) {
-              return datasets[i].datasets![names[j]];
-            }
-          }
-        }
-        return undefined;
-      })
-      .then((dataset) => {
-        return db.selectDataset(dataset!.manifest!);
-      })
-      .then((datasetData) => {
-        args.baseurl = datasetData.volumeViewerDataRoot + "/";
-        args.cellDownloadHref = datasetData.downloadRoot + "/" + params.id;
-        //fovDownloadHref = datasetData.downloadRoot + "/" + params.id;
-      })
-      .then(() => {
-        return db.getFileInfoByCellId(params.id!); // guarded above
-      })
-      .then((fileInfo) => {
-        args.cellPath = fileInfo!.volumeviewerPath;
-        args.fovPath = fileInfo!.fovVolumeviewerPath;
-        runApp();
-
-        // only now do we have all the data needed
-      });
+    loadDataset(params.dataset, params.id);
   } else {
     runApp();
   }
@@ -275,11 +240,10 @@ function runApp() {
   ReactDOM.render(
     <ImageViewerApp
       cellId={args.cellid.toString()}
-      baseUrl={args.baseurl}
+      imageUrl={args.imageUrl}
+      parentImageUrl={args.parentImageUrl}
       appHeight="100vh"
       canvasMargin="0 0 0 0"
-      cellPath={args.cellPath}
-      fovPath={args.fovPath}
       fovDownloadHref={args.fovDownloadHref}
       cellDownloadHref={args.cellDownloadHref}
       viewerSettings={viewerSettings}
