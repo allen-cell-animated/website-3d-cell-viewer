@@ -63,8 +63,8 @@ type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "url2" | "file" | "
 type Params = { [_ in ParamKeys]?: string };
 
 function parseQueryString(): Params {
-  var pairs = location.search.slice(1).split("&");
-  var result = {};
+  const pairs = location.search.slice(1).split("&");
+  const result = {};
   pairs.forEach((pairString) => {
     const pair = pairString.split("=");
     result[pair[0]] = decodeURIComponent(pair[1] || "");
@@ -186,7 +186,7 @@ if (params) {
     args.initialChannelSettings = initialChannelSettings;
   }
   if (params.url) {
-    let decodedUrl = decodeUrl(params.url);
+    const decodedUrl = decodeUrl(params.url);
 
     args.cellid = 1;
     args.imageUrl = decodedUrl;
