@@ -446,8 +446,8 @@ const App: React.FC<AppProps> = (props) => {
 
   const openImage = async (): Promise<void> => {
     const { imageUrl, parentImageUrl } = props;
-    const path =
-      viewerSettings.imageType === ImageType.fullField && parentImageUrl !== undefined ? parentImageUrl : imageUrl;
+    const showParentImage = viewerSettings.imageType === ImageType.fullField && parentImageUrl !== undefined;
+    const path = showParentImage ? parentImageUrl : imageUrl;
     // Don't reload if we're already looking at this image
     if (path === imageUrlRef.current) {
       return;
