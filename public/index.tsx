@@ -81,7 +81,7 @@ const decodeUrl = (url: string) => {
 const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
 const args = {
   cellid: 2025,
-  imageUrl: BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json",
+  imageUrl: (BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json") as string | string[],
   parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
   fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
@@ -187,9 +187,11 @@ if (params) {
   }
   if (params.url) {
     const decodedUrl = decodeUrl(params.url);
+    const decodedUrl2 = params.url2 && decodeUrl(params.url2);
+    const imageUrl = decodedUrl2 ? [decodedUrl, decodedUrl2] : decodedUrl;
 
     args.cellid = 1;
-    args.imageUrl = decodedUrl;
+    args.imageUrl = imageUrl;
     // this is invalid for zarr?
     args.cellDownloadHref = decodedUrl;
     args.parentImageUrl = "";
