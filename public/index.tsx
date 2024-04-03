@@ -8,7 +8,7 @@ import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
 import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
-import FirebaseRequest from "./firebase";
+import FirebaseRequest, { DatasetMetaData } from "./firebase";
 import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
 // vars filled at build time using webpack DefinePlugin
@@ -104,37 +104,34 @@ const viewerSettings: Partial<GlobalViewerSettings> = {
 async function loadDataset(dataset: string, id: string) {
   const db = new FirebaseRequest();
 
-  db.getAvailableDatasets()
-    .then((datasets) => {
-      for (let i = 0; i < datasets.length; ++i) {
-        console.log(datasets);
-        const names = Object.keys(datasets[i].datasets!);
-        for (let j = 0; j < names.length; ++j) {
-          if (names[j] === dataset) {
-            return datasets[i].datasets![names[j]];
-          }
-        }
-      }
-      return undefined;
-    })
-    .then((dataset) => {
-      return db.selectDataset(dataset!.manifest!);
-    })
-    .then((datasetData) => {
-      args.baseurl = datasetData.volumeViewerDataRoot + "/";
-      args.cellDownloadHref = datasetData.downloadRoot + "/" + id;
-      //fovDownloadHref = datasetData.downloadRoot + "/" + id;
-    })
-    .then(() => {
-      return db.getFileInfoByCellId(id);
-    })
-    .then((fileInfo) => {
-      args.cellPath = fileInfo!.volumeviewerPath;
-      args.fovPath = fileInfo!.fovVolumeviewerPath;
-      runApp();
+  const datasets = await db.getAvailableDatasets();
 
-      // only now do we have all the data needed
-    });
+  let datasetMeta: DatasetMetaData | undefined = undefined;
+  for (const d of datasets) {
+    const innerDatasets = d.datasets!;
+    const names = Object.keys(innerDatasets);
+    const matchingName = names.find((name) => name === dataset);
+    if (matchingName) {
+      datasetMeta = innerDatasets[matchingName];
+      break;
+    }
+  }
+  if (datasetMeta === undefined) {
+    console.error(`No matching dataset: ${dataset}`);
+    return;
+  }
+
+  const datasetData = await db.selectDataset(datasetMeta.manifest!);
+  const baseUrl = datasetData.volumeViewerDataRoot + "/";
+  args.cellDownloadHref = datasetData.downloadRoot + "/" + id;
+  // args.fovDownloadHref = datasetData.downloadRoot + "/" + id;
+
+  const fileInfo = await db.getFileInfoByCellId(id);
+  args.imageUrl = baseUrl + fileInfo!.volumeviewerPath;
+  args.parentImageUrl = baseUrl + fileInfo!.fovVolumeviewerPath;
+  runApp();
+
+  // only now do we have all the data needed
 }
 
 if (params) {
