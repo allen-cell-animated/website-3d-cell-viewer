@@ -126,12 +126,12 @@ const defaultProps: AppProps = {
   // rawDims is the volume dims that normally come from a json file
   rawDims: undefined,
 
+  imageUrl: "",
+  parentImageUrl: "",
+
   appHeight: "100vh",
-  cellPath: "",
-  fovPath: "",
   showControls: defaultShownControls,
   viewerSettings: defaultViewerSettings,
-  baseUrl: "",
   cellId: "",
   cellDownloadHref: "",
   fovDownloadHref: "",
