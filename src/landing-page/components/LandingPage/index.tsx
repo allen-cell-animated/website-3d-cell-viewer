@@ -28,7 +28,6 @@ const BannerTextContainer = styled(FlexColumn)`
   background-color: var(--color-background);
   // Make the background slightly transparent. Note that this may fail on internet explorer.
   background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.3);
   gap: 10px;
 
   & > h1 {
