@@ -46,7 +46,8 @@
     "d3": "^4.11.0",
     "lodash": "^4.17.20",
     "nouislider-react": "^3.4.0",
-    "react-color": "^2.19.3"
+    "react-color": "^2.19.3",
+    "styled-components": "^6.1.8"
   },
   "peerDependencies": {
     "antd": "^3.26.20",
