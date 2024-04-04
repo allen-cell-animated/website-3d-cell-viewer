@@ -1,7 +1,7 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "antd";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 import { landingPageContent } from "./content";
 import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
@@ -51,6 +51,7 @@ const BannerVideoContainer = styled.div`
   & > video {
     width: 100%;
     height: 100%;
+    object-position: 50% 30%;
     object-fit: cover;
   }
 `;
@@ -242,7 +243,14 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     );
   };
 
-  // TODO: Add accessibility check here for `prefers-reduced-motion`
+  const [allowMotion, setAllowMotion] = useState(window.matchMedia("(prefers-reduced-motion: no-preference)").matches);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    mediaQuery.addEventListener("change", () => {
+      setAllowMotion(mediaQuery.matches);
+    });
+  });
+
   return (
     <>
       {/* <Header>
@@ -253,7 +261,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
       </Header> */}
       <Banner>
         <BannerVideoContainer>
-          <video autoPlay loop muted>
+          <video autoPlay={allowMotion} loop muted>
             <source src="/videos/banner-video.mp4" type="video/mp4" />
           </video>
         </BannerVideoContainer>
