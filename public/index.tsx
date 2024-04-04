@@ -6,13 +6,10 @@ import "antd/dist/antd.less";
 // Components
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
-import "../src/aics-image-viewer/assets/styles/variables.css";
 
 import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import FirebaseRequest from "./firebase";
 import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
-import LandingPage from "../src/landing-page/components/LandingPage";
-import { ViewerArgs } from "../src/landing-page/types";
 
 // vars filled at build time using webpack DefinePlugin
 console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
@@ -110,7 +107,7 @@ if (params) {
       Z: ViewMode.xy,
       Y: ViewMode.xz,
       X: ViewMode.yz,
-    };
+    }
     const allowedViews = Object.keys(mapping);
     if (!allowedViews.includes(params.view)) {
       params.view = "3D";
@@ -171,14 +168,14 @@ if (params) {
     // any split between baseUrl + cellPath is ok
     // as long as (baseUrl+cellPath) ends with .json
 
-    // it is understood that if fovPath is provided,
+    // it is understood that if fovPath is provided, 
     // it must be relative to baseUrl in addition to cellPath.
 
     let decodedurl = decodeURI(params.url);
     let decodedimage = "";
     if (params.image) {
       decodedimage = decodeURIComponent(params.image);
-    }
+    } 
 
     // get the last thing in the url
     if (decodedurl.endsWith("/")) {
@@ -190,8 +187,9 @@ if (params) {
     // any difference for zarr or tiff or json?
     decodedurl = baseUrl;
     if (decodedimage !== "") {
-      decodedimage = lastpart + "/" + decodedimage;
-    } else {
+      decodedimage = lastpart+"/"+decodedimage;
+    }
+    else {
       decodedimage = lastpart;
     }
 
@@ -274,31 +272,19 @@ if (params) {
 }
 
 function runApp() {
-  const showLandingPage = false;
-
   ReactDOM.render(
-    <>
-      {showLandingPage ? (
-        <LandingPage
-          load={function (args: ViewerArgs): void {
-            throw new Error("Function not implemented.");
-          }}
-        />
-      ) : (
-        <ImageViewerApp
-          cellId={args.cellid.toString()}
-          baseUrl={args.baseurl}
-          appHeight="100vh"
-          canvasMargin="0 0 0 0"
-          cellPath={args.cellPath}
-          fovPath={args.fovPath}
-          fovDownloadHref={args.fovDownloadHref}
-          cellDownloadHref={args.cellDownloadHref}
-          viewerSettings={viewerSettings}
-          viewerChannelSettings={args.initialChannelSettings}
-        />
-      )}
-    </>,
+    <ImageViewerApp
+      cellId={args.cellid.toString()}
+      baseUrl={args.baseurl}
+      appHeight="100vh"
+      canvasMargin="0 0 0 0"
+      cellPath={args.cellPath}
+      fovPath={args.fovPath}
+      fovDownloadHref={args.fovDownloadHref}
+      cellDownloadHref={args.cellDownloadHref}
+      viewerSettings={viewerSettings}
+      viewerChannelSettings={args.initialChannelSettings}
+    />,
     document.getElementById("cell-viewer")
   );
 }
