@@ -27,7 +27,7 @@ const BannerTextContainer = styled(FlexColumn)`
   // Fallback in case color-mix is unsupported.
   background-color: var(--color-background);
   // Make the background slightly transparent. Note that this may fail on internet explorer.
-  background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
+  background-color: color-mix(in srgb, #020202 86%, transparent);
   gap: 10px;
 
   & > h1 {
@@ -52,8 +52,6 @@ const BannerVideoContainer = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    // Fixes a bug where a single pixel black outline would appear around the video.
-    clip-path: inset(1px 1px);
   }
 `;
 
@@ -244,6 +242,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     );
   };
 
+  // TODO: Add accessibility check here for `prefers-reduced-motion`
   return (
     <>
       {/* <Header>
@@ -255,7 +254,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
       <Banner>
         <BannerVideoContainer>
           <video autoPlay loop muted>
-            <source src="/banner_video.mp4" type="video/mp4" />
+            <source src="/videos/banner-video.mp4" type="video/mp4" />
           </video>
         </BannerVideoContainer>
         <BannerTextContainer>
