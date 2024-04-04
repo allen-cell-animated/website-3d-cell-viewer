@@ -274,7 +274,7 @@ if (params) {
 }
 
 function runApp() {
-  const showLandingPage = true;
+  const showLandingPage = false;
 
   ReactDOM.render(
     <>
