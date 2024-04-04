@@ -14,7 +14,7 @@ export type ViewerArgs = {
 export type DatasetEntry = {
   name: string;
   description: string;
-  loadParams: ViewerArgs;
+  loadParams: Partial<ViewerArgs>;
 };
 
 export type ProjectEntry = {
@@ -22,7 +22,7 @@ export type ProjectEntry = {
   description: string;
   publicationLink?: URL;
   publicationName?: string;
-  loadParams?: ViewerArgs;
+  loadParams?: Partial<ViewerArgs>;
   datasets?: DatasetEntry[];
   inReview?: boolean;
 };
