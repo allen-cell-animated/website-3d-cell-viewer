@@ -6,7 +6,7 @@ import React, { ReactElement } from "react";
 import { landingPageContent } from "./content";
 import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
 import styled from "styled-components";
-import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden } from "./utils";
+import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 
 const Banner = styled(FlexColumnAlignCenter)`
   position: relative;
@@ -183,26 +183,26 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   // Currently both the link and the button inside can be tab-selected.
   const renderDataset = (dataset: DatasetEntry, index: number): ReactElement => {
     return (
-      <div className="" key={index}>
+      <DatasetCard>
         <h4>{dataset.name}</h4>
         <p>{dataset.description}</p>
         <Button type="primary" onClick={() => props.load(dataset.loadParams)}>
           Load<VisuallyHidden> dataset {dataset.name}</VisuallyHidden>
         </Button>
-      </div>
+      </DatasetCard>
     );
   };
 
   const renderProject = (project: ProjectEntry, index: number): ReactElement => {
     const projectNameElement = project.inReview ? (
-      <div style={{ display: "flex", flexDirection: "row", gap: "10px", justifyContent: "space-between" }}>
+      <FlexRow style={{ justifyContent: "space-between" }} $gap={10}>
         <h3>{project.name}</h3>
         <Tooltip title="Final version of dataset will be released when associated paper is published">
-          <div className="in-review-flag">
+          <InReviewFlag>
             <p>IN REVIEW</p>
-          </div>
+          </InReviewFlag>
         </Tooltip>
-      </div>
+      </FlexRow>
     ) : (
       <h3>{project.name}</h3>
     );
@@ -253,12 +253,12 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
           <HelpDropdown />
         </FlexRowAlignCenter>
       </Header> */}
-      <div className="banner">
-        <div className="banner-video-container">
+      <Banner>
+        <BannerVideoContainer>
           <video autoPlay loop muted>
             <source src="/banner_video.mp4" type="video/mp4" />
           </video>
-        </div>
+        </BannerVideoContainer>
         <BannerTextContainer>
           <h1>Welcome to Timelapse Feature Explorer</h1>
           <p>
@@ -268,7 +268,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
             dynamic datasets.
           </p>
         </BannerTextContainer>
-      </div>
+      </Banner>
 
       <br />
       <ContentContainer $gap={10}>
