@@ -260,12 +260,11 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
           </video>
         </BannerVideoContainer>
         <BannerTextContainer>
-          <h1>Welcome to Timelapse Feature Explorer</h1>
+          <h1>Welcome to 3D Volume Viewer</h1>
           <p>
-            The Timelapse Feature Explorer is a web-based application designed for the interactive visualization and
-            analysis of segmented time-series microscopy data. Ideal for biomedical researchers and other data
-            professionals, it offers an intuitive set of tools for scientific research and deeper understanding of
-            dynamic datasets.
+            The 3D Volume Viewer is an open-use web-based tool designed to visualize, analyze and interpret
+            multi-channel 3D microscopy data. Ideal for researchers, educators, and students, the viewer offers powerful
+            interactive tools to extract key insights from imaging data.
           </p>
         </BannerTextContainer>
       </Banner>
@@ -274,30 +273,27 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
       <ContentContainer $gap={10}>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
-            <h3>Dynamic color mapping</h3>
-            <p>Customizable colormaps to understand patterns and trends within time lapse data.</p>
+            <h3>Multiresolution OME-Zarr support</h3>
+            <p>Load your cloud hosted OME-Zarr v0.4 images via http(s).</p>
           </FeatureHighlightsItem>
           <FeatureHighlightsItem>
-            <h3>Interactive data exploration</h3>
-            <p>Easily switch between features for focused analysis or comparing different datasets.</p>
+            <h3>Multiple viewing modes</h3>
+            <p>Rotate and examine the volume in 3D, or focus on single Z slices in 2D at higher resolution.</p>
           </FeatureHighlightsItem>
           <FeatureHighlightsItem>
-            <h3>Temporal navigation controls</h3>
+            <h3>Time-series playthrough</h3>
+            <p>Interactively explore dynamics and manipulate timelapse videos realtime in 2D or 3D.</p>
+          </FeatureHighlightsItem>
+          <FeatureHighlightsItem>
+            <h3>Customizable settings</h3>
             <p>
-              Feature-rich playback controls to observe motion and dynamics over time, revealing trends and anomalies.
-            </p>
-          </FeatureHighlightsItem>
-          <FeatureHighlightsItem>
-            <h3>Feature extraction and visualization</h3>
-            <p>
-              Integrated plots show feature evolution, outliers, clusters and other patterns facilitating a nuanced
-              understanding of temporal dynamics.
+              Switch colors, turn channels on and off or apply a threshold to reveal interesting features in the data.
             </p>
           </FeatureHighlightsItem>
         </FeatureHighlightsContainer>
         <Divider />
         <FlexColumnAlignCenter>
-          <h2>Load dataset(s) below or your own data to get started</h2>
+          <h2>Load an example below or your own data to get started.</h2>
         </FlexColumnAlignCenter>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
