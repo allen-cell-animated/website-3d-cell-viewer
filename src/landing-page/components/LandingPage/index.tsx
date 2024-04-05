@@ -25,9 +25,7 @@ const BannerTextContainer = styled(FlexColumn)`
   width: calc(90vw - var(--total-padding-x));
   border-radius: 5px;
   // Fallback in case color-mix is unsupported.
-  background-color: var(--color-background);
-  // Make the background slightly transparent. Note that this may fail on internet explorer.
-  background-color: color-mix(in srgb, #020202 86%, transparent);
+  background-color: var(--color-landingpage-banner-highlight-bg);
   gap: 10px;
 
   & > h1 {
@@ -252,7 +250,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   });
 
   return (
-    <>
+    <div style={{ backgroundColor: "var(--color-landingpage-bg)" }}>
       {/* <Header>
         <FlexRowAlignCenter $gap={15}>
           <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
@@ -260,12 +258,12 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </FlexRowAlignCenter>
       </Header> */}
       <Banner>
-        <BannerVideoContainer>
+        <BannerVideoContainer style={{ zIndex: 1 }}>
           <video autoPlay={allowMotion} loop muted>
             <source src="/videos/banner-video.mp4" type="video/mp4" />
           </video>
         </BannerVideoContainer>
-        <BannerTextContainer>
+        <BannerTextContainer style={{ zIndex: 1 }}>
           <h1>Welcome to 3D Volume Viewer</h1>
           <p>
             The 3D Volume Viewer is an open-use web-based tool designed to visualize, analyze and interpret
@@ -303,6 +301,6 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </FlexColumnAlignCenter>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
-    </>
+    </div>
   );
 }

@@ -1,0 +1,55 @@
+.aics-image-viewer-style-provider {
+    /* Color palette. COMPONENTS USING CSS VARIABLES SHOULD **NOT** ACCESS THESE DIRECTLY. */
+    --palette-black: #000000;
+    --palette-white: #ffffff;
+    --palette-lt-grey: #bfbfbf;
+    --palette-purple-grey: #aeacae;
+    --palette-med-lt-grey-alt: #a0a0a0;
+    --palette-med-grey: #6e6e6e;
+    --palette-med-dark-grey: #4b4b4b
+    --palette-dark-grey: #313131;
+    --palette-very-dark-grey: #222222;
+    --palette-lime-green: #b2d030;
+    --palette-lt-purple: #aa88ed;
+    --palette-med-purple: #9e6aff;
+    /* #8950D9 is deprecated. ("medium purple") */
+    --palette-dark-purple: #7e46d4;
+    --palette-very-lt-purple: #e7e4f2;
+    --palette-bright-red: #ff4d4d;
+    --palette-bright-green: #61d900;
+    --palette-bright-blue: #0099ff;
+
+    /* Component and color variables.
+     * TODO: use these to control component colors.
+     */
+    --color-header-text: var(--palette-med-purple);
+    --color-header-icon: var(--palette-white);
+    --color-header-bg: var(--palette-very-dark-grey);
+    --color-header-border: var(--palette-med-grey);
+
+    --color-button-primary-bg: var(--palette-med-purple);
+    --color-button-primary-text: var(--palette-white);
+    --color-button-primary-hover-bg: var(--palette-lt-purple);
+    --color-button-primary-active-outline: var(--palette-med-purple);
+    --color-button-primary-disabled-bg: var(--palette-med-dark-grey);
+
+    --color-button-secondary-bg: transparent;
+    --color-button-secondary-text: var(--palette-med-purple);
+    --color-button-secondary-outline: var(--palette-med-purple);
+    --color-button-secondary-hover-bg: var(--palette-lt-purple);
+
+    --color-controlpanel-bg: var(--palette-dark-grey);
+    --color-controlpanel-border: var(--palette-med-grey);
+    --color-controlpanel-text: var(--palette-lt-grey);
+    --color-controlpanel-section-bg: var(--palette-med-dark-grey);
+
+    --color-landingpage-bg: var(--palette-very-dark-grey);
+    --color-landingpage-text: var(--palette-lt-grey);
+    --color-landingpage-banner-highlight-bg: #020202DB;
+
+    --color-layout-dividers: var(--palette-med-grey);
+
+    --color-text-link: var(--palette-bright-blue);
+    --color-text-header: var(--palette-white);
+    --color-text-body: var(--palette-lt-grey);
+}
