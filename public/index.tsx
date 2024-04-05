@@ -83,8 +83,8 @@ const args = {
   cellid: 2025,
   imageUrl: (BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json") as string | string[],
   parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
-  fovDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
-  cellDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
+  parentImageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
+  imageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
   initialChannelSettings: VIEWER_3D_SETTINGS,
 };
 const viewerSettings: Partial<GlobalViewerSettings> = {
@@ -123,7 +123,7 @@ async function loadDataset(dataset: string, id: string) {
 
   const datasetData = await db.selectDataset(datasetMeta.manifest!);
   const baseUrl = datasetData.volumeViewerDataRoot + "/";
-  args.cellDownloadHref = datasetData.downloadRoot + "/" + id;
+  args.imageDownloadHref = datasetData.downloadRoot + "/" + id;
   // args.fovDownloadHref = datasetData.downloadRoot + "/" + id;
 
   const fileInfo = await db.getFileInfoByCellId(id);
@@ -193,9 +193,9 @@ if (params) {
     args.cellid = 1;
     args.imageUrl = imageUrl;
     // this is invalid for zarr?
-    args.cellDownloadHref = decodedUrl;
+    args.imageDownloadHref = decodedUrl;
     args.parentImageUrl = "";
-    args.fovDownloadHref = "";
+    args.parentImageDownloadHref = "";
     // if json, then use the CFE settings for now.
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
@@ -222,8 +222,8 @@ if (params) {
     const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
     args.imageUrl = baseUrl + params.file;
     args.parentImageUrl = baseUrl + params.file;
-    args.fovDownloadHref = "";
-    args.cellDownloadHref = "";
+    args.parentImageDownloadHref = "";
+    args.imageDownloadHref = "";
     runApp();
   } else if (params.dataset && params.id) {
     // ?dataset=aics_hipsc_v2020.1&id=232265
@@ -243,8 +243,8 @@ function runApp() {
       parentImageUrl={args.parentImageUrl}
       appHeight="100vh"
       canvasMargin="0 0 0 0"
-      parentImageDownloadHref={args.fovDownloadHref}
-      imageDownloadHref={args.cellDownloadHref}
+      parentImageDownloadHref={args.parentImageDownloadHref}
+      imageDownloadHref={args.imageDownloadHref}
       viewerSettings={viewerSettings}
       viewerChannelSettings={args.initialChannelSettings}
     />,
