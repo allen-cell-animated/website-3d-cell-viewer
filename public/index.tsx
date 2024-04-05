@@ -243,8 +243,8 @@ function runApp() {
       parentImageUrl={args.parentImageUrl}
       appHeight="100vh"
       canvasMargin="0 0 0 0"
-      fovDownloadHref={args.fovDownloadHref}
-      cellDownloadHref={args.cellDownloadHref}
+      parentImageDownloadHref={args.fovDownloadHref}
+      imageDownloadHref={args.cellDownloadHref}
       viewerSettings={viewerSettings}
       viewerChannelSettings={args.initialChannelSettings}
     />,

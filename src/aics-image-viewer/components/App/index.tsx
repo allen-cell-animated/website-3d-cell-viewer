@@ -133,8 +133,8 @@ const defaultProps: AppProps = {
   showControls: defaultShownControls,
   viewerSettings: defaultViewerSettings,
   cellId: "",
-  cellDownloadHref: "",
-  fovDownloadHref: "",
+  imageDownloadHref: "",
+  parentImageDownloadHref: "",
   pixelSize: undefined,
   canvasMargin: "0 0 0 0",
 };
@@ -815,8 +815,8 @@ const App: React.FC<AppProps> = (props) => {
         <Content>
           <Toolbar
             viewMode={viewerSettings.viewMode}
-            fovDownloadHref={props.fovDownloadHref}
-            cellDownloadHref={props.cellDownloadHref}
+            fovDownloadHref={props.parentImageDownloadHref}
+            cellDownloadHref={props.imageDownloadHref}
             autorotate={viewerSettings.autorotate}
             imageType={viewerSettings.imageType}
             hasParentImage={!!props.parentImageUrl}

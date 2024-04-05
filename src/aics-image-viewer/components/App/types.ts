@@ -71,8 +71,8 @@ export interface AppProps {
   cellId: string;
   showControls?: Partial<ShowControls>;
   viewerSettings?: Partial<GlobalViewerSettings>;
-  cellDownloadHref: string;
-  fovDownloadHref: string;
+  imageDownloadHref: string;
+  parentImageDownloadHref: string;
   pixelSize?: [number, number, number];
   canvasMargin: string;
   transform?: {
