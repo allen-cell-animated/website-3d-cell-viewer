@@ -160,6 +160,7 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   flex-wrap: wrap;
 
   & > p {
+    margin-bottom: 0;
     color: var(--color-statusflag-text);
     font-size: 10px;
     font-weight: 600;
