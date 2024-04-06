@@ -1,3 +1,5 @@
+/* TODO: Replace all of these with CSS variables (e.g. var(--color-text-body) and remove PostCSS from the project.*/
+
 /* $app-height: 100%; */
 /* $dark-gray: #313131; */
 /* $purple: #8048f3; */
