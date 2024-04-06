@@ -47,6 +47,9 @@
     --color-landingpage-text: var(--palette-lt-grey);
     --color-landingpage-banner-highlight-bg: #020202DB;
 
+    --color-statusflag-bg: var(--palette-very-lt-purple);
+    --color-statusflag-text: var(--palette-dark-purple);
+
     --color-layout-dividers: var(--palette-med-grey);
 
     --color-text-link: var(--palette-bright-blue);

@@ -24,7 +24,6 @@ const BannerTextContainer = styled(FlexColumn)`
   --total-padding-x: calc(2 * var(--padding-x) + 2 * var(--container-padding-x));
   width: calc(90vw - var(--total-padding-x));
   border-radius: 5px;
-  // Fallback in case color-mix is unsupported.
   background-color: var(--color-landingpage-banner-highlight-bg);
   gap: 10px;
 
@@ -156,14 +155,14 @@ const DatasetCard = styled.li`
 const InReviewFlag = styled(FlexRowAlignCenter)`
   border-radius: 4px;
   padding: 1px 6px;
-  background-color: var(--color-flag-background);
+  background-color: var(--color-statusflag-bg);
   height: 22px;
   flex-wrap: wrap;
 
   & > p {
-    color: var(--color-flag-text);
+    color: var(--color-statusflag-text);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
   }
 `;
