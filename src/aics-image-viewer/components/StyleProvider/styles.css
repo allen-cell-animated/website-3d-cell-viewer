@@ -20,7 +20,8 @@
     --palette-bright-blue: #0099ff;
 
     /* Component and color variables.
-     * TODO: use these to control component colors.
+     * TODO: use these to control component colors instead of the currently
+     * hard-coded colors in the components.
      */
     --color-header-text: var(--palette-med-purple);
     --color-header-icon: var(--palette-white);
@@ -55,4 +56,46 @@
     --color-text-link: var(--palette-bright-blue);
     --color-text-header: var(--palette-white);
     --color-text-body: var(--palette-lt-grey);
+
+    --font-family: 'Open Sans', Arial, sans-serif;
+
+    h1, h2, h3, h4, p {
+        font-family: var(--font-family);
+    }
+
+    h1 {
+        color: var(--color-text-header);
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    h2 {
+        color: var(--color-text-header);
+        font-size: 19px;
+        font-weight: 600;
+    }
+
+    h3 {
+        font-family: var(--font-family);
+        color: var(--color-text-header);
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    p {
+        font-family: var(--font-family);
+        color: var(--color-text-body);
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    & *::selection {
+        /** 
+         * Override Ant + Less styling, since it uses a very light purple that's 
+         * impossible to read white text on.
+         * TODO: Fix this in the main app too. This currently only applies to landing page.
+         */
+        background-color: #7e46d4;
+        color: var(--palette-white);
+    }
 }
