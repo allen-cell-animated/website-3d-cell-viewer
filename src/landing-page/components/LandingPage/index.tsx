@@ -116,6 +116,11 @@ const ProjectCard = styled.li`
   & h3 {
     font-weight: 600;
   }
+
+  & p,
+  & h3 {
+    margin: 0;
+  }
 `;
 
 const DatasetList = styled.ol`
@@ -233,8 +238,10 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     return (
       <ProjectCard key={index}>
         {projectNameElement}
-        <p>{project.description}</p>
-        {publicationElement}
+        <FlexColumn $gap={6}>
+          <p>{project.description}</p>
+          {publicationElement}
+        </FlexColumn>
         {loadButton}
         {datasetList}
       </ProjectCard>

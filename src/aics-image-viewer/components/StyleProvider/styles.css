@@ -56,6 +56,8 @@
     --color-text-link: var(--palette-bright-blue);
     --color-text-header: var(--palette-white);
     --color-text-body: var(--palette-lt-grey);
+    --color-text-selection-bg: var(--palette-med-purple);
+    --color-text-selection-text: var(--palette-white);
 
     --font-family: 'Open Sans', Arial, sans-serif;
 
@@ -95,7 +97,7 @@
          * impossible to read white text on.
          * TODO: Fix this in the main app too. This currently only applies to landing page.
          */
-        background-color: #7e46d4;
-        color: var(--palette-white);
+        background-color: var(--color-text-selection-bg);
+        color: var(--color-text-selection-text);
     }
 }
