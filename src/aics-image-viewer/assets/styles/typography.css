@@ -1,4 +1,6 @@
 #cell-viewer {
+  height: 100%;
+
   body {
     font-family: "Open Sans", "Overpass-Light", Arial, sans-serif;
   }

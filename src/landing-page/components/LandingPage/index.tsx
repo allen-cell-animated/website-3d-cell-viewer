@@ -58,6 +58,7 @@ const ContentContainer = styled(FlexColumn)`
   width: calc(90vw - 40px);
   margin: auto;
   padding: 0 20px;
+  gap: 20px;
 `;
 
 const FeatureHighlightsContainer = styled.li`
@@ -67,7 +68,7 @@ const FeatureHighlightsContainer = styled.li`
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   padding: 0;
   justify-content: space-evenly;
-  gap: 10px;
+  gap: 12px 24px;
   margin: 20px 0;
 `;
 
@@ -78,6 +79,7 @@ const FeatureHighlightsItem = styled(FlexColumn)`
 
   & > h3 {
     font-weight: 600;
+    margin: 0;
   }
 `;
 
@@ -227,9 +229,11 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
 
     const loadParams = project.loadParams;
     const loadButton = loadParams ? (
-      <Button type="primary" onClick={() => props.load(loadParams)}>
-        Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
-      </Button>
+      <div>
+        <Button type="primary" onClick={() => props.load(loadParams)}>
+          Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
+        </Button>
+      </div>
     ) : null;
 
     // TODO: Break up list of datasets when too long and hide under collapsible section.
@@ -257,7 +261,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   });
 
   return (
-    <div style={{ backgroundColor: "var(--color-landingpage-bg)" }}>
+    <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>
       {/* <Header>
         <FlexRowAlignCenter $gap={15}>
           <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
@@ -280,7 +284,6 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </BannerTextContainer>
       </Banner>
 
-      <br />
       <ContentContainer $gap={10}>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
