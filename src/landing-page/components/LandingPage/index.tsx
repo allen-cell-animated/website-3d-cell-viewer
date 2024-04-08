@@ -87,7 +87,7 @@ const Divider = styled.hr`
   display: block;
   width: 100%;
   height: 1px;
-  background-color: var(--color-borders);
+  background-color: var(--color-layout-dividers);
   border-style: none;
 `;
 
@@ -104,7 +104,7 @@ const ProjectList = styled.ul`
     display: block;
     width: 100%;
     height: 1px;
-    background-color: var(--color-borders);
+    background-color: var(--color-layout-dividers);
     margin-bottom: 10px;
   }
 `;
@@ -198,7 +198,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
 
   const renderProject = (project: ProjectEntry, index: number): ReactElement => {
     const projectNameElement = project.inReview ? (
-      <FlexRow style={{ justifyContent: "space-between" }} $gap={10}>
+      <FlexRow $gap={10}>
         <h3>{project.name}</h3>
         <Tooltip title="Final version of dataset will be released when associated paper is published">
           <InReviewFlag>
