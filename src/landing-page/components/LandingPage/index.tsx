@@ -8,18 +8,20 @@ import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 
+const MAX_CONTENT_WIDTH_PX = 1060;
+
 const Banner = styled(FlexColumnAlignCenter)`
   position: relative;
   --container-padding-x: 20px;
-  padding: 30px var(--container-padding-x);
+  padding: 40px var(--container-padding-x);
   overflow: hidden;
   margin: 0;
 `;
 
 const BannerTextContainer = styled(FlexColumn)`
   --padding-x: 30px;
-  padding: var(--padding-x);
-  max-width: calc(1060px - 2 * var(--padding-x));
+  padding: 26px var(--padding-x);
+  max-width: calc(${MAX_CONTENT_WIDTH_PX}px - 2 * var(--padding-x));
 
   --total-padding-x: calc(2 * var(--padding-x) + 2 * var(--container-padding-x));
   width: calc(90vw - var(--total-padding-x));
@@ -54,7 +56,7 @@ const BannerVideoContainer = styled.div`
 `;
 
 const ContentContainer = styled(FlexColumn)`
-  max-width: 1060px;
+  max-width: ${MAX_CONTENT_WIDTH_PX}px;
   width: calc(90vw - 40px);
   margin: auto;
   padding: 0 20px;
@@ -69,7 +71,7 @@ const FeatureHighlightsContainer = styled.li`
   padding: 0;
   justify-content: space-evenly;
   gap: 12px 24px;
-  margin: 20px 0;
+  margin: 30px 0 0 0;
 `;
 
 const FeatureHighlightsItem = styled(FlexColumn)`
@@ -258,7 +260,12 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     mediaQuery.addEventListener("change", () => {
       setAllowMotion(mediaQuery.matches);
     });
-  });
+    return () => {
+      mediaQuery.removeEventListener("change", () => {
+        setAllowMotion(mediaQuery.matches);
+      });
+    };
+  }, []);
 
   return (
     <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>

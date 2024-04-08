@@ -17,6 +17,7 @@
     --palette-med-purple: #9e6aff;
     /* #8950D9 is deprecated. ("medium purple") */
     --palette-dark-purple: #7e46d4;
+    --palette-very-dark-purple: #5f369f;
     --palette-very-lt-purple: #e7e4f2;
     --palette-bright-red: #ff4d4d;
     --palette-bright-green: #61d900;
@@ -52,12 +53,12 @@
     --color-landingpage-banner-highlight-bg: #020202DB;
 
     --color-statusflag-bg: var(--palette-very-lt-purple);
-    --color-statusflag-text: var(--palette-dark-purple);
+    --color-statusflag-text: var(--palette-very-dark-purple);
 
     --color-layout-dividers: var(--palette-med-grey);
 
     --color-text-link: var(--palette-bright-blue);
-    --color-text-header: var(--palette-white);
+    --color-text-header: var(--palette-lt-grey);
     --color-text-body: var(--palette-lt-grey);
     --color-text-selection-bg: var(--palette-med-purple);
     --color-text-selection-text: var(--palette-white);
