@@ -50,7 +50,7 @@ const BannerVideoContainer = styled.div`
   & > video {
     width: 100%;
     height: 100%;
-    object-position: 50% 30%;
+    object-position: 50% 40%;
     object-fit: cover;
   }
 `;
