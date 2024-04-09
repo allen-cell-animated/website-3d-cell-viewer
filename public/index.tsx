@@ -73,7 +73,7 @@ function parseQueryString(): Params {
 }
 const params = parseQueryString();
 
-const decodeUrl = (url: string): string => {
+const decodeURL = (url: string): string => {
   const decodedUrl = decodeURIComponent(url);
   return decodedUrl.endsWith("/") ? decodedUrl.slice(0, -1) : decodedUrl;
 };
@@ -84,7 +84,7 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
     return undefined;
   }
 
-  const urls = url.split(delim).map((u) => decodeUrl(u));
+  const urls = url.split(delim).map((u) => decodeURL(u));
 
   // Verify that all urls are valid
   for (const u of urls) {
@@ -206,7 +206,7 @@ if (params) {
     args.viewerChannelSettings = initialChannelSettings;
   }
   if (params.url) {
-    const imageUrls = tryDecodeURLList(params.url) ?? decodeUrl(params.url);
+    const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
     const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
 
     args.cellId = "1";
