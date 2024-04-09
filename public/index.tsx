@@ -59,7 +59,7 @@ export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
   maskChannelName: "SEG_Memb",
 };
 
-type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "url2" | "file" | "dataset" | "id" | "view";
+type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "file" | "dataset" | "id" | "view";
 type Params = { [_ in ParamKeys]?: string };
 
 function parseQueryString(): Params {
@@ -73,9 +73,29 @@ function parseQueryString(): Params {
 }
 const params = parseQueryString();
 
-const decodeUrl = (url: string) => {
-  const decodedUrl = decodeURI(url);
+const decodeUrl = (url: string): string => {
+  const decodedUrl = decodeURIComponent(url);
   return decodedUrl.endsWith("/") ? decodedUrl.slice(0, -1) : decodedUrl;
+};
+
+/** Tries to parse a string as a list of URLs */
+const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
+  if (!url.includes(delim)) {
+    return undefined;
+  }
+
+  const urls = url.split(delim).map((u) => decodeUrl(u));
+
+  // Verify that all urls are valid
+  for (const u of urls) {
+    try {
+      new URL(u);
+    } catch (_e) {
+      return undefined;
+    }
+  }
+
+  return urls;
 };
 
 const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
@@ -186,20 +206,19 @@ if (params) {
     args.viewerChannelSettings = initialChannelSettings;
   }
   if (params.url) {
-    const decodedUrl = decodeUrl(params.url);
-    const decodedUrl2 = params.url2 && decodeUrl(params.url2);
-    const imageUrl = decodedUrl2 ? [decodedUrl, decodedUrl2] : decodedUrl;
+    const imageUrls = tryDecodeURLList(params.url) ?? decodeUrl(params.url);
+    const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
 
     args.cellId = "1";
-    args.imageUrl = imageUrl;
+    args.imageUrl = imageUrls;
     // this is invalid for zarr?
-    args.imageDownloadHref = decodedUrl;
+    args.imageDownloadHref = firstUrl;
     args.parentImageUrl = "";
     args.parentImageDownloadHref = "";
     // if json, then use the CFE settings for now.
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
-    if (!decodedUrl.endsWith("json") && !params.ch) {
+    if (!firstUrl.endsWith("json") && !params.ch) {
       args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!
