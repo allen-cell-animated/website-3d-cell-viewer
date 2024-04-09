@@ -584,7 +584,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.setCameraMode(viewerSettings.viewMode);
   }, []);
 
-  // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, data)
+  // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `rawData`, etc)
   useEffect(() => {
     if (props.rawDims && props.rawData) {
       loadFromRaw();
