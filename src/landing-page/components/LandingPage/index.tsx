@@ -122,7 +122,7 @@ const ProjectCard = styled.li`
   }
 `;
 
-const DatasetList = styled.ol`
+const DatasetList = styled.ul`
   padding: 0;
   width: 100%;
   display: grid;
@@ -182,7 +182,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   // Currently both the link and the button inside can be tab-selected.
   const renderDataset = (dataset: DatasetEntry, index: number): ReactElement => {
     return (
-      <DatasetCard>
+      <DatasetCard key={index}>
         <h4>{dataset.name}</h4>
         <p>{dataset.description}</p>
         <Button type="primary" onClick={() => props.load(dataset.loadParams)}>
