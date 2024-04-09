@@ -9,7 +9,7 @@ import "./App.css";
 
 import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import FirebaseRequest, { DatasetMetaData } from "./firebase";
-import { GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
+import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
 // vars filled at build time using webpack DefinePlugin
 console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
@@ -79,13 +79,13 @@ const decodeUrl = (url: string) => {
 };
 
 const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
-const args = {
-  cellid: 2025,
-  imageUrl: (BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json") as string | string[],
+const args: Omit<AppProps, "appHeight" | "canvasMargin"> = {
+  cellId: "2025",
+  imageUrl: BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json",
   parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
   parentImageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
   imageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
-  initialChannelSettings: VIEWER_3D_SETTINGS,
+  viewerChannelSettings: VIEWER_3D_SETTINGS,
 };
 const viewerSettings: Partial<GlobalViewerSettings> = {
   showAxes: false,
@@ -183,14 +183,14 @@ if (params) {
         ch[i]["color"] = colors[i];
       }
     }
-    args.initialChannelSettings = initialChannelSettings;
+    args.viewerChannelSettings = initialChannelSettings;
   }
   if (params.url) {
     const decodedUrl = decodeUrl(params.url);
     const decodedUrl2 = params.url2 && decodeUrl(params.url2);
     const imageUrl = decodedUrl2 ? [decodedUrl, decodedUrl2] : decodedUrl;
 
-    args.cellid = 1;
+    args.cellId = "1";
     args.imageUrl = imageUrl;
     // this is invalid for zarr?
     args.imageDownloadHref = decodedUrl;
@@ -200,7 +200,7 @@ if (params) {
     // (See VIEWER_3D_SETTINGS)
     // otherwise turn the first 3 channels on and group them
     if (!decodedUrl.endsWith("json") && !params.ch) {
-      args.initialChannelSettings = {
+      args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!
           {
@@ -218,7 +218,7 @@ if (params) {
     // quick way to load a atlas.json from a special directory.
     //
     // ?file=relative-path-to-atlas-on-isilon
-    args.cellid = 1;
+    args.cellId = "1";
     const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
     args.imageUrl = baseUrl + params.file;
     args.parentImageUrl = baseUrl + params.file;
@@ -238,7 +238,7 @@ if (params) {
 function runApp() {
   ReactDOM.render(
     <ImageViewerApp
-      cellId={args.cellid.toString()}
+      cellId={args.cellId}
       imageUrl={args.imageUrl}
       parentImageUrl={args.parentImageUrl}
       appHeight="100vh"
@@ -246,7 +246,7 @@ function runApp() {
       parentImageDownloadHref={args.parentImageDownloadHref}
       imageDownloadHref={args.imageDownloadHref}
       viewerSettings={viewerSettings}
-      viewerChannelSettings={args.initialChannelSettings}
+      viewerChannelSettings={args.viewerChannelSettings}
     />,
     document.getElementById("cell-viewer")
   );
