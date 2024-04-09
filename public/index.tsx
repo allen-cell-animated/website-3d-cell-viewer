@@ -78,7 +78,7 @@ const decodeUrl = (url: string): string => {
   return decodedUrl.endsWith("/") ? decodedUrl.slice(0, -1) : decodedUrl;
 };
 
-/** Tries to parse a string as a list of URLs */
+/** Try to parse a `string` as a list of 2 or more URLs. Returns `undefined` if the string is not a valid URL list. */
 const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
   if (!url.includes(delim)) {
     return undefined;
