@@ -237,17 +237,7 @@ if (params) {
 
 function runApp() {
   ReactDOM.render(
-    <ImageViewerApp
-      cellId={args.cellId}
-      imageUrl={args.imageUrl}
-      parentImageUrl={args.parentImageUrl}
-      appHeight="100vh"
-      canvasMargin="0 0 0 0"
-      parentImageDownloadHref={args.parentImageDownloadHref}
-      imageDownloadHref={args.imageDownloadHref}
-      viewerSettings={viewerSettings}
-      viewerChannelSettings={args.viewerChannelSettings}
-    />,
+    <ImageViewerApp {...args} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />,
     document.getElementById("cell-viewer")
   );
 }
