@@ -2,7 +2,7 @@ import { DocumentReference, QuerySnapshot, DocumentData } from "@firebase/firest
 
 import { firestore } from "./configure-firebase";
 
-interface DatasetMetaData {
+export interface DatasetMetaData {
   name: string;
   version: string;
   datasets?: { [key: string]: DatasetMetaData };

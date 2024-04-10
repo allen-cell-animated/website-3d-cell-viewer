@@ -54,23 +54,25 @@ export interface GlobalViewerSettings {
 }
 
 export interface AppProps {
+  // FIRST WAY TO GET DATA INTO THE VIEWER: pass in volume data directly
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
   // rawDims is the volume dims that normally come from a json file
   rawDims?: ImageInfo;
+
+  // SECOND WAY TO GET DATA INTO THE VIEWER: (if `rawData`/`rawDims` isn't present) pass in URL(s) to fetch volume data
+  imageUrl: string | string[];
+  parentImageUrl?: string | string[];
 
   // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
   viewerChannelSettings?: ViewerChannelSettings;
 
   appHeight: string;
   cellId: string;
-  cellPath: string;
-  fovPath: string;
   showControls?: Partial<ShowControls>;
   viewerSettings?: Partial<GlobalViewerSettings>;
-  baseUrl: string;
-  cellDownloadHref: string;
-  fovDownloadHref: string;
+  imageDownloadHref: string;
+  parentImageDownloadHref: string;
   pixelSize?: [number, number, number];
   canvasMargin: string;
   transform?: {
