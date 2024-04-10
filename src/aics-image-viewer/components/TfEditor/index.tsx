@@ -718,6 +718,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.last_color = colorObjectToArray(color.rgb);
     if (this.selected) {
       this.selected.color = this.last_color;
+      this.props.updateChannelLutControlPoints([...this.props.controlPoints]);
       this.redraw();
     }
   }

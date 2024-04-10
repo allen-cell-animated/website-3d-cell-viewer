@@ -126,15 +126,15 @@ const defaultProps: AppProps = {
   // rawDims is the volume dims that normally come from a json file
   rawDims: undefined,
 
+  imageUrl: "",
+  parentImageUrl: "",
+
   appHeight: "100vh",
-  cellPath: "",
-  fovPath: "",
   showControls: defaultShownControls,
   viewerSettings: defaultViewerSettings,
-  baseUrl: "",
   cellId: "",
-  cellDownloadHref: "",
-  fovDownloadHref: "",
+  imageDownloadHref: "",
+  parentImageDownloadHref: "",
   pixelSize: undefined,
   canvasMargin: "0 0 0 0",
 };
@@ -181,7 +181,7 @@ const App: React.FC<AppProps> = (props) => {
   );
   const loader = useRef<IVolumeLoader>();
   const [image, setImage] = useState<Volume | null>(null);
-  const imageUrlRef = useRef<string>("");
+  const imageUrlRef = useRef<string | string[]>("");
 
   const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
   const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
@@ -445,11 +445,11 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const openImage = async (): Promise<void> => {
-    const { fovPath, cellPath, baseUrl } = props;
-    const path = viewerSettings.imageType === ImageType.fullField ? fovPath : cellPath;
-    const fullUrl = `${baseUrl}${path}`;
+    const { imageUrl, parentImageUrl } = props;
+    const showParentImage = viewerSettings.imageType === ImageType.fullField && parentImageUrl !== undefined;
+    const path = showParentImage ? parentImageUrl : imageUrl;
     // Don't reload if we're already looking at this image
-    if (fullUrl === imageUrlRef.current) {
+    if (path === imageUrlRef.current) {
       return;
     }
 
@@ -463,7 +463,7 @@ const App: React.FC<AppProps> = (props) => {
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
     await loadContext.onOpen();
-    loader.current = await loadContext.createLoader(fullUrl);
+    loader.current = await loadContext.createLoader(path);
 
     const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
@@ -478,7 +478,7 @@ const App: React.FC<AppProps> = (props) => {
 
     setAllChannelsUnloaded(channelNames.length);
 
-    imageUrlRef.current = fullUrl;
+    imageUrlRef.current = path;
     placeImageInViewer(aimg, newChannelSettings);
   };
 
@@ -584,7 +584,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.setCameraMode(viewerSettings.viewMode);
   }, []);
 
-  // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `time`)
+  // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `rawData`, etc)
   useEffect(() => {
     if (props.rawDims && props.rawData) {
       loadFromRaw();
@@ -815,11 +815,11 @@ const App: React.FC<AppProps> = (props) => {
         <Content>
           <Toolbar
             viewMode={viewerSettings.viewMode}
-            fovDownloadHref={props.fovDownloadHref}
-            cellDownloadHref={props.cellDownloadHref}
+            fovDownloadHref={props.parentImageDownloadHref}
+            cellDownloadHref={props.imageDownloadHref}
             autorotate={viewerSettings.autorotate}
             imageType={viewerSettings.imageType}
-            hasParentImage={!!props.fovPath}
+            hasParentImage={!!props.parentImageUrl}
             hasCellId={!!props.cellId}
             canPathTrace={view3d ? view3d.hasWebGL2() : false}
             showAxes={viewerSettings.showAxes}
