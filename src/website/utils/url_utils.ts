@@ -4,49 +4,6 @@ import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/componen
 import { ViewMode } from "../../aics-image-viewer/shared/enums";
 import { ViewerChannelSettings } from "../../aics-image-viewer/shared/utils/viewerChannelSettings";
 
-// export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
-//   groups: [
-//     {
-//       name: "Observed channels",
-//       channels: [
-//         { name: "Membrane", match: ["(CMDRP)"], color: "E2CDB3", enabled: true, lut: ["p50", "p98"] },
-//         {
-//           name: "Labeled structure",
-//           match: ["(EGFP)|(RFPT)"],
-//           color: "6FBA11",
-//           enabled: true,
-//           lut: ["p50", "p98"],
-//         },
-//         { name: "DNA", match: ["(H3342)"], color: "8DA3C0", enabled: true, lut: ["p50", "p98"] },
-//         { name: "Bright field", match: ["(100)|(Bright)"], color: "F5F1CB", enabled: false, lut: ["p50", "p98"] },
-//       ],
-//     },
-//     {
-//       name: "Segmentation channels",
-//       channels: [
-//         {
-//           name: "Labeled structure",
-//           match: ["(SEG_STRUCT)"],
-//           color: "E0E3D1",
-//           enabled: false,
-//           lut: ["p50", "p98"],
-//         },
-//         { name: "Membrane", match: ["(SEG_Memb)"], color: "DD9BF5", enabled: false, lut: ["p50", "p98"] },
-//         { name: "DNA", match: ["(SEG_DNA)"], color: "E3F4F5", enabled: false, lut: ["p50", "p98"] },
-//       ],
-//     },
-//     {
-//       name: "Contour channels",
-//       channels: [
-//         { name: "Membrane", match: ["(CON_Memb)"], color: "FF6200", enabled: false, lut: ["p50", "p98"] },
-//         { name: "DNA", match: ["(CON_DNA)"], color: "F7DB78", enabled: false, lut: ["p50", "p98"] },
-//       ],
-//     },
-//   ],
-//   // must be the true channel name in the volume data
-//   maskChannelName: "SEG_Memb",
-// };
-
 type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "file" | "dataset" | "id" | "view";
 type Params = { [_ in ParamKeys]?: string };
 
@@ -84,29 +41,6 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
 
   return urls;
 };
-
-// const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
-// const args: Omit<AppProps, "appHeight" | "canvasMargin"> = {
-//   cellId: "2025",
-//   imageUrl: BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json",
-//   parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
-//   parentImageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
-//   imageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
-//   viewerChannelSettings: VIEWER_3D_SETTINGS,
-// };
-// const viewerSettings: Partial<GlobalViewerSettings> = {
-//   showAxes: false,
-//   showBoundingBox: false,
-//   autorotate: false,
-//   viewMode: ViewMode.threeD,
-//   renderMode: RenderMode.volumetric,
-//   maskAlpha: 50,
-//   brightness: 70,
-//   density: 50,
-//   levels: [0, 128, 255] as [number, number, number],
-//   backgroundColor: [0, 0, 0] as [number, number, number],
-//   boundingBoxColor: [255, 255, 255] as [number, number, number],
-// };
 
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
