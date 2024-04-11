@@ -15,6 +15,18 @@ export const landingPageContent: ProjectEntry[] = [
       parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
       parentImageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
       imageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
+      viewerChannelSettings: {
+        groups: [
+          // first 3 channels on by default!
+          {
+            name: "Channels",
+            channels: [
+              { match: [0, 1, 2], enabled: true },
+              { match: "(.+)", enabled: false },
+            ],
+          },
+        ],
+      },
     },
   },
 ];
