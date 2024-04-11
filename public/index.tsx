@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 
 import "antd/dist/antd.less";
 
@@ -17,7 +17,7 @@ console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} bui
 console.log(`website-3d-cell-viewer Version ${WEBSITE3DCELLVIEWER_VERSION}`);
 console.log(`volume-viewer Version ${VOLUMEVIEWER_VERSION}`);
 
-const router = createBrowserRouter([
+const routes = [
   {
     path: "/",
     element: <LandingPage />,
@@ -27,7 +27,16 @@ const router = createBrowserRouter([
     path: "viewer",
     element: <AppWrapper />,
   },
-]);
+];
+
+let router;
+if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
+  router = createBrowserRouter(routes);
+} else {
+  // Production mode.
+  // TODO: Use createBrowserRouter when building to S3.
+  router = createHashRouter(routes);
+}
 
 ReactDOM.render(
   // <ImageViewerApp {...args} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />,
