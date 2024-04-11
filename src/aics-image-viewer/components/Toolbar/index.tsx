@@ -69,9 +69,12 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
   checkSize = debounce((): void => {
     const { leftRef, centerRef, rightRef, barRef } = this;
-    const leftRect = leftRef.current!.getBoundingClientRect();
-    const centerRect = centerRef.current!.getBoundingClientRect();
-    const rightRect = rightRef.current!.getBoundingClientRect();
+    if (!leftRef.current || !centerRef.current || !rightRef.current || !barRef.current) {
+      return;
+    }
+    const leftRect = leftRef.current.getBoundingClientRect();
+    const centerRect = centerRef.current.getBoundingClientRect();
+    const rightRect = rightRef.current.getBoundingClientRect();
 
     // when calculating width required to leave scroll mode, add a bit of extra width to ensure that triggers
     // for entering and leaving scroll mode never overlap (causing toolbar to rapidly switch when resizing)
