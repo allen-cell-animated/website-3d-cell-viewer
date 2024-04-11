@@ -4,9 +4,11 @@ import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 
 import { landingPageContent } from "./content";
-import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
+import { DatasetEntry, ProjectEntry } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
+import { useNavigate } from "react-router";
+import { AppProps } from "../../../aics-image-viewer/components/App/types";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -177,12 +179,20 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   }
 `;
 
-type LandingPageProps = {
-  load: (args: ViewerArgs) => void;
-};
+type LandingPageProps = {};
+
+// TODO: Replace this everywhere it's used
+type AppPropsNoLayout = Omit<AppProps, "appHeight" | "canvasMargin">;
 
 export default function LandingPage(props: LandingPageProps): ReactElement {
   // Rendering
+  const navigation = useNavigate();
+
+  const onClickLoad = (appProps: AppPropsNoLayout): void => {
+    navigation("/viewer", {
+      state: appProps,
+    });
+  };
 
   // TODO: Should the load buttons be link elements or buttons?
   // Currently both the link and the button inside can be tab-selected.
@@ -191,7 +201,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
       <DatasetCard key={index}>
         <h4>{dataset.name}</h4>
         <p>{dataset.description}</p>
-        <Button type="primary" onClick={() => props.load(dataset.loadParams)}>
+        <Button type="primary" onClick={() => onClickLoad(dataset.loadParams)}>
           Load<VisuallyHidden> dataset {dataset.name}</VisuallyHidden>
         </Button>
       </DatasetCard>
@@ -232,7 +242,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     const loadParams = project.loadParams;
     const loadButton = loadParams ? (
       <div>
-        <Button type="primary" onClick={() => props.load(loadParams)}>
+        <Button type="primary" onClick={() => onClickLoad(loadParams)}>
           Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
         </Button>
       </div>

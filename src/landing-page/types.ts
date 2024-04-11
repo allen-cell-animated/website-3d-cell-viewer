@@ -1,20 +1,9 @@
-import { ViewerChannelSettings } from "../aics-image-viewer/shared/utils/viewerChannelSettings";
-
-// TBD what URL parameters to include here
-export type ViewerArgs = {
-  baseurl: string;
-  cellid: number;
-  cellPath: string;
-  fovPath: string;
-  fovDownloadHref: string;
-  cellDownloadHref: string;
-  viewerSettings: ViewerChannelSettings;
-};
+import { AppProps } from "../aics-image-viewer/components/App/types";
 
 export type DatasetEntry = {
   name: string;
   description: string;
-  loadParams: ViewerArgs;
+  loadParams: Omit<AppProps, "appHeight" | "canvasMargin">;
 };
 
 export type ProjectEntry = {
@@ -22,7 +11,7 @@ export type ProjectEntry = {
   description: string;
   publicationLink?: URL;
   publicationName?: string;
-  loadParams?: ViewerArgs;
+  loadParams?: Omit<AppProps, "appHeight" | "canvasMargin">;
   datasets?: DatasetEntry[];
   inReview?: boolean;
 };

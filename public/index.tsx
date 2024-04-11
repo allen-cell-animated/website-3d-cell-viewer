@@ -1,15 +1,16 @@
 import FirebaseRequest, { DatasetMetaData } from "./firebase";
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "antd/dist/antd.less";
 
 // Components
 import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
+import AppWrapper from "../src/AppWrapper";
 import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 import LandingPage from "../src/landing-page/components/LandingPage";
-import { ViewerArgs } from "../src/landing-page/types";
+import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
@@ -259,19 +260,19 @@ if (params) {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <LandingPage
-        load={function (args: ViewerArgs): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
+    element: <LandingPage />,
+  },
+  {
+    path: "viewer",
+    element: <AppWrapper />,
   },
 ]);
 
-function runApp() {
-  ReactDOM.render(
-    <ImageViewerApp {...args} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />,
-    document.getElementById("cell-viewer")
-  );
-}
+function runApp() {}
+ReactDOM.render(
+  // <ImageViewerApp {...args} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />,
+  <StyleProvider>
+    <RouterProvider router={router} />
+  </StyleProvider>,
+  document.getElementById("cell-viewer")
+);
