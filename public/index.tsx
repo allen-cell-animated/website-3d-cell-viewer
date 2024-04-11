@@ -5,10 +5,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "antd/dist/antd.less";
 
 // Components
-import { RenderMode, ViewerChannelSettings, ViewMode } from "../src";
 import AppWrapper from "../src/website/components/AppWrapper";
 import LandingPage from "../src/website/components/LandingPage";
-import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
+import ErrorPage from "../src/website/components/ErrorPage";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
@@ -22,6 +21,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <LandingPage />,
+    errorElement: <ErrorPage />,
   },
   {
     path: "viewer",
