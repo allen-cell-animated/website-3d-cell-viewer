@@ -249,12 +249,3 @@ export async function getArgsFromQueryString(): Promise<{
 
   return { args, viewerSettings };
 }
-
-/**
- * Returns true if the current location has a query string
- * that can be successfully parsed into viewer arguments.
- */
-export async function locationHasUrlParamArgs(): Promise<boolean> {
-  const { args } = await getArgsFromQueryString();
-  return Object.keys(args).length > 0;
-}

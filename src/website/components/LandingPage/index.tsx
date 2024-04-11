@@ -7,7 +7,7 @@ import { landingPageContent } from "./content";
 import { DatasetEntry, ProjectEntry } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { redirect, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { AppProps } from "../../../aics-image-viewer/components/App/types";
 import { getArgsFromQueryString } from "../../utils/url_utils";
 
