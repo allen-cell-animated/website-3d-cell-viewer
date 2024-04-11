@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 import { getArgsFromQueryString } from "../utils/url_utils";
+import { AppDataProps } from "../types";
 
 type AppWrapperProps = {};
 
@@ -20,6 +21,13 @@ const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   boundingBoxColor: [255, 255, 255] as [number, number, number],
 };
 
+const DEFAULT_APP_PROPS: AppDataProps = {
+  imageUrl: "",
+  cellId: "",
+  imageDownloadHref: "",
+  parentImageDownloadHref: "",
+};
+
 /**
  * Renders additional components around the main ImageViewer component, and also collects URL and navigation state params
  * to pass to the viewer.
@@ -29,11 +37,11 @@ export default function AppWrapper(props: AppWrapperProps): ReactElement {
 
   // TODO: Update this with the load parameter later :)
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
-  const [viewerArgs, setViewerArgs] = useState<AppProps | undefined>(undefined);
+  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
 
   useMemo(async () => {
     // Collect navigation state params (AppProps)
-    const locationArgs = location.state as AppProps;
+    const locationArgs = location.state as AppDataProps;
     // Fetching URL query parameters is async, so we need to do it here
     const { args, viewerSettings } = await getArgsFromQueryString();
 
@@ -41,13 +49,5 @@ export default function AppWrapper(props: AppWrapperProps): ReactElement {
     setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...viewerSettings });
   }, []);
 
-  return (
-    <>
-      {viewerArgs && viewerSettings ? (
-        <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />
-      ) : (
-        <p>Loading...</p>
-      )}
-    </>
-  );
+  return <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />;
 }

@@ -1,9 +1,11 @@
 import { AppProps } from "../aics-image-viewer/components/App/types";
 
+export type AppDataProps = Omit<AppProps, "appHeight" | "canvasMargin">;
+
 export type DatasetEntry = {
   name: string;
   description: string;
-  loadParams: Omit<AppProps, "appHeight" | "canvasMargin">;
+  loadParams: AppDataProps;
 };
 
 export type ProjectEntry = {
@@ -11,7 +13,7 @@ export type ProjectEntry = {
   description: string;
   publicationLink?: URL;
   publicationName?: string;
-  loadParams?: Omit<AppProps, "appHeight" | "canvasMargin">;
+  loadParams?: AppDataProps;
   datasets?: DatasetEntry[];
   inReview?: boolean;
 };

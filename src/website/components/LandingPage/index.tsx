@@ -4,11 +4,10 @@ import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 
 import { landingPageContent } from "./content";
-import { DatasetEntry, ProjectEntry } from "../../types";
+import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { useNavigate } from "react-router";
-import { AppProps } from "../../../aics-image-viewer/components/App/types";
 import { getArgsFromQueryString } from "../../utils/url_utils";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
@@ -182,9 +181,6 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
 
 type LandingPageProps = {};
 
-// TODO: Replace this everywhere it's used
-type AppPropsNoLayout = Omit<AppProps, "appHeight" | "canvasMargin">;
-
 export default function LandingPage(props: LandingPageProps): ReactElement {
   // Rendering
   const navigation = useNavigate();
@@ -204,7 +200,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     }
   }, []);
 
-  const onClickLoad = (appProps: AppPropsNoLayout): void => {
+  const onClickLoad = (appProps: AppDataProps): void => {
     // TODO: Get URL search params from the appProps and append it to the viewer URL.
     // Alternatively, AppWrapper should manage syncing URL and received props.
     navigation("/viewer", {
