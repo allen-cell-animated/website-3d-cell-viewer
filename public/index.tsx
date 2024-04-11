@@ -1,15 +1,17 @@
+import FirebaseRequest, { DatasetMetaData } from "./firebase";
 import React from "react";
 import ReactDOM from "react-dom";
+import { createBrowserRouter } from "react-router-dom";
 
 import "antd/dist/antd.less";
 
 // Components
+import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
+import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
+import LandingPage from "../src/landing-page/components/LandingPage";
+import { ViewerArgs } from "../src/landing-page/types";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
-
-import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
-import FirebaseRequest, { DatasetMetaData } from "./firebase";
-import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
 
 // vars filled at build time using webpack DefinePlugin
 console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
@@ -253,6 +255,19 @@ if (params) {
 } else {
   runApp();
 }
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <LandingPage
+        load={function (args: ViewerArgs): void {
+          throw new Error("Function not implemented.");
+        }}
+      />
+    ),
+  },
+]);
 
 function runApp() {
   ReactDOM.render(
