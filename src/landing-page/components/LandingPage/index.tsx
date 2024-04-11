@@ -46,7 +46,7 @@ const BannerVideoContainer = styled.div`
   right: 0;
   width: 100%;
   height: 100%;
-  background-color: #ded9ef;
+  background-color: #000;
   z-index: -1;
 
   & > video {
