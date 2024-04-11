@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { AppProps, GlobalViewerSettings } from "./aics-image-viewer/components/App/types";
-import { ImageViewerApp, RenderMode, ViewMode } from ".";
+import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
+import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 
 type AppWrapperProps = {};
 

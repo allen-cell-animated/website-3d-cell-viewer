@@ -6,10 +6,10 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "antd/dist/antd.less";
 
 // Components
-import { ImageViewerApp, RenderMode, ViewerChannelSettings, ViewMode } from "../src";
-import AppWrapper from "../src/AppWrapper";
+import { RenderMode, ViewerChannelSettings, ViewMode } from "../src";
+import AppWrapper from "../src/website/components/AppWrapper";
+import LandingPage from "../src/website/components/LandingPage";
 import { AppProps, GlobalViewerSettings } from "../src/aics-image-viewer/components/App/types";
-import LandingPage from "../src/landing-page/components/LandingPage";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
