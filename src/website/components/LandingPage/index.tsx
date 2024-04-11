@@ -1,14 +1,15 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "antd";
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 
 import { landingPageContent } from "./content";
 import { DatasetEntry, ProjectEntry } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { useNavigate } from "react-router";
+import { redirect, useNavigate } from "react-router";
 import { AppProps } from "../../../aics-image-viewer/components/App/types";
+import { getArgsFromQueryString } from "../../utils/url_utils";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -188,7 +189,24 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   // Rendering
   const navigation = useNavigate();
 
+  useMemo(async () => {
+    // Check if the URL used to open the landing page has arguments;
+    // if so, assume that this is an old URL intended to go to the viewer.
+    // Navigate to the viewer while preserving URL arguments.
+    const { args } = await getArgsFromQueryString();
+    console.log(args);
+    if (Object.keys(args).length > 0) {
+      navigation("/viewer" + location.search, {
+        state: args,
+        replace: true,
+      });
+      // redirect("/viewer" + location.search);
+    }
+  }, []);
+
   const onClickLoad = (appProps: AppPropsNoLayout): void => {
+    // TODO: Get URL search params from the appProps and append it to the viewer URL.
+    // Alternatively, AppWrapper should manage syncing URL and received props.
     navigation("/viewer", {
       state: appProps,
     });
