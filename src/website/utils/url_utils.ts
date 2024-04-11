@@ -1,7 +1,7 @@
-import FirebaseRequest, { DatasetMetaData } from "./firebase";
+import FirebaseRequest, { DatasetMetaData } from "../../../public/firebase";
 
 import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
-import { RenderMode, ViewMode } from "../../aics-image-viewer/shared/enums";
+import { ViewMode } from "../../aics-image-viewer/shared/enums";
 import { ViewerChannelSettings } from "../../aics-image-viewer/shared/utils/viewerChannelSettings";
 
 // export const VIEWER_3D_SETTINGS: ViewerChannelSettings = {
@@ -139,10 +139,9 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   args.parentImageUrl = baseUrl + fileInfo!.fovVolumeviewerPath;
 
   return args;
-  // only now do we have all the data needed
 }
 
-async function getArgsFromQueryString(): Promise<{
+export async function getArgsFromQueryString(): Promise<{
   args: Partial<AppProps>;
   viewerSettings: Partial<GlobalViewerSettings>;
 }> {
@@ -249,4 +248,13 @@ async function getArgsFromQueryString(): Promise<{
   }
 
   return { args, viewerSettings };
+}
+
+/**
+ * Returns true if the current location has a query string
+ * that can be successfully parsed into viewer arguments.
+ */
+export async function locationHasUrlParamArgs(): Promise<boolean> {
+  const { args } = await getArgsFromQueryString();
+  return Object.keys(args).length > 0;
 }

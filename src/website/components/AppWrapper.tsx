@@ -1,7 +1,8 @@
-import React, { ReactElement, useState } from "react";
+import React, { ReactElement, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../..";
+import { getArgsFromQueryString } from "../utils/url_utils";
 
 type AppWrapperProps = {};
 
@@ -25,17 +26,28 @@ const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
  */
 export default function AppWrapper(props: AppWrapperProps): ReactElement {
   const location = useLocation();
-  // Collect navigation state params (AppProps)
-  const locationArgs = location.state as AppProps;
+
   // TODO: Update this with the load parameter later :)
-  const [viewerProps] = useState(locationArgs);
+  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
+  const [viewerArgs, setViewerArgs] = useState<AppProps | undefined>(undefined);
+
+  useMemo(async () => {
+    // Collect navigation state params (AppProps)
+    const locationArgs = location.state as AppProps;
+    // Fetching URL query parameters is async, so we need to do it here
+    const { args, viewerSettings } = await getArgsFromQueryString();
+
+    setViewerArgs({ ...locationArgs, ...args });
+    setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...viewerSettings });
+  }, []);
 
   return (
-    <ImageViewerApp
-      {...viewerProps}
-      appHeight="100vh"
-      canvasMargin="0 0 0 0"
-      viewerSettings={DEFAULT_VIEWER_SETTINGS}
-    />
+    <>
+      {viewerArgs && viewerSettings ? (
+        <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />
+      ) : (
+        <p>Loading...</p>
+      )}
+    </>
   );
 }
