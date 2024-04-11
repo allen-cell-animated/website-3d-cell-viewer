@@ -4,17 +4,18 @@ import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/componen
 import { ViewMode } from "../../aics-image-viewer/shared/enums";
 import { ViewerChannelSettings } from "../../aics-image-viewer/shared/utils/viewerChannelSettings";
 
-type ParamKeys = "mask" | "ch" | "luts" | "colors" | "url" | "file" | "dataset" | "id" | "view";
+const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
+type ParamKeys = (typeof paramKeys)[number];
 type Params = { [_ in ParamKeys]?: string };
 
-function parseQueryString(): Params {
-  const pairs = location.search.slice(1).split("&");
-  const result: Record<string, string> = {};
-  pairs.forEach((pairString) => {
-    const pair = pairString.split("=");
-    result[pair[0]] = decodeURIComponent(pair[1] || "");
-  });
-  return JSON.parse(JSON.stringify(result));
+function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
+  const result: Params = {};
+  for (const [key, value] of searchParams.entries()) {
+    if (paramKeys.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
 }
 
 const decodeURL = (url: string): string => {
@@ -75,11 +76,11 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   return args;
 }
 
-export async function getArgsFromQueryString(): Promise<{
+export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
   viewerSettings: Partial<GlobalViewerSettings>;
 }> {
-  const params = parseQueryString();
+  const params = urlSearchParamsToParams(urlSearchParams);
   let args: Partial<AppProps> = {};
   const viewerSettings: Partial<GlobalViewerSettings> = {};
 

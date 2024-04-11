@@ -8,7 +8,8 @@ import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { useNavigate } from "react-router";
-import { getArgsFromQueryString } from "../../utils/url_utils";
+import { getArgsFromParams } from "../../utils/url_utils";
+import { useSearchParams } from "react-router-dom";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -184,26 +185,26 @@ type LandingPageProps = {};
 export default function LandingPage(props: LandingPageProps): ReactElement {
   // Rendering
   const navigation = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   useMemo(async () => {
     // Check if the URL used to open the landing page has arguments;
     // if so, assume that this is an old URL intended to go to the viewer.
     // Navigate to the viewer while preserving URL arguments.
-    const { args } = await getArgsFromQueryString();
-    console.log(args);
+    const { args } = await getArgsFromParams(searchParams);
     if (Object.keys(args).length > 0) {
-      navigation("/viewer" + location.search, {
+      console.log("Detected URL parameters. Redirecting from landing page to viewer.");
+      navigation("viewer" + "?" + searchParams.toString(), {
         state: args,
         replace: true,
       });
-      // redirect("/viewer" + location.search);
     }
   }, []);
 
   const onClickLoad = (appProps: AppDataProps): void => {
     // TODO: Get URL search params from the appProps and append it to the viewer URL.
     // Alternatively, AppWrapper should manage syncing URL and received props.
-    navigation("/viewer", {
+    navigation("viewer", {
       state: appProps,
     });
   };

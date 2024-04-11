@@ -1,8 +1,8 @@
 import React, { ReactElement, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../..";
-import { getArgsFromQueryString } from "../utils/url_utils";
+import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 
 type AppWrapperProps = {};
@@ -38,12 +38,16 @@ export default function AppWrapper(props: AppWrapperProps): ReactElement {
   // TODO: Update this with the load parameter later :)
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
+  const [searchParams] = useSearchParams();
 
   useMemo(async () => {
     // Collect navigation state params (AppProps)
     const locationArgs = location.state as AppDataProps;
     // Fetching URL query parameters is async, so we need to do it here
-    const { args, viewerSettings } = await getArgsFromQueryString();
+    const { args, viewerSettings } = await getArgsFromParams(searchParams);
+
+    console.log("locationArgs", locationArgs);
+    console.log("args", args);
 
     setViewerArgs({ ...locationArgs, ...args });
     setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...viewerSettings });
