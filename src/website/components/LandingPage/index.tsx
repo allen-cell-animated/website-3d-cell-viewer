@@ -185,7 +185,7 @@ type LandingPageProps = {};
 export default function LandingPage(props: LandingPageProps): ReactElement {
   // Rendering
   const navigation = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   useMemo(async () => {
     // Check if the URL used to open the landing page has arguments;

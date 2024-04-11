@@ -1,6 +1,6 @@
 import React, { ReactElement, useMemo, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
+import { GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
