@@ -18,6 +18,21 @@
       format("truetype"),
     /* Legacy iOS */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-regular.svg#svgFontName") format("svg");
 }
+
+@font-face {
+  font-family: "Open Sans Local";
+  font-style: normal;
+  font-weight: 500;
+  src: url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.eot"); /* IE9 Compat Modes */
+  src: 
+    /* IE6-IE8 */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.eot?#iefix")
+      format("embedded-opentype"),
+    /* Super Modern Browsers */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.woff2") format("woff2"),
+    /* Pretty Modern Browsers */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.woff") format("woff"),
+    /* Safari, Android, iOS */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.ttf") format("truetype"),
+    /* Legacy iOS */ url("../aics-image-viewer/assets/fonts/open-sans/open-sans-500.svg#svgFontName") format("svg");
+}
+
 @font-face {
   font-family: "Open Sans Local";
   font-style: normal;
