@@ -2,6 +2,8 @@ import React, { ReactElement } from "react";
 import { FlexColumnAlignCenter } from "./LandingPage/utils";
 import { ErrorResponse, Link, useRouteError } from "react-router-dom";
 import { Button } from "antd";
+import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 type ErrorPageProps = {};
 
@@ -41,10 +43,16 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
               target="_blank"
             >
               please click here to report it.
+              <FontAwesomeIcon
+                icon={faUpRightFromSquare}
+                size="sm"
+                style={{ marginBottom: "-1px", marginLeft: "3px" }}
+              />
             </Link>
           </p>
         </FlexColumnAlignCenter>
         <br />
+        {/* TODO: Bad practice to wrap a button inside a link, since it's confusing for tab navigation. */}
         <Link to="/">
           <Button type="primary">Return to homepage</Button>
         </Link>
