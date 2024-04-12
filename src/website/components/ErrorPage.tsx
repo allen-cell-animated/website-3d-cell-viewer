@@ -24,8 +24,26 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
   return (
     <div>
       <FlexColumnAlignCenter style={{ width: "100%", padding: "40px" }}>
-        <h1>{errorMessage}</h1>
-        <p>Sorry, something went wrong.</p>
+        <h1>Sorry, something went wrong.</h1>
+        <FlexColumnAlignCenter>
+          <p>We encountered the following error:</p>
+          <FlexColumnAlignCenter style={{ margin: "10px 0" }}>
+            <h3>{errorMessage}</h3>
+            <p>
+              <i>Check the browser console for more details.</i>
+            </p>
+          </FlexColumnAlignCenter>
+          <p>
+            If the issue persists after a refresh,{" "}
+            <Link
+              to="https://github.com/allen-cell-animated/website-3d-cell-viewer/issues/new?template=bug_report.md"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              please click here to report it.
+            </Link>
+          </p>
+        </FlexColumnAlignCenter>
         <br />
         <Link to="/">
           <Button type="primary">Return to homepage</Button>
