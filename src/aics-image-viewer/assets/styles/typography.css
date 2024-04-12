@@ -2,12 +2,12 @@
   height: 100%;
 
   body {
-    font-family: "Open Sans", "Overpass-Light", Arial, sans-serif;
+    font-family: "Open Sans", "Open Sans Local", Arial, sans-serif;
   }
   h1,
   h2,
   h3,
   h4 {
-    font-family: "Open Sans", "Merriweather Sans", Arial, sans-serif;
+    font-family: "Open Sans", "Open Sans Local", Arial, sans-serif;
   }
 }
