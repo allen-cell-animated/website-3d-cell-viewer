@@ -39,7 +39,6 @@ if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
 }
 
 ReactDOM.render(
-  // <ImageViewerApp {...args} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />,
   <StyleProvider>
     <RouterProvider router={router} />
   </StyleProvider>,

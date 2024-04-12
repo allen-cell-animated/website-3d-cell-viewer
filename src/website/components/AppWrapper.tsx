@@ -5,8 +5,6 @@ import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 
-type AppWrapperProps = {};
-
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
   showBoundingBox: false,
@@ -29,28 +27,25 @@ const DEFAULT_APP_PROPS: AppDataProps = {
 };
 
 /**
- * Renders additional components around the main ImageViewer component, and also collects URL and navigation state params
- * to pass to the viewer.
+ * Wrapper around the main ImageViewer component. Handles the collection of parameters from the
+ * URL and routing state to pass to the viewer.
  */
-export default function AppWrapper(props: AppWrapperProps): ReactElement {
+export default function AppWrapper(): ReactElement {
   const location = useLocation();
 
-  // TODO: Update this with the load parameter later :)
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
   const [searchParams] = useSearchParams();
 
+  // On load, fetch parameters from the URL and routing state, then merge.
   useMemo(async () => {
     // Collect navigation state params (AppProps)
     const locationArgs = location.state as AppDataProps;
     // Fetching URL query parameters is async, so we need to do it here
-    const { args, viewerSettings } = await getArgsFromParams(searchParams);
+    const { args: urlArgs, viewerSettings: urlViewerSettings } = await getArgsFromParams(searchParams);
 
-    console.log("locationArgs", locationArgs);
-    console.log("args", args);
-
-    setViewerArgs({ ...locationArgs, ...args });
-    setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...viewerSettings });
+    setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
+    setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
   }, []);
 
   return <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />;
