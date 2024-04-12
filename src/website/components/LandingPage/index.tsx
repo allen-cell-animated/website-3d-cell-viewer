@@ -180,9 +180,7 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   }
 `;
 
-type LandingPageProps = {};
-
-export default function LandingPage(props: LandingPageProps): ReactElement {
+export default function LandingPage(): ReactElement {
   // Rendering
   const navigation = useNavigate();
   const [searchParams] = useSearchParams();
@@ -202,8 +200,8 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
   }, []);
 
   const onClickLoad = (appProps: AppDataProps): void => {
-    // TODO: Get URL search params from the appProps and append it to the viewer URL.
-    // Alternatively, AppWrapper should manage syncing URL and received props.
+    // TODO: Make URL search params from the appProps and append it to the viewer URL so the URL can be shared directly.
+    // Alternatively, AppWrapper should manage syncing URL and viewer props.
     navigation("viewer", {
       state: appProps,
     });

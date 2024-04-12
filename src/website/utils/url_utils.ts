@@ -84,102 +84,102 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   let args: Partial<AppProps> = {};
   const viewerSettings: Partial<GlobalViewerSettings> = {};
 
-  if (params) {
-    if (params.mask) {
-      viewerSettings.maskAlpha = parseInt(params.mask, 10);
+  if (params.mask) {
+    viewerSettings.maskAlpha = parseInt(params.mask, 10);
+  }
+  if (params.view) {
+    const mapping = {
+      "3D": ViewMode.threeD,
+      Z: ViewMode.xy,
+      Y: ViewMode.xz,
+      X: ViewMode.yz,
+    };
+    const allowedViews = Object.keys(mapping);
+    let view: "3D" | "X" | "Y" | "Z";
+    if (allowedViews.includes(params.view)) {
+      view = params.view as "3D" | "X" | "Y" | "Z";
+    } else {
+      view = "3D";
     }
-    if (params.view) {
-      const mapping = {
-        "3D": ViewMode.threeD,
-        Z: ViewMode.xy,
-        Y: ViewMode.xz,
-        X: ViewMode.yz,
-      };
-      const allowedViews = Object.keys(mapping);
-      let view: "3D" | "X" | "Y" | "Z";
-      if (allowedViews.includes(params.view)) {
-        view = params.view as "3D" | "X" | "Y" | "Z";
-      } else {
-        view = "3D";
-      }
-      viewerSettings.viewMode = mapping[view];
-    }
-    if (params.ch) {
-      // ?ch=1,2
-      // ?luts=0,255,0,255
-      // ?colors=ff0000,00ff00
-      const initialChannelSettings: ViewerChannelSettings = {
-        groups: [{ name: "Channels", channels: [] }],
-      };
-      const ch = initialChannelSettings.groups[0].channels;
+    viewerSettings.viewMode = mapping[view];
+  }
+  if (params.ch) {
+    // ?ch=1,2
+    // ?luts=0,255,0,255
+    // ?colors=ff0000,00ff00
+    const initialChannelSettings: ViewerChannelSettings = {
+      groups: [{ name: "Channels", channels: [] }],
+    };
+    const ch = initialChannelSettings.groups[0].channels;
 
-      const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
-      for (let i = 0; i < channelsOn.length; ++i) {
-        ch.push({ match: channelsOn[i], enabled: true });
-      }
-      // look for luts or color
-      if (params.luts) {
-        const luts = params.luts.split(",");
-        if (luts.length !== ch.length * 2) {
-          console.log("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
-        }
+    const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
+    for (let i = 0; i < channelsOn.length; ++i) {
+      ch.push({ match: channelsOn[i], enabled: true });
+    }
+    // look for luts or color
+    if (params.luts) {
+      const luts = params.luts.split(",");
+      if (luts.length !== ch.length * 2) {
+        console.warn("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
+      } else {
         for (let i = 0; i < ch.length; ++i) {
           ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
         }
       }
-      if (params.colors) {
-        const colors = params.colors.split(",");
-        if (colors.length !== ch.length) {
-          console.log("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
-        }
+    }
+    if (params.colors) {
+      const colors = params.colors.split(",");
+      if (colors.length !== ch.length) {
+        console.warn("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
+      } else {
         for (let i = 0; i < ch.length; ++i) {
           ch[i]["color"] = colors[i];
         }
       }
-      args.viewerChannelSettings = initialChannelSettings;
     }
-    if (params.url) {
-      const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
-      const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
+    args.viewerChannelSettings = initialChannelSettings;
+  }
+  if (params.url) {
+    const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
+    const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
 
-      args.cellId = "1";
-      args.imageUrl = imageUrls;
-      // this is invalid for zarr?
-      args.imageDownloadHref = firstUrl;
-      args.parentImageUrl = "";
-      args.parentImageDownloadHref = "";
-      // if json, then use the CFE settings for now.
-      // (See VIEWER_3D_SETTINGS)
-      // otherwise turn the first 3 channels on and group them
-      if (!firstUrl.endsWith("json") && !params.ch) {
-        args.viewerChannelSettings = {
-          groups: [
-            // first 3 channels on by default!
-            {
-              name: "Channels",
-              channels: [
-                { match: [0, 1, 2], enabled: true },
-                { match: "(.+)", enabled: false },
-              ],
-            },
-          ],
-        };
-      }
-    } else if (params.file) {
-      // quick way to load a atlas.json from a special directory.
-      //
-      // ?file=relative-path-to-atlas-on-isilon
-      args.cellId = "1";
-      const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
-      args.imageUrl = baseUrl + params.file;
-      args.parentImageUrl = baseUrl + params.file;
-      args.parentImageDownloadHref = "";
-      args.imageDownloadHref = "";
-    } else if (params.dataset && params.id) {
-      // ?dataset=aics_hipsc_v2020.1&id=232265
-      const datasetArgs = await loadDataset(params.dataset, params.id);
-      args = { ...args, ...datasetArgs };
+    args.cellId = "1";
+    args.imageUrl = imageUrls;
+    // this is invalid for zarr?
+    args.imageDownloadHref = firstUrl;
+    args.parentImageUrl = "";
+    args.parentImageDownloadHref = "";
+    // if json, then use the CFE settings for now.
+    // (See VIEWER_3D_SETTINGS)
+    // otherwise turn the first 3 channels on and group them
+    if (!firstUrl.endsWith("json") && !params.ch) {
+      args.viewerChannelSettings = {
+        groups: [
+          // first 3 channels on by default!
+          {
+            name: "Channels",
+            channels: [
+              { match: [0, 1, 2], enabled: true },
+              { match: "(.+)", enabled: false },
+            ],
+          },
+        ],
+      };
     }
+  } else if (params.file) {
+    // quick way to load a atlas.json from a special directory.
+    //
+    // ?file=relative-path-to-atlas-on-isilon
+    args.cellId = "1";
+    const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
+    args.imageUrl = baseUrl + params.file;
+    args.parentImageUrl = baseUrl + params.file;
+    args.parentImageDownloadHref = "";
+    args.imageDownloadHref = "";
+  } else if (params.dataset && params.id) {
+    // ?dataset=aics_hipsc_v2020.1&id=232265
+    const datasetArgs = await loadDataset(params.dataset, params.id);
+    args = { ...args, ...datasetArgs };
   }
 
   return { args, viewerSettings };

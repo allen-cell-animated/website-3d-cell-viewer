@@ -28,7 +28,7 @@ const DEFAULT_APP_PROPS: AppDataProps = {
 
 /**
  * Wrapper around the main ImageViewer component. Handles the collection of parameters from the
- * URL and routing state to pass to the viewer.
+ * URL and location state (from routing) to pass to the viewer.
  */
 export default function AppWrapper(): ReactElement {
   const location = useLocation();
@@ -37,11 +37,9 @@ export default function AppWrapper(): ReactElement {
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
   const [searchParams] = useSearchParams();
 
-  // On load, fetch parameters from the URL and routing state, then merge.
   useMemo(async () => {
-    // Collect navigation state params (AppProps)
+    // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    // Fetching URL query parameters is async, so we need to do it here
     const { args: urlArgs, viewerSettings: urlViewerSettings } = await getArgsFromParams(searchParams);
 
     setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
