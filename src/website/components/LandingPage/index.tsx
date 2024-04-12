@@ -10,6 +10,7 @@ import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, 
 import { useNavigate } from "react-router";
 import { getArgsFromParams } from "../../utils/url_utils";
 import { useSearchParams } from "react-router-dom";
+import Header from "../Header";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -292,12 +293,12 @@ export default function LandingPage(): ReactElement {
 
   return (
     <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>
-      {/* <Header>
-        <FlexRowAlignCenter $gap={15}>
+      <Header>
+        {/* <FlexRowAlignCenter $gap={15}>
           <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
           <HelpDropdown />
-        </FlexRowAlignCenter>
-      </Header> */}
+        </FlexRowAlignCenter> */}
+      </Header>
       <Banner>
         <BannerVideoContainer style={{ zIndex: 1 }}>
           <video autoPlay={allowMotion} loop muted>
