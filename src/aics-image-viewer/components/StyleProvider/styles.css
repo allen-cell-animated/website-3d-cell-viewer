@@ -38,11 +38,10 @@
     --color-button-primary-active-outline: var(--palette-med-purple);
     --color-button-primary-disabled-bg: var(--palette-med-dark-grey);
 
-    --color-button-link-bg: transparent;
     --color-button-link-text: var(--palette-med-purple);
     --color-button-link-hover-bg: var(--palette-lt-purple);
     --color-button-link-hover-text: var(--palette-white);
-    --color-button-link-active-outline: var(--palette-med-purple);
+    --color-button-link-disabled-text: var(--palette-med-lt-grey-alt);
 
     --color-button-secondary-bg: transparent;
     --color-button-secondary-text: var(--palette-med-purple);
@@ -144,6 +143,10 @@
         &:hover, &:focus-visible {
             color: var(--color-button-link-hover-text);
             background-color: var(--color-button-link-hover-bg);
+        }
+
+        &:disabled, &:disabled:hover{
+            color: var(--color-button-link-disabled-text);
         }
     }
 }

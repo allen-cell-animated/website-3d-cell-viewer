@@ -297,11 +297,11 @@ export default function LandingPage(): ReactElement {
       <Header>
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
-            <Button type="link">
+            <Button type="link" disabled={true}>
               <UploadOutlined />
               Load
             </Button>
-            <Button type="link">
+            <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share
             </Button>
