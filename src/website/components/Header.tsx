@@ -38,9 +38,9 @@ const AicsLogoLink = styled.a`
 const VerticalDivider = styled.div`
   height: 24px;
   width: 1px;
-  background-color: var(--color-dividers);
+  background-color: var(--color-layout-dividers);
   display: inline-block;
-  margin: 0 20px;
+  margin: 0 16px;
 
   @media only screen and (max-width: ${AICS_LOGO_RESIZE_THRESHOLD_PX}px) {
     margin: 0 10px;
@@ -62,7 +62,7 @@ function HeaderLogo(): ReactElement {
       </AicsLogoLink>
       <VerticalDivider />
       <Link to="/" aria-label="Go to home page" style={{ color: "var(--color-header-text)" }}>
-        <h1 style={{ fontSize: "20px", color: "var(--color-header-text)" }}>3D Volume Viewer</h1>
+        <h1 style={{ fontSize: "20px", color: "var(--color-header-text)", margin: 0 }}>3D Volume Viewer</h1>
       </Link>
     </FlexRowAlignCenter>
   );
