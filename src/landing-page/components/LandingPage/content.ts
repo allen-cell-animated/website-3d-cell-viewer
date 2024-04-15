@@ -8,5 +8,14 @@ export const landingPageContent: ProjectEntry[] = [
     publicationLink: new URL("https://google.com"),
     publicationName: "This is the name of the associated publication that the user can click to open in a new tab",
     inReview: true,
+    loadParams: {
+      baseurl: "",
+      cellid: 0,
+      cellPath: "",
+      fovPath: "",
+      fovDownloadHref: "",
+      cellDownloadHref: "",
+      viewerSettings: { groups: [] },
+    },
   },
 ];

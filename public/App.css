@@ -2,7 +2,7 @@ html,
 body {
   height: 100%;
   width: 100%;
-  font-family: 'Overpass'
+  font-family: "Open Sans", "Overpass", Arial, sans-serif;
 }
 
 /* Adjust container width (height needs to be changed through the appHeight prop for ImageViewerApp

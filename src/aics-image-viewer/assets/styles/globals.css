@@ -1,6 +1,7 @@
 .cell-viewer-app {
   height: 100%;
 }
+/** TODO: Remove and replace with just Open Sans. */
 /* merriweather-sans-regular - latin */
 @font-face {
   font-family: "Merriweather Sans";

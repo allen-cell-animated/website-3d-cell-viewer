@@ -1,33 +1,32 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "antd";
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 
 import { landingPageContent } from "./content";
 import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
 import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 
+const MAX_CONTENT_WIDTH_PX = 1060;
+
 const Banner = styled(FlexColumnAlignCenter)`
   position: relative;
   --container-padding-x: 20px;
-  padding: 30px var(--container-padding-x);
+  padding: 40px var(--container-padding-x);
   overflow: hidden;
   margin: 0;
 `;
 
 const BannerTextContainer = styled(FlexColumn)`
   --padding-x: 30px;
-  padding: var(--padding-x);
-  max-width: calc(1060px - 2 * var(--padding-x));
+  padding: 26px var(--padding-x);
+  max-width: calc(${MAX_CONTENT_WIDTH_PX}px - 2 * var(--padding-x));
 
   --total-padding-x: calc(2 * var(--padding-x) + 2 * var(--container-padding-x));
   width: calc(90vw - var(--total-padding-x));
   border-radius: 5px;
-  // Fallback in case color-mix is unsupported.
-  background-color: var(--color-background);
-  // Make the background slightly transparent. Note that this may fail on internet explorer.
-  background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
+  background-color: var(--color-landingpage-banner-highlight-bg);
   gap: 10px;
 
   & > h1 {
@@ -51,17 +50,17 @@ const BannerVideoContainer = styled.div`
   & > video {
     width: 100%;
     height: 100%;
+    object-position: 50% 40%;
     object-fit: cover;
-    // Fixes a bug where a single pixel black outline would appear around the video.
-    clip-path: inset(1px 1px);
   }
 `;
 
 const ContentContainer = styled(FlexColumn)`
-  max-width: 1060px;
+  max-width: ${MAX_CONTENT_WIDTH_PX}px;
   width: calc(90vw - 40px);
   margin: auto;
   padding: 0 20px;
+  gap: 20px;
 `;
 
 const FeatureHighlightsContainer = styled.li`
@@ -71,8 +70,8 @@ const FeatureHighlightsContainer = styled.li`
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   padding: 0;
   justify-content: space-evenly;
-  gap: 10px;
-  margin: 20px 0;
+  gap: 12px 24px;
+  margin: 30px 0 0 0;
 `;
 
 const FeatureHighlightsItem = styled(FlexColumn)`
@@ -82,6 +81,7 @@ const FeatureHighlightsItem = styled(FlexColumn)`
 
   & > h3 {
     font-weight: 600;
+    margin: 0;
   }
 `;
 
@@ -89,7 +89,7 @@ const Divider = styled.hr`
   display: block;
   width: 100%;
   height: 1px;
-  background-color: var(--color-borders);
+  background-color: var(--color-layout-dividers);
   border-style: none;
 `;
 
@@ -106,7 +106,7 @@ const ProjectList = styled.ul`
     display: block;
     width: 100%;
     height: 1px;
-    background-color: var(--color-borders);
+    background-color: var(--color-layout-dividers);
     margin-bottom: 10px;
   }
 `;
@@ -119,6 +119,11 @@ const ProjectCard = styled.li`
 
   & h3 {
     font-weight: 600;
+  }
+
+  & p,
+  & h3 {
+    margin: 0;
   }
 `;
 
@@ -159,14 +164,15 @@ const DatasetCard = styled.li`
 const InReviewFlag = styled(FlexRowAlignCenter)`
   border-radius: 4px;
   padding: 1px 6px;
-  background-color: var(--color-flag-background);
+  background-color: var(--color-statusflag-bg);
   height: 22px;
   flex-wrap: wrap;
 
   & > p {
-    color: var(--color-flag-text);
+    margin-bottom: 0;
+    color: var(--color-statusflag-text);
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
   }
 `;
@@ -194,7 +200,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
 
   const renderProject = (project: ProjectEntry, index: number): ReactElement => {
     const projectNameElement = project.inReview ? (
-      <FlexRow style={{ justifyContent: "space-between" }} $gap={10}>
+      <FlexRow $gap={10}>
         <h3>{project.name}</h3>
         <Tooltip title="Final version of dataset will be released when associated paper is published">
           <InReviewFlag>
@@ -225,9 +231,11 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
 
     const loadParams = project.loadParams;
     const loadButton = loadParams ? (
-      <Button type="primary" onClick={() => props.load(loadParams)}>
-        Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
-      </Button>
+      <div>
+        <Button type="primary" onClick={() => props.load(loadParams)}>
+          Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
+        </Button>
+      </div>
     ) : null;
 
     // TODO: Break up list of datasets when too long and hide under collapsible section.
@@ -236,16 +244,31 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     return (
       <ProjectCard key={index}>
         {projectNameElement}
-        <p>{project.description}</p>
-        {publicationElement}
+        <FlexColumn $gap={6}>
+          <p>{project.description}</p>
+          {publicationElement}
+        </FlexColumn>
         {loadButton}
         {datasetList}
       </ProjectCard>
     );
   };
 
+  const [allowMotion, setAllowMotion] = useState(window.matchMedia("(prefers-reduced-motion: no-preference)").matches);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    mediaQuery.addEventListener("change", () => {
+      setAllowMotion(mediaQuery.matches);
+    });
+    return () => {
+      mediaQuery.removeEventListener("change", () => {
+        setAllowMotion(mediaQuery.matches);
+      });
+    };
+  }, []);
+
   return (
-    <>
+    <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>
       {/* <Header>
         <FlexRowAlignCenter $gap={15}>
           <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
@@ -253,12 +276,12 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </FlexRowAlignCenter>
       </Header> */}
       <Banner>
-        <BannerVideoContainer>
-          <video autoPlay loop muted>
-            <source src="/banner_video.mp4" type="video/mp4" />
+        <BannerVideoContainer style={{ zIndex: 1 }}>
+          <video autoPlay={allowMotion} loop muted>
+            <source src="/videos/banner-video.mp4" type="video/mp4" />
           </video>
         </BannerVideoContainer>
-        <BannerTextContainer>
+        <BannerTextContainer style={{ zIndex: 1 }}>
           <h1>Welcome to 3D Volume Viewer</h1>
           <p>
             The 3D Volume Viewer is an open-use web-based tool designed to visualize, analyze and interpret
@@ -268,7 +291,6 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </BannerTextContainer>
       </Banner>
 
-      <br />
       <ContentContainer $gap={10}>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
@@ -296,6 +318,6 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
         </FlexColumnAlignCenter>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
-    </>
+    </div>
   );
 }
