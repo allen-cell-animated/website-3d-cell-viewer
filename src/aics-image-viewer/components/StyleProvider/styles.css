@@ -38,6 +38,12 @@
     --color-button-primary-active-outline: var(--palette-med-purple);
     --color-button-primary-disabled-bg: var(--palette-med-dark-grey);
 
+    --color-button-text-bg: transparent;
+    --color-button-text-text: var(--palette-med-purple);
+    --color-button-text-hover-bg: var(--palette-lt-purple);
+    --color-button-text-hover-text: var(--palette-white);
+    --color-button-text-active-outline: var(--palette-med-purple);
+
     --color-button-secondary-bg: transparent;
     --color-button-secondary-text: var(--palette-med-purple);
     --color-button-secondary-outline: var(--palette-med-purple);
@@ -123,12 +129,21 @@
         border-color: var(--color-button-primary-bg);
     }
 
-    .ant-btn:hover {
+    .ant-btn:hover, .ant-btn:focus-visible {
         background-color: var(--color-button-primary-hover-bg);
         border-color: var(--color-button-primary-hover-bg);
     }
 
     .ant-btn:active {
         border: 1px solid var(--color-button-primary-active-outline);
+    }
+
+    .ant-btn-link {
+        color: var(--color-button-text-text);
+
+        &:hover, &:focus-visible {
+            color: var(--color-button-text-hover-text);
+            background-color: var(--color-button-text-hover-bg);
+        }
     }
 }

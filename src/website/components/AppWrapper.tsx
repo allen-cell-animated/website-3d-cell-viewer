@@ -5,6 +5,9 @@ import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
+import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import { FlexRowAlignCenter } from "./LandingPage/utils";
 
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
@@ -49,7 +52,21 @@ export default function AppWrapper(): ReactElement {
 
   return (
     <div>
-      <Header></Header>
+      <Header>
+        <FlexRowAlignCenter $gap={15}>
+          <FlexRowAlignCenter $gap={2}>
+            <Button type="link">
+              <UploadOutlined />
+              Load
+            </Button>
+            <Button type="link">
+              <ShareAltOutlined />
+              Share
+            </Button>
+          </FlexRowAlignCenter>
+          {/* <HelpDropdown /> */}
+        </FlexRowAlignCenter>
+      </Header>
       <ImageViewerApp
         {...viewerArgs}
         appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}

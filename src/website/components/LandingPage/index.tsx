@@ -1,5 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 
@@ -294,10 +295,19 @@ export default function LandingPage(): ReactElement {
   return (
     <div style={{ backgroundColor: "var(--color-landingpage-bg)", minHeight: "100%" }}>
       <Header>
-        {/* <FlexRowAlignCenter $gap={15}>
-          <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
-          <HelpDropdown />
-        </FlexRowAlignCenter> */}
+        <FlexRowAlignCenter $gap={15}>
+          <FlexRowAlignCenter $gap={2}>
+            <Button type="link">
+              <UploadOutlined />
+              Load
+            </Button>
+            <Button type="link">
+              <ShareAltOutlined />
+              Share
+            </Button>
+          </FlexRowAlignCenter>
+          {/* <HelpDropdown /> */}
+        </FlexRowAlignCenter>
       </Header>
       <Banner>
         <BannerVideoContainer style={{ zIndex: 1 }}>
