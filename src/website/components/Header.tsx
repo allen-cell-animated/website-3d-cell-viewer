@@ -6,6 +6,8 @@ import { AicsLogoAndNameSVG, AicsLogoSVG } from "../assets/icons";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 
 const AICS_LOGO_RESIZE_THRESHOLD_PX = 540;
+/**  */
+export const HEADER_HEIGHT_PX = 61;
 
 const AicsLogoLink = styled.a`
   position: relative;
@@ -20,8 +22,8 @@ const AicsLogoLink = styled.a`
   // Width is determined here experimentally to prevent popping as the other buttons in the header wrap.
   @media only screen and (max-width: ${AICS_LOGO_RESIZE_THRESHOLD_PX}px) {
     & {
-      max-width: 30px;
-      max-height: 30px;
+      max-width: 36px;
+      max-height: 36px;
     }
 
     & > div > svg:first-child {

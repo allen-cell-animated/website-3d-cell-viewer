@@ -4,6 +4,7 @@ import { GlobalViewerSettings } from "../../aics-image-viewer/components/App/typ
 import { ImageViewerApp, RenderMode, ViewMode } from "../..";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
+import Header, { HEADER_HEIGHT_PX } from "./Header";
 
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
@@ -46,5 +47,15 @@ export default function AppWrapper(): ReactElement {
     setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
   }, []);
 
-  return <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />;
+  return (
+    <div>
+      <Header></Header>
+      <ImageViewerApp
+        {...viewerArgs}
+        appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+        canvasMargin="0 0 0 0"
+        viewerSettings={viewerSettings}
+      />
+    </div>
+  );
 }
