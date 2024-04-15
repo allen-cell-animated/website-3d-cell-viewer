@@ -292,7 +292,7 @@ export default function LandingPage(): ReactElement {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>
+    <div style={{ backgroundColor: "var(--color-landingpage-bg)", minHeight: "100%" }}>
       <Header>
         {/* <FlexRowAlignCenter $gap={15}>
           <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
