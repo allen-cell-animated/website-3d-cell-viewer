@@ -72,7 +72,7 @@ const theme = {
       hoverBg: palette.medLtGreyAlt,
     },
     controlPanel: {
-      bg: palette.veryDarkGrey,
+      bg: palette.darkGrey,
       border: palette.medGrey,
       text: palette.ltGrey,
       sectionBg: palette.medDarkGrey,
@@ -270,7 +270,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimary: theme.colors.theme.primary,
           colorLink: theme.colors.text.link,
           margin: 0,
-          colorBgBase: theme.colors.landingPage.bg,
+          colorBgBase: theme.colors.controlPanel.bg,
           borderRadiusSM: 2,
         },
         components: {
@@ -288,7 +288,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
         },
       }}
     >
-      <CssProvider $theme={theme}>{props.children}</CssProvider>;
+      <CssProvider $theme={theme}>{props.children}</CssProvider>
     </ConfigProvider>
   );
 }
