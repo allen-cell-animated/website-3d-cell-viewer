@@ -68,39 +68,39 @@
   padding: 12px;
   text-align: center;
 
-  .viewer-toolbar-left,
-  .viewer-toolbar-right {
+  & .viewer-toolbar-left,
+  & .viewer-toolbar-right {
     position: absolute;
     &:not(:empty) {
       padding: 0 12px;
     }
   }
-  .viewer-toolbar-left {
+  & .viewer-toolbar-left {
     left: 0;
   }
-  .viewer-toolbar-right {
+  & .viewer-toolbar-right {
     right: 0;
   }
 
-  .viewer-toolbar-group:not(:last-child) {
+  & .viewer-toolbar-group:not(:last-child) {
     margin-right: 14px;
   }
-  .viewer-toolbar-group > :not(:last-child) {
+  & .viewer-toolbar-group > :not(:last-child) {
     margin-right: 6px;
   }
 
   /* Icon-only buttons */
 
-  .ant-btn-icon-only {
+  & .ant-btn-icon-only {
     padding-bottom: 1px;
   }
 
-  .btn-borderless {
+  & .btn-borderless {
     background-color: transparent;
     border-color: transparent;
     color: #bfbfbf;
 
-    > .ant-btn[disabled] {
+    & > .ant-btn[disabled] {
       background-color: transparent;
       border-color: transparent;
       color: #bfbfbf;

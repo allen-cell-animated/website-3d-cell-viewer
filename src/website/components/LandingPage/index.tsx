@@ -39,7 +39,8 @@ const BannerTextContainer = styled(FlexColumn)`
   }
 
   & > p {
-    font-size: var(--font-size-label);
+    font-size: 16px;
+    margin: 0;
   }
 `;
 

@@ -195,7 +195,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     /** 
          * Override Ant + Less styling, since it uses a very light purple that's 
          * impossible to read white text on.
-         * TODO: Fix this in the main app too. This currently only applies to landing page.
+         * TODO: Fix this in the main app too...
          */
     background-color: var(--color-text-selection-bg);
     color: var(--color-text-selection-text);
@@ -272,11 +272,13 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           margin: 0,
           colorBgBase: theme.colors.controlPanel.bg,
           borderRadiusSM: 2,
-          borderRadiusLG: 0,
         },
         components: {
+          Card: {
+            borderRadiusLG: 0,
+          },
           Collapse: {
-            borderRadius: 0,
+            borderRadiusLG: 0,
           },
           Layout: {
             siderBg: theme.colors.controlPanel.bg,
@@ -285,6 +287,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
+          },
+          Button: {
+            defaultShadow: "",
           },
         },
       }}

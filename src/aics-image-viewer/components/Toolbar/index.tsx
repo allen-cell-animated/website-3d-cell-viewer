@@ -155,7 +155,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
           onWheel={this.wheelHandler}
           onScroll={this.checkScrollBtnVisible}
         >
-          <span className="viewer-toolbar-left" ref={this.leftRef} />
+          <span className="viewer-toolbar-left" ref={this.leftRef}></span>
           <span className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <span className="viewer-toolbar-group">
@@ -201,7 +201,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
             <span className="viewer-toolbar-group">
               <Select
                 className="select-render-setting"
-                dropdownClassName="viewer-toolbar-dropdown"
+                popupClassName="viewer-toolbar-dropdown"
                 value={props.renderMode}
                 onChange={(value) => changeViewerSetting("renderMode", value)}
               >
