@@ -95,18 +95,6 @@
     padding: 0 !important;
   }
 
-  .ant-checkbox-inner {
-    background-color: transparent;
-  }
-
-  .ant-checkbox-indeterminate .ant-checkbox-inner {
-    background-color: transparent;
-
-    :after {
-      background-color: white;
-    }
-  }
-
   .channel-rows-list {
     border-top: 1px solid $border-color;
   }

@@ -69,6 +69,7 @@ const theme = {
     },
     checkbox: {
       bg: palette.medGrey,
+      hoverBg: palette.medLtGreyAlt,
     },
     controlPanel: {
       bg: palette.veryDarkGrey,
@@ -140,6 +141,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-statusflag-text: ${$theme.colors.statusFlag.text};
 
       --color-layout-dividers: ${$theme.colors.layout.dividers};
+
+      --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
       --color-text-link: ${$theme.colors.text.link};
       --color-text-header: ${$theme.colors.text.header};
@@ -232,6 +235,25 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       color: var(--color-button-link-disabled-text);
     }
   }
+
+  // Overrides for checkbox styling
+  & .ant-checkbox-input {
+    &:hover {
+      border: 1px solid white;
+    }
+  }
+
+  & .ant-checkbox.ant-checkbox-checked {
+    background-color: var(--color-checkbox-bg);
+  }
+
+  .ant-checkbox-inner {
+    background-color: transparent;
+  }
+
+  & .ant-checkbox-indeterminate.checked .ant-checkbox-inner {
+    background-color: var(--color-checkbox-bg);
+  }
 `;
 
 /**
@@ -259,8 +281,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             siderBg: theme.colors.controlPanel.bg,
           },
           Checkbox: {
-            borderRadius: 0,
             colorBgContainer: theme.colors.checkbox.bg,
+            colorPrimary: theme.colors.checkbox.bg,
+            colorPrimaryHover: theme.colors.checkbox.hoverBg,
           },
         },
       }}
