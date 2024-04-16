@@ -42,10 +42,10 @@ const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, onVisibleCha
         placement="bottom"
         closable={false}
         getContainer={false}
-        visible={isVisible}
+        open={isVisible}
         mask={false}
         title={optionsButton}
-        afterVisibleChange={onVisibleChangeEnd}
+        afterOpenChange={onVisibleChangeEnd}
       >
         <div className="drawer-body-wrapper">{children}</div>
       </Drawer>
