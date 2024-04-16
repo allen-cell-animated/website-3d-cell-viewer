@@ -1,7 +1,7 @@
 import React from "react";
-import { Icon } from "antd";
 
 import "./styles.css";
+import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 
 interface NumericInputProps {
   value: number;
@@ -121,7 +121,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
           aria-disabled={disabled}
           onClick={() => changeByStep(true)}
         >
-          <Icon className="numinput-controls-button-icon" type="up" />
+          <CaretUpOutlined className="numinput-controls-button-icon" />
         </div>
         <div
           className="numinput-controls-button numinput-controls-button-down"
@@ -130,7 +130,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
           aria-disabled={disabled}
           onClick={() => changeByStep(false)}
         >
-          <Icon className="numinput-controls-button-icon" type="down" />
+          <CaretDownOutlined className="numinput-controls-button-icon" />
         </div>
       </div>
     </div>

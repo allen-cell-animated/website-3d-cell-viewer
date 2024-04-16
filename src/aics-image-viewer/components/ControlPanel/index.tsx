@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Card, Button, Dropdown, Icon, Menu, Tooltip } from "antd";
-import { ClickParam } from "antd/lib/menu";
+import { Card, Button, Dropdown, Menu, Tooltip } from "antd";
+import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
@@ -13,6 +13,7 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
 import { MetadataRecord } from "../../shared/types";
+import { DropdownSVG } from "../../../website/assets/icons";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
@@ -45,7 +46,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
   // TODO key is a number, but ClickParam assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
-  const makeTurnOnPresetFn = ({ key }: ClickParam): void =>
+  const makeTurnOnPresetFn = ({ key }: MenuInfo): void =>
     props.onApplyColorPresets(PRESET_COLOR_MAP[key as unknown as number].colors);
 
   const renderColorPresetsDropdown = (): React.ReactNode => {
@@ -60,7 +61,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
       <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
         <Button>
           Apply palette
-          <Icon type="down" />
+          <DropdownSVG />
         </Button>
       </Dropdown>
     );

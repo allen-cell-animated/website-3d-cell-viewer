@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
+import { Button, List, Col, Row, Checkbox, Slider } from "antd";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
@@ -19,6 +19,7 @@ import {
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
+import { SettingFilled, SettingOutlined } from "@ant-design/icons";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -136,12 +137,11 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
       surface
     </Checkbox>,
-    <Icon
-      key="openSettingsButton"
-      type="setting"
-      theme={this.state.controlsOpen ? "filled" : "outlined"}
-      onClick={this.toggleControlsOpen}
-    />,
+    this.state.controlsOpen ? (
+      <SettingFilled onClick={this.toggleControlsOpen} />
+    ) : (
+      <SettingOutlined onClick={this.toggleControlsOpen} />
+    ),
   ];
 
   createTFEditor(): React.ReactNode {
@@ -200,16 +200,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
       {this.props.volumeChecked && (
-        <Row type="flex" justify="space-between" className="volume-settings">
+        <Row justify="space-between" className="volume-settings">
           <h4 className="ant-list-item-meta-title">Volume settings:</h4>
           {this.createTFEditor()}
         </Row>
       )}
-      {this.props.isosurfaceChecked && (
-        <Row type="flex" justify="space-between">
-          {this.renderSurfaceControls()}
-        </Row>
-      )}
+      {this.props.isosurfaceChecked && <Row justify="space-between">{this.renderSurfaceControls()}</Row>}
     </div>
   );
 

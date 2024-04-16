@@ -1,14 +1,14 @@
 import React from "react";
-import { Icon } from "antd";
-import { IconProps } from "antd/lib/icon";
+import Icon from "@ant-design/icons";
 
 import ICONS from "../../assets/icons";
+import { IconComponentProps } from "@ant-design/icons/lib/components/Icon";
 
 const STYLE = { fontSize: "19px" };
 
 /** Wrapper component for easy inclusion of our own custom icons. */
-const ViewerIcon: React.FC<{ type: keyof typeof ICONS } & Omit<IconProps, "type" | "component">> = (props) => (
-  <Icon component={ICONS[props.type]} {...{ ...props, style: { ...STYLE, ...props.style } }} />
-);
+const ViewerIcon: React.FC<{ type: keyof typeof ICONS } & Omit<IconComponentProps, "type" | "component" | "ref">> = (
+  props
+) => <Icon component={ICONS[props.type]} {...{ ...props, style: { ...STYLE, ...props.style } }} />;
 
 export default ViewerIcon;
