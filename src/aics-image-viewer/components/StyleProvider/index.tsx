@@ -67,6 +67,9 @@ const theme = {
         hoverBg: palette.ltPurple,
       },
     },
+    checkbox: {
+      bg: palette.medGrey,
+    },
     controlPanel: {
       bg: palette.veryDarkGrey,
       border: palette.medGrey,
@@ -246,10 +249,18 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorLink: theme.colors.text.link,
           margin: 0,
           colorBgBase: theme.colors.landingPage.bg,
+          borderRadiusSM: 2,
         },
         components: {
           Collapse: {
             borderRadius: 0,
+          },
+          Layout: {
+            siderBg: theme.colors.controlPanel.bg,
+          },
+          Checkbox: {
+            borderRadius: 0,
+            colorBgContainer: theme.colors.checkbox.bg,
           },
         },
       }}
