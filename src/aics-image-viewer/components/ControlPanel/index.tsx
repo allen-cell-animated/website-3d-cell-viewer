@@ -101,6 +101,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
           bordered={false}
           className="control-panel"
           title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+          style={{ backgroundColor: "transparent", marginTop: "0" }}
         >
           {hasImage && (
             <div className="channel-rows-list">

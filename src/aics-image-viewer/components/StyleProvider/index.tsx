@@ -272,6 +272,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           margin: 0,
           colorBgBase: theme.colors.controlPanel.bg,
           borderRadiusSM: 2,
+          borderRadiusLG: 0,
         },
         components: {
           Collapse: {
