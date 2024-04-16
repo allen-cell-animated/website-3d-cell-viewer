@@ -67,6 +67,16 @@
 .viewer-toolbar {
   padding: 12px;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+
+  & > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    vertical-align: middle;
+  }
 
   & .viewer-toolbar-left,
   & .viewer-toolbar-right {
@@ -80,6 +90,16 @@
   }
   & .viewer-toolbar-right {
     right: 0;
+  }
+
+  & .viewer-toolbar-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    vertical-align: middle;
+
+    & .ant-btn {
+    }
   }
 
   & .viewer-toolbar-group:not(:last-child) {
