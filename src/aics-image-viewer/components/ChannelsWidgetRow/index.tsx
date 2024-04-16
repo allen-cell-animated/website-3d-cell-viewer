@@ -137,6 +137,8 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
       surface
     </Checkbox>,
+    // TODO: This settings icon is different from the ones in the original designs.
+    // Replace with SVG if no corresponding article is available.
     this.state.controlsOpen ? (
       <SettingFilled onClick={this.toggleControlsOpen} />
     ) : (
