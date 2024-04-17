@@ -11,6 +11,15 @@
   }
 }
 
+/* Fix vertical alignment of title*/
+.ant-list-item-meta {
+  align-items: center !important;
+
+  & .ant-list-item-meta-title {
+    margin: 0 !important;
+  }
+}
+
 .control-panel {
   .channel-rows-list {
     .ant-card-head {

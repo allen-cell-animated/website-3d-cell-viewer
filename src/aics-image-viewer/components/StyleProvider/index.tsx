@@ -177,6 +177,13 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     font-weight: 600;
   }
 
+  h4 {
+    font-family: var(--font-family);
+    color: var(--color-text-header);
+    font-size: 14px;
+    font-weight: 400;
+  }
+
   p {
     font-family: var(--font-family);
     color: var(--color-text-body);
@@ -269,9 +276,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
         token: {
           colorPrimary: theme.colors.theme.primary,
           colorLink: theme.colors.text.link,
-          margin: 0,
           colorBgBase: theme.colors.controlPanel.bg,
-          borderRadiusSM: 2,
         },
         components: {
           Card: {
@@ -284,6 +289,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             siderBg: theme.colors.controlPanel.bg,
           },
           Checkbox: {
+            borderRadiusSM: 2,
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
