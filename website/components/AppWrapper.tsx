@@ -5,6 +5,11 @@ import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 
+type AppWrapperProps = {
+  viewerSettings?: Partial<GlobalViewerSettings>;
+  viewerArgs?: AppDataProps;
+};
+
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
   showBoundingBox: false,
@@ -26,15 +31,21 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   parentImageDownloadHref: "",
 };
 
+const defaultAppWrapperProps = {
+  viewerSettings: DEFAULT_VIEWER_SETTINGS,
+  viewerArgs: DEFAULT_APP_PROPS,
+};
+
 /**
  * Wrapper around the main ImageViewer component. Handles the collection of parameters from the
  * URL and location state (from routing) to pass to the viewer.
  */
-export default function AppWrapper(): ReactElement {
+export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
+  const props = { ...defaultAppWrapperProps, ...inputProps };
   const location = useLocation();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
-  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
+  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
+  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
   const [searchParams] = useSearchParams();
 
   useMemo(async () => {
