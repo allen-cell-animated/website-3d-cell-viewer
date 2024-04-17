@@ -5,9 +5,9 @@ import { createBrowserRouter, createHashRouter, RouterProvider } from "react-rou
 import "antd/dist/antd.less";
 
 // Components
-import AppWrapper from "../src/website/components/AppWrapper";
-import LandingPage from "../src/website/components/LandingPage";
-import ErrorPage from "../src/website/components/ErrorPage";
+import AppWrapper from "../website/components/AppWrapper";
+import LandingPage from "../website/components/LandingPage";
+import ErrorPage from "../website/components/ErrorPage";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
