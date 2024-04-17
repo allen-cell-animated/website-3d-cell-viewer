@@ -5,7 +5,8 @@ import styled from "styled-components";
 import { AicsLogoAndNameSVG, AicsLogoSVG } from "../assets/icons";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 
-const AICS_LOGO_RESIZE_THRESHOLD_PX = 540;
+// TODO: Adjust this when additional buttons are added to the header.
+const AICS_LOGO_RESIZE_THRESHOLD_PX = 610;
 /**
  * Used to determine header height on viewer page.
  * TODO: Determine this dynamically?
