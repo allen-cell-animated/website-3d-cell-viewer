@@ -112,7 +112,7 @@
   /* Icon-only buttons */
 
   & .ant-btn-icon-only {
-    padding-bottom: 1px;
+    padding-bottom: 4px;
   }
 
   & .btn-borderless {

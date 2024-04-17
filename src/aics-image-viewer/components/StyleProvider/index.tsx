@@ -88,6 +88,7 @@ const theme = {
     },
     layout: {
       dividers: palette.medGrey,
+      split: palette.white,
     },
   },
   fonts: {
@@ -277,6 +278,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimary: theme.colors.theme.primary,
           colorLink: theme.colors.text.link,
           colorBgBase: theme.colors.controlPanel.bg,
+          colorSplit: theme.colors.layout.split,
         },
         components: {
           Card: {
