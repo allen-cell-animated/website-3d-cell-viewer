@@ -149,9 +149,8 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     args.imageDownloadHref = firstUrl;
     args.parentImageUrl = "";
     args.parentImageDownloadHref = "";
-    // if json, then use the CFE settings for now.
-    // (See VIEWER_3D_SETTINGS)
-    // otherwise turn the first 3 channels on and group them
+    // if json, will not override channel settings.
+    // otherwise turn the first 3 channels on by default and group them
     if (!firstUrl.endsWith("json") && !params.ch) {
       args.viewerChannelSettings = {
         groups: [
