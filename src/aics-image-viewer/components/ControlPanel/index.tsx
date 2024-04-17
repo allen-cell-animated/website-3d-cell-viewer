@@ -60,8 +60,10 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     return (
       <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
         <Button>
-          Apply palette
-          <DropdownSVG />
+          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
+            Apply palette
+            <DropdownSVG />
+          </div>
         </Button>
       </Dropdown>
     );
