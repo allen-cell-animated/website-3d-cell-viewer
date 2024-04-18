@@ -17,6 +17,7 @@ const HeaderTitleLink = styled(Link)`
   && h1 {
     color: var(--color-header-title);
     font-size: 20px;
+    margin: 0;
 
     &:hover {
       color: var(--color-header-hover-title);
