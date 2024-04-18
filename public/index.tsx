@@ -26,6 +26,7 @@ const routes = [
   {
     path: "viewer",
     element: <AppWrapper />,
+    errorElement: <ErrorPage />,
   },
 ];
 
