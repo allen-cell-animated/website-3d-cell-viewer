@@ -38,7 +38,7 @@ const BannerTextContainer = styled(FlexColumn)`
     margin-top: 0;
   }
 
-  & > p {
+  && > p {
     font-size: 16px;
     margin: 0;
   }
@@ -87,6 +87,10 @@ const FeatureHighlightsItem = styled(FlexColumn)`
 
   & > h3 {
     font-weight: 600;
+    margin: 0;
+  }
+
+  & > p {
     margin: 0;
   }
 `;
@@ -349,7 +353,7 @@ export default function LandingPage(): ReactElement {
         </FeatureHighlightsContainer>
         <Divider />
         <FlexColumnAlignCenter>
-          <h2>Load an example below or your own data to get started.</h2>
+          <h2 style={{ color: "var(--color-text-header)" }}>Load an example below or your own data to get started.</h2>
         </FlexColumnAlignCenter>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
