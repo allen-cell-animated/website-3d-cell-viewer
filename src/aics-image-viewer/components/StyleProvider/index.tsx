@@ -79,6 +79,7 @@ const theme = {
       border: palette.medGrey,
       text: palette.ltGrey,
       sectionBg: palette.medDarkGrey,
+      drawerBg: palette.veryDarkGrey,
     },
     toolbar: {
       buttonBg: "#000000cc",
@@ -150,6 +151,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
       --color-controlpanel-text: ${$theme.colors.controlPanel.text};
       --color-controlpanel-section-bg: ${$theme.colors.controlPanel.sectionBg};
+      --color-controlpanel-drawer-bg: ${$theme.colors.controlPanel.drawerBg};
 
       --color-landingpage-bg: ${$theme.colors.landingPage.bg};
       --color-landingpage-text: ${$theme.colors.landingPage.text};

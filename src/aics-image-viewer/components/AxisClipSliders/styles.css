@@ -15,10 +15,8 @@
 
   @extend %axis-override;
   max-width: calc(var(--w-group-title) + var(--w-axis-slider) + var(--w-name) + var(--w-values-3d) + 80px);
-  position: absolute;
+  position: relative;
   margin: auto;
-  top: calc(50% + 21px);
-  transform: translateY(-50%);
   left: 0;
   right: 0;
   padding: 0 25px;
