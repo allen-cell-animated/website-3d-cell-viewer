@@ -278,7 +278,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   // Overrides for checkbox styling
   & .ant-checkbox-input {
-    &:hover {
+    &:hover,
+    &:focus-visible {
       border: 1px solid white;
     }
   }

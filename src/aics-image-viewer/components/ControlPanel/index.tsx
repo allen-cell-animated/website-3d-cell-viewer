@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Card, Button, Dropdown, Menu, Tooltip } from "antd";
+import { Card, Button, Dropdown, Tooltip, MenuProps } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
@@ -50,15 +50,14 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     props.onApplyColorPresets(PRESET_COLOR_MAP[key as unknown as number].colors);
 
   const renderColorPresetsDropdown = (): React.ReactNode => {
-    const dropDownMenuItems = (
-      <Menu onClick={makeTurnOnPresetFn}>
-        {PRESET_COLOR_MAP.map((preset, index) => (
-          <Menu.Item key={index}>{preset.name}</Menu.Item>
-        ))}
-      </Menu>
-    );
+    const dropDownMenuProps: MenuProps = {
+      items: PRESET_COLOR_MAP.map((preset, index) => {
+        return { key: index, label: preset.name };
+      }),
+      onClick: makeTurnOnPresetFn,
+    };
     return (
-      <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
+      <Dropdown trigger={["click"]} menu={dropDownMenuProps}>
         <Button>
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
             Apply palette
@@ -70,7 +69,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
   };
 
   const renderTab = (thisTab: ControlTab, icon: React.ReactNode): React.ReactNode => (
-    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { visible: false })}>
+    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { open: false })}>
       <Button
         className={tab === thisTab ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
         onClick={() => setTab(thisTab)}
