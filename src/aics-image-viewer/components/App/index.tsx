@@ -55,6 +55,7 @@ import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
+import StyleProvider from "../StyleProvider";
 
 import "../../assets/styles/globals.css";
 import {
@@ -762,97 +763,99 @@ const App: React.FC<AppProps> = (props) => {
   const showControls = { ...defaultShownControls, ...props.showControls };
 
   return (
-    <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
-      {channelSettings.map((channelState, index) => (
-        <ChannelUpdater
-          key={`${index}_${channelState.name}`}
-          {...{ channelState, index }}
-          view3d={view3d}
-          image={image}
-          version={channelVersions[index]}
-        />
-      ))}
-      <Sider
-        className="control-panel-holder"
-        collapsible={true}
-        defaultCollapsed={false}
-        collapsedWidth={50}
-        trigger={null}
-        collapsed={controlPanelClosed}
-        width={500}
-      >
-        <ControlPanel
-          showControls={showControls}
-          // image state
-          imageName={image?.name}
-          hasImage={!!image}
-          pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
-          channelDataChannels={image?.channels}
-          channelGroupedByType={channelGroupedByType}
-          // user selections
-          channelSettings={channelSettings}
-          showBoundingBox={viewerSettings.showBoundingBox}
-          backgroundColor={viewerSettings.backgroundColor}
-          boundingBoxColor={viewerSettings.boundingBoxColor}
-          maskAlpha={viewerSettings.maskAlpha}
-          brightness={viewerSettings.brightness}
-          density={viewerSettings.density}
-          levels={viewerSettings.levels}
-          interpolationEnabled={viewerSettings.interpolationEnabled}
-          collapsed={controlPanelClosed}
-          // functions
-          changeViewerSetting={changeViewerSetting}
-          setCollapsed={setControlPanelClosed}
-          saveIsosurface={saveIsosurface}
-          onApplyColorPresets={applyColorPresets}
-          changeChannelSetting={changeChannelSetting}
-          changeMultipleChannelSettings={changeMultipleChannelSettings}
-          viewerChannelSettings={props.viewerChannelSettings}
-          getMetadata={getMetadata}
-        />
-      </Sider>
-      <Layout className="cell-viewer-wrapper" style={{ margin: props.canvasMargin }}>
-        <Content>
-          <Toolbar
-            viewMode={viewerSettings.viewMode}
-            fovDownloadHref={props.parentImageDownloadHref}
-            cellDownloadHref={props.imageDownloadHref}
-            autorotate={viewerSettings.autorotate}
-            imageType={viewerSettings.imageType}
-            hasParentImage={!!props.parentImageUrl}
-            hasCellId={!!props.cellId}
-            canPathTrace={view3d ? view3d.hasWebGL2() : false}
-            showAxes={viewerSettings.showAxes}
-            showBoundingBox={viewerSettings.showBoundingBox}
-            renderMode={viewerSettings.renderMode}
-            resetCamera={resetCamera}
-            downloadScreenshot={saveScreenshot}
-            changeViewerSetting={changeViewerSetting}
-            showControls={showControls}
-          />
-          <CellViewerCanvasWrapper
+    <StyleProvider>
+      <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
+        {channelSettings.map((channelState, index) => (
+          <ChannelUpdater
+            key={`${index}_${channelState.name}`}
+            {...{ channelState, index }}
             view3d={view3d}
-            hasImage={!!image}
-            viewMode={viewerSettings.viewMode}
-            autorotate={viewerSettings.autorotate}
-            loadingImage={sendingQueryRequest}
-            numSlices={numSlices}
-            numSlicesLoaded={numSlicesLoaded}
-            numTimesteps={numTimesteps}
-            region={viewerSettings.region}
-            slices={viewerSettings.slice}
-            time={viewerSettings.time}
-            playControls={playControls}
-            playingAxis={playingAxis}
-            appHeight={props.appHeight}
-            showControls={showControls}
-            changeViewerSetting={changeViewerSetting}
-            onClippingPanelVisibleChange={onClippingPanelVisibleChange}
-            onClippingPanelVisibleChangeEnd={onClippingPanelVisibleChangeEnd}
+            image={image}
+            version={channelVersions[index]}
           />
-        </Content>
+        ))}
+        <Sider
+          className="control-panel-holder"
+          collapsible={true}
+          defaultCollapsed={false}
+          collapsedWidth={50}
+          trigger={null}
+          collapsed={controlPanelClosed}
+          width={500}
+        >
+          <ControlPanel
+            showControls={showControls}
+            // image state
+            imageName={image?.name}
+            hasImage={!!image}
+            pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
+            channelDataChannels={image?.channels}
+            channelGroupedByType={channelGroupedByType}
+            // user selections
+            channelSettings={channelSettings}
+            showBoundingBox={viewerSettings.showBoundingBox}
+            backgroundColor={viewerSettings.backgroundColor}
+            boundingBoxColor={viewerSettings.boundingBoxColor}
+            maskAlpha={viewerSettings.maskAlpha}
+            brightness={viewerSettings.brightness}
+            density={viewerSettings.density}
+            levels={viewerSettings.levels}
+            interpolationEnabled={viewerSettings.interpolationEnabled}
+            collapsed={controlPanelClosed}
+            // functions
+            changeViewerSetting={changeViewerSetting}
+            setCollapsed={setControlPanelClosed}
+            saveIsosurface={saveIsosurface}
+            onApplyColorPresets={applyColorPresets}
+            changeChannelSetting={changeChannelSetting}
+            changeMultipleChannelSettings={changeMultipleChannelSettings}
+            viewerChannelSettings={props.viewerChannelSettings}
+            getMetadata={getMetadata}
+          />
+        </Sider>
+        <Layout className="cell-viewer-wrapper" style={{ margin: props.canvasMargin }}>
+          <Content>
+            <Toolbar
+              viewMode={viewerSettings.viewMode}
+              fovDownloadHref={props.parentImageDownloadHref}
+              cellDownloadHref={props.imageDownloadHref}
+              autorotate={viewerSettings.autorotate}
+              imageType={viewerSettings.imageType}
+              hasParentImage={!!props.parentImageUrl}
+              hasCellId={!!props.cellId}
+              canPathTrace={view3d ? view3d.hasWebGL2() : false}
+              showAxes={viewerSettings.showAxes}
+              showBoundingBox={viewerSettings.showBoundingBox}
+              renderMode={viewerSettings.renderMode}
+              resetCamera={resetCamera}
+              downloadScreenshot={saveScreenshot}
+              changeViewerSetting={changeViewerSetting}
+              showControls={showControls}
+            />
+            <CellViewerCanvasWrapper
+              view3d={view3d}
+              hasImage={!!image}
+              viewMode={viewerSettings.viewMode}
+              autorotate={viewerSettings.autorotate}
+              loadingImage={sendingQueryRequest}
+              numSlices={numSlices}
+              numSlicesLoaded={numSlicesLoaded}
+              numTimesteps={numTimesteps}
+              region={viewerSettings.region}
+              slices={viewerSettings.slice}
+              time={viewerSettings.time}
+              playControls={playControls}
+              playingAxis={playingAxis}
+              appHeight={props.appHeight}
+              showControls={showControls}
+              changeViewerSetting={changeViewerSetting}
+              onClippingPanelVisibleChange={onClippingPanelVisibleChange}
+              onClippingPanelVisibleChangeEnd={onClippingPanelVisibleChangeEnd}
+            />
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+    </StyleProvider>
   );
 };
 
