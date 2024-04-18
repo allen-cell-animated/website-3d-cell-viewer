@@ -213,10 +213,10 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   & *::selection {
     /** 
-         * Override Ant + Less styling, since it uses a very light purple that's 
-         * impossible to read white text on.
-         * TODO: Fix this in the main app too...
-         */
+    * Override Ant + Less styling, since it uses a very light purple that's 
+    * impossible to read white text on.
+    * TODO: Fix this in the main app too...
+    */
     background-color: var(--color-text-selection-bg);
     color: var(--color-text-selection-text);
   }
@@ -227,7 +227,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   .ant-btn-link,
   .ant-btn-text,
-  .ant-btn-primary {
+  .ant-btn-primary,
+  .ant-btn-icon-only {
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       background-color: var(--color-button-primary-hover-bg);
@@ -247,8 +248,11 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     color: var(--color-button-link-text);
   }
 
-  /** Tertiary style buttons. Grey outline by default, which */
-  .ant-btn-default {
+  /**
+   * Tertiary style buttons. Grey outline by default, turns to light
+   * purple outline on hover.
+   */
+  .ant-btn-default:not(.ant-btn-icon-only) {
     background-color: var(--color-button-default-bg);
     color: var(--color-button-default-text);
     border-color: var(--color-button-default-outline);
