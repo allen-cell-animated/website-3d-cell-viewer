@@ -1,5 +1,5 @@
 import React from "react";
-import { Menu, Dropdown, Button, MenuProps } from "antd";
+import { Dropdown, Button, MenuProps } from "antd";
 import ViewerIcon from "../shared/ViewerIcon";
 
 interface DownloadButtonProps {
