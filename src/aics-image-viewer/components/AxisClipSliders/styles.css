@@ -31,6 +31,7 @@
 
     .slider-group-title {
       flex: 0 0 var(--w-group-title);
+      margin: 0;
     }
 
     .slider-group-rows {
