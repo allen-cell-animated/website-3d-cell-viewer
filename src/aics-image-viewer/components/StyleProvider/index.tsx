@@ -36,8 +36,8 @@ const theme = {
     },
     text: {
       link: palette.brightBlue,
-      title: palette.medPurple,
       header: palette.ltGrey,
+      section: palette.white,
       body: palette.ltGrey,
       selectionBg: palette.medPurple,
       selectionText: palette.white,
@@ -46,6 +46,8 @@ const theme = {
       icon: palette.white,
       bg: palette.veryDarkGrey,
       border: palette.medGrey,
+      title: palette.medPurple,
+      hoverTitle: palette.ltPurple,
     },
     button: {
       primary: {
@@ -108,11 +110,16 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   ${({ $theme }) => {
     return css`
-      /* Component and color variables.
-       * TODO: use these to control component colors instead of the currently
-       * hard-coded colors in the components.
-       */
-      --color-header-text: ${$theme.colors.text.header};
+      /* Component and color variables. */
+      --color-text-link: ${$theme.colors.text.link};
+      --color-text-header: ${$theme.colors.text.header};
+      --color-text-section: ${$theme.colors.text.section};
+      --color-text-body: ${$theme.colors.text.body};
+      --color-text-selection-bg: ${$theme.colors.text.selectionBg};
+      --color-text-selection-text: ${$theme.colors.text.selectionText};
+
+      --color-header-title: ${$theme.colors.header.title};
+      --color-header-hover-title: ${theme.colors.header.hoverTitle};
       --color-header-icon: ${$theme.colors.header.icon};
       --color-header-bg: ${$theme.colors.header.bg};
       --color-header-border: ${$theme.colors.header.border};
@@ -153,13 +160,6 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
-      --color-text-title: ${theme.colors.text.title};
-      --color-text-link: ${$theme.colors.text.link};
-      --color-text-header: ${$theme.colors.text.header};
-      --color-text-body: ${$theme.colors.text.body};
-      --color-text-selection-bg: ${$theme.colors.text.selectionBg};
-      --color-text-selection-text: ${$theme.colors.text.selectionText};
-
       --font-family: ${$theme.fonts.family};
     `;
   }}
@@ -175,7 +175,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   }
 
   h2 {
-    color: var(--color-text-header);
+    color: var(--color-text-section);
     font-size: 19px;
     font-weight: 400;
   }
@@ -203,6 +203,10 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   a {
     color: var(--color-text-link);
+    &:not(:focus-visible) {
+      text-decoration: none;
+    }
+
     &:focus-visible {
       text-decoration: underline;
     }
@@ -228,8 +232,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     border: 1px solid transparent;
   }
 
-  .ant-btn:hover,
-  .ant-btn:focus-visible {
+  .ant-btn:hover:not(:disabled),
+  .ant-btn:focus-visible:not(:disabled) {
     background-color: var(--color-button-primary-hover-bg);
     border-color: var(--color-button-primary-hover-bg);
   }
@@ -242,8 +246,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   .ant-btn-link {
     color: var(--color-button-link-text);
 
-    &:hover,
-    &:focus-visible {
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
       color: var(--color-button-link-hover-text);
       background-color: var(--color-button-link-hover-bg);
     }
@@ -298,6 +302,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Card: {
             borderRadiusLG: 0,
+            headerHeight: 48,
           },
           Collapse: {
             borderRadiusLG: 0,

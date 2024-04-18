@@ -75,7 +75,7 @@
     }
 
     .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
-      transform: translateY(-320%);
+      transform: translateY(-300%);
       position: absolute;
       left: 16px;
     }
