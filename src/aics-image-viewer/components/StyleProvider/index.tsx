@@ -96,6 +96,9 @@ const theme = {
       dividers: palette.medGrey,
       split: palette.white,
     },
+    tooltip: {
+      bg: palette.black,
+    },
   },
   fonts: {
     family: "'Open Sans', Arial, sans-serif",
@@ -338,6 +341,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             optionSelectedBg: theme.colors.theme.primaryLt,
             colorTextPlaceholder: theme.colors.theme.primaryLt,
             colorBgContainer: theme.colors.toolbar.buttonBg,
+          },
+          Tooltip: {
+            colorBgSpotlight: theme.colors.tooltip.bg,
           },
         },
       }}
