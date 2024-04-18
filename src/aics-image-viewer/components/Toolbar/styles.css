@@ -113,12 +113,13 @@
 
   & .ant-btn-icon-only {
     padding-bottom: 4px;
+    padding-left: 1px;
   }
 
-  & .btn-borderless {
-    background-color: transparent;
+  & .ant-btn.ant-btn-default.btn-borderless {
+    background-color: var(--color-button-icon-bg);
     border-color: transparent;
-    color: #bfbfbf;
+    color: var(--color-text-body);
 
     & > .ant-btn[disabled] {
       background-color: transparent;
@@ -128,25 +129,19 @@
     }
 
     &.btn-active,
+    &:focus-visible,
     &:hover {
-      outline: none;
-      box-shadow: none;
-      color: white;
-      border-color: $light-gray;
+      background-color: var(--color-button-default-hover-bg);
+      color: var(--color-button-default-hover-text);
+    }
+
+    &:active {
+      /* TODO: Update this since no style is defined for these buttons specifically */
+      border-color: var(--color-button-default-active-outline);
     }
 
     &.btn-active {
       background-color: #4b4b4b;
-    }
-
-    &:hover {
-      background-color: $highlight-purple;
-    }
-
-    &:focus-within:not(.btn-active):not(:hover) {
-      background-color: transparent;
-      border-color: transparent;
-      color: #bfbfbf;
     }
 
     &[ant-click-animating-without-extra-node="true"]::after {

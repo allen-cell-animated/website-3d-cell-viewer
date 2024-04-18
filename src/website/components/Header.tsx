@@ -67,7 +67,7 @@ function HeaderLogo(): ReactElement {
       </AicsLogoLink>
       <VerticalDivider />
       <Link to="/" aria-label="Go to home page" style={{ color: "var(--color-header-text)" }}>
-        <h1 style={{ fontSize: "20px", color: "var(--color-header-text)", margin: 0 }}>3D Volume Viewer</h1>
+        <h1 style={{ fontSize: "20px", color: "var(--color-text-title)", margin: 0 }}>3D Volume Viewer</h1>
       </Link>
     </FlexRowAlignCenter>
   );

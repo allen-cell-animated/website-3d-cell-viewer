@@ -61,10 +61,14 @@ const theme = {
         hoverText: palette.white,
         disabledText: palette.medLtGreyAlt,
       },
-      secondary: {
+      default: {
         text: palette.medPurple,
         outline: palette.medPurple,
         hoverBg: palette.ltPurple,
+        hoverOutline: palette.ltPurple,
+        hoverText: palette.white,
+        activeBg: palette.darkPurple,
+        activeOutline: palette.medPurple,
       },
     },
     checkbox: {
@@ -124,10 +128,14 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-button-link-hover-text: ${$theme.colors.button.link.hoverText};
       --color-button-link-disabled-text: ${$theme.colors.button.link.disabledText};
 
-      --color-button-secondary-bg: transparent;
-      --color-button-secondary-text: ${$theme.colors.button.secondary.text};
-      --color-button-secondary-outline: ${$theme.colors.button.secondary.outline};
-      --color-button-secondary-hover-bg: ${$theme.colors.button.secondary.hoverBg};
+      --color-button-default-bg: transparent;
+      --color-button-default-text: ${$theme.colors.button.default.text};
+      --color-button-default-outline: ${$theme.colors.button.default.outline};
+      --color-button-default-hover-bg: ${$theme.colors.button.default.hoverBg};
+      --color-button-default-hover-text: ${$theme.colors.button.default.hoverText};
+      --color-button-default-active-outline: ${$theme.colors.button.default.outline};
+
+      --color-button-icon-bg: #000000cc;
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
@@ -145,6 +153,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
+      --color-text-title: ${theme.colors.text.title};
       --color-text-link: ${$theme.colors.text.link};
       --color-text-header: ${$theme.colors.text.header};
       --color-text-body: ${$theme.colors.text.body};
@@ -226,6 +235,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   }
 
   .ant-btn:active {
+    /* background-color: var(--color-button-primary-active-bg); */
     border: 1px solid var(--color-button-primary-active-outline);
   }
 
@@ -268,7 +278,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
  * Provides CSS variables and global styling for the image viewer.
  */
 export default function StyleProvider(props: PropsWithChildren<{}>): ReactElement {
-  const { defaultAlgorithm, darkAlgorithm } = AntTheme;
+  const { darkAlgorithm } = AntTheme;
 
   return (
     <ConfigProvider
@@ -281,6 +291,11 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorSplit: theme.colors.layout.split,
         },
         components: {
+          Button: {
+            defaultShadow: "",
+            defaultActiveBg: theme.colors.button.default.activeBg,
+            defaultActiveBorderColor: theme.colors.button.default.activeOutline,
+          },
           Card: {
             borderRadiusLG: 0,
           },
@@ -295,9 +310,6 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
-          },
-          Button: {
-            defaultShadow: "",
           },
         },
       }}
