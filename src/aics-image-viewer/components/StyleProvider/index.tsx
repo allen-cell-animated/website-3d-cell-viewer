@@ -28,7 +28,8 @@ const theme = {
   colors: {
     theme: {
       primary: palette.medPurple,
-      secondary: palette.ltPurple,
+      primaryLt: palette.ltPurple,
+      primaryDk: palette.darkPurple,
       success: palette.brightGreen,
       error: palette.brightRed,
       warning: palette.brightRed,
@@ -59,17 +60,13 @@ const theme = {
       },
       link: {
         text: palette.medPurple,
-        hoverBg: palette.ltPurple,
-        hoverText: palette.white,
-        disabledText: palette.medLtGreyAlt,
       },
       default: {
-        text: palette.medPurple,
-        outline: palette.medPurple,
-        hoverBg: palette.ltPurple,
+        bg: "transparent",
+        text: palette.ltGrey,
+        outline: palette.ltGrey,
         hoverOutline: palette.ltPurple,
-        hoverText: palette.white,
-        activeBg: palette.darkPurple,
+        hoverText: palette.ltPurple,
         activeOutline: palette.medPurple,
       },
     },
@@ -82,6 +79,9 @@ const theme = {
       border: palette.medGrey,
       text: palette.ltGrey,
       sectionBg: palette.medDarkGrey,
+    },
+    toolbar: {
+      buttonBg: "#000000cc",
     },
     landingPage: {
       bg: palette.veryDarkGrey,
@@ -127,22 +127,21 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-button-primary-bg: ${$theme.colors.button.primary.bg};
       --color-button-primary-text: ${$theme.colors.button.primary.text};
       --color-button-primary-hover-bg: ${$theme.colors.button.primary.hoverBg};
+      --color-button-primary-active-bg: ${$theme.colors.button.primary.hoverBg};
       --color-button-primary-active-outline: ${$theme.colors.button.primary.activeOutline};
       --color-button-primary-disabled-bg: ${$theme.colors.button.primary.disabledBg};
 
       --color-button-link-text: ${$theme.colors.button.link.text};
-      --color-button-link-hover-bg: ${$theme.colors.button.link.hoverBg};
-      --color-button-link-hover-text: ${$theme.colors.button.link.hoverText};
-      --color-button-link-disabled-text: ${$theme.colors.button.link.disabledText};
 
       --color-button-default-bg: transparent;
       --color-button-default-text: ${$theme.colors.button.default.text};
       --color-button-default-outline: ${$theme.colors.button.default.outline};
-      --color-button-default-hover-bg: ${$theme.colors.button.default.hoverBg};
+      --color-button-default-hover-outline: ${$theme.colors.button.default.hoverOutline};
       --color-button-default-hover-text: ${$theme.colors.button.default.hoverText};
-      --color-button-default-active-outline: ${$theme.colors.button.default.outline};
+      --color-button-default-active-outline: ${$theme.colors.button.default.activeOutline};
+      --color-button-default-active-text: ${$theme.colors.button.default.hoverText};
 
-      --color-button-icon-bg: #000000cc;
+      --color-button-icon-bg: ${$theme.colors.toolbar.buttonBg};
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
@@ -225,36 +224,46 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   /* TODO: Remove this when we upgrade to Ant versions that provide support for
      * ConfigProvider. 
      */
+
+  .ant-btn-link,
+  .ant-btn-text,
   .ant-btn-primary {
-    background-color: var(--color-button-primary-bg);
-    color: var(--color-button-primary-text);
-    border-color: var(--color-button-primary-bg);
-    border: 1px solid transparent;
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      background-color: var(--color-button-primary-hover-bg);
+      border-color: var(--color-button-primary-hover-bg);
+      color: var(--color-button-primary-text);
+    }
+
+    &:active:not(:disabled) {
+      background-color: var(--color-button-primary-hover-bg);
+      border: 1px solid var(--color-button-primary-active-outline);
+      color: var(--color-button-primary-text);
+    }
   }
 
-  .ant-btn:hover:not(:disabled),
-  .ant-btn:focus-visible:not(:disabled) {
-    background-color: var(--color-button-primary-hover-bg);
-    border-color: var(--color-button-primary-hover-bg);
-  }
-
-  .ant-btn:active {
-    /* background-color: var(--color-button-primary-active-bg); */
-    border: 1px solid var(--color-button-primary-active-outline);
-  }
-
-  .ant-btn-link {
+  .ant-btn-link:not(:disabled) {
+    // Change from default blue link text
     color: var(--color-button-link-text);
+  }
+
+  /** Tertiary style buttons. Grey outline by default, which */
+  .ant-btn-default {
+    background-color: var(--color-button-default-bg);
+    color: var(--color-button-default-text);
+    border-color: var(--color-button-default-outline);
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
-      color: var(--color-button-link-hover-text);
-      background-color: var(--color-button-link-hover-bg);
+      background-color: transparent;
+      border-color: var(--color-button-default-hover-bg);
+      color: var(--color-button-default-hover-text);
     }
 
-    &:disabled,
-    &:disabled:hover {
-      color: var(--color-button-link-disabled-text);
+    &:active:not(:disabled) {
+      background-color: transparent;
+      border-color: var(--color-button-default-active-outline);
+      color: var(--color-button-default-active-text);
     }
   }
 
@@ -290,14 +299,18 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
         algorithm: darkAlgorithm,
         token: {
           colorPrimary: theme.colors.theme.primary,
+          colorPrimaryHover: theme.colors.theme.primaryLt,
           colorLink: theme.colors.text.link,
           colorBgBase: theme.colors.controlPanel.bg,
           colorSplit: theme.colors.layout.split,
+          colorPrimaryTextHover: theme.colors.text.selectionText,
         },
         components: {
           Button: {
             defaultShadow: "",
-            defaultActiveBg: theme.colors.button.default.activeBg,
+            primaryColor: theme.colors.button.primary.text,
+            defaultHoverBg: theme.colors.button.default.bg,
+            defaultActiveBg: theme.colors.button.default.bg,
             defaultActiveBorderColor: theme.colors.button.default.activeOutline,
           },
           Card: {
@@ -315,6 +328,12 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
+          },
+          Radio: {},
+          Select: {
+            optionSelectedBg: theme.colors.theme.primaryLt,
+            colorTextPlaceholder: theme.colors.theme.primaryLt,
+            colorBgContainer: theme.colors.toolbar.buttonBg,
           },
         },
       }}
