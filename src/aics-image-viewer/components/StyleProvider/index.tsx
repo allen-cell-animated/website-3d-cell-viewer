@@ -1,5 +1,5 @@
-import React, { PropsWithChildren, ReactElement } from "react";
 import { theme as AntTheme, ConfigProvider } from "antd";
+import React, { PropsWithChildren, ReactElement } from "react";
 
 import styled, { css } from "styled-components";
 
@@ -114,6 +114,7 @@ const theme = {
 
 type AppTheme = typeof theme;
 
+/** Makes theme styling available to child components via CSS variables. */
 const CssProvider = styled.div<{ $theme: AppTheme }>`
   width: 100%;
   height: 100%;

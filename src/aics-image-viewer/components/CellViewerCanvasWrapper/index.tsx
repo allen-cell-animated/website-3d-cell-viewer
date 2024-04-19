@@ -1,5 +1,6 @@
 import React from "react";
 import { View3d } from "@aics/volume-viewer";
+import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
@@ -9,7 +10,6 @@ import PlayControls from "../../shared/utils/playControls";
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
 import "./styles.css";
-import { LoadingOutlined } from "@ant-design/icons";
 
 interface ViewerWrapperProps {
   view3d: View3d;

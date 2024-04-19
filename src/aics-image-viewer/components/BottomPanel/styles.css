@@ -32,19 +32,13 @@
   }
 
   &&& .ant-drawer-title .ant-btn {
-    background-color: #4b4b4b;
+    background-color: var(--color-controlpanel-drawer-bg);
     color: #aeacae;
 
+    &:active,
+    &:hover,
     &:focus {
-      color: #aeacae;
-      background-color: #4b4b4b;
-    }
-
-    &:active {
-      background-color: #4b4b4b;
-    }
-
-    &:hover {
+      background-color: var(--color-controlpanel-drawer-bg);
       color: white;
     }
   }
