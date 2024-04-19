@@ -482,12 +482,12 @@ const App: React.FC<AppProps> = (props) => {
       const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
       onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
     });
-    loader.current.loadVolumeData(aimg);
 
     const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
-
     setAllChannelsUnloaded(channelNames.length);
+
+    loader.current.loadVolumeData(aimg);
 
     imageUrlRef.current = path;
     placeImageInViewer(aimg, newChannelSettings);
