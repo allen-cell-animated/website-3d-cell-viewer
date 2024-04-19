@@ -487,6 +487,8 @@ const App: React.FC<AppProps> = (props) => {
     const newChannelSettings = setChannelStateForNewImage(channelNames);
     setAllChannelsUnloaded(channelNames.length);
 
+    // initiate loading only after setting up new channel settings,
+    // in case the loader callback fires before the state is set
     loader.current.loadVolumeData(aimg);
 
     imageUrlRef.current = path;
