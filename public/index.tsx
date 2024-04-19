@@ -2,8 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 
-// import "antd/dist/antd.less";
-
 // Components
 import AppWrapper from "../src/website/components/AppWrapper";
 import LandingPage from "../src/website/components/LandingPage";
