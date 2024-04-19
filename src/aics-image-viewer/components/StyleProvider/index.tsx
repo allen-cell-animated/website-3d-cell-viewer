@@ -48,6 +48,9 @@ const theme = {
       title: palette.medPurple,
       hoverTitle: palette.ltPurple,
     },
+    // TODO: Buttons could have their own type
+    // with properties for bg, text, and outline across hover/focus,
+    // active, and disabled states.
     button: {
       primary: {
         bg: palette.medPurple,
@@ -123,7 +126,6 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-section: ${$theme.colors.text.section};
       --color-text-body: ${$theme.colors.text.body};
 
-      /* Colors for text selection */
       --color-text-selection-bg: ${$theme.colors.text.selectionBg};
       --color-text-selection-text: ${$theme.colors.text.selectionText};
 
@@ -149,8 +151,9 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-button-default-active-outline: ${$theme.colors.button.secondary.activeOutline};
       --color-button-default-active-text: ${$theme.colors.button.secondary.hoverText};
 
-      --color-button-icon-bg: ${$theme.colors.toolbar.buttonBg};
       --color-button-icon-disabled-text: ${$theme.colors.button.secondary.disabledText};
+
+      --color-toolbar-button-bg: ${$theme.colors.toolbar.buttonBg};
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
@@ -247,6 +250,10 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     }
   }
 
+  .ant-btn-icon-only:disabled {
+    color: var(--color-button-icon-disabled-text);
+  }
+
   .ant-btn-link:not(:disabled) {
     // Change from default blue link text
     color: var(--color-button-link-text);
@@ -340,9 +347,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Radio: {},
           Select: {
-            optionSelectedBg: theme.colors.theme.primaryLt,
-            colorTextPlaceholder: theme.colors.theme.primaryLt,
-            colorBgContainer: theme.colors.toolbar.buttonBg,
+            optionSelectedBg: theme.colors.menu.selectedBg,
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,

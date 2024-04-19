@@ -97,9 +97,6 @@
     flex-direction: row;
     align-items: center;
     vertical-align: middle;
-
-    & .ant-btn {
-    }
   }
 
   & .viewer-toolbar-group:not(:last-child) {
@@ -116,42 +113,10 @@
     padding-left: 1px;
   }
 
-  & .ant-btn.ant-btn-default.btn-borderless {
-    background-color: var(--color-button-icon-bg);
+  & .btn-borderless {
+    background-color: var(--color-toolbar-button-bg);
     border-color: transparent;
     color: var(--color-text-body);
-
-    &:disabled {
-      background-color: transparent;
-      border-color: transparent;
-      color: var(--color-button-icon-disabled-text);
-    }
-
-    &.btn-active:not(:disabled),
-    &:focus-visible:not(:disabled),
-    &:hover:not(:disabled) {
-      background-color: var(--color-button-primary-hover-bg);
-      color: var(--color-button-primary-hover-text);
-    }
-
-    &:active {
-      /* TODO: Update this since no style is defined for these buttons specifically */
-      border-color: var(--color-button-default-active-outline);
-    }
-
-    &.btn-active {
-      background-color: #4b4b4b;
-    }
-
-    &[ant-click-animating-without-extra-node="true"]::after {
-      box-shadow: none !important;
-      background-color: #222222;
-    }
-  }
-
-  span.btn-borderless {
-    background-color: transparent !important;
-    border-color: transparent !important;
   }
 
   /* Radio buttons */
@@ -196,14 +161,15 @@
     min-width: 120px;
   }
 
-  .ant-select-selection {
-    border-color: $light-gray !important;
-    box-shadow: none !important;
-    background-color: black;
+  &&& .ant-select-selector {
+    border-color: $light-gray;
+    box-shadow: none;
+    background-color: var(--color-toolbar-button-bg);
 
-    &:hover {
-      background-color: $highlight-purple;
-      color: white;
+    &:focus-visible:not(:disabled),
+    &:hover:not(:disabled) {
+      outline-color: $highlight-purple;
+      color: $highlight-purple;
     }
   }
 }
