@@ -1,7 +1,8 @@
 import React from "react";
+import { RightOutlined } from "@ant-design/icons";
+
 import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
-import { RightOutlined } from "@ant-design/icons";
 
 type MetadataTableProps = {
   metadata: MetadataRecord;

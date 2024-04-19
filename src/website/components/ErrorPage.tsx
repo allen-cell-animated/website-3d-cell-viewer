@@ -1,11 +1,12 @@
-import React, { ReactElement } from "react";
-import { FlexColumnAlignCenter } from "./LandingPage/utils";
-import { ErrorResponse, Link, useRouteError } from "react-router-dom";
-import { Button } from "antd";
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Header from "./Header";
+import { Button } from "antd";
+import React, { ReactElement } from "react";
+import { ErrorResponse, Link, useRouteError } from "react-router-dom";
 import styled from "styled-components";
+
+import { FlexColumnAlignCenter } from "./LandingPage/utils";
+import Header from "./Header";
 
 const ErrorPageWrapper = styled.div`
   background-color: var(--color-landingpage-bg);

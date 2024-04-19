@@ -1,8 +1,8 @@
 import React from "react";
 import Icon from "@ant-design/icons";
+import { IconComponentProps } from "@ant-design/icons/lib/components/Icon";
 
 import ICONS from "../../assets/icons";
-import { IconComponentProps } from "@ant-design/icons/lib/components/Icon";
 
 const STYLE = { fontSize: "19px" };
 
