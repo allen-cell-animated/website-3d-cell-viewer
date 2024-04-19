@@ -1,7 +1,6 @@
 import React, { PropsWithChildren, ReactElement } from "react";
 import { theme as AntTheme, ConfigProvider } from "antd";
 
-// import "./styles.css";
 import styled, { css } from "styled-components";
 
 const palette = {
@@ -44,7 +43,6 @@ const theme = {
       selectionText: palette.white,
     },
     header: {
-      icon: palette.white,
       bg: palette.veryDarkGrey,
       border: palette.medGrey,
       title: palette.medPurple,
@@ -61,13 +59,14 @@ const theme = {
       link: {
         text: palette.medPurple,
       },
-      default: {
+      secondary: {
         bg: "transparent",
         text: palette.ltGrey,
         outline: palette.ltGrey,
         hoverOutline: palette.ltPurple,
         hoverText: palette.ltPurple,
         activeOutline: palette.medPurple,
+        disabledText: palette.medGrey,
       },
     },
     checkbox: {
@@ -97,6 +96,10 @@ const theme = {
       dividers: palette.medGrey,
       split: palette.white,
     },
+    menu: {
+      selectedBg: palette.ltPurple,
+      textPlaceholder: palette.ltPurple,
+    },
     tooltip: {
       bg: palette.black,
     },
@@ -119,12 +122,13 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
       --color-text-body: ${$theme.colors.text.body};
+
+      /* Colors for text selection */
       --color-text-selection-bg: ${$theme.colors.text.selectionBg};
       --color-text-selection-text: ${$theme.colors.text.selectionText};
 
       --color-header-title: ${$theme.colors.header.title};
       --color-header-hover-title: ${theme.colors.header.hoverTitle};
-      --color-header-icon: ${$theme.colors.header.icon};
       --color-header-bg: ${$theme.colors.header.bg};
       --color-header-border: ${$theme.colors.header.border};
 
@@ -138,14 +142,15 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-button-link-text: ${$theme.colors.button.link.text};
 
       --color-button-default-bg: transparent;
-      --color-button-default-text: ${$theme.colors.button.default.text};
-      --color-button-default-outline: ${$theme.colors.button.default.outline};
-      --color-button-default-hover-outline: ${$theme.colors.button.default.hoverOutline};
-      --color-button-default-hover-text: ${$theme.colors.button.default.hoverText};
-      --color-button-default-active-outline: ${$theme.colors.button.default.activeOutline};
-      --color-button-default-active-text: ${$theme.colors.button.default.hoverText};
+      --color-button-default-text: ${$theme.colors.button.secondary.text};
+      --color-button-default-outline: ${$theme.colors.button.secondary.outline};
+      --color-button-default-hover-outline: ${$theme.colors.button.secondary.hoverOutline};
+      --color-button-default-hover-text: ${$theme.colors.button.secondary.hoverText};
+      --color-button-default-active-outline: ${$theme.colors.button.secondary.activeOutline};
+      --color-button-default-active-text: ${$theme.colors.button.secondary.hoverText};
 
       --color-button-icon-bg: ${$theme.colors.toolbar.buttonBg};
+      --color-button-icon-disabled-text: ${$theme.colors.button.secondary.disabledText};
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
@@ -217,23 +222,17 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   }
 
   & *::selection {
-    /** 
-    * Override Ant + Less styling, since it uses a very light purple that's 
-    * impossible to read white text on.
-    * TODO: Fix this in the main app too...
-    */
     background-color: var(--color-text-selection-bg);
     color: var(--color-text-selection-text);
   }
 
-  /* TODO: Remove this when we upgrade to Ant versions that provide support for
-     * ConfigProvider. 
-     */
-
+  /** TODO: Go through these styles and see if we can use Ant ConfigProvider for them instead. */
   .ant-btn-link,
   .ant-btn-text,
   .ant-btn-primary,
   .ant-btn-icon-only {
+    box-shadow: none;
+
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       background-color: var(--color-button-primary-hover-bg);
@@ -319,9 +318,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           Button: {
             defaultShadow: "",
             primaryColor: theme.colors.button.primary.text,
-            defaultHoverBg: theme.colors.button.default.bg,
-            defaultActiveBg: theme.colors.button.default.bg,
-            defaultActiveBorderColor: theme.colors.button.default.activeOutline,
+            defaultHoverBg: theme.colors.button.secondary.bg,
+            defaultActiveBg: theme.colors.button.secondary.bg,
+            defaultActiveBorderColor: theme.colors.button.secondary.activeOutline,
           },
           Card: {
             borderRadiusLG: 0,

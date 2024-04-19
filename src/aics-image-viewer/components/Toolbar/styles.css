@@ -121,16 +121,15 @@
     border-color: transparent;
     color: var(--color-text-body);
 
-    & > .ant-btn[disabled] {
+    &:disabled {
       background-color: transparent;
       border-color: transparent;
-      color: #bfbfbf;
-      padding: 0;
+      color: var(--color-button-icon-disabled-text);
     }
 
-    &.btn-active,
-    &:focus-visible,
-    &:hover {
+    &.btn-active:not(:disabled),
+    &:focus-visible:not(:disabled),
+    &:hover:not(:disabled) {
       background-color: var(--color-button-primary-hover-bg);
       color: var(--color-button-primary-hover-text);
     }
