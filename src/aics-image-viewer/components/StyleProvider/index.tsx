@@ -48,9 +48,10 @@ const theme = {
       title: palette.medPurple,
       hoverTitle: palette.ltPurple,
     },
-    // TODO: Buttons could have their own type
+    // TODO: Buttons could have a shared type
     // with properties for bg, text, and outline across hover/focus,
-    // active, and disabled states.
+    // active, and disabled states. This could then be defined for
+    // each of the button types (primary, secondary, tertiary).
     button: {
       primary: {
         bg: palette.medPurple,

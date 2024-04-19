@@ -67,6 +67,10 @@ const ContentContainer = styled(FlexColumn)`
   margin: auto;
   padding: 0 20px;
   gap: 20px;
+
+  h2 {
+    color: var(--color-text-header);
+  }
 `;
 
 const FeatureHighlightsContainer = styled.li`
@@ -353,7 +357,7 @@ export default function LandingPage(): ReactElement {
         </FeatureHighlightsContainer>
         <Divider />
         <FlexColumnAlignCenter>
-          <h2 style={{ color: "var(--color-text-header)" }}>Load an example below or your own data to get started.</h2>
+          <h2>Load an example below or your own data to get started.</h2>
         </FlexColumnAlignCenter>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
