@@ -107,6 +107,11 @@ const theme = {
     tooltip: {
       bg: palette.black,
     },
+    modal: {
+      maskBg: "#000000cc",
+      bg: palette.veryDarkGrey,
+      border: palette.medDarkGrey,
+    },
   },
   fonts: {
     family: "'Open Sans', Arial, sans-serif",
@@ -322,6 +327,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorBgBase: theme.colors.controlPanel.bg,
           colorSplit: theme.colors.layout.split,
           colorPrimaryTextHover: theme.colors.text.selectionText,
+          fontWeightStrong: 400,
         },
         components: {
           Button: {
@@ -353,6 +359,13 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,
+          },
+          Modal: {
+            colorBgMask: theme.colors.modal.maskBg,
+            contentBg: theme.colors.modal.bg,
+            headerBg: theme.colors.modal.bg,
+            footerBg: theme.colors.modal.bg,
+            titleFontSize: 19,
           },
         },
       }}

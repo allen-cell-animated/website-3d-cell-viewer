@@ -3,15 +3,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 import { landingPageContent } from "./content";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
-import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { useNavigate } from "react-router";
 import { getArgsFromParams } from "../../utils/url_utils";
-import { useSearchParams } from "react-router-dom";
 import Header from "../Header";
+import LoadModal from "../LoadModal";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -310,6 +311,7 @@ export default function LandingPage(): ReactElement {
               <UploadOutlined />
               Load
             </Button>
+            <LoadModal loadUrl={(url: string) => {}} />
             <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share
