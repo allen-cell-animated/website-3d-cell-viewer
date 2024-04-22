@@ -71,6 +71,9 @@ export function useLocalForage<T>(
 
 // Label and URL are stored separately, so if a user provides an input URL (the label) that is transformed into an absolute
 // URL, we can check for duplicates using the absolute URL while still showing the user's input.
+// This is more relevant in nucmorph, where we're resolving filepaths to absolute URLs, but it's useful functionality to bake in
+// for future use.
+
 export type RecentDataUrl = {
   /** The absolute URL path, post any transformation or remapping. Stored for comparison between urls. */
   url: string;
@@ -82,8 +85,13 @@ export type RecentDataUrl = {
  * Wrapper around locally-stored recent urls.
  * @returns an array containing the list of recent data urls and a function to add a new url to the list.
  */
-export const useRecentDataUrls = (): [RecentDataUrl[], (collection: RecentDataUrl) => void] => {
-  const [recentEntries, setRecentEntries] = useLocalForage<RecentDataUrl[]>(RECENT_COLLECTIONS_STORAGE_KEY, []);
+export const useRecentDataUrls = (
+  initialDataUrls?: RecentDataUrl[]
+): [RecentDataUrl[], (newEntry: RecentDataUrl) => void] => {
+  const [recentEntries, setRecentEntries] = useLocalForage<RecentDataUrl[]>(
+    RECENT_COLLECTIONS_STORAGE_KEY,
+    initialDataUrls || []
+  );
 
   /** Adds a new URL entry (url + label) to the list of recent datasets. */
   const addRecentEntry = (newEntry: RecentDataUrl): void => {
