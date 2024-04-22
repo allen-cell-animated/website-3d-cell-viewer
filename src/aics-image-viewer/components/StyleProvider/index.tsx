@@ -325,9 +325,11 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimaryHover: theme.colors.theme.primaryLt,
           colorLink: theme.colors.text.link,
           colorBgBase: theme.colors.controlPanel.bg,
+          colorBgContainer: "transparent",
           colorSplit: theme.colors.layout.split,
           colorPrimaryTextHover: theme.colors.text.selectionText,
           fontWeightStrong: 400,
+          colorBgElevated: palette.darkGrey,
         },
         components: {
           Button: {

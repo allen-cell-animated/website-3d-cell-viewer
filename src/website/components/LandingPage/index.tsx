@@ -1,6 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -307,11 +307,7 @@ export default function LandingPage(): ReactElement {
       <Header>
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
-            <Button type="link" disabled={true}>
-              <UploadOutlined />
-              Load
-            </Button>
-            <LoadModal loadUrl={(url: string) => {}} />
+            <LoadModal onLoad={onClickLoad} />
             <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share
