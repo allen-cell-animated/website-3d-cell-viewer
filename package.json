@@ -45,6 +45,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "color-string": "^1.5.3",
     "d3": "^4.11.0",
+    "localforage": "^1.10.0",
     "lodash": "^4.17.20",
     "nouislider-react": "^3.4.0",
     "react-color": "^2.19.3",
