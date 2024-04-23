@@ -2,29 +2,59 @@ import { UploadOutlined } from "@ant-design/icons";
 import { AutoComplete, Button, Modal } from "antd";
 import Fuse from "fuse.js";
 import React, { ReactElement, useMemo, useRef, useState } from "react";
+import styled from "styled-components";
 
 import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
 
-const MAX_RECENT_DISPLAY_URLS = 20;
+const MAX_RECENT_URLS_TO_DISPLAY = 20;
 
 type LoadModalProps = {
   onLoad: (appProps: AppDataProps) => void;
 };
 
+const ModalContainer = styled.div`
+  // Override styling for the Ant dropdown
+  .ant-select-dropdown {
+    /* width: max-content !important; */
+
+    & .ant-select-item-option-content {
+      direction: rtl;
+      text-align: left;
+    }
+  }
+`;
+
 export default function LoadModal(props: LoadModalProps): ReactElement {
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, _setShowModal] = useState(false);
   const [urlInput, setUrlInput] = useState("");
+  const [showErrorText, setShowErrorText] = useState(false);
 
   const [recentDataUrls, addRecentDataUrl] = useRecentDataUrls();
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
+  const setShowModal = (show: boolean): void => {
+    if (show) {
+      setUrlInput("");
+      setShowErrorText(false);
+    }
+    _setShowModal(show);
+  };
+
+  const isUrlInputValid = (): boolean => {
+    return urlInput !== "" && urlInput.startsWith("http");
+  };
+
   const onClickLoad = (): void => {
-    // TODO: Add checks for input validity
     // TODO: Handle multiple URLs?
     // TODO: Do any transformation of URLs here? Currently just using the labels directly.
+    if (!isUrlInputValid()) {
+      // Show error message?
+      setShowErrorText(true);
+      return;
+    }
     const appProps: AppDataProps = {
       imageUrl: urlInput,
       imageDownloadHref: urlInput,
@@ -33,7 +63,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     };
     props.onLoad(appProps);
     addRecentDataUrl({ url: urlInput, label: urlInput });
-
+    setShowModal(false);
     // do the fancy thing of only enabling first three channels for JSON?
   };
 
@@ -53,18 +83,18 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     });
   }, [recentDataUrls]);
 
-  // TODO: This search could be done using a transition if needed, but since there is a max of 100 urls,
+  // This search could be done using a transition if needed, but since there is a max of 100 urls,
   // performance hits should be minimal.
   const autoCompleteOptions: { label: string; value: string }[] = useMemo(() => {
     let filteredItems: RecentDataUrl[] = [];
     if (urlInput === "") {
       // Show first 20 recent data urls
-      filteredItems = recentDataUrls.slice(0, MAX_RECENT_DISPLAY_URLS);
+      filteredItems = recentDataUrls.slice(0, MAX_RECENT_URLS_TO_DISPLAY);
     } else {
       // Show first 20 search results
       filteredItems = fuse
         .search(urlInput)
-        .slice(0, MAX_RECENT_DISPLAY_URLS)
+        .slice(0, MAX_RECENT_URLS_TO_DISPLAY)
         .map((option) => option.item);
     }
     return filteredItems.map((item) => {
@@ -78,7 +108,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
   const getAutoCompletePopupContainer = modalContainerRef.current ? () => modalContainerRef.current! : undefined;
 
   return (
-    <div ref={modalContainerRef}>
+    <ModalContainer ref={modalContainerRef}>
       <Button type="link" onClick={() => setShowModal(!showModal)}>
         <UploadOutlined />
         Load
@@ -118,7 +148,8 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
             Copy URL
           </Button>
         </FlexRow>
+        {showErrorText && <p style={{ color: "var(--color-text-error)" }}>Please enter a valid URL.</p>}
       </Modal>
-    </div>
+    </ModalContainer>
   );
 }

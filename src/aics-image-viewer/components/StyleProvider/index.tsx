@@ -39,6 +39,7 @@ const theme = {
       header: palette.ltGrey,
       section: palette.white,
       body: palette.ltGrey,
+      error: palette.brightRed,
       selectionBg: palette.medPurple,
       selectionText: palette.white,
     },
@@ -132,6 +133,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
       --color-text-body: ${$theme.colors.text.body};
+      --color-text-error: ${$theme.colors.text.error};
 
       --color-text-selection-bg: ${$theme.colors.text.selectionBg};
       --color-text-selection-text: ${$theme.colors.text.selectionText};
