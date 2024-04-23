@@ -100,9 +100,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       >
         <p style={{ fontSize: "16px" }}>Provide the URL to load your OME-Zarr or OME-TIFF* data.</p>
         <p style={{ fontSize: "12px" }}>
-          <i>
-            *Note: this tool is intended for OME-Zarr use and performance of large OME-TIFF files may not be optimal.
-          </i>
+          <i>*Note: this tool is intended for OME-Zarr use. Large {"(> 100 MB)"} OME-TIFF files are not supported.</i>
         </p>
         <FlexRow $gap={6}>
           <AutoComplete
