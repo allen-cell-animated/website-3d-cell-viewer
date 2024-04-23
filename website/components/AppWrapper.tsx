@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
@@ -48,13 +48,13 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
   const [searchParams] = useSearchParams();
 
-  useMemo(async () => {
+  useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    const { args: urlArgs, viewerSettings: urlViewerSettings } = await getArgsFromParams(searchParams);
-
-    setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
-    setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+    getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
+      setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
+      setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+    });
   }, []);
 
   return <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />;

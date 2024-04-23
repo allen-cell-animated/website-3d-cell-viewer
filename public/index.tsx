@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
+import { Router } from "@remix-run/router";
 
 import "antd/dist/antd.less";
 
@@ -29,7 +30,7 @@ const routes = [
   },
 ];
 
-let router;
+let router: Router;
 if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
   router = createBrowserRouter(routes);
 } else {
