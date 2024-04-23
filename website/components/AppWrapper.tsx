@@ -1,13 +1,18 @@
-import React, { ReactElement, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
-import { ImageViewerApp, RenderMode, ViewMode } from "../..";
+import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
+
+type AppWrapperProps = {
+  viewerSettings?: Partial<GlobalViewerSettings>;
+  viewerArgs?: AppDataProps;
+};
 
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
@@ -30,24 +35,30 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   parentImageDownloadHref: "",
 };
 
+const defaultAppWrapperProps = {
+  viewerSettings: DEFAULT_VIEWER_SETTINGS,
+  viewerArgs: DEFAULT_APP_PROPS,
+};
+
 /**
  * Wrapper around the main ImageViewer component. Handles the collection of parameters from the
  * URL and location state (from routing) to pass to the viewer.
  */
-export default function AppWrapper(): ReactElement {
+export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
+  const props = { ...defaultAppWrapperProps, ...inputProps };
   const location = useLocation();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(DEFAULT_VIEWER_SETTINGS);
-  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(DEFAULT_APP_PROPS);
+  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
+  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
   const [searchParams] = useSearchParams();
 
-  useMemo(async () => {
+  useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    const { args: urlArgs, viewerSettings: urlViewerSettings } = await getArgsFromParams(searchParams);
-
-    setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
-    setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+    getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
+      setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
+      setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+    });
   }, []);
 
   return (

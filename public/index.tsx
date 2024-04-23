@@ -1,11 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
+import { Router } from "@remix-run/router";
 
 // Components
-import AppWrapper from "../src/website/components/AppWrapper";
-import LandingPage from "../src/website/components/LandingPage";
-import ErrorPage from "../src/website/components/ErrorPage";
+import AppWrapper from "../website/components/AppWrapper";
+import LandingPage from "../website/components/LandingPage";
+import ErrorPage from "../website/components/ErrorPage";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
@@ -28,7 +29,7 @@ const routes = [
   },
 ];
 
-let router;
+let router: Router;
 if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
   router = createBrowserRouter(routes);
 } else {

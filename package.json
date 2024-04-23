@@ -38,8 +38,8 @@
   "author": "Megan Riel-Mehan",
   "license": "ISC",
   "dependencies": {
-    "@aics/volume-viewer": "^3.8.0",
     "@ant-design/icons": "^5.2.5",
+    "@aics/volume-viewer": "^3.8.3",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
