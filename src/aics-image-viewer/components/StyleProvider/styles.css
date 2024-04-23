@@ -95,14 +95,6 @@
         font-weight: 400;
     }
 
-    a {
-        color: var(--color-text-link);
-        &:focus,
-        &:focus-visible {
-          text-decoration: underline;
-        }
-    }
-
     & *::selection {
         /** 
          * Override Ant + Less styling, since it uses a very light purple that's 
