@@ -2,16 +2,16 @@ import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
+import styled from "styled-components";
 
 import { landingPageContent } from "./content";
-import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
-import styled from "styled-components";
-import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { useNavigate } from "react-router";
-import { getArgsFromParams } from "../../utils/url_utils";
-import { useSearchParams } from "react-router-dom";
 import Header from "../Header";
+import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
+import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
+import { getArgsFromParams } from "../../utils/url_utils";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -187,18 +187,19 @@ export default function LandingPage(): ReactElement {
   const navigation = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useMemo(async () => {
+  useEffect(() => {
     // Check if the URL used to open the landing page has arguments;
     // if so, assume that this is an old URL intended to go to the viewer.
     // Navigate to the viewer while preserving URL arguments.
-    const { args } = await getArgsFromParams(searchParams);
-    if (Object.keys(args).length > 0) {
-      console.log("Detected URL parameters. Redirecting from landing page to viewer.");
-      navigation("viewer" + "?" + searchParams.toString(), {
-        state: args,
-        replace: true,
-      });
-    }
+    getArgsFromParams(searchParams).then(({ args }) => {
+      if (Object.keys(args).length > 0) {
+        console.log("Detected URL parameters. Redirecting from landing page to viewer.");
+        navigation("viewer" + "?" + searchParams.toString(), {
+          state: args,
+          replace: true,
+        });
+      }
+    });
   }, []);
 
   const onClickLoad = (appProps: AppDataProps): void => {
