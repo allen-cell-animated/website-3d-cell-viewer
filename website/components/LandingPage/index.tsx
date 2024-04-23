@@ -2,11 +2,14 @@ import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
+import styled from "styled-components";
 
 import { landingPageContent } from "./content";
-import { DatasetEntry, ProjectEntry, ViewerArgs } from "../../types";
-import styled from "styled-components";
+import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
+import { getArgsFromParams } from "../../utils/url_utils";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -44,7 +47,7 @@ const BannerVideoContainer = styled.div`
   right: 0;
   width: 100%;
   height: 100%;
-  background-color: #ded9ef;
+  background-color: #000;
   z-index: -1;
 
   & > video {
@@ -177,12 +180,33 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   }
 `;
 
-type LandingPageProps = {
-  load: (args: ViewerArgs) => void;
-};
-
-export default function LandingPage(props: LandingPageProps): ReactElement {
+export default function LandingPage(): ReactElement {
   // Rendering
+  const navigation = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // Check if the URL used to open the landing page has arguments;
+    // if so, assume that this is an old URL intended to go to the viewer.
+    // Navigate to the viewer while preserving URL arguments.
+    getArgsFromParams(searchParams).then(({ args }) => {
+      if (Object.keys(args).length > 0) {
+        console.log("Detected URL parameters. Redirecting from landing page to viewer.");
+        navigation("viewer" + "?" + searchParams.toString(), {
+          state: args,
+          replace: true,
+        });
+      }
+    });
+  }, []);
+
+  const onClickLoad = (appProps: AppDataProps): void => {
+    // TODO: Make URL search params from the appProps and append it to the viewer URL so the URL can be shared directly.
+    // Alternatively, AppWrapper should manage syncing URL and viewer props.
+    navigation("viewer", {
+      state: appProps,
+    });
+  };
 
   // TODO: Should the load buttons be link elements or buttons?
   // Currently both the link and the button inside can be tab-selected.
@@ -191,7 +215,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
       <DatasetCard key={index}>
         <h4>{dataset.name}</h4>
         <p>{dataset.description}</p>
-        <Button type="primary" onClick={() => props.load(dataset.loadParams)}>
+        <Button type="primary" onClick={() => onClickLoad(dataset.loadParams)}>
           Load<VisuallyHidden> dataset {dataset.name}</VisuallyHidden>
         </Button>
       </DatasetCard>
@@ -232,7 +256,7 @@ export default function LandingPage(props: LandingPageProps): ReactElement {
     const loadParams = project.loadParams;
     const loadButton = loadParams ? (
       <div>
-        <Button type="primary" onClick={() => props.load(loadParams)}>
+        <Button type="primary" onClick={() => onClickLoad(loadParams)}>
           Load<VisuallyHidden> dataset {project.name}</VisuallyHidden>
         </Button>
       </div>
