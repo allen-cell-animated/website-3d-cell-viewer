@@ -2,14 +2,14 @@ import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router-dom";
+import styled from "styled-components";
 
 import { landingPageContent } from "./content";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
-import styled from "styled-components";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { useNavigate } from "react-router";
 import { getArgsFromParams } from "../../utils/url_utils";
-import { useSearchParams } from "react-router-dom";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
