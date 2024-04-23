@@ -13,7 +13,6 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
 import { MetadataRecord } from "../../shared/types";
-import { DropdownSVG } from "../../../website/assets/icons";
 
 interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
   hasImage: boolean;
@@ -61,7 +60,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         <Button>
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
             Apply palette
-            <DropdownSVG />
+            <ViewerIcon type="dropdownArrow" style={{ fontSize: "14px" }} />
           </div>
         </Button>
       </Dropdown>
