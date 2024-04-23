@@ -21,7 +21,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
-  const onClickLoad = () => {
+  const onClickLoad = (): void => {
     // TODO: Add checks for input validity
     // TODO: Handle multiple URLs?
     // TODO: Do any transformation of URLs here? Currently just using the labels directly.
@@ -37,7 +37,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     // do the fancy thing of only enabling first three channels for JSON?
   };
 
-  const onClickCopy = () => {
+  const onClickCopy = (): void => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(urlInput);
       // TODO: Add more user feedback here. (Button should say `Copied!` or some popup should appear.)

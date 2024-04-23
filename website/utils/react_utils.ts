@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import localForage from "localforage";
 
 /** Key for local storage to read/write recently opened collections */
@@ -26,7 +26,7 @@ export function useLocalForage<T>(
   );
 
   useEffect(() => {
-    const tryGetValueFromStorage = async () => {
+    const tryGetValueFromStorage = async (): Promise<void> => {
       try {
         const value: T | null = await localForage.getItem(key);
         if (value !== null) {
@@ -41,7 +41,7 @@ export function useLocalForage<T>(
 
   const setValue = useCallback(
     (value) => {
-      const trySetValue = async (value: any) => {
+      const trySetValue = async (value: any): Promise<void> => {
         try {
           setStoredValue(value);
           await localForage.setItem(key, value);
@@ -55,7 +55,7 @@ export function useLocalForage<T>(
   );
 
   const removeValue = useCallback(() => {
-    const tryRemoveValue = async () => {
+    const tryRemoveValue = async (): Promise<void> => {
       try {
         setStoredValue(null);
         await localForage.removeItem(key);
