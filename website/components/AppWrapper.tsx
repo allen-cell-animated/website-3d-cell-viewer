@@ -4,6 +4,10 @@ import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
+import Header, { HEADER_HEIGHT_PX } from "./Header";
+import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { Button } from "antd";
+import { FlexRowAlignCenter } from "./LandingPage/utils";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;
@@ -57,5 +61,29 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     });
   }, []);
 
-  return <ImageViewerApp {...viewerArgs} appHeight="100vh" canvasMargin="0 0 0 0" viewerSettings={viewerSettings} />;
+  return (
+    <div>
+      <Header>
+        <FlexRowAlignCenter $gap={15}>
+          <FlexRowAlignCenter $gap={2}>
+            <Button type="link" disabled={true}>
+              <UploadOutlined />
+              Load
+            </Button>
+            <Button type="link" disabled={true}>
+              <ShareAltOutlined />
+              Share
+            </Button>
+          </FlexRowAlignCenter>
+          {/* <HelpDropdown /> */}
+        </FlexRowAlignCenter>
+      </Header>
+      <ImageViewerApp
+        {...viewerArgs}
+        appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+        canvasMargin="0 0 0 0"
+        viewerSettings={viewerSettings}
+      />
+    </div>
+  );
 }

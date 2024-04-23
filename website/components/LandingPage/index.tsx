@@ -1,5 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -7,6 +8,7 @@ import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import { landingPageContent } from "./content";
+import Header from "../Header";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { getArgsFromParams } from "../../utils/url_utils";
@@ -292,13 +294,22 @@ export default function LandingPage(): ReactElement {
   }, []);
 
   return (
-    <div style={{ backgroundColor: "var(--color-landingpage-bg)", height: "100%" }}>
-      {/* <Header>
+    <div style={{ backgroundColor: "var(--color-landingpage-bg)", minHeight: "100%" }}>
+      <Header>
         <FlexRowAlignCenter $gap={15}>
-          <LoadDatasetButton onLoad={onDatasetLoad} currentResourceUrl={""} />
-          <HelpDropdown />
+          <FlexRowAlignCenter $gap={2}>
+            <Button type="link" disabled={true}>
+              <UploadOutlined />
+              Load
+            </Button>
+            <Button type="link" disabled={true}>
+              <ShareAltOutlined />
+              Share
+            </Button>
+          </FlexRowAlignCenter>
+          {/* <HelpDropdown /> */}
         </FlexRowAlignCenter>
-      </Header> */}
+      </Header>
       <Banner>
         <BannerVideoContainer style={{ zIndex: 1 }}>
           <video autoPlay={allowMotion} loop muted>
