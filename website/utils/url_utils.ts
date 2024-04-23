@@ -1,8 +1,8 @@
-import FirebaseRequest, { DatasetMetaData } from "../../../public/firebase";
+import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 
-import { AppProps, GlobalViewerSettings } from "../../aics-image-viewer/components/App/types";
-import { ViewMode } from "../../aics-image-viewer/shared/enums";
-import { ViewerChannelSettings } from "../../aics-image-viewer/shared/utils/viewerChannelSettings";
+import { AppProps, GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
+import { ViewerChannelSettings } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
 const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
 type ParamKeys = (typeof paramKeys)[number];
@@ -149,9 +149,8 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     args.imageDownloadHref = firstUrl;
     args.parentImageUrl = "";
     args.parentImageDownloadHref = "";
-    // if json, then use the CFE settings for now.
-    // (See VIEWER_3D_SETTINGS)
-    // otherwise turn the first 3 channels on and group them
+    // if json, will not override channel settings.
+    // otherwise turn the first 3 channels on by default and group them
     if (!firstUrl.endsWith("json") && !params.ch) {
       args.viewerChannelSettings = {
         groups: [

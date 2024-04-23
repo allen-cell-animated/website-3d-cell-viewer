@@ -1,4 +1,4 @@
-import { View3d, Volume, ImageInfo } from "@aics/volume-viewer";
+import { View3d, Volume, RawArrayInfo, RawArrayData } from "@aics/volume-viewer";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
@@ -56,9 +56,9 @@ export interface GlobalViewerSettings {
 export interface AppProps {
   // FIRST WAY TO GET DATA INTO THE VIEWER: pass in volume data directly
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
-  rawData?: { dtype: "uint8"; shape: [number, number, number, number]; buffer: DataView };
-  // rawDims is the volume dims that normally come from a json file
-  rawDims?: ImageInfo;
+  rawData?: RawArrayData;
+  // rawDims is a small amount of metadata (e.g. dimensions and channel names) to be converted internally to an ImageInfo
+  rawDims?: RawArrayInfo;
 
   // SECOND WAY TO GET DATA INTO THE VIEWER: (if `rawData`/`rawDims` isn't present) pass in URL(s) to fetch volume data
   imageUrl: string | string[];
