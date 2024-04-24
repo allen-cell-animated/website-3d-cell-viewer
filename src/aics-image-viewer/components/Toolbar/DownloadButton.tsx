@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown, Button, MenuProps } from "antd";
+import { Dropdown, Button, MenuProps, Tooltip } from "antd";
 
 import ViewerIcon from "../shared/ViewerIcon";
 
@@ -33,17 +33,21 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ fovDownloadHref, cellDo
       ],
     };
     return (
-      <Dropdown menu={menu} placement="bottomRight" trigger={["click"]}>
-        <Button className="ant-btn-icon-only btn-borderless">
-          <ViewerIcon type="download" />
-        </Button>
-      </Dropdown>
+      <Tooltip trigger={["hover", "focus"]} placement="bottom" title={"Download volume data"}>
+        <Dropdown menu={menu} placement="bottomRight" trigger={["click"]}>
+          <Button className="ant-btn-icon-only btn-borderless">
+            <ViewerIcon type="download" />
+          </Button>
+        </Dropdown>
+      </Tooltip>
     );
   } else if (cellDownloadHref) {
     return (
-      <Button className="ant-btn-icon-only btn-borderless" href={cellDownloadHref}>
-        <ViewerIcon type="download" />
-      </Button>
+      <Tooltip trigger={["hover", "focus"]} placement="bottom" title={"Download volume data"}>
+        <Button className="ant-btn-icon-only btn-borderless" href={cellDownloadHref}>
+          <ViewerIcon type="download" />
+        </Button>
+      </Tooltip>
     );
   } else {
     return null;
