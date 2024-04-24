@@ -1,4 +1,3 @@
-import { useState, useEffect, useCallback } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 /** Key for local storage to read/write recently opened collections */
