@@ -17,7 +17,8 @@ type LoadModalProps = {
 const ModalContainer = styled.div`
   // Override styling for the Ant dropdown
   .ant-select-dropdown {
-    /* width: max-content !important; */
+    width: max-content !important;
+    max-width: 50vw;
 
     & .ant-select-item-option-content {
       direction: rtl;
@@ -58,20 +59,14 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     const appProps: AppDataProps = {
       imageUrl: urlInput,
       imageDownloadHref: urlInput,
-      cellId: "",
+      cellId: "1",
+      parentImageUrl: "",
       parentImageDownloadHref: "",
     };
     props.onLoad(appProps);
     addRecentDataUrl({ url: urlInput, label: urlInput });
     setShowModal(false);
     // do the fancy thing of only enabling first three channels for JSON?
-  };
-
-  const onClickCopy = (): void => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(urlInput);
-      // TODO: Add more user feedback here. (Button should say `Copied!` or some popup should appear.)
-    }
   };
 
   // Set up fuse for fuzzy searching
@@ -122,8 +117,8 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
         getContainer={modalContainerRef.current || undefined}
         okButtonProps={{}}
         footer={
-          <Button type="primary" onClick={onClickLoad}>
-            Load
+          <Button type="default" onClick={() => setShowModal(false)}>
+            Cancel
           </Button>
         }
         destroyOnClose={true}
@@ -144,8 +139,8 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
             placeholder="Enter a URL..."
             autoFocus={true}
           ></AutoComplete>
-          <Button type="primary" onClick={onClickCopy}>
-            Copy URL
+          <Button type="primary" onClick={onClickLoad}>
+            Load
           </Button>
         </FlexRow>
         {showErrorText && <p style={{ color: "var(--color-text-error)" }}>Please enter a valid URL.</p>}

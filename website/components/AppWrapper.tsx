@@ -53,7 +53,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
   const [searchParams] = useSearchParams();
-  const [recentDataUrls, addRecentDataUrl] = useRecentDataUrls();
+  const [, addRecentDataUrl] = useRecentDataUrls();
 
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
@@ -67,17 +67,23 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   // Save recent data urls to local storage
   useEffect(() => {
     if (viewerArgs.imageUrl !== "") {
-      // TODO: Handle case where there are multiple URLs
+      // TODO: Handle case where there are multiple URLs...
+      // TODO: Save ALL AppProps instead of only the URL? Handle rawData?
+      // TODO: Only save if data was loaded successfully? Is there a callback we can use in ImageViewerApp?
       addRecentDataUrl({ url: viewerArgs.imageUrl as string, label: viewerArgs.imageUrl as string });
     }
   }, [viewerArgs]);
+
+  const onLoad = (appProps: AppDataProps): void => {
+    setViewerArgs({ ...viewerArgs, ...appProps });
+  };
 
   return (
     <div>
       <Header>
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
-            <LoadModal onLoad={(appProps) => setViewerArgs({ ...viewerArgs, ...appProps })} />
+            <LoadModal onLoad={onLoad} />
             <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share
