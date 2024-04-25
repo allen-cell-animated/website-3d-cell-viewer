@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
-import { getArgsFromParams } from "../utils/url_utils";
+import { getArgsFromParams, isValidZarrUrl } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import { ShareAltOutlined } from "@ant-design/icons";
@@ -64,10 +64,10 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     });
   }, []);
 
-  // Save recent data urls to local storage
+  // Save recent zarr data urls
   useEffect(() => {
-    if (viewerArgs.imageUrl !== "") {
-      // TODO: Handle case where there are multiple URLs...
+    if (typeof viewerArgs.imageUrl === "string" && isValidZarrUrl(viewerArgs.imageUrl)) {
+      // TODO: Handle case where there are multiple URLs?
       // TODO: Save ALL AppProps instead of only the URL? Handle rawData?
       // TODO: Only save if data was loaded successfully? Is there a callback we can use in ImageViewerApp?
       addRecentDataUrl({ url: viewerArgs.imageUrl as string, label: viewerArgs.imageUrl as string });
@@ -75,7 +75,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
-    setViewerArgs({ ...viewerArgs, ...appProps });
+    setViewerArgs(appProps);
   };
 
   return (

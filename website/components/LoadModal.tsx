@@ -8,6 +8,7 @@ import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
 import TruncatedText from "./TruncatedText";
+import { isValidUrl, isValidZarrUrl } from "../utils/url_utils";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
 
@@ -29,7 +30,7 @@ const ModalContainer = styled.div`
 export default function LoadModal(props: LoadModalProps): ReactElement {
   const [showModal, _setShowModal] = useState(false);
   const [urlInput, setUrlInput] = useState("");
-  const [showErrorText, setShowErrorText] = useState(false);
+  const [errorText, setErrorText] = useState<string>("");
 
   const [recentDataUrls, addRecentDataUrl] = useRecentDataUrls();
 
@@ -38,23 +39,23 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
   const setShowModal = (show: boolean): void => {
     if (show) {
       setUrlInput("");
-      setShowErrorText(false);
+      setErrorText("");
     }
     _setShowModal(show);
-  };
-
-  const isUrlInputValid = (): boolean => {
-    return urlInput !== "" && urlInput.startsWith("http");
   };
 
   const onClickLoad = (): void => {
     // TODO: Handle multiple URLs?
     // TODO: Do any transformation of URLs here? Currently just using the labels directly.
-    if (!isUrlInputValid()) {
-      // Show error message?
-      setShowErrorText(true);
+    if (!isValidUrl(urlInput)) {
+      setErrorText("Please enter a valid URL.");
       return;
     }
+    if (!isValidZarrUrl(urlInput)) {
+      setErrorText("Please enter a valid OME-Zarr URL (ending with .zarr).");
+      return;
+    }
+
     const appProps: AppDataProps = {
       imageUrl: urlInput,
       imageDownloadHref: urlInput,
@@ -130,7 +131,10 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
           <AutoComplete
             value={urlInput}
             onChange={(value) => setUrlInput(value)}
-            onSelect={(_value, { label }) => setUrlInput(label as string)}
+            onSelect={(value) => {
+              console.log(value);
+              setUrlInput(value as string);
+            }}
             style={{ width: "100%" }}
             allowClear={true}
             options={autoCompleteOptions}
@@ -142,7 +146,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
             Load
           </Button>
         </FlexRow>
-        {showErrorText && <p style={{ color: "var(--color-text-error)" }}>Please enter a valid URL.</p>}
+        {errorText !== "" && <p style={{ color: "var(--color-text-error)" }}>{errorText}</p>}
       </Modal>
     </ModalContainer>
   );

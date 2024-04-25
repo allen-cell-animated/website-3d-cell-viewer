@@ -21,11 +21,18 @@ export type RecentDataUrl = {
  * @returns an array containing the list of recent data urls and a function to add a new url to the list.
  */
 export const useRecentDataUrls = (): [RecentDataUrl[], (newEntry: RecentDataUrl) => void] => {
-  const [recentEntries, setRecentEntries] = useLocalStorage<RecentDataUrl[]>(RECENT_COLLECTIONS_STORAGE_KEY, []);
+  const [storedRecentEntries, setRecentEntries] = useLocalStorage<RecentDataUrl[]>(RECENT_COLLECTIONS_STORAGE_KEY, []);
+
+  // Sanitize/validate recent entries
+  let recentEntries: RecentDataUrl[] = storedRecentEntries.filter(
+    ({ url, label }) => typeof url === "string" && typeof label === "string"
+  );
+  if (recentEntries.length !== storedRecentEntries.length) {
+    setRecentEntries(recentEntries);
+  }
 
   /** Adds a new URL entry (url + label) to the list of recent datasets. */
   const addRecentEntry = (newEntry: RecentDataUrl): void => {
-    console.log(recentEntries);
     if (recentEntries === null) {
       setRecentEntries([newEntry]);
       return;
