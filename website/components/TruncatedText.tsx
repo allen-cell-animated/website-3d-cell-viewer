@@ -77,7 +77,7 @@ export default function TruncatedText(inputProps: TruncatedTextProps): ReactElem
 
   // TODO: Text characters in endText can be partially clipped. Is there a way to prevent this from happening?
   return (
-    <TruncatedTextContainer $startChars={startChars} $endChars={endChars} aria-label={props.text}>
+    <TruncatedTextContainer $startChars={startChars} $endChars={endChars} aria-label={props.text} title={props.text}>
       <span>{startText}</span>
       <span>{endText}</span>
     </TruncatedTextContainer>
