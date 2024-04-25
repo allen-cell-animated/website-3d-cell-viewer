@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
+import TruncatedText from "./TruncatedText";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
 
@@ -21,8 +22,6 @@ const ModalContainer = styled.div`
     max-width: 50vw;
 
     & .ant-select-item-option-content {
-      direction: rtl;
-      text-align: left;
     }
   }
 `;
@@ -80,7 +79,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
 
   // This search could be done using a transition if needed, but since there is a max of 100 urls,
   // performance hits should be minimal.
-  const autoCompleteOptions: { label: string; value: string }[] = useMemo(() => {
+  const autoCompleteOptions: { label: React.ReactNode; value: string }[] = useMemo(() => {
     let filteredItems: RecentDataUrl[] = [];
     if (urlInput === "") {
       // Show first 20 recent data urls
@@ -94,7 +93,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     }
     return filteredItems.map((item) => {
       return {
-        label: item.label,
+        label: <TruncatedText text={item.label} />,
         value: item.url,
       };
     });
@@ -131,7 +130,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
           <AutoComplete
             value={urlInput}
             onChange={(value) => setUrlInput(value)}
-            onSelect={(_value, { label }) => setUrlInput(label)}
+            onSelect={(_value, { label }) => setUrlInput(label as string)}
             style={{ width: "100%" }}
             allowClear={true}
             options={autoCompleteOptions}
