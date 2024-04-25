@@ -12,7 +12,7 @@ import {
   Volume,
   IVolumeLoader,
   PrefetchDirection,
-  VolumeFileFormat
+  VolumeFileFormat,
 } from "@aics/volume-viewer";
 
 import {
@@ -472,9 +472,9 @@ const App: React.FC<AppProps> = (props) => {
       options.fileType = VolumeFileFormat.DATA;
       options.rawArrayOptions = { data: rawData, metadata: rawDims };
     }
-  
+
     loader.current = await loadContext.createLoader(path, {
-      ...options
+      ...options,
     });
 
     const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
@@ -575,7 +575,7 @@ const App: React.FC<AppProps> = (props) => {
   // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `rawData`, etc)
   useEffect(() => {
     openImage();
-  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
+  }, [props.imageUrl, props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
