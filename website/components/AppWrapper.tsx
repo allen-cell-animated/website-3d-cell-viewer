@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { getArgsFromParams, isValidZarrUrl } from "../utils/url_utils";
@@ -49,6 +49,7 @@ const defaultAppWrapperProps = {
 export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const props = { ...defaultAppWrapperProps, ...inputProps };
   const location = useLocation();
+  const navigation = useNavigate();
 
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
@@ -75,7 +76,11 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
-    setViewerArgs(appProps);
+    navigation("/viewer", {
+      state: appProps,
+    });
+    navigation(0);
+    // setViewerArgs(appProps);
   };
 
   return (
