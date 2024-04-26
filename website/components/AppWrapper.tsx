@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
-import { getArgsFromParams, isValidZarrUrl } from "../utils/url_utils";
+import { getArgsFromParams } from "../utils/url_utils";
 import { AppDataProps } from "../types";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import { ShareAltOutlined } from "@ant-design/icons";
@@ -65,22 +65,27 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     });
   }, []);
 
+  // TODO: Disabled for now, since it only makes sense for Zarr/OME-tiff URLs. Checking for
+  // validity may be more complex. (Also, we could add a callback to `ImageViewerApp` for successful
+  // loading and only save the URL then.)
+  //
   // Save recent zarr data urls
-  useEffect(() => {
-    if (typeof viewerArgs.imageUrl === "string" && isValidZarrUrl(viewerArgs.imageUrl)) {
-      // TODO: Handle case where there are multiple URLs?
-      // TODO: Save ALL AppProps instead of only the URL? Handle rawData?
-      // TODO: Only save if data was loaded successfully? Is there a callback we can use in ImageViewerApp?
-      addRecentDataUrl({ url: viewerArgs.imageUrl as string, label: viewerArgs.imageUrl as string });
-    }
-  }, [viewerArgs]);
+  // useEffect(() => {
+  //   if (typeof viewerArgs.imageUrl === "string" && isValidZarrUrl(viewerArgs.imageUrl)) {
+  //     // TODO: Handle case where there are multiple URLs?
+  //     // TODO: Save ALL AppProps instead of only the URL? Ignore/handle rawData?
+  //     addRecentDataUrl({ url: viewerArgs.imageUrl as string, label: viewerArgs.imageUrl as string });
+  //   }
+  // }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
+    // Force a page reload. This prevents a bug where a desync in the number of channels
+    // in the viewer can cause a crash. The root cause is React immediately forcing a
+    // re-render every time `setState` is called in an async function.
     navigation("/viewer", {
       state: appProps,
     });
     navigation(0);
-    // setViewerArgs(appProps);
   };
 
   return (

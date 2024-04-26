@@ -8,7 +8,7 @@ import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
 import TruncatedText from "./TruncatedText";
-import { isValidUrl, isValidZarrUrl } from "../utils/url_utils";
+import { isValidUrl } from "../utils/url_utils";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
 
@@ -49,10 +49,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     // TODO: Do any transformation of URLs here? Currently just using the labels directly.
     if (!isValidUrl(urlInput)) {
       setErrorText("Please enter a valid URL.");
-      return;
-    }
-    if (!isValidZarrUrl(urlInput)) {
-      setErrorText("Please enter a valid OME-Zarr URL (ending with .zarr).");
       return;
     }
 

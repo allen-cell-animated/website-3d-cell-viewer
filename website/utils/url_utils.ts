@@ -187,16 +187,3 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
 export function isValidUrl(url: string): boolean {
   return url.startsWith("http");
 }
-
-export function isValidZarrUrl(url: string): boolean {
-  // strip off query string
-  let strippedUrl = url.split("?")[0];
-  if (strippedUrl.endsWith("/")) {
-    strippedUrl.slice(0, -1);
-  }
-  return isValidUrl(url) && (strippedUrl.endsWith(".zarr") || strippedUrl.endsWith(".zarr/"));
-}
-
-// export function hasExpectedZarrFiles(url: string): Promise<boolean> {
-//   return false;
-// }
