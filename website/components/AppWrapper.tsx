@@ -59,7 +59,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
     getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-      setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
+      setViewerArgs({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
       setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
     });
   }, []);
@@ -81,7 +81,8 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     // Force a page reload. This prevents a bug where a desync in the number of channels
     // in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
-    navigation("/viewer", {
+    const url = appProps.imageUrl;
+    navigation(`/viewer?url=${url}`, {
       state: appProps,
     });
     navigation(0);
