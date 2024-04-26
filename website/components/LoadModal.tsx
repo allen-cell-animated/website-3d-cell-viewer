@@ -4,10 +4,10 @@ import Fuse from "fuse.js";
 import React, { ReactElement, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
+import MiddleTruncatedText from "./MiddleTruncatedText";
 import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
-import MiddleTruncatedText from "./MiddleTruncatedText";
 import { isValidUrl } from "../utils/url_utils";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
@@ -17,13 +17,11 @@ type LoadModalProps = {
 };
 
 const ModalContainer = styled.div`
-  // Override styling for the Ant dropdown
+  // Get the dropdown to size itself based on the webpage width, but resize itself to match the
+  // input area (~100vw - 100px of padding) when the webpage is very narrow
   .ant-select-dropdown {
     width: max-content !important;
-    max-width: 50vw;
-
-    & .ant-select-item-option-content {
-    }
+    max-width: calc(max(50vw, min(400px, 100vw - 100px)));
   }
 `;
 
@@ -58,6 +56,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       cellId: "1",
       parentImageUrl: "",
       parentImageDownloadHref: "",
+      // Enable first three channels by default
       viewerChannelSettings: {
         groups: [
           {
@@ -73,10 +72,9 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     props.onLoad(appProps);
     addRecentDataUrl({ url: urlInput, label: urlInput });
     setShowModal(false);
-    // do the fancy thing of only enabling first three channels for JSON?
   };
 
-  // Set up fuse for fuzzy searching
+  // Set up fuse for fuzzy searching on the labels of recent datasets
   const fuse = useMemo(() => {
     return new Fuse(recentDataUrls, {
       keys: ["label"],
@@ -139,7 +137,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
             value={urlInput}
             onChange={(value) => setUrlInput(value)}
             onSelect={(value) => {
-              console.log(value);
               setUrlInput(value as string);
             }}
             style={{ width: "100%" }}
