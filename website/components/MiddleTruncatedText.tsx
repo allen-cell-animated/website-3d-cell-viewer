@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 // Adapted from "CSS-only middle truncation with ellipsis"
 // by Mark Chitty https://codepen.io/markchitty/pen/RNZbRE
 
-type TruncatedTextProps = {
+type MiddleTruncatedTextProps = {
   text: string;
   /** Minimum characters to show at the start of the text. */
   startCharacters?: number;
@@ -14,12 +14,12 @@ type TruncatedTextProps = {
   endCharacters?: number;
 };
 
-const defaultProps: Partial<TruncatedTextProps> = {
+const defaultProps: Partial<MiddleTruncatedTextProps> = {
   startCharacters: 3,
   endCharacters: 40,
 };
 
-const TruncatedTextContainer = styled.div<{ $startChars: number; $endChars: number }>`
+const MiddleTruncatedTextContainer = styled.div<{ $startChars: number; $endChars: number }>`
   display: flex;
   flex-direction: row;
   vertical-align: bottom;
@@ -57,10 +57,10 @@ const TruncatedTextContainer = styled.div<{ $startChars: number; $endChars: numb
 
 /**
  * Renders text that will be truncated with ellipses in the middle of the text if there isn't
- * enough space to show the full text. The start and end characters counts are prioritized.
+ * enough space to show the full text. The number of characters shown at the start and end of the text are configurable.
  */
-export default function TruncatedText(inputProps: TruncatedTextProps): ReactElement {
-  const props = { ...defaultProps, ...inputProps } as Required<TruncatedTextProps>;
+export default function MiddleTruncatedText(inputProps: MiddleTruncatedTextProps): ReactElement {
+  const props = { ...defaultProps, ...inputProps } as Required<MiddleTruncatedTextProps>;
 
   // Split text into start and end characters.
   let startChars = Math.max(0, props.startCharacters);
@@ -80,9 +80,14 @@ export default function TruncatedText(inputProps: TruncatedTextProps): ReactElem
   // of `endText` is rendered at the end instead. See https://en.wikipedia.org/wiki/Left-to-right_mark.
   // (we are using rtl rendering so that the ellipses render on the left side of the text. )
   return (
-    <TruncatedTextContainer $startChars={startChars} $endChars={endChars} aria-label={props.text} title={props.text}>
+    <MiddleTruncatedTextContainer
+      $startChars={startChars}
+      $endChars={endChars}
+      aria-label={props.text}
+      title={props.text}
+    >
       <span>{startText}</span>
       <span>&lrm;{endText}</span>
-    </TruncatedTextContainer>
+    </MiddleTruncatedTextContainer>
   );
 }

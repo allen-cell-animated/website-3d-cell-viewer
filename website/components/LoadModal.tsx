@@ -7,7 +7,7 @@ import styled from "styled-components";
 import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
-import TruncatedText from "./TruncatedText";
+import MiddleTruncatedText from "./MiddleTruncatedText";
 import { isValidUrl } from "../utils/url_utils";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
@@ -101,7 +101,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     }
     return filteredItems.map((item) => {
       return {
-        label: <TruncatedText text={item.label} />,
+        label: <MiddleTruncatedText text={item.label} />,
         value: item.url,
       };
     });
