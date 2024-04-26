@@ -20,7 +20,10 @@ const ModalContainer = styled.div`
   // Get the dropdown to size itself based on the webpage width, but resize itself to match the
   // input area (~100vw - 100px of padding) when the webpage is very narrow
   .ant-select-dropdown {
-    width: max-content !important;
+    // TODO: Size to max-content so there isn't extra dead space past the end of the current items.
+    // Setting width to max-content directly causes the dropdown to collapse to a width of
+    // 0 pixels when more than 8 items are present and scrolling becomes enabled.
+    width: 100% !important;
     max-width: calc(max(50vw, min(400px, 100vw - 100px)));
   }
 `;
