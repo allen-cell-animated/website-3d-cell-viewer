@@ -8,7 +8,6 @@ import Header, { HEADER_HEIGHT_PX } from "./Header";
 import { ShareAltOutlined } from "@ant-design/icons";
 import { Button } from "antd";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
-import { useRecentDataUrls } from "../utils/react_utils";
 import LoadModal from "./LoadModal";
 
 type AppWrapperProps = {
@@ -54,7 +53,6 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
   const [searchParams] = useSearchParams();
-  const [, addRecentDataUrl] = useRecentDataUrls();
 
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
