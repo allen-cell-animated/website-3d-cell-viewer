@@ -44,13 +44,11 @@ const TruncatedTextContainer = styled.div<{ $startChars: number; $endChars: numb
         min-width: var(--startWidth);
         text-overflow: ellipsis;
         overflow: hidden;
-        background: rgba(0, 120, 0, 0.2);
       }
 
       & span:last-child {
         max-width: calc(100% - var(--startWidth));
         direction: rtl;
-        background: rgba(0, 0, 120, 0.2);
         z-index: 800;
       }
     `;
@@ -76,10 +74,15 @@ export default function TruncatedText(inputProps: TruncatedTextProps): ReactElem
   const endText = props.text.slice(splitIndex);
 
   // TODO: Text characters in endText can be partially clipped. Is there a way to prevent this from happening?
+
+  // The `$lrm;` is a non-printing character that indicates text punctuation should be rendered as left-to-right instead of rtl.
+  // It's included to prevent a visual bug where punctuation at the start (ex: !, _, ?, ., etc.)
+  // of `endText` is rendered at the end instead. See https://en.wikipedia.org/wiki/Left-to-right_mark.
+  // (we are using rtl rendering so that the ellipses render on the left side of the text. )
   return (
     <TruncatedTextContainer $startChars={startChars} $endChars={endChars} aria-label={props.text} title={props.text}>
       <span>{startText}</span>
-      <span>{endText}</span>
+      <span>&lrm;{endText}</span>
     </TruncatedTextContainer>
   );
 }
