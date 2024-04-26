@@ -58,6 +58,18 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       cellId: "1",
       parentImageUrl: "",
       parentImageDownloadHref: "",
+      viewerChannelSettings: {
+        groups: [
+          // first 3 channels on by default!
+          {
+            name: "Channels",
+            channels: [
+              { match: [0, 1, 2], enabled: true },
+              { match: "(.+)", enabled: false },
+            ],
+          },
+        ],
+      },
     };
     props.onLoad(appProps);
     addRecentDataUrl({ url: urlInput, label: urlInput });
