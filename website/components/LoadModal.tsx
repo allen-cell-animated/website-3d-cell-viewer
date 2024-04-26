@@ -60,7 +60,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       parentImageDownloadHref: "",
       viewerChannelSettings: {
         groups: [
-          // first 3 channels on by default!
           {
             name: "Channels",
             channels: [

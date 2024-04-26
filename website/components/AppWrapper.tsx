@@ -1,14 +1,15 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
-import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
-import { getArgsFromParams } from "../utils/url_utils";
-import { AppDataProps } from "../types";
-import Header, { HEADER_HEIGHT_PX } from "./Header";
 import { ShareAltOutlined } from "@ant-design/icons";
 import { Button } from "antd";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 import LoadModal from "./LoadModal";
+import Header, { HEADER_HEIGHT_PX } from "./Header";
+import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
+import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { AppDataProps } from "../types";
+import { getArgsFromParams } from "../utils/url_utils";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;
