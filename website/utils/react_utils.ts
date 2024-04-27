@@ -1,7 +1,7 @@
 import { useLocalStorage } from "usehooks-ts";
 
-/** Key for local storage to read/write recently opened collections */
-const RECENT_COLLECTIONS_STORAGE_KEY = "recentDatasets";
+/** Key for local storage to read/write recently opened datasets */
+const RECENT_DATASETS_STORAGE_KEY = "recentDatasets";
 const MAX_RECENT_URLS = 100;
 
 // Label and URL are stored separately, so if a user provides an input URL (the label) that is transformed into an absolute
@@ -21,7 +21,7 @@ export type RecentDataUrl = {
  * @returns an array containing the list of recent data urls and a function to add a new url to the list.
  */
 export const useRecentDataUrls = (): [RecentDataUrl[], (newEntry: RecentDataUrl) => void] => {
-  const [storedRecentEntries, setRecentEntries] = useLocalStorage<RecentDataUrl[]>(RECENT_COLLECTIONS_STORAGE_KEY, []);
+  const [storedRecentEntries, setRecentEntries] = useLocalStorage<RecentDataUrl[]>(RECENT_DATASETS_STORAGE_KEY, []);
 
   // Sanitize/validate recent entries
   let recentEntries: RecentDataUrl[] = storedRecentEntries.filter(
