@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
-import { Router } from "@remix-run/router";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import "antd/dist/antd.less";
 
@@ -30,14 +29,7 @@ const routes = [
   },
 ];
 
-let router: Router;
-if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
-  router = createBrowserRouter(routes);
-} else {
-  // Production mode.
-  // TODO: Use createBrowserRouter when building to S3.
-  router = createHashRouter(routes);
-}
+const router = createBrowserRouter(routes);
 
 ReactDOM.render(
   <StyleProvider>
