@@ -83,6 +83,8 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       keys: ["label"],
       isCaseSensitive: false,
       shouldSort: true, // sorts by match score
+      ignoreLocation: true, // search more than first 60 characters
+      findAllMatches: true, // return all matches
     });
   }, [recentDataUrls]);
 
