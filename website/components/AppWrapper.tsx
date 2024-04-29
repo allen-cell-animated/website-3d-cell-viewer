@@ -34,6 +34,17 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
+  viewerChannelSettings: {
+    groups: [
+      {
+        name: "Channels",
+        channels: [
+          { match: [0, 1, 2], enabled: true },
+          { match: "(.+)", enabled: false },
+        ],
+      },
+    ],
+  },
 };
 
 const defaultAppWrapperProps = {
@@ -81,9 +92,15 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     // in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
     const url = appProps.imageUrl;
-    navigation(`/viewer?url=${url}`, {
-      state: appProps,
-    });
+    if (url instanceof Array) {
+      navigation(`/viewer?url=${encodeURIComponent(url.join(","))}`, {
+        state: appProps,
+      });
+    } else {
+      navigation(`/viewer?url=${encodeURIComponent(url)}`, {
+        state: appProps,
+      });
+    }
     navigation(0);
   };
 

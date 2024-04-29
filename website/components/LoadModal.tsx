@@ -120,7 +120,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       </Button>
       <Modal
         open={showModal}
-        title={"Load image data"}
+        title={"Load"}
         onCancel={() => {
           setShowModal(false);
         }}
