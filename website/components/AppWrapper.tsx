@@ -35,6 +35,17 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
+  viewerChannelSettings: {
+    groups: [
+      {
+        name: "Channels",
+        channels: [
+          { match: [0, 1, 2], enabled: true },
+          { match: "(.+)", enabled: false },
+        ],
+      },
+    ],
+  },
 };
 
 const defaultAppWrapperProps = {
