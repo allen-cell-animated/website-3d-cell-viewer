@@ -10,6 +10,7 @@ import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
+import ShareModal from "./ShareModal";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;
@@ -94,10 +95,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onLoad} />
-            <Button type="link" disabled={true}>
-              <ShareAltOutlined />
-              Share
-            </Button>
+            <ShareModal appProps={viewerArgs} />
           </FlexRowAlignCenter>
           {/* <HelpDropdown /> */}
         </FlexRowAlignCenter>
