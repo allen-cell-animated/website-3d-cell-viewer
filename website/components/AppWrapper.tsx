@@ -4,11 +4,11 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
+import ShareModal from "./ShareModal";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
-import ShareModal from "./ShareModal";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;

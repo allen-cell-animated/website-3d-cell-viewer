@@ -1,8 +1,8 @@
-import { Button, Checkbox, Input, Modal, notification } from "antd";
+import { Button, Input, Modal, notification } from "antd";
 import React, { ReactElement, useState, useRef } from "react";
 import styled from "styled-components";
 
-import { FlexColumn, FlexRow } from "./LandingPage/utils";
+import { FlexRow } from "./LandingPage/utils";
 import { AppDataProps } from "../types";
 import { ShareAltOutlined } from "@ant-design/icons";
 
@@ -30,10 +30,11 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       params.push(`url=${encodeURIComponent(props.appProps.imageUrl)}`);
     }
   }
+  // TODO: Include additional app props in `params`
 
   const shareUrl = params.length > 0 ? `${baseUrl}?${params.join("&")}` : baseUrl;
 
-  const copyUrl = () => {
+  const copyUrl = (): void => {
     navigator.clipboard.writeText(shareUrl);
     notificationApi.success({
       message: "URL copied",
