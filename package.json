@@ -19,7 +19,9 @@
   },
   "scripts": {
     "start": "webpack serve --config webpack.dev.js  --env env=dev",
-    "gh-build": "webpack --config webpack.dev.js --env env=production",
+    "gh-build-nightly": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer",
+    "gh-build-release": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer-release",
+    "s3-build": "webpack --config webpack.dev.js --env env=production",
     "dev": "webpack --config webpack.dev.js --env env=dev",
     "lint": "eslint --config ./.eslintrc --ignore-path ./.eslintignore --ext .jsx --ext .js --ext .ts --ext .tsx ./",
     "test": "jest --coverage --passWithNoTests",
