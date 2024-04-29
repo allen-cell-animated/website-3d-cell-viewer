@@ -26,9 +26,8 @@ module.exports = (env) => {
         WEBSITE3DCELLVIEWER_VERSION: JSON.stringify(require("./package.json").version),
         VOLUMEVIEWER_VERSION: JSON.stringify(require("./node_modules/@aics/volume-viewer/package.json").version),
         WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT: JSON.stringify(env.env),
-        WEBSITE3DCELLVIEWER_BASENAME: JSON.stringify(env.basename),
       }),
-      new CopyWebpackPlugin({ patterns: ["./.nojekyll", "./public/404.html"] }),
+      new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
       new webpack.ProvidePlugin({
         THREE: "three",
         jQuery: "jquery",

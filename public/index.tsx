@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
+import { Router } from "@remix-run/router";
 
 // Components
 import AppWrapper from "../website/components/AppWrapper";
@@ -13,10 +14,8 @@ import "./App.css";
 // vars filled at build time using webpack DefinePlugin
 console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
 console.log(`website-3d-cell-viewer Version ${WEBSITE3DCELLVIEWER_VERSION}`);
-console.log(`website-3d-cell-viewer Basename ${WEBSITE3DCELLVIEWER_BASENAME}`);
 console.log(`volume-viewer Version ${VOLUMEVIEWER_VERSION}`);
 
-const basename = WEBSITE3DCELLVIEWER_BASENAME;
 const routes = [
   {
     path: "/",
@@ -30,7 +29,14 @@ const routes = [
   },
 ];
 
-const router = createBrowserRouter(routes, { basename: basename });
+let router: Router;
+if (WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT === "dev") {
+  router = createBrowserRouter(routes);
+} else {
+  // Production mode.
+  // TODO: Use createBrowserRouter when building to S3.
+  router = createHashRouter(routes);
+}
 
 ReactDOM.render(
   <StyleProvider>
