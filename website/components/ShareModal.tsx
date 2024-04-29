@@ -34,7 +34,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
 
   const shareUrl = params.length > 0 ? `${baseUrl}?${params.join("&")}` : baseUrl;
 
-  const copyUrl = (): void => {
+  const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
     notificationApi.success({
       message: "URL copied",
@@ -58,7 +58,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
           setShowModal(false);
         }}
         getContainer={modalContainerRef.current || undefined}
-        okButtonProps={{}}
         footer={
           <Button type="default" onClick={() => setShowModal(false)}>
             Close
@@ -68,7 +67,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       >
         <FlexRow $gap={8} style={{ marginTop: "12px" }}>
           <Input value={shareUrl} readOnly={true}></Input>
-          <Button type="primary" onClick={copyUrl}>
+          <Button type="primary" onClick={onClickCopy}>
             Copy URL
           </Button>
         </FlexRow>
