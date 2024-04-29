@@ -216,9 +216,15 @@ export default function LandingPage(): ReactElement {
     // TODO: Make URL search params from the appProps and append it to the viewer URL so the URL can be shared directly.
     // Alternatively, AppWrapper should manage syncing URL and viewer props.
     const url = appProps.imageUrl;
-    navigation(`/viewer?url=${url}`, {
-      state: appProps,
-    });
+    if (url instanceof Array) {
+      navigation(`/viewer?url=${encodeURIComponent(url.join(","))}`, {
+        state: appProps,
+      });
+    } else {
+      navigation(`/viewer?url=${encodeURIComponent(url)}`, {
+        state: appProps,
+      });
+    }
   };
 
   // TODO: Should the load buttons be link elements or buttons?
