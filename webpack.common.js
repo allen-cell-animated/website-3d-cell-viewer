@@ -34,7 +34,7 @@ module.exports = (env) => {
         WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT: JSON.stringify(env.env),
         WEBSITE3DCELLVIEWER_BASENAME: JSON.stringify(env.basename),
       }),
-      new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
+      new CopyWebpackPlugin({ patterns: ["./.nojekyll", "./public/404.html"] }),
       new webpack.ProvidePlugin({
         THREE: "three",
         jQuery: "jquery",
