@@ -14,10 +14,13 @@ const ModalContainer = styled.div``;
 
 export default function LoadModal(props: LoadModalProps): ReactElement {
   const [showModal, setShowModal] = useState(false);
-
-  const [notificationApi, notificationContextHolder] = notification.useNotification();
-
   const modalContainerRef = useRef<HTMLDivElement>(null);
+
+  const [notificationApi, notificationContextHolder] = notification.useNotification({
+    getContainer: modalContainerRef.current ? () => modalContainerRef.current! : undefined,
+    placement: "bottomLeft",
+    duration: 2,
+  });
 
   // location.pathname will include up to `.../viewer`
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
@@ -38,8 +41,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
     navigator.clipboard.writeText(shareUrl);
     notificationApi.success({
       message: "URL copied",
-      placement: "bottomLeft",
-      duration: 2,
     });
   };
 

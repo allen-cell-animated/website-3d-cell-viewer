@@ -310,6 +310,12 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   & .ant-checkbox-indeterminate.checked .ant-checkbox-inner {
     background-color: var(--color-checkbox-bg);
   }
+
+  // Add outlines to modals and notifications
+  & .ant-notification-notice-wrapper,
+  & .ant-modal-content {
+    border: 1px solid ${theme.colors.modal.border};
+  }
 `;
 
 /**
