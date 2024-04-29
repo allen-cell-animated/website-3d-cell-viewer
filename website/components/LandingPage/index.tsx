@@ -13,6 +13,7 @@ import LoadModal from "../LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { getArgsFromParams } from "../../utils/url_utils";
+import HelpDropdown from "../HelpDropdown";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -321,7 +322,7 @@ export default function LandingPage(): ReactElement {
               Share
             </Button>
           </FlexRowAlignCenter>
-          {/* <HelpDropdown /> */}
+          <HelpDropdown />
         </FlexRowAlignCenter>
       </Header>
       <Banner>
