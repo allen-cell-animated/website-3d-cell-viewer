@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Modal } from "antd";
+import { Button, Checkbox, Input, Modal, notification } from "antd";
 import React, { ReactElement, useState, useRef, useMemo } from "react";
 import styled from "styled-components";
 
@@ -17,6 +17,8 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
   const [includeTimeStamp, setIncludeTimeStamp] = useState(false);
   const [timeStamp, setTimeStamp] = useState(0);
 
+  const [notificationApi, notificationContextHolder] = notification.useNotification();
+
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
   // TODO add basename
@@ -33,8 +35,19 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
 
   const shareUrl = params.length > 0 ? `${baseUrl}?${params.join("&")}` : baseUrl;
 
+  const copyUrl = () => {
+    navigator.clipboard.writeText(shareUrl);
+    notificationApi.success({
+      message: "URL copied",
+      placement: "bottomLeft",
+      duration: 2,
+    });
+  };
+
   return (
     <ModalContainer ref={modalContainerRef}>
+      {notificationContextHolder}
+
       <Button type="link" onClick={() => setShowModal(!showModal)}>
         <ShareAltOutlined />
         Share
@@ -58,7 +71,9 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
           <Checkbox>Start at 0/570ms</Checkbox>
           <FlexRow $gap={8}>
             <Input value={shareUrl} readOnly={true}></Input>
-            <Button type="primary">Copy URL</Button>
+            <Button type="primary" onClick={copyUrl}>
+              Copy URL
+            </Button>
           </FlexRow>
         </FlexColumn>
       </Modal>
