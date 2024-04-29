@@ -1,5 +1,5 @@
 import { Button, Checkbox, Input, Modal, notification } from "antd";
-import React, { ReactElement, useState, useRef, useMemo } from "react";
+import React, { ReactElement, useState, useRef } from "react";
 import styled from "styled-components";
 
 import { FlexColumn, FlexRow } from "./LandingPage/utils";
@@ -14,15 +14,13 @@ const ModalContainer = styled.div``;
 
 export default function LoadModal(props: LoadModalProps): ReactElement {
   const [showModal, setShowModal] = useState(false);
-  const [includeTimeStamp, setIncludeTimeStamp] = useState(false);
-  const [timeStamp, setTimeStamp] = useState(0);
 
   const [notificationApi, notificationContextHolder] = notification.useNotification();
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
-  // TODO add basename
-  const baseUrl = location.protocol + "//" + location.host + "/viewer";
+  // location.pathname will include up to `.../viewer`
+  const baseUrl = location.protocol + "//" + location.host + location.pathname;
   const params: string[] = [];
 
   if (props.appProps.imageUrl) {
@@ -67,15 +65,12 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
         }
         destroyOnClose={true}
       >
-        <FlexColumn $gap={12}>
-          <Checkbox>Start at 0/570ms</Checkbox>
-          <FlexRow $gap={8}>
-            <Input value={shareUrl} readOnly={true}></Input>
-            <Button type="primary" onClick={copyUrl}>
-              Copy URL
-            </Button>
-          </FlexRow>
-        </FlexColumn>
+        <FlexRow $gap={8} style={{ marginTop: "12px" }}>
+          <Input value={shareUrl} readOnly={true}></Input>
+          <Button type="primary" onClick={copyUrl}>
+            Copy URL
+          </Button>
+        </FlexRow>
       </Modal>
     </ModalContainer>
   );
