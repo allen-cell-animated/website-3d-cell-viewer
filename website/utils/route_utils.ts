@@ -51,5 +51,5 @@ export function convertQueryStringPathToUrl(url: URL): URL {
     .map((s) => s.replace(new RegExp(ESCAPED_AMPERSAND, "g"), "&")) // Restore escaped ampersands
     .join("?"); // Rejoin the path and query string
 
-  return new URL(`${url.origin}${newPathAndQueryString}${url.hash}`);
+  return new URL(`${url.origin}/${newPathAndQueryString}${url.hash}`);
 }

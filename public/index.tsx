@@ -17,7 +17,10 @@ import "./App.css";
 const locationUrl = new URL(window.location.toString());
 if (isQueryStringPath(locationUrl)) {
   const url = convertQueryStringPathToUrl(locationUrl);
-  window.history.replaceState(null, "", url);
+
+  const newRelativePath = url.pathname + url.search + url.hash;
+  console.log("Redirecting to " + newRelativePath);
+  window.history.replaceState(null, "", newRelativePath);
 }
 
 // vars filled at build time using webpack DefinePlugin
