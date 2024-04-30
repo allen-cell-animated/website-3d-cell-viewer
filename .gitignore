@@ -6,3 +6,4 @@ environment.txt
 es/
 type-declarations/
 .vscode/launch.json
+coverage/
