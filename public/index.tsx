@@ -27,7 +27,7 @@ if (isQueryStringPath(locationUrl)) {
   const url = convertQueryStringPathToUrl(locationUrl);
   console.log("Converted URL", url);
 
-  const newRelativePath = "/" + basename + url.pathname + url.search + url.hash;
+  const newRelativePath = basename + url.pathname + url.search + url.hash;
   console.log("Redirecting to " + newRelativePath);
   window.history.replaceState(null, "", newRelativePath);
 }
