@@ -1,0 +1,21 @@
+/*!**************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./public/gh-reroute/styles.css ***!
+  \**************************************************************************************************************************/
+#error-page-404{
+  background-color:#222222;
+  color:#bfbfbf;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+  #error-page-404 a{
+    color:#0099ff;
+  }
+
+  #error-page-404 a:hover,
+    #error-page-404 a:focus-within{
+      text-decoration:underline;
+    }
+
