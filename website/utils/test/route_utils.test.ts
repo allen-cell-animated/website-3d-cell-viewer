@@ -36,21 +36,18 @@ describe("Route utils", () => {
       const url = new URL("https://www.example.com/one/two/");
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
       const restoredUrl = convertQueryStringPathToUrl(convertedUrl);
-
       expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
     it("ignores normal urls", () => {
       const url = new URL("https://www.example.com/one/two/");
       const restoredUrl = convertQueryStringPathToUrl(url);
-
       expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
     it("ignores normal urls with query parameters", () => {
       const url = new URL("https://www.example.com/one/two/?a=0");
       const restoredUrl = convertQueryStringPathToUrl(url);
-
       expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
@@ -58,7 +55,6 @@ describe("Route utils", () => {
       const url = new URL("https://www.example.com/one/two?a=0&b=1#hash");
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
       const restoredUrl = convertQueryStringPathToUrl(convertedUrl);
-
       expect(restoredUrl.toString()).toEqual(url.toString());
     });
   });

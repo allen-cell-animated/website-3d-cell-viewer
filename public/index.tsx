@@ -25,10 +25,10 @@ const basename = WEBSITE3DCELLVIEWER_BASENAME;
 const locationUrl = new URL(window.location.toString());
 if (isQueryStringPath(locationUrl)) {
   const url = convertQueryStringPathToUrl(locationUrl);
-  console.log("Converted URL", url);
-
   const newRelativePath = url.pathname + url.search + url.hash;
   console.log("Redirecting to " + newRelativePath);
+  // Replaces the query string path with the original path now that the
+  // single-page app has loaded. This lets routing work as normal below.
   window.history.replaceState(null, "", newRelativePath);
 }
 
