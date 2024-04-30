@@ -6,28 +6,28 @@ describe("Route utils", () => {
     it("converts paths to query string", () => {
       const url = new URL("https://www.example.com/one/two");
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
-      expect(convertedUrl).toEqual(new URL("https://www.example.com/?/one/two"));
+      expect(convertedUrl.toString()).toEqual("https://www.example.com/?/one/two");
     });
 
     it("handles extra slashes", () => {
       const url = new URL("https://www.example.com/one/two/");
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
-      expect(convertedUrl).toEqual(new URL("https://www.example.com/?/one/two/"));
+      expect(convertedUrl.toString()).toEqual("https://www.example.com/?/one/two/");
     });
 
     it("handles original query params and hashes", () => {
       const url = new URL("https://www.example.com/one/two?a=0&b=1#hash");
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
-      expect(convertedUrl).toEqual(new URL("https://www.example.com/?/one/two&a=0~and~b=1#hash"));
+      expect(convertedUrl.toString()).toEqual("https://www.example.com/?/one/two&a=0~and~b=1#hash");
     });
 
     it("handles base path segments", () => {
       const url = new URL("https://www.example.com/one/two/");
       const convertedUrl1 = convertUrlToQueryStringPath(url, 1);
-      expect(convertedUrl1).toEqual(new URL("https://www.example.com/one/?/two/"));
+      expect(convertedUrl1.toString()).toEqual("https://www.example.com/one/?/two/");
 
       const convertedUrl2 = convertUrlToQueryStringPath(url, 2);
-      expect(convertedUrl2).toEqual(new URL("https://www.example.com/one/two/?/"));
+      expect(convertedUrl2.toString()).toEqual("https://www.example.com/one/two/?/");
     });
   });
 
@@ -37,21 +37,21 @@ describe("Route utils", () => {
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
       const restoredUrl = convertQueryStringPathToUrl(convertedUrl);
 
-      expect(restoredUrl).toEqual(url);
+      expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
     it("ignores normal urls", () => {
       const url = new URL("https://www.example.com/one/two/");
       const restoredUrl = convertQueryStringPathToUrl(url);
 
-      expect(restoredUrl).toEqual(url);
+      expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
     it("ignores normal urls with query parameters", () => {
       const url = new URL("https://www.example.com/one/two/?a=0");
       const restoredUrl = convertQueryStringPathToUrl(url);
 
-      expect(restoredUrl).toEqual(url);
+      expect(restoredUrl.toString()).toEqual(url.toString());
     });
 
     it("handles converted query params and hashes", () => {
@@ -59,7 +59,7 @@ describe("Route utils", () => {
       const convertedUrl = convertUrlToQueryStringPath(url, 0);
       const restoredUrl = convertQueryStringPathToUrl(convertedUrl);
 
-      expect(restoredUrl).toEqual(url);
+      expect(restoredUrl.toString()).toEqual(url.toString());
     });
   });
 
@@ -68,7 +68,7 @@ describe("Route utils", () => {
       const urlsToTest: string[][] = [
         [
           "https://allen-cell-animated.github.io/website-3d-cell-viewer/",
-          "https://allen-cell-animated.github.io/website-3d-cell-viewer/",
+          "https://allen-cell-animated.github.io/website-3d-cell-viewer/?/",
         ],
         [
           "https://allen-cell-animated.github.io/website-3d-cell-viewer/viewer",
@@ -84,17 +84,17 @@ describe("Route utils", () => {
         ],
         [
           "https://allen-cell-animated.github.io/website-3d-cell-viewer/viewer?url=https://example.com&file=example.json",
-          "https://allen-cell-animated.github.io/website-3d-cell-viewer/?/viewer&url=https://example.com~and~file=example",
+          "https://allen-cell-animated.github.io/website-3d-cell-viewer/?/viewer&url=https://example.com~and~file=example.json",
         ],
       ];
 
-      urlsToTest.forEach(([input, expected]) => {
+      for (const [input, expected] of urlsToTest) {
         const url = new URL(input);
         const convertedUrl = convertUrlToQueryStringPath(url, 1);
 
-        expect(convertedUrl).toEqual(new URL(expected));
-        expect(convertQueryStringPathToUrl(convertedUrl)).toEqual(url);
-      });
+        expect(convertedUrl.toString()).toEqual(expected);
+        expect(convertQueryStringPathToUrl(convertedUrl).toString()).toEqual(input);
+      }
     });
   });
 });

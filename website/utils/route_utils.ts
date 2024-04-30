@@ -25,7 +25,11 @@ export function convertUrlToQueryStringPath(url: URL, basePathSegments: number =
   // Remove the `?` and replace with an `&` if there are already query parameters
   const queryString = url.search ? url.search.slice(1).replace(/&/g, ESCAPED_AMPERSAND) : "";
 
-  return new URL(`${url.origin}${basePath}/?/${queryPath}&${queryString}${url.hash}`);
+  let newUrl = `${url.origin}${basePath}/?/${queryPath}`;
+  newUrl += queryString ? `&${queryString}` : "";
+  newUrl += url.hash;
+
+  return new URL(newUrl);
 }
 
 export function isQueryStringPath(url: URL): boolean {
@@ -51,5 +55,5 @@ export function convertQueryStringPathToUrl(url: URL): URL {
     .map((s) => s.replace(new RegExp(ESCAPED_AMPERSAND, "g"), "&")) // Restore escaped ampersands
     .join("?"); // Rejoin the path and query string
 
-  return new URL(`${url.origin}/${newPathAndQueryString}${url.hash}`);
+  return new URL(`${url.origin}${url.pathname}${newPathAndQueryString}${url.hash}`);
 }
