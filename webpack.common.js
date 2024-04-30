@@ -14,7 +14,7 @@ const themeVariables = lessToJs(
 
 module.exports = (env) => {
   return {
-    entry: {index: "./public/index.tsx", reroute: "./public/reroute.tsx"},
+    entry: {index: "./public/index.tsx", reroute: "./public/gh-reroute/index.tsx"},
     output: {
       path: path.resolve(__dirname, "imageviewer"),
       filename: "[name].bundle.js",
@@ -32,7 +32,7 @@ module.exports = (env) => {
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         filename: "404.html",
-        template: "./public/404.html",
+        template: "./public/gh-reroute/404.html",
         chunks: ["reroute"],
       }),
       new MiniCssExtractPlugin(),

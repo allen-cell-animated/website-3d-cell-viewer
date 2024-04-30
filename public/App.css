@@ -11,21 +11,3 @@ body {
 .cell-viewer-app {
   width: 100vw;
 }
-
-#error-page-404 {
-  background-color: #222222;
-  color: #bfbfbf;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  a {
-    color: #0099ff;
-
-    &:hover,
-    &:focus-within {
-      text-decoration: underline;
-    }
-  }
-}
