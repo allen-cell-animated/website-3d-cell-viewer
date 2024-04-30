@@ -8,9 +8,17 @@ import "antd/dist/antd.less";
 import AppWrapper from "../website/components/AppWrapper";
 import LandingPage from "../website/components/LandingPage";
 import ErrorPage from "../website/components/ErrorPage";
+import { isQueryStringPath, convertQueryStringPathToUrl } from "../website/utils/route_utils";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
 import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
+
+// Check for redirects in the query string, and update browser history state.
+const locationUrl = new URL(window.location.toString());
+if (isQueryStringPath(locationUrl)) {
+  const url = convertQueryStringPathToUrl(locationUrl);
+  window.history.replaceState(null, "", url);
+}
 
 // vars filled at build time using webpack DefinePlugin
 console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
