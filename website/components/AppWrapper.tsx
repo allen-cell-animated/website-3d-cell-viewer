@@ -10,6 +10,7 @@ import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
+import HelpDropdown from "./HelpDropdown";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;
@@ -116,7 +117,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
               Share
             </Button>
           </FlexRowAlignCenter>
-          {/* <HelpDropdown /> */}
+          <HelpDropdown />
         </FlexRowAlignCenter>
       </Header>
       <ImageViewerApp

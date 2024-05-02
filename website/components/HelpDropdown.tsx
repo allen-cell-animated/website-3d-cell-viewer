@@ -2,8 +2,9 @@ import { Button, Dropdown, MenuProps, Modal } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { FlexColumnAlignCenter } from "./LandingPage/utils";
+import { FlexColumnAlignCenter, FlexRowAlignCenter } from "./LandingPage/utils";
 import { SecondaryButton } from "./Buttons";
+import { DropdownSVG } from "../assets/icons";
 
 export default function HelpDropdown(): ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>();
@@ -61,8 +62,12 @@ export default function HelpDropdown(): ReactElement {
 
   return (
     <div ref={containerRef}>
-      <Dropdown menu={{ items: items }} getPopupContainer={getContainer}>
-        <SecondaryButton>Help</SecondaryButton>
+      <Dropdown menu={{ items: items }} getPopupContainer={getContainer} trigger={["click", "hover"]}>
+        <SecondaryButton>
+          <FlexRowAlignCenter $gap={6}>
+            Help <DropdownSVG />
+          </FlexRowAlignCenter>
+        </SecondaryButton>
       </Dropdown>
       <Modal
         open={showVersionModal}
