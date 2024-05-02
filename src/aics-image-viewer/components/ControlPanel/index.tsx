@@ -43,7 +43,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
   const { viewerChannelSettings, showControls, hasImage } = props;
 
-  // TODO key is a number, but ClickParam assumes keys will always be strings
+  // TODO key is a number, but MenuInfo assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
   const makeTurnOnPresetFn = ({ key }: MenuInfo): void =>
     props.onApplyColorPresets(PRESET_COLOR_MAP[key as unknown as number].colors);
