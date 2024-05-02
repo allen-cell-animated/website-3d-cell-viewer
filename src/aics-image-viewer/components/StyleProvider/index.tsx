@@ -66,6 +66,11 @@ const theme = {
       },
       secondary: {
         bg: "transparent",
+        text: palette.medPurple,
+        outline: palette.medPurple,
+      },
+      tertiary: {
+        bg: "transparent",
         text: palette.ltGrey,
         outline: palette.ltGrey,
         hoverOutline: palette.ltPurple,
@@ -152,15 +157,19 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-button-link-text: ${$theme.colors.button.link.text};
 
-      --color-button-default-bg: transparent;
-      --color-button-default-text: ${$theme.colors.button.secondary.text};
-      --color-button-default-outline: ${$theme.colors.button.secondary.outline};
-      --color-button-default-hover-outline: ${$theme.colors.button.secondary.hoverOutline};
-      --color-button-default-hover-text: ${$theme.colors.button.secondary.hoverText};
-      --color-button-default-active-outline: ${$theme.colors.button.secondary.activeOutline};
-      --color-button-default-active-text: ${$theme.colors.button.secondary.hoverText};
+      --color-button-secondary-bg: ${$theme.colors.button.secondary.bg};
+      --color-button-secondary-text: ${$theme.colors.button.secondary.text};
+      --color-button-secondary-outline: ${$theme.colors.button.secondary.outline};
 
-      --color-button-icon-disabled-text: ${$theme.colors.button.secondary.disabledText};
+      --color-button-tertiary-bg: transparent;
+      --color-button-tertiary-text: ${$theme.colors.button.tertiary.text};
+      --color-button-tertiary-outline: ${$theme.colors.button.tertiary.outline};
+      --color-button-tertiary-hover-outline: ${$theme.colors.button.tertiary.hoverOutline};
+      --color-button-tertiary-hover-text: ${$theme.colors.button.tertiary.hoverText};
+      --color-button-tertiary-active-outline: ${$theme.colors.button.tertiary.activeOutline};
+      --color-button-tertiary-active-text: ${$theme.colors.button.tertiary.hoverText};
+
+      --color-button-icon-disabled-text: ${$theme.colors.button.tertiary.disabledText};
 
       --color-toolbar-button-bg: ${$theme.colors.toolbar.buttonBg};
 
@@ -273,21 +282,21 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
    * purple outline on hover.
    */
   .ant-btn-default:not(.ant-btn-icon-only) {
-    background-color: var(--color-button-default-bg);
-    color: var(--color-button-default-text);
-    border-color: var(--color-button-default-outline);
+    background-color: var(--color-button-tertiary-bg);
+    color: var(--color-button-tertiary-text);
+    border-color: var(--color-button-tertiary-outline);
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       background-color: transparent;
-      border-color: var(--color-button-default-hover-bg);
-      color: var(--color-button-default-hover-text);
+      border-color: var(--color-button-tertiary-hover-bg);
+      color: var(--color-button-tertiary-hover-text);
     }
 
     &:active:not(:disabled) {
       background-color: transparent;
-      border-color: var(--color-button-default-active-outline);
-      color: var(--color-button-default-active-text);
+      border-color: var(--color-button-tertiary-active-outline);
+      color: var(--color-button-tertiary-active-text);
     }
   }
 
@@ -339,7 +348,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             primaryColor: theme.colors.button.primary.text,
             defaultHoverBg: theme.colors.button.secondary.bg,
             defaultActiveBg: theme.colors.button.secondary.bg,
-            defaultActiveBorderColor: theme.colors.button.secondary.activeOutline,
+            defaultActiveBorderColor: theme.colors.button.tertiary.activeOutline,
           },
           Card: {
             borderRadiusLG: 0,
