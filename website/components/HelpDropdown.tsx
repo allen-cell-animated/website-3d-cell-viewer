@@ -75,6 +75,7 @@ export default function HelpDropdown(): ReactElement {
       <Modal
         open={showVersionModal}
         title="Version info"
+        getContainer={getContainer}
         onCancel={() => {
           setShowVersionModal(false);
         }}
