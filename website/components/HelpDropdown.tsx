@@ -6,6 +6,9 @@ import { FlexColumnAlignCenter, FlexRowAlignCenter } from "./LandingPage/utils";
 import { SecondaryButton } from "./Buttons";
 import { DropdownSVG } from "../assets/icons";
 
+declare const WEBSITE3DCELLVIEWER_VERSION: string;
+declare const VOLUMEVIEWER_VERSION: string;
+
 export default function HelpDropdown(): ReactElement {
   const [container, setContainer] = useState<HTMLDivElement | null>();
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -88,8 +91,8 @@ export default function HelpDropdown(): ReactElement {
         }}
       >
         <FlexColumnAlignCenter $gap={0}>
-          <p>3D Volume Viewer v{WEBSITE3DCELLVIEWER_VERSION}</p>
-          <p>Volume Viewer v{VOLUMEVIEWER_VERSION}</p>
+          <p style={{ margin: 0 }}>Website v{WEBSITE3DCELLVIEWER_VERSION}</p>
+          <p style={{ margin: 0 }}>Volume viewer plugin v{VOLUMEVIEWER_VERSION}</p>
         </FlexColumnAlignCenter>
       </Modal>
     </div>
