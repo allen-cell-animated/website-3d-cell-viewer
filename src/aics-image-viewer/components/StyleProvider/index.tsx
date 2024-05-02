@@ -137,6 +137,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   ${({ $theme }) => {
     return css`
       /* Component and color variables. */
+      // TODO: Fix inconsistent use of border vs. outline
       --color-text-link: ${$theme.colors.text.link};
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
@@ -194,6 +195,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-statusflag-text: ${$theme.colors.statusFlag.text};
 
       --color-layout-dividers: ${$theme.colors.layout.dividers};
+
+      --color-modal-border: ${$theme.colors.modal.border};
 
       --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
@@ -325,6 +328,13 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   & .ant-checkbox-indeterminate.checked .ant-checkbox-inner {
     background-color: var(--color-checkbox-bg);
+  }
+
+  // Add outlines to modals and dropdowns
+  & .ant-select-dropdown,
+  & .ant-dropdown-menu,
+  & .ant-modal-content {
+    border: 1px solid var(--color-modal-border);
   }
 `;
 
