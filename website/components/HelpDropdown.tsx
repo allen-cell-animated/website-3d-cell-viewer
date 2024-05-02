@@ -62,7 +62,7 @@ export default function HelpDropdown(): ReactElement {
 
   return (
     <div ref={containerRef}>
-      <Dropdown menu={{ items: items }} getPopupContainer={getContainer} trigger={["click", "hover"]}>
+      <Dropdown menu={{ items: items }} getPopupContainer={getContainer} trigger={["click"]}>
         <SecondaryButton>
           <FlexRowAlignCenter $gap={6}>
             Help <DropdownSVG />

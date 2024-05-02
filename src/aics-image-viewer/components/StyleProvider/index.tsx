@@ -110,7 +110,10 @@ const theme = {
       split: palette.white,
     },
     menu: {
-      selectedBg: palette.ltPurple,
+      hoverText: palette.white,
+      hoverBg: palette.ltPurple,
+      selectedText: palette.white,
+      selectedBg: palette.medGrey,
       textPlaceholder: palette.ltPurple,
     },
     tooltip: {
@@ -138,6 +141,8 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     return css`
       /* Component and color variables. */
       // TODO: Fix inconsistent use of border vs. outline
+      // TODO: Remove variables that aren't used in other CSS files. These should be set directly
+      // from the $theme object to reduce unnecessary variables.
       --color-text-link: ${$theme.colors.text.link};
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
@@ -197,6 +202,9 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-layout-dividers: ${$theme.colors.layout.dividers};
 
       --color-modal-border: ${$theme.colors.modal.border};
+
+      --color-menu-hover-text: ${$theme.colors.menu.hoverText};
+      --color-menu-selected-text: ${$theme.colors.menu.selectedText};
 
       --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
@@ -336,6 +344,22 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   & .ant-modal-content {
     border: 1px solid var(--color-modal-border);
   }
+
+  & .ant-dropdown-menu-item-active {
+    color: var(--color-menu-hover-text);
+  }
+
+  // Remove padding in dropdown menus so items can be flush with the edge
+  & .ant-dropdown-menu,
+  & .ant-select-dropdown {
+    padding: 0;
+    overflow: hidden;
+
+    & .ant-dropdown-menu-item,
+    & .ant-select-item {
+      border-radius: 0;
+    }
+  }
 `;
 
 /**
@@ -358,6 +382,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimaryTextHover: theme.colors.text.selectionText,
           fontWeightStrong: 400,
           colorBgElevated: palette.darkGrey,
+          controlItemBgHover: theme.colors.menu.hoverBg,
+          controlItemBgActiveHover: theme.colors.menu.hoverBg,
+          controlItemBgActive: theme.colors.menu.selectedBg,
         },
         components: {
           Button: {
@@ -385,7 +412,8 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Radio: {},
           Select: {
-            optionSelectedBg: theme.colors.menu.selectedBg,
+            // optionSelectedBg: theme.colors.menu.selectedBg,
+            // optionActiveBg: theme.colors.menu.hoverBg,
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,
