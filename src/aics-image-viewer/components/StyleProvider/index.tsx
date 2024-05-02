@@ -262,12 +262,6 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     color: var(--color-button-icon-disabled-text);
   }
 
-  .btn-active {
-    color: var(--color-button-icon-activated-text);
-    background-color: var(--color-button-icon-activated-bg);
-    border: 1px solid var(--color-button-icon-activated-outline);
-  }
-
   .ant-btn-link:not(:disabled) {
     // Change from default blue link text
     color: var(--color-button-link-text);

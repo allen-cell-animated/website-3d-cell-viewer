@@ -119,6 +119,12 @@
     color: var(--color-text-body);
   }
 
+  & .btn-active {
+    color: var(--color-button-icon-activated-text);
+    background-color: var(--color-button-icon-activated-bg);
+    border: 1px solid var(--color-button-icon-activated-outline);
+  }
+
   /* Radio buttons */
 
   & .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
