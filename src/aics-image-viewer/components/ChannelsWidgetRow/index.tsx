@@ -95,7 +95,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
           start={defaultValue}
           connect={true}
           tooltips={true}
-          format={{ to: (value: number) => Math.round(value).toString(), from: (value: string) => parseInt(value) }}
+          format={{ to: (value: number) => Math.round(value).toString(), from: (value: string) => parseInt(value, 10) }}
           behaviour="drag"
           onChange={onChange}
           step={1}
