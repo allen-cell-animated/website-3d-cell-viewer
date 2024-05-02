@@ -8,6 +8,7 @@ const PrimaryButton = React.forwardRef<HTMLButtonElement>((props, ref) => (
     {props.children}
   </Button>
 ));
+PrimaryButton.displayName = "PrimaryButton"; // Used for debugging in React
 
 export const SecondaryButton = styled(PrimaryButton)`
   &&& {
