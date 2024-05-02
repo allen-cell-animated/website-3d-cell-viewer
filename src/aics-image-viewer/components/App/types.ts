@@ -88,7 +88,7 @@ export interface AppProps {
 export type ViewerSettingsKey = keyof GlobalViewerSettings;
 
 /**
- * If a value of `GlobalViewerSettings` is an object, we want to allow updates with a partial object. Otherwise,
+ * If a value in `GlobalViewerSettings` is an object, we want to allow updates with a partial object. Otherwise,
  * components that update some but not all of the object's properties have to know the object's current value in order
  * to clone it with only the key they care about updated, which exposes us to stale closure issues.
  */
@@ -106,8 +106,8 @@ export type ViewerSettingChangeHandlers = {
 };
 
 /**
- * The type of the global settings updater provided by `App` and passed down to most UI components. It looks kind of
- * like a redux reducer if you squint. `key` is the setting to update; `value` is the new (potentially partial) value.
+ * The type of the global settings updater provided by `App` and passed down to most UI components. Looks kind of like
+ * redux's `dispatch` if you squint. `key` names the setting to update; `value` is the new (potentially partial) value.
  */
 export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(
   key: K,
