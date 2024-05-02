@@ -2,10 +2,11 @@ import { Button, Dropdown, MenuProps, Modal } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { FlexColumnAlignCenter, FlexRowAlignCenter } from "./LandingPage/utils";
-import { SecondaryButton } from "./Buttons";
 import { DropdownSVG } from "../assets/icons";
+import { SecondaryButton } from "./Buttons";
+import { FlexColumnAlignCenter, FlexRowAlignCenter } from "./LandingPage/utils";
 
+// Defined in webpack config
 declare const WEBSITE3DCELLVIEWER_VERSION: string;
 declare const VOLUMEVIEWER_VERSION: string;
 
@@ -57,11 +58,12 @@ export default function HelpDropdown(): ReactElement {
     },
   ];
 
-  const getContainer = container !== null ? () => container! : undefined;
-
+  // Use state update here to force a re-render so Dropdown is rendered with a valid `getContainer` callback.
+  // Otherwise, the `getContainer` callback will be undefined on the first render.
   useEffect(() => {
     setContainer(containerRef.current);
   }, [containerRef.current]);
+  const getContainer = container !== null ? () => container! : undefined;
 
   return (
     <div ref={containerRef}>

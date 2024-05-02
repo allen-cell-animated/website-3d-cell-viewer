@@ -345,11 +345,12 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     border: 1px solid var(--color-modal-border);
   }
 
+  // Force active/hovered text to be white instead of grey for better contrast
   & .ant-dropdown-menu-item-active {
     color: var(--color-menu-hover-text);
   }
 
-  // Remove padding in dropdown menus so items can be flush with the edge
+  // Remove padding in dropdown menus and make items reactangular + flush with the edge
   & .ant-dropdown-menu,
   & .ant-select-dropdown {
     padding: 0;
@@ -409,11 +410,6 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
-          },
-          Radio: {},
-          Select: {
-            // optionSelectedBg: theme.colors.menu.selectedBg,
-            // optionActiveBg: theme.colors.menu.hoverBg,
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,
