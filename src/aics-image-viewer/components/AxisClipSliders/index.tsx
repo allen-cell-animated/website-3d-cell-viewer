@@ -179,17 +179,17 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   const updateRegion = (axis: AxisName, minval: number, maxval: number): void => {
     pauseOnInput(axis);
 
-    const { changeViewerSetting, numSlices, region } = props;
+    const { changeViewerSetting, numSlices } = props;
     // get a value from 0-1
     const max = numSlices[axis];
     const start = minval / max;
     const end = maxval / max;
-    changeViewerSetting("region", { ...region, [axis]: [start, end] });
+    changeViewerSetting("region", { [axis]: [start, end] });
   };
 
   const updateSlice = (axis: AxisName, slice: number): void => {
     pauseOnInput(axis);
-    props.changeViewerSetting("slice", { ...props.slices, [axis]: slice / props.numSlices[axis] });
+    props.changeViewerSetting("slice", { [axis]: slice / props.numSlices[axis] });
   };
 
   const updateTime = (time: number): void => {
