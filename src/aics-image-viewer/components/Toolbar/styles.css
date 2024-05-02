@@ -121,7 +121,7 @@
 
   /* Radio buttons */
 
-  .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
+  & .ant-radio-button-wrapper:not(.ant-radio-button-wrapper-disabled) {
     background-color: black;
     box-shadow: -1px 0px 0px 0px transparent;
     transition-property: color, background-color, border-color, box-shadow;
@@ -156,20 +156,31 @@
   }
 
   /* Dropdown */
-
-  .select-render-setting {
+  && .ant-select.select-render-setting {
     min-width: 120px;
+
+    & .ant-select-arrow {
+      color: var(--color-button-default-text);
+    }
+
+    & .ant-select-selector {
+      /* Override default button styling */
+      border-color: $light-gray;
+      box-shadow: none;
+      background-color: var(--color-toolbar-button-bg);
+    }
   }
 
-  &&& .ant-select-selector {
-    border-color: $light-gray;
-    box-shadow: none;
-    background-color: var(--color-toolbar-button-bg);
-
-    &:focus-visible:not(:disabled),
-    &:hover:not(:disabled) {
-      outline-color: $highlight-purple;
-      color: $highlight-purple;
+  /* Control response to hover + active menu */
+  & .ant-select.select-render-setting:hover:not(:disabled),
+  & .ant-select.select-render-setting:focus-visible:not(:disabled),
+  &&& .ant-select-open {
+    & .ant-select-selector,
+    & .ant-select-arrow,
+    & .ant-select-selection-item {
+      color: var(--color-button-default-hover-text);
+      transition: color 0.3s;
+      outline-color: var(--color-button-default-hover-outline);
     }
   }
 }
