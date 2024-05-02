@@ -70,6 +70,9 @@ const theme = {
         hoverOutline: palette.ltPurple,
         hoverText: palette.ltPurple,
         activeOutline: palette.medPurple,
+        activatedText: palette.white,
+        activatedBg: palette.medDarkGrey,
+        activatedOutline: palette.purpleGrey,
         disabledText: palette.medGrey,
       },
     },
@@ -154,6 +157,9 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-button-default-active-text: ${$theme.colors.button.secondary.hoverText};
 
       --color-button-icon-disabled-text: ${$theme.colors.button.secondary.disabledText};
+      --color-button-icon-activated-text: ${$theme.colors.button.secondary.activatedText};
+      --color-button-icon-activated-bg: ${$theme.colors.button.secondary.activatedBg};
+      --color-button-icon-activated-outline: ${$theme.colors.button.secondary.activatedOutline};
 
       --color-toolbar-button-bg: ${$theme.colors.toolbar.buttonBg};
 
@@ -254,6 +260,12 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
   .ant-btn-icon-only:disabled {
     color: var(--color-button-icon-disabled-text);
+  }
+
+  .btn-active {
+    color: var(--color-button-icon-activated-text);
+    background-color: var(--color-button-icon-activated-bg);
+    border: 1px solid var(--color-button-icon-activated-outline);
   }
 
   .ant-btn-link:not(:disabled) {
