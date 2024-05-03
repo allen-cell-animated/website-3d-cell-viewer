@@ -155,7 +155,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
           onWheel={this.wheelHandler}
           onScroll={this.checkScrollBtnVisible}
         >
-          <span className="viewer-toolbar-left" ref={this.leftRef} />
+          <div className="viewer-toolbar-left" ref={this.leftRef} />
           <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <div className="viewer-toolbar-group">
