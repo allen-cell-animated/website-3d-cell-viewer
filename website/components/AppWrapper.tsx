@@ -92,7 +92,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     // in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
     const url = appProps.imageUrl;
-    if (url instanceof Array) {
+    if (Array.isArray(url)) {
       navigation(`/viewer?url=${encodeURIComponent(url.join(","))}`, {
         state: appProps,
       });

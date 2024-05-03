@@ -121,9 +121,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       <Modal
         open={showModal}
         title={"Load"}
-        onCancel={() => {
-          setShowModal(false);
-        }}
+        onCancel={() => setShowModal(false)}
         getContainer={modalContainerRef.current || undefined}
         okButtonProps={{}}
         footer={
@@ -141,9 +139,7 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
           <AutoComplete
             value={urlInput}
             onChange={(value) => setUrlInput(value)}
-            onSelect={(value) => {
-              setUrlInput(value as string);
-            }}
+            onSelect={setUrlInput}
             style={{ width: "100%" }}
             allowClear={true}
             options={autoCompleteOptions}
