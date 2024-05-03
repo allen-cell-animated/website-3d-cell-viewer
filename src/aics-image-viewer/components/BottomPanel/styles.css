@@ -3,28 +3,22 @@
   bottom: 0;
   width: 100%;
 
-  .ant-drawer {
-    position: absolute;
-  }
-
-  .drawer .ant-drawer-content-wrapper {
-    transform: translateY(69%) !important;
+  .ant-drawer .ant-drawer-content-wrapper {
+    transform: translateY(69%);
   }
 
   .ant-drawer-content-wrapper {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    height: unset !important;
-    position: absolute;
+    height: 190px !important;
+    transition: all 0.3s, max-width 0s 0s;
+    opacity: 85%;
+    box-shadow: none;
   }
 
   .ant-drawer-content {
     background: none;
-  }
-
-  .ant-drawer-wrapper-body {
-    opacity: 85%;
   }
 
   .ant-drawer-header {
@@ -35,23 +29,24 @@
 
   .ant-drawer-body {
     padding: 16px 24px;
-    height: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 
-  .ant-drawer-title .ant-btn {
-    background-color: #4b4b4b;
+  &&& .ant-drawer-title .ant-btn {
+    background-color: var(--color-controlpanel-drawer-bg);
     color: #aeacae;
 
+    &:active,
+    &:hover,
     &:focus {
-      color: #aeacae;
-    }
-
-    &:hover {
+      background-color: var(--color-controlpanel-drawer-bg);
       color: white;
     }
   }
 
-  .options-button {
+  & .options-button {
     border: none;
     box-shadow: none;
     margin-right: 0.8em;
@@ -67,11 +62,12 @@
 
   .drawer-body-wrapper {
     display: none;
+    width: 100%;
   }
 
-  .drawer.ant-drawer-open {
+  .ant-drawer.ant-drawer-open {
     .ant-drawer-content-wrapper {
-      transform: none !important;
+      transform: none;
       box-shadow: none;
       -webkit-box-shadow: none;
     }
@@ -81,8 +77,8 @@
     }
 
     .ant-drawer-body,
-    .ant-drawer-title .ant-btn {
-      background-color: #222222;
+    .ant-drawer-title .ant-btn.ant-btn-default {
+      background-color: var(--color-controlpanel-drawer-bg);
     }
 
     .button-arrow {

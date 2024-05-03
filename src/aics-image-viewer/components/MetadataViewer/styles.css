@@ -1,6 +1,9 @@
 .viewer-metadata-table {
   width: 100%;
   table-layout: fixed;
+  box-sizing: border-box;
+  border-spacing: 0;
+  border-collapse: collapse;
 
   tbody {
     padding: 10px;

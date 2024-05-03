@@ -83,8 +83,9 @@
     padding: 0 16px;
   }
 
-  > .ant-card-head > .ant-card-head-wrapper > .ant-card-head-title {
-    padding-top: 0;
+  & > .ant-card-head {
+    min-height: 0;
+    margin-bottom: 16px;
   }
 
   .ant-card-body {
@@ -93,18 +94,6 @@
 
   .ant-collapse-item .ant-collapse-header {
     padding: 0 !important;
-  }
-
-  .ant-checkbox-inner {
-    background-color: transparent;
-  }
-
-  .ant-checkbox-indeterminate .ant-checkbox-inner {
-    background-color: transparent;
-
-    :after {
-      background-color: white;
-    }
   }
 
   .channel-rows-list {

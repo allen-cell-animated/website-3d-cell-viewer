@@ -1,7 +1,7 @@
 import React from "react";
 
-import { Card, Button, Dropdown, Icon, Menu, Tooltip } from "antd";
-import { ClickParam } from "antd/lib/menu";
+import { Card, Button, Dropdown, Tooltip, MenuProps } from "antd";
+import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
@@ -43,31 +43,32 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
   const { viewerChannelSettings, showControls, hasImage } = props;
 
-  // TODO key is a number, but ClickParam assumes keys will always be strings
+  // TODO key is a number, but MenuInfo assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
-  const makeTurnOnPresetFn = ({ key }: ClickParam): void =>
+  const makeTurnOnPresetFn = ({ key }: MenuInfo): void =>
     props.onApplyColorPresets(PRESET_COLOR_MAP[key as unknown as number].colors);
 
   const renderColorPresetsDropdown = (): React.ReactNode => {
-    const dropDownMenuItems = (
-      <Menu onClick={makeTurnOnPresetFn}>
-        {PRESET_COLOR_MAP.map((preset, index) => (
-          <Menu.Item key={index}>{preset.name}</Menu.Item>
-        ))}
-      </Menu>
-    );
+    const dropDownMenuProps: MenuProps = {
+      items: PRESET_COLOR_MAP.map((preset, index) => {
+        return { key: index, label: preset.name };
+      }),
+      onClick: makeTurnOnPresetFn,
+    };
     return (
-      <Dropdown trigger={["click"]} overlay={dropDownMenuItems}>
+      <Dropdown trigger={["click"]} menu={dropDownMenuProps}>
         <Button>
-          Apply palette
-          <Icon type="down" />
+          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
+            Apply palette
+            <ViewerIcon type="dropdownArrow" style={{ fontSize: "14px" }} />
+          </div>
         </Button>
       </Dropdown>
     );
   };
 
   const renderTab = (thisTab: ControlTab, icon: React.ReactNode): React.ReactNode => (
-    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { visible: false })}>
+    <Tooltip title={ControlTabNames[thisTab]} placement="right" {...(!props.collapsed && { open: false })}>
       <Button
         className={tab === thisTab ? "ant-btn-icon-only btn-tabactive" : "ant-btn-icon-only"}
         onClick={() => setTab(thisTab)}
@@ -100,6 +101,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
           bordered={false}
           className="control-panel"
           title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+          style={{ backgroundColor: "transparent", marginTop: "0" }}
         >
           {hasImage && (
             <div className="channel-rows-list">

@@ -2,8 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import "antd/dist/antd.less";
-
 // Components
 import AppWrapper from "../website/components/AppWrapper";
 import LandingPage from "../website/components/LandingPage";
@@ -41,6 +39,7 @@ const routes = [
   {
     path: "viewer",
     element: <AppWrapper />,
+    errorElement: <ErrorPage />,
   },
 ];
 
