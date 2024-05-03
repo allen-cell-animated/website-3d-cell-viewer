@@ -1,11 +1,10 @@
-import { ShareAltOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
+import ShareModal from "./ShareModal";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { AppDataProps } from "../types";
@@ -111,10 +110,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onLoad} />
-            <Button type="link" disabled={true}>
-              <ShareAltOutlined />
-              Share
-            </Button>
+            <ShareModal appProps={viewerArgs} />
           </FlexRowAlignCenter>
           {/* <HelpDropdown /> */}
         </FlexRowAlignCenter>
