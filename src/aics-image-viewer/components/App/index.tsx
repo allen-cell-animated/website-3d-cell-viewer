@@ -12,7 +12,7 @@ import {
   Volume,
   IVolumeLoader,
   PrefetchDirection,
-  VolumeFileFormat
+  VolumeFileFormat,
 } from "@aics/volume-viewer";
 
 import {
@@ -203,6 +203,9 @@ const App: React.FC<AppProps> = (props) => {
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
+  // Only allow auto-close once while the screen is too narrow.
+  const [hasAutoClosedControlPanel, setHasAutoClosedControlPanel] = useState(false);
+
   // Clipping panel state doesn't need to trigger renders on change, so it can go in a ref
   const clippingPanelOpenRef = useRef(true);
 
@@ -472,9 +475,9 @@ const App: React.FC<AppProps> = (props) => {
       options.fileType = VolumeFileFormat.DATA;
       options.rawArrayOptions = { data: rawData, metadata: rawDims };
     }
-  
+
     loader.current = await loadContext.createLoader(path, {
-      ...options
+      ...options,
     });
 
     const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
@@ -558,14 +561,19 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     const onResize = (): void => {
       if (window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH) {
-        setControlPanelClosed(true);
+        if (!hasAutoClosedControlPanel) {
+          setControlPanelClosed(true);
+          setHasAutoClosedControlPanel(true);
+        }
+      } else {
+        setHasAutoClosedControlPanel(false);
       }
     };
     const onResizeDebounced = debounce(onResize, 500);
 
     window.addEventListener("resize", onResizeDebounced);
     return () => window.removeEventListener("resize", onResizeDebounced);
-  }, []);
+  }, [hasAutoClosedControlPanel]);
 
   // one-time init after view3d exists and before we start loading images
   useEffect(() => {
