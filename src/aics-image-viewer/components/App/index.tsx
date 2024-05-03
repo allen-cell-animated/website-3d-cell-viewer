@@ -74,6 +74,9 @@ const { Sider, Content } = Layout;
 
 const INIT_COLORS = PRESET_COLORS_0;
 
+const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
+  typeof val === "object" && val !== null && !Array.isArray(val);
+
 function colorHexToArray(hex: string): ColorArray | null {
   // hex is a xxxxxx string. split it into array of rgb ints
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -259,10 +262,20 @@ const App: React.FC<AppProps> = (props) => {
   const changeViewerSetting = useCallback<ViewerSettingUpdater>(
     (key, value) => {
       const changeHandler = viewerSettingsChangeHandlers[key];
+      const viewerSettings = getViewerSettings();
+
       if (changeHandler) {
-        setViewerSettings(changeHandler(getViewerSettings(), value));
+        // This setting has a custom change handler. Let it handle creating a new state object.
+        setViewerSettings(changeHandler(viewerSettings, value));
       } else {
-        setViewerSettings({ ...getViewerSettings(), [key]: value });
+        const setting = viewerSettings[key];
+        if (isObject(setting) && isObject(value)) {
+          // This setting is an object, and we may be updating it with a partial object.
+          setViewerSettings({ ...viewerSettings, [key]: { ...setting, ...value } });
+        } else {
+          // This setting is regular. Update it the regular way.
+          setViewerSettings({ ...viewerSettings, [key]: value });
+        }
       }
     },
     [viewerSettings, image]
@@ -476,9 +489,7 @@ const App: React.FC<AppProps> = (props) => {
       options.rawArrayOptions = { data: rawData, metadata: rawDims };
     }
 
-    loader.current = await loadContext.createLoader(path, {
-      ...options,
-    });
+    loader.current = await loadContext.createLoader(path, { ...options });
 
     const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
       // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
@@ -583,7 +594,7 @@ const App: React.FC<AppProps> = (props) => {
   // Hook to trigger image load: on mount, when image source props/state change (`cellId`, `imageType`, `rawData`, etc)
   useEffect(() => {
     openImage();
-  }, [props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
+  }, [props.imageUrl, props.cellId, viewerSettings.imageType, props.rawDims, props.rawData]);
 
   useEffect(
     () => props.onControlPanelToggle && props.onControlPanelToggle(controlPanelClosed),
