@@ -1,5 +1,6 @@
-import { Icon } from "antd";
+import { RightOutlined } from "@ant-design/icons";
 import React from "react";
+
 import { MetadataEntry, MetadataRecord } from "../../shared/types";
 import "./styles.css";
 
@@ -43,7 +44,7 @@ const MetadataCategory: React.FC<CollapsibleCategoryProps> = ({ metadata, title 
       <tr className={"metadata-row-collapse-title" + collapsedClass} onClick={() => setCollapsed(!collapsed)}>
         <td colSpan={2}>
           <span className="metadata-collapse-caret">
-            <Icon type="right" style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
+            <RightOutlined style={{ transform: `rotate(${collapsed ? 0 : 90}deg)` }} />
           </span>
           {title}
         </td>

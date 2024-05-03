@@ -1,7 +1,6 @@
 import React from "react";
 import { View3d } from "@aics/volume-viewer";
-
-import { Icon } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
@@ -59,7 +58,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     const showSpinner = this.props.loadingImage && !this.props.playingAxis;
     const spinner = showSpinner ? (
       <div style={STYLES.noImage}>
-        <Icon type="loading" theme="outlined" style={{ fontSize: 60, zIndex: 1000 }} />
+        <LoadingOutlined style={{ fontSize: 60, zIndex: 1000 }} />
       </div>
     ) : null;
 

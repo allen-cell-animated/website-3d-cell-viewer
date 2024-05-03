@@ -155,10 +155,10 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
           onWheel={this.wheelHandler}
           onScroll={this.checkScrollBtnVisible}
         >
-          <span className="viewer-toolbar-left" ref={this.leftRef} />
-          <span className="viewer-toolbar-center" ref={this.centerRef}>
+          <div className="viewer-toolbar-left" ref={this.leftRef} />
+          <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
-              <span className="viewer-toolbar-group">
+              <div className="viewer-toolbar-group">
                 {showControls.viewModeRadioButtons && (
                   <ViewModeRadioButtons
                     mode={props.viewMode}
@@ -183,11 +183,11 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                     </Button>
                   </Tooltip>
                 )}
-              </span>
+              </div>
             )}
 
             {showControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
-              <span className="viewer-toolbar-group">
+              <div className="viewer-toolbar-group">
                 <Radio.Group
                   value={props.imageType}
                   onChange={({ target }) => changeViewerSetting("imageType", target.value)}
@@ -195,13 +195,13 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                   <Radio.Button value={ImageType.segmentedCell}>Single cell</Radio.Button>
                   <Radio.Button value={ImageType.fullField}>Full field</Radio.Button>
                 </Radio.Group>
-              </span>
+              </div>
             )}
 
-            <span className="viewer-toolbar-group">
+            <div className="viewer-toolbar-group">
               <Select
                 className="select-render-setting"
-                dropdownClassName="viewer-toolbar-dropdown"
+                popupClassName="viewer-toolbar-dropdown"
                 value={props.renderMode}
                 onChange={(value) => changeViewerSetting("renderMode", value)}
               >
@@ -217,10 +217,10 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                   Max project
                 </Select.Option>
               </Select>
-            </span>
+            </div>
 
             {renderGroup4 && (
-              <span className="viewer-toolbar-group">
+              <div className="viewer-toolbar-group">
                 {showControls.showAxesButton && (
                   <Tooltip placement="bottom" title={axesToggleTitle}>
                     <Button className={this.classForToggleBtn(showAxes)} onClick={this.toggleAxis}>
@@ -235,11 +235,11 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                     </Button>
                   </Tooltip>
                 )}
-              </span>
+              </div>
             )}
-          </span>
+          </div>
 
-          <span className="viewer-toolbar-right viewer-toolbar-group" ref={this.rightRef}>
+          <div className="viewer-toolbar-right viewer-toolbar-group" ref={this.rightRef}>
             <Tooltip placement="bottom" title="Download">
               <DownloadButton
                 cellDownloadHref={props.cellDownloadHref}
@@ -252,7 +252,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                 <ViewerIcon type="camera" />
               </Button>
             </Tooltip>
-          </span>
+          </div>
         </div>
         <div
           className="viewer-toolbar-scroll-right"

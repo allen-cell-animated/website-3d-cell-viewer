@@ -13,6 +13,19 @@ const AICS_LOGO_RESIZE_THRESHOLD_PX = 610;
  */
 export const HEADER_HEIGHT_PX = 61;
 
+const HeaderTitleLink = styled(Link)`
+  &&,
+  && h1 {
+    color: var(--color-header-title);
+    font-size: 20px;
+    margin: 0;
+
+    &:hover {
+      color: var(--color-header-hover-title);
+    }
+  }
+`;
+
 const AicsLogoLink = styled.a`
   position: relative;
   width: 140px;
@@ -67,9 +80,9 @@ function HeaderLogo(): ReactElement {
         </div>
       </AicsLogoLink>
       <VerticalDivider />
-      <Link to="/" aria-label="Go to home page" style={{ color: "var(--color-header-text)" }}>
-        <h1 style={{ fontSize: "20px", color: "var(--color-header-text)", margin: 0 }}>3D Volume Viewer</h1>
-      </Link>
+      <HeaderTitleLink to="/" aria-label="Go to home page">
+        <h1>3D Volume Viewer</h1>
+      </HeaderTitleLink>
     </FlexRowAlignCenter>
   );
 }

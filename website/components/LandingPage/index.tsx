@@ -38,8 +38,9 @@ const BannerTextContainer = styled(FlexColumn)`
     margin-top: 0;
   }
 
-  & > p {
-    font-size: var(--font-size-label);
+  && > p {
+    font-size: 16px;
+    margin: 0;
   }
 `;
 
@@ -66,6 +67,10 @@ const ContentContainer = styled(FlexColumn)`
   margin: auto;
   padding: 0 20px;
   gap: 20px;
+
+  h2 {
+    color: var(--color-text-header);
+  }
 `;
 
 const FeatureHighlightsContainer = styled.li`
@@ -86,6 +91,10 @@ const FeatureHighlightsItem = styled(FlexColumn)`
 
   & > h3 {
     font-weight: 600;
+    margin: 0;
+  }
+
+  & > p {
     margin: 0;
   }
 `;
@@ -173,10 +182,10 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   height: 22px;
   flex-wrap: wrap;
 
-  & > p {
+  && > p {
     margin-bottom: 0;
     color: var(--color-statusflag-text);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     white-space: nowrap;
   }
