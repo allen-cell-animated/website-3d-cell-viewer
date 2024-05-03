@@ -39,6 +39,7 @@ const theme = {
       header: palette.ltGrey,
       section: palette.white,
       body: palette.ltGrey,
+      error: palette.brightRed,
       selectionBg: palette.medPurple,
       selectionText: palette.white,
     },
@@ -110,6 +111,11 @@ const theme = {
     tooltip: {
       bg: palette.black,
     },
+    modal: {
+      maskBg: "#000000cc",
+      bg: palette.veryDarkGrey,
+      border: palette.medDarkGrey,
+    },
   },
   fonts: {
     family: "'Open Sans', Arial, sans-serif",
@@ -130,6 +136,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
       --color-text-body: ${$theme.colors.text.body};
+      --color-text-error: ${$theme.colors.text.error};
 
       --color-text-selection-bg: ${$theme.colors.text.selectionBg};
       --color-text-selection-text: ${$theme.colors.text.selectionText};
@@ -326,8 +333,11 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimaryHover: theme.colors.theme.primaryLt,
           colorLink: theme.colors.text.link,
           colorBgBase: theme.colors.controlPanel.bg,
+          colorBgContainer: "transparent",
           colorSplit: theme.colors.layout.split,
           colorPrimaryTextHover: theme.colors.text.selectionText,
+          fontWeightStrong: 400,
+          colorBgElevated: palette.darkGrey,
         },
         components: {
           Button: {
@@ -359,6 +369,13 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,
+          },
+          Modal: {
+            colorBgMask: theme.colors.modal.maskBg,
+            contentBg: theme.colors.modal.bg,
+            headerBg: theme.colors.modal.bg,
+            footerBg: theme.colors.modal.bg,
+            titleFontSize: 19,
           },
         },
       }}

@@ -1,13 +1,15 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
-import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
-import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
-import { getArgsFromParams } from "../utils/url_utils";
-import { AppDataProps } from "../types";
-import Header, { HEADER_HEIGHT_PX } from "./Header";
-import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { ShareAltOutlined } from "@ant-design/icons";
 import { Button } from "antd";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+
 import { FlexRowAlignCenter } from "./LandingPage/utils";
+import LoadModal from "./LoadModal";
+import Header, { HEADER_HEIGHT_PX } from "./Header";
+import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
+import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { AppDataProps } from "../types";
+import { getArgsFromParams } from "../utils/url_utils";
 
 type AppWrapperProps = {
   viewerSettings?: Partial<GlobalViewerSettings>;
@@ -33,6 +35,17 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
+  viewerChannelSettings: {
+    groups: [
+      {
+        name: "Channels",
+        channels: [
+          { match: [0, 1, 2], enabled: true },
+          { match: "(.+)", enabled: false },
+        ],
+      },
+    ],
+  },
 };
 
 const defaultAppWrapperProps = {
@@ -47,6 +60,7 @@ const defaultAppWrapperProps = {
 export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const props = { ...defaultAppWrapperProps, ...inputProps };
   const location = useLocation();
+  const navigation = useNavigate();
 
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
   const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
@@ -56,20 +70,47 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
     getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-      setViewerArgs({ ...DEFAULT_APP_PROPS, ...locationArgs, ...urlArgs });
+      setViewerArgs({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
       setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
     });
   }, []);
+
+  // TODO: Disabled for now, since it only makes sense for Zarr/OME-tiff URLs. Checking for
+  // validity may be more complex. (Also, we could add a callback to `ImageViewerApp` for successful
+  // loading and only save the URL then.)
+  //
+  // Save recent zarr data urls
+  // useEffect(() => {
+  //   if (typeof viewerArgs.imageUrl === "string" && isValidZarrUrl(viewerArgs.imageUrl)) {
+  //     // TODO: Handle case where there are multiple URLs?
+  //     // TODO: Save ALL AppProps instead of only the URL? Ignore/handle rawData?
+  //     addRecentDataUrl({ url: viewerArgs.imageUrl as string, label: viewerArgs.imageUrl as string });
+  //   }
+  // }, [viewerArgs]);
+
+  const onLoad = (appProps: AppDataProps): void => {
+    // Force a page reload. This prevents a bug where a desync in the number of channels
+    // in the viewer can cause a crash. The root cause is React immediately forcing a
+    // re-render every time `setState` is called in an async function.
+    const url = appProps.imageUrl;
+    if (Array.isArray(url)) {
+      navigation(`/viewer?url=${encodeURIComponent(url.join(","))}`, {
+        state: appProps,
+      });
+    } else {
+      navigation(`/viewer?url=${encodeURIComponent(url)}`, {
+        state: appProps,
+      });
+    }
+    navigation(0);
+  };
 
   return (
     <div>
       <Header>
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
-            <Button type="link" disabled={true}>
-              <UploadOutlined />
-              Load
-            </Button>
+            <LoadModal onLoad={onLoad} />
             <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share

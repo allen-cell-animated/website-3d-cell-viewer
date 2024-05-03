@@ -1,6 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { UploadOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { ShareAltOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -9,6 +9,7 @@ import styled from "styled-components";
 
 import { landingPageContent } from "./content";
 import Header from "../Header";
+import LoadModal from "../LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { getArgsFromParams } from "../../utils/url_utils";
@@ -214,9 +215,16 @@ export default function LandingPage(): ReactElement {
   const onClickLoad = (appProps: AppDataProps): void => {
     // TODO: Make URL search params from the appProps and append it to the viewer URL so the URL can be shared directly.
     // Alternatively, AppWrapper should manage syncing URL and viewer props.
-    navigation("viewer", {
-      state: appProps,
-    });
+    const url = appProps.imageUrl;
+    if (Array.isArray(url)) {
+      navigation(`/viewer?url=${encodeURIComponent(url.join(","))}`, {
+        state: appProps,
+      });
+    } else {
+      navigation(`/viewer?url=${encodeURIComponent(url)}`, {
+        state: appProps,
+      });
+    }
   };
 
   // TODO: Should the load buttons be link elements or buttons?
@@ -307,10 +315,7 @@ export default function LandingPage(): ReactElement {
       <Header>
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
-            <Button type="link" disabled={true}>
-              <UploadOutlined />
-              Load
-            </Button>
+            <LoadModal onLoad={onClickLoad} />
             <Button type="link" disabled={true}>
               <ShareAltOutlined />
               Share

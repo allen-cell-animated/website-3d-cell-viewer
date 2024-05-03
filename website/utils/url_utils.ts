@@ -183,3 +183,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
 
   return { args, viewerSettings };
 }
+
+export function isValidUrl(url: string): boolean {
+  return url.startsWith("http");
+}
