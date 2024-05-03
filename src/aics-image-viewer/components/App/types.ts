@@ -86,10 +86,33 @@ export interface AppProps {
 }
 
 export type ViewerSettingsKey = keyof GlobalViewerSettings;
+
+/**
+ * If a value in `GlobalViewerSettings` is an object, we want to allow updates with a partial object. Otherwise,
+ * components that update some but not all of the object's properties have to know the object's current value in order
+ * to clone it with only the key they care about updated, which exposes us to stale closure issues.
+ */
+type PartialIfObject<T> = T extends Record<string, unknown> ? Partial<T> : T;
+
+/**
+ * A type which lets us provide a map of optional check functions for certain settings updates, to avoid entering
+ * illegal states. E.g., whenever `renderMode` is changed to pathtrace, make sure `autorotate` is set to false.
+ */
 export type ViewerSettingChangeHandlers = {
-  [K in ViewerSettingsKey]?: (settings: GlobalViewerSettings, value: GlobalViewerSettings[K]) => GlobalViewerSettings;
+  [K in ViewerSettingsKey]?: (
+    settings: GlobalViewerSettings,
+    value: PartialIfObject<GlobalViewerSettings[K]>
+  ) => GlobalViewerSettings;
 };
-export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(key: K, value: GlobalViewerSettings[K]) => void;
+
+/**
+ * The type of the global settings updater provided by `App` and passed down to most UI components. Looks kind of like
+ * redux's `dispatch` if you squint. `key` names the setting to update; `value` is the new (potentially partial) value.
+ */
+export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(
+  key: K,
+  value: PartialIfObject<GlobalViewerSettings[K]>
+) => void;
 
 export interface AppState {
   view3d: View3d;
