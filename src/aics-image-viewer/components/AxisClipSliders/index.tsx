@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Tooltip } from "antd";
+import { CaretRightOutlined, PauseOutlined } from "@ant-design/icons";
 
 import NumericInput from "../shared/NumericInput";
 import SmarterSlider from "../shared/SmarterSlider";
@@ -145,7 +146,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
         <Button
           className="slider-play-button"
           onClick={() => props.onTogglePlayback(!props.playing)}
-          icon={props.playing ? "pause" : "caret-right"}
+          icon={props.playing ? <PauseOutlined /> : <CaretRightOutlined />}
           aria-label={(props.playing ? "Pause " : "Play ") + props.label}
         />
       </Tooltip>

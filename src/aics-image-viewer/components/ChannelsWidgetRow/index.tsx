@@ -1,12 +1,12 @@
 import React from "react";
-import { Button, Icon, List, Col, Row, Checkbox, Slider } from "antd";
+import { Button, List, Col, Row, Checkbox } from "antd";
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
+import { SettingFilled, SettingOutlined } from "@ant-design/icons";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-
 import colorPalette from "../../shared/colorPalette";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
-
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
@@ -18,7 +18,7 @@ import {
 } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
-import { CheckboxChangeEvent } from "antd/lib/checkbox";
+import Nouislider from "nouislider-react";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -85,18 +85,21 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     defaultValue: number,
     onChange: (newValue: any) => void
   ): React.ReactNode => (
-    <Row>
+    <Row style={{ marginBottom: "10px" }}>
       <Col span={10}>
         <label style={STYLES.controlName}>{name}</label>
       </Col>
-      <Col span={12}>
-        <Slider // TODO: this is the only remaining place we're using antd's slider rather than Nouislider. Replace it?
-          disabled={!this.props.isosurfaceChecked}
-          min={0}
-          max={maxValue}
-          defaultValue={defaultValue}
-          style={STYLES.slider}
+      <Col span={12} style={{ marginTop: "10px" }}>
+        <Nouislider
+          range={{ min: [0], max: [maxValue] }}
+          start={defaultValue}
+          connect={true}
+          tooltips={true}
+          format={{ to: (value: number) => Math.round(value).toString(), from: (value: string) => parseInt(value, 10) }}
+          behaviour="drag"
           onChange={onChange}
+          step={1}
+          disabled={!this.props.isosurfaceChecked}
         />
       </Col>
     </Row>
@@ -136,12 +139,11 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
     <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
       surface
     </Checkbox>,
-    <Icon
-      key="openSettingsButton"
-      type="setting"
-      theme={this.state.controlsOpen ? "filled" : "outlined"}
-      onClick={this.toggleControlsOpen}
-    />,
+    this.state.controlsOpen ? (
+      <SettingFilled onClick={this.toggleControlsOpen} />
+    ) : (
+      <SettingOutlined onClick={this.toggleControlsOpen} />
+    ),
   ];
 
   createTFEditor(): React.ReactNode {
@@ -172,10 +174,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
 
   renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
-      <h4 className="ant-list-item-meta-title">Surface settings:</h4>
-      {this.createSliderRow("isovalue", 255, ISOVALUE_DEFAULT, this.onIsovalueChange)}
+      <h4 className="ant-list-item-meta-title" style={{ marginTop: "20px", marginBottom: "5px" }}>
+        Surface settings:
+      </h4>
+      {this.createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, this.onIsovalueChange)}
       {this.createSliderRow(
-        "opacity",
+        "Opacity",
         ISOSURFACE_OPACITY_SLIDER_MAX,
         ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
         this.onOpacityChange
@@ -200,16 +204,12 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
       {this.props.volumeChecked && (
-        <Row type="flex" justify="space-between" className="volume-settings">
+        <Row justify="space-between" className="volume-settings">
           <h4 className="ant-list-item-meta-title">Volume settings:</h4>
           {this.createTFEditor()}
         </Row>
       )}
-      {this.props.isosurfaceChecked && (
-        <Row type="flex" justify="space-between">
-          {this.renderSurfaceControls()}
-        </Row>
-      )}
+      {this.props.isosurfaceChecked && <Row justify="space-between">{this.renderSurfaceControls()}</Row>}
     </div>
   );
 

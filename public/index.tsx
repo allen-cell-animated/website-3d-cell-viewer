@@ -3,8 +3,6 @@ import ReactDOM from "react-dom";
 import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 import { Router } from "@remix-run/router";
 
-import "antd/dist/antd.less";
-
 // Components
 import AppWrapper from "../website/components/AppWrapper";
 import LandingPage from "../website/components/LandingPage";
@@ -27,6 +25,7 @@ const routes = [
   {
     path: "viewer",
     element: <AppWrapper />,
+    errorElement: <ErrorPage />,
   },
 ];
 

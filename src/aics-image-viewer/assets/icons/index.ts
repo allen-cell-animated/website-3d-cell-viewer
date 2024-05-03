@@ -4,6 +4,7 @@ import camera from "./camera.svg";
 import channels from "./channels.svg";
 import closePanel from "./closePanel.svg";
 import download from "./download.svg";
+import dropdownArrow from "./dropdownArrow.svg";
 import metadata from "./metadata.svg";
 import preferences from "./preferences.svg";
 import resetView from "./resetView.svg";
@@ -16,6 +17,7 @@ export default {
   channels,
   closePanel,
   download,
+  dropdownArrow,
   metadata,
   preferences,
   resetView,
