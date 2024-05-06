@@ -5,4 +5,5 @@ environment.txt
 .DS_Store
 es/
 type-declarations/
+coverage/
 .vscode/

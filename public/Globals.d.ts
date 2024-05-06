@@ -1,3 +1,4 @@
 declare const WEBSITE3DCELLVIEWER_VERSION: string;
 declare const VOLUMEVIEWER_VERSION: string;
 declare const WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT: string;
+declare const WEBSITE3DCELLVIEWER_BASENAME: string;

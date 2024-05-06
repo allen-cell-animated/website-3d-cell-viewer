@@ -8,10 +8,10 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env) => {
   return {
-    entry: ["./public/index.tsx"],
+    entry: {index: "./public/index.tsx", reroute: "./public/gh-reroute/index.tsx"},
     output: {
       path: path.resolve(__dirname, "imageviewer"),
-      filename: "image-viewer-ui.bundle.js",
+      filename: "[name].bundle.js",
     },
     resolve: {
       extensions: [".js", ".jsx", ".ts", ".tsx"],
@@ -19,13 +19,24 @@ module.exports = (env) => {
     plugins: [
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
+        filename: "index.html",
         template: "./public/index.html",
+        chunks: ["index"],
+      }),
+      new CleanWebpackPlugin(),
+      new HtmlWebpackPlugin({
+        filename: "404.html",
+        template: "./public/gh-reroute/404.html",
+        chunks: ["reroute"],
+        inject: "head",
+        scriptLoading: "blocking",
       }),
       new MiniCssExtractPlugin(),
       new webpack.DefinePlugin({
         WEBSITE3DCELLVIEWER_VERSION: JSON.stringify(require("./package.json").version),
         VOLUMEVIEWER_VERSION: JSON.stringify(require("./node_modules/@aics/volume-viewer/package.json").version),
         WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT: JSON.stringify(env.env),
+        WEBSITE3DCELLVIEWER_BASENAME: JSON.stringify(env.basename),
       }),
       new CopyWebpackPlugin({ patterns: ["./.nojekyll"] }),
       new webpack.ProvidePlugin({
