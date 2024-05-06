@@ -1,6 +1,6 @@
 import React from "react";
-import { map, find } from "lodash";
-import { Card, Collapse, List } from "antd";
+import { find } from "lodash";
+import { Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
 import {
@@ -15,8 +15,6 @@ import SharedCheckBox from "../shared/SharedCheckBox";
 import ChannelsWidgetRow from "../ChannelsWidgetRow";
 
 import "./styles.css";
-
-const { Panel } = Collapse;
 
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
@@ -74,7 +72,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           onChecked={showVolumes}
           onUnchecked={hideVolumes}
         >
-          All volumes
+          All vol
         </SharedCheckBox>
         <SharedCheckBox
           allOptions={channelArray}
@@ -82,66 +80,69 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           onChecked={showSurfaces}
           onUnchecked={hideSurfaces}
         >
-          All surfaces
+          All surf
         </SharedCheckBox>
       </div>
     );
   };
 
-  const getRows = (): React.ReactNode => {
+  const firstKey = Object.keys(props.channelGroupedByType)[0];
+  const getRows = (): CollapseProps["items"] => {
     const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
     if (channelDataChannels === undefined) {
       return;
     }
 
-    const firstKey = Object.keys(channelGroupedByType)[0];
-    return map(channelGroupedByType, (channelArray: number[], key: string) => {
-      if (!channelArray.length || (filterFunc && !filterFunc(key))) {
-        return null;
-      }
-      return (
-        <Card bordered={false} title={key} extra={renderVisibilityControls(channelArray)} type="inner" key={key}>
-          <Collapse bordered={false} defaultActiveKey={key === firstKey ? key : ""}>
-            <Panel key={key} header={null}>
-              <List
-                itemLayout="horizontal"
-                dataSource={channelArray}
-                renderItem={(actualIndex: number) => {
-                  const thisChannelSettings = find(
-                    channelSettings,
-                    (channel: ChannelState) => channel.name === channelDataChannels[actualIndex].name
-                  );
+    return Object.entries(channelGroupedByType)
+      .filter(([key, channelArray]) => channelArray.length > 0 && (!filterFunc || filterFunc(key)))
+      .map(([key, channelArray]) => {
+        const children = (
+          <List
+            itemLayout="horizontal"
+            dataSource={channelArray}
+            renderItem={(actualIndex: number) => {
+              const thisChannelSettings = find(
+                channelSettings,
+                (channel: ChannelState) => channel.name === channelDataChannels[actualIndex].name
+              );
 
-                  return thisChannelSettings ? (
-                    <ChannelsWidgetRow
-                      key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
-                      index={actualIndex}
-                      channelDataForChannel={channelDataChannels[actualIndex]}
-                      name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
-                      volumeChecked={thisChannelSettings.volumeEnabled}
-                      isosurfaceChecked={thisChannelSettings.isosurfaceEnabled}
-                      channelControlPoints={thisChannelSettings.controlPoints}
-                      colorizeEnabled={thisChannelSettings.colorizeEnabled}
-                      colorizeAlpha={thisChannelSettings.colorizeAlpha}
-                      color={thisChannelSettings.color}
-                      changeChannelSetting={props.changeChannelSetting}
-                      onColorChangeComplete={props.onColorChangeComplete}
-                      saveIsosurface={props.saveIsosurface}
-                    />
-                  ) : (
-                    <div></div>
-                  );
-                }}
-              />
-            </Panel>
-          </Collapse>
-        </Card>
-      );
-    });
+              return thisChannelSettings ? (
+                <ChannelsWidgetRow
+                  key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
+                  index={actualIndex}
+                  channelDataForChannel={channelDataChannels[actualIndex]}
+                  name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
+                  volumeChecked={thisChannelSettings.volumeEnabled}
+                  isosurfaceChecked={thisChannelSettings.isosurfaceEnabled}
+                  channelControlPoints={thisChannelSettings.controlPoints}
+                  colorizeEnabled={thisChannelSettings.colorizeEnabled}
+                  colorizeAlpha={thisChannelSettings.colorizeAlpha}
+                  color={thisChannelSettings.color}
+                  changeChannelSetting={props.changeChannelSetting}
+                  onColorChangeComplete={props.onColorChangeComplete}
+                  saveIsosurface={props.saveIsosurface}
+                />
+              ) : (
+                <div></div>
+              );
+            }}
+          />
+        );
+
+        return {
+          key,
+          label: key,
+          children,
+          extra: renderVisibilityControls(channelArray),
+        };
+      });
   };
-
-  return <div>{getRows()}</div>;
+  return (
+    <div>
+      <Collapse bordered={false} defaultActiveKey={firstKey} items={getRows()} />
+    </div>
+  );
 };
 
 export default ChannelsWidget;
