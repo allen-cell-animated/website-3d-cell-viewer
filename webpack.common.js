@@ -2,7 +2,6 @@ const path = require("path");
 const webpack = require("webpack");
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const HtmlInlineScriptPlugin = require('html-inline-script-webpack-plugin');
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -29,8 +28,9 @@ module.exports = (env) => {
         filename: "404.html",
         template: "./public/gh-reroute/404.html",
         chunks: ["reroute"],
+        inject: true,
+        scriptLoading: "blocking",
       }),
-      new HtmlInlineScriptPlugin({htmlMatchPattern: [/404.html$/]}),
       new MiniCssExtractPlugin(),
       new webpack.DefinePlugin({
         WEBSITE3DCELLVIEWER_VERSION: JSON.stringify(require("./package.json").version),
