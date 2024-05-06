@@ -22,7 +22,7 @@ import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shar
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 
-export interface ChannelsWidgetProps {
+export type ChannelsWidgetProps = {
   channelDataChannels: Channel[] | undefined;
   channelSettings: ChannelState[];
   channelGroupedByType: ChannelGrouping;
@@ -36,24 +36,21 @@ export interface ChannelsWidgetProps {
 
   filterFunc?: (key: string) => boolean;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
-}
+};
 
-export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
-  constructor(props: ChannelsWidgetProps) {
-    super(props);
-  }
-
-  createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
-    this.props.changeMultipleChannelSettings(channelArray, key, value);
+// export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
+const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
+  const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
+    props.changeMultipleChannelSettings(channelArray, key, value);
   };
 
-  showVolumes = this.createCheckboxHandler("volumeEnabled", true);
-  showSurfaces = this.createCheckboxHandler("isosurfaceEnabled", true);
-  hideVolumes = this.createCheckboxHandler("volumeEnabled", false);
-  hideSurfaces = this.createCheckboxHandler("isosurfaceEnabled", false);
+  const showVolumes = createCheckboxHandler("volumeEnabled", true);
+  const showSurfaces = createCheckboxHandler("isosurfaceEnabled", true);
+  const hideVolumes = createCheckboxHandler("volumeEnabled", false);
+  const hideSurfaces = createCheckboxHandler("isosurfaceEnabled", false);
 
-  renderVisibilityControls(channelArray: number[]): React.ReactNode {
-    const { channelSettings, channelDataChannels } = this.props;
+  const renderVisibilityControls = (channelArray: number[]): React.ReactNode => {
+    const { channelSettings, channelDataChannels } = props;
 
     let volChecked: number[] = [];
     let isoChecked: number[] = [];
@@ -74,26 +71,25 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={volChecked}
-          onChecked={this.showVolumes}
-          onUnchecked={this.hideVolumes}
+          onChecked={showVolumes}
+          onUnchecked={hideVolumes}
         >
           All volumes
         </SharedCheckBox>
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={isoChecked}
-          onChecked={this.showSurfaces}
-          onUnchecked={this.hideSurfaces}
+          onChecked={showSurfaces}
+          onUnchecked={hideSurfaces}
         >
           All surfaces
         </SharedCheckBox>
       </div>
     );
-  }
+  };
 
-  getRows(): React.ReactNode {
-    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } =
-      this.props;
+  const getRows = (): React.ReactNode => {
+    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
     if (channelDataChannels === undefined) {
       return;
@@ -105,7 +101,7 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
         return null;
       }
       return (
-        <Card bordered={false} title={key} extra={this.renderVisibilityControls(channelArray)} type="inner" key={key}>
+        <Card bordered={false} title={key} extra={renderVisibilityControls(channelArray)} type="inner" key={key}>
           <Collapse bordered={false} defaultActiveKey={key === firstKey ? key : ""}>
             <Panel key={key} header={null}>
               <List
@@ -129,9 +125,9 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
                       colorizeEnabled={thisChannelSettings.colorizeEnabled}
                       colorizeAlpha={thisChannelSettings.colorizeAlpha}
                       color={thisChannelSettings.color}
-                      changeChannelSetting={this.props.changeChannelSetting}
-                      onColorChangeComplete={this.props.onColorChangeComplete}
-                      saveIsosurface={this.props.saveIsosurface}
+                      changeChannelSetting={props.changeChannelSetting}
+                      onColorChangeComplete={props.onColorChangeComplete}
+                      saveIsosurface={props.saveIsosurface}
                     />
                   ) : (
                     <div></div>
@@ -143,12 +139,12 @@ export default class ChannelsWidget extends React.Component<ChannelsWidgetProps,
         </Card>
       );
     });
-  }
+  };
 
-  render(): React.ReactNode {
-    return <div>{this.getRows()}</div>;
-  }
-}
+  return <div>{getRows()}</div>;
+};
+
+export default ChannelsWidget;
 
 const STYLES: Styles = {
   header: {
