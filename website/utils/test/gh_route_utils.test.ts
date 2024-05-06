@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { convertQueryStringPathToUrl, convertUrlToQueryStringPath } from "../route_utils";
+import { convertQueryStringPathToUrl, convertUrlToQueryStringPath } from "../gh_route_utils";
 
 describe("Route utils", () => {
   describe("convertUrlToQueryStringPath", () => {

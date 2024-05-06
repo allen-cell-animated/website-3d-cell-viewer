@@ -1,4 +1,4 @@
-import { convertUrlToQueryStringPath } from "../../website/utils/route_utils";
+import { convertUrlToQueryStringPath } from "../../website/utils/gh_route_utils";
 
 // This script is used in the 404.html page to redirect the browser to the correct URL.
 // Convert the current URL to a query string path and redirect the browser.

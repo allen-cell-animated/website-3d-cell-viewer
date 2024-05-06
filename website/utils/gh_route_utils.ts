@@ -2,7 +2,9 @@ const ESCAPED_AMPERSAND = "~and~";
 
 /**
  * Converts the path component of a URL into a query string. Used to redirect the browser
- * for single-page apps when the server is not configured to serve the app for all paths.
+ * for single-page apps when the server is not configured to serve the app for all paths,
+ * e.g. GitHub pages.
+ *
  * Adapted from https://github.com/rafgraph/spa-github-pages.
  *
  * The original path will be converted into a query string, and the original query string will be
@@ -43,7 +45,7 @@ export function isQueryStringPath(url: URL): boolean {
 
 /**
  * Converts a query string back into a complete URL. Used in combination with `convertUrlToQueryStringPath()`.
- * to redirect the browser for single-page apps when the server cannot be configured.
+ * to redirect the browser for single-page apps when the server cannot be configured, e.g. GitHub pages.
  * Adapted from https://github.com/rafgraph/spa-github-pages.
  *
  * @param url - The URL with a path converted to a query string, and the original query string escaped.
