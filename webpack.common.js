@@ -28,7 +28,7 @@ module.exports = (env) => {
         filename: "404.html",
         template: "./public/gh-reroute/404.html",
         chunks: ["reroute"],
-        inject: true,
+        inject: "head",
         scriptLoading: "blocking",
       }),
       new MiniCssExtractPlugin(),
