@@ -22,28 +22,9 @@
 
 .control-panel {
   .channel-rows-list {
-    .ant-card-head {
-      margin-bottom: 0;
-      border-bottom: 1px solid $border-color;
-
-      .ant-checkbox.ant-checkbox-checked {
-        .ant-checkbox-inner {
-          background-color: $dimgray;
-        }
-      }
-    }
-
     /* hover states of checkboxes */
-    .ant-checkbox:hover .ant-checkbox-inner {
-      border-color: white;
-    }
-
     .ant-checkbox-wrapper:hover .ant-checkbox-inner {
       border-color: white;
-    }
-
-    .ant-card-inner {
-      border-bottom: 1px solid $border-color;
     }
 
     .ant-collapse-content-box {
@@ -52,49 +33,6 @@
 
     .ant-collapse-content-active {
       border-bottom: 1px solid $border-color;
-    }
-
-    .ant-card-body {
-      padding: 0;
-    }
-
-    .ant-collapse-item {
-      .ant-collapse-header {
-        height: 0;
-      }
-    }
-
-    .ant-card-extra {
-      label {
-        font-size: 12px;
-      }
-    }
-
-    .ant-card-head-title {
-      margin-left: 20px;
-    }
-
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
-      transform: translateY(-300%);
-      position: absolute;
-      left: 16px;
-    }
-
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header[aria-expanded="true"] .anticon-right svg {
-      transform: rotate(90deg);
-    }
-
-    .ant-collapse > .ant-collapse-item > .ant-collapse-header > .ant-collapse-arrow svg {
-      transform: rotate(0);
-      transition: transform 0.24s;
-    }
-
-    .ant-collapse > .ant-collapse-item {
-      border-bottom: none;
-    }
-
-    .ant-collapse-content {
-      overflow: visible;
     }
 
     .global-volume-controls {

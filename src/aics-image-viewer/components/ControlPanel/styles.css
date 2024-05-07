@@ -92,21 +92,13 @@
     padding: 0;
   }
 
-  .ant-collapse-item .ant-collapse-header {
-    padding: 0 !important;
-  }
-
   .channel-rows-list {
     border-top: 1px solid $border-color;
   }
 
   .ant-collapse {
+    /* TODO use variables in here! */
     background-color: #313131;
-  }
-
-  .ant-collapse-content {
-    border-radius: 0 !important;
-    border-bottom-color: #6e6e6e;
   }
 
   .channel-rows-list > .ant-card:last-child .ant-collapse-content {
