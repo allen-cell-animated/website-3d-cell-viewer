@@ -142,7 +142,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-selection-text: ${$theme.colors.text.selectionText};
 
       --color-header-title: ${$theme.colors.header.title};
-      --color-header-hover-title: ${theme.colors.header.hoverTitle};
+      --color-header-hover-title: ${$theme.colors.header.hoverTitle};
       --color-header-bg: ${$theme.colors.header.bg};
       --color-header-border: ${$theme.colors.header.border};
 

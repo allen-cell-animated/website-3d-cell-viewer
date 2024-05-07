@@ -7,7 +7,7 @@
 
   .control-panel-tab-col,
   .control-panel-col {
-    border-right: 1px solid $border-color;
+    border-right: 1px solid var(--color-controlpanel-border);
   }
 
   .control-panel-tab-col {
@@ -17,20 +17,20 @@
       margin-top: 12px;
       background-color: transparent;
       border: 1px solid transparent;
-      color: #bfbfbf;
+      color: var(--color-button-default-text);
 
       &:not([disabled]) {
         &.btn-tabactive {
-          color: white;
-          background-color: #4b4b4b;
-          border-color: #6e6e6e;
+          color: var(--color-button-icon-activated-text);
+          background-color: var(--color-button-icon-activated-bg);
+          border-color: var(--color-controlpanel-border);
         }
 
         &:hover,
         &:focus-visible {
-          color: white;
-          background-color: $highlight-purple;
-          border-color: #6e6e6e;
+          color: var(--color-button-icon-activated-text);
+          background-color: var(--color-button-primary-hover-bg);
+          border-color: var(--color-controlpanel-border);
         }
       }
 
@@ -53,7 +53,7 @@
     .tab-divider {
       width: 70%;
       margin: 12px 15% 0;
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid var(--color-controlpanel-border);
     }
   }
 
@@ -82,17 +82,16 @@
     margin: 0 16px 16px;
   }
 
-  .ant-card-body {
-    padding: 0;
-  }
-
   .channel-rows-list {
-    border-top: 1px solid $border-color;
+    border-top: 1px solid var(--color-controlpanel-border);
   }
 
   .ant-collapse {
-    /* TODO use variables in here! */
-    background-color: #313131;
+    background-color: var(--color-controlpanel-bg);
+  }
+
+  .ant-collapse-header {
+    background-color: var(--color-controlpanel-section-bg);
   }
 
   /*slider settings*/

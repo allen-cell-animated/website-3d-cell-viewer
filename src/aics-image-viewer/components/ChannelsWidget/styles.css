@@ -20,7 +20,7 @@
   }
 }
 
-.control-panel {
+.control-panel-col {
   .channel-rows-list {
     /* hover states of checkboxes */
     .ant-checkbox-wrapper:hover .ant-checkbox-inner {
@@ -32,7 +32,7 @@
     }
 
     .ant-collapse-content-active {
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid var(--color-controlpanel-border);
     }
 
     .global-volume-controls {
