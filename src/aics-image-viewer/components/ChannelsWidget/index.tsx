@@ -10,7 +10,6 @@ import {
   MultipleChannelSettingsUpdater,
 } from "../../shared/utils/viewerChannelSettings";
 
-import colorPalette from "../../shared/colorPalette";
 import SharedCheckBox from "../shared/SharedCheckBox";
 import ChannelsWidgetRow from "../ChannelsWidgetRow";
 
@@ -18,7 +17,7 @@ import "./styles.css";
 
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
-import { IsosurfaceFormat, Styles } from "../../shared/types";
+import { IsosurfaceFormat } from "../../shared/types";
 
 export type ChannelsWidgetProps = {
   channelDataChannels: Channel[] | undefined;
@@ -65,14 +64,14 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     });
 
     return (
-      <div style={STYLES.buttonRow}>
+      <div>
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={volChecked}
           onChecked={showVolumes}
           onUnchecked={hideVolumes}
         >
-          All vol
+          All Vol
         </SharedCheckBox>
         <SharedCheckBox
           allOptions={channelArray}
@@ -80,7 +79,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           onChecked={showSurfaces}
           onUnchecked={hideSurfaces}
         >
-          All surf
+          All Surf
         </SharedCheckBox>
       </div>
     );
@@ -138,34 +137,8 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
   };
-  return (
-    <div>
-      <Collapse bordered={false} defaultActiveKey={firstKey} items={getRows()} />
-    </div>
-  );
+
+  return <Collapse bordered={false} defaultActiveKey={firstKey} items={getRows()} />;
 };
 
 export default ChannelsWidget;
-
-const STYLES: Styles = {
-  header: {
-    textAlign: "left",
-    fontWeight: 900,
-  },
-  buttonRow: {
-    display: "flex",
-    flexFlow: "row wrap",
-    justifyContent: "flex-end",
-  },
-  button: {
-    display: "inline-block",
-    minWidth: "initial",
-    height: "initial",
-    color: colorPalette.primary1Color,
-    padding: 0,
-    width: 24,
-  },
-  presetRow: {
-    width: "100%",
-  },
-};
