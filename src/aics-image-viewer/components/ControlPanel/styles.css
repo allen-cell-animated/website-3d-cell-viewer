@@ -67,6 +67,7 @@
 
     .control-panel-title {
       margin: 16px;
+      max-height: 24px; /* align bottom border with divider to the left */
       font-size: 1.4em;
     }
   }
@@ -99,10 +100,6 @@
   .ant-collapse {
     /* TODO use variables in here! */
     background-color: #313131;
-  }
-
-  .channel-rows-list > .ant-card:last-child .ant-collapse-content {
-    border-bottom: none;
   }
 
   /*slider settings*/
