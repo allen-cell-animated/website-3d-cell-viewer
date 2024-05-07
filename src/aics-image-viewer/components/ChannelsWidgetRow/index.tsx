@@ -134,10 +134,10 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
 
   renderActions = (): React.ReactNode[] => [
     <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
-      volume
+      vol
     </Checkbox>,
     <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
-      surface
+      surf
     </Checkbox>,
     this.state.controlsOpen ? (
       <SettingFilled onClick={this.toggleControlsOpen} />
