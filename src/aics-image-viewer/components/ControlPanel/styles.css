@@ -73,20 +73,13 @@
   }
 }
 
-.control-panel {
+.control-panel-col {
   flex: 1 auto;
   order: 1;
   max-width: 540px;
 
-  .ant-card-head {
-    border-radius: 0;
-    border-bottom: none;
-    padding: 0 16px;
-  }
-
-  & > .ant-card-head {
-    min-height: 0;
-    margin-bottom: 16px;
+  .color-presets-dropdown {
+    margin: 0 16px 16px;
   }
 
   .ant-card-body {

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Card, Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
+import { Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
@@ -56,14 +56,16 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
       onClick: makeTurnOnPresetFn,
     };
     return (
-      <Dropdown trigger={["click"]} menu={dropDownMenuProps}>
-        <Button>
-          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
-            Apply palette
-            <ViewerIcon type="dropdownArrow" style={{ fontSize: "14px" }} />
-          </div>
-        </Button>
-      </Dropdown>
+      <div className="color-presets-dropdown">
+        <Dropdown trigger={["click"]} menu={dropDownMenuProps}>
+          <Button>
+            <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
+              Apply palette
+              <ViewerIcon type="dropdownArrow" style={{ fontSize: "14px" }} />
+            </div>
+          </Button>
+        </Dropdown>
+      </div>
     );
   };
 
@@ -139,33 +141,27 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
-        <Card
-          bordered={false}
-          className="control-panel"
-          title={showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
-          style={{ backgroundColor: "transparent", marginTop: "0" }}
-        >
-          {hasImage && (
-            <div className="channel-rows-list">
-              {tab === ControlTab.Channels && (
-                <ChannelsWidget
-                  channelSettings={props.channelSettings}
-                  channelDataChannels={props.channelDataChannels}
-                  channelGroupedByType={props.channelGroupedByType}
-                  changeMultipleChannelSettings={props.changeMultipleChannelSettings}
-                  saveIsosurface={props.saveIsosurface}
-                  changeChannelSetting={props.changeChannelSetting}
-                  onColorChangeComplete={props.onColorChangeComplete}
-                  onApplyColorPresets={props.onApplyColorPresets}
-                  filterFunc={props.filterFunc}
-                  viewerChannelSettings={viewerChannelSettings}
-                />
-              )}
-              {tab === ControlTab.Advanced && renderAdvancedSettings()}
-              {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
-            </div>
-          )}
-        </Card>
+        {showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+        {hasImage && (
+          <div className="channel-rows-list">
+            {tab === ControlTab.Channels && (
+              <ChannelsWidget
+                channelSettings={props.channelSettings}
+                channelDataChannels={props.channelDataChannels}
+                channelGroupedByType={props.channelGroupedByType}
+                changeMultipleChannelSettings={props.changeMultipleChannelSettings}
+                saveIsosurface={props.saveIsosurface}
+                changeChannelSetting={props.changeChannelSetting}
+                onColorChangeComplete={props.onColorChangeComplete}
+                onApplyColorPresets={props.onApplyColorPresets}
+                filterFunc={props.filterFunc}
+                viewerChannelSettings={viewerChannelSettings}
+              />
+            )}
+            {tab === ControlTab.Advanced && renderAdvancedSettings()}
+            {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
+          </div>
+        )}
       </div>
     </div>
   );
