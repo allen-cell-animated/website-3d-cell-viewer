@@ -11,40 +11,11 @@
   }
 }
 
-/* Fix vertical alignment of title*/
+/* Fix vertical alignment of title */
 .ant-list-item-meta {
   align-items: center !important;
 
   & .ant-list-item-meta-title {
     margin: 0 !important;
-  }
-}
-
-.control-panel-col {
-  .channel-rows-list {
-    /* hover states of checkboxes */
-    .ant-checkbox-wrapper:hover .ant-checkbox-inner {
-      border-color: white;
-    }
-
-    .ant-collapse-content-box {
-      padding: 0 16px 0 16px;
-    }
-
-    .ant-collapse-content-active {
-      border-bottom: 1px solid var(--color-controlpanel-border);
-    }
-
-    .global-volume-controls {
-      .ant-collapse-content-box {
-        padding: 16px 24px;
-      }
-    }
-
-    .color-customizer {
-      .ant-collapse-content-box {
-        padding: 0 16px;
-      }
-    }
   }
 }

@@ -23,20 +23,16 @@
         &.btn-tabactive {
           color: var(--color-button-icon-activated-text);
           background-color: var(--color-button-icon-activated-bg);
-          border-color: var(--color-controlpanel-border);
+          border-color: var(--color-button-icon-activated-outline);
         }
 
         &:hover,
         &:focus-visible {
           color: var(--color-button-icon-activated-text);
+          /* TODO update from changes on Peyton's help menu PR */
           background-color: var(--color-button-primary-hover-bg);
-          border-color: var(--color-controlpanel-border);
+          border-color: var(--color-button-icon-activated-outline);
         }
-      }
-
-      &[ant-click-animating-without-extra-node="true"]::after {
-        box-shadow: none !important;
-        background-color: #222;
       }
     }
 
@@ -84,6 +80,31 @@
 
   .channel-rows-list {
     border-top: 1px solid var(--color-controlpanel-border);
+
+    /* hover states of checkboxes */
+    .ant-checkbox-wrapper:hover .ant-checkbox-inner {
+      border-color: white;
+    }
+
+    .ant-collapse-content-box {
+      padding: 0 16px 0 16px;
+    }
+
+    .ant-collapse {
+      border-bottom: 1px solid var(--color-controlpanel-border);
+    }
+
+    .global-volume-controls {
+      .ant-collapse-content-box {
+        padding: 16px 24px;
+      }
+    }
+
+    .color-customizer {
+      .ant-collapse-content-box {
+        padding: 0 16px;
+      }
+    }
   }
 
   .ant-collapse {
