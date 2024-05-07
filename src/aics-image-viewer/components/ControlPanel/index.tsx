@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Card, Button, Dropdown, Tooltip, MenuProps } from "antd";
+import { Card, Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
@@ -79,6 +79,48 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     </Tooltip>
   );
 
+  // TODO factor into own component?
+  const renderAdvancedSettings = (): React.ReactNode => {
+    const items: CollapseProps["items"] = [
+      {
+        key: 0,
+        label: "Rendering adjustments",
+        children: (
+          <GlobalVolumeControls
+            imageName={props.imageName}
+            pixelSize={props.pixelSize}
+            changeViewerSetting={props.changeViewerSetting}
+            maskAlpha={props.maskAlpha}
+            brightness={props.brightness}
+            density={props.density}
+            levels={props.levels}
+            interpolationEnabled={props.interpolationEnabled}
+            showControls={showControls}
+          />
+        ),
+      },
+    ];
+    const showCustomize = showControls.backgroundColorPicker || showControls.boundingBoxColorPicker;
+
+    if (showCustomize) {
+      items.push({
+        key: 1,
+        label: "Customize",
+        children: (
+          <CustomizeWidget
+            backgroundColor={props.backgroundColor}
+            boundingBoxColor={props.boundingBoxColor}
+            changeViewerSetting={props.changeViewerSetting}
+            showBoundingBox={props.showBoundingBox}
+            showControls={props.showControls}
+          />
+        ),
+      });
+    }
+
+    return <Collapse bordered={false} defaultActiveKey={showCustomize ? [0, 1] : 0} items={items} />;
+  };
+
   return (
     <div className="control-panel-col-container">
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
@@ -119,30 +161,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
                   viewerChannelSettings={viewerChannelSettings}
                 />
               )}
-              {tab === ControlTab.Advanced && (
-                <>
-                  <GlobalVolumeControls
-                    imageName={props.imageName}
-                    pixelSize={props.pixelSize}
-                    changeViewerSetting={props.changeViewerSetting}
-                    maskAlpha={props.maskAlpha}
-                    brightness={props.brightness}
-                    density={props.density}
-                    levels={props.levels}
-                    interpolationEnabled={props.interpolationEnabled}
-                    showControls={showControls}
-                  />
-                  {(showControls.backgroundColorPicker || showControls.boundingBoxColorPicker) && (
-                    <CustomizeWidget
-                      backgroundColor={props.backgroundColor}
-                      boundingBoxColor={props.boundingBoxColor}
-                      changeViewerSetting={props.changeViewerSetting}
-                      showBoundingBox={props.showBoundingBox}
-                      showControls={props.showControls}
-                    />
-                  )}
-                </>
-              )}
+              {tab === ControlTab.Advanced && renderAdvancedSettings()}
               {tab === ControlTab.Metadata && <MetadataViewer metadata={props.getMetadata()} />}
             </div>
           )}
