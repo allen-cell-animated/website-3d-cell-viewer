@@ -344,6 +344,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimaryTextHover: theme.colors.text.selectionText,
           fontWeightStrong: 400,
           colorBgElevated: palette.darkGrey,
+          borderRadius: 4,
         },
         components: {
           Button: {
