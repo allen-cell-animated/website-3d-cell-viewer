@@ -62,7 +62,6 @@ const STYLES: Styles = {
   colorPickerRow: {
     padding: "14px 0",
     display: "flex",
-    alignItems: "flex-start",
     borderBottom: "1px solid #6e6e6e",
   },
   colorPicker: {
