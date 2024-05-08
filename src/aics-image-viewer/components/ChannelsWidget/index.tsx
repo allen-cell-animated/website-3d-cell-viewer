@@ -37,6 +37,8 @@ export type ChannelsWidgetProps = {
 
 // export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
+  const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
+
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
     props.changeMultipleChannelSettings(channelArray, key, value);
   };
@@ -47,8 +49,6 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   const hideSurfaces = createCheckboxHandler("isosurfaceEnabled", false);
 
   const renderVisibilityControls = (channelArray: number[]): React.ReactNode => {
-    const { channelSettings, channelDataChannels } = props;
-
     let volChecked: number[] = [];
     let isoChecked: number[] = [];
     channelArray.forEach((channelIndex: number) => {
@@ -85,49 +85,38 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     );
   };
 
-  const firstKey = Object.keys(props.channelGroupedByType)[0];
-  const getRows = (): CollapseProps["items"] => {
-    const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
+  const renderChannelRow = (channelIndex: number): React.ReactNode => {
+    const thisChannelSettings = find(
+      channelSettings,
+      (channel: ChannelState) => channel.name === channelDataChannels?.[channelIndex].name
+    );
 
-    if (channelDataChannels === undefined) {
-      return;
-    }
+    return thisChannelSettings ? (
+      <ChannelsWidgetRow
+        key={`${channelIndex}_${thisChannelSettings.name}_${channelIndex}`}
+        index={channelIndex}
+        channelDataForChannel={channelDataChannels![channelIndex]}
+        name={getDisplayName(thisChannelSettings.name, channelIndex, viewerChannelSettings)}
+        volumeChecked={thisChannelSettings.volumeEnabled}
+        isosurfaceChecked={thisChannelSettings.isosurfaceEnabled}
+        channelControlPoints={thisChannelSettings.controlPoints}
+        colorizeEnabled={thisChannelSettings.colorizeEnabled}
+        colorizeAlpha={thisChannelSettings.colorizeAlpha}
+        color={thisChannelSettings.color}
+        changeChannelSetting={props.changeChannelSetting}
+        onColorChangeComplete={props.onColorChangeComplete}
+        saveIsosurface={props.saveIsosurface}
+      />
+    ) : null;
+  };
 
-    return Object.entries(channelGroupedByType)
+  const firstKey = Object.keys(channelGroupedByType)[0];
+  const rows: CollapseProps["items"] =
+    channelDataChannels &&
+    Object.entries(channelGroupedByType)
       .filter(([key, channelArray]) => channelArray.length > 0 && (!filterFunc || filterFunc(key)))
       .map(([key, channelArray]) => {
-        const children = (
-          <List
-            itemLayout="horizontal"
-            dataSource={channelArray}
-            renderItem={(actualIndex: number) => {
-              const thisChannelSettings = find(
-                channelSettings,
-                (channel: ChannelState) => channel.name === channelDataChannels[actualIndex].name
-              );
-
-              return thisChannelSettings ? (
-                <ChannelsWidgetRow
-                  key={`${actualIndex}_${thisChannelSettings.name}_${actualIndex}`}
-                  index={actualIndex}
-                  channelDataForChannel={channelDataChannels[actualIndex]}
-                  name={getDisplayName(thisChannelSettings.name, actualIndex, viewerChannelSettings)}
-                  volumeChecked={thisChannelSettings.volumeEnabled}
-                  isosurfaceChecked={thisChannelSettings.isosurfaceEnabled}
-                  channelControlPoints={thisChannelSettings.controlPoints}
-                  colorizeEnabled={thisChannelSettings.colorizeEnabled}
-                  colorizeAlpha={thisChannelSettings.colorizeAlpha}
-                  color={thisChannelSettings.color}
-                  changeChannelSetting={props.changeChannelSetting}
-                  onColorChangeComplete={props.onColorChangeComplete}
-                  saveIsosurface={props.saveIsosurface}
-                />
-              ) : (
-                <div></div>
-              );
-            }}
-          />
-        );
+        const children = <List itemLayout="horizontal" dataSource={channelArray} renderItem={renderChannelRow} />;
 
         return {
           key,
@@ -136,9 +125,8 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           extra: renderVisibilityControls(channelArray),
         };
       });
-  };
 
-  return <Collapse bordered={false} defaultActiveKey={firstKey} items={getRows()} />;
+  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} />;
 };
 
 export default ChannelsWidget;
