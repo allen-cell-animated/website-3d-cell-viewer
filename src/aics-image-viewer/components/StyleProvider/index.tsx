@@ -84,6 +84,7 @@ const theme = {
     controlPanel: {
       bg: palette.darkGrey,
       border: palette.medGrey,
+      sectionText: palette.white,
       text: palette.ltGrey,
       sectionBg: palette.medDarkGrey,
       drawerBg: palette.veryDarkGrey,
@@ -172,6 +173,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
+      --color-controlpanel-section-text: ${$theme.colors.controlPanel.sectionText};
       --color-controlpanel-text: ${$theme.colors.controlPanel.text};
       --color-controlpanel-section-bg: ${$theme.colors.controlPanel.sectionBg};
       --color-controlpanel-drawer-bg: ${$theme.colors.controlPanel.drawerBg};
