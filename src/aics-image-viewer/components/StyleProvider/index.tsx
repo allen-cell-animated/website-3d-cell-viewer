@@ -1,6 +1,5 @@
 import { theme as AntTheme, ConfigProvider } from "antd";
 import React, { PropsWithChildren, ReactElement } from "react";
-
 import styled, { css } from "styled-components";
 
 const palette = {
@@ -118,7 +117,9 @@ const theme = {
     },
   },
   fonts: {
-    family: "'Open Sans', Arial, sans-serif",
+    // Include web + local font files
+    family:
+      "'Open Sans', 'Open Sans Local', Arial, sans-serif, apple-system, BlinkMacSystemFont, 'Segoe UI','PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'",
   },
 };
 
@@ -208,21 +209,18 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   }
 
   h3 {
-    font-family: var(--font-family);
     color: var(--color-text-header);
     font-size: 16px;
     font-weight: 600;
   }
 
   h4 {
-    font-family: var(--font-family);
     color: var(--color-text-header);
     font-size: 14px;
     font-weight: 400;
   }
 
   p {
-    font-family: var(--font-family);
     color: var(--color-text-body);
     font-size: 14px;
     font-weight: 400;
