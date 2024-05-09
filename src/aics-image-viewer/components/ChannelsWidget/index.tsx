@@ -126,7 +126,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="header" />;
+  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
 };
 
 export default ChannelsWidget;
