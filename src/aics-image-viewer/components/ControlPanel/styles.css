@@ -81,9 +81,37 @@
   .channel-rows-list {
     border-top: 1px solid var(--color-controlpanel-border);
 
+    /* Fix vertical alignment of title */
+    .ant-list-item-meta {
+      align-items: center;
+
+      .ant-list-item-meta-title {
+        margin: 0;
+      }
+    }
+
     /* hover states of checkboxes */
     .ant-checkbox-wrapper:hover .ant-checkbox-inner {
       border-color: white;
+    }
+
+    /* checkbox spacing */
+    .channel-visibility-controls {
+      flex: 0.6;
+      display: flex;
+
+      .ant-checkbox-wrapper {
+        flex: 4;
+      }
+
+      .anticon {
+        flex: 1;
+        color: var(--color-controlpanel-text);
+      }
+
+      &.controls-open .anticon {
+        color: var(--color-button-icon-activated-text);
+      }
     }
 
     .ant-collapse-content-box {

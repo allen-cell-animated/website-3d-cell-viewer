@@ -1,8 +1,8 @@
 import React from "react";
 import { Button, List, Col, Row, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { SettingFilled, SettingOutlined } from "@ant-design/icons";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
+import Nouislider from "nouislider-react";
 
 import TfEditor from "../TfEditor";
 import colorPalette from "../../shared/colorPalette";
@@ -10,6 +10,7 @@ import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
+
 import {
   ColorObject,
   colorObjectToArray,
@@ -18,7 +19,7 @@ import {
 } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
-import Nouislider from "nouislider-react";
+import ViewerIcon from "../shared/ViewerIcon";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -131,28 +132,14 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   );
 
   renderActions = (): React.ReactNode => (
-    <div style={{ display: "flex", flex: 0.6 }} className="channel-row-extra">
-      <Checkbox
-        checked={this.props.volumeChecked}
-        onChange={this.volumeCheckHandler}
-        key="volCheckbox"
-        style={{ flex: 4 }}
-      >
+    <div className={"channel-visibility-controls" + (this.state.controlsOpen ? " controls-open" : "")}>
+      <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
         Vol
       </Checkbox>
-      <Checkbox
-        checked={this.props.isosurfaceChecked}
-        onChange={this.isosurfaceCheckHandler}
-        key="isoCheckbox"
-        style={{ flex: 4 }}
-      >
+      <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
         Surf
       </Checkbox>{" "}
-      {this.state.controlsOpen ? (
-        <SettingFilled onClick={this.toggleControlsOpen} style={{ flex: 1 }} />
-      ) : (
-        <SettingOutlined onClick={this.toggleControlsOpen} style={{ flex: 1 }} />
-      )}
+      <ViewerIcon type="preferences" onClick={this.toggleControlsOpen} style={{ fontSize: "16px" }} />
     </div>
   );
 
