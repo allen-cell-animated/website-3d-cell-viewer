@@ -46,6 +46,7 @@ interface ToolbarState {
 const RESIZE_DEBOUNCE_DELAY = 50;
 
 export default class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
+  containerRef: React.RefObject<HTMLDivElement>;
   barRef: React.RefObject<HTMLDivElement>;
   leftRef: React.RefObject<HTMLDivElement>;
   rightRef: React.RefObject<HTMLDivElement>;
@@ -58,6 +59,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
       scrollBtnLeft: false,
       scrollBtnRight: false,
     };
+    this.containerRef = React.createRef();
     this.barRef = React.createRef();
     this.leftRef = React.createRef();
     this.rightRef = React.createRef();
@@ -140,8 +142,10 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
     const boundingBoxToggleTitle = showBoundingBox ? "Hide bounding box" : "Show bounding box";
     const turntableToggleTitle = autorotate ? "Turn off turntable" : "Turn on turntable";
 
+    const getPopupContainer = this.containerRef.current ? () => this.containerRef.current! : undefined;
+
     return (
-      <div className={`viewer-toolbar-container${scrollMode ? " viewer-toolbar-scroll" : ""}`}>
+      <div className={`viewer-toolbar-container${scrollMode ? " viewer-toolbar-scroll" : ""}`} ref={this.containerRef}>
         <div
           className="viewer-toolbar-scroll-left"
           style={{ display: scrollBtnLeft ? "flex" : "none" }}
@@ -204,6 +208,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
                 popupClassName="viewer-toolbar-dropdown"
                 value={props.renderMode}
                 onChange={(value) => changeViewerSetting("renderMode", value)}
+                getPopupContainer={getPopupContainer}
               >
                 <Select.Option value={RenderMode.volumetric} key={RenderMode.volumetric}>
                   Volumetric
