@@ -80,6 +80,7 @@ const theme = {
     checkbox: {
       bg: palette.medGrey,
       hoverBg: palette.medLtGreyAlt,
+      text: palette.white,
     },
     controlPanel: {
       bg: palette.darkGrey,
@@ -362,6 +363,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Collapse: {
             borderRadiusLG: 0,
+            colorTextHeading: theme.colors.text.section,
           },
           Layout: {
             siderBg: theme.colors.controlPanel.bg,
@@ -371,6 +373,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
+            colorText: theme.colors.checkbox.text,
           },
           Radio: {},
           Select: {
