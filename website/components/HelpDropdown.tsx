@@ -65,7 +65,7 @@ export default function HelpDropdown(): ReactElement {
   }, [containerRef.current]);
   const getContainer = container !== null ? () => container! : undefined;
 
-  const closeVersionModal = () => setShowVersionModal(false);
+  const closeVersionModal = (): void => setShowVersionModal(false);
 
   return (
     <div ref={containerRef}>
