@@ -68,12 +68,18 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    // TODO: Handle promise failure
-    getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-      console.log("URL viewer settings", urlViewerSettings);
-      setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...urlArgs, ...locationArgs });
-      setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings, ...urlViewerSettings });
-    });
+    getArgsFromParams(searchParams).then(
+      ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
+        console.log("URL viewer settings", urlViewerSettings);
+        setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...urlArgs, ...locationArgs });
+        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings, ...urlViewerSettings });
+      },
+      (reason) => {
+        console.warn("Failed to parse URL parameters: ", reason);
+        setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...locationArgs });
+        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings });
+      }
+    );
   }, []);
 
   // TODO: Disabled for now, since it only makes sense for Zarr/OME-tiff URLs. Checking for
