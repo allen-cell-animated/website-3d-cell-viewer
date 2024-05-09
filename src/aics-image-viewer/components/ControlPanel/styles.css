@@ -105,10 +105,11 @@
 
   .ant-collapse {
     background-color: var(--color-controlpanel-bg);
-  }
 
-  .ant-collapse-header {
-    background-color: var(--color-controlpanel-section-bg);
+    .ant-collapse-header {
+      padding: 13px 16px;
+      background-color: var(--color-controlpanel-section-bg);
+    }
   }
 
   /*slider settings*/
