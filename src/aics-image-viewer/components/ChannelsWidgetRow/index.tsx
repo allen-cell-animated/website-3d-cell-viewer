@@ -120,31 +120,41 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   }
 
   createColorPicker = (): React.ReactNode => (
-    <div style={STYLES.colorPicker}>
-      <ColorPicker
-        color={colorArrayToObject(this.props.color)}
-        onColorChange={this.onColorChange}
-        onColorChangeComplete={this.props.onColorChangeComplete}
-        disableAlpha={true}
-        idx={this.props.index}
-        width={18}
-      />
-    </div>
+    <ColorPicker
+      color={colorArrayToObject(this.props.color)}
+      onColorChange={this.onColorChange}
+      onColorChangeComplete={this.props.onColorChangeComplete}
+      disableAlpha={true}
+      idx={this.props.index}
+      width={18}
+    />
   );
 
-  renderActions = (): React.ReactNode[] => [
-    <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
-      vol
-    </Checkbox>,
-    <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
-      surf
-    </Checkbox>,
-    this.state.controlsOpen ? (
-      <SettingFilled onClick={this.toggleControlsOpen} />
-    ) : (
-      <SettingOutlined onClick={this.toggleControlsOpen} />
-    ),
-  ];
+  renderActions = (): React.ReactNode => (
+    <div style={{ display: "flex", flex: 0.6 }} className="channel-row-extra">
+      <Checkbox
+        checked={this.props.volumeChecked}
+        onChange={this.volumeCheckHandler}
+        key="volCheckbox"
+        style={{ flex: 4 }}
+      >
+        Vol
+      </Checkbox>
+      <Checkbox
+        checked={this.props.isosurfaceChecked}
+        onChange={this.isosurfaceCheckHandler}
+        key="isoCheckbox"
+        style={{ flex: 4 }}
+      >
+        Surf
+      </Checkbox>{" "}
+      {this.state.controlsOpen ? (
+        <SettingFilled onClick={this.toggleControlsOpen} style={{ flex: 1 }} />
+      ) : (
+        <SettingOutlined onClick={this.toggleControlsOpen} style={{ flex: 1 }} />
+      )}
+    </div>
+  );
 
   createTFEditor(): React.ReactNode {
     const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha, index } = this.props;
@@ -216,7 +226,7 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
   render(): React.ReactNode {
     const rowClass = this.state.controlsOpen ? "row-card" : "row-card controls-closed";
     return (
-      <List.Item key={this.props.index} className={rowClass} actions={this.renderActions()}>
+      <List.Item key={this.props.index} className={rowClass} extra={this.renderActions()}>
         <List.Item.Meta
           title={<span style={STYLES.channelName}>{this.props.name}</span>}
           avatar={this.createColorPicker()}
@@ -245,10 +255,6 @@ const STYLES: Styles = {
   raisedButton: {
     marginLeft: "2px",
     marginRight: "2px",
-  },
-  colorPicker: {
-    margin: "auto",
-    marginRight: 16,
   },
   slider: {
     marginBottom: "4px",
