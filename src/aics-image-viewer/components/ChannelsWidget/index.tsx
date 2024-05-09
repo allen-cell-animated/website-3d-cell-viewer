@@ -13,8 +13,6 @@ import {
 import SharedCheckBox from "../shared/SharedCheckBox";
 import ChannelsWidgetRow from "../ChannelsWidgetRow";
 
-import "./styles.css";
-
 import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
 import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
 import { IsosurfaceFormat } from "../../shared/types";
