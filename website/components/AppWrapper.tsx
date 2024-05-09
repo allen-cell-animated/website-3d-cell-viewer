@@ -70,7 +70,6 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     const locationArgs = location.state as AppDataProps;
     getArgsFromParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-        console.log("URL viewer settings", urlViewerSettings);
         setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...urlArgs, ...locationArgs });
         setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings, ...urlViewerSettings });
       },
