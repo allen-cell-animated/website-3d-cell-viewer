@@ -41,6 +41,9 @@ const ControlTabNames = {
 export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = React.useState(ControlTab.Channels);
 
+  const controlPanelContainerRef = React.useRef<HTMLDivElement>(null);
+  const getDropdownContainer = controlPanelContainerRef.current ? () => controlPanelContainerRef.current! : undefined;
+
   const { viewerChannelSettings, showControls, hasImage } = props;
 
   // TODO key is a number, but MenuInfo assumes keys will always be strings
@@ -56,7 +59,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
       onClick: makeTurnOnPresetFn,
     };
     return (
-      <Dropdown trigger={["click"]} menu={dropDownMenuProps}>
+      <Dropdown trigger={["click"]} menu={dropDownMenuProps} getPopupContainer={getDropdownContainer}>
         <Button>
           <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "4px" }}>
             Apply palette
@@ -80,7 +83,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
   );
 
   return (
-    <div className="control-panel-col-container">
+    <div className="control-panel-col-container" ref={controlPanelContainerRef}>
       <div className="control-panel-tab-col" style={{ flex: "0 0 50px" }}>
         <Button
           className={"ant-btn-icon-only btn-collapse" + (props.collapsed ? " btn-collapse-collapsed" : "")}
