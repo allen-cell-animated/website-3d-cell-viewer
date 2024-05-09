@@ -78,20 +78,8 @@ export default function HelpDropdown(): ReactElement {
         open={showVersionModal}
         title="Version info"
         getContainer={getContainer}
-        onCancel={() => {
-          setShowVersionModal(false);
-        }}
-        footer={() => {
-          return (
-            <Button
-              onClick={() => {
-                setShowVersionModal(false);
-              }}
-            >
-              Close
-            </Button>
-          );
-        }}
+        onCancel={() => setShowVersionModal(false)}
+        footer={<Button onClick={() => setShowVersionModal(false)}>Close</Button>}
       >
         <FlexColumnAlignCenter $gap={0}>
           <p style={{ margin: 0 }}>Website v{WEBSITE3DCELLVIEWER_VERSION}</p>
