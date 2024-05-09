@@ -1,16 +1,3 @@
-@import "../../assets/styles/variables";
-
-.cell-viewer-app {
-  .ant-layout-sider-zero-width-trigger {
-    z-index: 2000;
-    background-color: $header-gray;
-  }
-
-  .ant-layout-sider-zero-width-trigger:hover {
-    background-color: $light-gray;
-  }
-}
-
 /* Fix vertical alignment of title */
 .ant-list-item-meta {
   align-items: center !important;
