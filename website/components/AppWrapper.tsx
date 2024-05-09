@@ -61,16 +61,18 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings>>(props.viewerSettings);
-  const [viewerArgs, setViewerArgs] = useState<AppDataProps>(props.viewerArgs);
+  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings> | null>(null);
+  const [viewerArgs, setViewerArgs] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
+    // TODO: Handle promise failure
     getArgsFromParams(searchParams).then(({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-      setViewerArgs({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-      setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+      console.log("URL viewer settings", urlViewerSettings);
+      setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...urlArgs, ...locationArgs });
+      setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings, ...urlViewerSettings });
     });
   }, []);
 
@@ -110,17 +112,19 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onLoad} />
-            <ShareModal appProps={viewerArgs} />
+            {viewerArgs && <ShareModal appProps={viewerArgs} />}
           </FlexRowAlignCenter>
           {/* <HelpDropdown /> */}
         </FlexRowAlignCenter>
       </Header>
-      <ImageViewerApp
-        {...viewerArgs}
-        appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
-        canvasMargin="0 0 0 0"
-        viewerSettings={viewerSettings}
-      />
+      {viewerArgs && viewerSettings && (
+        <ImageViewerApp
+          {...viewerArgs}
+          appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+          canvasMargin="0 0 0 0"
+          viewerSettings={viewerSettings}
+        />
+      )}
     </div>
   );
 }
