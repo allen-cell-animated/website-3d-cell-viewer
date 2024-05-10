@@ -8,14 +8,14 @@ import {
   ChannelSettingUpdater,
   getDisplayName,
   MultipleChannelSettingsUpdater,
-} from "../../shared/utils/viewerChannelSettings";
+} from "../shared/utils/viewerChannelSettings";
 
-import SharedCheckBox from "../shared/SharedCheckBox";
-import ChannelsWidgetRow from "../ChannelsWidgetRow";
+import SharedCheckBox from "./shared/SharedCheckBox";
+import ChannelsWidgetRow from "./ChannelsWidgetRow";
 
-import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../../shared/utils/viewerChannelSettings";
-import { ColorArray, ColorObject } from "../../shared/utils/colorRepresentations";
-import { IsosurfaceFormat } from "../../shared/types";
+import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../shared/utils/viewerChannelSettings";
+import { ColorArray, ColorObject } from "../shared/utils/colorRepresentations";
+import { IsosurfaceFormat } from "../shared/types";
 
 export type ChannelsWidgetProps = {
   channelDataChannels: Channel[] | undefined;
