@@ -9,7 +9,7 @@ import "./styles.css";
 
 import { Button, Checkbox } from "antd";
 
-import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE, HISTOGRAM_NUM_BINS } from "../../shared/constants";
+import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
   ColorArray,
   colorArrayToObject,
@@ -372,7 +372,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   private redrawHistogram(): void {
     d3.select(this.svgElement.current).select("g").selectAll(".bar").remove();
     if (this.props.volumeData && this.props.volumeData.length > 0) {
-      // const bins = this.bins(this.props.volumeData);
       const { binLengths, max } = this.getBinLengths();
 
       this.binScale.domain([0.1, max]);
