@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { FlexRowAlignCenter } from "./LandingPage/utils";
 import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
+import HelpDropdown from "./HelpDropdown";
 import ShareModal from "./ShareModal";
 import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
@@ -112,7 +113,7 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
             <LoadModal onLoad={onLoad} />
             <ShareModal appProps={viewerArgs} />
           </FlexRowAlignCenter>
-          {/* <HelpDropdown /> */}
+          <HelpDropdown />
         </FlexRowAlignCenter>
       </Header>
       <ImageViewerApp

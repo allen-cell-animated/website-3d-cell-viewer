@@ -66,6 +66,11 @@ const theme = {
       },
       secondary: {
         bg: "transparent",
+        text: palette.medPurple,
+        outline: palette.medPurple,
+      },
+      tertiary: {
+        bg: "transparent",
         text: palette.ltGrey,
         outline: palette.ltGrey,
         hoverOutline: palette.ltPurple,
@@ -107,7 +112,10 @@ const theme = {
       split: palette.white,
     },
     menu: {
-      selectedBg: palette.ltPurple,
+      hoverText: palette.white,
+      hoverBg: palette.ltPurple,
+      selectedText: palette.white,
+      selectedBg: palette.medGrey,
       textPlaceholder: palette.ltPurple,
     },
     tooltip: {
@@ -134,6 +142,9 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
   ${({ $theme }) => {
     return css`
       /* Component and color variables. */
+      // TODO: Fix inconsistent use of border vs. outline
+      // TODO: Remove variables that aren't used in other CSS files. These should be set directly
+      // from the $theme object to reduce unnecessary variables.
       --color-text-link: ${$theme.colors.text.link};
       --color-text-header: ${$theme.colors.text.header};
       --color-text-section: ${$theme.colors.text.section};
@@ -157,18 +168,23 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-button-link-text: ${$theme.colors.button.link.text};
 
-      --color-button-default-bg: transparent;
-      --color-button-default-text: ${$theme.colors.button.secondary.text};
-      --color-button-default-outline: ${$theme.colors.button.secondary.outline};
-      --color-button-default-hover-outline: ${$theme.colors.button.secondary.hoverOutline};
-      --color-button-default-hover-text: ${$theme.colors.button.secondary.hoverText};
-      --color-button-default-active-outline: ${$theme.colors.button.secondary.activeOutline};
-      --color-button-default-active-text: ${$theme.colors.button.secondary.hoverText};
+      --color-button-secondary-bg: ${$theme.colors.button.secondary.bg};
+      --color-button-secondary-text: ${$theme.colors.button.secondary.text};
+      --color-button-secondary-outline: ${$theme.colors.button.secondary.outline};
 
-      --color-button-icon-disabled-text: ${$theme.colors.button.secondary.disabledText};
-      --color-button-icon-activated-text: ${$theme.colors.button.secondary.activatedText};
-      --color-button-icon-activated-bg: ${$theme.colors.button.secondary.activatedBg};
-      --color-button-icon-activated-outline: ${$theme.colors.button.secondary.activatedOutline};
+      --color-button-tertiary-bg: transparent;
+      --color-button-tertiary-text: ${$theme.colors.button.tertiary.text};
+      --color-button-tertiary-outline: ${$theme.colors.button.tertiary.outline};
+      --color-button-tertiary-hover-outline: ${$theme.colors.button.tertiary.hoverOutline};
+      --color-button-tertiary-hover-text: ${$theme.colors.button.tertiary.hoverText};
+      --color-button-tertiary-active-outline: ${$theme.colors.button.tertiary.activeOutline};
+      --color-button-tertiary-active-text: ${$theme.colors.button.tertiary.hoverText};
+
+      --color-button-icon-disabled-text: ${$theme.colors.button.tertiary.disabledText};
+      --color-button-icon-disabled-text: ${$theme.colors.button.tertiary.disabledText};
+      --color-button-icon-activated-text: ${$theme.colors.button.tertiary.activatedText};
+      --color-button-icon-activated-bg: ${$theme.colors.button.tertiary.activatedBg};
+      --color-button-icon-activated-outline: ${$theme.colors.button.tertiary.activatedOutline};
 
       --color-toolbar-button-bg: ${$theme.colors.toolbar.buttonBg};
 
@@ -187,6 +203,11 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-statusflag-text: ${$theme.colors.statusFlag.text};
 
       --color-layout-dividers: ${$theme.colors.layout.dividers};
+
+      --color-modal-border: ${$theme.colors.modal.border};
+
+      --color-menu-hover-text: ${$theme.colors.menu.hoverText};
+      --color-menu-selected-text: ${$theme.colors.menu.selectedText};
 
       --color-checkbox-bg: ${$theme.colors.checkbox.bg};
 
@@ -282,21 +303,21 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
    * purple outline on hover.
    */
   .ant-btn-default:not(.ant-btn-icon-only) {
-    background-color: var(--color-button-default-bg);
-    color: var(--color-button-default-text);
-    border-color: var(--color-button-default-outline);
+    background-color: var(--color-button-tertiary-bg);
+    color: var(--color-button-tertiary-text);
+    border-color: var(--color-button-tertiary-outline);
 
     &:hover:not(:disabled),
     &:focus-visible:not(:disabled) {
       background-color: transparent;
-      border-color: var(--color-button-default-hover-bg);
-      color: var(--color-button-default-hover-text);
+      border-color: var(--color-button-tertiary-hover-bg);
+      color: var(--color-button-tertiary-hover-text);
     }
 
     &:active:not(:disabled) {
       background-color: transparent;
-      border-color: var(--color-button-default-active-outline);
-      color: var(--color-button-default-active-text);
+      border-color: var(--color-button-tertiary-active-outline);
+      color: var(--color-button-tertiary-active-text);
     }
   }
 
@@ -320,10 +341,28 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     background-color: var(--color-checkbox-bg);
   }
 
-  // Add outlines to modals and notifications
-  & .ant-notification-notice-wrapper,
+  // Add outlines to modals and dropdowns
+  & .ant-select-dropdown,
+  & .ant-dropdown-menu,
   & .ant-modal-content {
-    border: 1px solid ${theme.colors.modal.border};
+    border: 1px solid var(--color-modal-border);
+  }
+
+  // Force active/hovered text to be white instead of grey for better contrast
+  & .ant-dropdown-menu-item-active {
+    color: var(--color-menu-hover-text);
+  }
+
+  // Remove padding in dropdown menus and make items reactangular + flush with the edge
+  & .ant-dropdown-menu,
+  & .ant-select-dropdown {
+    padding: 0;
+    overflow: hidden;
+
+    & .ant-dropdown-menu-item,
+    & .ant-select-item {
+      border-radius: 0;
+    }
   }
 `;
 
@@ -347,6 +386,9 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           colorPrimaryTextHover: theme.colors.text.selectionText,
           fontWeightStrong: 400,
           colorBgElevated: palette.darkGrey,
+          controlItemBgHover: theme.colors.menu.hoverBg,
+          controlItemBgActiveHover: theme.colors.menu.hoverBg,
+          controlItemBgActive: theme.colors.menu.selectedBg,
           borderRadius: 4,
         },
         components: {
@@ -355,7 +397,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             primaryColor: theme.colors.button.primary.text,
             defaultHoverBg: theme.colors.button.secondary.bg,
             defaultActiveBg: theme.colors.button.secondary.bg,
-            defaultActiveBorderColor: theme.colors.button.secondary.activeOutline,
+            defaultActiveBorderColor: theme.colors.button.tertiary.activeOutline,
           },
           Card: {
             borderRadiusLG: 0,
@@ -374,10 +416,6 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
             colorText: theme.colors.checkbox.text,
-          },
-          Radio: {},
-          Select: {
-            optionSelectedBg: theme.colors.menu.selectedBg,
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,
