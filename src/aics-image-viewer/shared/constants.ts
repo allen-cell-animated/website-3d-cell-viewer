@@ -19,7 +19,8 @@ export const // Control panel will automatically close if viewport is less than 
   LEVELS_SLIDER_DEFAULT: ColorArray = [35.0, 140.0, 255.0],
   INTERPOLATION_ENABLED_DEFAULT = true,
   OTHER_CHANNEL_KEY = "Other",
-  SINGLE_GROUP_CHANNEL_KEY = "Channels";
+  SINGLE_GROUP_CHANNEL_KEY = "Channels",
+  HISTOGRAM_NUM_BINS = 256;
 
 export const CACHE_MAX_SIZE = 1_000_000_000;
 export const QUEUE_MAX_SIZE = 10;
