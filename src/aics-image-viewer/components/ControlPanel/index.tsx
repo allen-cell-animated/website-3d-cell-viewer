@@ -84,7 +84,6 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     </Tooltip>
   );
 
-  // TODO factor into own component?
   const renderAdvancedSettings = (): React.ReactNode => {
     const items: CollapseProps["items"] = [
       {
