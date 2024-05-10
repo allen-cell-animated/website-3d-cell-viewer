@@ -359,6 +359,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   private getBinLengths(): { binLengths: number[]; max: number } {
     const histogram = this.props.channelData.histogram;
     const binLengths = [];
+    // TODO: Change `histogram.bins` to be readable/readonly
+    // so we don't have to copy it here!
     let max = Number.NEGATIVE_INFINITY;
     for (let i = 0; i < histogram.getNumBins(); i++) {
       const binLength = histogram.getBin(i);
@@ -385,7 +387,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       barEnter
         .append("rect")
         .attr("x", 1)
-        .attr("width", () => 1)
+        .attr("width", 1)
         .attr("height", (length) => this.height - this.binScale(length));
 
       d3.select(this.svgElement.current).select("g").selectAll(".bar").lower();
