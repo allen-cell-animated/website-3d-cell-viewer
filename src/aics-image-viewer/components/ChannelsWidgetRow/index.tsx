@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, List, Col, Row, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
@@ -41,46 +41,36 @@ interface ChannelsWidgetRowProps {
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
-export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRowProps, { controlsOpen: boolean }> {
-  constructor(props: ChannelsWidgetRowProps) {
-    super(props);
-    this.toggleControlsOpen = this.toggleControlsOpen.bind(this);
-    this.onColorChange = this.onColorChange.bind(this);
-    this.volumeCheckHandler = this.volumeCheckHandler.bind(this);
-    this.isosurfaceCheckHandler = this.isosurfaceCheckHandler.bind(this);
-    this.state = {
-      controlsOpen: false,
-    };
-  }
+const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidgetRowProps) => {
+  const { index, changeChannelSetting, isosurfaceChecked, volumeChecked, saveIsosurface } = props;
+  const [controlsOpen, setControlsOpen] = useState(false);
 
-  volumeCheckHandler({ target }: CheckboxChangeEvent): void {
-    const { index, changeChannelSetting, isosurfaceChecked } = this.props;
+  const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
     if (!target.checked && !isosurfaceChecked) {
-      this.setState({ controlsOpen: false });
+      setControlsOpen(false);
     }
     changeChannelSetting(index, "volumeEnabled", target.checked);
-  }
+  };
 
-  isosurfaceCheckHandler({ target }: CheckboxChangeEvent): void {
-    const { index, changeChannelSetting, volumeChecked } = this.props;
+  const isosurfaceCheckHandler = ({ target }: CheckboxChangeEvent): void => {
     if (!target.checked && !volumeChecked) {
-      this.setState({ controlsOpen: false });
+      setControlsOpen(false);
     }
     changeChannelSetting(index, "isosurfaceEnabled", target.checked);
-  }
+  };
 
-  createChannelSettingHandler =
-    <K extends ChannelStateKey>(settingKey: K) =>
-    (newValue: ChannelState[K]) => {
-      const { index, changeChannelSetting } = this.props;
+  const createChannelSettingHandler = <K extends ChannelStateKey>(settingKey: K) => {
+    return (newValue: ChannelState[K]) => {
       changeChannelSetting(index, settingKey, newValue);
     };
+  };
 
-  onIsovalueChange = this.createChannelSettingHandler("isovalue");
-  onOpacityChangeUnwrapped = this.createChannelSettingHandler("opacity");
-  onOpacityChange = (newValue: number): void => this.onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+  const onIsovalueChange = createChannelSettingHandler("isovalue");
+  const onOpacityChangeUnwrapped = createChannelSettingHandler("opacity");
+  const onOpacityChange = (newValue: number): void =>
+    onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
-  createSliderRow = (
+  const createSliderRow = (
     name: string,
     maxValue: number,
     defaultValue: number,
@@ -100,51 +90,48 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
           behaviour="drag"
           onChange={onChange}
           step={1}
-          disabled={!this.props.isosurfaceChecked}
+          disabled={!isosurfaceChecked}
         />
       </Col>
     </Row>
   );
 
-  toggleControlsOpen(): void {
-    const { isosurfaceChecked, volumeChecked } = this.props;
+  const toggleControlsOpen = (): void => {
     if (isosurfaceChecked || volumeChecked) {
-      this.setState({
-        controlsOpen: !this.state.controlsOpen,
-      });
+      setControlsOpen(!controlsOpen);
     }
-  }
+  };
 
-  onColorChange(newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void {
+  const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
-    this.props.changeChannelSetting(index!, "color", color);
-  }
+    props.changeChannelSetting(index!, "color", color);
+  };
 
-  createColorPicker = (): React.ReactNode => (
+  const createColorPicker = (): React.ReactNode => (
     <ColorPicker
-      color={colorArrayToObject(this.props.color)}
-      onColorChange={this.onColorChange}
-      onColorChangeComplete={this.props.onColorChangeComplete}
+      color={colorArrayToObject(props.color)}
+      onColorChange={onColorChange}
+      onColorChangeComplete={props.onColorChangeComplete}
       disableAlpha={true}
-      idx={this.props.index}
+      idx={index}
       width={18}
     />
   );
 
-  renderActions = (): React.ReactNode => (
-    <div className={"channel-visibility-controls" + (this.state.controlsOpen ? " controls-open" : "")}>
-      <Checkbox checked={this.props.volumeChecked} onChange={this.volumeCheckHandler} key="volCheckbox">
+  const renderActions = (): React.ReactNode => (
+    <div className={"channel-visibility-controls" + (controlsOpen ? " controls-open" : "")}>
+      <Checkbox checked={volumeChecked} onChange={volumeCheckHandler} key="volCheckbox">
         Vol
       </Checkbox>
-      <Checkbox checked={this.props.isosurfaceChecked} onChange={this.isosurfaceCheckHandler} key="isoCheckbox">
+      <Checkbox checked={isosurfaceChecked} onChange={isosurfaceCheckHandler} key="isoCheckbox">
         Surf
       </Checkbox>{" "}
-      <ViewerIcon type="preferences" onClick={this.toggleControlsOpen} style={{ fontSize: "16px" }} />
+      <ViewerIcon type="preferences" onClick={toggleControlsOpen} style={{ fontSize: "16px" }} />
     </div>
   );
 
-  createTFEditor(): React.ReactNode {
-    const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha, index } = this.props;
+  const createTFEditor = (): React.ReactNode => {
+    const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha } = props;
     return (
       <TfEditor
         id={"TFEditor" + index}
@@ -155,74 +142,58 @@ export default class ChannelsWidgetRow extends React.Component<ChannelsWidgetRow
         volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
-        updateChannelLutControlPoints={this.createChannelSettingHandler("controlPoints")}
-        updateColorizeMode={this.createChannelSettingHandler("colorizeEnabled")}
-        updateColorizeAlpha={this.createChannelSettingHandler("colorizeAlpha")}
+        updateChannelLutControlPoints={createChannelSettingHandler("controlPoints")}
+        updateColorizeMode={createChannelSettingHandler("colorizeEnabled")}
+        updateColorizeAlpha={createChannelSettingHandler("colorizeAlpha")}
         colorizeEnabled={colorizeEnabled}
         colorizeAlpha={colorizeAlpha}
       />
     );
-  }
-
-  createSaveIsosurfaceHandler = (format: IsosurfaceFormat) => () => {
-    const { index, saveIsosurface } = this.props;
-    saveIsosurface(index, format);
   };
 
-  renderSurfaceControls = (): React.ReactNode => (
+  const renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
       <h4 className="ant-list-item-meta-title" style={{ marginTop: "20px", marginBottom: "5px" }}>
         Surface settings:
       </h4>
-      {this.createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, this.onIsovalueChange)}
-      {this.createSliderRow(
+      {createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, onIsovalueChange)}
+      {createSliderRow(
         "Opacity",
         ISOSURFACE_OPACITY_SLIDER_MAX,
         ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
-        this.onOpacityChange
+        onOpacityChange
       )}
-      <Button
-        disabled={!this.props.isosurfaceChecked}
-        onClick={this.createSaveIsosurfaceHandler("GLTF")}
-        style={STYLES.raisedButton}
-      >
+      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "GLTF")} style={STYLES.raisedButton}>
         Save GLTF
       </Button>
-      <Button
-        disabled={!this.props.isosurfaceChecked}
-        onClick={this.createSaveIsosurfaceHandler("STL")}
-        style={STYLES.raisedButton}
-      >
+      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "STL")} style={STYLES.raisedButton}>
         Save STL
       </Button>
     </Col>
   );
 
-  renderControls = (): React.ReactNode => (
+  const renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
-      {this.props.volumeChecked && (
+      {volumeChecked && (
         <Row justify="space-between" className="volume-settings">
           <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-          {this.createTFEditor()}
+          {createTFEditor()}
         </Row>
       )}
-      {this.props.isosurfaceChecked && <Row justify="space-between">{this.renderSurfaceControls()}</Row>}
+      {isosurfaceChecked && <Row justify="space-between">{renderSurfaceControls()}</Row>}
     </div>
   );
 
-  render(): React.ReactNode {
-    const rowClass = this.state.controlsOpen ? "row-card" : "row-card controls-closed";
-    return (
-      <List.Item key={this.props.index} className={rowClass} extra={this.renderActions()}>
-        <List.Item.Meta
-          title={<span style={STYLES.channelName}>{this.props.name}</span>}
-          avatar={this.createColorPicker()}
-        />
-        {this.state.controlsOpen && this.renderControls()}
-      </List.Item>
-    );
-  }
-}
+  const rowClass = controlsOpen ? "row-card" : "row-card controls-closed";
+  return (
+    <List.Item key={index} className={rowClass} extra={renderActions()}>
+      <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
+      {controlsOpen && renderControls()}
+    </List.Item>
+  );
+};
+
+export default ChannelsWidgetRow;
 
 const STYLES: Styles = {
   channelName: {
