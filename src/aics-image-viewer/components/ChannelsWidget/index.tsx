@@ -33,7 +33,6 @@ export type ChannelsWidgetProps = {
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 };
 
-// export default class ChannelsWidget extends React.Component<ChannelsWidgetProps, {}> {
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
@@ -62,7 +61,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     });
 
     return (
-      <div>
+      <>
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={volChecked}
@@ -76,10 +75,12 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           checkedList={isoChecked}
           onChecked={showSurfaces}
           onUnchecked={hideSurfaces}
+          // keep checkboxes lined up when channel rows have settings icon and headers don't
+          style={{ flex: 5 }}
         >
           All Surf
         </SharedCheckBox>
-      </div>
+      </>
     );
   };
 

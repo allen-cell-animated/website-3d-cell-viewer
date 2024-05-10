@@ -95,9 +95,10 @@
       border-color: white;
     }
 
-    /* checkbox spacing */
-    .channel-visibility-controls {
-      flex: 0.6;
+    /* checkbox spacing, in channel entries and shared in headings */
+    .channel-visibility-controls,
+    .ant-collapse-extra {
+      width: 40%;
       display: flex;
 
       .ant-checkbox-wrapper {
