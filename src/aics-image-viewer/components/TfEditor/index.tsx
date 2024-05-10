@@ -380,13 +380,13 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         .enter()
         .append("g")
         .attr("class", "bar")
-        .attr("transform", (count, idx) => `translate(${this.xScale(idx)},${this.binScale(count)})`);
+        .attr("transform", (length, idx) => `translate(${this.xScale(idx)},${this.binScale(length)})`);
 
       barEnter
         .append("rect")
         .attr("x", 1)
         .attr("width", () => 1)
-        .attr("height", (count) => this.height - this.binScale(count));
+        .attr("height", (length) => this.height - this.binScale(length));
 
       d3.select(this.svgElement.current).select("g").selectAll(".bar").lower();
 
