@@ -17,7 +17,7 @@
       margin-top: 12px;
       background-color: transparent;
       border: 1px solid transparent;
-      color: var(--color-button-default-text);
+      color: var(--color-button-tertiary-text);
 
       &:not([disabled]) {
         &.btn-tabactive {
@@ -29,7 +29,6 @@
         &:hover,
         &:focus-visible {
           color: var(--color-button-icon-activated-text);
-          /* TODO update from changes on Peyton's help menu PR */
           background-color: var(--color-button-primary-hover-bg);
           border-color: var(--color-button-icon-activated-outline);
         }
