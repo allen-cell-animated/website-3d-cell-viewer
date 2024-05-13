@@ -11,11 +11,6 @@ import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
 
-type AppWrapperProps = {
-  viewerSettings?: Partial<GlobalViewerSettings>;
-  viewerArgs?: AppDataProps;
-};
-
 const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
   showAxes: false,
   showBoundingBox: false,
@@ -48,22 +43,16 @@ const DEFAULT_APP_PROPS: AppDataProps = {
   },
 };
 
-const defaultAppWrapperProps = {
-  viewerSettings: DEFAULT_VIEWER_SETTINGS,
-  viewerArgs: DEFAULT_APP_PROPS,
-};
-
 /**
  * Wrapper around the main ImageViewer component. Handles the collection of parameters from the
  * URL and location state (from routing) to pass to the viewer.
  */
-export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
-  const props = { ...defaultAppWrapperProps, ...inputProps };
+export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
   const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings> | null>(null);
-  const [viewerArgs, setViewerArgs] = useState<AppDataProps | null>(null);
+  const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -71,13 +60,13 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
     const locationArgs = location.state as AppDataProps;
     getArgsFromParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-        setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings, ...urlViewerSettings });
+        setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
+        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
-        setViewerArgs({ ...DEFAULT_APP_PROPS, ...props.viewerArgs, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...props.viewerSettings });
+        setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
+        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS });
       }
     );
   }, []);
@@ -118,14 +107,14 @@ export default function AppWrapper(inputProps: AppWrapperProps): ReactElement {
         <FlexRowAlignCenter $gap={15}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onLoad} />
-            {viewerArgs && <ShareModal appProps={viewerArgs} />}
+            {viewerProps && <ShareModal appProps={viewerProps} />}
           </FlexRowAlignCenter>
           <HelpDropdown />
         </FlexRowAlignCenter>
       </Header>
-      {viewerArgs && viewerSettings && (
+      {viewerProps && viewerSettings && (
         <ImageViewerApp
-          {...viewerArgs}
+          {...viewerProps}
           appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
           canvasMargin="0 0 0 0"
           viewerSettings={viewerSettings}
