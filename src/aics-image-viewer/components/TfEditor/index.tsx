@@ -153,7 +153,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     const { volumeData } = this.props;
 
     this.redraw();
-    if (!prevProps.volumeData && volumeData) {
+    if (prevProps.volumeData !== volumeData) {
       this.redrawHistogram();
     }
   }
@@ -356,24 +356,39 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     svg.selectAll<SVGGElement, unknown>(".axis.axis--x").call(axis);
   }
 
+  private getBinLengths(): { binLengths: number[]; max: number } {
+    const histogram = this.props.channelData.histogram;
+    const binLengths = [];
+    // TODO: Change `histogram.bins` to be readable/readonly
+    // so we don't have to copy it here!
+    let max = Number.NEGATIVE_INFINITY;
+    for (let i = 0; i < histogram.getNumBins(); i++) {
+      const binLength = histogram.getBin(i);
+      binLengths.push(binLength);
+      max = Math.max(max, binLength);
+    }
+    return { binLengths, max };
+  }
+
   // update the chart data
   private redrawHistogram(): void {
     d3.select(this.svgElement.current).select("g").selectAll(".bar").remove();
     if (this.props.volumeData && this.props.volumeData.length > 0) {
-      const bins = this.bins(this.props.volumeData);
-      this.binScale.domain([0.1, d3.max(bins, (d) => d.length)!]);
-      const bar = d3.select(this.svgElement.current).select("g").selectAll(".bar").data(bins);
+      const { binLengths, max } = this.getBinLengths();
+
+      this.binScale.domain([0.1, max]);
+      const bar = d3.select(this.svgElement.current).select("g").selectAll(".bar").data(binLengths);
       const barEnter = bar
         .enter()
         .append("g")
         .attr("class", "bar")
-        .attr("transform", (d) => `translate(${this.xScale(d.x0!)},${this.binScale(d.length)})`);
+        .attr("transform", (length, idx) => `translate(${this.xScale(idx)},${this.binScale(length)})`);
 
       barEnter
         .append("rect")
         .attr("x", 1)
-        .attr("width", (d) => d.x1! - d.x0!)
-        .attr("height", (d) => this.height - this.binScale(d.length));
+        .attr("width", 1)
+        .attr("height", (length) => this.height - this.binScale(length));
 
       d3.select(this.svgElement.current).select("g").selectAll(".bar").lower();
 
