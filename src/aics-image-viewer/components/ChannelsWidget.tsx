@@ -3,19 +3,20 @@ import { find } from "lodash";
 import { Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
-import {
+import type {
   ChannelGrouping,
   ChannelSettingUpdater,
-  getDisplayName,
+  ChannelState,
+  ChannelStateKey,
   MultipleChannelSettingsUpdater,
+  ViewerChannelSettings,
 } from "../shared/utils/viewerChannelSettings";
+import { getDisplayName } from "../shared/utils/viewerChannelSettings";
+import type { ColorArray, ColorObject } from "../shared/utils/colorRepresentations";
+import type { IsosurfaceFormat } from "../shared/types";
 
-import SharedCheckBox from "./shared/SharedCheckBox";
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
-
-import { ChannelState, ViewerChannelSettings, ChannelStateKey } from "../shared/utils/viewerChannelSettings";
-import { ColorArray, ColorObject } from "../shared/utils/colorRepresentations";
-import { IsosurfaceFormat } from "../shared/types";
+import SharedCheckBox from "./shared/SharedCheckBox";
 
 export type ChannelsWidgetProps = {
   channelDataChannels: Channel[] | undefined;
