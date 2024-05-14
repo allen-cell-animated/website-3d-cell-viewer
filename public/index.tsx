@@ -8,7 +8,6 @@ import LandingPage from "../website/components/LandingPage";
 import ErrorPage from "../website/components/ErrorPage";
 import { isQueryStringPath, convertQueryStringPathToUrl } from "../website/utils/gh_route_utils";
 import StyleProvider from "../src/aics-image-viewer/components/StyleProvider";
-import "../src/aics-image-viewer/assets/styles/typography.css";
 import "./App.css";
 
 // vars filled at build time using webpack DefinePlugin
