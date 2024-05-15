@@ -8,7 +8,7 @@ RUN npm ci
 
 
 # Build the project to ./imageviewer
-RUN npm run s3-build
+RUN npm run docker-build
 
 # # Serve the static imageviewer files over nginx
 FROM nginx:alpine
