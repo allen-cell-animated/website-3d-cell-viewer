@@ -28,3 +28,9 @@ or as React component:
     />
 ```
 
+### Dockerfile
+
+```cmd
+docker build -t d-volume-viewer .
+docker run -d -p 8080:80 3d-volume-viewer
+```
