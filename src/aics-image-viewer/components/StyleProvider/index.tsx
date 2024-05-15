@@ -289,6 +289,19 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
     }
   }
 
+  /* Let us use buttons with type="text" as purely semantic containers - don't bring any styling! */
+  .ant-btn-text {
+    width: unset;
+    height: unset;
+    padding: unset;
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      background-color: unset;
+      border-color: transparent;
+    }
+  }
+
   .ant-btn-icon-only:disabled {
     color: var(--color-button-icon-disabled-text);
   }

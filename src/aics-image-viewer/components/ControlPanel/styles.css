@@ -103,15 +103,6 @@
       .ant-checkbox-wrapper {
         flex: 4;
       }
-
-      .anticon {
-        flex: 1;
-        color: var(--color-controlpanel-text);
-      }
-
-      &.controls-open .anticon {
-        color: var(--color-button-icon-activated-text);
-      }
     }
 
     .ant-collapse-content-box {

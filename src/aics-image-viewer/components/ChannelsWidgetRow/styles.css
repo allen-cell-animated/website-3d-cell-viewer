@@ -23,6 +23,15 @@
     .ant-checkbox-wrapper {
       color: var(--color-controlpanel-text);
     }
+
+    .anticon {
+      color: var(--color-button-icon-activated-text);
+      transition: color 0.3s;
+    }
+
+    &.controls-closed .anticon:not(:hover):not(:focus-visible) {
+      color: var(--color-controlpanel-text);
+    }
   }
 
   &.controls-closed {

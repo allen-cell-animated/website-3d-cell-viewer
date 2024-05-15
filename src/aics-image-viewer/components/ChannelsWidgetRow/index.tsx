@@ -126,7 +126,12 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
       <Checkbox checked={isosurfaceChecked} onChange={isosurfaceCheckHandler} key="isoCheckbox">
         Surf
       </Checkbox>
-      <ViewerIcon type="preferences" onClick={toggleControlsOpen} style={{ fontSize: "16px" }} />
+      <Button
+        onClick={toggleControlsOpen}
+        type="text"
+        icon={<ViewerIcon type="preferences" style={{ fontSize: "16px" }} />}
+        title="Channel settings"
+      />
     </div>
   );
 
