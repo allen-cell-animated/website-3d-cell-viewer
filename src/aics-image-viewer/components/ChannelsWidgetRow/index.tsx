@@ -129,7 +129,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
       <Button
         icon={<ViewerIcon type="preferences" style={{ fontSize: "16px" }} />}
         onClick={toggleControlsOpen}
-        title="Channel settings"
+        title="Open channel settings"
         type="text"
       />
     </div>
