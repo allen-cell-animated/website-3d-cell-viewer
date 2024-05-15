@@ -24,12 +24,16 @@
       color: var(--color-controlpanel-text);
     }
 
-    .anticon {
+    .ant-btn-text {
       color: var(--color-button-icon-activated-text);
       transition: color 0.3s;
+
+      &:hover {
+        color: var(--color-button-tertiary-hover-text) !important;
+      }
     }
 
-    &.controls-closed .anticon:not(:hover):not(:focus-visible) {
+    &.controls-closed .ant-btn-text:not(:focus-visible) {
       color: var(--color-controlpanel-text);
     }
   }
