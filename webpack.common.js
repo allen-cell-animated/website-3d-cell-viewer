@@ -12,6 +12,7 @@ module.exports = (env) => {
     output: {
       path: path.resolve(__dirname, "imageviewer"),
       filename: "[name].bundle.js",
+      publicPath: env.basename,
     },
     resolve: {
       extensions: [".js", ".jsx", ".ts", ".tsx"],
@@ -57,7 +58,7 @@ module.exports = (env) => {
           use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
         },
         {
-          test: /\.(woff|woff2|tff|eot|glyph)$/,
+          test: /\.(woff|woff2|tff|eot|glyph|mp4)$/,
           type: "asset/resource",
         },
       ],

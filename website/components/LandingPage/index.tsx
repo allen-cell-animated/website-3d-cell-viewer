@@ -13,6 +13,7 @@ import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { getArgsFromParams } from "../../utils/url_utils";
 import HelpDropdown from "../HelpDropdown";
+import { BannerVideo } from "../../assets/videos";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -323,7 +324,7 @@ export default function LandingPage(): ReactElement {
       <Banner>
         <BannerVideoContainer style={{ zIndex: 1 }}>
           <video autoPlay={allowMotion} loop muted>
-            <source src="/videos/banner-video.mp4" type="video/mp4" />
+            <source src={BannerVideo} type="video/mp4" />
           </video>
         </BannerVideoContainer>
         <BannerTextContainer style={{ zIndex: 1 }}>
