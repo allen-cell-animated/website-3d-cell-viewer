@@ -119,7 +119,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const renderActions = (): React.ReactNode => (
-    <div className={"channel-visibility-controls" + (controlsOpen ? " controls-open" : "")}>
+    <div className="channel-visibility-controls">
       <Checkbox checked={volumeChecked} onChange={volumeCheckHandler} key="volCheckbox">
         Vol
       </Checkbox>
@@ -127,10 +127,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
         Surf
       </Checkbox>
       <Button
-        onClick={toggleControlsOpen}
-        type="text"
         icon={<ViewerIcon type="preferences" style={{ fontSize: "16px" }} />}
+        onClick={toggleControlsOpen}
         title="Channel settings"
+        type="text"
       />
     </div>
   );
