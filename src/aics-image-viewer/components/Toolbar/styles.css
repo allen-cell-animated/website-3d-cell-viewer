@@ -167,7 +167,7 @@
 
     & .ant-select-selection-item,
     & .ant-select-arrow {
-      color: var(--color-button-default-text);
+      color: var(--color-button-tertiary-text);
       transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
     }
 
@@ -186,8 +186,8 @@
     & .ant-select-selector,
     & .ant-select-arrow,
     & .ant-select-selection-item {
-      color: var(--color-button-default-hover-text);
-      outline-color: var(--color-button-default-hover-outline);
+      color: var(--color-button-tertiary-hover-text);
+      outline-color: var(--color-button-tertiary-hover-outline);
     }
   }
 }
