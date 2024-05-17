@@ -120,10 +120,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderActions = (): React.ReactNode => (
     <div className="channel-visibility-controls">
-      <Checkbox checked={volumeChecked} onChange={volumeCheckHandler} key="volCheckbox">
+      <Checkbox checked={volumeChecked} onChange={volumeCheckHandler}>
         Vol
       </Checkbox>
-      <Checkbox checked={isosurfaceChecked} onChange={isosurfaceCheckHandler} key="isoCheckbox">
+      <Checkbox checked={isosurfaceChecked} onChange={isosurfaceCheckHandler}>
         Surf
       </Checkbox>
       <Button
