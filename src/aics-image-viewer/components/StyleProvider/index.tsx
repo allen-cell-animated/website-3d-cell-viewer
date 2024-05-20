@@ -84,10 +84,12 @@ const theme = {
     checkbox: {
       bg: palette.medGrey,
       hoverBg: palette.medLtGreyAlt,
+      text: palette.white,
     },
     controlPanel: {
       bg: palette.darkGrey,
       border: palette.medGrey,
+      sectionText: palette.white,
       text: palette.ltGrey,
       sectionBg: palette.medDarkGrey,
       drawerBg: palette.veryDarkGrey,
@@ -154,7 +156,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-text-selection-text: ${$theme.colors.text.selectionText};
 
       --color-header-title: ${$theme.colors.header.title};
-      --color-header-hover-title: ${theme.colors.header.hoverTitle};
+      --color-header-hover-title: ${$theme.colors.header.hoverTitle};
       --color-header-bg: ${$theme.colors.header.bg};
       --color-header-border: ${$theme.colors.header.border};
 
@@ -189,6 +191,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
 
       --color-controlpanel-bg: ${$theme.colors.controlPanel.bg};
       --color-controlpanel-border: ${$theme.colors.controlPanel.border};
+      --color-controlpanel-section-text: ${$theme.colors.controlPanel.sectionText};
       --color-controlpanel-text: ${$theme.colors.controlPanel.text};
       --color-controlpanel-section-bg: ${$theme.colors.controlPanel.sectionBg};
       --color-controlpanel-drawer-bg: ${$theme.colors.controlPanel.drawerBg};
@@ -281,6 +284,19 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       background-color: var(--color-button-primary-hover-bg);
       border: 1px solid var(--color-button-primary-active-outline);
       color: var(--color-button-primary-text);
+    }
+  }
+
+  /* Let us use buttons with type="text" as purely semantic containers - don't bring any styling! */
+  .ant-btn-text {
+    width: unset;
+    height: unset;
+    padding: unset;
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+      background-color: unset;
+      border-color: transparent;
     }
   }
 
@@ -384,6 +400,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           controlItemBgHover: theme.colors.menu.hoverBg,
           controlItemBgActiveHover: theme.colors.menu.hoverBg,
           controlItemBgActive: theme.colors.menu.selectedBg,
+          borderRadius: 4,
         },
         components: {
           Button: {
@@ -399,6 +416,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
           },
           Collapse: {
             borderRadiusLG: 0,
+            colorTextHeading: theme.colors.text.section,
           },
           Layout: {
             siderBg: theme.colors.controlPanel.bg,
@@ -408,6 +426,7 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             colorBgContainer: theme.colors.checkbox.bg,
             colorPrimary: theme.colors.checkbox.bg,
             colorPrimaryHover: theme.colors.checkbox.hoverBg,
+            colorText: theme.colors.checkbox.text,
           },
           Tooltip: {
             colorBgSpotlight: theme.colors.tooltip.bg,

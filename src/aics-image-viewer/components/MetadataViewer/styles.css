@@ -11,7 +11,7 @@
 
   /* On the top nest level, the top border is given by the panel header, and the bottom by the containing table */
   &.metadata-top-level {
-    border-bottom: 1px solid #6e6e6e;
+    border-bottom: 1px solid var(--color-controlpanel-border);
 
     > tbody > tr.metadata-row-collapse-title:first-child {
       border-top: none;
@@ -20,18 +20,20 @@
 
   /* ----- TABLE ROWS ----- */
   tr {
-    &:nth-child(odd):not(.metadata-row-collapse-content) {
+    color: var(--color-controlpanel-text);
+
+    &:nth-child(odd):not(.metadata-row-collapse-content):not(.metadata-row-collapse-title) {
       background-color: #3a3a3a;
     }
 
     /* CATEGORY TITLE */
     &.metadata-row-collapse-title {
-      color: white;
-      background-color: #4b4b4b !important;
+      color: var(--color-text-section);
+      background-color: var(--color-controlpanel-section-bg);
 
       /* Keeps borders aligned when this category opens and closes */
       &:not(.metadata-collapse-collapsed) > td {
-        padding-bottom: 5px;
+        padding-bottom: 7px;
       }
     }
 
@@ -45,13 +47,13 @@
     /* ROW BORDERS: all categories have top borders; any row which follows a category provides its bottom border */
     tr.metadata-row-collapse-title,
     &.metadata-row-collapse-content + tr {
-      border-top: 1px solid #6e6e6e;
+      border-top: 1px solid var(--color-controlpanel-border);
     }
   }
 
   /* ----- TABLE CELLS ----- */
   td {
-    padding: 6px 0;
+    padding: 8px 0;
     overflow-wrap: break-word;
 
     .metadata-collapse-caret {
