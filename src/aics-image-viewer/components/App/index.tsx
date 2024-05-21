@@ -58,6 +58,7 @@ import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
+import { useErrorBanner } from "../ErrorBanner";
 
 import "../../assets/styles/globals.css";
 import {
@@ -188,6 +189,12 @@ const App: React.FC<AppProps> = (props) => {
   const loader = useRef<IVolumeLoader>();
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string | string[]>("");
+
+  const [errorBanner, showError] = useErrorBanner();
+  useEffect(() => {
+    view3d.setLoadErrorHandler((_vol, e) => showError(e));
+    return () => view3d.setLoadErrorHandler(undefined);
+  }, [view3d, showError]);
 
   const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
   const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
@@ -489,14 +496,20 @@ const App: React.FC<AppProps> = (props) => {
       options.rawArrayOptions = { data: rawData, metadata: rawDims };
     }
 
-    loader.current = await loadContext.createLoader(path, { ...options });
+    let aimg: Volume;
+    try {
+      loader.current = await loadContext.createLoader(path, { ...options });
 
-    const aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
-      // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
-      // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
-      const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
-      onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
-    });
+      aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
+        // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
+        // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
+        const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
+        onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
+      });
+    } catch (e) {
+      showError(e);
+      throw e;
+    }
 
     const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
@@ -504,7 +517,10 @@ const App: React.FC<AppProps> = (props) => {
 
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
-    loader.current.loadVolumeData(aimg);
+    loader.current.loadVolumeData(aimg).catch((e) => {
+      showError(e);
+      throw e;
+    });
 
     imageUrlRef.current = path;
     placeImageInViewer(aimg, newChannelSettings);
@@ -766,6 +782,7 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <StyleProvider>
+      {errorBanner}
       <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
         {channelSettings.map((channelState, index) => (
           <ChannelUpdater
