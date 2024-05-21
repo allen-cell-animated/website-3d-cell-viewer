@@ -1,6 +1,7 @@
 import React from "react";
 import { Alert, Button } from "antd";
 import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
+import { RightOutlined } from "@ant-design/icons";
 
 import "./styles.css";
 
@@ -70,11 +71,13 @@ const pickErrorDescription = (error: unknown): React.ReactNode => {
 };
 
 export type ErrorBannerProps = {
-  error: unknown;
+  errors: unknown;
+  setErrors?: (errors: React.SetStateAction<unknown[]>) => void;
 };
 
-const ErrorBanner: React.FC<ErrorBannerProps> = ({ error }) => {
+const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
   const [showDetails, setShowDetails] = React.useState(false);
+  const error = Array.isArray(errors) ? errors[0] : errors;
 
   const errorTitle = (error instanceof Error && error.toString?.()) || "An error occurred";
 
@@ -83,14 +86,38 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ error }) => {
       <div>
         {errorTitle}
         <Button type="text" onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? " show less" : " show more"}
+          {showDetails ? " show less info" : " show more info"}
         </Button>
       </div>
       <div style={{ display: showDetails ? undefined : "none" }}>{pickErrorDescription(error)}</div>
     </>
   );
 
-  return <Alert banner type="error" className="error-banner" message={errorMessage} closable />;
+  const nextError = Array.isArray(errors) && setErrors && errors.length > 1 && (
+    <Button type="text" onClick={() => setErrors((errs) => errs.slice(1))}>
+      {errors.length - 1} more errors <RightOutlined />
+    </Button>
+  );
+
+  return (
+    <Alert
+      banner
+      type="error"
+      className="error-banner"
+      message={errorMessage}
+      closable
+      afterClose={() => Array.isArray(errors) && setErrors?.([])}
+      action={nextError}
+    />
+  );
+};
+
+export const useErrorBanner = (): [React.ReactNode, (error: unknown) => void] => {
+  const [errorList, setErrorList] = React.useState<unknown[]>([]);
+  const addError = React.useCallback((error: unknown) => setErrorList((prev) => [...prev, error]), []);
+
+  const ErrorBannerComponent = errorList.length > 0 && <ErrorBanner errors={errorList} setErrors={setErrorList} />;
+  return [ErrorBannerComponent, addError];
 };
 
 export default ErrorBanner;
