@@ -83,6 +83,7 @@ export type ErrorBannerProps = {
 
 const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
   const [showDetails, setShowDetails] = React.useState(false);
+  const [errorsSeenCount, setErrorsSeenCount] = React.useState(0);
   const error = Array.isArray(errors) ? errors[0] : errors;
 
   const errorTitle = (error instanceof Error && error.toString?.()) || "An error occurred";
@@ -100,8 +101,14 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
   );
 
   const nextError = Array.isArray(errors) && setErrors && errors.length > 1 && (
-    <Button type="text" onClick={() => setErrors((errs) => errs.slice(1))}>
-      {errors.length - 1} more errors <RightOutlined />
+    <Button
+      type="text"
+      onClick={() => {
+        setErrors((errs) => errs.slice(1));
+        setErrorsSeenCount((count) => count + 1);
+      }}
+    >
+      Error {errorsSeenCount + 1} of {errors.length + errorsSeenCount} <RightOutlined />
     </Button>
   );
 
@@ -112,7 +119,10 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
       className="load-error-banner"
       message={errorMessage}
       closable
-      afterClose={() => Array.isArray(errors) && setErrors?.([])}
+      afterClose={() => {
+        setErrorsSeenCount(0);
+        Array.isArray(errors) && setErrors?.([]);
+      }}
       action={nextError}
     />
   );
