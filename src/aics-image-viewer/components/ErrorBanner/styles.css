@@ -1,0 +1,21 @@
+.error-banner {
+  position: fixed;
+  align-items: start;
+  z-index: 5000;
+  width: 100%;
+  padding: 12px 30px;
+
+  .anticon,
+  .ant-alert-message div {
+    height: 24px;
+  }
+
+  .ant-btn-text {
+    margin-left: 15px;
+  }
+
+  .ant-alert-message div:first-child {
+    color: var(--color-text-section);
+    font-weight: bold;
+  }
+}

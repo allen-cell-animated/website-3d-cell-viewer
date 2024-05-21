@@ -1,7 +1,9 @@
 import React from "react";
-import { Alert } from "antd";
-
+import { Alert, Button } from "antd";
 import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
+
+import "./styles.css";
+
 const IssueLink: React.FC<React.PropsWithChildren<{ bug?: boolean }>> = ({ bug, children }) => (
   <a
     href={`https://github.com/allen-cell-animated/website-3d-cell-viewer/issues/new${
@@ -71,23 +73,24 @@ export type ErrorBannerProps = {
   error: unknown;
 };
 
-const ErrorBanner: React.FC<ErrorBannerProps> = (props) => {
-  // const test = (
-  //   <>
-  //     <p style={{ margin: "5px 0" }}>Test line 1</p>
-  //     <p style={{ margin: "5px 0" }}>Test line 2</p>
-  //   </>
-  // );
+const ErrorBanner: React.FC<ErrorBannerProps> = ({ error }) => {
+  const [showDetails, setShowDetails] = React.useState(false);
 
-  return (
-    <Alert
-      type="error"
-      message={pickErrorDescription(props.error)}
-      banner
-      closable
-      style={{ position: "fixed", zIndex: 5000, width: "100%" }}
-    />
+  const errorTitle = (error instanceof Error && error.toString?.()) || "An error occurred";
+
+  const errorMessage = (
+    <>
+      <div>
+        {errorTitle}
+        <Button type="text" onClick={() => setShowDetails(!showDetails)}>
+          {showDetails ? " show less" : " show more"}
+        </Button>
+      </div>
+      <div style={{ display: showDetails ? undefined : "none" }}>{pickErrorDescription(error)}</div>
+    </>
   );
+
+  return <Alert banner type="error" className="error-banner" message={errorMessage} closable />;
 };
 
 export default ErrorBanner;
