@@ -19,7 +19,7 @@ const IssueLink: React.FC<React.PropsWithChildren<{ bug?: boolean }>> = ({ bug, 
 
 const UNKNOWN_ERROR_DESCRIPTION: React.ReactNode = (
   <>
-    An unknown error occurred. Check the browser console for more details. If this looks like a bug,{" "}
+    An unknown error occurred. Check the browser console (F12) for more details. If this looks like a bug,{" "}
     <IssueLink bug>send us a bug report here</IssueLink>.
   </>
 );
@@ -40,8 +40,8 @@ const ERROR_TYPE_DESCRIPTIONS: { [T in VolumeLoadErrorType]: React.ReactNode } =
   [VolumeLoadErrorType.TOO_LARGE]: (
     <>
       No scale level is available for this volume which fits within our maximum GPU memory footprint. This maximum is
-      tuned to ensure compatibility with the majority of browsers. If the volume you&apos;re opening is in OME-Zarr
-      format, try adding a lower scale level.
+      tuned to ensure compatibility with the majority of browsers. If you&apos;re trying to load your own OME-Zarr
+      dataset, you may be able to open this volume by including a lower scale level.
     </>
   ),
   [VolumeLoadErrorType.LOAD_DATA_FAILED]: (
@@ -56,10 +56,16 @@ const ERROR_TYPE_DESCRIPTIONS: { [T in VolumeLoadErrorType]: React.ReactNode } =
     <>
       The viewer was unable to read all necessary information from this volume&apos;s metadata. Check that your
       dataset&apos;s metadata is complete and properly formatted. If you believe your data is valid and should be
-      supported by our viewer, <IssueLink>open a GitHub issue here</IssueLink>.
+      supported by our viewer, let us know by <IssueLink>opening a GitHub issue</IssueLink>.
     </>
   ),
-  [VolumeLoadErrorType.INVALID_MULTI_SOURCE_ZARR]: <>TODO write message</>,
+  [VolumeLoadErrorType.INVALID_MULTI_SOURCE_ZARR]: (
+    <>
+      The viewer is currently configured to consolidate multiple OME-Zarr datasets into a single volume, but the
+      provided datasets can&apos;t all be matched up. Ensure that all dataset URLs are correct and that at least one
+      equivalently-sized scale level exists in all datasets.
+    </>
+  ),
 };
 
 const pickErrorDescription = (error: unknown): React.ReactNode => {
