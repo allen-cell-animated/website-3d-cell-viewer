@@ -109,7 +109,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
     <Alert
       banner
       type="error"
-      className="error-banner"
+      className="load-error-banner"
       message={errorMessage}
       closable
       afterClose={() => Array.isArray(errors) && setErrors?.([])}
