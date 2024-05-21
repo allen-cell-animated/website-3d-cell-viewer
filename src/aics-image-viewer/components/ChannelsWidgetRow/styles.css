@@ -1,37 +1,37 @@
 @import "../../assets/styles/variables";
-.channel-rows-list {
-  .ant-list-items {
-    padding: 0;
-  }
-  .row-card {
-    min-height: 72px;
-    padding: 24px 0 12px 0;
-    border-bottom: 1px solid $border-color;
+.channel-rows-list .row-card {
+  min-height: 70px;
+  padding: 22px 0 12px 0;
+  border-bottom: 1px solid var(--color-controlpanel-border);
 
-    .ant-list-item-content {
-      order: 3;
-    }
-    .ant-list-item-action {
-      order: 1;
-    }
-
-    .ant-row-flex {
-      margin-top: 1em;
-    }
+  .ant-row-flex {
+    margin-top: 1em;
   }
-  .row-card.ant-list-item {
+
+  &.ant-list-item {
     flex-flow: row wrap;
+
+    .ant-list-item-meta-title,
+    .ant-checkbox-wrapper {
+      color: var(--color-controlpanel-text);
+    }
+
+    .ant-btn-text {
+      color: var(--color-button-icon-activated-text);
+      transition: color 0.3s;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--color-button-tertiary-hover-text) !important;
+      }
+    }
+
+    &.controls-closed .ant-btn-text:not(:focus-visible) {
+      color: var(--color-controlpanel-text);
+    }
   }
 
-  .row-card.controls-closed {
+  &.controls-closed {
     padding: 12px 0 12px 0;
-
-    .ant-list-item-action {
-      order: 3;
-    }
-
-    .ant-list-item-content {
-      order: 2;
-    }
   }
 }

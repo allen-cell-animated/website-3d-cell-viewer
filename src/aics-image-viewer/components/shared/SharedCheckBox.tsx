@@ -7,6 +7,7 @@ type SharedCheckboxProps<T> = React.PropsWithChildren<{
   checkedList: T[];
   onChecked: (checked: T[]) => void;
   onUnchecked: (unchecked: T[]) => void;
+  style?: React.CSSProperties;
 }>;
 
 type SharedCheckboxState<T> = {
@@ -52,7 +53,7 @@ export default class SharedCheckbox<T> extends React.Component<SharedCheckboxPro
         indeterminate={this.state.indeterminate}
         onChange={this.onCheckAllChange}
         checked={this.state.checkAll}
-        style={{ margin: "auto", width: 120 }}
+        style={this.props.style}
       >
         {this.props.children}
       </Checkbox>

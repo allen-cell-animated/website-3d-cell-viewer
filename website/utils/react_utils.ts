@@ -1,7 +1,7 @@
 import { useLocalStorage } from "usehooks-ts";
 
 /** Key for local storage to read/write recently opened datasets */
-const RECENT_DATASETS_STORAGE_KEY = "recentDatasets";
+const RECENT_DATASETS_STORAGE_KEY = "WEBSITE_3D_CELL_VIEWER.recentDatasets";
 const MAX_RECENT_URLS = 100;
 
 // Label and URL are stored separately, so if a user provides an input URL (the label) that is transformed into an absolute
