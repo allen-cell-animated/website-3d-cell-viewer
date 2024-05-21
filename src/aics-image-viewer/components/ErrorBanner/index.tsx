@@ -4,6 +4,7 @@ import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
 import { RightOutlined } from "@ant-design/icons";
 
 import "./styles.css";
+import { useConstructor } from "../../shared/utils/hooks";
 
 const IssueLink: React.FC<React.PropsWithChildren<{ bug?: boolean }>> = ({ bug, children }) => (
   <a
@@ -68,7 +69,9 @@ const ERROR_TYPE_DESCRIPTIONS: { [T in VolumeLoadErrorType]: React.ReactNode } =
   ),
 };
 
-const pickErrorDescription = (error: unknown): React.ReactNode => {
+const getErrorTitle = (error: unknown): string => (error instanceof Error && error.toString?.()) || "Unknown error";
+
+const getErrorDescription = (error: unknown): React.ReactNode => {
   const type: VolumeLoadErrorType | undefined = (error as VolumeLoadError).type;
   if (!type) {
     return UNKNOWN_ERROR_DESCRIPTION;
@@ -78,34 +81,35 @@ const pickErrorDescription = (error: unknown): React.ReactNode => {
 
 export type ErrorBannerProps = {
   errors: unknown;
-  setErrors?: (errors: React.SetStateAction<unknown[]>) => void;
+  /** The number of times we've seen an error of the type that is currently being displayed before */
+  firstErrorCount?: number;
+  afterClose?: () => void;
+  onSkipError?: () => void;
 };
 
-const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
+const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, afterClose, onSkipError }) => {
   const [showDetails, setShowDetails] = React.useState(false);
   const [errorsSeenCount, setErrorsSeenCount] = React.useState(0);
   const error = Array.isArray(errors) ? errors[0] : errors;
 
-  const errorTitle = (error instanceof Error && error.toString?.()) || "An error occurred";
-
   const errorMessage = (
     <>
       <div>
-        {errorTitle}
+        {getErrorTitle(error) + (firstErrorCount > 1 ? ` (${firstErrorCount})` : "")}
         <Button type="text" onClick={() => setShowDetails(!showDetails)}>
           {showDetails ? " show less info" : " show more info"}
         </Button>
       </div>
-      <div style={{ display: showDetails ? undefined : "none" }}>{pickErrorDescription(error)}</div>
+      <div style={{ display: showDetails ? undefined : "none" }}>{getErrorDescription(error)}</div>
     </>
   );
 
-  const nextError = Array.isArray(errors) && setErrors && errors.length > 1 && (
+  const skipErrorButton = Array.isArray(errors) && errors.length > 1 && (
     <Button
       type="text"
       onClick={() => {
-        setErrors((errs) => errs.slice(1));
         setErrorsSeenCount((count) => count + 1);
+        onSkipError?.();
       }}
     >
       Error {errorsSeenCount + 1} of {errors.length + errorsSeenCount} <RightOutlined />
@@ -121,19 +125,43 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, setErrors }) => {
       closable
       afterClose={() => {
         setErrorsSeenCount(0);
-        Array.isArray(errors) && setErrors?.([]);
+        afterClose?.();
       }}
-      action={nextError}
+      action={skipErrorButton}
     />
   );
 };
 
 export const useErrorBanner = (): [React.ReactNode, (error: unknown) => void] => {
   const [errorList, setErrorList] = React.useState<unknown[]>([]);
-  const addError = React.useCallback((error: unknown) => setErrorList((prev) => [...prev, error]), []);
+  // Keep track of which errors have been seen and how many times
+  const seenErrors = useConstructor(() => new Map<string, number>());
+  const [errorCounts, setErrorCounts] = React.useState<number[]>([]);
 
-  const ErrorBannerComponent = errorList.length > 0 && <ErrorBanner errors={errorList} setErrors={setErrorList} />;
-  return [ErrorBannerComponent, addError];
+  const addError = React.useCallback((error: unknown) => {
+    const errorTitle = getErrorTitle(error);
+    const errorSeenCount = (seenErrors.get(errorTitle) ?? 0) + 1;
+
+    setErrorList((prev) => [...prev, error]);
+    setErrorCounts((prev) => [...prev, errorSeenCount]);
+    seenErrors.set(errorTitle, errorSeenCount);
+  }, []);
+
+  const onSkipError = React.useCallback(() => {
+    setErrorList((prev) => prev.slice(1));
+    setErrorCounts((prev) => prev.slice(1));
+  }, []);
+
+  const afterClose = React.useCallback(() => {
+    setErrorList([]);
+    setErrorCounts([]);
+  }, []);
+
+  const errCount = errorCounts[0];
+  const bannerComponent = errorList.length > 0 && (
+    <ErrorBanner errors={errorList} firstErrorCount={errCount} onSkipError={onSkipError} afterClose={afterClose} />
+  );
+  return [bannerComponent, addError];
 };
 
 export default ErrorBanner;
