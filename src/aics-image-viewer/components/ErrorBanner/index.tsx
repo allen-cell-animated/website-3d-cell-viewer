@@ -1,10 +1,11 @@
 import React from "react";
 import { Alert, Button } from "antd";
-import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
 import { RightOutlined } from "@ant-design/icons";
+import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
+
+import { useConstructor } from "../../shared/utils/hooks";
 
 import "./styles.css";
-import { useConstructor } from "../../shared/utils/hooks";
 
 const IssueLink: React.FC<React.PropsWithChildren<{ bug?: boolean }>> = ({ bug, children }) => (
   <a
