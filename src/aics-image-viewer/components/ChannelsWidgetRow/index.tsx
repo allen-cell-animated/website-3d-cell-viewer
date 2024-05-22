@@ -118,7 +118,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     />
   );
 
-  const renderActions = (): React.ReactNode => (
+  const visibilityControls = (
     <div className="channel-visibility-controls">
       <Checkbox checked={volumeChecked} onChange={volumeCheckHandler}>
         Vol
@@ -191,7 +191,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const rowClass = controlsOpen ? "row-card" : "row-card controls-closed";
   return (
-    <List.Item key={index} className={rowClass} extra={renderActions()}>
+    <List.Item key={index} className={rowClass} extra={visibilityControls}>
       <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
       {controlsOpen && renderControls()}
     </List.Item>
