@@ -111,6 +111,7 @@ const STYLES: Styles = {
   view3d: {
     width: "100%",
     display: "flex",
+    overflow: "hidden",
   },
   noImage: {
     position: "absolute",
