@@ -98,7 +98,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, 
       <div>
         {getErrorTitle(error) + (firstErrorCount > 1 ? ` (${firstErrorCount})` : "")}
         <Button type="text" onClick={() => setShowDetails(!showDetails)}>
-          {showDetails ? " show less info" : " show more info"}
+          {showDetails ? "Show less info" : "Show more info"}
         </Button>
       </div>
       <div style={{ display: showDetails ? undefined : "none" }}>{getErrorDescription(error)}</div>
