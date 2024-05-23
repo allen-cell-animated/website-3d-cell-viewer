@@ -201,27 +201,13 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 export default ChannelsWidgetRow;
 
 const STYLES: Styles = {
-  channelName: {
-    display: "inline-block",
-    minWidth: 90,
-  },
-  checkedIcon: {
-    fill: colorPalette.textColor,
-  },
   settingsContainer: {
     width: "100%",
     order: 3,
   },
-  uncheckedIcon: {
-    fill: colorPalette.accent3Color,
-  },
   raisedButton: {
     marginLeft: "2px",
     marginRight: "2px",
-  },
-  slider: {
-    marginBottom: "4px",
-    marginTop: "4px",
   },
   controlName: {
     whiteSpace: "nowrap",
