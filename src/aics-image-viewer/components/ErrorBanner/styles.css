@@ -1,8 +1,11 @@
 .load-error-banner {
   position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 40vw;
   align-items: start;
   z-index: 5000;
-  width: 100%;
+  border-color: #dc4446;
   padding: 12px 30px;
 
   /* Keeps icons vertically aligned with the *first row* of text */
@@ -13,7 +16,6 @@
   }
 
   .ant-btn-text {
-    margin-left: 15px;
     color: var(--color-text-link);
   }
 

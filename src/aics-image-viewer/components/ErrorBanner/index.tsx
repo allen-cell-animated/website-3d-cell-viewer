@@ -96,7 +96,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, 
   const errorMessage = (
     <>
       <div>
-        {getErrorTitle(error) + (firstErrorCount > 1 ? ` (${firstErrorCount})` : "")}
+        {getErrorTitle(error) + (firstErrorCount > 1 ? ` (${firstErrorCount})` : "")}{" "}
         <Button type="text" onClick={() => setShowDetails(!showDetails)}>
           {showDetails ? "Show less info" : "Show more info"}
         </Button>
@@ -119,7 +119,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, 
 
   return (
     <Alert
-      banner
+      showIcon
       type="error"
       className="load-error-banner"
       message={errorMessage}
