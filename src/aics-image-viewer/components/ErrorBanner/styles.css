@@ -18,6 +18,6 @@
 
   .ant-alert-message div:first-child {
     color: var(--color-text-section);
-    font-weight: bold;
+    font-weight: 600;
   }
 }
