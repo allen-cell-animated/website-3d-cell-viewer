@@ -80,7 +80,7 @@ const getErrorDescription = (error: unknown): React.ReactNode => {
   return ERROR_TYPE_DESCRIPTIONS[type] ?? UNKNOWN_ERROR_DESCRIPTION;
 };
 
-export type ErrorBannerProps = {
+export type ErrorAlertProps = {
   errors: unknown;
   /** The number of times we've seen an error of the type that is currently being displayed before */
   firstErrorCount?: number;
@@ -88,7 +88,7 @@ export type ErrorBannerProps = {
   onSkipError?: () => void;
 };
 
-const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, afterClose, onSkipError }) => {
+const ErrorAlert: React.FC<ErrorAlertProps> = ({ errors, firstErrorCount = 0, afterClose, onSkipError }) => {
   const [showDetails, setShowDetails] = React.useState(false);
   const [errorsSeenCount, setErrorsSeenCount] = React.useState(0);
   const error = Array.isArray(errors) ? errors[0] : errors;
@@ -121,7 +121,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, 
     <Alert
       showIcon
       type="error"
-      className="load-error-banner"
+      className="load-error-alert"
       message={errorMessage}
       closable
       afterClose={() => {
@@ -133,7 +133,7 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ errors, firstErrorCount = 0, 
   );
 };
 
-export const useErrorBanner = (): [React.ReactNode, (error: unknown) => void] => {
+export const useErrorAlert = (): [React.ReactNode, (error: unknown) => void] => {
   const [errorList, setErrorList] = React.useState<unknown[]>([]);
   // Keep track of which errors have been seen and how many times
   const seenErrors = useConstructor(() => new Map<string, number>());
@@ -159,10 +159,10 @@ export const useErrorBanner = (): [React.ReactNode, (error: unknown) => void] =>
   }, []);
 
   const errCount = errorCounts[0];
-  const bannerComponent = errorList.length > 0 && (
-    <ErrorBanner errors={errorList} firstErrorCount={errCount} onSkipError={onSkipError} afterClose={afterClose} />
+  const alertComponent = errorList.length > 0 && (
+    <ErrorAlert errors={errorList} firstErrorCount={errCount} onSkipError={onSkipError} afterClose={afterClose} />
   );
-  return [bannerComponent, addError];
+  return [alertComponent, addError];
 };
 
-export default ErrorBanner;
+export default ErrorAlert;

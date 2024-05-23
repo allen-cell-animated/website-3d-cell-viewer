@@ -58,7 +58,7 @@ import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
-import { useErrorBanner } from "../ErrorBanner";
+import { useErrorAlert } from "../ErrorBanner";
 
 import "../../assets/styles/globals.css";
 import {
@@ -190,7 +190,7 @@ const App: React.FC<AppProps> = (props) => {
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string | string[]>("");
 
-  const [errorBanner, showError] = useErrorBanner();
+  const [errorAlert, showError] = useErrorAlert();
   useEffect(() => {
     // Get notifications of loading errors which occur after the initial load, e.g. on time change or new channel load
     view3d.setLoadErrorHandler((_vol, e) => {
@@ -788,7 +788,7 @@ const App: React.FC<AppProps> = (props) => {
 
   return (
     <StyleProvider>
-      {errorBanner}
+      {errorAlert}
       <Layout className="cell-viewer-app" style={{ height: props.appHeight }}>
         {channelSettings.map((channelState, index) => (
           <ChannelUpdater
