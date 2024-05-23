@@ -1,6 +1,9 @@
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common");
 
+// NOTE: webpack.dev.js is currently used in our deployments across multiple platforms
+// (S3, GitHub Pages, etc.). Please be cautious when making changes to this file.
+
 module.exports = (env) => {
   return merge(common(env), {
     mode: "development",
