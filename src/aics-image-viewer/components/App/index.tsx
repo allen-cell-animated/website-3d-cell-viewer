@@ -190,15 +190,16 @@ const App: React.FC<AppProps> = (props) => {
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string | string[]>("");
 
-  const [errorAlert, showError] = useErrorAlert();
+  const [errorAlert, _showError] = useErrorAlert();
+  const showError = (error: unknown): void => {
+    _showError(error);
+    setSendingQueryRequest(false);
+  };
   useEffect(() => {
     // Get notifications of loading errors which occur after the initial load, e.g. on time change or new channel load
-    view3d.setLoadErrorHandler((_vol, e) => {
-      showError(e);
-      setSendingQueryRequest(false);
-    });
+    view3d.setLoadErrorHandler((_vol, e) => showError(e));
     return () => view3d.setLoadErrorHandler(undefined);
-  }, [view3d, showError]);
+  }, [view3d]);
 
   const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
   const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
@@ -512,7 +513,6 @@ const App: React.FC<AppProps> = (props) => {
       });
     } catch (e) {
       showError(e);
-      setSendingQueryRequest(false);
       throw e;
     }
 
@@ -524,7 +524,6 @@ const App: React.FC<AppProps> = (props) => {
     // in case the loader callback fires before the state is set
     loader.current.loadVolumeData(aimg).catch((e) => {
       showError(e);
-      setSendingQueryRequest(false);
       throw e;
     });
 
