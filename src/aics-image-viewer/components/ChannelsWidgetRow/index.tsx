@@ -5,7 +5,6 @@ import { Channel, ControlPoint } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 
 import TfEditor from "../TfEditor";
-import colorPalette from "../../shared/colorPalette";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 
