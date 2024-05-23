@@ -1,2 +1,1 @@
-docker run -p 9020:9020 -d -v /allen:/allen:rshared danielt/ace2-3d-viewer
-#docker run -p 9020:9020 -d -v /allen:/allen:rshared -e DEPLOYMENT_ENV=dev $docker_image
+docker run --rm -p 9020:80 --name 3d-volume-viewer 3d-volume-viewer-image

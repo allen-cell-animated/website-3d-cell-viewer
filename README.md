@@ -28,3 +28,15 @@ or as React component:
     />
 ```
 
+### Running with Docker
+
+Clone the repository and run the following commands in the root of the project:
+
+```cmd
+docker build -t 3d-volume-viewer-image .
+docker run --rm -p 9020:80 --name 3d-volume-viewer 3d-volume-viewer-image
+```
+
+This will create a new docker image called `3d-volume-viewer` and run it on port 9020. You can access the viewer by navigating to http://localhost:9020 in your browser.
+
+To rebuild changes, run the above commands again. (The `--rm` flag will automatically delete the existing container when it is stopped.)
