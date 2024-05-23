@@ -58,7 +58,7 @@ import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
-import { useErrorAlert } from "../ErrorBanner";
+import { useErrorAlert } from "../ErrorAlert";
 
 import "../../assets/styles/globals.css";
 import {
