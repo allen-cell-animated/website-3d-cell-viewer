@@ -181,7 +181,7 @@
 /******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
-/******/ 		__webpack_require__.p = "/website-3d-cell-viewer";
+/******/ 		__webpack_require__.p = "/website-3d-cell-viewer/";
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/importScripts chunk loading */
