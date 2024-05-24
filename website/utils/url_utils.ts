@@ -240,10 +240,8 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
       const channelIndex = parseInt(key.slice(1), 10);
       // TODO: try/catch here
       const channelData = parseKeyValueList(params[key]!);
-      channelIndexToSettings.set(
-        channelIndex,
-        deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson)
-      );
+      const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
+      channelIndexToSettings.set(channelIndex, channelSetting);
     }
   });
   if (channelIndexToSettings.size > 0) {
@@ -266,9 +264,10 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     args.imageDownloadHref = firstUrl;
     args.parentImageUrl = "";
     args.parentImageDownloadHref = "";
-    // if json, will not override channel settings.
-    // otherwise turn the first 3 channels on by default and group them
-    if (!firstUrl.endsWith("json") && !params.ch) {
+    // Check if channel settings are already provided (through per-channel settings or
+    // old `ch` query param, or included in JSON files). If not, make first three
+    // channels visible by default.
+    if (!firstUrl.endsWith("json") && !params.ch && channelIndexToSettings.size === 0) {
       args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!

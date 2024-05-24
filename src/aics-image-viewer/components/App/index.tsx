@@ -376,7 +376,6 @@ const App: React.FC<AppProps> = (props) => {
 
     // note that this modifies aimg also
     const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
-    console.log("channel", channel, index, "new control points", newControlPoints);
 
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
