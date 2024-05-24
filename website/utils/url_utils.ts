@@ -8,8 +8,8 @@ import {
 } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
-// Match comma separated string array.
-const LUT_REGEX = /^\[[a-z0-9.]*,[ ]*[a-z0-9.]*\]$/;
+// Match colon-separated pairs of alphanumeric strings
+const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
 export type ViewerChannelSettingJson = {
@@ -37,7 +37,7 @@ type ChannelKey = `c${number}`;
 type ParamKeys = (typeof paramKeys)[number];
 type Params = { [_ in ParamKeys | ChannelKey]?: string };
 
-function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
+export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
   const result: Params = {};
   for (const [key, value] of searchParams.entries()) {
     if (paramKeys.includes(key) || CHANNEL_STATE_KEY_REGEX.test(key)) {
@@ -89,7 +89,9 @@ export function parseKeyValueList(data: string): Record<string, string> {
   const result: Record<string, string> = {};
   const keyValuePairs = data.split(",");
   for (const pair of keyValuePairs) {
-    const [key, value] = pair.split(":");
+    const splitIndex = pair.indexOf(":");
+    const key = pair.slice(0, splitIndex);
+    const value = pair.slice(splitIndex + 1);
     result[decodeURIComponent(key).trim()] = decodeURIComponent(value).trim();
   }
   return result;
@@ -124,7 +126,7 @@ export function deserializeViewerChannelSetting(
   // Parse LUT
   if (jsonState.lut) {
     if (LUT_REGEX.test(jsonState.lut)) {
-      const [min, max] = jsonState.lut.slice(1, -1).split(",");
+      const [min, max] = jsonState.lut.split(":");
       result.lut = [min.trim(), max.trim()];
     }
   }
