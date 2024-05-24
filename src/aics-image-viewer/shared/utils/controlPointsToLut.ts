@@ -50,7 +50,6 @@ export function initializeLut(
             lutmod = "";
             lvalue = parseFloat(lstr);
           }
-
           if (lutmod === "m") {
             lutvalues[i] = histogram.maxBin * lvalue;
           } else if (lutmod === "p") {

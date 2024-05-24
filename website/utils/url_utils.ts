@@ -15,19 +15,21 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 export type ViewerChannelSettingJson = {
   /** Color, as a 6-digit hex color */
   c?: string;
-  /** Colorize */
+  /** Colorize. "1" is enabled. */
   cz?: "1" | "0";
-  /** Colorize alpha */
+  /** Colorize alpha, in the [0, 1] range. */
   cza?: string;
-  /** Opacity */
+  /** Opacity, in the [0, 1 range] */
   op?: string;
-
+  /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
+   * by a colon, e.g. "0:255", "p50:p90", or "autoij:0".
+   */
   lut?: string;
-  /** volume enabled */
+  /** Volume enabled. "1" is enabled. */
   v?: "1" | "0";
-  /** isosurface enabled */
+  /** Isosurface enabled. "1" is enabled. */
   i?: "1" | "0";
-  /** isosurface value */
+  /** Isosurface value, in the [0, 255] range. */
   iv?: string;
 };
 

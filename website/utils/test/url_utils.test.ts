@@ -66,7 +66,7 @@ describe("parseKeyValueList", () => {
 });
 
 describe("deserializeViewerChannelSetting", () => {
-  it("handles empty objects", () => {
+  it("returns default settings for empty objects", () => {
     const data = {};
     const result = deserializeViewerChannelSetting(0, data);
     expect(result).toEqual(defaultSettings);
@@ -78,7 +78,7 @@ describe("deserializeViewerChannelSetting", () => {
     expect(result).toEqual(defaultSettings);
   });
 
-  it("loads settings correctly", () => {
+  it("parses settings correctly", () => {
     const data = {
       c: "FF0000",
       cz: "1",
@@ -157,8 +157,7 @@ describe("deserializeViewerChannelSetting", () => {
 });
 
 describe("getArgsFromParams", () => {
-  // Note that all of these are NOT encoded.
-  // Tests will try parsing both unencoded and encoded.
+  // Tests will try parsing both unencoded and encoded URL params.
   const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
     [
       "c3=v:1,c:ff00ff,cz:0,cza:0.9,op:0.4,lut:p50:p99,i:1,iv:129",
@@ -249,7 +248,9 @@ describe("getArgsFromParams", () => {
     const params = new URLSearchParams(queryString);
     const { args } = await getArgsFromParams(params);
 
-    const channelSetting = args.viewerChannelSettings?.groups[0].channels[0]!;
+    const groups = args.viewerChannelSettings?.groups[0]!;
+    expect(groups.channels).toHaveLength(1);
+    const channelSetting = groups.channels[0];
 
     expect(channelSetting.match).toEqual(1);
     expect(channelSetting.enabled).toEqual(true);
