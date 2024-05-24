@@ -4,7 +4,6 @@ import {
   deserializeViewerChannelSetting,
   getArgsFromParams,
   parseKeyValueList,
-  urlSearchParamsToParams,
 } from "../url_utils";
 import { ViewerChannelSetting } from "../../../src";
 
@@ -212,7 +211,7 @@ describe("getArgsFromParams", () => {
   ];
 
   it("parses unencoded per-channel setting", async () => {
-    for (const [queryString, _, expected] of channelParamToSetting) {
+    for (const [queryString, , expected] of channelParamToSetting) {
       const params = new URLSearchParams(queryString);
       const { args } = await getArgsFromParams(params);
       const channelSetting = args.viewerChannelSettings?.groups[0].channels[0]!;
@@ -221,7 +220,7 @@ describe("getArgsFromParams", () => {
   });
 
   it("parses encoded per-channel settings", async () => {
-    for (const [_, queryString, expected] of channelParamToSetting) {
+    for (const [, queryString, expected] of channelParamToSetting) {
       const params = new URLSearchParams(queryString);
       const { args } = await getArgsFromParams(params);
       const channelSetting = args.viewerChannelSettings?.groups[0].channels[0]!;
