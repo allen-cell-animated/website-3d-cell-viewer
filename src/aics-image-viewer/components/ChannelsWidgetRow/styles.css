@@ -1,33 +1,30 @@
 @import "../../assets/styles/variables";
-.channel-rows-list .channel-row {
+.channel-rows-list .ant-list-item.channel-row {
   min-height: 70px;
   padding: 22px 0 12px 0;
   border-bottom: 1px solid var(--color-controlpanel-border);
+  flex-flow: row wrap;
 
-  &.ant-list-item {
-    flex-flow: row wrap;
+  .ant-list-item-meta-title,
+  .ant-checkbox-wrapper {
+    color: var(--color-controlpanel-text);
+  }
 
-    .ant-list-item-meta-title,
-    .ant-checkbox-wrapper {
-      color: var(--color-controlpanel-text);
-    }
+  .ant-btn-text {
+    color: var(--color-button-icon-activated-text);
+    transition: color 0.3s;
 
-    .ant-btn-text {
-      color: var(--color-button-icon-activated-text);
-      transition: color 0.3s;
-
-      &:hover,
-      &:focus-visible {
-        color: var(--color-button-tertiary-hover-text) !important;
-      }
-    }
-
-    &.controls-closed .ant-btn-text:not(:focus-visible) {
-      color: var(--color-controlpanel-text);
+    &:hover,
+    &:focus-visible {
+      color: var(--color-button-tertiary-hover-text) !important;
     }
   }
 
   &.controls-closed {
     padding: 12px 0 12px 0;
+
+    .ant-btn-text:not(:focus-visible) {
+      color: var(--color-controlpanel-text);
+    }
   }
 }
