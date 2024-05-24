@@ -3,12 +3,12 @@ import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 import { AppProps, GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
-  ChannelState,
   ViewerChannelSetting,
   ViewerChannelSettings,
 } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
+// Match comma separated string array.
 const LUT_REGEX = /^\[[a-z0-9.]*,[a-z0-9.]*\]$/;
 
 type ViewerChannelSettingJson = {
@@ -72,12 +72,17 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
 };
 
 /**
- * Parse data in the format "key1:value1,key2:value2,...".
- * Note that data should be decoded before calling this function.
+ * Parse a string list of comma-separated key:value pairs into
+ * a key-value object.
  *
- * Key and value strings will also be decoded.
+ * @param data The string to parse. Expected to be in the format
+ * "key1:value1,key2:value2,...". Colons and commas in keys or values
+ * should be encoded using `encodeURIComponent`.
+ * @returns An object with the parsed key-value pairs. Key and value strings
+ *  will be decoded using `decodeURIComponent`.
  */
-function parseKeyValueData(data: string): Record<string, string> {
+export function parseKeyValueList(data: string): Record<string, string> {
+  if (data === "") return {};
   const result: Record<string, string> = {};
   const keyValuePairs = data.split(",");
   for (const pair of keyValuePairs) {
@@ -87,7 +92,7 @@ function parseKeyValueData(data: string): Record<string, string> {
   return result;
 }
 
-function deserializeViewerChannelSetting(
+export function deserializeViewerChannelSetting(
   channelIndex: number,
   jsonState: ViewerChannelSettingJson
 ): ViewerChannelSetting {
@@ -208,13 +213,16 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     }
     args.viewerChannelSettings = initialChannelSettings;
   }
-  // Check for and parse params that match new channel settings model
+  // Check for per-channel settings; this will override the old channel settings (`ch`)
+  // if present.
+  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
+  // a comma-separated list of key-value pairs.
   const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
   Object.keys(params).forEach((key) => {
     if (CHANNEL_STATE_KEY_REGEX.test(key)) {
       const channelIndex = parseInt(key.slice(1), 10);
       // TODO: try/catch here
-      const channelData = parseKeyValueData(params[key]!);
+      const channelData = parseKeyValueList(params[key]!);
       channelIndexToSettings.set(
         channelIndex,
         deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson)
