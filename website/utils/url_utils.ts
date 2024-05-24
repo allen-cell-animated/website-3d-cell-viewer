@@ -9,15 +9,16 @@ import {
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 // Match comma separated string array.
-const LUT_REGEX = /^\[[a-z0-9.]*,[a-z0-9.]*\]$/;
+const LUT_REGEX = /^\[[a-z0-9.]*,[ ]*[a-z0-9.]*\]$/;
+const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
-type ViewerChannelSettingJson = {
+export type ViewerChannelSettingJson = {
+  /** Color, as a 6-digit hex color */
+  c?: string;
   /** Colorize */
   cz?: "1" | "0";
   /** Colorize alpha */
   cza?: string;
-  /** Color */
-  c?: string;
   /** Opacity */
   op?: string;
 
@@ -82,14 +83,24 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
  *  will be decoded using `decodeURIComponent`.
  */
 export function parseKeyValueList(data: string): Record<string, string> {
-  if (data === "") return {};
+  if (data === "") {
+    return {};
+  }
   const result: Record<string, string> = {};
   const keyValuePairs = data.split(",");
   for (const pair of keyValuePairs) {
     const [key, value] = pair.split(":");
-    result[decodeURIComponent(key)] = decodeURIComponent(value);
+    result[decodeURIComponent(key).trim()] = decodeURIComponent(value).trim();
   }
   return result;
+}
+
+function parseFloat(value: string | undefined): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const number = Number.parseFloat(value);
+  return Number.isNaN(number) ? undefined : number;
 }
 
 export function deserializeViewerChannelSetting(
@@ -98,19 +109,23 @@ export function deserializeViewerChannelSetting(
 ): ViewerChannelSetting {
   const result: ViewerChannelSetting = {
     match: channelIndex,
-    color: jsonState.c,
     enabled: jsonState.v === "1",
     surfaceEnabled: jsonState.i === "1",
-    isovalue: jsonState.iv ? Number.parseFloat(jsonState.iv) : undefined,
-    surfaceOpacity: jsonState.op ? Number.parseFloat(jsonState.op) : undefined,
+    isovalue: parseFloat(jsonState.iv),
+    surfaceOpacity: parseFloat(jsonState.op),
     colorizeEnabled: jsonState.cz === "1",
-    colorizeAlpha: jsonState.cza ? Number.parseFloat(jsonState.cza) : undefined,
+    colorizeAlpha: parseFloat(jsonState.cza),
   };
+  if (jsonState.c) {
+    if (HEX_COLOR_REGEX.test(jsonState.c)) {
+      result.color = jsonState.c;
+    }
+  }
   // Parse LUT
   if (jsonState.lut) {
     if (LUT_REGEX.test(jsonState.lut)) {
       const [min, max] = jsonState.lut.slice(1, -1).split(",");
-      result.lut = [min, max];
+      result.lut = [min.trim(), max.trim()];
     }
   }
   return result;
