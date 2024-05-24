@@ -238,10 +238,16 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   Object.keys(params).forEach((key) => {
     if (CHANNEL_STATE_KEY_REGEX.test(key)) {
       const channelIndex = parseInt(key.slice(1), 10);
-      // TODO: try/catch here
-      const channelData = parseKeyValueList(params[key]!);
-      const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
-      channelIndexToSettings.set(channelIndex, channelSetting);
+      try {
+        const channelData = parseKeyValueList(params[key]!);
+        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
+        channelIndexToSettings.set(channelIndex, channelSetting);
+      } catch (e) {
+        console.warn(
+          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
+          e
+        );
+      }
     }
   });
   if (channelIndexToSettings.size > 0) {
