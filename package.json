@@ -19,8 +19,8 @@
   },
   "scripts": {
     "start": "webpack serve --config webpack.dev.js  --env env=dev",
-    "gh-build-nightly": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer",
-    "gh-build-release": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer-release",
+    "gh-build-nightly": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer/",
+    "gh-build-release": "webpack --config webpack.dev.js --env env=production basename=/website-3d-cell-viewer-release/",
     "s3-build": "webpack --config webpack.dev.js --env env=production",
     "docker-build": "webpack --config webpack.common.js --env env=production",
     "dev": "webpack --config webpack.dev.js --env env=dev",
