@@ -125,7 +125,6 @@ export function deserializeViewerChannelSetting(
       result.color = jsonState.c;
     }
   }
-  // Parse LUT
   if (jsonState.lut) {
     if (LUT_REGEX.test(jsonState.lut)) {
       const [min, max] = jsonState.lut.split(":");
