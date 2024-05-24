@@ -45,16 +45,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    if (!target.checked && !isosurfaceChecked) {
-      setControlsOpen(false);
-    }
     changeChannelSetting(index, "volumeEnabled", target.checked);
   };
 
   const isosurfaceCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    if (!target.checked && !volumeChecked) {
-      setControlsOpen(false);
-    }
     changeChannelSetting(index, "isosurfaceEnabled", target.checked);
   };
 
@@ -157,9 +151,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
-      <h4 className="ant-list-item-meta-title" style={{ marginTop: "20px", marginBottom: "5px" }}>
-        Surface settings:
-      </h4>
       {createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, onIsovalueChange)}
       {createSliderRow(
         "Opacity",
@@ -178,13 +169,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
-      {volumeChecked && (
-        <Row justify="space-between" className="volume-settings">
-          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-          {createTFEditor()}
-        </Row>
-      )}
-      {isosurfaceChecked && <Row justify="space-between">{renderSurfaceControls()}</Row>}
+      <h4 className="ant-list-item-meta-title">Volume settings:</h4>
+      {volumeChecked ? createTFEditor() : <i>Disabled</i>}
+      <h4 className="ant-list-item-meta-title">Surface settings:</h4>
+      {isosurfaceChecked ? renderSurfaceControls() : <i>Disabled</i>}
     </div>
   );
 
