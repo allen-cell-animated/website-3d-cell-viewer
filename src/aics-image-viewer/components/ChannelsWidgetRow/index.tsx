@@ -188,7 +188,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </div>
   );
 
-  const rowClass = controlsOpen ? "row-card" : "row-card controls-closed";
+  const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
     <List.Item key={index} className={rowClass} extra={visibilityControls}>
       <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />

@@ -1,12 +1,8 @@
 @import "../../assets/styles/variables";
-.channel-rows-list .row-card {
+.channel-rows-list .channel-row {
   min-height: 70px;
   padding: 22px 0 12px 0;
   border-bottom: 1px solid var(--color-controlpanel-border);
-
-  .ant-row-flex {
-    margin-top: 1em;
-  }
 
   &.ant-list-item {
     flex-flow: row wrap;

@@ -1,6 +1,6 @@
 @import "../../assets/styles/variables";
 
-.row-card {
+.channel-row {
   :host {
     display: block;
   }
