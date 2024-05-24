@@ -31,8 +31,16 @@ export function initializeLut(
         let lutmod = "";
         let lvalue = 0;
         let lutvalues = [0, 0];
+        let useLutValues = true;
         for (let i = 0; i < 2; ++i) {
           const lstr = initSettings.lut[i];
+          if (lstr === "autoij") {
+            const [hmin, hmax] = histogram.findAutoIJBins();
+            lutObject = new Lut().createFromMinMax(hmin, hmax);
+            useLutValues = false;
+            break;
+          }
+
           // look at first char of string.
           let firstchar = lstr.charAt(0);
           if (firstchar === "m" || firstchar === "p") {
@@ -42,6 +50,7 @@ export function initializeLut(
             lutmod = "";
             lvalue = parseFloat(lstr);
           }
+
           if (lutmod === "m") {
             lutvalues[i] = histogram.maxBin * lvalue;
           } else if (lutmod === "p") {
@@ -51,10 +60,12 @@ export function initializeLut(
           }
         }
 
-        lutObject = new Lut().createFromMinMax(
-          Math.min(lutvalues[0], lutvalues[1]),
-          Math.max(lutvalues[0], lutvalues[1])
-        );
+        if (useLutValues) {
+          lutObject = new Lut().createFromMinMax(
+            Math.min(lutvalues[0], lutvalues[1]),
+            Math.max(lutvalues[0], lutvalues[1])
+          );
+        }
       }
     }
   }

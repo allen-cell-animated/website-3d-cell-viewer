@@ -371,9 +371,12 @@ const App: React.FC<AppProps> = (props) => {
     let color = defaultColor;
     let volumeEnabled = false;
     let surfaceEnabled = false;
+    let colorizeEnabled = false;
+    let colorizeAlpha = 1.0;
 
     // note that this modifies aimg also
     const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
+    console.log("channel", channel, index, "new control points", newControlPoints);
 
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
@@ -391,6 +394,12 @@ const App: React.FC<AppProps> = (props) => {
         if (initSettings.surfaceEnabled !== undefined) {
           surfaceEnabled = initSettings.surfaceEnabled;
         }
+        if (initSettings.colorizeEnabled !== undefined) {
+          colorizeEnabled = initSettings.colorizeEnabled;
+        }
+        if (initSettings.colorizeAlpha !== undefined) {
+          colorizeAlpha = initSettings.colorizeAlpha;
+        }
       }
     }
 
@@ -398,8 +407,8 @@ const App: React.FC<AppProps> = (props) => {
       name: channel || "Channel " + index,
       volumeEnabled: volumeEnabled,
       isosurfaceEnabled: surfaceEnabled,
-      colorizeEnabled: false,
-      colorizeAlpha: 1.0,
+      colorizeEnabled: colorizeEnabled,
+      colorizeAlpha: colorizeAlpha,
       isovalue: 188,
       opacity: 1.0,
       color: color,

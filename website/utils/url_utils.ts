@@ -2,16 +2,44 @@ import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 
 import { AppProps, GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
-import { ViewerChannelSettings } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import {
+  ChannelState,
+  ViewerChannelSetting,
+  ViewerChannelSettings,
+} from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+
+const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
+const LUT_REGEX = /^\[[a-z0-9.]*,[a-z0-9.]*\]$/;
+
+type ViewerChannelSettingJson = {
+  /** Colorize */
+  cz?: "1" | "0";
+  /** Colorize alpha */
+  cza?: string;
+  /** Color */
+  c?: string;
+  /** Opacity */
+  op?: string;
+
+  lut?: string;
+  /** volume enabled */
+  v?: "1" | "0";
+  /** isosurface enabled */
+  i?: "1" | "0";
+  /** isosurface value */
+  iv?: string;
+};
 
 const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
+type ChannelKey = `c${number}`;
+
 type ParamKeys = (typeof paramKeys)[number];
-type Params = { [_ in ParamKeys]?: string };
+type Params = { [_ in ParamKeys | ChannelKey]?: string };
 
 function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
   const result: Params = {};
   for (const [key, value] of searchParams.entries()) {
-    if (paramKeys.includes(key)) {
+    if (paramKeys.includes(key) || CHANNEL_STATE_KEY_REGEX.test(key)) {
       result[key] = value;
     }
   }
@@ -42,6 +70,46 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
 
   return urls;
 };
+
+/**
+ * Parse data in the format "key1:value1,key2:value2,...".
+ * Note that data should be decoded before calling this function.
+ *
+ * Key and value strings will also be decoded.
+ */
+function parseKeyValueData(data: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  const keyValuePairs = data.split(",");
+  for (const pair of keyValuePairs) {
+    const [key, value] = pair.split(":");
+    result[decodeURIComponent(key)] = decodeURIComponent(value);
+  }
+  return result;
+}
+
+function deserializeViewerChannelSetting(
+  channelIndex: number,
+  jsonState: ViewerChannelSettingJson
+): ViewerChannelSetting {
+  const result: ViewerChannelSetting = {
+    match: channelIndex,
+    color: jsonState.c,
+    enabled: jsonState.v === "1",
+    surfaceEnabled: jsonState.i === "1",
+    isovalue: jsonState.iv ? Number.parseFloat(jsonState.iv) : undefined,
+    surfaceOpacity: jsonState.op ? Number.parseFloat(jsonState.op) : undefined,
+    colorizeEnabled: jsonState.cz === "1",
+    colorizeAlpha: jsonState.cza ? Number.parseFloat(jsonState.cza) : undefined,
+  };
+  // Parse LUT
+  if (jsonState.lut) {
+    if (LUT_REGEX.test(jsonState.lut)) {
+      const [min, max] = jsonState.lut.slice(1, -1).split(",");
+      result.lut = [min, max];
+    }
+  }
+  return result;
+}
 
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
@@ -103,6 +171,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     }
     viewerSettings.viewMode = mapping[view];
   }
+  // old, deprecated channels model
   if (params.ch) {
     // ?ch=1,2
     // ?luts=0,255,0,255
@@ -139,6 +208,29 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     }
     args.viewerChannelSettings = initialChannelSettings;
   }
+  // Check for and parse params that match new channel settings model
+  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
+  Object.keys(params).forEach((key) => {
+    if (CHANNEL_STATE_KEY_REGEX.test(key)) {
+      const channelIndex = parseInt(key.slice(1), 10);
+      // TODO: try/catch here
+      const channelData = parseKeyValueData(params[key]!);
+      channelIndexToSettings.set(
+        channelIndex,
+        deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson)
+      );
+    }
+  });
+  if (channelIndexToSettings.size > 0) {
+    const groups: ViewerChannelSettings["groups"] = [
+      {
+        name: "Channels",
+        channels: Array.from(channelIndexToSettings.values()),
+      },
+    ];
+    args.viewerChannelSettings = { groups };
+  }
+
   if (params.url) {
     const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
     const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;

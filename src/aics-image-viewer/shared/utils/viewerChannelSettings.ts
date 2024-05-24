@@ -46,6 +46,8 @@ export interface ViewerChannelSetting {
   isovalue?: number;
   // valid when surfaceEnabled = true. default 1.0 fully opaque
   surfaceOpacity?: number;
+  colorizeEnabled?: boolean;
+  colorizeAlpha?: number;
 }
 
 export interface ViewerChannelGroup {
