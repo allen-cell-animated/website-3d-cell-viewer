@@ -108,18 +108,6 @@
     .ant-collapse-content-box {
       padding: 0 16px;
     }
-
-    .global-volume-controls {
-      .ant-collapse-content-box {
-        padding: 16px 24px;
-      }
-    }
-
-    .color-customizer {
-      .ant-collapse-content-box {
-        padding: 0 16px;
-      }
-    }
   }
 
   .ant-collapse {
