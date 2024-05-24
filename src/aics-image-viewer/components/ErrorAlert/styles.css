@@ -1,0 +1,26 @@
+.load-error-alert {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 40vw;
+  align-items: start;
+  z-index: 5000;
+  border-color: #dc4446;
+  padding: 12px 30px;
+
+  /* Keeps icons vertically aligned with the *first row* of text */
+  .ant-alert-icon,
+  .ant-alert-close-icon,
+  .ant-alert-message div {
+    min-height: 24px;
+  }
+
+  .ant-btn-text {
+    color: var(--color-text-link);
+  }
+
+  .ant-alert-message div:first-child {
+    color: var(--color-text-section);
+    font-weight: 600;
+  }
+}
