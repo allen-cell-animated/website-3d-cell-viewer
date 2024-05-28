@@ -58,10 +58,10 @@ describe("parseKeyValueList", () => {
     });
   });
 
-  it("removes whitespace", () => {
-    const data = " key1 : value1 , key2 : value2 ";
+  it("removes trailing and leading whitespace", () => {
+    const data = " key1 : value1 , key2 : value2 , key3: value 3";
     const result = parseKeyValueList(data);
-    expect(result).toEqual({ key1: "value1", key2: "value2" });
+    expect(result).toEqual({ key1: "value1", key2: "value2", key3: "value 3" });
   });
 });
 
