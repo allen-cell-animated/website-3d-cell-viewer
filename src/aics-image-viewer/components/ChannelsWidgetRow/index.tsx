@@ -170,9 +170,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const renderControls = (): React.ReactNode => (
     <div style={STYLES.settingsContainer}>
       <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-      {volumeChecked ? createTFEditor() : <i>Disabled</i>}
+      {volumeChecked ? createTFEditor() : <i>Not currently selected</i>}
       <h4 className="ant-list-item-meta-title">Surface settings:</h4>
-      {isosurfaceChecked ? renderSurfaceControls() : <i>Disabled</i>}
+      {isosurfaceChecked ? renderSurfaceControls() : <i>Not currently selected</i>}
     </div>
   );
 
