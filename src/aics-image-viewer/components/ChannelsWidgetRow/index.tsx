@@ -89,12 +89,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </Row>
   );
 
-  const toggleControlsOpen = (): void => {
-    if (isosurfaceChecked || volumeChecked) {
-      setControlsOpen(!controlsOpen);
-    }
-  };
-
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
     props.changeChannelSetting(index!, "color", color);
@@ -121,7 +115,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
       </Checkbox>
       <Button
         icon={<ViewerIcon type="preferences" style={{ fontSize: "16px" }} />}
-        onClick={toggleControlsOpen}
+        onClick={() => setControlsOpen(!controlsOpen)}
         title="Open channel settings"
         type="text"
       />
