@@ -28,7 +28,7 @@ export type ViewerChannelSettingJson = {
   /** Volume enabled. "1" is enabled. */
   ven?: "1" | "0";
   /** Isosurface enabled. "1" is enabled. */
-  ien?: "1" | "0";
+  sen?: "1" | "0";
   /** Isosurface value, in the [0, 255] range. */
   isv?: string;
 };
@@ -114,7 +114,7 @@ export function deserializeViewerChannelSetting(
   const result: ViewerChannelSetting = {
     match: channelIndex,
     enabled: jsonState.ven === "1",
-    surfaceEnabled: jsonState.ien === "1",
+    surfaceEnabled: jsonState.sen === "1",
     isovalue: parseFloat(jsonState.isv),
     surfaceOpacity: parseFloat(jsonState.isa),
     colorizeEnabled: jsonState.clz === "1",

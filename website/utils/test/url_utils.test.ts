@@ -44,7 +44,7 @@ describe("parseKeyValueList", () => {
   });
 
   it("parses example viewer channel settings", () => {
-    const data = "col:FF0000,clz:1,cza:0.5,isa:0.75,ven:1,ien:1,isv:128,lut:autoij:";
+    const data = "col:FF0000,clz:1,cza:0.5,isa:0.75,ven:1,sen:1,isv:128,lut:autoij:";
     const result = parseKeyValueList(data);
     expect(result).toEqual({
       col: "FF0000",
@@ -52,7 +52,7 @@ describe("parseKeyValueList", () => {
       cza: "0.5",
       isa: "0.75",
       ven: "1",
-      ien: "1",
+      sen: "1",
       isv: "128",
       lut: "autoij:",
     });
@@ -85,7 +85,7 @@ describe("deserializeViewerChannelSetting", () => {
       cza: "0.5",
       isa: "0.75",
       ven: "1",
-      ien: "1",
+      sen: "1",
       isv: "128",
       lut: "0:255",
     } as ViewerChannelSettingJson;
@@ -162,8 +162,8 @@ describe("getArgsFromParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
   const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
     [
-      "c3=ven:1,col:ff00ff,clz:0,cza:0.9,isa:0.4,lut:p50:p99,ien:1,isv:129",
-      "c3=ven%3A1%2Ccol%3Aff00ff%2Cclz%3A0%2Ccza%3A0.9%2Cisa%3A0.4%2Clut%3Ap50%3Ap99%2Cien%3A1%2Cisv%3A129",
+      "c3=ven:1,col:ff00ff,clz:0,cza:0.9,isa:0.4,lut:p50:p99,sen:1,isv:129",
+      "c3=ven%3A1%2Ccol%3Aff00ff%2Cclz%3A0%2Ccza%3A0.9%2Cisa%3A0.4%2Clut%3Ap50%3Ap99%2Csen%3A1%2Cisv%3A129",
       {
         color: "ff00ff",
         name: undefined,
@@ -178,8 +178,8 @@ describe("getArgsFromParams", () => {
       },
     ],
     [
-      "c1=ven:0,col:ff0000,clz:1,cza:0.5,isa:0.75,lut:0:255,ien:0,isv:0",
-      "c1=ven%3A0%2Ccol%3Aff0000%2Cclz%3A1%2Ccza%3A0.5%2Cisa%3A0.75%2Clut%3A0%3A255%2Cien%3A0%2Cisv%3A0",
+      "c1=ven:0,col:ff0000,clz:1,cza:0.5,isa:0.75,lut:0:255,sen:0,isv:0",
+      "c1=ven%3A0%2Ccol%3Aff0000%2Cclz%3A1%2Ccza%3A0.5%2Cisa%3A0.75%2Clut%3A0%3A255%2Csen%3A0%2Cisv%3A0",
       {
         color: "ff0000",
         name: undefined,
@@ -194,8 +194,8 @@ describe("getArgsFromParams", () => {
       },
     ],
     [
-      "c5=ven:0,col:00ff00,clz:0,cza:0,isa:1,lut:autoij:,ien:1,isv:100",
-      "c5=ven%3A0%2Ccol%3A00ff00%2Cclz%3A0%2Ccza%3A0%2Cisa%3A1%2Clut%3Aautoij%3A%2Cien%3A1%2Cisv%3A100",
+      "c5=ven:0,col:00ff00,clz:0,cza:0,isa:1,lut:autoij:,sen:1,isv:100",
+      "c5=ven%3A0%2Ccol%3A00ff00%2Cclz%3A0%2Ccza%3A0%2Cisa%3A1%2Clut%3Aautoij%3A%2Csen%3A1%2Cisv%3A100",
       {
         color: "00ff00",
         name: undefined,
