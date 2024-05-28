@@ -14,23 +14,23 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
 export type ViewerChannelSettingJson = {
   /** Color, as a 6-digit hex color */
-  c?: string;
+  col?: string;
   /** Colorize. "1" is enabled. */
-  cz?: "1" | "0";
+  clz?: "1" | "0";
   /** Colorize alpha, in the [0, 1] range. */
   cza?: string;
   /** Opacity, in the [0, 1 range] */
-  op?: string;
+  isa?: string;
   /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
    * by a colon, e.g. "0:255", "p50:p90", or "autoij:0".
    */
   lut?: string;
   /** Volume enabled. "1" is enabled. */
-  v?: "1" | "0";
+  ven?: "1" | "0";
   /** Isosurface enabled. "1" is enabled. */
-  i?: "1" | "0";
+  ien?: "1" | "0";
   /** Isosurface value, in the [0, 255] range. */
-  iv?: string;
+  isv?: string;
 };
 
 const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
@@ -113,16 +113,16 @@ export function deserializeViewerChannelSetting(
 ): ViewerChannelSetting {
   const result: ViewerChannelSetting = {
     match: channelIndex,
-    enabled: jsonState.v === "1",
-    surfaceEnabled: jsonState.i === "1",
-    isovalue: parseFloat(jsonState.iv),
-    surfaceOpacity: parseFloat(jsonState.op),
-    colorizeEnabled: jsonState.cz === "1",
+    enabled: jsonState.ven === "1",
+    surfaceEnabled: jsonState.ien === "1",
+    isovalue: parseFloat(jsonState.isv),
+    surfaceOpacity: parseFloat(jsonState.isa),
+    colorizeEnabled: jsonState.clz === "1",
     colorizeAlpha: parseFloat(jsonState.cza),
   };
-  if (jsonState.c) {
-    if (HEX_COLOR_REGEX.test(jsonState.c)) {
-      result.color = jsonState.c;
+  if (jsonState.col) {
+    if (HEX_COLOR_REGEX.test(jsonState.col)) {
+      result.color = jsonState.col;
     }
   }
   if (jsonState.lut) {

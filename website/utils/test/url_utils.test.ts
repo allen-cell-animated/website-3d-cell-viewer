@@ -44,16 +44,16 @@ describe("parseKeyValueList", () => {
   });
 
   it("parses example viewer channel settings", () => {
-    const data = "c:FF0000,cz:1,cza:0.5,op:0.75,v:1,i:1,iv:128,lut:autoij:";
+    const data = "col:FF0000,clz:1,cza:0.5,isa:0.75,ven:1,ien:1,isv:128,lut:autoij:";
     const result = parseKeyValueList(data);
     expect(result).toEqual({
-      c: "FF0000",
-      cz: "1",
+      col: "FF0000",
+      clz: "1",
       cza: "0.5",
-      op: "0.75",
-      v: "1",
-      i: "1",
-      iv: "128",
+      isa: "0.75",
+      ven: "1",
+      ien: "1",
+      isv: "128",
       lut: "autoij:",
     });
   });
@@ -80,13 +80,13 @@ describe("deserializeViewerChannelSetting", () => {
 
   it("parses settings correctly", () => {
     const data = {
-      c: "FF0000",
-      cz: "1",
+      col: "FF0000",
+      clz: "1",
       cza: "0.5",
-      op: "0.75",
-      v: "1",
-      i: "1",
-      iv: "128",
+      isa: "0.75",
+      ven: "1",
+      ien: "1",
+      isv: "128",
       lut: "0:255",
     } as ViewerChannelSettingJson;
     expect(deserializeViewerChannelSetting(0, data)).toEqual({
@@ -106,6 +106,8 @@ describe("deserializeViewerChannelSetting", () => {
     const luts = [
       ["autoij:0", ["autoij", "0"]],
       ["0:autoij", ["0", "autoij"]],
+      [":autoij", ["", "autoij"]],
+      ["autoij:", ["autoij", ""]],
       ["0:255", ["0", "255"]],
       ["0.5:1.0", ["0.5", "1.0"]],
       ["0.50:1.00", ["0.50", "1.00"]],
@@ -132,7 +134,7 @@ describe("deserializeViewerChannelSetting", () => {
   it("handles hex color formats", () => {
     const colors = ["000000", "FFFFFF", "ffffff", "012345", "6789AB", "CDEF01", "abcdef"];
     for (const color of colors) {
-      const data = { c: color } as ViewerChannelSettingJson;
+      const data = { col: color } as ViewerChannelSettingJson;
       const result = deserializeViewerChannelSetting(0, data);
       expect(result.color).toEqual(color);
     }
@@ -141,14 +143,14 @@ describe("deserializeViewerChannelSetting", () => {
   it("ignores bad color formats", () => {
     const badColors = ["f", "ff00", "red", "rgb(255,0,0)"];
     for (const color of badColors) {
-      const data = { c: color } as ViewerChannelSettingJson;
+      const data = { col: color } as ViewerChannelSettingJson;
       const result = deserializeViewerChannelSetting(0, data);
       expect(result.color).toBeUndefined();
     }
   });
 
   it("ignores bad float data", () => {
-    const data = { cza: "NaN", op: "bad", iv: "f8" } as ViewerChannelSettingJson;
+    const data = { cza: "NaN", isa: "bad", isv: "f8" } as ViewerChannelSettingJson;
     const result = deserializeViewerChannelSetting(0, data);
     expect(result.colorizeAlpha).toBeUndefined();
     expect(result.surfaceOpacity).toBeUndefined();
@@ -160,8 +162,8 @@ describe("getArgsFromParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
   const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
     [
-      "c3=v:1,c:ff00ff,cz:0,cza:0.9,op:0.4,lut:p50:p99,i:1,iv:129",
-      "c3=v%3A1%2Cc%3Aff00ff%2Ccz%3A0%2Ccza%3A0.9%2Cop%3A0.4%2Clut%3Ap50%3Ap99%2Ci%3A1%2Civ%3A129",
+      "c3=ven:1,col:ff00ff,clz:0,cza:0.9,isa:0.4,lut:p50:p99,ien:1,isv:129",
+      "c3=ven%3A1%2Ccol%3Aff00ff%2Cclz%3A0%2Ccza%3A0.9%2Cisa%3A0.4%2Clut%3Ap50%3Ap99%2Cien%3A1%2Cisv%3A129",
       {
         color: "ff00ff",
         name: undefined,
@@ -176,8 +178,8 @@ describe("getArgsFromParams", () => {
       },
     ],
     [
-      "c1=v:0,c:ff0000,cz:1,cza:0.5,op:0.75,lut:0:255,i:0,iv:0",
-      "c1=v%3A0%2Cc%3Aff0000%2Ccz%3A1%2Ccza%3A0.5%2Cop%3A0.75%2Clut%3A0%3A255%2Ci%3A0%2Civ%3A0",
+      "c1=ven:0,col:ff0000,clz:1,cza:0.5,isa:0.75,lut:0:255,ien:0,isv:0",
+      "c1=ven%3A0%2Ccol%3Aff0000%2Cclz%3A1%2Ccza%3A0.5%2Cisa%3A0.75%2Clut%3A0%3A255%2Cien%3A0%2Cisv%3A0",
       {
         color: "ff0000",
         name: undefined,
@@ -192,8 +194,8 @@ describe("getArgsFromParams", () => {
       },
     ],
     [
-      "c5=v:0,c:00ff00,cz:0,cza:0,op:1,lut:autoij:,i:1,iv:100",
-      "c5=v%3A0%2Cc%3A00ff00%2Ccz%3A0%2Ccza%3A0%2Cop%3A1%2Clut%3Aautoij%3A%2Ci%3A1%2Civ%3A100",
+      "c5=ven:0,col:00ff00,clz:0,cza:0,isa:1,lut:autoij:,ien:1,isv:100",
+      "c5=ven%3A0%2Ccol%3A00ff00%2Cclz%3A0%2Ccza%3A0%2Cisa%3A1%2Clut%3Aautoij%3A%2Cien%3A1%2Cisv%3A100",
       {
         color: "00ff00",
         name: undefined,
@@ -244,7 +246,7 @@ describe("getArgsFromParams", () => {
   });
 
   it("overrides ch settings when per-channel settings are included", async () => {
-    const queryString = "?ch=0&lut=1,2&c1=v:1,lut:4:5";
+    const queryString = "?ch=0&lut=1,2&c1=ven:1,lut:4:5";
     const params = new URLSearchParams(queryString);
     const { args } = await getArgsFromParams(params);
 
