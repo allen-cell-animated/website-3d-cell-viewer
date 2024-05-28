@@ -111,6 +111,7 @@ export function deserializeViewerChannelSetting(
   channelIndex: number,
   jsonState: ViewerChannelSettingJson
 ): ViewerChannelSetting {
+  // Missing/undefined fields should be handled downstream.
   const result: ViewerChannelSetting = {
     match: channelIndex,
     enabled: jsonState.ven === "1",

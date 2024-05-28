@@ -259,6 +259,24 @@ describe("getArgsFromParams", () => {
     expect(channelSetting.lut).toEqual(["4", "5"]);
   });
 
+  it("skips missing channel indices", async () => {
+    const queryString = "?c0=ven:1&c15=ven:1,lut:4:5";
+    const params = new URLSearchParams(queryString);
+    const { args } = await getArgsFromParams(params);
+
+    const groups = args.viewerChannelSettings?.groups[0]!;
+    expect(groups.channels).toHaveLength(2);
+    const channelSetting1 = groups.channels[0];
+    const channelSetting2 = groups.channels[1];
+
+    expect(channelSetting1.match).toEqual(0);
+    expect(channelSetting1.enabled).toEqual(true);
+
+    expect(channelSetting2.match).toEqual(15);
+    expect(channelSetting2.enabled).toEqual(true);
+    expect(channelSetting2.lut).toEqual(["4", "5"]);
+  });
+
   it("creates empty default data for bad per-channel setting formats", async () => {
     const queryString = "c1=bad&c0=ultrabad:bad&c2=,,,,,,";
     const params = new URLSearchParams(queryString);
