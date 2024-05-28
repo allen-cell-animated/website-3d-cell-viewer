@@ -1,13 +1,18 @@
 @import "../../assets/styles/variables";
 .channel-rows-list .ant-list-item.channel-row {
-  min-height: 70px;
-  padding: 22px 0 12px 0;
+  padding: 22px 0;
   border-bottom: 1px solid var(--color-controlpanel-border);
   flex-flow: row wrap;
 
   .ant-list-item-meta-title,
   .ant-checkbox-wrapper {
     color: var(--color-controlpanel-text);
+  }
+
+  h4 {
+    color: var(--color-text-section);
+    margin-top: 28px;
+    margin-bottom: 10px;
   }
 
   .ant-btn-text {
@@ -20,11 +25,7 @@
     }
   }
 
-  &.controls-closed {
-    padding: 12px 0 12px 0;
-
-    .ant-btn-text:not(:focus-visible) {
-      color: var(--color-controlpanel-text);
-    }
+  &.controls-closed .ant-btn-text:not(:focus-visible) {
+    color: var(--color-controlpanel-text);
   }
 }
