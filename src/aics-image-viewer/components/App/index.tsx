@@ -385,6 +385,8 @@ const App: React.FC<AppProps> = (props) => {
     let surfaceEnabled = false;
     let colorizeEnabled = false;
     let colorizeAlpha = 1.0;
+    let isosurfaceOpacity = 1.0;
+    let isovalue = 128;
 
     // note that this modifies aimg also
     const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
@@ -411,6 +413,12 @@ const App: React.FC<AppProps> = (props) => {
         if (initSettings.colorizeAlpha !== undefined) {
           colorizeAlpha = initSettings.colorizeAlpha;
         }
+        if (initSettings.surfaceOpacity !== undefined) {
+          isosurfaceOpacity = initSettings.surfaceOpacity;
+        }
+        if (initSettings.isovalue !== undefined) {
+          isovalue = initSettings.isovalue;
+        }
       }
     }
 
@@ -420,8 +428,8 @@ const App: React.FC<AppProps> = (props) => {
       isosurfaceEnabled: surfaceEnabled,
       colorizeEnabled: colorizeEnabled,
       colorizeAlpha: colorizeAlpha,
-      isovalue: 188,
-      opacity: 1.0,
+      isovalue: isovalue,
+      opacity: isosurfaceOpacity,
       color: color,
       controlPoints: newControlPoints || [],
     };
