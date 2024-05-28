@@ -57,7 +57,7 @@ const ColorPicker: React.FC<ColorPickerProps> = (props) => {
   React.useEffect(() => setCurrentColor(props.color), [props.color]);
 
   const width = props.width || 36;
-  const popoverDirectionStyle = openAboveSwatch ? { bottom: "25px" } : { top: "1px" };
+  const popoverDirectionStyle = openAboveSwatch ? { bottom: "21px" } : { top: "0px" };
   return (
     <div>
       <div style={STYLES.swatch} ref={swatchRef} onClick={handleClick}>
@@ -85,12 +85,12 @@ export default ColorPicker;
 const STYLES: Styles = {
   color: {
     height: "14px",
+    margin: "3px",
     borderRadius: "2px",
   },
   swatch: {
-    padding: "5px",
-    borderRadius: "1px",
-    boxShadow: "0 0 0 1px rgba(0,0,0,.1)",
+    borderRadius: "3px",
+    border: "1px solid var(--color-controlpanel-border)",
     display: "inline-block",
     cursor: "pointer",
     verticalAlign: "middle",
