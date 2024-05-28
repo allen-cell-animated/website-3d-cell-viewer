@@ -73,9 +73,9 @@ describe("deserializeViewerChannelSetting", () => {
   });
 
   it("ignores unexpected keys", () => {
-    const data = { badKey: "badValue" } as ViewerChannelSettingJson;
+    const data = { badKey: "badValue", ven: "1", sen: "1" } as ViewerChannelSettingJson;
     const result = deserializeViewerChannelSetting(0, data);
-    expect(result).toEqual(defaultSettings);
+    expect(result).toEqual({ ...defaultSettings, enabled: true, surfaceEnabled: true });
   });
 
   it("parses settings correctly", () => {
