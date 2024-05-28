@@ -162,7 +162,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const renderControls = (): React.ReactNode => (
-    <div style={STYLES.settingsContainer}>
+    <div style={{ width: "100%" }}>
       <h4>Volume settings:</h4>
       {volumeChecked ? createTFEditor() : <i>Not currently selected</i>}
       <h4>Surface settings:</h4>
@@ -172,8 +172,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
-    <List.Item key={index} className={rowClass} extra={visibilityControls}>
+    <List.Item key={index} className={rowClass}>
       <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
+      {visibilityControls}
       {controlsOpen && renderControls()}
     </List.Item>
   );
@@ -182,10 +183,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 export default ChannelsWidgetRow;
 
 const STYLES: Styles = {
-  settingsContainer: {
-    width: "100%",
-    order: 3,
-  },
   raisedButton: {
     marginLeft: "2px",
     marginRight: "2px",
