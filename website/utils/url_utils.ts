@@ -33,16 +33,29 @@ export type ViewerChannelSettingJson = {
   isv?: string;
 };
 
-const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
-type ChannelKey = `c${number}`;
+const baseParamKeys = ["mask", "url", "file", "dataset", "id", "view"] as const;
+const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
 
-type ParamKeys = (typeof paramKeys)[number];
-type Params = { [_ in ParamKeys | ChannelKey]?: string };
+type BaseParamKeys = (typeof baseParamKeys)[number];
+type ChannelKey = `c${number}`;
+type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
+
+type ParamKeysV0 = BaseParamKeys | DeprecatedParamKeys;
+type ParamKeysV2_9_0 = BaseParamKeys | ChannelKey;
+
+type AllParamKeys = ParamKeysV0 | ParamKeysV2_9_0;
+
+type Params = { [_ in AllParamKeys]?: string };
+
+const isParamKey = (key: string): key is BaseParamKeys => baseParamKeys.includes(key as BaseParamKeys);
+const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
+  deprecatedParamKeys.includes(key as DeprecatedParamKeys);
+const isChannelKey = (key: string): key is ChannelKey => CHANNEL_STATE_KEY_REGEX.test(key);
 
 export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
   const result: Params = {};
   for (const [key, value] of searchParams.entries()) {
-    if (paramKeys.includes(key) || CHANNEL_STATE_KEY_REGEX.test(key)) {
+    if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
       result[key] = value;
     }
   }
@@ -238,7 +251,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   // a comma-separated list of key-value pairs.
   const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
   Object.keys(params).forEach((key) => {
-    if (CHANNEL_STATE_KEY_REGEX.test(key)) {
+    if (isChannelKey(key)) {
       const channelIndex = parseInt(key.slice(1), 10);
       try {
         const channelData = parseKeyValueList(params[key]!);
