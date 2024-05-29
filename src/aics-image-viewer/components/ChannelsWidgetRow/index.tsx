@@ -163,16 +163,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderControls = (): React.ReactNode => {
     if (!volumeChecked && !isosurfaceChecked) {
-      return (
-        <div style={{ width: "100%" }}>
-          <h4>
-            <i>Not currently visible</i>
-          </h4>
-        </div>
-      );
+      return <h4 style={{ fontStyle: "italic" }}>Not currently visible</h4>;
     }
     return (
-      <div style={{ width: "100%" }}>
+      <>
         {volumeChecked && (
           <>
             <h4>Volume settings:</h4>
@@ -185,7 +179,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
             {renderSurfaceControls()}
           </>
         )}
-      </div>
+      </>
     );
   };
 
@@ -194,7 +188,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     <List.Item key={index} className={rowClass}>
       <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
       {visibilityControls}
-      {controlsOpen && renderControls()}
+      {controlsOpen && <div style={{ width: "100%" }}>{renderControls()}</div>}
     </List.Item>
   );
 };
