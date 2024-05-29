@@ -17,7 +17,6 @@ import {
   ColorObject,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
-import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
@@ -112,8 +111,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.auto2XF = this.auto2XF.bind(this);
     this.auto98XF = this.auto98XF.bind(this);
     this.bestFitXF = this.bestFitXF.bind(this);
-    this.handleColorizeCheckbox = this.handleColorizeCheckbox.bind(this);
-    this.handleColorizeAlpha = this.handleColorizeAlpha.bind(this);
     this.colorPick = this.colorPick.bind(this);
     this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
     this.handleChangeColor = this.handleChangeColor.bind(this);
@@ -614,23 +611,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   // TODO unused
-  // NOTE none of this component's elements are focusable (required to fire keyboard events).
-  //   The behavior in this function would be a bit awkward to implement properly.
-  private keydown(_e: KeyboardEvent): void {
-    if (!this.selected) {
-      return;
-    }
-    if (d3.event.keyCode === 46) {
-      // delete
-      const i = this.props.controlPoints.indexOf(this.selected);
-      let newControlPoints = [...this.props.controlPoints];
-      newControlPoints.splice(i, 1);
-      this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
-      this.props.updateChannelLutControlPoints(newControlPoints);
-    }
-  }
-
-  // TODO unused
   private export(): void {
     const jsonContent = JSON.stringify(this.props.controlPoints);
     const a = document.createElement("a");
@@ -691,14 +671,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
   }
 
-  private handleColorizeCheckbox(e: CheckboxChangeEvent): void {
-    this.props.updateColorizeMode(e.target.checked);
-  }
-
-  private handleColorizeAlpha(values: number[]): void {
-    this.props.updateColorizeAlpha(values[0]);
-  }
-
   private resetXF(): void {
     const lutObj = new Lut().createFullRange();
     this.updateControlPointsWithoutColor(lutObj.controlPoints);
@@ -757,18 +729,21 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           ) : null}
         </div>
         <div className="aligned">
-          <Checkbox checked={colorizeEnabled} onChange={this.handleColorizeCheckbox} id={`colorize-${id}`}>
+          <Checkbox
+            checked={colorizeEnabled}
+            onChange={(e) => this.props.updateColorizeMode(e.target.checked)}
+            id={`colorize-${id}`}
+          >
             Colorize
           </Checkbox>
           <div style={STYLES.control}>
             <Nouislider
-              //                      id={`svg-${id}`}
               range={{ min: [0], max: [1] }}
               start={colorizeAlpha}
               connect={true}
               tooltips={true}
               behaviour="drag"
-              onUpdate={this.handleColorizeAlpha}
+              onUpdate={(values) => this.props.updateColorizeAlpha(values[0])}
             />
           </div>
         </div>
