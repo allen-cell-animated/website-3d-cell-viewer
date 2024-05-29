@@ -32,6 +32,8 @@ import {
   ChannelGrouping,
   ChannelSettingUpdater,
   MultipleChannelSettingsUpdater,
+  ViewerChannelSettings,
+  ViewerChannelSetting,
 } from "../../shared/utils/viewerChannelSettings";
 import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
@@ -125,6 +127,18 @@ const defaultViewerSettings: GlobalViewerSettings = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
+};
+
+const DEFAULT_CHANNEL_STATE: ChannelState = {
+  name: "",
+  volumeEnabled: false,
+  isosurfaceEnabled: false,
+  colorizeEnabled: false,
+  colorizeAlpha: 1.0,
+  isovalue: 128,
+  opacity: 1.0,
+  color: [226, 205, 179] as ColorArray,
+  controlPoints: [],
 };
 
 const defaultProps: AppProps = {
@@ -373,65 +387,34 @@ const App: React.FC<AppProps> = (props) => {
     }
   };
 
+  // TODO: Refactor this out of App index?
   const initializeOneChannelSetting = (
     aimg: Volume | null,
     channel: string,
     index: number,
-    defaultColor: ColorArray
+    defaultColor: ColorArray,
+    viewerChannelSettings?: ViewerChannelSettings,
+    defaultChannelState = DEFAULT_CHANNEL_STATE
   ): ChannelState => {
-    const { viewerChannelSettings } = props;
-    let color = defaultColor;
-    let volumeEnabled = false;
-    let surfaceEnabled = false;
-    let colorizeEnabled = false;
-    let colorizeAlpha = 1.0;
-    let isosurfaceOpacity = 1.0;
-    let isovalue = 128;
-
     // note that this modifies aimg also
     const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
 
+    let initSettings = {} as Partial<ViewerChannelSetting>;
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
-      const initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings);
-      if (initSettings) {
-        if (initSettings.color !== undefined) {
-          const initColor = colorHexToArray(initSettings.color);
-          if (initColor) {
-            color = initColor;
-          }
-        }
-        if (initSettings.enabled !== undefined) {
-          volumeEnabled = initSettings.enabled;
-        }
-        if (initSettings.surfaceEnabled !== undefined) {
-          surfaceEnabled = initSettings.surfaceEnabled;
-        }
-        if (initSettings.colorizeEnabled !== undefined) {
-          colorizeEnabled = initSettings.colorizeEnabled;
-        }
-        if (initSettings.colorizeAlpha !== undefined) {
-          colorizeAlpha = initSettings.colorizeAlpha;
-        }
-        if (initSettings.surfaceOpacity !== undefined) {
-          isosurfaceOpacity = initSettings.surfaceOpacity;
-        }
-        if (initSettings.isovalue !== undefined) {
-          isovalue = initSettings.isovalue;
-        }
-      }
+      initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
     }
 
     return {
-      name: channel || "Channel " + index,
-      volumeEnabled: volumeEnabled,
-      isosurfaceEnabled: surfaceEnabled,
-      colorizeEnabled: colorizeEnabled,
-      colorizeAlpha: colorizeAlpha,
-      isovalue: isovalue,
-      opacity: isosurfaceOpacity,
-      color: color,
-      controlPoints: newControlPoints || [],
+      name: initSettings.name ?? channel ?? "Channel " + index,
+      volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
+      isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
+      colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
+      colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
+      isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
+      opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
+      color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
+      controlPoints: newControlPoints ?? defaultChannelState.controlPoints,
     };
   };
 
@@ -446,7 +429,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      return initializeOneChannelSetting(null, channel, index, color);
+      return initializeOneChannelSetting(null, channel, index, color, props.viewerChannelSettings);
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
