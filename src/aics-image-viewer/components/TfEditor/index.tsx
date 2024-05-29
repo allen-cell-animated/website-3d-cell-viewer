@@ -718,10 +718,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 }
 
 const STYLES: Styles = {
-  colorPicker: {
-    margin: "auto",
-    marginRight: 16,
-  },
   cover: {
     position: "fixed",
     top: "0px",
