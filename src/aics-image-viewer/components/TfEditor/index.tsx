@@ -276,7 +276,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .attr("class", "line")
       .attr("fill", "url(#tfGradient-" + this.id + ")")
       .attr("stroke", "white")
-      .call(() => this.initDraw());
+      .call(() => this.redraw());
 
     // Mouse interaction handler
     g.append("rect")
@@ -470,18 +470,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       });
 
     gradient.exit().remove();
-  }
-
-  // create the chart content
-  private initDraw(): void {
-    // Add circle to connect and interact with the control points
-    this.makeCirclesForControlPoints();
-
-    // Create a linear gradient definition of the control points
-    this.makeGradient();
-
-    // Draw gradient in canvas too
-    this.drawCanvas();
   }
 
   // Update the chart content
