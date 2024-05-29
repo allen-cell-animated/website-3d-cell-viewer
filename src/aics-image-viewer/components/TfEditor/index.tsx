@@ -25,7 +25,6 @@ type Pair = [number, number];
 
 interface MyTfEditorProps {
   id: string;
-  index: number;
   width: number;
   height: number;
   volumeData: Uint8Array;

@@ -127,10 +127,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     return (
       <TfEditor
         id={"TFEditor" + index}
-        index={index}
         fit-to-data={false}
         width={418}
-        height={130}
+        height={125}
         volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
