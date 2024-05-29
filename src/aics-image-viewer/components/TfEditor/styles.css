@@ -6,7 +6,7 @@
   }
 
   .bar rect {
-    fill: $border-color;
+    fill: var(--color-controlpanel-border);
   }
 
   .aligned {
@@ -18,12 +18,12 @@
   }
 
   .tick text {
-    fill: $text-gray;
+    fill: var(--color-controlpanel-text);
   }
 
   .axis path,
   .axis line {
-    stroke: $border-color;
+    stroke: var(--color-controlpanel-border);
   }
 
   button::-moz-focus-inner {

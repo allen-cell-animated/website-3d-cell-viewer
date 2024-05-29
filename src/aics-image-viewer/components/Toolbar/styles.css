@@ -32,7 +32,7 @@
 
   /* Toolbar scroll mode: collapse all sections to the left and scroll */
   &.viewer-toolbar-scroll {
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--color-layout-dividers);
 
     .viewer-toolbar-scroll-left,
     .viewer-toolbar-scroll-right {
@@ -40,9 +40,8 @@
     }
 
     .viewer-toolbar {
-      display: static;
-      text-align: left;
       white-space: nowrap;
+      justify-content: normal;
 
       overflow-x: scroll;
       scrollbar-width: none;
