@@ -39,11 +39,7 @@ const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
 type BaseParamKeys = (typeof baseParamKeys)[number];
 type ChannelKey = `c${number}`;
 type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
-
-type ParamKeysV0 = BaseParamKeys | DeprecatedParamKeys;
-type ParamKeysV2_9_0 = BaseParamKeys | ChannelKey;
-
-type AllParamKeys = ParamKeysV0 | ParamKeysV2_9_0;
+type AllParamKeys = BaseParamKeys | DeprecatedParamKeys | ChannelKey;
 
 type Params = { [_ in AllParamKeys]?: string };
 
@@ -134,16 +130,12 @@ export function deserializeViewerChannelSetting(
     colorizeEnabled: jsonState.clz === "1",
     colorizeAlpha: parseFloat(jsonState.cza),
   };
-  if (jsonState.col) {
-    if (HEX_COLOR_REGEX.test(jsonState.col)) {
-      result.color = jsonState.col;
-    }
+  if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
+    result.color = jsonState.col;
   }
-  if (jsonState.lut) {
-    if (LUT_REGEX.test(jsonState.lut)) {
-      const [min, max] = jsonState.lut.split(":");
-      result.lut = [min.trim(), max.trim()];
-    }
+  if (jsonState.lut && LUT_REGEX.test(jsonState.lut)) {
+    const [min, max] = jsonState.lut.split(":");
+    result.lut = [min.trim(), max.trim()];
   }
   return result;
 }
