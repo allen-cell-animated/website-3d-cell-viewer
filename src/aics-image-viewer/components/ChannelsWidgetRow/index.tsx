@@ -161,14 +161,33 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </Col>
   );
 
-  const renderControls = (): React.ReactNode => (
-    <div style={{ width: "100%" }}>
-      <h4>Volume settings:</h4>
-      {volumeChecked ? createTFEditor() : <i>Not currently selected</i>}
-      <h4>Surface settings:</h4>
-      {isosurfaceChecked ? renderSurfaceControls() : <i>Not currently selected</i>}
-    </div>
-  );
+  const renderControls = (): React.ReactNode => {
+    if (!volumeChecked && !isosurfaceChecked) {
+      return (
+        <div style={{ width: "100%" }}>
+          <h4>
+            <i>Not currently visible</i>
+          </h4>
+        </div>
+      );
+    }
+    return (
+      <div style={{ width: "100%" }}>
+        {volumeChecked && (
+          <>
+            <h4>Volume settings:</h4>
+            {createTFEditor()}
+          </>
+        )}
+        {isosurfaceChecked && (
+          <>
+            <h4>Surface settings:</h4>
+            {renderSurfaceControls()}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
