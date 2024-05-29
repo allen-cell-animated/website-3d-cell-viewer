@@ -1,7 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
-import { Channel, ControlPoint, Lut } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 import "nouislider/distribute/nouislider.css";
 
@@ -57,6 +57,27 @@ const StatefulSketchPicker: React.FC<{
   return <SketchPicker color={colorState} onChange={wrappedOnChange} disableAlpha={disableAlpha} />;
 };
 
+const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
+  autoXF: (histo) => {
+    const [b, e] = histo.findAutoMinMax();
+    return new Lut().createFromMinMax(b, e);
+  },
+  auto2XF: (histo) => {
+    const [hmin, hmax] = histo.findAutoIJBins();
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  auto98XF: (histo) => {
+    const hmin = histo.findBinOfPercentile(LUT_MIN_PERCENTILE);
+    const hmax = histo.findBinOfPercentile(LUT_MAX_PERCENTILE);
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  bestFitXF: (histo) => {
+    const [hmin, hmax] = histo.findBestFitBins();
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  resetXF: (_histo) => new Lut().createFullRange(),
+};
+
 export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEditorState> {
   id: string;
   private width: number;
@@ -106,11 +127,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.mousemove = this.mousemove.bind(this);
     this.mouseup = this.mouseup.bind(this);
     this.drawCanvas = this.drawCanvas.bind(this);
-    this.autoXF = this.autoXF.bind(this);
-    this.resetXF = this.resetXF.bind(this);
-    this.auto2XF = this.auto2XF.bind(this);
-    this.auto98XF = this.auto98XF.bind(this);
-    this.bestFitXF = this.bestFitXF.bind(this);
+    this.applyTFGenerator = this.applyTFGenerator.bind(this);
     this.colorPick = this.colorPick.bind(this);
     this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
     this.handleChangeColor = this.handleChangeColor.bind(this);
@@ -612,42 +629,9 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(pts);
   }
 
-  private autoXF(): void {
-    const { channelData } = this.props;
-
-    const [b, e] = channelData.histogram.findAutoMinMax();
-    const lutObj = new Lut().createFromMinMax(b, e);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private auto2XF(): void {
-    const { channelData } = this.props;
-
-    const [hmin, hmax] = channelData.histogram.findAutoIJBins();
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private auto98XF(): void {
-    const { channelData } = this.props;
-
-    const hmin = channelData.histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
-    const hmax = channelData.histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private bestFitXF(): void {
-    const { channelData } = this.props;
-
-    const [hmin, hmax] = channelData.histogram.findBestFitBins();
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private resetXF(): void {
-    const lutObj = new Lut().createFullRange();
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
+  applyTFGenerator(generator: string): void {
+    const lut = TF_GENERATORS[generator](this.props.channelData.histogram);
+    this.updateControlPointsWithoutColor(lut.controlPoints);
   }
 
   /////// Public API functions ///////
@@ -722,21 +706,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           </div>
         </div>
         <div className="aligned">
-          <Button id={`reset-${id}`} className="ant-btn" onClick={this.resetXF}>
-            Reset
-          </Button>
-          <Button id={`auto-${id}`} className="ant-btn" onClick={this.autoXF}>
-            Auto
-          </Button>
-          <Button id={`bestfit-${id}`} className="ant-btn" onClick={this.bestFitXF}>
-            BestFit
-          </Button>
-          <Button id={`auto2-${id}`} className="ant-btn" onClick={this.auto2XF}>
-            Auto_IJ
-          </Button>
-          <Button id={`auto98-${id}`} className="ant-btn" onClick={this.auto98XF}>
-            Auto_98
-          </Button>
+          <Button onClick={() => this.applyTFGenerator("resetXF")}>Reset</Button>
+          <Button onClick={() => this.applyTFGenerator("autoXF")}>Auto</Button>
+          <Button onClick={() => this.applyTFGenerator("bestFitXF")}>BestFit</Button>
+          <Button onClick={() => this.applyTFGenerator("auto2XF")}>Auto_IJ</Button>
+          <Button onClick={() => this.applyTFGenerator("auto98XF")}>Auto_98</Button>
         </div>
       </div>
     );
