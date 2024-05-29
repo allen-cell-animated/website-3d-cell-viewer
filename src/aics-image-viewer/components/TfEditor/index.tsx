@@ -610,20 +610,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.dragged = null;
   }
 
-  // TODO unused
-  private export(): void {
-    const jsonContent = JSON.stringify(this.props.controlPoints);
-    const a = document.createElement("a");
-    const blob = new Blob([jsonContent], {
-      type: "octet/stream",
-    });
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = "transferFunction.json";
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-
   updateControlPointsWithoutColor(ptsWithoutColor: ControlPoint[]): void {
     const pts = ptsWithoutColor.map((pt) => ({
       ...pt,
