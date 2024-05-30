@@ -1,8 +1,11 @@
 .viewer-control-row {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
   margin-right: 10px;
+
+  &:not(:last-child) {
+    margin-bottom: 20px;
+  }
 
   .control-name {
     flex: 2;

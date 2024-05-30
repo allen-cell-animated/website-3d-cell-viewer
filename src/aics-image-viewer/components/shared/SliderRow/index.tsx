@@ -21,7 +21,7 @@ const INTEGER_FORMATTER = { to: Math.round, from: Number };
 const SliderRow: React.FC<SliderRowProps> = (props) => (
   <div className="viewer-control-row">
     <div className="control-name">{props.label}</div>
-    <div className={props.children !== undefined ? "control" : "control control-slider"}>
+    <div className="control">
       {props.start === undefined
         ? props.children
         : !props.hideSlider && (
