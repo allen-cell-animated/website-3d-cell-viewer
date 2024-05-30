@@ -1,8 +1,7 @@
 import React from "react";
-import SmarterSlider from "./shared/SmarterSlider";
-import "nouislider/distribute/nouislider.css";
-
 import { Checkbox } from "antd";
+
+import SliderRow from "./shared/SliderRow";
 import { ViewerSettingUpdater } from "./App/types";
 import { Styles } from "../shared/types";
 
@@ -34,24 +33,14 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
     start: number | number[],
     max: number,
     propKey: GlobalVolumeControlKey
-  ): React.ReactNode => (
-    <div style={STYLES.controlRow}>
-      <div style={STYLES.controlName}>{label}</div>
-      <div style={STYLES.control}>
-        <SmarterSlider
-          range={{ min: 0, max }}
-          start={start}
-          connect={true}
-          tooltips={true}
-          behaviour="drag"
-          onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
-            const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
-            props.changeViewerSetting(propKey, selectValue);
-          }}
-        />
-      </div>
-    </div>
-  );
+  ): React.ReactNode => {
+    const onUpdate = (_strValues: string[], _handle: number, values: number[]): void => {
+      const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
+      props.changeViewerSetting(propKey, selectValue);
+    };
+
+    return <SliderRow label={label} start={start} max={max} onUpdate={onUpdate} />;
+  };
 
   const { showControls, maskAlpha, brightness, density, levels } = props;
 
@@ -62,15 +51,12 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
       {showControls.densitySlider && createSliderRow("density", density, 100, "density")}
       {showControls.levelsSliders && createSliderRow("levels", levels, 255, "levels")}
       {showControls.interpolationControl && (
-        <div style={STYLES.controlRow}>
-          <div style={STYLES.controlName}>interpolate</div>
-          <div style={{ flex: 5 }}>
-            <Checkbox
-              checked={props.interpolationEnabled}
-              onChange={({ target }) => props.changeViewerSetting("interpolationEnabled", target.checked)}
-            />
-          </div>
-        </div>
+        <SliderRow label="interpolate">
+          <Checkbox
+            checked={props.interpolationEnabled}
+            onChange={({ target }) => props.changeViewerSetting("interpolationEnabled", target.checked)}
+          />
+        </SliderRow>
       )}
     </div>
   );
