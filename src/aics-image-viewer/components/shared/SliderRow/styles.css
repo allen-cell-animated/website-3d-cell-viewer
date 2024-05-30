@@ -1,0 +1,18 @@
+.viewer-control-row {
+  height: 3em;
+  display: flex;
+
+  .control-name {
+    flex: 2;
+    white-space: nowrap;
+  }
+
+  .control {
+    flex: 5;
+
+    &.control-slider {
+      height: 30px;
+      margin-top: 10px;
+    }
+  }
+}
