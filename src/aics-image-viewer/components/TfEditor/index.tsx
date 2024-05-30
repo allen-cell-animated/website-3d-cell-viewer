@@ -19,6 +19,7 @@ import {
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
+const COLOR_PICKER_MARGIN = 6;
 
 type Pair = [number, number];
 
@@ -38,7 +39,11 @@ interface MyTfEditorProps {
 }
 
 interface MyTfEditorState {
-  displayColorPicker: boolean;
+  /**
+   * Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
+   * Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
+   */
+  colorPickerPosition: number | null;
 }
 
 /** Wrapper to convince color picker interface to update while open */
@@ -133,7 +138,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.svgElement = React.createRef();
 
     this.state = {
-      displayColorPicker: false,
+      colorPickerPosition: null,
     };
 
     /**
@@ -438,7 +443,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         // react on right-clicking
         d3.event.preventDefault();
         this.mouseup();
-        this.colorPick();
+        this.colorPick(d3.event.clientX);
       })
       .transition()
       .duration(750)
@@ -547,8 +552,19 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   /////// User interaction related event callbacks ////////
 
-  private colorPick(): void {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+  private colorPick(clientX = 0): void {
+    if (!this.svgElement.current) {
+      return;
+    }
+    const svgRect = this.svgElement.current.getBoundingClientRect();
+    const offset = clientX - svgRect.left;
+    if (offset < svgRect.width / 2) {
+      // Control point is towards the left of the plot; open color picker to its right
+      this.setState({ colorPickerPosition: offset + COLOR_PICKER_MARGIN });
+    } else {
+      // Control point is towards the right of the plot; open color picker to its left
+      this.setState({ colorPickerPosition: -(svgRect.width - offset + COLOR_PICKER_MARGIN) });
+    }
   }
 
   private mousedown(): void {
@@ -662,7 +678,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   handleCloseColorPicker(): void {
-    this.setState({ displayColorPicker: false });
+    this.setState({ colorPickerPosition: null });
   }
 
   handleChangeColor(color: ColorResult): void {
@@ -676,6 +692,8 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   render(): React.ReactNode {
     const { width, height, colorizeEnabled, colorizeAlpha } = this.props;
+    const { colorPickerPosition } = this.state;
+    const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
 
     return (
       <div>
@@ -686,19 +704,17 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
           {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
+        {colorPickerPosition !== null && (
+          <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
+            <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
+            <StatefulSketchPicker
+              color={colorArrayToObject(this.last_color)}
+              onChange={this.handleChangeColor}
+              disableAlpha={true}
+            />
+          </div>
+        )}
         <svg className="tf-editor-svg" width={width} height={height} ref={this.svgElement} />
-        <div>
-          {this.state.displayColorPicker && (
-            <div style={STYLES.popover}>
-              <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <StatefulSketchPicker
-                color={colorArrayToObject(this.last_color)}
-                onChange={this.handleChangeColor}
-                disableAlpha={true}
-              />
-            </div>
-          )}
-        </div>
         <SliderRow
           label={
             <Checkbox checked={colorizeEnabled} onChange={(e) => this.props.updateColorizeMode(e.target.checked)}>
@@ -726,10 +742,5 @@ const STYLES: Styles = {
   popover: {
     position: "absolute",
     zIndex: "9999",
-  },
-  control: {
-    flex: 5,
-    height: 30,
-    paddingTop: 15,
   },
 };
