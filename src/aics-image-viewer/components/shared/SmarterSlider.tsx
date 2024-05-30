@@ -1,7 +1,7 @@
 import React from "react";
 import Nouislider, { NouisliderProps } from "nouislider-react";
 
-type CallbackArgs = [values: any[], handle: number, unencodedValues: number[], tap: boolean, positions: number[]];
+type CallbackArgs = Parameters<NonNullable<NouisliderProps["onStart"]>>;
 
 /** A wrapper around `Nouislider` that prevents updates while the slider is being dragged. */
 export default class SmarterSlider extends React.Component<NouisliderProps, { shouldUpdate: boolean }> {
