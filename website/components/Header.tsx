@@ -70,7 +70,7 @@ const VerticalDivider = styled.div`
  * The logo and title of the app, to be used with the Header component.
  * Both the logo and app title are links that can be used for navigation.
  */
-function HeaderLogo(): ReactElement {
+function HeaderLogo({ noNavigate }: { noNavigate?: boolean }): ReactElement {
   return (
     <FlexRowAlignCenter>
       <AicsLogoLink href="https://www.allencell.org/" rel="noopener noreferrer" target="_blank">
@@ -80,7 +80,12 @@ function HeaderLogo(): ReactElement {
         </div>
       </AicsLogoLink>
       <VerticalDivider />
-      <HeaderTitleLink to="/" aria-label="Go to home page">
+      <HeaderTitleLink
+        to="/"
+        aria-label="Go to home page"
+        rel="noopener noreferrer"
+        target={noNavigate ? "_blank" : undefined}
+      >
         <h1>3D Volume Viewer</h1>
       </HeaderTitleLink>
     </FlexRowAlignCenter>
@@ -114,13 +119,15 @@ const HeaderContainer = styled(FlexRowAlignCenter)`
 type HeaderProps = {
   /** Optional element for alerts; will be rendered under the main header bar and use sticky positioning. */
   alertElement?: ReactElement;
+  /** When `true`, open links in a new tab rather than navigating away and causing the user to potentially lose work. */
+  noNavigate?: boolean;
 };
 
 export default function Header(props: PropsWithChildren<HeaderProps>): ReactElement {
   return (
     <StickyContainer>
       <HeaderContainer>
-        <HeaderLogo />
+        <HeaderLogo noNavigate={props.noNavigate} />
         {props.children}
       </HeaderContainer>
       {props.alertElement}
