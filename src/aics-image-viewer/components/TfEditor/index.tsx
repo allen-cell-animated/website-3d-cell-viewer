@@ -19,7 +19,7 @@ import {
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
-const COLOR_PICKER_MARGIN = 6;
+const COLOR_PICKER_MARGIN = 2;
 
 type Pair = [number, number];
 
@@ -439,11 +439,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         document.addEventListener("mousemove", this.capturedMousemove, false);
         document.addEventListener("mouseup", this.mouseup, false);
       })
-      .on("contextmenu", (d, i) => {
+      .on("contextmenu", () => {
         // react on right-clicking
         d3.event.preventDefault();
         this.mouseup();
-        this.colorPick(d3.event.clientX);
+        this.colorPick(d3.event.target);
       })
       .transition()
       .duration(750)
@@ -552,18 +552,22 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   /////// User interaction related event callbacks ////////
 
-  private colorPick(clientX = 0): void {
-    if (!this.svgElement.current) {
+  private colorPick(cpEl?: HTMLElement): void {
+    if (!cpEl || !this.svgElement.current) {
+      this.setState({ colorPickerPosition: 0 });
       return;
     }
+
     const svgRect = this.svgElement.current.getBoundingClientRect();
-    const offset = clientX - svgRect.left;
-    if (offset < svgRect.width / 2) {
+    const cpRect = cpEl.getBoundingClientRect();
+    const cpRectCenter = cpRect.left + cpRect.width / 2;
+
+    if (cpRectCenter - svgRect.left < svgRect.width / 2) {
       // Control point is towards the left of the plot; open color picker to its right
-      this.setState({ colorPickerPosition: offset + COLOR_PICKER_MARGIN });
+      this.setState({ colorPickerPosition: cpRect.right - svgRect.left + COLOR_PICKER_MARGIN });
     } else {
       // Control point is towards the right of the plot; open color picker to its left
-      this.setState({ colorPickerPosition: -(svgRect.width - offset + COLOR_PICKER_MARGIN) });
+      this.setState({ colorPickerPosition: -(svgRect.right - cpRect.left + COLOR_PICKER_MARGIN) });
     }
   }
 
