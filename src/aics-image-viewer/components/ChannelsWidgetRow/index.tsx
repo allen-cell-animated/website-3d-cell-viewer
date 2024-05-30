@@ -16,7 +16,7 @@ import {
   colorArrayToObject,
 } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
-import { IsosurfaceFormat, Styles } from "../../shared/types";
+import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
 
@@ -156,7 +156,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
     <List.Item key={index} className={rowClass}>
-      <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
+      <List.Item.Meta title={props.name} avatar={createColorPicker()} />
       {visibilityControls}
       {controlsOpen && <div style={{ width: "100%" }}>{renderControls()}</div>}
     </List.Item>
@@ -164,13 +164,3 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 };
 
 export default ChannelsWidgetRow;
-
-const STYLES: Styles = {
-  raisedButton: {
-    marginLeft: "2px",
-    marginRight: "2px",
-  },
-  controlName: {
-    whiteSpace: "nowrap",
-  },
-};
