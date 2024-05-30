@@ -679,7 +679,14 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     const { id, width, height, colorizeEnabled, colorizeAlpha } = this.props;
 
     return (
-      <div id="container">
+      <div>
+        <div className="aligned">
+          {this.createTFGeneratorButton("resetXF", "None", "Reset the transfer function to the full range.")}
+          {this.createTFGeneratorButton("auto98XF", "Default", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("autoXF", "Auto", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
+        </div>
         <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} />
         <div className="aligned">
           {this.state.displayColorPicker ? (
@@ -711,13 +718,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
               onUpdate={(values) => this.props.updateColorizeAlpha(values[0])}
             />
           </div>
-        </div>
-        <div className="aligned">
-          {this.createTFGeneratorButton("resetXF", "None", "Reset the transfer function to the full range.")}
-          {this.createTFGeneratorButton("auto98XF", "Default", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("autoXF", "Auto", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
       </div>
     );
