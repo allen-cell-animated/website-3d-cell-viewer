@@ -28,12 +28,8 @@ export interface GlobalVolumeControlsProps {
   changeViewerSetting: ViewerSettingUpdater;
 }
 
-export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
-  constructor(props: GlobalVolumeControlsProps) {
-    super(props);
-  }
-
-  createSliderRow = (
+const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
+  const createSliderRow = (
     label: string,
     start: number | number[],
     max: number,
@@ -50,36 +46,37 @@ export default class GlobalVolumeControls extends React.Component<GlobalVolumeCo
           behaviour="drag"
           onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
             const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
-            this.props.changeViewerSetting(propKey, selectValue);
+            props.changeViewerSetting(propKey, selectValue);
           }}
         />
       </div>
     </div>
   );
 
-  render(): React.ReactNode {
-    const { showControls, maskAlpha, brightness, density, levels } = this.props;
-    return (
-      <div style={STYLES.slidersWrapper}>
-        {showControls.alphaMaskSlider && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
-        {showControls.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
-        {showControls.densitySlider && this.createSliderRow("density", density, 100, "density")}
-        {showControls.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
-        {showControls.interpolationControl && (
-          <div style={STYLES.controlRow}>
-            <div style={STYLES.controlName}>interpolate</div>
-            <div style={{ flex: 5 }}>
-              <Checkbox
-                checked={this.props.interpolationEnabled}
-                onChange={({ target }) => this.props.changeViewerSetting("interpolationEnabled", target.checked)}
-              />
-            </div>
+  const { showControls, maskAlpha, brightness, density, levels } = props;
+
+  return (
+    <div style={STYLES.slidersWrapper}>
+      {showControls.alphaMaskSlider && createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
+      {showControls.brightnessSlider && createSliderRow("brightness", brightness, 100, "brightness")}
+      {showControls.densitySlider && createSliderRow("density", density, 100, "density")}
+      {showControls.levelsSliders && createSliderRow("levels", levels, 255, "levels")}
+      {showControls.interpolationControl && (
+        <div style={STYLES.controlRow}>
+          <div style={STYLES.controlName}>interpolate</div>
+          <div style={{ flex: 5 }}>
+            <Checkbox
+              checked={props.interpolationEnabled}
+              onChange={({ target }) => props.changeViewerSetting("interpolationEnabled", target.checked)}
+            />
           </div>
-        )}
-      </div>
-    );
-  }
-}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default GlobalVolumeControls;
 
 const STYLES: Styles = {
   slidersWrapper: {
