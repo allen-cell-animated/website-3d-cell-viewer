@@ -680,7 +680,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
     return (
       <div>
-        <div className="aligned">
+        <div className="button-row">
           {this.createTFGeneratorButton("resetXF", "None", "Reset the transfer function to the full range.")}
           {this.createTFGeneratorButton("auto98XF", "Default", "Automatically set the transfer function.")}
           {this.createTFGeneratorButton("autoXF", "Auto", "Automatically set the transfer function.")}
@@ -688,7 +688,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
         <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} />
-        <div className="aligned">
+        <div>
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />

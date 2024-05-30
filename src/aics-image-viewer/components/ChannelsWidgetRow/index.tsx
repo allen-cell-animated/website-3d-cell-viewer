@@ -143,7 +143,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   };
 
   const renderSurfaceControls = (): React.ReactNode => (
-    <Col span={24}>
+    <div>
       {createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, onIsovalueChange)}
       {createSliderRow(
         "Opacity",
@@ -151,13 +151,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
         ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
         onOpacityChange
       )}
-      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "GLTF")} style={STYLES.raisedButton}>
-        Save GLTF
-      </Button>
-      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "STL")} style={STYLES.raisedButton}>
-        Save STL
-      </Button>
-    </Col>
+      <div className="button-row">
+        <Button onClick={() => saveIsosurface(index, "GLTF")}>Export GLTF</Button>
+        <Button onClick={() => saveIsosurface(index, "STL")}>Export STL</Button>
+      </div>
+    </div>
   );
 
   const renderControls = (): React.ReactNode => {
