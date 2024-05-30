@@ -62,6 +62,7 @@ const StatefulSketchPicker: React.FC<{
 
 const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
   autoXF: (histo) => {
+    // Currently unused. min and max are the first and last bins whose values are >=10% of max bin
     const [b, e] = histo.findAutoMinMax();
     return new Lut().createFromMinMax(b, e);
   },
@@ -702,11 +703,10 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     return (
       <div>
         <div className="button-row">
-          {this.createTFGeneratorButton("resetXF", "None", "Reset the transfer function to the full range.")}
-          {this.createTFGeneratorButton("auto98XF", "Default", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("autoXF", "Auto", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
-          {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("resetXF", "None", "Reset transfer function to full range.")}
+          {this.createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
+          {this.createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
+          {this.createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
         </div>
         {colorPickerPosition !== null && (
           <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
