@@ -3,7 +3,6 @@ import { Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
 import { ViewerSettingUpdater } from "./App/types";
-import { Styles } from "../shared/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
@@ -45,7 +44,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
   const { showControls, maskAlpha, brightness, density, levels } = props;
 
   return (
-    <div style={STYLES.slidersWrapper}>
+    <div style={{ marginRight: 10, paddingTop: 18 }}>
       {showControls.alphaMaskSlider && createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
       {showControls.brightnessSlider && createSliderRow("brightness", brightness, 100, "brightness")}
       {showControls.densitySlider && createSliderRow("density", density, 100, "density")}
@@ -63,23 +62,3 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
 };
 
 export default GlobalVolumeControls;
-
-const STYLES: Styles = {
-  slidersWrapper: {
-    marginRight: "10px",
-    paddingTop: "18px",
-  },
-  controlRow: {
-    height: "3em",
-    display: "flex",
-  },
-  controlName: {
-    flex: 2,
-    whiteSpace: "nowrap",
-  },
-  control: {
-    flex: 5,
-    height: 30,
-    marginTop: 10,
-  },
-};
