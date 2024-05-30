@@ -675,7 +675,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   render(): React.ReactNode {
-    const { id, width, height, colorizeEnabled, colorizeAlpha } = this.props;
+    const { width, height, colorizeEnabled, colorizeAlpha } = this.props;
 
     return (
       <div>
@@ -686,9 +686,9 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
           {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
-        <svg id={`svg-${id}`} className="tf-editor-svg" width={width} height={height} ref={this.svgElement} />
+        <svg className="tf-editor-svg" width={width} height={height} ref={this.svgElement} />
         <div>
-          {this.state.displayColorPicker ? (
+          {this.state.displayColorPicker && (
             <div style={STYLES.popover}>
               <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
               <StatefulSketchPicker
@@ -697,7 +697,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
                 disableAlpha={true}
               />
             </div>
-          ) : null}
+          )}
         </div>
         <SliderRow
           label={
