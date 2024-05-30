@@ -314,7 +314,7 @@ export default function LandingPage(): ReactElement {
   return (
     <div style={{ backgroundColor: "var(--color-landingpage-bg)", minHeight: "100%" }}>
       <Header>
-        <FlexRowAlignCenter $gap={15}>
+        <FlexRowAlignCenter $gap={12}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onClickLoad} />
           </FlexRowAlignCenter>
