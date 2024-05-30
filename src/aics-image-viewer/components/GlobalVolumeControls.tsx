@@ -44,7 +44,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
   const { showControls, maskAlpha, brightness, density, levels } = props;
 
   return (
-    <div style={{ marginRight: 10, paddingTop: 18 }}>
+    <div style={{ paddingTop: 18 }}>
       {showControls.alphaMaskSlider && createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
       {showControls.brightnessSlider && createSliderRow("brightness", brightness, 100, "brightness")}
       {showControls.densitySlider && createSliderRow("density", density, 100, "density")}

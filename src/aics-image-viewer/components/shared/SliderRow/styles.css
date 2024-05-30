@@ -1,6 +1,8 @@
 .viewer-control-row {
-  height: 3em;
   display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-right: 10px;
 
   .control-name {
     flex: 2;
@@ -9,10 +11,5 @@
 
   .control {
     flex: 5;
-
-    &.control-slider {
-      height: 30px;
-      margin-top: 10px;
-    }
   }
 }
