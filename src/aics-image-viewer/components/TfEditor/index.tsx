@@ -2,13 +2,12 @@ import React from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
 import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
-import Nouislider from "nouislider-react";
+import { Button, Checkbox, Tooltip } from "antd";
 import "nouislider/distribute/nouislider.css";
 
 import "./styles.css";
 
-import { Button, Checkbox, Tooltip } from "antd";
-
+import SliderRow from "../shared/SliderRow";
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
   ColorArray,
@@ -687,7 +686,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
           {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
-        <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} />
+        <svg id={`svg-${id}`} className="tf-editor-svg" width={width} height={height} ref={this.svgElement} />
         <div>
           {this.state.displayColorPicker ? (
             <div style={STYLES.popover}>
@@ -700,25 +699,17 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
             </div>
           ) : null}
         </div>
-        <div className="aligned">
-          <Checkbox
-            checked={colorizeEnabled}
-            onChange={(e) => this.props.updateColorizeMode(e.target.checked)}
-            id={`colorize-${id}`}
-          >
-            Colorize
-          </Checkbox>
-          <div style={STYLES.control}>
-            <Nouislider
-              range={{ min: [0], max: [1] }}
-              start={colorizeAlpha}
-              connect={true}
-              tooltips={true}
-              behaviour="drag"
-              onUpdate={(values) => this.props.updateColorizeAlpha(values[0])}
-            />
-          </div>
-        </div>
+        <SliderRow
+          label={
+            <Checkbox checked={colorizeEnabled} onChange={(e) => this.props.updateColorizeMode(e.target.checked)}>
+              Colorize
+            </Checkbox>
+          }
+          max={1}
+          start={colorizeAlpha}
+          onUpdate={(values) => this.props.updateColorizeAlpha(values[0])}
+          hideSlider={!colorizeEnabled}
+        />
       </div>
     );
   }

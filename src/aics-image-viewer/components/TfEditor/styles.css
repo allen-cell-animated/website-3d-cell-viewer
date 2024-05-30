@@ -1,6 +1,10 @@
 @import "../../assets/styles/variables";
 
 .channel-row {
+  .tf-editor-svg {
+    margin-bottom: 8px;
+  }
+
   :host {
     display: block;
   }
