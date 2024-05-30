@@ -7,7 +7,7 @@ import "nouislider/distribute/nouislider.css";
 
 import "./styles.css";
 
-import { Button, Checkbox } from "antd";
+import { Button, Checkbox, Tooltip } from "antd";
 
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
@@ -633,6 +633,14 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.updateControlPointsWithoutColor(lut.controlPoints);
   }
 
+  createTFGeneratorButton(generator: string, name: string, description: string): React.ReactNode {
+    return (
+      <Tooltip title={description} placement="top">
+        <Button onClick={() => this.applyTFGenerator(generator)}>{name}</Button>
+      </Tooltip>
+    );
+  }
+
   /////// Public API functions ///////
 
   /** Set the pixel data we are manipulating */
@@ -705,11 +713,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
           </div>
         </div>
         <div className="aligned">
-          <Button onClick={() => this.applyTFGenerator("resetXF")}>Reset</Button>
-          <Button onClick={() => this.applyTFGenerator("autoXF")}>Auto</Button>
-          <Button onClick={() => this.applyTFGenerator("bestFitXF")}>BestFit</Button>
-          <Button onClick={() => this.applyTFGenerator("auto2XF")}>Auto_IJ</Button>
-          <Button onClick={() => this.applyTFGenerator("auto98XF")}>Auto_98</Button>
+          {this.createTFGeneratorButton("resetXF", "None", "Reset the transfer function to the full range.")}
+          {this.createTFGeneratorButton("auto98XF", "Default", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("autoXF", "Auto", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("bestFitXF", "BestFit", "Automatically set the transfer function.")}
+          {this.createTFGeneratorButton("auto2XF", "Auto_IJ", "Automatically set the transfer function.")}
         </div>
       </div>
     );
