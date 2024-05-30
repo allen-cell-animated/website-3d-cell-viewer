@@ -26,21 +26,6 @@
     stroke: var(--color-controlpanel-border);
   }
 
-  button::-moz-focus-inner {
-    border: none;
-    padding: 1px 2px;
-  }
-
-  input[type="color"] {
-    border: 1px solid;
-    width: 44px;
-    height: 23px;
-    margin-left: 2px;
-    margin-right: 2px;
-    padding: 1px 2px;
-    cursor: pointer;
-  }
-
   rect {
     fill: none;
     pointer-events: all;
@@ -59,7 +44,7 @@
   }
 
   .selected {
-    fill: "white";
-    stroke: "white";
+    fill: white;
+    stroke: white;
   }
 }
