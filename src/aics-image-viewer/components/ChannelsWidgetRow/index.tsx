@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Button, List, Col, Row, Checkbox } from "antd";
+import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
-import Nouislider from "nouislider-react";
 
 import TfEditor from "../TfEditor";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
@@ -19,6 +18,7 @@ import {
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
+import SliderRow from "../shared/SliderRow";
 
 const ISOSURFACE_OPACITY_DEFAULT = 1.0;
 const ISOVALUE_DEFAULT = 128.0;
@@ -53,41 +53,13 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   };
 
   const createChannelSettingHandler = <K extends ChannelStateKey>(settingKey: K) => {
-    return (newValue: ChannelState[K]) => {
-      changeChannelSetting(index, settingKey, newValue);
-    };
+    return (newValue: ChannelState[K]) => changeChannelSetting(index, settingKey, newValue);
   };
 
-  const onIsovalueChange = createChannelSettingHandler("isovalue");
-  const onOpacityChangeUnwrapped = createChannelSettingHandler("opacity");
-  const onOpacityChange = (newValue: number): void =>
-    onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
-
-  const createSliderRow = (
-    name: string,
-    maxValue: number,
-    defaultValue: number,
-    onChange: (newValue: any) => void
-  ): React.ReactNode => (
-    <Row style={{ marginBottom: "10px" }}>
-      <Col span={10}>
-        <label style={STYLES.controlName}>{name}</label>
-      </Col>
-      <Col span={12} style={{ marginTop: "10px" }}>
-        <Nouislider
-          range={{ min: [0], max: [maxValue] }}
-          start={defaultValue}
-          connect={true}
-          tooltips={true}
-          format={{ to: (value: number) => Math.round(value).toString(), from: (value: string) => parseInt(value, 10) }}
-          behaviour="drag"
-          onChange={onChange}
-          step={1}
-          disabled={!isosurfaceChecked}
-        />
-      </Col>
-    </Row>
-  );
+  const _onIsovalueChange = createChannelSettingHandler("isovalue");
+  const onIsovalueChange = ([newValue]: number[]): void => _onIsovalueChange(newValue);
+  const _onOpacityChange = createChannelSettingHandler("opacity");
+  const onOpacityChange = ([newValue]: number[]): void => _onOpacityChange(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
@@ -144,13 +116,14 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <div>
-      {createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, onIsovalueChange)}
-      {createSliderRow(
-        "Opacity",
-        ISOSURFACE_OPACITY_SLIDER_MAX,
-        ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
-        onOpacityChange
-      )}
+      <SliderRow label="Isovalue" max={255} start={ISOVALUE_DEFAULT} onChange={onIsovalueChange} formatInteger={true} />
+      <SliderRow
+        label="Opacity"
+        max={ISOSURFACE_OPACITY_SLIDER_MAX}
+        start={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
+        onChange={onOpacityChange}
+        formatInteger={true}
+      />
       <div className="button-row">
         <Button onClick={() => saveIsosurface(index, "GLTF")}>Export GLTF</Button>
         <Button onClick={() => saveIsosurface(index, "STL")}>Export STL</Button>

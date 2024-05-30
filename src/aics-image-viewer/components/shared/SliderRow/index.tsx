@@ -7,10 +7,15 @@ import "./styles.css";
 type SliderRowProps = {
   label: React.ReactNode;
   start?: number | number[];
+  step?: number;
+  formatInteger?: boolean;
   max?: number;
   onUpdate?: NouisliderProps["onUpdate"];
+  onChange?: NouisliderProps["onChange"];
   hideSlider?: boolean;
 };
+
+const INTEGER_FORMATTER = { to: Math.round, from: Number };
 
 /** A component to ensure a single unified style across the many labeled slider rows in the control panel */
 const SliderRow: React.FC<SliderRowProps> = (props) => (
@@ -26,7 +31,9 @@ const SliderRow: React.FC<SliderRowProps> = (props) => (
           connect={true}
           tooltips={true}
           behaviour="drag"
+          format={props.formatInteger ? INTEGER_FORMATTER : undefined}
           onUpdate={props.onUpdate}
+          onChange={props.onChange}
           style={{ display: props.hideSlider ? "none" : "block" }}
         />
       )}
