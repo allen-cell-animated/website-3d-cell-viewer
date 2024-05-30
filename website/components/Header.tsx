@@ -104,7 +104,7 @@ const HeaderContainer = styled(FlexRowAlignCenter)`
   width: auto;
   height: fit-content;
   min-height: var(--header-content-height);
-  padding: 12px 30px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--color-header-border);
   gap: 10px;
   position: sticky;
