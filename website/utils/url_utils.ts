@@ -13,23 +13,38 @@ const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
 export type ViewerChannelSettingJson = {
-  /** Color, as a 6-digit hex color */
+  /** Color, as a 6-digit hex color.  */
   col?: string;
-  /** Colorize. "1" is enabled. */
+  /** Colorize. "1" is enabled. Disabled by default. */
   clz?: "1" | "0";
-  /** Colorize alpha, in the [0, 1] range. */
+  /** Colorize alpha, in the [0, 1] range. Set to `1.0` by default. */
   cza?: string;
-  /** Opacity, in the [0, 1 range] */
+  /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
   isa?: string;
   /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
-   * by a colon, e.g. "0:255", "p50:p90", or "autoij:0".
+   * by a colon. The first value is the minimum and the second is the maximum.
+   * Defaults to [0, 255].
+   *
+   * - Plain numbers are treated as direct intensity values.
+   * - `p{n}` represents a percentile, where n is a percentile in the [0, 100].
+   * - `m{n}` represents the median multiplied by n.
+   * - `autoij` in either the min or max fields will use the "auto" algorithm
+   * from ImageJ to select the min and max.
+   *
+   * @example
+   * ```
+   * "0:255"    // min: intensity 0, max: intensity 255.
+   * "p50:p90"  // min: 50th percentile, max: 90th percentile.
+   * "m1:p75"   // min: median, max: 75th percentile.
+   * "autoij:0" // use Auto-IJ to calculate min and max.
+   * ```
    */
   lut?: string;
-  /** Volume enabled. "1" is enabled. */
+  /** Volume enabled. "1" is enabled. Disabled by default. */
   ven?: "1" | "0";
-  /** Isosurface enabled. "1" is enabled. */
+  /** Isosurface enabled. "1" is enabled. Disabled by default. */
   sen?: "1" | "0";
-  /** Isosurface value, in the [0, 255] range. */
+  /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
   isv?: string;
 };
 
