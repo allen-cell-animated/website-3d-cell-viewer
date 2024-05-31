@@ -41,6 +41,15 @@ export interface ViewerChannelSetting {
   surfaceEnabled?: boolean;
   // min and max. these are shorthand expressions.
   // a plain number (intensity), or a "p##", or a "m##" for percentile or median
+  /**
+   * Min and max, shorthand expressions. Defaults to [0, 255].
+   *
+   * - Plain numbers are treated as direct intensity values.
+   * - `p{n}` represents a percentile, where `n` is a percentile in the [0, 100] range.
+   * - `m{n}` represents the median multiplied by `n / 100`.
+   * - `autoij` in either the min or max fields will use the "auto" algorithm
+   * from ImageJ to select the min and max.
+   */
   lut?: [string, string];
   // valid when surfaceEnabled = true. default 128 or 0.5 of max intensity range
   isovalue?: number;

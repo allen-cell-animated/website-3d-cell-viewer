@@ -26,8 +26,8 @@ export type ViewerChannelSettingJson = {
    * Defaults to [0, 255].
    *
    * - Plain numbers are treated as direct intensity values.
-   * - `p{n}` represents a percentile, where n is a percentile in the [0, 100].
-   * - `m{n}` represents the median multiplied by n.
+   * - `p{n}` represents a percentile, where `n` is a percentile in the [0, 100] range.
+   * - `m{n}` represents the median multiplied by `n / 100`.
    * - `autoij` in either the min or max fields will use the "auto" algorithm
    * from ImageJ to select the min and max.
    *
@@ -48,7 +48,32 @@ export type ViewerChannelSettingJson = {
   isv?: string;
 };
 
-const baseParamKeys = ["mask", "url", "file", "dataset", "id", "view"] as const;
+type BaseParams = {
+  /**
+   * The opacity of the mask channel, an integer in the range [0, 100]. Set to `50` by default.
+   */
+  mask?: string;
+  /**
+   * One or more volume URLs to load. If multiple URLs are provided, they should
+   * be separated by commas.
+   */
+  url?: string;
+  /**
+   * The name of a dataset in the Cell Feature Explorer database. Used with `id`.
+   */
+  dataset?: string;
+  /**
+   * The ID of a cell within the loaded dataset. Used with `dataset`.
+   */
+  id?: string;
+  /**
+   * Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D".
+   */
+  view?: string;
+};
+// Copy of keys for above params. Both types are defined so that spec comments can be provided.
+// TODO: Remove redundant `baseParamKeys` type.
+const baseParamKeys = ["mask", "url", "dataset", "id", "view"] as const;
 const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
 
 type BaseParamKeys = (typeof baseParamKeys)[number];
@@ -56,7 +81,7 @@ type ChannelKey = `c${number}`;
 type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
 type AllParamKeys = BaseParamKeys | DeprecatedParamKeys | ChannelKey;
 
-type Params = { [_ in AllParamKeys]?: string };
+type Params = BaseParams & { [_ in AllParamKeys]?: string };
 
 const isParamKey = (key: string): key is BaseParamKeys => baseParamKeys.includes(key as BaseParamKeys);
 const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
@@ -309,16 +334,6 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
         ],
       };
     }
-  } else if (params.file) {
-    // quick way to load a atlas.json from a special directory.
-    //
-    // ?file=relative-path-to-atlas-on-isilon
-    args.cellId = "1";
-    const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
-    args.imageUrl = baseUrl + params.file;
-    args.parentImageUrl = baseUrl + params.file;
-    args.parentImageDownloadHref = "";
-    args.imageDownloadHref = "";
   } else if (params.dataset && params.id) {
     // ?dataset=aics_hipsc_v2020.1&id=232265
     const datasetArgs = await loadDataset(params.dataset, params.id);
