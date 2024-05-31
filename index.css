@@ -278,15 +278,15 @@
 /*!**************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/TfEditor/styles.css ***!
   \**************************************************************************************************************************************************/
-.row-card :host{
+.channel-row :host{
     display:block;
   }
 
-.row-card .bar rect{
+.channel-row .bar rect{
     fill:#6e6e6e;
   }
 
-.row-card .aligned{
+.channel-row .aligned{
     margin:auto;
     display:flex;
     flex-flow:row wrap;
@@ -294,21 +294,21 @@
     align-items:center;
   }
 
-.row-card .tick text{
+.channel-row .tick text{
     fill:#a0a0a0;
   }
 
-.row-card .axis path,
-  .row-card .axis line{
+.channel-row .axis path,
+  .channel-row .axis line{
     stroke:#6e6e6e;
   }
 
-.row-card button::-moz-focus-inner{
+.channel-row button::-moz-focus-inner{
     border:none;
     padding:1px 2px;
   }
 
-.row-card input[type="color"]{
+.channel-row input[type="color"]{
     border:1px solid;
     width:44px;
     height:23px;
@@ -318,24 +318,24 @@
     cursor:pointer;
   }
 
-.row-card rect{
+.channel-row rect{
     fill:none;
     pointer-events:all;
   }
 
-.row-card .line{
+.channel-row .line{
     stroke:#aeacae;
     stroke-width:1.5px;
   }
 
-.row-card circle{
+.channel-row circle{
     fill-opacity:0.6;
     cursor:move;
     stroke:#aeacae;
     stroke-width:1.5px;
   }
 
-.row-card .selected{
+.channel-row .selected{
     fill:"white";
     stroke:"white";
   }
@@ -343,41 +343,35 @@
 /*!***********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/ChannelsWidgetRow/styles.css ***!
   \***********************************************************************************************************************************************************/
-.channel-rows-list .row-card{
-  min-height:70px;
-  padding:22px 0 12px 0;
+.channel-rows-list .ant-list-item.channel-row{
+  padding:22px 0;
   border-bottom:1px solid var(--color-controlpanel-border);
+  flex-flow:row wrap;
 }
 
-.channel-rows-list .row-card .ant-row-flex{
-    margin-top:1em;
+.channel-rows-list .ant-list-item.channel-row .ant-list-item-meta-title,
+  .channel-rows-list .ant-list-item.channel-row .ant-checkbox-wrapper{
+    color:var(--color-controlpanel-text);
   }
 
-.channel-rows-list .row-card.ant-list-item{
-    flex-flow:row wrap;
+.channel-rows-list .ant-list-item.channel-row h4{
+    color:var(--color-text-section);
+    margin-top:28px;
+    margin-bottom:10px;
   }
 
-.channel-rows-list .row-card.ant-list-item .ant-list-item-meta-title,
-    .channel-rows-list .row-card.ant-list-item .ant-checkbox-wrapper{
-      color:var(--color-controlpanel-text);
+.channel-rows-list .ant-list-item.channel-row .ant-btn-text{
+    color:var(--color-button-icon-activated-text);
+    transition:color 0.3s;
+  }
+
+.channel-rows-list .ant-list-item.channel-row .ant-btn-text:hover,
+    .channel-rows-list .ant-list-item.channel-row .ant-btn-text:focus-visible{
+      color:var(--color-button-tertiary-hover-text) !important;
     }
 
-.channel-rows-list .row-card.ant-list-item .ant-btn-text{
-      color:var(--color-button-icon-activated-text);
-      transition:color 0.3s;
-    }
-
-.channel-rows-list .row-card.ant-list-item .ant-btn-text:hover,
-      .channel-rows-list .row-card.ant-list-item .ant-btn-text:focus-visible{
-        color:var(--color-button-tertiary-hover-text) !important;
-      }
-
-.channel-rows-list .row-card.ant-list-item.controls-closed .ant-btn-text:not(:focus-visible){
-      color:var(--color-controlpanel-text);
-    }
-
-.channel-rows-list .row-card.controls-closed{
-    padding:12px 0 12px 0;
+.channel-rows-list .ant-list-item.channel-row.controls-closed .ant-btn-text:not(:focus-visible){
+    color:var(--color-controlpanel-text);
   }
 
 /*!********************************************************************************************************************************************************!*\
@@ -571,14 +565,6 @@
 .control-panel-col .channel-rows-list .ant-collapse-content-box{
       padding:0 16px;
     }
-
-.control-panel-col .channel-rows-list .global-volume-controls .ant-collapse-content-box{
-        padding:16px 24px;
-      }
-
-.control-panel-col .channel-rows-list .color-customizer .ant-collapse-content-box{
-        padding:0 16px;
-      }
 
 .control-panel-col .ant-collapse{
     background-color:var(--color-controlpanel-bg);
