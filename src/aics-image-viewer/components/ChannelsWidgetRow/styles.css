@@ -1,37 +1,31 @@
 @import "../../assets/styles/variables";
-.channel-rows-list .row-card {
-  min-height: 70px;
-  padding: 22px 0 12px 0;
+.channel-rows-list .ant-list-item.channel-row {
+  padding: 22px 0;
   border-bottom: 1px solid var(--color-controlpanel-border);
+  flex-flow: row wrap;
 
-  .ant-row-flex {
-    margin-top: 1em;
+  .ant-list-item-meta-title,
+  .ant-checkbox-wrapper {
+    color: var(--color-controlpanel-text);
   }
 
-  &.ant-list-item {
-    flex-flow: row wrap;
+  h4 {
+    color: var(--color-text-section);
+    margin-top: 28px;
+    margin-bottom: 10px;
+  }
 
-    .ant-list-item-meta-title,
-    .ant-checkbox-wrapper {
-      color: var(--color-controlpanel-text);
-    }
+  .ant-btn-text {
+    color: var(--color-button-icon-activated-text);
+    transition: color 0.3s;
 
-    .ant-btn-text {
-      color: var(--color-button-icon-activated-text);
-      transition: color 0.3s;
-
-      &:hover,
-      &:focus-visible {
-        color: var(--color-button-tertiary-hover-text) !important;
-      }
-    }
-
-    &.controls-closed .ant-btn-text:not(:focus-visible) {
-      color: var(--color-controlpanel-text);
+    &:hover,
+    &:focus-visible {
+      color: var(--color-button-tertiary-hover-text) !important;
     }
   }
 
-  &.controls-closed {
-    padding: 12px 0 12px 0;
+  &.controls-closed .ant-btn-text:not(:focus-visible) {
+    color: var(--color-controlpanel-text);
   }
 }

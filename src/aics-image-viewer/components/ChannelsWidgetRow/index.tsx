@@ -5,7 +5,6 @@ import { Channel, ControlPoint } from "@aics/volume-viewer";
 import Nouislider from "nouislider-react";
 
 import TfEditor from "../TfEditor";
-import colorPalette from "../../shared/colorPalette";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 
@@ -45,16 +44,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    if (!target.checked && !isosurfaceChecked) {
-      setControlsOpen(false);
-    }
     changeChannelSetting(index, "volumeEnabled", target.checked);
   };
 
   const isosurfaceCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    if (!target.checked && !volumeChecked) {
-      setControlsOpen(false);
-    }
     changeChannelSetting(index, "isosurfaceEnabled", target.checked);
   };
 
@@ -95,12 +88,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </Row>
   );
 
-  const toggleControlsOpen = (): void => {
-    if (isosurfaceChecked || volumeChecked) {
-      setControlsOpen(!controlsOpen);
-    }
-  };
-
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
     props.changeChannelSetting(index!, "color", color);
@@ -117,7 +104,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     />
   );
 
-  const renderActions = (): React.ReactNode => (
+  const visibilityControls = (
     <div className="channel-visibility-controls">
       <Checkbox checked={volumeChecked} onChange={volumeCheckHandler}>
         Vol
@@ -127,7 +114,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
       </Checkbox>
       <Button
         icon={<ViewerIcon type="preferences" style={{ fontSize: "16px" }} />}
-        onClick={toggleControlsOpen}
+        onClick={() => setControlsOpen(!controlsOpen)}
         title="Open channel settings"
         type="text"
       />
@@ -157,9 +144,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
-      <h4 className="ant-list-item-meta-title" style={{ marginTop: "20px", marginBottom: "5px" }}>
-        Surface settings:
-      </h4>
       {createSliderRow("Isovalue", 255, props.isovalue, onIsovalueChange)}
       {createSliderRow(
         "Opacity",
@@ -176,23 +160,34 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </Col>
   );
 
-  const renderControls = (): React.ReactNode => (
-    <div style={STYLES.settingsContainer}>
-      {volumeChecked && (
-        <Row justify="space-between" className="volume-settings">
-          <h4 className="ant-list-item-meta-title">Volume settings:</h4>
-          {createTFEditor()}
-        </Row>
-      )}
-      {isosurfaceChecked && <Row justify="space-between">{renderSurfaceControls()}</Row>}
-    </div>
-  );
+  const renderControls = (): React.ReactNode => {
+    if (!volumeChecked && !isosurfaceChecked) {
+      return <h4 style={{ fontStyle: "italic" }}>Not currently visible</h4>;
+    }
+    return (
+      <>
+        {volumeChecked && (
+          <>
+            <h4>Volume settings:</h4>
+            {createTFEditor()}
+          </>
+        )}
+        {isosurfaceChecked && (
+          <>
+            <h4>Surface settings:</h4>
+            {renderSurfaceControls()}
+          </>
+        )}
+      </>
+    );
+  };
 
-  const rowClass = controlsOpen ? "row-card" : "row-card controls-closed";
+  const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
-    <List.Item key={index} className={rowClass} extra={renderActions()}>
+    <List.Item key={index} className={rowClass}>
       <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
-      {controlsOpen && renderControls()}
+      {visibilityControls}
+      {controlsOpen && <div style={{ width: "100%" }}>{renderControls()}</div>}
     </List.Item>
   );
 };
@@ -200,27 +195,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 export default ChannelsWidgetRow;
 
 const STYLES: Styles = {
-  channelName: {
-    display: "inline-block",
-    minWidth: 90,
-  },
-  checkedIcon: {
-    fill: colorPalette.textColor,
-  },
-  settingsContainer: {
-    width: "100%",
-    order: 3,
-  },
-  uncheckedIcon: {
-    fill: colorPalette.accent3Color,
-  },
   raisedButton: {
     marginLeft: "2px",
     marginRight: "2px",
-  },
-  slider: {
-    marginBottom: "4px",
-    marginTop: "4px",
   },
   controlName: {
     whiteSpace: "nowrap",
