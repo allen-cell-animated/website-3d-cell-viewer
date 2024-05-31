@@ -33,6 +33,11 @@ export function initializeLut(
         let lutvalues = [0, 0];
         for (let i = 0; i < 2; ++i) {
           const lstr = initSettings.lut[i];
+          if (lstr === "autoij") {
+            lutvalues = histogram.findAutoIJBins();
+            break;
+          }
+
           // look at first char of string.
           let firstchar = lstr.charAt(0);
           if (firstchar === "m" || firstchar === "p") {
@@ -49,7 +54,7 @@ export function initializeLut(
           } else {
             lutvalues[i] = lvalue;
           }
-        }
+        } // end for
 
         lutObject = new Lut().createFromMinMax(
           Math.min(lutvalues[0], lutvalues[1]),

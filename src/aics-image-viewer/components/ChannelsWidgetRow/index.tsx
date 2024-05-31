@@ -20,14 +20,13 @@ import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shar
 import { IsosurfaceFormat, Styles } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 
-const ISOSURFACE_OPACITY_DEFAULT = 1.0;
-const ISOVALUE_DEFAULT = 128.0;
-
 interface ChannelsWidgetRowProps {
   index: number;
   name: string;
   volumeChecked: boolean;
   isosurfaceChecked: boolean;
+  isovalue: number;
+  isosurfaceOpacity: number;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
   color: ColorArray;
@@ -145,11 +144,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <Col span={24}>
-      {createSliderRow("Isovalue", 255, ISOVALUE_DEFAULT, onIsovalueChange)}
+      {createSliderRow("Isovalue", 255, props.isovalue, onIsovalueChange)}
       {createSliderRow(
         "Opacity",
         ISOSURFACE_OPACITY_SLIDER_MAX,
-        ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX,
+        props.isosurfaceOpacity * ISOSURFACE_OPACITY_SLIDER_MAX,
         onOpacityChange
       )}
       <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "GLTF")} style={STYLES.raisedButton}>
