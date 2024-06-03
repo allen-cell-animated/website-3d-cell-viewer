@@ -103,8 +103,8 @@ export default function AppWrapper(): ReactElement {
 
   return (
     <div>
-      <Header>
-        <FlexRowAlignCenter $gap={15}>
+      <Header noNavigate>
+        <FlexRowAlignCenter $gap={12}>
           <FlexRowAlignCenter $gap={2}>
             <LoadModal onLoad={onLoad} />
             {viewerProps && <ShareModal appProps={viewerProps} />}
