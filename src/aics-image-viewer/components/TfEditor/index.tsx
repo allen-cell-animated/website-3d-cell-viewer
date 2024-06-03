@@ -63,8 +63,8 @@ const StatefulSketchPicker: React.FC<{
 const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
   autoXF: (histo) => {
     // Currently unused. min and max are the first and last bins whose values are >=10% of max bin
-    const [b, e] = histo.findAutoMinMax();
-    return new Lut().createFromMinMax(b, e);
+    const [hmin, hmax] = histo.findAutoMinMax();
+    return new Lut().createFromMinMax(hmin, hmax);
   },
   auto2XF: (histo) => {
     const [hmin, hmax] = histo.findAutoIJBins();
