@@ -1,5 +1,5 @@
 import "@firebase/analytics";
-import firebase from "firebase/app";
+import firebase, { analytics } from "firebase/app";
 import "firebase/firestore";
 import { FirebaseFirestore } from "@firebase/firestore-types";
 
@@ -25,7 +25,12 @@ const firebaseDevConfig = {
 };
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-firebase.analytics();
+
+analytics.isSupported().then((supported) => {
+  if (supported) {
+    firebase.analytics();
+  }
+});
 
 const firestore: FirebaseFirestore = firebase.firestore();
 

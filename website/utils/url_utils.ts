@@ -2,16 +2,96 @@ import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 
 import { AppProps, GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
-import { ViewerChannelSettings } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import {
+  ViewerChannelSetting,
+  ViewerChannelSettings,
+} from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
-const paramKeys = ["mask", "ch", "luts", "colors", "url", "file", "dataset", "id", "view"];
-type ParamKeys = (typeof paramKeys)[number];
-type Params = { [_ in ParamKeys]?: string };
+const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
+// Match colon-separated pairs of alphanumeric strings
+const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
-function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
+export type ViewerChannelSettingJson = {
+  /** Color, as a 6-digit hex color.  */
+  col?: string;
+  /** Colorize. "1" is enabled. Disabled by default. */
+  clz?: "1" | "0";
+  /** Colorize alpha, in the [0, 1] range. Set to `1.0` by default. */
+  cza?: string;
+  /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
+  isa?: string;
+  /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
+   * by a colon. The first value is the minimum and the second is the maximum.
+   * Defaults to [0, 255].
+   *
+   * - Plain numbers are treated as direct intensity values.
+   * - `p{n}` represents a percentile, where `n` is a percentile in the [0, 100] range.
+   * - `m{n}` represents the median multiplied by `n / 100`.
+   * - `autoij` in either the min or max fields will use the "auto" algorithm
+   * from ImageJ to select the min and max.
+   *
+   * @example
+   * ```
+   * "0:255"    // min: intensity 0, max: intensity 255.
+   * "p50:p90"  // min: 50th percentile, max: 90th percentile.
+   * "m1:p75"   // min: median, max: 75th percentile.
+   * "autoij:0" // use Auto-IJ to calculate min and max.
+   * ```
+   */
+  lut?: string;
+  /** Volume enabled. "1" is enabled. Disabled by default. */
+  ven?: "1" | "0";
+  /** Isosurface enabled. "1" is enabled. Disabled by default. */
+  sen?: "1" | "0";
+  /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
+  isv?: string;
+};
+
+type BaseParams = {
+  /**
+   * The opacity of the mask channel, an integer in the range [0, 100]. Set to `50` by default.
+   */
+  mask?: string;
+  /**
+   * One or more volume URLs to load. If multiple URLs are provided, they should
+   * be separated by commas.
+   */
+  url?: string;
+  /**
+   * The name of a dataset in the Cell Feature Explorer database. Used with `id`.
+   */
+  dataset?: string;
+  /**
+   * The ID of a cell within the loaded dataset. Used with `dataset`.
+   */
+  id?: string;
+  /**
+   * Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D".
+   */
+  view?: string;
+};
+// Copy of keys for above params. Both types are defined so that spec comments can be provided.
+// TODO: Remove redundant `baseParamKeys` type.
+const baseParamKeys = ["mask", "url", "dataset", "id", "view"] as const;
+const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
+
+type BaseParamKeys = (typeof baseParamKeys)[number];
+type ChannelKey = `c${number}`;
+type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
+type AllParamKeys = BaseParamKeys | DeprecatedParamKeys | ChannelKey;
+
+type Params = BaseParams & { [_ in AllParamKeys]?: string };
+
+const isParamKey = (key: string): key is BaseParamKeys => baseParamKeys.includes(key as BaseParamKeys);
+const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
+  deprecatedParamKeys.includes(key as DeprecatedParamKeys);
+const isChannelKey = (key: string): key is ChannelKey => CHANNEL_STATE_KEY_REGEX.test(key);
+
+export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
   const result: Params = {};
   for (const [key, value] of searchParams.entries()) {
-    if (paramKeys.includes(key)) {
+    if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
       result[key] = value;
     }
   }
@@ -42,6 +122,63 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
 
   return urls;
 };
+
+/**
+ * Parse a string list of comma-separated key:value pairs into
+ * a key-value object.
+ *
+ * @param data The string to parse. Expected to be in the format
+ * "key1:value1,key2:value2,...". Colons and commas in keys or values
+ * should be encoded using `encodeURIComponent`.
+ * @returns An object with the parsed key-value pairs. Key and value strings
+ *  will be decoded using `decodeURIComponent`.
+ */
+export function parseKeyValueList(data: string): Record<string, string> {
+  if (data === "") {
+    return {};
+  }
+  const result: Record<string, string> = {};
+  const keyValuePairs = data.split(",");
+  for (const pair of keyValuePairs) {
+    const splitIndex = pair.indexOf(":");
+    const key = pair.slice(0, splitIndex);
+    const value = pair.slice(splitIndex + 1);
+    result[decodeURIComponent(key).trim()] = decodeURIComponent(value).trim();
+  }
+  return result;
+}
+
+function parseFloat(value: string | undefined): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const number = Number.parseFloat(value);
+  return Number.isNaN(number) ? undefined : number;
+}
+
+export function deserializeViewerChannelSetting(
+  channelIndex: number,
+  jsonState: ViewerChannelSettingJson
+): ViewerChannelSetting {
+  // Missing/undefined fields should be handled downstream.
+  const result: ViewerChannelSetting = {
+    match: channelIndex,
+    enabled: jsonState.ven === "1",
+    surfaceEnabled: jsonState.sen === "1",
+    isovalue: parseFloat(jsonState.isv),
+    surfaceOpacity: parseFloat(jsonState.isa),
+    colorizeEnabled: jsonState.clz === "1",
+    colorizeAlpha: parseFloat(jsonState.cza),
+  };
+  if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
+    result.color = jsonState.col;
+  }
+  if (jsonState.lut && LUT_REGEX.test(jsonState.lut)) {
+    const [min, max] = jsonState.lut.split(":");
+    result.lut = [min.trim(), max.trim()];
+  }
+  return result;
+}
 
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
@@ -103,6 +240,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     }
     viewerSettings.viewMode = mapping[view];
   }
+  // old, deprecated channels model
   if (params.ch) {
     // ?ch=1,2
     // ?luts=0,255,0,255
@@ -139,6 +277,36 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     }
     args.viewerChannelSettings = initialChannelSettings;
   }
+  // Check for per-channel settings; this will override the old channel settings (`ch`)
+  // if present.
+  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
+  // a comma-separated list of key-value pairs.
+  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
+  Object.keys(params).forEach((key) => {
+    if (isChannelKey(key)) {
+      const channelIndex = parseInt(key.slice(1), 10);
+      try {
+        const channelData = parseKeyValueList(params[key]!);
+        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
+        channelIndexToSettings.set(channelIndex, channelSetting);
+      } catch (e) {
+        console.warn(
+          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
+          e
+        );
+      }
+    }
+  });
+  if (channelIndexToSettings.size > 0) {
+    const groups: ViewerChannelSettings["groups"] = [
+      {
+        name: "Channels",
+        channels: Array.from(channelIndexToSettings.values()),
+      },
+    ];
+    args.viewerChannelSettings = { groups };
+  }
+
   if (params.url) {
     const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
     const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
@@ -149,9 +317,10 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     args.imageDownloadHref = firstUrl;
     args.parentImageUrl = "";
     args.parentImageDownloadHref = "";
-    // if json, will not override channel settings.
-    // otherwise turn the first 3 channels on by default and group them
-    if (!firstUrl.endsWith("json") && !params.ch) {
+    // Check if channel settings are already provided (through per-channel settings or
+    // old `ch` query param, or included in JSON files). If not, make first three
+    // channels visible by default.
+    if (!firstUrl.endsWith("json") && !params.ch && channelIndexToSettings.size === 0) {
       args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!
@@ -165,16 +334,6 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
         ],
       };
     }
-  } else if (params.file) {
-    // quick way to load a atlas.json from a special directory.
-    //
-    // ?file=relative-path-to-atlas-on-isilon
-    args.cellId = "1";
-    const baseUrl = "http://dev-aics-dtp-001.corp.alleninstitute.org/dan-data/";
-    args.imageUrl = baseUrl + params.file;
-    args.parentImageUrl = baseUrl + params.file;
-    args.parentImageDownloadHref = "";
-    args.imageDownloadHref = "";
   } else if (params.dataset && params.id) {
     // ?dataset=aics_hipsc_v2020.1&id=232265
     const datasetArgs = await loadDataset(params.dataset, params.id);

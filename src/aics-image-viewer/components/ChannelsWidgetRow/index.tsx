@@ -20,14 +20,13 @@ import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
 
-const ISOSURFACE_OPACITY_DEFAULT = 1.0;
-const ISOVALUE_DEFAULT = 128.0;
-
 interface ChannelsWidgetRowProps {
   index: number;
   name: string;
   volumeChecked: boolean;
   isosurfaceChecked: boolean;
+  isovalue: number;
+  isosurfaceOpacity: number;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
   color: ColorArray;
@@ -116,11 +115,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <div>
-      <SliderRow label="Isovalue" max={255} start={ISOVALUE_DEFAULT} onChange={onIsovalueChange} formatInteger={true} />
+      <SliderRow label="Isovalue" max={255} start={props.isovalue} onChange={onIsovalueChange} formatInteger={true} />
       <SliderRow
         label="Opacity"
         max={ISOSURFACE_OPACITY_SLIDER_MAX}
-        start={ISOSURFACE_OPACITY_DEFAULT * ISOSURFACE_OPACITY_SLIDER_MAX}
+        start={props.isosurfaceOpacity * ISOSURFACE_OPACITY_SLIDER_MAX}
         onChange={onOpacityChange}
         formatInteger={true}
       />
