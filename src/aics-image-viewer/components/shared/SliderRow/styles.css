@@ -1,0 +1,19 @@
+.viewer-control-row {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+
+  &:not(:last-child) {
+    margin-bottom: 20px;
+  }
+
+  .control-name {
+    color: var(--color-controlpanel-text);
+    flex: 2;
+    white-space: nowrap;
+  }
+
+  .control {
+    flex: 5;
+  }
+}

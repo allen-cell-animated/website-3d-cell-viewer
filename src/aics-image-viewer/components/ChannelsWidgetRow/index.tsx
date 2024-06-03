@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { Button, List, Col, Row, Checkbox } from "antd";
+import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel, ControlPoint } from "@aics/volume-viewer";
-import Nouislider from "nouislider-react";
 
 import TfEditor from "../TfEditor";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
@@ -17,8 +16,9 @@ import {
   colorArrayToObject,
 } from "../../shared/utils/colorRepresentations";
 import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
-import { IsosurfaceFormat, Styles } from "../../shared/types";
+import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
+import SliderRow from "../shared/SliderRow";
 
 interface ChannelsWidgetRowProps {
   index: number;
@@ -52,41 +52,13 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   };
 
   const createChannelSettingHandler = <K extends ChannelStateKey>(settingKey: K) => {
-    return (newValue: ChannelState[K]) => {
-      changeChannelSetting(index, settingKey, newValue);
-    };
+    return (newValue: ChannelState[K]) => changeChannelSetting(index, settingKey, newValue);
   };
 
-  const onIsovalueChange = createChannelSettingHandler("isovalue");
-  const onOpacityChangeUnwrapped = createChannelSettingHandler("opacity");
-  const onOpacityChange = (newValue: number): void =>
-    onOpacityChangeUnwrapped(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
-
-  const createSliderRow = (
-    name: string,
-    maxValue: number,
-    defaultValue: number,
-    onChange: (newValue: any) => void
-  ): React.ReactNode => (
-    <Row style={{ marginBottom: "10px" }}>
-      <Col span={10}>
-        <label style={STYLES.controlName}>{name}</label>
-      </Col>
-      <Col span={12} style={{ marginTop: "10px" }}>
-        <Nouislider
-          range={{ min: [0], max: [maxValue] }}
-          start={defaultValue}
-          connect={true}
-          tooltips={true}
-          format={{ to: (value: number) => Math.round(value).toString(), from: (value: string) => parseInt(value, 10) }}
-          behaviour="drag"
-          onChange={onChange}
-          step={1}
-          disabled={!isosurfaceChecked}
-        />
-      </Col>
-    </Row>
-  );
+  const _onIsovalueChange = createChannelSettingHandler("isovalue");
+  const onIsovalueChange = ([newValue]: number[]): void => _onIsovalueChange(newValue);
+  const _onOpacityChange = createChannelSettingHandler("opacity");
+  const onOpacityChange = ([newValue]: number[]): void => _onOpacityChange(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
@@ -126,10 +98,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     return (
       <TfEditor
         id={"TFEditor" + index}
-        index={index}
         fit-to-data={false}
-        width={250}
-        height={150}
+        width={418}
+        height={125}
         volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
@@ -143,21 +114,20 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   };
 
   const renderSurfaceControls = (): React.ReactNode => (
-    <Col span={24}>
-      {createSliderRow("Isovalue", 255, props.isovalue, onIsovalueChange)}
-      {createSliderRow(
-        "Opacity",
-        ISOSURFACE_OPACITY_SLIDER_MAX,
-        props.isosurfaceOpacity * ISOSURFACE_OPACITY_SLIDER_MAX,
-        onOpacityChange
-      )}
-      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "GLTF")} style={STYLES.raisedButton}>
-        Save GLTF
-      </Button>
-      <Button disabled={!isosurfaceChecked} onClick={() => saveIsosurface(index, "STL")} style={STYLES.raisedButton}>
-        Save STL
-      </Button>
-    </Col>
+    <div>
+      <SliderRow label="Isovalue" max={255} start={props.isovalue} onChange={onIsovalueChange} formatInteger={true} />
+      <SliderRow
+        label="Opacity"
+        max={ISOSURFACE_OPACITY_SLIDER_MAX}
+        start={props.isosurfaceOpacity * ISOSURFACE_OPACITY_SLIDER_MAX}
+        onChange={onOpacityChange}
+        formatInteger={true}
+      />
+      <div className="button-row">
+        <Button onClick={() => saveIsosurface(index, "GLTF")}>Export GLTF</Button>
+        <Button onClick={() => saveIsosurface(index, "STL")}>Export STL</Button>
+      </div>
+    </div>
   );
 
   const renderControls = (): React.ReactNode => {
@@ -185,7 +155,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const rowClass = controlsOpen ? "channel-row" : "channel-row controls-closed";
   return (
     <List.Item key={index} className={rowClass}>
-      <List.Item.Meta title={<span style={STYLES.channelName}>{props.name}</span>} avatar={createColorPicker()} />
+      <List.Item.Meta title={props.name} avatar={createColorPicker()} />
       {visibilityControls}
       {controlsOpen && <div style={{ width: "100%" }}>{renderControls()}</div>}
     </List.Item>
@@ -193,13 +163,3 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 };
 
 export default ChannelsWidgetRow;
-
-const STYLES: Styles = {
-  raisedButton: {
-    marginLeft: "2px",
-    marginRight: "2px",
-  },
-  controlName: {
-    whiteSpace: "nowrap",
-  },
-};

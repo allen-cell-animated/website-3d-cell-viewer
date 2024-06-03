@@ -1,10 +1,8 @@
 import React from "react";
-import SmarterSlider from "./shared/SmarterSlider";
-import "nouislider/distribute/nouislider.css";
-
 import { Checkbox } from "antd";
+
+import SliderRow from "./shared/SliderRow";
 import { ViewerSettingUpdater } from "./App/types";
-import { Styles } from "../shared/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
@@ -28,75 +26,39 @@ export interface GlobalVolumeControlsProps {
   changeViewerSetting: ViewerSettingUpdater;
 }
 
-export default class GlobalVolumeControls extends React.Component<GlobalVolumeControlsProps, {}> {
-  constructor(props: GlobalVolumeControlsProps) {
-    super(props);
-  }
-
-  createSliderRow = (
+const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
+  const createSliderRow = (
     label: string,
     start: number | number[],
     max: number,
     propKey: GlobalVolumeControlKey
-  ): React.ReactNode => (
-    <div style={STYLES.controlRow}>
-      <div style={STYLES.controlName}>{label}</div>
-      <div style={STYLES.control}>
-        <SmarterSlider
-          range={{ min: 0, max }}
-          start={start}
-          connect={true}
-          tooltips={true}
-          behaviour="drag"
-          onUpdate={(_strValues: string[], _handle: number, values: number[]): void => {
-            const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
-            this.props.changeViewerSetting(propKey, selectValue);
-          }}
-        />
-      </div>
+  ): React.ReactNode => {
+    const onUpdate = (_strValues: string[], _handle: number, values: number[]): void => {
+      const selectValue = values.length === 1 ? values[0] : (values as [number, number, number]);
+      props.changeViewerSetting(propKey, selectValue);
+    };
+
+    return <SliderRow label={label} start={start} max={max} onUpdate={onUpdate} />;
+  };
+
+  const { showControls, maskAlpha, brightness, density, levels } = props;
+
+  return (
+    <div style={{ paddingTop: 18, paddingBottom: 22 }}>
+      {showControls.alphaMaskSlider && createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
+      {showControls.brightnessSlider && createSliderRow("brightness", brightness, 100, "brightness")}
+      {showControls.densitySlider && createSliderRow("density", density, 100, "density")}
+      {showControls.levelsSliders && createSliderRow("levels", levels, 255, "levels")}
+      {showControls.interpolationControl && (
+        <SliderRow label="interpolate">
+          <Checkbox
+            checked={props.interpolationEnabled}
+            onChange={({ target }) => props.changeViewerSetting("interpolationEnabled", target.checked)}
+          />
+        </SliderRow>
+      )}
     </div>
   );
-
-  render(): React.ReactNode {
-    const { showControls, maskAlpha, brightness, density, levels } = this.props;
-    return (
-      <div style={STYLES.slidersWrapper}>
-        {showControls.alphaMaskSlider && this.createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
-        {showControls.brightnessSlider && this.createSliderRow("brightness", brightness, 100, "brightness")}
-        {showControls.densitySlider && this.createSliderRow("density", density, 100, "density")}
-        {showControls.levelsSliders && this.createSliderRow("levels", levels, 255, "levels")}
-        {showControls.interpolationControl && (
-          <div style={STYLES.controlRow}>
-            <div style={STYLES.controlName}>interpolate</div>
-            <div style={{ flex: 5 }}>
-              <Checkbox
-                checked={this.props.interpolationEnabled}
-                onChange={({ target }) => this.props.changeViewerSetting("interpolationEnabled", target.checked)}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
-
-const STYLES: Styles = {
-  slidersWrapper: {
-    marginRight: "10px",
-    paddingTop: "18px",
-  },
-  controlRow: {
-    height: "3em",
-    display: "flex",
-  },
-  controlName: {
-    flex: 2,
-    whiteSpace: "nowrap",
-  },
-  control: {
-    flex: 5,
-    height: 30,
-    marginTop: 10,
-  },
 };
+
+export default GlobalVolumeControls;
