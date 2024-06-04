@@ -278,44 +278,25 @@
 /*!**************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/TfEditor/styles.css ***!
   \**************************************************************************************************************************************************/
+.channel-row .tf-editor-svg{
+    margin-bottom:8px;
+  }
+
 .channel-row :host{
     display:block;
   }
 
 .channel-row .bar rect{
-    fill:#6e6e6e;
-  }
-
-.channel-row .aligned{
-    margin:auto;
-    display:flex;
-    flex-flow:row wrap;
-    justify-content:space-between;
-    align-items:center;
+    fill:var(--color-controlpanel-border);
   }
 
 .channel-row .tick text{
-    fill:#a0a0a0;
+    fill:var(--color-controlpanel-text);
   }
 
 .channel-row .axis path,
   .channel-row .axis line{
-    stroke:#6e6e6e;
-  }
-
-.channel-row button::-moz-focus-inner{
-    border:none;
-    padding:1px 2px;
-  }
-
-.channel-row input[type="color"]{
-    border:1px solid;
-    width:44px;
-    height:23px;
-    margin-left:2px;
-    margin-right:2px;
-    padding:1px 2px;
-    cursor:pointer;
+    stroke:var(--color-controlpanel-border);
   }
 
 .channel-row rect{
@@ -336,8 +317,31 @@
   }
 
 .channel-row .selected{
-    fill:"white";
-    stroke:"white";
+    fill:white;
+    stroke:white;
+  }
+
+/*!**********************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/shared/SliderRow/styles.css ***!
+  \**********************************************************************************************************************************************************/
+.viewer-control-row{
+  display:flex;
+  align-items:center;
+  margin-right:10px;
+}
+
+  .viewer-control-row:not(:last-child){
+    margin-bottom:20px;
+  }
+
+  .viewer-control-row .control-name{
+    color:var(--color-controlpanel-text);
+    flex:2;
+    white-space:nowrap;
+  }
+
+  .viewer-control-row .control{
+    flex:5;
   }
 
 /*!***********************************************************************************************************************************************************!*\
@@ -368,6 +372,18 @@
 .channel-rows-list .ant-list-item.channel-row .ant-btn-text:hover,
     .channel-rows-list .ant-list-item.channel-row .ant-btn-text:focus-visible{
       color:var(--color-button-tertiary-hover-text) !important;
+    }
+
+.channel-rows-list .ant-list-item.channel-row .button-row{
+    margin-top:16px;
+    display:flex;
+    justify-content:start;
+    align-items:end;
+    gap:6px;
+  }
+
+.channel-rows-list .ant-list-item.channel-row .button-row:not(:last-child){
+      margin-bottom:16px;
     }
 
 .channel-rows-list .ant-list-item.channel-row.controls-closed .ant-btn-text:not(:focus-visible){
@@ -480,7 +496,7 @@
       margin-top:12px;
       background-color:transparent;
       border:1px solid transparent;
-      color:var(--color-button-tertiary-text);
+      color:var(--color-button-tertiary-text)
     }
 
 .control-panel-col-container .control-panel-tab-col .ant-btn:not([disabled]).btn-tabactive{
@@ -512,6 +528,8 @@
     }
 
 .control-panel-col-container .control-panel-col{
+    flex:1 auto;
+    max-width:540px;
     overflow-y:scroll;
     scrollbar-width:none;
   }
@@ -520,62 +538,59 @@
       display:none;
     }
 
+.control-panel-col-container .control-panel-col{
+  }
+
 .control-panel-col-container .control-panel-col .control-panel-title{
       margin:16px;
       max-height:24px;
       font-size:1.4em;
     }
 
-.control-panel-col{
-  flex:1 auto;
-  order:1;
-  max-width:540px;
-}
-
-.control-panel-col .color-presets-dropdown{
-    margin:0 16px 16px;
-  }
-
-.control-panel-col .channel-rows-list{
-    border-top:1px solid var(--color-controlpanel-border);
-  }
-
-.control-panel-col .channel-rows-list .ant-list-item-meta{
-      align-items:center;
+.control-panel-col-container .control-panel-col .color-presets-dropdown{
+      margin:0 16px 16px;
     }
 
-.control-panel-col .channel-rows-list .ant-list-item-meta .ant-list-item-meta-title{
-        margin:0;
+.control-panel-col-container .control-panel-col .channel-rows-list{
+      border-top:1px solid var(--color-controlpanel-border);
+    }
+
+.control-panel-col-container .control-panel-col .channel-rows-list .ant-list-item-meta{
+        align-items:center;
       }
 
-.control-panel-col .channel-rows-list .ant-checkbox-wrapper:hover .ant-checkbox-inner{
-      border-color:white;
-    }
+.control-panel-col-container .control-panel-col .channel-rows-list .ant-list-item-meta .ant-list-item-meta-title{
+          margin:0;
+        }
 
-.control-panel-col .channel-rows-list .channel-visibility-controls,
-    .control-panel-col .channel-rows-list .ant-collapse-extra{
-      width:40%;
-      display:flex;
-    }
-
-.control-panel-col .channel-rows-list .channel-visibility-controls .ant-checkbox-wrapper, .control-panel-col .channel-rows-list .ant-collapse-extra .ant-checkbox-wrapper{
-        flex:4;
+.control-panel-col-container .control-panel-col .channel-rows-list .ant-checkbox-wrapper:hover .ant-checkbox-inner{
+        border-color:white;
       }
 
-.control-panel-col .channel-rows-list .ant-collapse-content-box{
-      padding:0 16px;
+.control-panel-col-container .control-panel-col .channel-rows-list .channel-visibility-controls,
+      .control-panel-col-container .control-panel-col .channel-rows-list .ant-collapse-extra{
+        width:40%;
+        display:flex;
+      }
+
+.control-panel-col-container .control-panel-col .channel-rows-list .channel-visibility-controls .ant-checkbox-wrapper, .control-panel-col-container .control-panel-col .channel-rows-list .ant-collapse-extra .ant-checkbox-wrapper{
+          flex:4;
+        }
+
+.control-panel-col-container .control-panel-col .channel-rows-list .ant-collapse-content-box{
+        padding:0 16px;
+      }
+
+.control-panel-col-container .control-panel-col .ant-collapse{
+      background-color:var(--color-controlpanel-bg);
     }
 
-.control-panel-col .ant-collapse{
-    background-color:var(--color-controlpanel-bg);
-  }
+.control-panel-col-container .control-panel-col .ant-collapse .ant-collapse-header{
+        padding:13px 16px;
+        background-color:var(--color-controlpanel-section-bg);
+      }
 
-.control-panel-col .ant-collapse .ant-collapse-header{
-      padding:13px 16px;
-      background-color:var(--color-controlpanel-section-bg);
-    }
-
-.control-panel-col .noUi-handle{
+.control-panel-col-container .control-panel-col .noUi-handle{
     box-shadow:none;
     cursor:pointer;
     pointer-events:inherit;
@@ -590,12 +605,12 @@
     transform:translate(-50%, calc(-100% - 4px));
   }
 
-.control-panel-col .noUi-handle::before{
+.control-panel-col-container .control-panel-col .noUi-handle::before{
     display:none;
     content:none;
   }
 
-.control-panel-col .noUi-handle::after{
+.control-panel-col-container .control-panel-col .noUi-handle::after{
     background-color:inherit;
     width:8px;
     height:8px;
@@ -605,30 +620,30 @@
     content:"";
   }
 
-.control-panel-col .noUi-touch-area{
+.control-panel-col-container .control-panel-col .noUi-touch-area{
     padding:8px;
     margin-top:-4px;
     margin-left:-4px;
   }
 
-.control-panel-col .noUi-connect{
+.control-panel-col-container .control-panel-col .noUi-connect{
     background-color:#a0a0a0;
   }
 
-.control-panel-col .noUi-target.noUi-ltr.noUi-horizontal{
+.control-panel-col-container .control-panel-col .noUi-target.noUi-ltr.noUi-horizontal{
     background-color:#a0a0a0;
   }
 
-.control-panel-col .noUi-horizontal{
+.control-panel-col-container .control-panel-col .noUi-horizontal{
     height:2px;
   }
 
-.control-panel-col .noUi-target{
+.control-panel-col-container .control-panel-col .noUi-target{
     border:none;
     box-shadow:none;
   }
 
-.control-panel-col .noUi-tooltip{
+.control-panel-col-container .control-panel-col .noUi-tooltip{
     border:none;
     background-color:transparent;
     color:inherit;
@@ -672,7 +687,7 @@
   }
 
 .viewer-toolbar-container.viewer-toolbar-scroll{
-    border-bottom:1px solid #6e6e6e;
+    border-bottom:1px solid var(--color-layout-dividers);
   }
 
 .viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar-scroll-left,
@@ -681,9 +696,8 @@
     }
 
 .viewer-toolbar-container.viewer-toolbar-scroll .viewer-toolbar{
-      display:static;
-      text-align:left;
       white-space:nowrap;
+      justify-content:normal;
 
       overflow-x:scroll;
       scrollbar-width:none;
