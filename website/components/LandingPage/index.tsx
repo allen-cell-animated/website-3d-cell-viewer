@@ -59,7 +59,7 @@ const BannerVideoContainer = styled.div`
     position: absolute;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(90deg, rgba(35, 25, 50, 0.8) 50%, rgba(0, 0, 0, 0) 70%);
+    background-image: linear-gradient(90deg, rgba(35, 25, 50, 0.5) 50%, rgba(0, 0, 0, 0) 70%);
     z-index: 3;
   }
 
@@ -67,8 +67,7 @@ const BannerVideoContainer = styled.div`
     position: absolute;
     width: 100%;
     max-width: 1400px;
-    height: 180%;
-    top: -40%;
+    height: 100%;
     left: 35%;
     object-fit: cover;
   }
