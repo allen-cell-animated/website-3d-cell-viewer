@@ -63,6 +63,7 @@ const STYLES: Styles = {
     padding: "14px 0",
     display: "flex",
     borderBottom: "1px solid #6e6e6e",
+    color: "var(--color-controlpanel-text)",
   },
   colorPicker: {
     marginRight: "16px",

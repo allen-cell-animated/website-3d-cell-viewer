@@ -45,8 +45,8 @@ const theme = {
     header: {
       bg: palette.veryDarkGrey,
       border: palette.medGrey,
-      title: palette.medPurple,
-      hoverTitle: palette.ltPurple,
+      title: palette.white,
+      hoverTitle: palette.white,
     },
     // TODO: Buttons could have a shared type
     // with properties for bg, text, and outline across hover/focus,

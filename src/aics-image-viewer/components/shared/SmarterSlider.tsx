@@ -1,27 +1,26 @@
 import React from "react";
 import Nouislider, { NouisliderProps } from "nouislider-react";
 
-type CallbackArgs = [values: any[], handle: number, unencodedValues: number[], tap: boolean, positions: number[]];
+type CallbackArgs = Parameters<NonNullable<NouisliderProps["onStart"]>>;
+
+const MemoedNouislider = React.memo(
+  Nouislider as React.ComponentType<NouisliderProps & { shouldUpdate: boolean }>,
+  ({ shouldUpdate }) => shouldUpdate
+);
 
 /** A wrapper around `Nouislider` that prevents updates while the slider is being dragged. */
-export default class SmarterSlider extends React.Component<NouisliderProps, { shouldUpdate: boolean }> {
-  constructor(props: NouisliderProps) {
-    super(props);
-    this.state = { shouldUpdate: true };
-  }
-
-  shouldComponentUpdate = (): boolean => this.state.shouldUpdate;
-
-  wrapEventHandler(shouldUpdate: boolean, handler?: (...args: CallbackArgs) => void) {
+const SmarterSlider: React.FC<NouisliderProps> = (props) => {
+  const [shouldUpdate, setShouldUpdate] = React.useState(true);
+  const wrapEventHandler = (shouldUpdate: boolean, handler?: (...args: CallbackArgs) => void) => {
     return (...args: CallbackArgs) => {
-      this.setState({ shouldUpdate });
+      setShouldUpdate(shouldUpdate);
       if (handler) handler(...args);
     };
-  }
+  };
 
-  render(): React.ReactNode {
-    const onStart = this.wrapEventHandler(false, this.props.onStart);
-    const onEnd = this.wrapEventHandler(true, this.props.onEnd);
-    return <Nouislider {...{ ...this.props, onStart, onEnd }} />;
-  }
-}
+  const onStart = wrapEventHandler(false, props.onStart);
+  const onEnd = wrapEventHandler(true, props.onEnd);
+  return <MemoedNouislider {...{ ...props, shouldUpdate, onStart, onEnd }} />;
+};
+
+export default SmarterSlider;

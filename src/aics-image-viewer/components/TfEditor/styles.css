@@ -1,44 +1,25 @@
 @import "../../assets/styles/variables";
 
 .channel-row {
+  .tf-editor-svg {
+    margin-bottom: 8px;
+  }
+
   :host {
     display: block;
   }
 
   .bar rect {
-    fill: $border-color;
-  }
-
-  .aligned {
-    margin: auto;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
+    fill: var(--color-controlpanel-border);
   }
 
   .tick text {
-    fill: $text-gray;
+    fill: var(--color-controlpanel-text);
   }
 
   .axis path,
   .axis line {
-    stroke: $border-color;
-  }
-
-  button::-moz-focus-inner {
-    border: none;
-    padding: 1px 2px;
-  }
-
-  input[type="color"] {
-    border: 1px solid;
-    width: 44px;
-    height: 23px;
-    margin-left: 2px;
-    margin-right: 2px;
-    padding: 1px 2px;
-    cursor: pointer;
+    stroke: var(--color-controlpanel-border);
   }
 
   rect {
@@ -59,7 +40,7 @@
   }
 
   .selected {
-    fill: "white";
-    stroke: "white";
+    fill: white;
+    stroke: white;
   }
 }

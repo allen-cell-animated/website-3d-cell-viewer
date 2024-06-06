@@ -1,14 +1,13 @@
 import React from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
-import { Channel, ControlPoint, Lut } from "@aics/volume-viewer";
-import Nouislider from "nouislider-react";
+import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
+import { Button, Checkbox, Tooltip } from "antd";
 import "nouislider/distribute/nouislider.css";
 
 import "./styles.css";
 
-import { Button, Checkbox } from "antd";
-
+import SliderRow from "../shared/SliderRow";
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
   ColorArray,
@@ -17,16 +16,15 @@ import {
   ColorObject,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
-import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
+const COLOR_PICKER_MARGIN = 2;
 
 type Pair = [number, number];
 
 interface MyTfEditorProps {
   id: string;
-  index: number;
   width: number;
   height: number;
   volumeData: Uint8Array;
@@ -41,7 +39,11 @@ interface MyTfEditorProps {
 }
 
 interface MyTfEditorState {
-  displayColorPicker: boolean;
+  /**
+   * Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
+   * Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
+   */
+  colorPickerPosition: number | null;
 }
 
 /** Wrapper to convince color picker interface to update while open */
@@ -56,6 +58,28 @@ const StatefulSketchPicker: React.FC<{
     onChange(newColor);
   };
   return <SketchPicker color={colorState} onChange={wrappedOnChange} disableAlpha={disableAlpha} />;
+};
+
+const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
+  autoXF: (histo) => {
+    // Currently unused. min and max are the first and last bins whose values are >=10% of max bin
+    const [hmin, hmax] = histo.findAutoMinMax();
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  auto2XF: (histo) => {
+    const [hmin, hmax] = histo.findAutoIJBins();
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  auto98XF: (histo) => {
+    const hmin = histo.findBinOfPercentile(LUT_MIN_PERCENTILE);
+    const hmax = histo.findBinOfPercentile(LUT_MAX_PERCENTILE);
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  bestFitXF: (histo) => {
+    const [hmin, hmax] = histo.findBestFitBins();
+    return new Lut().createFromMinMax(hmin, hmax);
+  },
+  resetXF: (_histo) => new Lut().createFullRange(),
 };
 
 export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEditorState> {
@@ -107,13 +131,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.mousemove = this.mousemove.bind(this);
     this.mouseup = this.mouseup.bind(this);
     this.drawCanvas = this.drawCanvas.bind(this);
-    this.autoXF = this.autoXF.bind(this);
-    this.resetXF = this.resetXF.bind(this);
-    this.auto2XF = this.auto2XF.bind(this);
-    this.auto98XF = this.auto98XF.bind(this);
-    this.bestFitXF = this.bestFitXF.bind(this);
-    this.handleColorizeCheckbox = this.handleColorizeCheckbox.bind(this);
-    this.handleColorizeAlpha = this.handleColorizeAlpha.bind(this);
+    this.applyTFGenerator = this.applyTFGenerator.bind(this);
     this.colorPick = this.colorPick.bind(this);
     this.handleCloseColorPicker = this.handleCloseColorPicker.bind(this);
     this.handleChangeColor = this.handleChangeColor.bind(this);
@@ -121,7 +139,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.svgElement = React.createRef();
 
     this.state = {
-      displayColorPicker: false,
+      colorPickerPosition: null,
     };
 
     /**
@@ -279,7 +297,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       .attr("class", "line")
       .attr("fill", "url(#tfGradient-" + this.id + ")")
       .attr("stroke", "white")
-      .call(() => this.initDraw());
+      .call(() => this.redraw());
 
     // Mouse interaction handler
     g.append("rect")
@@ -422,11 +440,11 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
         document.addEventListener("mousemove", this.capturedMousemove, false);
         document.addEventListener("mouseup", this.mouseup, false);
       })
-      .on("contextmenu", (d, i) => {
+      .on("contextmenu", () => {
         // react on right-clicking
         d3.event.preventDefault();
         this.mouseup();
-        this.colorPick();
+        this.colorPick(d3.event.target);
       })
       .transition()
       .duration(750)
@@ -473,18 +491,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
       });
 
     gradient.exit().remove();
-  }
-
-  // create the chart content
-  private initDraw(): void {
-    // Add circle to connect and interact with the control points
-    this.makeCirclesForControlPoints();
-
-    // Create a linear gradient definition of the control points
-    this.makeGradient();
-
-    // Draw gradient in canvas too
-    this.drawCanvas();
   }
 
   // Update the chart content
@@ -547,8 +553,23 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
 
   /////// User interaction related event callbacks ////////
 
-  private colorPick(): void {
-    this.setState({ displayColorPicker: !this.state.displayColorPicker });
+  private colorPick(cpEl?: HTMLElement): void {
+    if (!cpEl || !this.svgElement.current) {
+      this.setState({ colorPickerPosition: 0 });
+      return;
+    }
+
+    const svgRect = this.svgElement.current.getBoundingClientRect();
+    const cpRect = cpEl.getBoundingClientRect();
+    const cpRectCenter = cpRect.left + cpRect.width / 2;
+
+    if (cpRectCenter - svgRect.left < svgRect.width / 2) {
+      // Control point is towards the left of the plot; open color picker to its right
+      this.setState({ colorPickerPosition: cpRect.right - svgRect.left + COLOR_PICKER_MARGIN });
+    } else {
+      // Control point is towards the right of the plot; open color picker to its left
+      this.setState({ colorPickerPosition: -(svgRect.right - cpRect.left + COLOR_PICKER_MARGIN) });
+    }
   }
 
   private mousedown(): void {
@@ -613,37 +634,6 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.dragged = null;
   }
 
-  // TODO unused
-  // NOTE none of this component's elements are focusable (required to fire keyboard events).
-  //   The behavior in this function would be a bit awkward to implement properly.
-  private keydown(_e: KeyboardEvent): void {
-    if (!this.selected) {
-      return;
-    }
-    if (d3.event.keyCode === 46) {
-      // delete
-      const i = this.props.controlPoints.indexOf(this.selected);
-      let newControlPoints = [...this.props.controlPoints];
-      newControlPoints.splice(i, 1);
-      this.selected = newControlPoints.length > 0 ? newControlPoints[i > 0 ? i - 1 : 0] : null;
-      this.props.updateChannelLutControlPoints(newControlPoints);
-    }
-  }
-
-  // TODO unused
-  private export(): void {
-    const jsonContent = JSON.stringify(this.props.controlPoints);
-    const a = document.createElement("a");
-    const blob = new Blob([jsonContent], {
-      type: "octet/stream",
-    });
-    const url = window.URL.createObjectURL(blob);
-    a.href = url;
-    a.download = "transferFunction.json";
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-
   updateControlPointsWithoutColor(ptsWithoutColor: ControlPoint[]): void {
     const pts = ptsWithoutColor.map((pt) => ({
       ...pt,
@@ -658,50 +648,17 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
     this.props.updateChannelLutControlPoints(pts);
   }
 
-  private autoXF(): void {
-    const { channelData } = this.props;
-
-    const [b, e] = channelData.histogram.findAutoMinMax();
-    const lutObj = new Lut().createFromMinMax(b, e);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
+  applyTFGenerator(generator: string): void {
+    const lut = TF_GENERATORS[generator](this.props.channelData.histogram);
+    this.updateControlPointsWithoutColor(lut.controlPoints);
   }
 
-  private auto2XF(): void {
-    const { channelData } = this.props;
-
-    const [hmin, hmax] = channelData.histogram.findAutoIJBins();
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private auto98XF(): void {
-    const { channelData } = this.props;
-
-    const hmin = channelData.histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
-    const hmax = channelData.histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private bestFitXF(): void {
-    const { channelData } = this.props;
-
-    const [hmin, hmax] = channelData.histogram.findBestFitBins();
-    const lutObj = new Lut().createFromMinMax(hmin, hmax);
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
-  }
-
-  private handleColorizeCheckbox(e: CheckboxChangeEvent): void {
-    this.props.updateColorizeMode(e.target.checked);
-  }
-
-  private handleColorizeAlpha(values: number[]): void {
-    this.props.updateColorizeAlpha(values[0]);
-  }
-
-  private resetXF(): void {
-    const lutObj = new Lut().createFullRange();
-    this.updateControlPointsWithoutColor(lutObj.controlPoints);
+  createTFGeneratorButton(generator: string, name: string, description: string): React.ReactNode {
+    return (
+      <Tooltip title={description} placement="top">
+        <Button onClick={() => this.applyTFGenerator(generator)}>{name}</Button>
+      </Tooltip>
+    );
   }
 
   /////// Public API functions ///////
@@ -726,7 +683,7 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   handleCloseColorPicker(): void {
-    this.setState({ displayColorPicker: false });
+    this.setState({ colorPickerPosition: null });
   }
 
   handleChangeColor(color: ColorResult): void {
@@ -739,66 +696,46 @@ export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEdi
   }
 
   render(): React.ReactNode {
-    const { id, width, height, colorizeEnabled, colorizeAlpha } = this.props;
+    const { width, height, colorizeEnabled, colorizeAlpha } = this.props;
+    const { colorPickerPosition } = this.state;
+    const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
 
     return (
-      <div id="container">
-        <svg id={`svg-${id}`} width={width} height={height} ref={this.svgElement} />
-        <div className="aligned">
-          {this.state.displayColorPicker ? (
-            <div style={STYLES.popover}>
-              <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
-              <StatefulSketchPicker
-                color={colorArrayToObject(this.last_color)}
-                onChange={this.handleChangeColor}
-                disableAlpha={true}
-              />
-            </div>
-          ) : null}
+      <div>
+        <div className="button-row">
+          {this.createTFGeneratorButton("resetXF", "None", "Reset transfer function to full range.")}
+          {this.createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
+          {this.createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
+          {this.createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
         </div>
-        <div className="aligned">
-          <Checkbox checked={colorizeEnabled} onChange={this.handleColorizeCheckbox} id={`colorize-${id}`}>
-            Colorize
-          </Checkbox>
-          <div style={STYLES.control}>
-            <Nouislider
-              //                      id={`svg-${id}`}
-              range={{ min: [0], max: [1] }}
-              start={colorizeAlpha}
-              connect={true}
-              tooltips={true}
-              behaviour="drag"
-              onUpdate={this.handleColorizeAlpha}
+        {colorPickerPosition !== null && (
+          <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
+            <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
+            <StatefulSketchPicker
+              color={colorArrayToObject(this.last_color)}
+              onChange={this.handleChangeColor}
+              disableAlpha={true}
             />
           </div>
-        </div>
-        <div className="aligned">
-          <Button id={`reset-${id}`} className="ant-btn" onClick={this.resetXF}>
-            Reset
-          </Button>
-          <Button id={`auto-${id}`} className="ant-btn" onClick={this.autoXF}>
-            Auto
-          </Button>
-          <Button id={`bestfit-${id}`} className="ant-btn" onClick={this.bestFitXF}>
-            BestFit
-          </Button>
-          <Button id={`auto2-${id}`} className="ant-btn" onClick={this.auto2XF}>
-            Auto_IJ
-          </Button>
-          <Button id={`auto98-${id}`} className="ant-btn" onClick={this.auto98XF}>
-            Auto_98
-          </Button>
-        </div>
+        )}
+        <svg className="tf-editor-svg" width={width} height={height} ref={this.svgElement} />
+        <SliderRow
+          label={
+            <Checkbox checked={colorizeEnabled} onChange={(e) => this.props.updateColorizeMode(e.target.checked)}>
+              Colorize
+            </Checkbox>
+          }
+          max={1}
+          start={colorizeAlpha}
+          onUpdate={(values) => this.props.updateColorizeAlpha(values[0])}
+          hideSlider={!colorizeEnabled}
+        />
       </div>
     );
   }
 }
 
 const STYLES: Styles = {
-  colorPicker: {
-    margin: "auto",
-    marginRight: 16,
-  },
   cover: {
     position: "fixed",
     top: "0px",
@@ -809,10 +746,5 @@ const STYLES: Styles = {
   popover: {
     position: "absolute",
     zIndex: "9999",
-  },
-  control: {
-    flex: 5,
-    height: 30,
-    paddingTop: 15,
   },
 };
