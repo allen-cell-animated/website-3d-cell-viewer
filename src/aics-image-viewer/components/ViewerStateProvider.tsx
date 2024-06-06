@@ -190,4 +190,4 @@ export function connectToViewerState<Keys extends keyof ViewerContextType, Props
   return ConnectedComponent;
 }
 
-export default React.memo(ViewerStateProvider);
+export default ViewerStateProvider;

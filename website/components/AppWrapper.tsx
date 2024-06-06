@@ -6,7 +6,7 @@ import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
 import ShareModal from "./ShareModal";
-import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
+import { ImageViewerApp, RenderMode, ViewMode, ViewerStateProvider } from "../../src";
 import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
@@ -113,12 +113,14 @@ export default function AppWrapper(): ReactElement {
         </FlexRowAlignCenter>
       </Header>
       {viewerProps && viewerSettings && (
-        <ImageViewerApp
-          {...viewerProps}
-          appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
-          canvasMargin="0 0 0 0"
-          viewerSettings={viewerSettings}
-        />
+        <ViewerStateProvider>
+          <ImageViewerApp
+            {...viewerProps}
+            appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+            canvasMargin="0 0 0 0"
+            viewerSettings={viewerSettings}
+          />
+        </ViewerStateProvider>
       )}
     </div>
   );
