@@ -3,7 +3,7 @@ import React from "react";
 import ColorPicker from "./ColorPicker";
 import { ColorArray, colorArrayToObject, colorObjectToArray } from "../shared/utils/colorRepresentations";
 import { Styles } from "../shared/types";
-import { ViewerSettingUpdater } from "./App/types";
+import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
 import { connectToViewerState } from "./ViewerStateProvider";
 
 const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: ColorArray) => void }> = ({

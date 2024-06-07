@@ -7,11 +7,11 @@ import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
 import ShareModal from "./ShareModal";
 import { ImageViewerApp, RenderMode, ViewMode, ViewerStateProvider } from "../../src";
-import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
 
-const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
+const DEFAULT_VIEWER_SETTINGS: Partial<ViewerState> = {
   showAxes: false,
   showBoundingBox: false,
   autorotate: false,
@@ -51,7 +51,7 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings> | null>(null);
+  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState> | null>(null);
   const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 

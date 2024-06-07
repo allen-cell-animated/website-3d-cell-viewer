@@ -15,11 +15,11 @@ import {
   VolumeFileFormat,
 } from "@aics/volume-viewer";
 
-import { AppProps, ShowControls, GlobalViewerSettings, UseImageEffectType } from "./types";
+import type { AppProps, ShowControls, UseImageEffectType } from "./types";
+import type { ViewerState, ChannelState } from "../ViewerStateProvider/types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import { initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
-  ChannelState,
   findFirstChannelMatch,
   makeChannelIndexGrouping,
   ChannelGrouping,
@@ -99,7 +99,7 @@ const defaultShownControls: ShowControls = {
   metadataViewer: true,
 };
 
-const defaultViewerSettings: GlobalViewerSettings = {
+const defaultViewerSettings: ViewerState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,

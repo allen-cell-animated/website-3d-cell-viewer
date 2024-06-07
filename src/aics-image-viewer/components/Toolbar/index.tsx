@@ -6,7 +6,7 @@ import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
 
-import { ViewerSettingUpdater } from "../App/types";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 

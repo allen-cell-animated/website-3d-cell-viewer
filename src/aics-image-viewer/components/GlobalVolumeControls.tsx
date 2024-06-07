@@ -3,7 +3,7 @@ import { Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
 import { connectToViewerState } from "./ViewerStateProvider";
-import { ViewerSettingUpdater } from "./App/types";
+import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 

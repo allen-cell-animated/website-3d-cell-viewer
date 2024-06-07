@@ -1,6 +1,13 @@
 import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
-import { GlobalViewerSettings, ViewerSettingChangeHandlers, ViewerSettingUpdater } from "../App/types";
+import type {
+  ViewerState,
+  ViewerSettingChangeHandlers,
+  ViewerSettingUpdater,
+  ChannelSettingUpdater,
+  ChannelState,
+  MultipleChannelSettingsUpdater,
+} from "./types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   ALPHA_MASK_SLIDER_DEFAULT,
@@ -11,17 +18,12 @@ import {
   INTERPOLATION_ENABLED_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
 } from "../../shared/constants";
-import {
-  ChannelSettingUpdater,
-  ChannelState,
-  MultipleChannelSettingsUpdater,
-} from "../../shared/utils/viewerChannelSettings";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
 
-const DEFAULT_VIEWER_SETTINGS: GlobalViewerSettings = {
+const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -66,7 +68,7 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
   }),
 };
 
-export type ViewerContextType = GlobalViewerSettings & {
+export type ViewerContextType = ViewerState & {
   channelSettings: ChannelState[];
   changeViewerSetting: ViewerSettingUpdater;
   setChannelSettings: React.Dispatch<React.SetStateAction<ChannelState[]>>;
@@ -75,7 +77,7 @@ export type ViewerContextType = GlobalViewerSettings & {
   applyColorPresets: (presets: ColorArray[]) => void;
 };
 
-const extractViewerSettings = (context: ViewerContextType): GlobalViewerSettings => {
+const extractViewerSettings = (context: ViewerContextType): ViewerState => {
   const {
     channelSettings: _channelSettings,
     changeViewerSetting: _changeViewerSetting,

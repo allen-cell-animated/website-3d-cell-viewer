@@ -4,7 +4,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
-import { ViewerSettingUpdater } from "../App/types";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import PlayControls from "../../shared/utils/playControls";
 
 import { connectToViewerState } from "../ViewerStateProvider";
