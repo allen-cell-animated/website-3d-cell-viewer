@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
 import type {
+  ViewerContextType,
   ViewerState,
   ViewerSettingChangeHandlers,
   ViewerSettingUpdater,
@@ -66,15 +67,6 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
     // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
     autorotate: prevSettings.renderMode === RenderMode.pathTrace ? false : autorotate,
   }),
-};
-
-export type ViewerContextType = ViewerState & {
-  channelSettings: ChannelState[];
-  changeViewerSetting: ViewerSettingUpdater;
-  setChannelSettings: React.Dispatch<React.SetStateAction<ChannelState[]>>;
-  changeChannelSetting: ChannelSettingUpdater;
-  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
-  applyColorPresets: (presets: ColorArray[]) => void;
 };
 
 const extractViewerSettings = (context: ViewerContextType): ViewerState => {
