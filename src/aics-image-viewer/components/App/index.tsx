@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import {
@@ -689,7 +689,14 @@ const App: React.FC<AppProps> = (props) => {
 
   // Rendering ////////////////////////////////////////////////////////////////
 
-  const showControls = { ...defaultShownControls, ...props.showControls };
+  const showControls = useMemo(
+    (): ShowControls => ({ ...defaultShownControls, ...props.showControls }),
+    [props.showControls]
+  );
+  const pixelSize = useMemo(
+    (): [number, number, number] => (image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]),
+    [image?.imageInfo.physicalPixelSize]
+  );
 
   return (
     <StyleProvider>
@@ -719,7 +726,7 @@ const App: React.FC<AppProps> = (props) => {
             // image state
             imageName={image?.name}
             hasImage={!!image}
-            pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
+            pixelSize={pixelSize}
             channelDataChannels={image?.channels}
             channelGroupedByType={channelGroupedByType}
             // functions

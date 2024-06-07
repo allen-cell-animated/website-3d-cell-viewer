@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
 import { GlobalViewerSettings, ViewerSettingChangeHandlers, ViewerSettingUpdater } from "./App/types";
 import { ImageType, RenderMode, ViewMode } from "../shared/enums";
@@ -102,10 +102,9 @@ const DEFAULT_VIEWER_CONTEXT: ViewerContextType = {
 const DEFAULT_VIEWER_CONTEXT_OUTER = { ref: { current: DEFAULT_VIEWER_CONTEXT } };
 
 type NoNull<T> = { [K in keyof T]: NonNullable<T[K]> };
+type ContextRefType = NoNull<React.MutableRefObject<ViewerContextType>>;
 
-export const ViewerStateContext = React.createContext<{ ref: NoNull<React.MutableRefObject<ViewerContextType>> }>(
-  DEFAULT_VIEWER_CONTEXT_OUTER
-);
+export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(DEFAULT_VIEWER_CONTEXT_OUTER);
 
 const ViewerStateProvider: React.FC = ({ children }) => {
   const [viewerSettings, setViewerSettings] = useState({ ...DEFAULT_VIEWER_SETTINGS });
@@ -114,70 +113,64 @@ const ViewerStateProvider: React.FC = ({ children }) => {
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
 
-  const changeViewerSetting = useCallback<ViewerSettingUpdater>(
-    (key, value) => {
-      const currentSettings = extractViewerSettings(ref.current);
-      const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
+  // Below callbacks get no dependencies since we're accessing state via the ref
 
-      if (changeHandler) {
-        // This setting has a custom change handler. Let it handle creating a new state object.
-        setViewerSettings(changeHandler(currentSettings, value));
+  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => {
+    const currentSettings = extractViewerSettings(ref.current);
+    const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
+
+    if (changeHandler) {
+      // This setting has a custom change handler. Let it handle creating a new state object.
+      setViewerSettings(changeHandler(currentSettings, value));
+    } else {
+      const setting = currentSettings[key];
+      if (isObject(setting) && isObject(value)) {
+        // This setting is an object, and we may be updating it with a partial object.
+        setViewerSettings({ ...currentSettings, [key]: { ...setting, ...value } });
       } else {
-        const setting = currentSettings[key];
-        if (isObject(setting) && isObject(value)) {
-          // This setting is an object, and we may be updating it with a partial object.
-          setViewerSettings({ ...currentSettings, [key]: { ...setting, ...value } });
-        } else {
-          // This setting is regular. Update it the regular way.
-          setViewerSettings({ ...currentSettings, [key]: value });
-        }
+        // This setting is regular. Update it the regular way.
+        setViewerSettings({ ...currentSettings, [key]: value });
       }
-    },
-    [viewerSettings]
-  );
+    }
+  }, []);
 
-  const changeChannelSetting = useCallback<ChannelSettingUpdater>(
-    (index, key, value) => {
-      const newChannelSettings = ref.current.channelSettings.slice();
-      newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
+  const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
+    const newChannelSettings = ref.current.channelSettings.slice();
+    newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
+    setChannelSettings(newChannelSettings);
+  }, []);
 
-  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>(
-    (indices, key, value) => {
-      const newChannelSettings = ref.current.channelSettings.map((settings, idx) =>
-        indices.includes(idx) ? { ...settings, [key]: value } : settings
-      );
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
+  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>((indices, key, value) => {
+    const newChannelSettings = ref.current.channelSettings.map((settings, idx) =>
+      indices.includes(idx) ? { ...settings, [key]: value } : settings
+    );
+    setChannelSettings(newChannelSettings);
+  }, []);
 
-  const applyColorPresets = useCallback(
-    (presets: ColorArray[]): void => {
-      const newChannelSettings = ref.current.channelSettings.map((channel, idx) =>
-        presets[idx] ? { ...channel, color: presets[idx] } : channel
-      );
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
+  const applyColorPresets = useCallback((presets: ColorArray[]): void => {
+    const newChannelSettings = ref.current.channelSettings.map((channel, idx) =>
+      presets[idx] ? { ...channel, color: presets[idx] } : channel
+    );
+    setChannelSettings(newChannelSettings);
+  }, []);
 
-  ref.current = {
-    ...viewerSettings,
-    channelSettings,
-    changeViewerSetting,
-    setChannelSettings,
-    changeChannelSetting,
-    changeMultipleChannelSettings,
-    applyColorPresets,
-  };
+  const context = useMemo(() => {
+    ref.current = {
+      ...viewerSettings,
+      channelSettings,
+      changeViewerSetting,
+      setChannelSettings,
+      changeChannelSetting,
+      changeMultipleChannelSettings,
+      applyColorPresets,
+    };
 
-  // `ref` is wrapped in another object to ensure that the context always updates when this component renders.
-  // (`ref` on its own would always compare equal to itself and the context would never update.)
-  return <ViewerStateContext.Provider value={{ ref }}>{children}</ViewerStateContext.Provider>;
+    // `ref` is wrapped in another object to ensure that the context updates when state does.
+    // (`ref` on its own would always compare equal to itself and the context would never update.)
+    return { ref };
+  }, [viewerSettings, channelSettings]);
+
+  return <ViewerStateContext.Provider value={context}>{children}</ViewerStateContext.Provider>;
 };
 
 /**

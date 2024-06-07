@@ -43,7 +43,7 @@ const ControlTabNames = {
   [ControlTab.Metadata]: "Metadata",
 };
 
-export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
+function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = React.useState(ControlTab.Channels);
 
   const controlPanelContainerRef = React.useRef<HTMLDivElement>(null);
@@ -152,3 +152,5 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     </div>
   );
 }
+
+export default React.memo(ControlPanel);
