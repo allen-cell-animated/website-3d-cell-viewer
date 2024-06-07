@@ -4,6 +4,7 @@ import ColorPicker from "./ColorPicker";
 import { ColorArray, colorArrayToObject, colorObjectToArray } from "../shared/utils/colorRepresentations";
 import { Styles } from "../shared/types";
 import { ViewerSettingUpdater } from "./App/types";
+import { connectToViewerState } from "./ViewerStateProvider";
 
 const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: ColorArray) => void }> = ({
   color,
@@ -24,16 +25,18 @@ const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: Color
 );
 
 export interface CustomizeWidgetProps {
+  // From parent
+  showControls: {
+    backgroundColorPicker: boolean;
+    boundingBoxColorPicker: boolean;
+  };
+
+  // From viewer state
   showBoundingBox: boolean;
   backgroundColor: ColorArray;
   boundingBoxColor: ColorArray;
 
   changeViewerSetting: ViewerSettingUpdater;
-
-  showControls: {
-    backgroundColorPicker: boolean;
-    boundingBoxColorPicker: boolean;
-  };
 }
 
 const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
@@ -70,4 +73,9 @@ const STYLES: Styles = {
   },
 };
 
-export default CustomizeWidget;
+export default connectToViewerState(CustomizeWidget, [
+  "showBoundingBox",
+  "backgroundColor",
+  "boundingBoxColor",
+  "changeViewerSetting",
+]);

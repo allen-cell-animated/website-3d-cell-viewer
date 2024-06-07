@@ -17,21 +17,24 @@ import type { IsosurfaceFormat } from "../shared/types";
 
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
+import { connectToViewerState } from "./ViewerStateProvider";
 
 export type ChannelsWidgetProps = {
+  // From parent
   channelDataChannels: Channel[] | undefined;
-  channelSettings: ChannelState[];
   channelGroupedByType: ChannelGrouping;
   viewerChannelSettings?: ViewerChannelSettings;
-
-  changeChannelSetting: ChannelSettingUpdater;
-  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   onApplyColorPresets: (presets: ColorArray[]) => void;
 
   filterFunc?: (key: string) => boolean;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
+
+  // From viewer state
+  channelSettings: ChannelState[];
+  changeChannelSetting: ChannelSettingUpdater;
+  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
 };
 
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
@@ -131,4 +134,8 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
 };
 
-export default ChannelsWidget;
+export default connectToViewerState(ChannelsWidget, [
+  "channelSettings",
+  "changeChannelSetting",
+  "changeMultipleChannelSettings",
+]);

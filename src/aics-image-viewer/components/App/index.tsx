@@ -186,14 +186,8 @@ const App: React.FC<AppProps> = (props) => {
   // State management /////////////////////////////////////////////////////////
 
   const viewerState = useContext(ViewerStateContext).ref;
-  const {
-    channelSettings,
-    setChannelSettings,
-    changeViewerSetting,
-    changeChannelSetting,
-    changeMultipleChannelSettings,
-    applyColorPresets,
-  } = viewerState.current;
+  const { channelSettings, setChannelSettings, changeViewerSetting, changeChannelSetting, applyColorPresets } =
+    viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
   const loadContext = useConstructor(
@@ -721,30 +715,17 @@ const App: React.FC<AppProps> = (props) => {
         >
           <ControlPanel
             showControls={showControls}
+            collapsed={controlPanelClosed}
             // image state
             imageName={image?.name}
             hasImage={!!image}
             pixelSize={image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]}
             channelDataChannels={image?.channels}
             channelGroupedByType={channelGroupedByType}
-            // user selections
-            channelSettings={channelSettings}
-            showBoundingBox={viewerSettings.showBoundingBox}
-            backgroundColor={viewerSettings.backgroundColor}
-            boundingBoxColor={viewerSettings.boundingBoxColor}
-            maskAlpha={viewerSettings.maskAlpha}
-            brightness={viewerSettings.brightness}
-            density={viewerSettings.density}
-            levels={viewerSettings.levels}
-            interpolationEnabled={viewerSettings.interpolationEnabled}
-            collapsed={controlPanelClosed}
             // functions
-            changeViewerSetting={changeViewerSetting}
             setCollapsed={setControlPanelClosed}
             saveIsosurface={saveIsosurface}
             onApplyColorPresets={applyColorPresets}
-            changeChannelSetting={changeChannelSetting}
-            changeMultipleChannelSettings={changeMultipleChannelSettings}
             viewerChannelSettings={props.viewerChannelSettings}
             getMetadata={getMetadata}
           />
@@ -752,39 +733,26 @@ const App: React.FC<AppProps> = (props) => {
         <Layout className="cell-viewer-wrapper" style={{ margin: props.canvasMargin }}>
           <Content>
             <Toolbar
-              viewMode={viewerSettings.viewMode}
               fovDownloadHref={props.parentImageDownloadHref}
               cellDownloadHref={props.imageDownloadHref}
-              autorotate={viewerSettings.autorotate}
-              imageType={viewerSettings.imageType}
               hasParentImage={!!props.parentImageUrl}
               hasCellId={!!props.cellId}
               canPathTrace={view3d ? view3d.hasWebGL2() : false}
-              showAxes={viewerSettings.showAxes}
-              showBoundingBox={viewerSettings.showBoundingBox}
-              renderMode={viewerSettings.renderMode}
               resetCamera={resetCamera}
               downloadScreenshot={saveScreenshot}
-              changeViewerSetting={changeViewerSetting}
               showControls={showControls}
             />
             <CellViewerCanvasWrapper
               view3d={view3d}
               hasImage={!!image}
-              viewMode={viewerSettings.viewMode}
-              autorotate={viewerSettings.autorotate}
               loadingImage={sendingQueryRequest}
               numSlices={numSlices}
               numSlicesLoaded={numSlicesLoaded}
               numTimesteps={numTimesteps}
-              region={viewerSettings.region}
-              slices={viewerSettings.slice}
-              time={viewerSettings.time}
               playControls={playControls}
               playingAxis={playingAxis}
               appHeight={props.appHeight}
               showControls={showControls}
-              changeViewerSetting={changeViewerSetting}
               onClippingPanelVisibleChange={onClippingPanelVisibleChange}
               onClippingPanelVisibleChangeEnd={onClippingPanelVisibleChangeEnd}
             />

@@ -2,11 +2,13 @@ import React from "react";
 import { Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
+import { connectToViewerState } from "./ViewerStateProvider";
 import { ViewerSettingUpdater } from "./App/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
 export interface GlobalVolumeControlsProps {
+  // From parent
   imageName: string | undefined;
   pixelSize: [number, number, number];
   showControls: {
@@ -17,6 +19,7 @@ export interface GlobalVolumeControlsProps {
     interpolationControl: boolean;
   };
 
+  // From viewer state
   maskAlpha: number;
   brightness: number;
   density: number;
@@ -61,4 +64,11 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
   );
 };
 
-export default GlobalVolumeControls;
+export default connectToViewerState(GlobalVolumeControls, [
+  "maskAlpha",
+  "brightness",
+  "density",
+  "levels",
+  "interpolationEnabled",
+  "changeViewerSetting",
+]);

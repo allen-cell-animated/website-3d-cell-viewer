@@ -3,7 +3,7 @@ import React from "react";
 import { Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
-import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
+import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
 import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
 import MetadataViewer from "../MetadataViewer";
@@ -14,7 +14,12 @@ import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
 import { MetadataRecord } from "../../shared/types";
 
-interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
+type PropsOf<T> = T extends React.ComponentType<infer P> ? P : never;
+
+interface ControlPanelProps
+  extends PropsOf<typeof ChannelsWidget>,
+    PropsOf<typeof GlobalVolumeControls>,
+    PropsOf<typeof CustomizeWidget> {
   hasImage: boolean;
   showControls: GlobalVolumeControlsProps["showControls"] &
     CustomizeWidgetProps["showControls"] & {
@@ -90,17 +95,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
         key: 0,
         label: "Rendering adjustments",
         children: (
-          <GlobalVolumeControls
-            imageName={props.imageName}
-            pixelSize={props.pixelSize}
-            changeViewerSetting={props.changeViewerSetting}
-            maskAlpha={props.maskAlpha}
-            brightness={props.brightness}
-            density={props.density}
-            levels={props.levels}
-            interpolationEnabled={props.interpolationEnabled}
-            showControls={showControls}
-          />
+          <GlobalVolumeControls imageName={props.imageName} pixelSize={props.pixelSize} showControls={showControls} />
         ),
       },
     ];
@@ -110,15 +105,7 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
       items.push({
         key: 1,
         label: "Customize",
-        children: (
-          <CustomizeWidget
-            backgroundColor={props.backgroundColor}
-            boundingBoxColor={props.boundingBoxColor}
-            changeViewerSetting={props.changeViewerSetting}
-            showBoundingBox={props.showBoundingBox}
-            showControls={props.showControls}
-          />
-        ),
+        children: <CustomizeWidget showControls={props.showControls} />,
       });
     }
 
@@ -148,12 +135,9 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
           <div className="channel-rows-list">
             {tab === ControlTab.Channels && (
               <ChannelsWidget
-                channelSettings={props.channelSettings}
                 channelDataChannels={props.channelDataChannels}
                 channelGroupedByType={props.channelGroupedByType}
-                changeMultipleChannelSettings={props.changeMultipleChannelSettings}
                 saveIsosurface={props.saveIsosurface}
-                changeChannelSetting={props.changeChannelSetting}
                 onColorChangeComplete={props.onColorChangeComplete}
                 onApplyColorPresets={props.onApplyColorPresets}
                 filterFunc={props.filterFunc}
