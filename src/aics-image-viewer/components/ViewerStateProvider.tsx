@@ -177,14 +177,16 @@ const ViewerStateProvider: React.FC = ({ children }) => {
  * Higher-order component that connects a component to the viewer state context.
  *
  * Accepts a `component` and an array of `keys` from the viewer state context, and returns a new memoized component
- * which "subscribes" to only those fields of state, and will not re-render if other fields change.
+ * which "subscribes" to only those fields of state, and will not re-render if other fields change. This works by
+ * "splitting the component in two" as described
+ * [here](https://react.dev/reference/react/memo#updating-a-memoized-component-using-a-context).
  *
  * NOTE that while higher-order components don't seem to be explicitly considered an anti-pattern, they don't appear in
  * modern documentation because they are "[not commonly used in modern React
  * code](https://legacy.reactjs.org/docs/higher-order-components.html)." React-redux, which inspired this "connect"
  * pattern, has also generally moved away from this pattern [in favor of a hooks-based
  * approach](https://react-redux.js.org/api/hooks). I too would love to use hooks to connect to viewer state, but there
- * is currently no way hook into context without agreeing to re-render on every change. I feel okay writing a higher-
+ * is currently no way to hook into context without agreeing to re-render on every change. I feel okay using a higher-
  * order component in this case because, analogous to a custom hook, it extends a provided primitive HOC (`memo`).
  */
 export function connectToViewerState<Keys extends keyof ViewerContextType, Props extends Pick<ViewerContextType, Keys>>(
