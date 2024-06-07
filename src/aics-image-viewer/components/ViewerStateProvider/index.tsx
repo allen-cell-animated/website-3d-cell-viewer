@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
-import { GlobalViewerSettings, ViewerSettingChangeHandlers, ViewerSettingUpdater } from "./App/types";
-import { ImageType, RenderMode, ViewMode } from "../shared/enums";
+import { GlobalViewerSettings, ViewerSettingChangeHandlers, ViewerSettingUpdater } from "../App/types";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   ALPHA_MASK_SLIDER_DEFAULT,
   BACKGROUND_COLOR_DEFAULT,
@@ -10,13 +10,13 @@ import {
   DENSITY_SLIDER_LEVEL_DEFAULT,
   INTERPOLATION_ENABLED_DEFAULT,
   LEVELS_SLIDER_DEFAULT,
-} from "../shared/constants";
+} from "../../shared/constants";
 import {
   ChannelSettingUpdater,
   ChannelState,
   MultipleChannelSettingsUpdater,
-} from "../shared/utils/viewerChannelSettings";
-import { ColorArray } from "../shared/utils/colorRepresentations";
+} from "../../shared/utils/viewerChannelSettings";
+import { ColorArray } from "../../shared/utils/colorRepresentations";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
