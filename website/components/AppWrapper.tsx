@@ -113,13 +113,8 @@ export default function AppWrapper(): ReactElement {
         </FlexRowAlignCenter>
       </Header>
       {viewerProps && viewerSettings && (
-        <ViewerStateProvider>
-          <ImageViewerApp
-            {...viewerProps}
-            appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
-            canvasMargin="0 0 0 0"
-            viewerSettings={viewerSettings}
-          />
+        <ViewerStateProvider viewerSettings={viewerSettings}>
+          <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
         </ViewerStateProvider>
       )}
     </div>

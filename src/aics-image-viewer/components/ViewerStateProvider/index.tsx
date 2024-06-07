@@ -100,8 +100,9 @@ type ContextRefType = NoNull<React.MutableRefObject<ViewerContextType>>;
 
 export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(DEFAULT_VIEWER_CONTEXT_OUTER);
 
-const ViewerStateProvider: React.FC = ({ children }) => {
-  const [viewerSettings, setViewerSettings] = useState({ ...DEFAULT_VIEWER_SETTINGS });
+/** Provides a central store for the state of the viewer, and the methods to update it. */
+const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
+  const [viewerSettings, setViewerSettings] = useState<ViewerState>({ ...DEFAULT_VIEWER_SETTINGS });
   const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -148,6 +149,16 @@ const ViewerStateProvider: React.FC = ({ children }) => {
     setChannelSettings(newChannelSettings);
   }, []);
 
+  // Sync viewer settings prop with state
+  if (props.viewerSettings) {
+    for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
+      if (viewerSettings[key] !== props.viewerSettings[key]) {
+        // Update viewer settings one at a time to allow change handlers to keep state valid
+        changeViewerSetting(key, props.viewerSettings[key] as any);
+      }
+    }
+  }
+
   const context = useMemo(() => {
     ref.current = {
       ...viewerSettings,
@@ -164,7 +175,7 @@ const ViewerStateProvider: React.FC = ({ children }) => {
     return { ref };
   }, [viewerSettings, channelSettings]);
 
-  return <ViewerStateContext.Provider value={context}>{children}</ViewerStateContext.Provider>;
+  return <ViewerStateContext.Provider value={context}>{props.children}</ViewerStateContext.Provider>;
 };
 
 /**
@@ -172,7 +183,7 @@ const ViewerStateProvider: React.FC = ({ children }) => {
  *
  * Accepts a `component` and an array of `keys` from the viewer state context, and returns a new memoized component
  * which "subscribes" to only those fields of state, and will not re-render if other fields change. This works by
- * "splitting the component in two" as described
+ * creating a component which is "split in two" as described
  * [here](https://react.dev/reference/react/memo#updating-a-memoized-component-using-a-context).
  *
  * NOTE that while higher-order components don't seem to be explicitly considered an anti-pattern, they don't appear in
