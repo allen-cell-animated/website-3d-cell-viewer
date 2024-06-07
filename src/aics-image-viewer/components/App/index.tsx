@@ -1,5 +1,5 @@
 // 3rd Party Imports
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import {
@@ -15,14 +15,7 @@ import {
   VolumeFileFormat,
 } from "@aics/volume-viewer";
 
-import {
-  AppProps,
-  ShowControls,
-  GlobalViewerSettings,
-  ViewerSettingUpdater,
-  ViewerSettingChangeHandlers,
-  UseImageEffectType,
-} from "./types";
+import { AppProps, ShowControls, GlobalViewerSettings, UseImageEffectType } from "./types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import { initializeLut } from "../../shared/utils/controlPointsToLut";
 import {
@@ -30,8 +23,6 @@ import {
   findFirstChannelMatch,
   makeChannelIndexGrouping,
   ChannelGrouping,
-  ChannelSettingUpdater,
-  MultipleChannelSettingsUpdater,
   ViewerChannelSettings,
   ViewerChannelSetting,
 } from "../../shared/utils/viewerChannelSettings";
@@ -55,6 +46,7 @@ import {
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 
+import { ViewerStateContext } from "../ViewerStateProvider";
 import ChannelUpdater from "./ChannelUpdater";
 import ControlPanel from "../ControlPanel";
 import Toolbar from "../Toolbar";
@@ -76,9 +68,6 @@ import "./styles.css";
 const { Sider, Content } = Layout;
 
 const INIT_COLORS = PRESET_COLORS_0;
-
-const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
-  typeof val === "object" && val !== null && !Array.isArray(val);
 
 function colorHexToArray(hex: string): ColorArray | null {
   // hex is a xxxxxx string. split it into array of rgb ints
@@ -196,6 +185,16 @@ const App: React.FC<AppProps> = (props) => {
 
   // State management /////////////////////////////////////////////////////////
 
+  const viewerState = useContext(ViewerStateContext).ref;
+  const {
+    channelSettings,
+    setChannelSettings,
+    changeViewerSetting,
+    changeChannelSetting,
+    changeMultipleChannelSettings,
+    applyColorPresets,
+  } = viewerState.current;
+
   const view3d = useConstructor(() => new View3d());
   const loadContext = useConstructor(
     () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
@@ -238,17 +237,6 @@ const App: React.FC<AppProps> = (props) => {
   // Clipping panel state doesn't need to trigger renders on change, so it can go in a ref
   const clippingPanelOpenRef = useRef(true);
 
-  // These are the major parts of `App` state
-  // `viewerSettings` represents global state, while `channelSettings` represents per-channel state
-  const [viewerSettings, setViewerSettings, getViewerSettings] = useStateWithGetter<GlobalViewerSettings>(() => ({
-    ...defaultViewerSettings,
-    ...props.viewerSettings,
-  }));
-  // `channelSettings` gets a getter to break through stale closures when loading images.
-  // (`openImage` creates a closure to call back whenever a new channel is loaded, which sets this state.
-  // To do this it requires access to the current state value, not the one it closed over)
-  const [channelSettings, setChannelSettings, getChannelSettings] = useStateWithGetter<ChannelState[]>([]);
-
   // `PlayControls` manages playing through time and spatial axes, which isn't practical with "pure" React
   // Playback state goes here, but the play/pause buttons that mainly control this class are down in `AxisClipSliders`
   const playControls = useConstructor(() => new PlayControls());
@@ -259,87 +247,10 @@ const App: React.FC<AppProps> = (props) => {
     setPlayingAxis(axis);
   };
 
-  // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
-  // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
-  const viewerSettingsChangeHandlers: ViewerSettingChangeHandlers = {
-    // View mode: if we're switching to 2d, switch to volumetric rendering
-    viewMode: (prevSettings, viewMode) => {
-      const switchToVolumetric = viewMode !== ViewMode.threeD && prevSettings.renderMode === RenderMode.pathTrace;
-      return {
-        ...prevSettings,
-        viewMode,
-        renderMode: switchToVolumetric ? RenderMode.volumetric : prevSettings.renderMode,
-      };
-    },
-    // Render mode: if we're switching to pathtrace, turn off autorotate
-    renderMode: (prevSettings, renderMode) => ({
-      ...prevSettings,
-      renderMode,
-      autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
-    }),
-    // Autorotate: do not enable autorotate while in pathtrace mode
-    autorotate: (prevSettings, autorotate) => ({
-      ...prevSettings,
-      // The button should theoretically be unclickable while in pathtrace mode, but this provides extra security
-      autorotate: prevSettings.renderMode === RenderMode.pathTrace ? false : autorotate,
-    }),
-  };
-
-  const changeViewerSetting = useCallback<ViewerSettingUpdater>(
-    (key, value) => {
-      const changeHandler = viewerSettingsChangeHandlers[key];
-      const viewerSettings = getViewerSettings();
-
-      if (changeHandler) {
-        // This setting has a custom change handler. Let it handle creating a new state object.
-        setViewerSettings(changeHandler(viewerSettings, value));
-      } else {
-        const setting = viewerSettings[key];
-        if (isObject(setting) && isObject(value)) {
-          // This setting is an object, and we may be updating it with a partial object.
-          setViewerSettings({ ...viewerSettings, [key]: { ...setting, ...value } });
-        } else {
-          // This setting is regular. Update it the regular way.
-          setViewerSettings({ ...viewerSettings, [key]: value });
-        }
-      }
-    },
-    [viewerSettings, image]
-  );
-
-  const changeChannelSetting = useCallback<ChannelSettingUpdater>(
-    (index, key, value) => {
-      const newChannelSettings = getChannelSettings().slice();
-      newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
-
-  const applyColorPresets = useCallback(
-    (presets: ColorArray[]): void => {
-      const newChannelSettings = channelSettings.map((channel, idx) =>
-        presets[idx] ? { ...channel, color: presets[idx] } : channel
-      );
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
-
-  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>(
-    (indices, key, value) => {
-      const newChannelSettings = channelSettings.map((settings, idx) =>
-        indices.includes(idx) ? { ...settings, [key]: value } : settings
-      );
-      setChannelSettings(newChannelSettings);
-    },
-    [channelSettings]
-  );
-
   // These last state functions are only ever used within this component - no need for a `useCallback`
 
   const getOneChannelSetting = (channelName: string, settings?: ChannelState[]): ChannelState | undefined => {
-    return (settings || getChannelSettings()).find((channel) => channel.name === channelName);
+    return (settings || viewerState.current.channelSettings).find((channel) => channel.name === channelName);
   };
 
   const setAllChannelsUnloaded = (numberOfChannels: number): void => {
@@ -462,11 +373,11 @@ const App: React.FC<AppProps> = (props) => {
 
     playControls.stepAxis = (axis: AxisName | "t") => {
       if (axis === "t") {
-        changeViewerSetting("time", (getViewerSettings().time + 1) % aimg.imageInfo.times);
+        changeViewerSetting("time", (viewerState.current.time + 1) % aimg.imageInfo.times);
       } else {
         const max = aimg.imageInfo.volumeSize[axis];
-        const current = getViewerSettings().slice[axis] * max;
-        changeViewerSetting("slice", { ...getViewerSettings().slice, [axis]: ((current + 1) % max) / max });
+        const current = viewerState.current.slice[axis] * max;
+        changeViewerSetting("slice", { ...viewerState.current.slice, [axis]: ((current + 1) % max) / max });
       }
     };
     playControls.getVolumeIsLoaded = () => aimg.isLoaded();
@@ -476,7 +387,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const openImage = async (): Promise<void> => {
     const { imageUrl, parentImageUrl, rawData, rawDims } = props;
-    const showParentImage = viewerSettings.imageType === ImageType.fullField && parentImageUrl !== undefined;
+    const showParentImage = viewerState.current.imageType === ImageType.fullField && parentImageUrl !== undefined;
     const path = showParentImage ? parentImageUrl : imageUrl;
     // Don't reload if we're already looking at this image
     if (path === imageUrlRef.current && !rawData && !rawDims) {
@@ -488,7 +399,7 @@ const App: React.FC<AppProps> = (props) => {
     initialLoadRef.current = true;
 
     const loadSpec = new LoadSpec();
-    loadSpec.time = viewerSettings.time;
+    loadSpec.time = viewerState.current.time;
 
     // if this does NOT end with tif or json,
     // then we assume it's zarr.
@@ -531,6 +442,8 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
+
+  const viewerSettings = viewerState.current;
 
   const saveIsosurface = useCallback(
     (channelIndex: number, type: IsosurfaceFormat): void => {
