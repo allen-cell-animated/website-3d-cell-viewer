@@ -1,8 +1,8 @@
-import { View3d, Volume, RawArrayInfo, RawArrayData } from "@aics/volume-viewer";
+import { Volume, RawArrayInfo, RawArrayData } from "@aics/volume-viewer";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import { PerAxis, MetadataRecord } from "../../shared/types";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { ChannelGrouping, ChannelState, ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
+import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 /** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
 export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => void;
@@ -113,22 +113,3 @@ export type ViewerSettingUpdater = <K extends ViewerSettingsKey>(
   key: K,
   value: PartialIfObject<GlobalViewerSettings[K]>
 ) => void;
-
-export interface AppState {
-  view3d: View3d;
-  image: Volume | null;
-
-  sendingQueryRequest: boolean;
-  currentlyLoadedImagePath?: string;
-  cachingInProgress: boolean;
-  controlPanelClosed: boolean;
-  // channelGroupedByType is an object where channel indexes are grouped by type (observed, segmenations, and countours)
-  // {observed: channelIndex[], segmentations: channelIndex[], contours: channelIndex[], other: channelIndex[] }
-  channelGroupedByType: ChannelGrouping;
-  // global (not per-channel) state set by the UI:
-  viewerSettings: GlobalViewerSettings;
-  // channelSettings is a flat list of objects of this type:
-  // { name, enabled, volumeEnabled, isosurfaceEnabled, isovalue, opacity, color}
-  // the list is in the order they were in the raw data.
-  channelSettings: ChannelState[];
-}
