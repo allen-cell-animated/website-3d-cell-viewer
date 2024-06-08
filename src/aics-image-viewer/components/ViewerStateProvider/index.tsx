@@ -8,6 +8,7 @@ import type {
   ChannelSettingUpdater,
   ChannelState,
   MultipleChannelSettingsUpdater,
+  PartialIfObject,
 } from "./types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
@@ -81,6 +82,29 @@ const extractViewerSettings = (context: ViewerContextType): ViewerState => {
   return settings;
 };
 
+/** Changes a key in a given `ViewerState` object, keeping the object in a valid state and applying partial values */
+const applyChangeToViewerSettings = <K extends keyof ViewerState>(
+  viewerSettings: ViewerState,
+  key: K,
+  value: PartialIfObject<ViewerState[K]>
+): ViewerState => {
+  const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
+
+  if (changeHandler) {
+    // This setting has a custom change handler. Let it handle creating a new state object.
+    return changeHandler(viewerSettings, value);
+  } else {
+    const setting = viewerSettings[key];
+    if (isObject(setting) && isObject(value)) {
+      // This setting is an object, and we may be updating it with a partial object.
+      return { ...viewerSettings, [key]: { ...setting, ...value } };
+    } else {
+      // This setting is regular. Update it the regular way.
+      return { ...viewerSettings, [key]: value };
+    }
+  }
+};
+
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerContextType = {
@@ -112,21 +136,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => {
     const currentSettings = extractViewerSettings(ref.current);
-    const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
-
-    if (changeHandler) {
-      // This setting has a custom change handler. Let it handle creating a new state object.
-      setViewerSettings(changeHandler(currentSettings, value));
-    } else {
-      const setting = currentSettings[key];
-      if (isObject(setting) && isObject(value)) {
-        // This setting is an object, and we may be updating it with a partial object.
-        setViewerSettings({ ...currentSettings, [key]: { ...setting, ...value } });
-      } else {
-        // This setting is regular. Update it the regular way.
-        setViewerSettings({ ...currentSettings, [key]: value });
-      }
-    }
+    setViewerSettings(applyChangeToViewerSettings(currentSettings, key, value));
   }, []);
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
@@ -150,12 +160,20 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, []);
 
   // Sync viewer settings prop with state
+  // React docs seem to be fine with syncing state with props directly in the render function:
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   if (props.viewerSettings) {
+    let newSettings = viewerSettings;
+
     for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
       if (viewerSettings[key] !== props.viewerSettings[key]) {
         // Update viewer settings one at a time to allow change handlers to keep state valid
-        changeViewerSetting(key, props.viewerSettings[key] as any);
+        newSettings = applyChangeToViewerSettings(viewerSettings, key, props.viewerSettings[key] as any);
       }
+    }
+
+    if (newSettings !== viewerSettings) {
+      setViewerSettings(newSettings);
     }
   }
 
