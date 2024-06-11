@@ -11,9 +11,9 @@ const MemoedNouislider = React.memo(
 /** A wrapper around `Nouislider` that prevents updates while the slider is being dragged. */
 const SmarterSlider: React.FC<NouisliderProps> = (props) => {
   const [noUpdate, setNoUpdate] = React.useState(false);
-  const wrapEventHandler = (shouldUpdate: boolean, handler?: (...args: CallbackArgs) => void) => {
+  const wrapEventHandler = (shouldNotUpdate: boolean, handler?: (...args: CallbackArgs) => void) => {
     return (...args: CallbackArgs) => {
-      setNoUpdate(shouldUpdate);
+      setNoUpdate(shouldNotUpdate);
       if (handler) handler(...args);
     };
   };
