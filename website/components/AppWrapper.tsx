@@ -6,24 +6,10 @@ import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
 import ShareModal from "./ShareModal";
-import { ImageViewerApp, RenderMode, ViewMode, ViewerStateProvider } from "../../src";
+import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
-
-const DEFAULT_VIEWER_SETTINGS: Partial<ViewerState> = {
-  showAxes: false,
-  showBoundingBox: false,
-  autorotate: false,
-  viewMode: ViewMode.threeD,
-  renderMode: RenderMode.volumetric,
-  maskAlpha: 50,
-  brightness: 70,
-  density: 50,
-  levels: [0, 128, 255] as [number, number, number],
-  backgroundColor: [0, 0, 0] as [number, number, number],
-  boundingBoxColor: [255, 255, 255] as [number, number, number],
-};
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
@@ -61,12 +47,12 @@ export default function AppWrapper(): ReactElement {
     getArgsFromParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+        setViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
         setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS });
+        setViewerSettings({});
       }
     );
   }, []);
