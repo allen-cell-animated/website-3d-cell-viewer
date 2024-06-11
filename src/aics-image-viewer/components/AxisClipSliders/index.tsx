@@ -211,6 +211,9 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
 
   const create2dAxisSlider = (axis: AxisName): React.ReactNode => {
     const numSlices = props.numSlices[axis];
+    if (numSlices === 1) {
+      return null;
+    }
     const numSlicesLoaded = props.numSlicesLoaded[axis];
 
     return (
@@ -232,6 +235,9 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
 
   const create3dAxisSlider = (axis: AxisName): React.ReactNode => {
     const numSlices = props.numSlices[axis];
+    if (numSlices === 1) {
+      return null;
+    }
     const region = props.region[axis];
 
     return (
