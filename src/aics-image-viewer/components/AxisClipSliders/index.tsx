@@ -8,7 +8,7 @@ import SmarterSlider from "../shared/SmarterSlider";
 import "./styles.css";
 
 import { ViewMode } from "../../shared/enums";
-import { ViewerSettingUpdater } from "../App/types";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import { AxisName, PerAxis, activeAxisMap } from "../../shared/types";
 import PlayControls from "../../shared/utils/playControls";
 

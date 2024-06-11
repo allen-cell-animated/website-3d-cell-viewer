@@ -4,39 +4,44 @@ import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
-import { ViewerSettingUpdater } from "../App/types";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import PlayControls from "../../shared/utils/playControls";
 
+import { connectToViewerState } from "../ViewerStateProvider";
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
+
 import "./styles.css";
 
 interface ViewerWrapperProps {
+  // From parent
   view3d: View3d;
-  autorotate: boolean;
   loadingImage: boolean;
-  viewMode: ViewMode;
   appHeight: string;
   hasImage: boolean;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
-  region: PerAxis<[number, number]>;
-  slices: PerAxis<number>;
   playControls: PlayControls;
   playingAxis: AxisName | "t" | null;
   numTimesteps: number;
-  time: number;
-  showControls: {
+  visibleControls: {
     axisClipSliders: boolean;
   };
-  changeViewerSetting: ViewerSettingUpdater;
   onClippingPanelVisibleChange?: (panelOpen: boolean, hasTime: boolean) => void;
   onClippingPanelVisibleChangeEnd?: (panelOpen: boolean) => void;
+
+  // From viewer state
+  autorotate: boolean;
+  viewMode: ViewMode;
+  region: PerAxis<[number, number]>;
+  slice: PerAxis<number>;
+  time: number;
+  changeViewerSetting: ViewerSettingUpdater;
 }
 
 interface ViewerWrapperState {}
 
-export default class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
+class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperState> {
   private view3dviewerRef: React.RefObject<HTMLDivElement>;
 
   constructor(props: ViewerWrapperProps) {
@@ -71,7 +76,7 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
   }
 
   render(): React.ReactNode {
-    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region, slices, time } =
+    const { appHeight, changeViewerSetting, visibleControls, numSlices, numTimesteps, viewMode, region, slice, time } =
       this.props;
 
     return (
@@ -82,14 +87,14 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
           onVisibleChange={(visible) => this.props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1)}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
-          {showControls.axisClipSliders && this.props.hasImage && (
+          {visibleControls.axisClipSliders && this.props.hasImage && (
             <AxisClipSliders
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
               numSlicesLoaded={this.props.numSlicesLoaded}
               region={region}
-              slices={slices}
+              slices={slice}
               numTimesteps={numTimesteps}
               time={time}
               playControls={this.props.playControls}
@@ -102,6 +107,15 @@ export default class ViewerWrapper extends React.Component<ViewerWrapperProps, V
     );
   }
 }
+
+export default connectToViewerState(ViewerWrapper, [
+  "autorotate",
+  "viewMode",
+  "region",
+  "slice",
+  "time",
+  "changeViewerSetting",
+]);
 
 const STYLES: Styles = {
   viewer: {

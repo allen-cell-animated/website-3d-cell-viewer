@@ -6,24 +6,10 @@ import LoadModal from "./LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
 import ShareModal from "./ShareModal";
-import { ImageViewerApp, RenderMode, ViewMode } from "../../src";
-import { GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import { ImageViewerApp, ViewerStateProvider } from "../../src";
+import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
 import { getArgsFromParams } from "../utils/url_utils";
-
-const DEFAULT_VIEWER_SETTINGS: Partial<GlobalViewerSettings> = {
-  showAxes: false,
-  showBoundingBox: false,
-  autorotate: false,
-  viewMode: ViewMode.threeD,
-  renderMode: RenderMode.volumetric,
-  maskAlpha: 50,
-  brightness: 70,
-  density: 50,
-  levels: [0, 128, 255] as [number, number, number],
-  backgroundColor: [0, 0, 0] as [number, number, number],
-  boundingBoxColor: [255, 255, 255] as [number, number, number],
-};
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
@@ -51,7 +37,7 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<GlobalViewerSettings> | null>(null);
+  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState> | null>(null);
   const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
@@ -61,12 +47,12 @@ export default function AppWrapper(): ReactElement {
     getArgsFromParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS, ...urlViewerSettings });
+        setViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
         setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
-        setViewerSettings({ ...DEFAULT_VIEWER_SETTINGS });
+        setViewerSettings({});
       }
     );
   }, []);
@@ -113,12 +99,9 @@ export default function AppWrapper(): ReactElement {
         </FlexRowAlignCenter>
       </Header>
       {viewerProps && viewerSettings && (
-        <ImageViewerApp
-          {...viewerProps}
-          appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
-          canvasMargin="0 0 0 0"
-          viewerSettings={viewerSettings}
-        />
+        <ViewerStateProvider viewerSettings={viewerSettings}>
+          <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
+        </ViewerStateProvider>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 
-import { AppProps, GlobalViewerSettings } from "../../src/aics-image-viewer/components/App/types";
+import type { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
 import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
   ViewerChannelSetting,
@@ -215,11 +216,11 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
 
 export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
-  viewerSettings: Partial<GlobalViewerSettings>;
+  viewerSettings: Partial<ViewerState>;
 }> {
   const params = urlSearchParamsToParams(urlSearchParams);
   let args: Partial<AppProps> = {};
-  const viewerSettings: Partial<GlobalViewerSettings> = {};
+  const viewerSettings: Partial<ViewerState> = {};
 
   if (params.mask) {
     viewerSettings.maskAlpha = parseInt(params.mask, 10);
