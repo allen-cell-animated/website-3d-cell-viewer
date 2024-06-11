@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
 import type {
-  ViewerContextType,
+  ViewerStateContextType,
   ViewerState,
   ViewerSettingChangeHandlers,
   ViewerSettingUpdater,
@@ -70,7 +70,7 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
   }),
 };
 
-const extractViewerSettings = (context: ViewerContextType): ViewerState => {
+const extractViewerSettings = (context: ViewerStateContextType): ViewerState => {
   const {
     channelSettings: _channelSettings,
     changeViewerSetting: _changeViewerSetting,
@@ -107,7 +107,7 @@ const applyChangeToViewerSettings = <K extends keyof ViewerState>(
 
 const nullfn = (): void => {};
 
-const DEFAULT_VIEWER_CONTEXT: ViewerContextType = {
+const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...DEFAULT_VIEWER_SETTINGS,
   channelSettings: [],
   changeViewerSetting: nullfn,
@@ -120,7 +120,7 @@ const DEFAULT_VIEWER_CONTEXT: ViewerContextType = {
 const DEFAULT_VIEWER_CONTEXT_OUTER = { ref: { current: DEFAULT_VIEWER_CONTEXT } };
 
 type NoNull<T> = { [K in keyof T]: NonNullable<T[K]> };
-type ContextRefType = NoNull<React.MutableRefObject<ViewerContextType>>;
+type ContextRefType = NoNull<React.MutableRefObject<ViewerStateContextType>>;
 
 export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(DEFAULT_VIEWER_CONTEXT_OUTER);
 
@@ -212,10 +212,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
  * is currently no way to hook into context without agreeing to re-render on every change. I feel okay using a higher-
  * order component in this case because, analogous to a custom hook, it extends a provided primitive HOC (`memo`).
  */
-export function connectToViewerState<Keys extends keyof ViewerContextType, Props extends Pick<ViewerContextType, Keys>>(
-  component: React.ComponentType<Props>,
-  keys: Keys[]
-): React.FC<Omit<Props, Keys>> {
+export function connectToViewerState<
+  Keys extends keyof ViewerStateContextType,
+  Props extends Pick<ViewerStateContextType, Keys>
+>(component: React.ComponentType<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
   const MemoedComponent = React.memo(component);
 
   const ConnectedComponent: React.FC<Omit<Props, Keys>> = (props) => {
@@ -223,7 +223,7 @@ export function connectToViewerState<Keys extends keyof ViewerContextType, Props
 
     const mergedProps = { ...props } as Props;
     for (const key of keys) {
-      (mergedProps as Pick<ViewerContextType, Keys>)[key] = viewerState.ref.current[key];
+      (mergedProps as Pick<ViewerStateContextType, Keys>)[key] = viewerState.ref.current[key];
     }
 
     return <MemoedComponent {...mergedProps} />;

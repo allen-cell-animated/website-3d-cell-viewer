@@ -73,7 +73,7 @@ export type MultipleChannelSettingsUpdater = <K extends ChannelStateKey>(
   value: ChannelState[K]
 ) => void;
 
-export type ViewerContextType = ViewerState & {
+export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
   changeViewerSetting: ViewerSettingUpdater;
   setChannelSettings: React.Dispatch<React.SetStateAction<ChannelState[]>>;
