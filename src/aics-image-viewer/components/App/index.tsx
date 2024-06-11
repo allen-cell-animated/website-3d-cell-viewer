@@ -15,7 +15,7 @@ import {
   VolumeFileFormat,
 } from "@aics/volume-viewer";
 
-import type { AppProps, ShowControls, UseImageEffectType } from "./types";
+import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
 import type { ViewerState, ChannelState } from "../ViewerStateProvider/types";
 
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
@@ -80,7 +80,7 @@ function colorHexToArray(hex: string): ColorArray | null {
   }
 }
 
-const defaultShownControls: ShowControls = {
+const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,
   autoRotateButton: true,
   axisClipSliders: true,
@@ -141,7 +141,7 @@ const defaultProps: AppProps = {
   parentImageUrl: "",
 
   appHeight: "100vh",
-  showControls: defaultShownControls,
+  visibleControls: defaultVisibleControls,
   viewerSettings: defaultViewerSettings,
   cellId: "",
   imageDownloadHref: "",
@@ -690,9 +690,9 @@ const App: React.FC<AppProps> = (props) => {
 
   // Rendering ////////////////////////////////////////////////////////////////
 
-  const showControls = useMemo(
-    (): ShowControls => ({ ...defaultShownControls, ...props.showControls }),
-    [props.showControls]
+  const visibleControls = useMemo(
+    (): ControlVisibilityFlags => ({ ...defaultVisibleControls, ...props.visibleControls }),
+    [props.visibleControls]
   );
   const pixelSize = useMemo(
     (): [number, number, number] => (image ? image.imageInfo.physicalPixelSize.toArray() : [1, 1, 1]),
@@ -722,7 +722,7 @@ const App: React.FC<AppProps> = (props) => {
           width={500}
         >
           <ControlPanel
-            showControls={showControls}
+            visibleControls={visibleControls}
             collapsed={controlPanelClosed}
             // image state
             imageName={image?.name}
@@ -748,7 +748,7 @@ const App: React.FC<AppProps> = (props) => {
               canPathTrace={view3d ? view3d.hasWebGL2() : false}
               resetCamera={resetCamera}
               downloadScreenshot={saveScreenshot}
-              showControls={showControls}
+              visibleControls={visibleControls}
             />
             <CellViewerCanvasWrapper
               view3d={view3d}
@@ -760,7 +760,7 @@ const App: React.FC<AppProps> = (props) => {
               playControls={playControls}
               playingAxis={playingAxis}
               appHeight={props.appHeight}
-              showControls={showControls}
+              visibleControls={visibleControls}
               onClippingPanelVisibleChange={onClippingPanelVisibleChange}
               onClippingPanelVisibleChangeEnd={onClippingPanelVisibleChangeEnd}
             />

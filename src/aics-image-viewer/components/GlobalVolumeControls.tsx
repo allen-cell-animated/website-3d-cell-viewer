@@ -11,7 +11,7 @@ export interface GlobalVolumeControlsProps {
   // From parent
   imageName: string | undefined;
   pixelSize: [number, number, number];
-  showControls: {
+  visibleControls: {
     alphaMaskSlider: boolean;
     brightnessSlider: boolean;
     densitySlider: boolean;
@@ -44,7 +44,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
     return <SliderRow label={label} start={start} max={max} onUpdate={onUpdate} />;
   };
 
-  const { showControls, maskAlpha, brightness, density, levels } = props;
+  const { visibleControls: showControls, maskAlpha, brightness, density, levels } = props;
 
   return (
     <div style={{ paddingTop: 18, paddingBottom: 22 }}>

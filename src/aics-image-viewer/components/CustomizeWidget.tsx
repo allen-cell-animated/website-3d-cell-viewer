@@ -26,7 +26,7 @@ const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: Color
 
 export interface CustomizeWidgetProps {
   // From parent
-  showControls: {
+  visibleControls: {
     backgroundColorPicker: boolean;
     boundingBoxColorPicker: boolean;
   };
@@ -41,7 +41,7 @@ export interface CustomizeWidgetProps {
 
 const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
   <>
-    {props.showControls.backgroundColorPicker && (
+    {props.visibleControls.backgroundColorPicker && (
       <ColorPickerRow
         color={props.backgroundColor}
         onColorChange={(color) => props.changeViewerSetting("backgroundColor", color)}
@@ -49,7 +49,7 @@ const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
         Background color
       </ColorPickerRow>
     )}
-    {props.showControls.boundingBoxColorPicker && (
+    {props.visibleControls.boundingBoxColorPicker && (
       <ColorPickerRow
         color={props.boundingBoxColor}
         onColorChange={(color) => props.changeViewerSetting("boundingBoxColor", color)}

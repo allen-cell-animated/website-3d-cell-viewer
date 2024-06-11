@@ -26,7 +26,7 @@ type ControlNames =
   | "showBoundingBoxButton"
   | "metadataViewer";
 /** Show/hide different elements of the UI */
-export type ShowControls = { [K in ControlNames]: boolean };
+export type ControlVisibilityFlags = { [K in ControlNames]: boolean };
 
 export interface AppProps {
   // FIRST WAY TO GET DATA INTO THE VIEWER: pass in volume data directly
@@ -44,7 +44,7 @@ export interface AppProps {
 
   appHeight: string;
   cellId: string;
-  showControls?: Partial<ShowControls>;
+  visibleControls?: Partial<ControlVisibilityFlags>;
   viewerSettings?: Partial<ViewerState>;
   imageDownloadHref: string;
   parentImageDownloadHref: string;

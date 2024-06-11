@@ -23,7 +23,7 @@ interface ToolbarProps {
   resetCamera: () => void;
   downloadScreenshot: () => void;
 
-  showControls: {
+  visibleControls: {
     autoRotateButton: boolean;
     viewModeRadioButtons: boolean;
     fovCellSwitchControls: boolean;
@@ -135,13 +135,13 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
   render(): React.ReactElement {
     const { props } = this;
-    const { changeViewerSetting, showControls, showAxes, showBoundingBox, autorotate } = props;
+    const { changeViewerSetting, visibleControls, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
     const renderGroup1 =
-      showControls.viewModeRadioButtons || showControls.resetCameraButton || showControls.autoRotateButton;
-    const renderGroup4 = showControls.showAxesButton || showControls.showBoundingBoxButton;
+      visibleControls.viewModeRadioButtons || visibleControls.resetCameraButton || visibleControls.autoRotateButton;
+    const renderGroup4 = visibleControls.showAxesButton || visibleControls.showBoundingBoxButton;
 
     const axesToggleTitle = showAxes ? "Hide axes" : "Show axes";
     const boundingBoxToggleTitle = showBoundingBox ? "Hide bounding box" : "Show bounding box";
@@ -168,20 +168,20 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
           <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <div className="viewer-toolbar-group">
-                {showControls.viewModeRadioButtons && (
+                {visibleControls.viewModeRadioButtons && (
                   <ViewModeRadioButtons
                     mode={props.viewMode}
                     onViewModeChange={(newMode) => changeViewerSetting("viewMode", newMode)}
                   />
                 )}
-                {showControls.resetCameraButton && (
+                {visibleControls.resetCameraButton && (
                   <Tooltip placement="bottom" title="Reset camera">
                     <Button className="ant-btn-icon-only btn-borderless" onClick={props.resetCamera}>
                       <ViewerIcon type="resetView" />
                     </Button>
                   </Tooltip>
                 )}
-                {showControls.autoRotateButton && (
+                {visibleControls.autoRotateButton && (
                   <Tooltip placement="bottom" title={turntableToggleTitle}>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
@@ -195,7 +195,7 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
               </div>
             )}
 
-            {showControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
+            {visibleControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
               <div className="viewer-toolbar-group">
                 <Radio.Group
                   value={props.imageType}
@@ -231,14 +231,14 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
             {renderGroup4 && (
               <div className="viewer-toolbar-group">
-                {showControls.showAxesButton && (
+                {visibleControls.showAxesButton && (
                   <Tooltip placement="bottom" title={axesToggleTitle}>
                     <Button className={this.classForToggleBtn(showAxes)} onClick={this.toggleAxis}>
                       <ViewerIcon type="axes" />
                     </Button>
                   </Tooltip>
                 )}
-                {showControls.showBoundingBoxButton && (
+                {visibleControls.showBoundingBoxButton && (
                   <Tooltip placement="bottom" title={boundingBoxToggleTitle}>
                     <Button className={this.classForToggleBtn(showBoundingBox)} onClick={this.toggleBoundingBox}>
                       <ViewerIcon type="boundingBox" />

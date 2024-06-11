@@ -24,7 +24,7 @@ interface ViewerWrapperProps {
   playControls: PlayControls;
   playingAxis: AxisName | "t" | null;
   numTimesteps: number;
-  showControls: {
+  visibleControls: {
     axisClipSliders: boolean;
   };
   onClippingPanelVisibleChange?: (panelOpen: boolean, hasTime: boolean) => void;
@@ -76,7 +76,7 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
   }
 
   render(): React.ReactNode {
-    const { appHeight, changeViewerSetting, showControls, numSlices, numTimesteps, viewMode, region, slice, time } =
+    const { appHeight, changeViewerSetting, visibleControls, numSlices, numTimesteps, viewMode, region, slice, time } =
       this.props;
 
     return (
@@ -87,7 +87,7 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
           onVisibleChange={(visible) => this.props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1)}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
-          {showControls.axisClipSliders && this.props.hasImage && (
+          {visibleControls.axisClipSliders && this.props.hasImage && (
             <AxisClipSliders
               mode={viewMode}
               changeViewerSetting={changeViewerSetting}

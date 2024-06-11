@@ -21,8 +21,8 @@ interface ControlPanelProps
     PropsOf<typeof GlobalVolumeControls>,
     PropsOf<typeof CustomizeWidget> {
   hasImage: boolean;
-  showControls: GlobalVolumeControlsProps["showControls"] &
-    CustomizeWidgetProps["showControls"] & {
+  visibleControls: GlobalVolumeControlsProps["visibleControls"] &
+    CustomizeWidgetProps["visibleControls"] & {
       colorPresetsDropdown: boolean;
       metadataViewer: boolean;
     };
@@ -49,7 +49,7 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const controlPanelContainerRef = React.useRef<HTMLDivElement>(null);
   const getDropdownContainer = controlPanelContainerRef.current ? () => controlPanelContainerRef.current! : undefined;
 
-  const { viewerChannelSettings, showControls, hasImage } = props;
+  const { viewerChannelSettings, visibleControls, hasImage } = props;
 
   // TODO key is a number, but MenuInfo assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
@@ -95,17 +95,21 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
         key: 0,
         label: "Rendering adjustments",
         children: (
-          <GlobalVolumeControls imageName={props.imageName} pixelSize={props.pixelSize} showControls={showControls} />
+          <GlobalVolumeControls
+            imageName={props.imageName}
+            pixelSize={props.pixelSize}
+            visibleControls={visibleControls}
+          />
         ),
       },
     ];
-    const showCustomize = showControls.backgroundColorPicker || showControls.boundingBoxColorPicker;
+    const showCustomize = visibleControls.backgroundColorPicker || visibleControls.boundingBoxColorPicker;
 
     if (showCustomize) {
       items.push({
         key: 1,
         label: "Customize",
-        children: <CustomizeWidget showControls={props.showControls} />,
+        children: <CustomizeWidget visibleControls={props.visibleControls} />,
       });
     }
 
@@ -126,11 +130,11 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.showControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
+        {props.visibleControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
-        {showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+        {visibleControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
         {hasImage && (
           <div className="channel-rows-list">
             {tab === ControlTab.Channels && (
