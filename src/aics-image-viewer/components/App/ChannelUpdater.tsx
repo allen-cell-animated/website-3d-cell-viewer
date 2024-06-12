@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { Lut, View3d, Volume } from "@aics/volume-viewer";
 
 import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
-import { ChannelState } from "../../shared/utils/viewerChannelSettings";
+import { ChannelState } from "../ViewerStateProvider/types";
 import { UseImageEffectType } from "./types";
 
 interface ChannelUpdaterProps {

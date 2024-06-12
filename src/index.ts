@@ -1,4 +1,5 @@
 import ImageViewerApp from "./aics-image-viewer/components/App";
+import ViewerStateProvider from "./aics-image-viewer/components/ViewerStateProvider";
 
 export type {
   ViewerChannelSettings,
@@ -11,4 +12,4 @@ export { ViewMode, RenderMode, ImageType } from "./aics-image-viewer/shared/enum
 export type { AppProps } from "./aics-image-viewer/components/App/types";
 export type { RawArrayData, RawArrayInfo } from "@aics/volume-viewer";
 
-export { ImageViewerApp };
+export { ImageViewerApp, ViewerStateProvider };

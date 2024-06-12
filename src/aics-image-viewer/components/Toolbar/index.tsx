@@ -4,30 +4,26 @@ import { debounce } from "lodash";
 
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
+import { connectToViewerState } from "../ViewerStateProvider";
 
-import { ViewerSettingUpdater } from "../App/types";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
+
 import "./styles.css";
 
 interface ToolbarProps {
-  imageType: ImageType;
-  renderMode: RenderMode;
+  // From parent
   cellDownloadHref: string;
   fovDownloadHref: string;
-  viewMode: ViewMode;
   hasCellId: boolean;
   hasParentImage: boolean;
-  autorotate: boolean;
   canPathTrace: boolean;
-  showAxes: boolean;
-  showBoundingBox: boolean;
 
-  changeViewerSetting: ViewerSettingUpdater;
   resetCamera: () => void;
   downloadScreenshot: () => void;
 
-  showControls: {
+  visibleControls: {
     autoRotateButton: boolean;
     viewModeRadioButtons: boolean;
     fovCellSwitchControls: boolean;
@@ -35,6 +31,15 @@ interface ToolbarProps {
     showAxesButton: boolean;
     showBoundingBoxButton: boolean;
   };
+
+  // From viewer state
+  imageType: ImageType;
+  renderMode: RenderMode;
+  viewMode: ViewMode;
+  autorotate: boolean;
+  showAxes: boolean;
+  showBoundingBox: boolean;
+  changeViewerSetting: ViewerSettingUpdater;
 }
 
 interface ToolbarState {
@@ -45,7 +50,7 @@ interface ToolbarState {
 
 const RESIZE_DEBOUNCE_DELAY = 50;
 
-export default class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
+class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
   containerRef: React.RefObject<HTMLDivElement>;
   barRef: React.RefObject<HTMLDivElement>;
   leftRef: React.RefObject<HTMLDivElement>;
@@ -130,13 +135,13 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
   render(): React.ReactElement {
     const { props } = this;
-    const { changeViewerSetting, showControls, showAxes, showBoundingBox, autorotate } = props;
+    const { changeViewerSetting, visibleControls, showAxes, showBoundingBox, autorotate } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
     const renderGroup1 =
-      showControls.viewModeRadioButtons || showControls.resetCameraButton || showControls.autoRotateButton;
-    const renderGroup4 = showControls.showAxesButton || showControls.showBoundingBoxButton;
+      visibleControls.viewModeRadioButtons || visibleControls.resetCameraButton || visibleControls.autoRotateButton;
+    const renderGroup4 = visibleControls.showAxesButton || visibleControls.showBoundingBoxButton;
 
     const axesToggleTitle = showAxes ? "Hide axes" : "Show axes";
     const boundingBoxToggleTitle = showBoundingBox ? "Hide bounding box" : "Show bounding box";
@@ -163,20 +168,20 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
           <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <div className="viewer-toolbar-group">
-                {showControls.viewModeRadioButtons && (
+                {visibleControls.viewModeRadioButtons && (
                   <ViewModeRadioButtons
                     mode={props.viewMode}
                     onViewModeChange={(newMode) => changeViewerSetting("viewMode", newMode)}
                   />
                 )}
-                {showControls.resetCameraButton && (
+                {visibleControls.resetCameraButton && (
                   <Tooltip placement="bottom" title="Reset camera">
                     <Button className="ant-btn-icon-only btn-borderless" onClick={props.resetCamera}>
                       <ViewerIcon type="resetView" />
                     </Button>
                   </Tooltip>
                 )}
-                {showControls.autoRotateButton && (
+                {visibleControls.autoRotateButton && (
                   <Tooltip placement="bottom" title={turntableToggleTitle}>
                     <Button
                       className={this.classForToggleBtn(autorotate && !twoDMode)}
@@ -190,7 +195,7 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
               </div>
             )}
 
-            {showControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
+            {visibleControls.fovCellSwitchControls && props.hasCellId && props.hasParentImage && (
               <div className="viewer-toolbar-group">
                 <Radio.Group
                   value={props.imageType}
@@ -226,14 +231,14 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
 
             {renderGroup4 && (
               <div className="viewer-toolbar-group">
-                {showControls.showAxesButton && (
+                {visibleControls.showAxesButton && (
                   <Tooltip placement="bottom" title={axesToggleTitle}>
                     <Button className={this.classForToggleBtn(showAxes)} onClick={this.toggleAxis}>
                       <ViewerIcon type="axes" />
                     </Button>
                   </Tooltip>
                 )}
-                {showControls.showBoundingBoxButton && (
+                {visibleControls.showBoundingBoxButton && (
                   <Tooltip placement="bottom" title={boundingBoxToggleTitle}>
                     <Button className={this.classForToggleBtn(showBoundingBox)} onClick={this.toggleBoundingBox}>
                       <ViewerIcon type="boundingBox" />
@@ -270,3 +275,13 @@ export default class Toolbar extends React.Component<ToolbarProps, ToolbarState>
     );
   }
 }
+
+export default connectToViewerState(Toolbar, [
+  "imageType",
+  "renderMode",
+  "viewMode",
+  "autorotate",
+  "showAxes",
+  "showBoundingBox",
+  "changeViewerSetting",
+]);
