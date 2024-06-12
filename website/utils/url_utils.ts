@@ -1,6 +1,7 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
+import { clamp } from "lodash";
 
-import type { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import type { ViewerState, ViewerStateKey } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
 import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
@@ -49,11 +50,73 @@ export type ViewerChannelSettingJson = {
   isv?: string;
 };
 
-type BaseParams = {
+type ViewerStateParams = {
+  /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
+  view?: string;
   /**
-   * The opacity of the mask channel, an integer in the range [0, 100]. Set to `50` by default.
+   * Render mode. Valid values are "volumetric", "maxproject", and "pathtrace".
+   * Defaults to "volumetric".
    */
+  mode?: string;
+  /** The opacity of the mask channel, an integer in the range [0, 100]. Defaults to 50. */
   mask?: string;
+  /** The type of image to display. Valid values are "cell" and "fov". Defaults to "cell". */
+  image?: string;
+  /** Whether to show the axes helper. "1" is enabled. Disabled by default. */
+  axes?: string;
+  /** Whether to show the bounding box. "1" is enabled. Disabled by default. */
+  bb?: string;
+  /** The color of the bounding box, as a 6-digit hex color. */
+  bbcol?: string;
+  /** The background color, as a 6-digit hex color. */
+  bgcol?: string;
+  /** Whether to autorotate the view. "1" is enabled. Disabled by default. */
+  rot?: string;
+  /** The brightness of the image, an float in the range [0, 100]. Defaults to 70. */
+  bright?: string;
+  /** Density, a float in the range [0, 100]. Defaults to 50. */
+  dens?: string;
+  /**
+   * Levels for image intensity adjustment. Should be three numeric values separated
+   * by commas, representing the low, middle, and high values in a [0, 255] range.
+   * Values will be sorted in ascending order; empty values will be parsed as 0.
+   */
+  lvl?: string;
+  /** Whether to enable interpolation. "1" is enabled. Disabled by default. */
+  interp?: string;
+  /** Subregions per axis.
+   * Defaults to full range (`0:1`) for each axis.
+   */
+  reg?: string;
+  slice?: string;
+  t?: string;
+};
+
+/**
+ * Maps from ViewerState to URL query parameter keys. This allows for data mapping, but also
+ * ensures that the URL query parameter keys are consistent with the ViewerState keys.
+ */
+const ViewerStateToParamKey: Record<ViewerStateKey, keyof ViewerStateParams> = {
+  viewMode: "view",
+  renderMode: "mode",
+  imageType: "image",
+  showAxes: "axes",
+  showBoundingBox: "bb",
+  boundingBoxColor: "bbcol",
+  backgroundColor: "bgcol",
+  autorotate: "rot",
+  maskAlpha: "mask",
+  brightness: "bright",
+  density: "dens",
+  levels: "lvl",
+  interpolationEnabled: "interp",
+  region: "reg",
+  slice: "slice",
+  time: "t",
+};
+
+/** Parameters that define loaded datasets. */
+type DataParams = {
   /**
    * One or more volume URLs to load. If multiple URLs are provided, they should
    * be separated by commas.
@@ -67,28 +130,34 @@ type BaseParams = {
    * The ID of a cell within the loaded dataset. Used with `dataset`.
    */
   id?: string;
-  /**
-   * Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D".
-   */
-  view?: string;
 };
+
 // Copy of keys for above params. Both types are defined so that spec comments can be provided.
 // TODO: Remove redundant `baseParamKeys` type.
-const baseParamKeys = ["mask", "url", "dataset", "id", "view"] as const;
+const baseParamKeys = ["mask", "view"] as const;
+const dataParamKeys = ["url", "dataset", "id"] as const;
 const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
 
 type BaseParamKeys = (typeof baseParamKeys)[number];
+type DataParamKeys = (typeof dataParamKeys)[number];
 type ChannelKey = `c${number}`;
 type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
-type AllParamKeys = BaseParamKeys | DeprecatedParamKeys | ChannelKey;
+type AllParamKeys = DataParamKeys | BaseParamKeys | DeprecatedParamKeys | ChannelKey;
 
-type Params = BaseParams & { [_ in AllParamKeys]?: string };
+type Params = ViewerStateParams & DataParams & { [_ in AllParamKeys]?: string };
 
-const isParamKey = (key: string): key is BaseParamKeys => baseParamKeys.includes(key as BaseParamKeys);
+const isParamKey = (key: string): key is BaseParamKeys =>
+  baseParamKeys.includes(key as BaseParamKeys) || dataParamKeys.includes(key as DataParamKeys);
 const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
   deprecatedParamKeys.includes(key as DeprecatedParamKeys);
 const isChannelKey = (key: string): key is ChannelKey => CHANNEL_STATE_KEY_REGEX.test(key);
 
+/**
+ * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
+ * Non-matching keys are discarded.
+ * @param searchParams Input URL search parameters.
+ * @returns a dictionary object matching the type of `Params`.
+ */
 export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
   const result: Params = {};
   for (const [key, value] of searchParams.entries()) {
@@ -149,13 +218,30 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
-function parseFloat(value: string | undefined): number | undefined {
+function parseFloat(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
   }
   const number = Number.parseFloat(value);
-  return Number.isNaN(number) ? undefined : number;
+  return Number.isNaN(number) ? undefined : clamp(number, min, max);
 }
+
+// type StringEnum<T> = {
+//   [id: string]: T | string;
+// };
+
+// function parseStringEnum<T extends StringEnum<string>>(
+//   value: string | undefined,
+//   enumValues: [keyof T][],
+//   defaultValue: T[string] | undefined = undefined
+// ): T[string] | undefined {
+//   if (value === undefined || enumValues.indexOf(value) !== -1) {
+//     return defaultValue;
+//   }
+//   return value as T[string];
+// }
+
+// const mode = parseStringEnum<ViewMode>("3D", ["3D", "X", "Y", "Z"]);
 
 export function deserializeViewerChannelSetting(
   channelIndex: number,
@@ -166,10 +252,10 @@ export function deserializeViewerChannelSetting(
     match: channelIndex,
     enabled: jsonState.ven === "1",
     surfaceEnabled: jsonState.sen === "1",
-    isovalue: parseFloat(jsonState.isv),
-    surfaceOpacity: parseFloat(jsonState.isa),
+    isovalue: parseFloat(jsonState.isv, 0, 255),
+    surfaceOpacity: parseFloat(jsonState.isa, 0, 1),
     colorizeEnabled: jsonState.clz === "1",
-    colorizeAlpha: parseFloat(jsonState.cza),
+    colorizeAlpha: parseFloat(jsonState.cza, 0, 1),
   };
   if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
     result.color = jsonState.col;
