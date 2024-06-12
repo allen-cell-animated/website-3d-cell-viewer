@@ -47,47 +47,53 @@ const SliderRow: React.FC<SliderRowProps> = ({
   return (
     <span className="axis-slider-container">
       <span className="slider-name">{label}</span>
-      <span className="axis-slider">
-        <SmarterSlider
-          className={isRange ? "" : "slider-single-handle"}
-          connect={true}
-          range={{ min: 0, max: inputMax }}
-          start={vals}
-          step={1}
-          margin={1}
-          behaviour="drag"
-          pips={{
-            mode: "positions",
-            values: [25, 50, 75],
-            density: 25,
-            format: {
-              // remove labels from pips
-              to: () => "",
-            },
-          }}
-          // round slider output to nearest slice; assume any string inputs represent ints
-          format={{ to: Math.round, from: parseInt }}
-          onSlide={onSlide}
-          onChange={onChange}
-          onStart={onStart}
-          onEnd={onEnd}
-        />
-      </span>
-      <span className="slider-values">
-        <NumericInput
-          max={inputMax}
-          value={valsReadout[0]}
-          onChange={(value) => onChange?.(isRange ? [value, vals[1]] : [value])}
-        />
-        {isRange && (
-          <>
-            {" , "}
-            <NumericInput max={inputMax} value={valsReadout[1]} onChange={(value) => onChange?.([vals[0], value])} />
-          </>
-        )}
-        {" / "}
-        {max}
-      </span>
+      {inputMax === 0 ? (
+        <i>No values to adjust</i>
+      ) : (
+        <span className="axis-slider">
+          <SmarterSlider
+            className={isRange ? "" : "slider-single-handle"}
+            connect={true}
+            range={{ min: 0, max: inputMax }}
+            start={vals}
+            step={1}
+            margin={1}
+            behaviour="drag"
+            pips={{
+              mode: "positions",
+              values: [25, 50, 75],
+              density: 25,
+              format: {
+                // remove labels from pips
+                to: () => "",
+              },
+            }}
+            // round slider output to nearest slice; assume any string inputs represent ints
+            format={{ to: Math.round, from: parseInt }}
+            onSlide={onSlide}
+            onChange={onChange}
+            onStart={onStart}
+            onEnd={onEnd}
+          />
+        </span>
+      )}
+      {inputMax > 0 && (
+        <span className="slider-values">
+          <NumericInput
+            max={inputMax}
+            value={valsReadout[0]}
+            onChange={(value) => onChange?.(isRange ? [value, vals[1]] : [value])}
+          />
+          {isRange && (
+            <>
+              {" , "}
+              <NumericInput max={inputMax} value={valsReadout[1]} onChange={(value) => onChange?.([vals[0], value])} />
+            </>
+          )}
+          {" / "}
+          {max}
+        </span>
+      )}
     </span>
   );
 };
@@ -141,14 +147,16 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
         onStart={wrappedOnStart}
         onEnd={wrappedOnEnd}
       />
-      <Tooltip placement="top" title="Play through sequence" trigger={["hover", "focus"]}>
-        <Button
-          className="slider-play-button"
-          onClick={() => props.onTogglePlayback(!props.playing)}
-          icon={props.playing ? <PauseOutlined /> : <CaretRightOutlined />}
-          aria-label={(props.playing ? "Pause " : "Play ") + props.label}
-        />
-      </Tooltip>
+      {props.max > 1 && (
+        <Tooltip placement="top" title="Play through sequence" trigger={["hover", "focus"]}>
+          <Button
+            className="slider-play-button"
+            onClick={() => props.onTogglePlayback(!props.playing)}
+            icon={props.playing ? <PauseOutlined /> : <CaretRightOutlined />}
+            aria-label={(props.playing ? "Pause " : "Play ") + props.label}
+          />
+        </Tooltip>
+      )}
     </>
   );
 };
@@ -210,9 +218,6 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
 
   const create2dAxisSlider = (axis: AxisName): React.ReactNode => {
     const numSlices = props.numSlices[axis];
-    if (numSlices === 1) {
-      return null;
-    }
     const numSlicesLoaded = props.numSlicesLoaded[axis];
 
     return (
