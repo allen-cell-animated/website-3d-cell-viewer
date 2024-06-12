@@ -254,20 +254,15 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
     );
   };
 
-  const roiSliders = activeAxis ? create2dAxisSlider(activeAxis) : AXES.map(create3dAxisSlider);
-
   return (
     <div className={activeAxis ? "clip-sliders clip-sliders-2d" : "clip-sliders"}>
-      {roiSliders === null ? (
-        <i style={{ color: "var(--color-text-section)" }}>No value to adjust</i>
-      ) : (
-        <span className="slider-group">
-          <h4 className="slider-group-title">ROI</h4>
-          <span className="slider-group-rows">
-            {activeAxis ? create2dAxisSlider(activeAxis) : AXES.map(create3dAxisSlider)}
-          </span>
+      <span className="slider-group">
+        <h4 className="slider-group-title">ROI</h4>
+        <span className="slider-group-rows">
+          {activeAxis ? create2dAxisSlider(activeAxis) : AXES.map(create3dAxisSlider)}
         </span>
-      )}
+      </span>
+
       {props.numTimesteps > 1 && (
         <span className="slider-group">
           <h4 className="slider-group-title">Time</h4>
