@@ -1,17 +1,33 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 import { clamp } from "lodash";
 
-import type { ViewerState, ViewerStateKey } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import type {
+  ChannelState,
+  ViewerState,
+  ViewerStateKey,
+} from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
-import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
+import { ImageType, ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
   ViewerChannelSetting,
   ViewerChannelSettings,
 } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
+import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 // Match colon-separated pairs of alphanumeric strings
 const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+/**
+ * Match colon-separated pair of numeric strings in the [0, 1] range.
+ * Values will be clamped to the [0, 1] range and sorted.
+ */
+const SLICE_REGEX = /^[0-9.]*:[0-9.]*$/;
+/**
+ * Matches a sequence of three comma-separated min:max number pairs, representing
+ * the x, y, and z axes. Values will be clamped to the [0, 1] range and sorted.
+ */
+const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
 export type ViewerChannelSettingJson = {
@@ -193,6 +209,8 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
   return urls;
 };
 
+//// DATA PARSING //////////////////////
+
 /**
  * Parse a string list of comma-separated key:value pairs into
  * a key-value object.
@@ -218,7 +236,17 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
-function parseFloat(value: string | undefined, min: number, max: number): number | undefined {
+/**
+ * Parses a string to a number, clamping the result to the [min, max] range.
+ * Returns `undefined` if the string is undefined or NaN.
+ * @param value String to parse as a float. Will be parsed with `Number.parseFloat`.
+ * @param min Minimum clamping value, inclusive.
+ * @param max Maximum clamping value, inclusive.
+ * @returns
+ * - The parsed number, clamped to the [min, max] range.
+ * - `undefined` if the string is undefined or NaN.
+ */
+function parseStringFloat(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -226,22 +254,84 @@ function parseFloat(value: string | undefined, min: number, max: number): number
   return Number.isNaN(number) ? undefined : clamp(number, min, max);
 }
 
-// type StringEnum<T> = {
-//   [id: string]: T | string;
-// };
+function parseStringInt(value: string | undefined, min: number, max: number): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const number = Number.parseInt(value, 10);
+  return clamp(number, min, max);
+}
 
-// function parseStringEnum<T extends StringEnum<string>>(
-//   value: string | undefined,
-//   enumValues: [keyof T][],
-//   defaultValue: T[string] | undefined = undefined
-// ): T[string] | undefined {
-//   if (value === undefined || enumValues.indexOf(value) !== -1) {
-//     return defaultValue;
-//   }
-//   return value as T[string];
-// }
+/**
+ * Parses a string to an enum value; if the string is not in the enum, returns the default value.
+ * @param value String to parse.
+ * @param enumValues Enum. Cannot be a `const enum`, as these are removed at compile time.
+ * @param defaultValue Default value to return if the string is not in the enum.
+ * @returns A value from the enum or the default value.
+ */
+function parseStringEnum<E>(
+  value: string | undefined,
+  enumValues: Record<string | number | symbol, E>,
+  defaultValue: E | undefined
+): E | undefined {
+  if (value === undefined || !Object(enumValues).values().includes(value)) {
+    return defaultValue;
+  }
+  return value as E;
+}
 
-// const mode = parseStringEnum<ViewMode>("3D", ["3D", "X", "Y", "Z"]);
+function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
+  if (!hexColor || !HEX_COLOR_REGEX.test(hexColor)) {
+    return undefined;
+  }
+  const r = Number.parseInt(hexColor.slice(0, 2), 16);
+  const g = Number.parseInt(hexColor.slice(2, 4), 16);
+  const b = Number.parseInt(hexColor.slice(4, 6), 16);
+  return [r, g, b];
+}
+
+function removeUndefinedProperties<T>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
+function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
+  if (!region || !SLICE_REGEX.test(region)) {
+    return undefined;
+  }
+  const [x, y, z] = region.split(":").map((val) => parseStringFloat(val, 0, 1));
+  if (x === undefined || y === undefined || z === undefined) {
+    return undefined;
+  }
+  return { x, y, z };
+}
+
+function parseStringRegion(region: string | undefined): PerAxis<[number, number]> | undefined {
+  if (!region || !REGION_REGEX.test(region)) {
+    return undefined;
+  }
+  const [x, y, z] = region.split(",").map((axis): [number, number] | undefined => {
+    // each is a min/max pair
+    const [min, max] = axis.split(":").map((val) => parseStringFloat(val, 0, 1));
+    if (min === undefined || max === undefined) {
+      return undefined;
+    }
+    // Ensure sorted order
+    return min < max ? [min, max] : [max, min];
+  });
+  // Check for undefined values
+  if (x === undefined || y === undefined || z === undefined) {
+    return undefined;
+  }
+  return { x, y, z };
+}
+
+//// DATA SERIALIZATION //////////////////////
 
 export function deserializeViewerChannelSetting(
   channelIndex: number,
@@ -252,10 +342,10 @@ export function deserializeViewerChannelSetting(
     match: channelIndex,
     enabled: jsonState.ven === "1",
     surfaceEnabled: jsonState.sen === "1",
-    isovalue: parseFloat(jsonState.isv, 0, 255),
-    surfaceOpacity: parseFloat(jsonState.isa, 0, 1),
+    isovalue: parseStringFloat(jsonState.isv, 0, 255),
+    surfaceOpacity: parseStringFloat(jsonState.isa, 0, 1),
     colorizeEnabled: jsonState.clz === "1",
-    colorizeAlpha: parseFloat(jsonState.cza, 0, 1),
+    colorizeAlpha: parseStringFloat(jsonState.cza, 0, 1),
   };
   if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
     result.color = jsonState.col;
@@ -265,6 +355,21 @@ export function deserializeViewerChannelSetting(
     result.lut = [min.trim(), max.trim()];
   }
   return result;
+}
+
+export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingJson {
+  return removeUndefinedProperties({
+    ven: channelSetting.volumeEnabled ? "1" : "0",
+    sen: channelSetting.isosurfaceEnabled ? "1" : "0",
+    isv: channelSetting.isovalue.toString(),
+    isa: channelSetting.opacity.toString(),
+    clz: channelSetting.colorizeEnabled ? "1" : "0",
+    cza: channelSetting.colorizeAlpha?.toString(),
+    // Convert to hex string
+    col: channelSetting.color.map((c) => c.toString(16)).join(""),
+    // TODO: Serialize control points....
+    // lut: channelSetting.lut?.join(":"),
+  });
 }
 
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
@@ -300,6 +405,74 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   return args;
 }
 
+export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
+  const result: Partial<ViewerState> = {
+    maskAlpha: parseStringInt(params.mask, 0, 100),
+    imageType: parseStringEnum(params.image, ImageType, ImageType.segmentedCell),
+    showAxes: params.axes === "1",
+    showBoundingBox: params.bb === "1",
+    boundingBoxColor: parseHexColorAsColorArray(params.bbcol),
+    backgroundColor: parseHexColorAsColorArray(params.bgcol),
+    autorotate: params.rot === "1",
+    brightness: parseStringFloat(params.bright, 0, 100),
+    density: parseStringFloat(params.dens, 0, 100),
+    interpolationEnabled: params.interp === "1",
+    region: parseStringRegion(params.reg),
+    slice: parseStringSlice(params.slice),
+    time: parseStringInt(params.t, 0, Number.POSITIVE_INFINITY),
+  };
+
+  // Handle viewmode, since they use different mappings
+  // TODO: Allow lowercase
+  if (params.view) {
+    const viewParamToViewMode = {
+      "3D": ViewMode.threeD,
+      Z: ViewMode.xy,
+      Y: ViewMode.xz,
+      X: ViewMode.yz,
+    };
+    const allowedViews = Object.keys(viewParamToViewMode);
+    let view: "3D" | "X" | "Y" | "Z";
+    if (allowedViews.includes(params.view.toUpperCase())) {
+      view = params.view.toUpperCase() as "3D" | "X" | "Y" | "Z";
+    } else {
+      view = "3D";
+    }
+    result.viewMode = viewParamToViewMode[view];
+  }
+
+  return removeUndefinedProperties(result);
+}
+
+export function serializeViewerState(state: ViewerState): ViewerStateParams {
+  // TODO: Enforce number formatting for floats/decimals?
+  const result: ViewerStateParams = {
+    mask: state.maskAlpha?.toString(),
+    image: state.imageType,
+    axes: state.showAxes ? "1" : "0",
+    bb: state.showBoundingBox ? "1" : "0",
+    bbcol: state.boundingBoxColor.map((c) => c.toString(16)).join(""),
+    bgcol: state.backgroundColor.map((c) => c.toString(16)).join(""),
+    rot: state.autorotate ? "1" : "0",
+    bright: state.brightness.toString(),
+    dens: state.density.toString(),
+    interp: state.interpolationEnabled ? "1" : "0",
+    reg: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
+    slice: `${state.slice.x}:${state.slice.y}:${state.slice.z}`,
+    t: state.time.toString(),
+  };
+  const viewModeToViewParam = {
+    [ViewMode.threeD]: "3D",
+    [ViewMode.xy]: "Z",
+    [ViewMode.xz]: "Y",
+    [ViewMode.yz]: "X",
+  };
+  result.view = viewModeToViewParam[state.viewMode];
+  return result;
+}
+
+//// FULL URL PARSING //////////////////////
+
 export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
@@ -308,25 +481,6 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   let args: Partial<AppProps> = {};
   const viewerSettings: Partial<ViewerState> = {};
 
-  if (params.mask) {
-    viewerSettings.maskAlpha = parseInt(params.mask, 10);
-  }
-  if (params.view) {
-    const mapping = {
-      "3D": ViewMode.threeD,
-      Z: ViewMode.xy,
-      Y: ViewMode.xz,
-      X: ViewMode.yz,
-    };
-    const allowedViews = Object.keys(mapping);
-    let view: "3D" | "X" | "Y" | "Z";
-    if (allowedViews.includes(params.view)) {
-      view = params.view as "3D" | "X" | "Y" | "Z";
-    } else {
-      view = "3D";
-    }
-    viewerSettings.viewMode = mapping[view];
-  }
   // old, deprecated channels model
   if (params.ch) {
     // ?ch=1,2
@@ -337,7 +491,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     };
     const ch = initialChannelSettings.groups[0].channels;
 
-    const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
+    const channelsOn = params.ch.split(",").map((numstr) => Number.parseInt(numstr, 10));
     for (let i = 0; i < channelsOn.length; ++i) {
       ch.push({ match: channelsOn[i], enabled: true });
     }
@@ -371,7 +525,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
   Object.keys(params).forEach((key) => {
     if (isChannelKey(key)) {
-      const channelIndex = parseInt(key.slice(1), 10);
+      const channelIndex = Number.parseInt(key.slice(1), 10);
       try {
         const channelData = parseKeyValueList(params[key]!);
         const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
