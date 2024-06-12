@@ -141,7 +141,6 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
         onStart={wrappedOnStart}
         onEnd={wrappedOnEnd}
       />
-      {/* @ts-ignore antd 3.x thinks the type of `trigger` below is bad, but it works. TODO remove this on update. */}
       <Tooltip placement="top" title="Play through sequence" trigger={["hover", "focus"]}>
         <Button
           className="slider-play-button"
