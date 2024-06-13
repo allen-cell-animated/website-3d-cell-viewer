@@ -8,7 +8,7 @@ import type {
   ViewerStateKey,
 } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
-import { ImageType, ViewMode } from "../../src/aics-image-viewer/shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
   ViewerChannelSetting,
   ViewerChannelSettings,
@@ -22,7 +22,7 @@ const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
  * Match colon-separated pair of numeric strings in the [0, 1] range.
  * Values will be clamped to the [0, 1] range and sorted.
  */
-const SLICE_REGEX = /^[0-9.]*:[0-9.]*$/;
+const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 /**
  * Matches a sequence of three comma-separated min:max number pairs, representing
  * the x, y, and z axes. Values will be clamped to the [0, 1] range and sorted.
@@ -66,7 +66,7 @@ export type ViewerChannelSettingJson = {
   isv?: string;
 };
 
-type ViewerStateParams = {
+export type ViewerStateParams = {
   /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
   view?: string;
   /**
@@ -98,13 +98,17 @@ type ViewerStateParams = {
    * Values will be sorted in ascending order; empty values will be parsed as 0.
    */
   lvl?: string;
-  /** Whether to enable interpolation. "1" is enabled. Disabled by default. */
+  /** Whether to enable interpolation. "1" is enabled. Enabled by default. */
   interp?: string;
-  /** Subregions per axis.
+  /** Subregions per axis, as min:max pairs separated by commas.
    * Defaults to full range (`0:1`) for each axis.
    */
   reg?: string;
+  /** Slice position per X, Y, and Z axes, as a list of comma-separated floats.
+   * 0.5 for all axes by default (e.g. `0.5,0.5,0.5`)
+   */
   slice?: string;
+  /** Frame number, for time-series volumes. 0 by default. */
   t?: string;
 };
 
@@ -129,7 +133,7 @@ const ViewerStateToParamKey: Record<ViewerStateKey, keyof ViewerStateParams> = {
   region: "reg",
   slice: "slice",
   time: "t",
-};
+} as const;
 
 /** Parameters that define loaded datasets. */
 type DataParams = {
@@ -150,7 +154,24 @@ type DataParams = {
 
 // Copy of keys for above params. Both types are defined so that spec comments can be provided.
 // TODO: Remove redundant `baseParamKeys` type.
-const baseParamKeys = ["mask", "view"] as const;
+const baseParamKeys = [
+  "view",
+  "mode",
+  "mask",
+  "image",
+  "axes",
+  "bb",
+  "bbcol",
+  "bgcol",
+  "rot",
+  "bright",
+  "dens",
+  "lvl",
+  "interp",
+  "reg",
+  "slice",
+  "t",
+] as const;
 const dataParamKeys = ["url", "dataset", "id"] as const;
 const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
 
@@ -307,7 +328,7 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   if (!region || !SLICE_REGEX.test(region)) {
     return undefined;
   }
-  const [x, y, z] = region.split(":").map((val) => parseStringFloat(val, 0, 1));
+  const [x, y, z] = region.split(",").map((val) => parseStringFloat(val, 0, 1));
   if (x === undefined || y === undefined || z === undefined) {
     return undefined;
   }
@@ -375,10 +396,86 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     clz: channelSetting.colorizeEnabled ? "1" : "0",
     cza: channelSetting.colorizeAlpha?.toString(),
     // Convert to hex string
-    col: channelSetting.color.map((c) => c.toString(16)).join(""),
+    col: channelSetting.color.map((c) => c.toString(16).padStart(2, "0")).join(""),
     // TODO: Serialize control points....
     // lut: channelSetting.lut?.join(":"),
   });
+}
+
+export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
+  const result: Partial<ViewerState> = {
+    maskAlpha: parseStringInt(params.mask, 0, 100),
+    imageType: parseStringEnum(params.image, ImageType, ImageType.segmentedCell),
+    showAxes: params.axes === "1",
+    showBoundingBox: params.bb === "1",
+    boundingBoxColor: parseHexColorAsColorArray(params.bbcol),
+    backgroundColor: parseHexColorAsColorArray(params.bgcol),
+    autorotate: params.rot === "1",
+    brightness: parseStringFloat(params.bright, 0, 100),
+    density: parseStringFloat(params.dens, 0, 100),
+    levels: params.lvl?.split(",").map((val) => parseStringFloat(val, 0, 255)) as [number, number, number],
+    interpolationEnabled: params.interp === "1",
+    region: parseStringRegion(params.reg),
+    slice: parseStringSlice(params.slice),
+    time: parseStringInt(params.t, 0, Number.POSITIVE_INFINITY),
+    renderMode: parseStringEnum(params.mode, RenderMode, RenderMode.volumetric),
+  };
+
+  // Handle viewmode, since they use different mappings
+  // TODO: Allow lowercase
+  if (params.view) {
+    const viewParamToViewMode = {
+      "3D": ViewMode.threeD,
+      Z: ViewMode.xy,
+      Y: ViewMode.xz,
+      X: ViewMode.yz,
+    };
+    const allowedViews = Object.keys(viewParamToViewMode);
+    let view: "3D" | "X" | "Y" | "Z";
+    if (allowedViews.includes(params.view.toUpperCase())) {
+      view = params.view.toUpperCase() as "3D" | "X" | "Y" | "Z";
+    } else {
+      view = "3D";
+    }
+    result.viewMode = viewParamToViewMode[view];
+  }
+
+  return removeUndefinedProperties(result);
+}
+
+export function serializeViewerState(state: ViewerState): ViewerStateParams {
+  // TODO: Enforce number formatting for floats/decimals?
+  const result: ViewerStateParams = {
+    mode: state.renderMode,
+    mask: state.maskAlpha.toString(),
+    image: state.imageType,
+    axes: state.showAxes ? "1" : "0",
+    bb: state.showBoundingBox ? "1" : "0",
+    bbcol: state.boundingBoxColor
+      .map((c) => c.toString(16).padStart(2, "0"))
+      .join("")
+      .toLowerCase(),
+    bgcol: state.backgroundColor
+      .map((c) => c.toString(16).padStart(2, "0"))
+      .join("")
+      .toLowerCase(),
+    rot: state.autorotate ? "1" : "0",
+    bright: state.brightness.toString(),
+    dens: state.density.toString(),
+    interp: state.interpolationEnabled ? "1" : "0",
+    reg: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
+    slice: `${state.slice.x},${state.slice.y},${state.slice.z}`,
+    lvl: state.levels.join(","),
+    t: state.time.toString(),
+  };
+  const viewModeToViewParam = {
+    [ViewMode.threeD]: "3D",
+    [ViewMode.xy]: "Z",
+    [ViewMode.xz]: "Y",
+    [ViewMode.yz]: "X",
+  };
+  result.view = viewModeToViewParam[state.viewMode];
+  return result;
 }
 
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
@@ -412,72 +509,6 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   args.parentImageUrl = baseUrl + fileInfo!.fovVolumeviewerPath;
 
   return args;
-}
-
-export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
-  const result: Partial<ViewerState> = {
-    maskAlpha: parseStringInt(params.mask, 0, 100),
-    imageType: parseStringEnum(params.image, ImageType, ImageType.segmentedCell),
-    showAxes: params.axes === "1",
-    showBoundingBox: params.bb === "1",
-    boundingBoxColor: parseHexColorAsColorArray(params.bbcol),
-    backgroundColor: parseHexColorAsColorArray(params.bgcol),
-    autorotate: params.rot === "1",
-    brightness: parseStringFloat(params.bright, 0, 100),
-    density: parseStringFloat(params.dens, 0, 100),
-    interpolationEnabled: params.interp === "1",
-    region: parseStringRegion(params.reg),
-    slice: parseStringSlice(params.slice),
-    time: parseStringInt(params.t, 0, Number.POSITIVE_INFINITY),
-  };
-
-  // Handle viewmode, since they use different mappings
-  // TODO: Allow lowercase
-  if (params.view) {
-    const viewParamToViewMode = {
-      "3D": ViewMode.threeD,
-      Z: ViewMode.xy,
-      Y: ViewMode.xz,
-      X: ViewMode.yz,
-    };
-    const allowedViews = Object.keys(viewParamToViewMode);
-    let view: "3D" | "X" | "Y" | "Z";
-    if (allowedViews.includes(params.view.toUpperCase())) {
-      view = params.view.toUpperCase() as "3D" | "X" | "Y" | "Z";
-    } else {
-      view = "3D";
-    }
-    result.viewMode = viewParamToViewMode[view];
-  }
-
-  return removeUndefinedProperties(result);
-}
-
-export function serializeViewerState(state: ViewerState): ViewerStateParams {
-  // TODO: Enforce number formatting for floats/decimals?
-  const result: ViewerStateParams = {
-    mask: state.maskAlpha.toString(),
-    image: state.imageType,
-    axes: state.showAxes ? "1" : "0",
-    bb: state.showBoundingBox ? "1" : "0",
-    bbcol: state.boundingBoxColor.map((c) => c.toString(16)).join(""),
-    bgcol: state.backgroundColor.map((c) => c.toString(16)).join(""),
-    rot: state.autorotate ? "1" : "0",
-    bright: state.brightness.toString(),
-    dens: state.density.toString(),
-    interp: state.interpolationEnabled ? "1" : "0",
-    reg: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
-    slice: `${state.slice.x}:${state.slice.y}:${state.slice.z}`,
-    t: state.time.toString(),
-  };
-  const viewModeToViewParam = {
-    [ViewMode.threeD]: "3D",
-    [ViewMode.xy]: "Z",
-    [ViewMode.xz]: "Y",
-    [ViewMode.yz]: "X",
-  };
-  result.view = viewModeToViewParam[state.viewMode];
-  return result;
 }
 
 //// FULL URL PARSING //////////////////////

@@ -8,8 +8,15 @@ import {
   parseStringEnum,
   parseStringInt,
   parseStringFloat,
+  serializeViewerChannelSetting,
+  serializeViewerState,
+  deserializeViewerState,
+  urlSearchParamsToParams,
+  ViewerStateParams,
 } from "../url_utils";
 import { ViewerChannelSetting } from "../../../src";
+import { ChannelState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import { DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -162,108 +169,222 @@ describe("parseStringFloat", () => {
   });
 });
 
-//// SERIALIZE STATES /////////////////////////////////
+//// SERIALIZE STATES ///////////////////////
 
-// describe("deserializeViewerChannelSetting", () => {
-//   it("", () => {
-//     throw new Error("Test not implemented");
-//   });
-// });
+describe("Viewer channel serialization", () => {
+  const DEFAULT_CHANNEL_STATE: ChannelState = {
+    name: "",
+    color: [255, 0, 0],
+    volumeEnabled: true,
+    isosurfaceEnabled: true,
+    isovalue: 128,
+    opacity: 0.75,
+    colorizeEnabled: true,
+    colorizeAlpha: 0.5,
+    controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+  };
+  const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingJson = {
+    col: "ff0000",
+    ven: "1",
+    sen: "1",
+    isv: "128",
+    isa: "0.75",
+    clz: "1",
+    cza: "0.5",
+    // TODO: include LUT and name
+  };
 
-//// SERIALIZE CHANNEL SETTINGS ///////////////////////
+  // Note that the serialization + deserialization are NOT direct inverses.
+  // Serializing converts a ChannelState object to a ViewerChannelSettingJson object,
+  // deserializing converts a ViewerChannelSettingJson object to a ViewerChannelSetting object.
 
-describe("deserializeViewerChannelSetting", () => {
-  it("returns default settings for empty objects", () => {
-    const data = {};
-    const result = deserializeViewerChannelSetting(0, data);
-    expect(result).toEqual(defaultSettings);
-  });
+  // ViewerChannelSettings are input into the viewer and support grouping/matching to multiple channels,
+  // while ChannelStates are per-channel and are used internally.
+  // TODO: refactor these to all be the same state?
 
-  it("ignores unexpected keys", () => {
-    const data = { badKey: "badValue", ven: "1", sen: "1" } as ViewerChannelSettingJson;
-    const result = deserializeViewerChannelSetting(0, data);
-    expect(result).toEqual({ ...defaultSettings, enabled: true, surfaceEnabled: true });
-  });
+  describe("deserializeViewerChannelSetting", () => {
+    it("returns default settings for empty objects", () => {
+      const data = {};
+      const result = deserializeViewerChannelSetting(0, data);
+      expect(result).toEqual(defaultSettings);
+    });
 
-  it("parses settings correctly", () => {
-    const data = {
-      col: "FF0000",
-      clz: "1",
-      cza: "0.5",
-      isa: "0.75",
-      ven: "1",
-      sen: "1",
-      isv: "128",
-      lut: "0:255",
-    } as ViewerChannelSettingJson;
-    expect(deserializeViewerChannelSetting(0, data)).toEqual({
-      match: 0,
-      color: "FF0000",
-      enabled: true,
-      surfaceEnabled: true,
-      isovalue: 128,
-      surfaceOpacity: 0.75,
-      colorizeEnabled: true,
-      colorizeAlpha: 0.5,
-      lut: ["0", "255"],
+    it("ignores unexpected keys", () => {
+      const data = { badKey: "badValue", ven: "1", sen: "1" } as ViewerChannelSettingJson;
+      const result = deserializeViewerChannelSetting(0, data);
+      expect(result).toEqual({ ...defaultSettings, enabled: true, surfaceEnabled: true });
+    });
+
+    it("parses settings correctly", () => {
+      const data = {
+        col: "FF0000",
+        clz: "1",
+        cza: "0.5",
+        isa: "0.75",
+        ven: "1",
+        sen: "1",
+        isv: "128",
+        lut: "0:255",
+      } as ViewerChannelSettingJson;
+      expect(deserializeViewerChannelSetting(0, data)).toEqual({
+        match: 0,
+        color: "FF0000",
+        enabled: true,
+        surfaceEnabled: true,
+        isovalue: 128,
+        surfaceOpacity: 0.75,
+        colorizeEnabled: true,
+        colorizeAlpha: 0.5,
+        lut: ["0", "255"],
+      });
+    });
+
+    it("handles expected lut formatting", () => {
+      const luts = [
+        ["autoij:0", ["autoij", "0"]],
+        ["0:autoij", ["0", "autoij"]],
+        [":autoij", ["", "autoij"]],
+        ["autoij:", ["autoij", ""]],
+        ["0:255", ["0", "255"]],
+        ["0.5:1.0", ["0.5", "1.0"]],
+        ["0.50:1.00", ["0.50", "1.00"]],
+        ["m99:m100", ["m99", "m100"]],
+        ["p10:p90", ["p10", "p90"]],
+        ["p10: p90", ["p10", "p90"]], // handle spaces
+      ];
+      for (const [encodedLut, decodedLut] of luts) {
+        const data = { lut: encodedLut } as ViewerChannelSettingJson;
+        const result = deserializeViewerChannelSetting(0, data);
+        expect(result.lut).toEqual(decodedLut);
+      }
+    });
+
+    it("ignores unexpected lut formats", () => {
+      const luts = ["!:0", "0:9:93", "255", ""];
+      for (const lut of luts) {
+        const data = { lut } as ViewerChannelSettingJson;
+        const result = deserializeViewerChannelSetting(0, data);
+        expect(result.lut).toBeUndefined();
+      }
+    });
+
+    it("handles hex color formats", () => {
+      const colors = ["000000", "FFFFFF", "ffffff", "012345", "6789AB", "CDEF01", "abcdef"];
+      for (const color of colors) {
+        const data = { col: color } as ViewerChannelSettingJson;
+        const result = deserializeViewerChannelSetting(0, data);
+        expect(result.color).toEqual(color);
+      }
+    });
+
+    it("ignores bad color formats", () => {
+      const badColors = ["f", "ff00", "red", "rgb(255,0,0)"];
+      for (const color of badColors) {
+        const data = { col: color } as ViewerChannelSettingJson;
+        const result = deserializeViewerChannelSetting(0, data);
+        expect(result.color).toBeUndefined();
+      }
+    });
+
+    it("ignores bad float data", () => {
+      const data = { cza: "NaN", isa: "bad", isv: "f8" } as ViewerChannelSettingJson;
+      const result = deserializeViewerChannelSetting(0, data);
+      expect(result.colorizeAlpha).toBeUndefined();
+      expect(result.surfaceOpacity).toBeUndefined();
+      expect(result.isovalue).toBeUndefined();
     });
   });
 
-  it("handles expected lut formatting", () => {
-    const luts = [
-      ["autoij:0", ["autoij", "0"]],
-      ["0:autoij", ["0", "autoij"]],
-      [":autoij", ["", "autoij"]],
-      ["autoij:", ["autoij", ""]],
-      ["0:255", ["0", "255"]],
-      ["0.5:1.0", ["0.5", "1.0"]],
-      ["0.50:1.00", ["0.50", "1.00"]],
-      ["m99:m100", ["m99", "m100"]],
-      ["p10:p90", ["p10", "p90"]],
-      ["p10: p90", ["p10", "p90"]], // handle spaces
-    ];
-    for (const [encodedLut, decodedLut] of luts) {
-      const data = { lut: encodedLut } as ViewerChannelSettingJson;
-      const result = deserializeViewerChannelSetting(0, data);
-      expect(result.lut).toEqual(decodedLut);
-    }
-  });
+  describe("serializeViewerChannelSetting", () => {
+    it("serializes channel settings to expected format", () => {
+      // Default case
+      expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
 
-  it("ignores unexpected lut formats", () => {
-    const luts = ["!:0", "0:9:93", "255", ""];
-    for (const lut of luts) {
-      const data = { lut } as ViewerChannelSettingJson;
-      const result = deserializeViewerChannelSetting(0, data);
-      expect(result.lut).toBeUndefined();
-    }
-  });
-
-  it("handles hex color formats", () => {
-    const colors = ["000000", "FFFFFF", "ffffff", "012345", "6789AB", "CDEF01", "abcdef"];
-    for (const color of colors) {
-      const data = { col: color } as ViewerChannelSettingJson;
-      const result = deserializeViewerChannelSetting(0, data);
-      expect(result.color).toEqual(color);
-    }
-  });
-
-  it("ignores bad color formats", () => {
-    const badColors = ["f", "ff00", "red", "rgb(255,0,0)"];
-    for (const color of badColors) {
-      const data = { col: color } as ViewerChannelSettingJson;
-      const result = deserializeViewerChannelSetting(0, data);
-      expect(result.color).toBeUndefined();
-    }
-  });
-
-  it("ignores bad float data", () => {
-    const data = { cza: "NaN", isa: "bad", isv: "f8" } as ViewerChannelSettingJson;
-    const result = deserializeViewerChannelSetting(0, data);
-    expect(result.colorizeAlpha).toBeUndefined();
-    expect(result.surfaceOpacity).toBeUndefined();
-    expect(result.isovalue).toBeUndefined();
+      // Custom case
+      const customChannelState: ChannelState = {
+        name: "a",
+        color: [3, 255, 157],
+        volumeEnabled: false,
+        isosurfaceEnabled: false,
+        isovalue: 0,
+        opacity: 0.54,
+        colorizeEnabled: false,
+        colorizeAlpha: 1.0,
+        controlPoints: [],
+      };
+      const serializedCustomChannelState: ViewerChannelSettingJson = {
+        col: "03ff9d",
+        ven: "0",
+        sen: "0",
+        isv: "0",
+        isa: "0.54",
+        clz: "0",
+        cza: "1",
+      };
+      expect(serializeViewerChannelSetting(customChannelState)).toEqual(serializedCustomChannelState);
+    });
   });
 });
+
+// export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+//   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+//   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+//   imageType: ImageType.segmentedCell,
+//   showAxes: false,
+//   showBoundingBox: false,
+//   backgroundColor: BACKGROUND_COLOR_DEFAULT,
+//   boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
+//   autorotate: false,
+//   maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
+//   brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+//   density: DENSITY_SLIDER_LEVEL_DEFAULT,
+//   levels: LEVELS_SLIDER_DEFAULT,
+//   interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
+//   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+//   slice: { x: 0.5, y: 0.5, z: 0.5 },
+//   time: 0,
+// };
+
+describe("serializeViewerState", () => {
+  // Serialized copy of DEFAULT_VIEWER_SETTINGS.
+  const SERIALIZED_DEFAULT_VIEWER_SETTINGS: ViewerStateParams = {
+    view: "3D",
+    mode: "volumetric",
+    image: "cell",
+    axes: "0",
+    bb: "0",
+    bgcol: "000000",
+    bbcol: "ffffff",
+    rot: "0",
+    mask: "0",
+    bright: "70",
+    dens: "50",
+    lvl: "35,140,255",
+    interp: "1",
+    reg: "0:1,0:1,0:1",
+    slice: "0.5,0.5,0.5",
+    t: "0",
+  };
+
+  describe("serializeViewerState", () => {
+    it("serializes the default viewer settings", () => {
+      expect(serializeViewerState(DEFAULT_VIEWER_SETTINGS)).toEqual(SERIALIZED_DEFAULT_VIEWER_SETTINGS);
+    });
+  });
+
+  describe("deserializeViewerState", () => {
+    it("deserializes the default viewer settings", () => {
+      const params = urlSearchParamsToParams(new URLSearchParams(SERIALIZED_DEFAULT_VIEWER_SETTINGS));
+      expect(deserializeViewerState(params)).toEqual(DEFAULT_VIEWER_SETTINGS);
+    });
+
+    it("handles all ViewMode values", () => {
+      // throw new Error("Test not implemented");
+    });
+  });
+});
+
+//// DESERIALIZE STATES /////////////////////////////////
 
 describe("parseViewerUrlParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
