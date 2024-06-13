@@ -25,7 +25,7 @@ import { ColorArray } from "../../shared/utils/colorRepresentations";
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
 
-const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,

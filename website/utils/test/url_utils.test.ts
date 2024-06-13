@@ -2,8 +2,12 @@ import { describe, expect, it } from "@jest/globals";
 import {
   ViewerChannelSettingJson,
   deserializeViewerChannelSetting,
-  getArgsFromParams,
+  parseViewerUrlParams,
   parseKeyValueList,
+  parseHexColorAsColorArray,
+  parseStringEnum,
+  parseStringInt,
+  parseStringFloat,
 } from "../url_utils";
 import { ViewerChannelSetting } from "../../../src";
 
@@ -17,6 +21,8 @@ const defaultSettings: ViewerChannelSetting = {
   colorizeEnabled: false,
   colorizeAlpha: undefined,
 };
+
+//// VALUE PARSING ///////////////////////////////////////
 
 describe("parseKeyValueList", () => {
   it("returns expected key value pairs", () => {
@@ -64,6 +70,107 @@ describe("parseKeyValueList", () => {
     expect(result).toEqual({ key1: "value1", key2: "value2", key3: "value 3" });
   });
 });
+
+describe("parseHexColorAsColorArray", () => {
+  it("parses hex values", () => {
+    expect(parseHexColorAsColorArray("000000")).toEqual([0, 0, 0]);
+    expect(parseHexColorAsColorArray("FFFFFF")).toEqual([255, 255, 255]);
+    expect(parseHexColorAsColorArray("ff0000")).toEqual([255, 0, 0]);
+    expect(parseHexColorAsColorArray("123456")).toEqual([18, 52, 86]);
+    expect(parseHexColorAsColorArray("7890ab")).toEqual([120, 144, 171]);
+    expect(parseHexColorAsColorArray("cdefef")).toEqual([205, 239, 239]);
+  });
+
+  it("ignores unrecognized formats", () => {
+    expect(parseHexColorAsColorArray("f")).toBeUndefined();
+    expect(parseHexColorAsColorArray("fff")).toBeUndefined();
+    expect(parseHexColorAsColorArray("fffffff")).toBeUndefined();
+    expect(parseHexColorAsColorArray("hjklmn")).toBeUndefined();
+  });
+});
+
+describe("parseStringEnum", () => {
+  enum TestEnum {
+    SOME_VALUE = "some_value",
+    ANOTHER_VALUE = "another_value",
+  }
+
+  it("recognizes enum values", () => {
+    expect(parseStringEnum("some_value", TestEnum, undefined)).toEqual(TestEnum.SOME_VALUE);
+    expect(parseStringEnum("another_value", TestEnum, undefined)).toEqual(TestEnum.ANOTHER_VALUE);
+  });
+
+  it("returns default values for unrecognized enum values", () => {
+    expect(parseStringEnum("unexpected", TestEnum, undefined)).toEqual(undefined);
+    expect(parseStringEnum("unexpected", TestEnum, TestEnum.SOME_VALUE)).toEqual(TestEnum.SOME_VALUE);
+  });
+});
+
+describe("parseStringInt", () => {
+  it("parses int and undefined values", () => {
+    expect(parseStringInt("0", 0, 1000)).toEqual(0);
+    expect(parseStringInt("1", 0, 1000)).toEqual(1);
+    expect(parseStringInt("100", 0, 1000)).toEqual(100);
+    expect(parseStringInt("255", 0, 1000)).toEqual(255);
+    expect(parseStringInt("-1", -1000, 1000)).toEqual(-1);
+  });
+
+  it("returns undefined for undefined and NaN values", () => {
+    expect(parseStringInt("bad", -1000, 1000)).toEqual(undefined);
+    expect(parseStringInt("NaN", -1000, 1000)).toEqual(undefined);
+    expect(parseStringInt(undefined, -1000, 1000)).toEqual(undefined);
+  });
+
+  it("casts float values to integers", () => {
+    expect(parseStringInt("0.5", 0, 1000)).toEqual(0);
+  });
+
+  it("applies clamping", () => {
+    expect(parseStringInt("1001", 0, 1000)).toEqual(1000);
+    expect(parseStringInt("-1001", -1000, 1000)).toEqual(-1000);
+
+    expect(parseStringInt("0", 0, 255)).toEqual(0);
+    expect(parseStringInt("-1", 0, 255)).toEqual(0);
+    expect(parseStringInt("128", 0, 255)).toEqual(128);
+    expect(parseStringInt("255", 0, 255)).toEqual(255);
+    expect(parseStringInt("256", 0, 255)).toEqual(255);
+  });
+});
+
+describe("parseStringFloat", () => {
+  it("parses strings to float values", () => {
+    expect(parseStringFloat("0", -1000, 1000)).toEqual(0);
+    expect(parseStringFloat("1.0", -1000, 1000)).toEqual(1.0);
+    expect(parseStringFloat("0.5", -1000, 1000)).toEqual(0.5);
+    expect(parseStringFloat("128.5", -1000, 1000)).toEqual(128.5);
+    expect(parseStringFloat("495.344", -1000, 1000)).toEqual(495.344);
+    expect(parseStringFloat("-1", -1000, 1000)).toEqual(-1);
+  });
+
+  it("returns undefined for NaN or undefined values", () => {
+    expect(parseStringFloat("bad", -1000, 1000)).toEqual(undefined);
+    expect(parseStringFloat("NaN", -1000, 1000)).toEqual(undefined);
+    expect(parseStringFloat(undefined, -1000, 1000)).toEqual(undefined);
+  });
+
+  it("applies clamping", () => {
+    expect(parseStringFloat("0.5", 0, 1.0)).toEqual(0.5);
+    expect(parseStringFloat("1.0", 0, 1.0)).toEqual(1.0);
+    expect(parseStringFloat("1.1", 0, 1.0)).toEqual(1.0);
+    expect(parseStringFloat("0", 0, 1.0)).toEqual(0);
+    expect(parseStringFloat("-0.1", 0, 1.0)).toEqual(0);
+  });
+});
+
+//// SERIALIZE STATES /////////////////////////////////
+
+// describe("deserializeViewerChannelSetting", () => {
+//   it("", () => {
+//     throw new Error("Test not implemented");
+//   });
+// });
+
+//// SERIALIZE CHANNEL SETTINGS ///////////////////////
 
 describe("deserializeViewerChannelSetting", () => {
   it("returns default settings for empty objects", () => {
@@ -158,7 +265,7 @@ describe("deserializeViewerChannelSetting", () => {
   });
 });
 
-describe("getArgsFromParams", () => {
+describe("parseViewerUrlParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
   const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
     [
@@ -214,7 +321,7 @@ describe("getArgsFromParams", () => {
   it("parses unencoded per-channel setting", async () => {
     for (const [queryString, , expected] of channelParamToSetting) {
       const params = new URLSearchParams(queryString);
-      const { args } = await getArgsFromParams(params);
+      const { args } = await parseViewerUrlParams(params);
       const channelSetting = args.viewerChannelSettings?.groups[0].channels[0]!;
       expect(channelSetting).toEqual(expected);
     }
@@ -223,7 +330,7 @@ describe("getArgsFromParams", () => {
   it("parses encoded per-channel settings", async () => {
     for (const [, queryString, expected] of channelParamToSetting) {
       const params = new URLSearchParams(queryString);
-      const { args } = await getArgsFromParams(params);
+      const { args } = await parseViewerUrlParams(params);
       const channelSetting = args.viewerChannelSettings?.groups[0].channels[0]!;
       expect(channelSetting).toEqual(expected);
     }
@@ -235,7 +342,7 @@ describe("getArgsFromParams", () => {
       const queryString =
         channelParamToSetting[0][i] + "&" + channelParamToSetting[1][i] + "&" + channelParamToSetting[2][i];
       const params = new URLSearchParams(queryString);
-      const { args } = await getArgsFromParams(params);
+      const { args } = await parseViewerUrlParams(params);
       const channelSettings = args.viewerChannelSettings?.groups[0].channels!;
 
       // Order is not guaranteed, so check if any of the expected settings are present
@@ -248,7 +355,7 @@ describe("getArgsFromParams", () => {
   it("overrides ch settings when per-channel settings are included", async () => {
     const queryString = "?ch=0&lut=1,2&c1=ven:1,lut:4:5";
     const params = new URLSearchParams(queryString);
-    const { args } = await getArgsFromParams(params);
+    const { args } = await parseViewerUrlParams(params);
 
     const groups = args.viewerChannelSettings?.groups[0]!;
     expect(groups.channels).toHaveLength(1);
@@ -262,7 +369,7 @@ describe("getArgsFromParams", () => {
   it("skips missing channel indices", async () => {
     const queryString = "?c0=ven:1&c15=ven:1,lut:4:5";
     const params = new URLSearchParams(queryString);
-    const { args } = await getArgsFromParams(params);
+    const { args } = await parseViewerUrlParams(params);
 
     const groups = args.viewerChannelSettings?.groups[0]!;
     expect(groups.channels).toHaveLength(2);
@@ -280,7 +387,7 @@ describe("getArgsFromParams", () => {
   it("creates empty default data for bad per-channel setting formats", async () => {
     const queryString = "c1=bad&c0=ultrabad:bad&c2=,,,,,,";
     const params = new URLSearchParams(queryString);
-    const { args } = await getArgsFromParams(params);
+    const { args } = await parseViewerUrlParams(params);
     const channelSettings = args.viewerChannelSettings?.groups[0].channels!;
     expect(channelSettings).toHaveLength(3);
     for (let i = 0; i < channelSettings.length; i++) {

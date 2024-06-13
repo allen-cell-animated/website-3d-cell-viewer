@@ -4,6 +4,7 @@ import { clamp } from "lodash";
 import type {
   ChannelState,
   ViewerState,
+  ViewerStateContextType,
   ViewerStateKey,
 } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
@@ -16,8 +17,7 @@ import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepres
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
-// Match colon-separated pairs of alphanumeric strings
-const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+/** Match colon-separated pairs of alphanumeric strings */ const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
 /**
  * Match colon-separated pair of numeric strings in the [0, 1] range.
  * Values will be clamped to the [0, 1] range and sorted.
@@ -246,7 +246,7 @@ export function parseKeyValueList(data: string): Record<string, string> {
  * - The parsed number, clamped to the [min, max] range.
  * - `undefined` if the string is undefined or NaN.
  */
-function parseStringFloat(value: string | undefined, min: number, max: number): number | undefined {
+export function parseStringFloat(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
   }
@@ -254,11 +254,14 @@ function parseStringFloat(value: string | undefined, min: number, max: number): 
   return Number.isNaN(number) ? undefined : clamp(number, min, max);
 }
 
-function parseStringInt(value: string | undefined, min: number, max: number): number | undefined {
+export function parseStringInt(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
   }
   const number = Number.parseInt(value, 10);
+  if (Number.isNaN(number)) {
+    return undefined;
+  }
   return clamp(number, min, max);
 }
 
@@ -269,18 +272,18 @@ function parseStringInt(value: string | undefined, min: number, max: number): nu
  * @param defaultValue Default value to return if the string is not in the enum.
  * @returns A value from the enum or the default value.
  */
-function parseStringEnum<E>(
+export function parseStringEnum<E extends string>(
   value: string | undefined,
   enumValues: Record<string | number | symbol, E>,
   defaultValue: E | undefined
 ): E | undefined {
-  if (value === undefined || !Object(enumValues).values().includes(value)) {
+  if (value === undefined || !Object.values(enumValues).includes(value as E)) {
     return defaultValue;
   }
   return value as E;
 }
 
-function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
+export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
   if (!hexColor || !HEX_COLOR_REGEX.test(hexColor)) {
     return undefined;
   }
@@ -333,6 +336,12 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
 
 //// DATA SERIALIZATION //////////////////////
 
+/**
+ * Parses a ViewerChannelSetting from a JSON object.
+ * @param channelIndex
+ * @param jsonState
+ * @returns
+ */
 export function deserializeViewerChannelSetting(
   channelIndex: number,
   jsonState: ViewerChannelSettingJson
@@ -447,7 +456,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
 export function serializeViewerState(state: ViewerState): ViewerStateParams {
   // TODO: Enforce number formatting for floats/decimals?
   const result: ViewerStateParams = {
-    mask: state.maskAlpha?.toString(),
+    mask: state.maskAlpha.toString(),
     image: state.imageType,
     axes: state.showAxes ? "1" : "0",
     bb: state.showBoundingBox ? "1" : "0",
@@ -473,7 +482,12 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
 
 //// FULL URL PARSING //////////////////////
 
-export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promise<{
+/**
+ * Parses a set of URL search parameters into a set of args/props for the viewer.
+ * @param urlSearchParams
+ * @returns
+ */
+export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
 }> {
@@ -582,6 +596,24 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
   }
 
   return { args, viewerSettings };
+}
+
+/**
+ * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
+ * @param state ViewerStateContext to serialize.
+ */
+export function serializeViewerUrlParams(state: ViewerStateContextType): Params {
+  const params = serializeViewerState(state);
+
+  const channelParams: Record<string, ViewerChannelSettingJson> = state.channelSettings.reduce<
+    Record<string, ViewerChannelSettingJson>
+  >((acc, channelSetting, index): Record<string, ViewerChannelSettingJson> => {
+    const key = `c${index}`;
+    acc[key] = serializeViewerChannelSetting(channelSetting);
+    return acc;
+  }, {} as Record<string, ViewerChannelSettingJson>);
+
+  return { ...params, ...channelParams };
 }
 
 export function isValidUrl(url: string): boolean {
