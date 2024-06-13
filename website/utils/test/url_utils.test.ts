@@ -14,9 +14,10 @@ import {
   urlSearchParamsToParams,
   ViewerStateParams,
 } from "../url_utils";
-import { ViewerChannelSetting } from "../../../src";
-import { ChannelState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
+import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -366,9 +367,50 @@ describe("serializeViewerState", () => {
     t: "0",
   };
 
+  const CUSTOM_VIEWER_SETTINGS: ViewerState = {
+    renderMode: RenderMode.pathTrace,
+    viewMode: ViewMode.xy,
+    imageType: ImageType.fullField,
+    showAxes: true,
+    showBoundingBox: true,
+    backgroundColor: [255, 0, 0],
+    boundingBoxColor: [0, 255, 0],
+    autorotate: true,
+    maskAlpha: 55,
+    brightness: 100,
+    density: 75,
+    levels: [0, 250, 251],
+    interpolationEnabled: false,
+    region: { x: [0, 0.5], y: [0, 1], z: [0, 1] },
+    slice: { x: 0.25, y: 0.75, z: 0.5 },
+    time: 100,
+  };
+  const SERIALIZED_CUSTOM_VIEWER_SETTINGS: ViewerStateParams = {
+    view: "Z",
+    mode: "pathtrace",
+    image: "fov",
+    axes: "1",
+    bb: "1",
+    bgcol: "ff0000",
+    bbcol: "00ff00",
+    rot: "1",
+    mask: "55",
+    bright: "100",
+    dens: "75",
+    lvl: "0,250,251",
+    interp: "0",
+    reg: "0:0.5,0:1,0:1",
+    slice: "0.25,0.75,0.5",
+    t: "100",
+  };
+
   describe("serializeViewerState", () => {
     it("serializes the default viewer settings", () => {
       expect(serializeViewerState(DEFAULT_VIEWER_SETTINGS)).toEqual(SERIALIZED_DEFAULT_VIEWER_SETTINGS);
+    });
+
+    it("serializes custom viewer settings", () => {
+      expect(serializeViewerState(CUSTOM_VIEWER_SETTINGS)).toEqual(SERIALIZED_CUSTOM_VIEWER_SETTINGS);
     });
   });
 
@@ -378,13 +420,18 @@ describe("serializeViewerState", () => {
       expect(deserializeViewerState(params)).toEqual(DEFAULT_VIEWER_SETTINGS);
     });
 
+    it("deserializes custom viewer settings", () => {
+      const params = urlSearchParamsToParams(new URLSearchParams(SERIALIZED_CUSTOM_VIEWER_SETTINGS));
+      expect(deserializeViewerState(params)).toEqual(CUSTOM_VIEWER_SETTINGS);
+    });
+
     it("handles all ViewMode values", () => {
       // throw new Error("Test not implemented");
     });
   });
 });
 
-//// DESERIALIZE STATES /////////////////////////////////
+//// URL parsing /////////////////////////////////
 
 describe("parseViewerUrlParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.

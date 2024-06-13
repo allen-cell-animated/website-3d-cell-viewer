@@ -296,7 +296,7 @@ export function parseStringInt(value: string | undefined, min: number, max: numb
 export function parseStringEnum<E extends string>(
   value: string | undefined,
   enumValues: Record<string | number | symbol, E>,
-  defaultValue: E | undefined
+  defaultValue: E | undefined = undefined
 ): E | undefined {
   if (value === undefined || !Object.values(enumValues).includes(value as E)) {
     return defaultValue;
@@ -418,7 +418,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     region: parseStringRegion(params.reg),
     slice: parseStringSlice(params.slice),
     time: parseStringInt(params.t, 0, Number.POSITIVE_INFINITY),
-    renderMode: parseStringEnum(params.mode, RenderMode, RenderMode.volumetric),
+    renderMode: parseStringEnum(params.mode, RenderMode),
   };
 
   // Handle viewmode, since they use different mappings
