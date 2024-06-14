@@ -628,4 +628,14 @@ describe("parseViewerUrlParams", () => {
     expect(viewerSettings.viewMode).toEqual(ViewMode.yz);
     expect(viewerSettings.maskAlpha).toEqual(30);
   });
+
+  it("returns an empty object when no params are passed in", async () => {
+    const queryString = "";
+    const params = new URLSearchParams(queryString);
+    const { args, viewerSettings } = await parseViewerUrlParams(params);
+    expect(Object.keys(args).length === 0);
+    expect(args).toEqual({});
+    expect(Object.keys(viewerSettings).length === 0);
+    expect(viewerSettings).toEqual({});
+  });
 });
