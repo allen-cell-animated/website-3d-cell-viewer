@@ -1,18 +1,24 @@
 import { Button, Input, Modal, notification } from "antd";
-import React, { ReactElement, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 
 import { FlexRow } from "../LandingPage/utils";
 import { AppDataProps } from "../../types";
 import { ShareAltOutlined } from "@ant-design/icons";
+import {
+  ALL_VIEWER_STATE_KEYS,
+  connectToViewerState,
+} from "../../../src/aics-image-viewer/components/ViewerStateProvider";
+import { ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import { deserializeViewerState, serializeViewerState } from "../../utils/url_utils";
 
-type LoadModalProps = {
+type ShareModalProps = {
   appProps: AppDataProps;
-};
+} & ViewerState;
 
 const ModalContainer = styled.div``;
 
-export default function LoadModal(props: LoadModalProps): ReactElement {
+const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
   const [showModal, setShowModal] = useState(false);
   const modalContainerRef = useRef<HTMLDivElement>(null);
 
@@ -24,18 +30,18 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
 
   // location.pathname will include up to `.../viewer`
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
-  const params: string[] = [];
+  const params: URLSearchParams = new URLSearchParams(serializeViewerState(props) as Record<string, string>);
 
   if (props.appProps.imageUrl) {
     if (props.appProps.imageUrl instanceof Array) {
-      params.push(`url=${props.appProps.imageUrl.map((url) => encodeURIComponent(url)).join(",")}`);
+      params.append("url", props.appProps.imageUrl.map((url) => encodeURIComponent(url)).join(","));
     } else {
-      params.push(`url=${encodeURIComponent(props.appProps.imageUrl)}`);
+      params.append("url", encodeURIComponent(props.appProps.imageUrl));
     }
   }
   // TODO: Include additional app props in `params`
 
-  const shareUrl = params.length > 0 ? `${baseUrl}?${params.join("&")}` : baseUrl;
+  const shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
 
   const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
@@ -75,4 +81,6 @@ export default function LoadModal(props: LoadModalProps): ReactElement {
       </Modal>
     </ModalContainer>
   );
-}
+};
+
+export default connectToViewerState(ShareModal, ALL_VIEWER_STATE_KEYS);

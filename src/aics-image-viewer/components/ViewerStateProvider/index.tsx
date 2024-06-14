@@ -42,7 +42,9 @@ const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-};
+} as const;
+
+export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_SETTINGS) as (keyof ViewerState)[];
 
 // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
 // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
