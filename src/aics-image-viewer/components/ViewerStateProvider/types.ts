@@ -1,5 +1,5 @@
 import { ControlPoint } from "@aics/volume-viewer";
-import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
+import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
 
