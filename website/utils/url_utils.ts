@@ -1,4 +1,5 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
+import { clamp } from "lodash";
 
 import type { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
@@ -7,10 +8,22 @@ import {
   ViewerChannelSetting,
   ViewerChannelSettings,
 } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
+import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
-// Match colon-separated pairs of alphanumeric strings
+/** Match colon-separated pairs of alphanumeric strings */
 const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+/**
+ * Match colon-separated pair of numeric strings in the [0, 1] range.
+ * Values will be clamped to the [0, 1] range and sorted.
+ */
+const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
+/**
+ * Matches a sequence of three comma-separated min:max number pairs, representing
+ * the x, y, and z axes. Values will be clamped to the [0, 1] range and sorted.
+ */
+const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
 export type ViewerChannelSettingJson = {
@@ -124,6 +137,8 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
   return urls;
 };
 
+//// DATA PARSING //////////////////////
+
 /**
  * Parse a string list of comma-separated key:value pairs into
  * a key-value object.
@@ -149,13 +164,137 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
-function parseFloat(value: string | undefined): number | undefined {
+/**
+ * Parses a string to a float and clamps the result to the [min, max] range.
+ * Returns `undefined` if the string is undefined or NaN.
+ * @param value String to parse as a float. Will be parsed with `Number.parseFloat`.
+ * @param min Minimum value, inclusive.
+ * @param max Maximum value, inclusive.
+ * @returns
+ * - The parsed number, clamped to the [min, max] range.
+ * - `undefined` if the string is undefined or NaN.
+ */
+export function parseStringFloat(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
   }
   const number = Number.parseFloat(value);
-  return Number.isNaN(number) ? undefined : number;
+  return Number.isNaN(number) ? undefined : clamp(number, min, max);
 }
+
+/**
+ * Parses a string to an integer and clamps the result to the [min, max] range.
+ * @param value String to parse as a float. Assumes base 10, parses with `Number.parseInt(value, 10)`.
+ * @param min Minimum value, inclusive.
+ * @param max Maximum value, inclusive.
+ * @returns
+ * - The parsed number, clamped to the [min, max] range.
+ * - `undefined` if the string is undefined or NaN.
+ */
+export function parseStringInt(value: string | undefined, min: number, max: number): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const number = Number.parseInt(value, 10);
+  if (Number.isNaN(number)) {
+    return undefined;
+  }
+  return clamp(number, min, max);
+}
+
+/**
+ * Parses a string to an enum value; if the string is not in the enum, returns the default value.
+ * @param value String to parse.
+ * @param enumValues Enum. Cannot be a `const enum`, as these are removed at compile time.
+ * @param defaultValue Default value to return if the string is not in the enum.
+ * @returns A value from the enum or the default value. Note that the return type includes `undefined`
+ * if the `defaultValue` is `undefined`.
+ */
+export function parseStringEnum<E extends string, T extends E | undefined>(
+  value: string | undefined,
+  enumValues: Record<string | number | symbol, E>,
+  defaultValue: T = undefined as T
+): T {
+  if (value === undefined || !Object.values(enumValues).includes(value as E)) {
+    return defaultValue;
+  }
+  return value as T;
+}
+
+/**
+ * Parses a string boolean value ("1" as true, "0" as false), and returns `undefined` if the value is `undefined`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseStringBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return value === "1";
+}
+
+export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
+  if (!hexColor || !HEX_COLOR_REGEX.test(hexColor)) {
+    return undefined;
+  }
+  const r = Number.parseInt(hexColor.slice(0, 2), 16);
+  const g = Number.parseInt(hexColor.slice(2, 4), 16);
+  const b = Number.parseInt(hexColor.slice(4, 6), 16);
+  return [r, g, b];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function colorArrayToHex(color: ColorArray): string {
+  return color
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("")
+    .toLowerCase();
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function removeUndefinedProperties<T>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
+  if (!region || !SLICE_REGEX.test(region)) {
+    return undefined;
+  }
+  const [x, y, z] = region.split(",").map((val) => parseStringFloat(val, 0, 1));
+  if (x === undefined || y === undefined || z === undefined) {
+    return undefined;
+  }
+  return { x, y, z };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseStringRegion(region: string | undefined): PerAxis<[number, number]> | undefined {
+  if (!region || !REGION_REGEX.test(region)) {
+    return undefined;
+  }
+  const [x, y, z] = region.split(",").map((axis): [number, number] | undefined => {
+    // each is a min/max pair
+    const [min, max] = axis.split(":").map((val) => parseStringFloat(val, 0, 1));
+    if (min === undefined || max === undefined) {
+      return undefined;
+    }
+    // Ensure sorted order
+    return min < max ? [min, max] : [max, min];
+  });
+  // Check for undefined values
+  if (x === undefined || y === undefined || z === undefined) {
+    return undefined;
+  }
+  return { x, y, z };
+}
+
+//// DATA SERIALIZATION //////////////////////
 
 export function deserializeViewerChannelSetting(
   channelIndex: number,
@@ -166,10 +305,10 @@ export function deserializeViewerChannelSetting(
     match: channelIndex,
     enabled: jsonState.ven === "1",
     surfaceEnabled: jsonState.sen === "1",
-    isovalue: parseFloat(jsonState.isv),
-    surfaceOpacity: parseFloat(jsonState.isa),
+    isovalue: parseStringFloat(jsonState.isv, 0, 255),
+    surfaceOpacity: parseStringFloat(jsonState.isa, 0, 1),
     colorizeEnabled: jsonState.clz === "1",
-    colorizeAlpha: parseFloat(jsonState.cza),
+    colorizeAlpha: parseStringFloat(jsonState.cza, 0, 1),
   };
   if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
     result.color = jsonState.col;

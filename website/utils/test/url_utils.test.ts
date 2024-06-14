@@ -1,9 +1,14 @@
 import { describe, expect, it } from "@jest/globals";
+
 import {
   ViewerChannelSettingJson,
   deserializeViewerChannelSetting,
   getArgsFromParams,
   parseKeyValueList,
+  parseHexColorAsColorArray,
+  parseStringEnum,
+  parseStringFloat,
+  parseStringInt,
 } from "../url_utils";
 import { ViewerChannelSetting } from "../../../src";
 
@@ -17,6 +22,8 @@ const defaultSettings: ViewerChannelSetting = {
   colorizeEnabled: false,
   colorizeAlpha: undefined,
 };
+
+//// VALUE PARSING ///////////////////////////////////////
 
 describe("parseKeyValueList", () => {
   it("returns expected key value pairs", () => {
@@ -62,6 +69,97 @@ describe("parseKeyValueList", () => {
     const data = " key1 : value1 , key2 : value2 , key3: value 3";
     const result = parseKeyValueList(data);
     expect(result).toEqual({ key1: "value1", key2: "value2", key3: "value 3" });
+  });
+});
+
+describe("parseHexColorAsColorArray", () => {
+  it("parses hex values", () => {
+    expect(parseHexColorAsColorArray("000000")).toEqual([0, 0, 0]);
+    expect(parseHexColorAsColorArray("FFFFFF")).toEqual([255, 255, 255]);
+    expect(parseHexColorAsColorArray("ff0000")).toEqual([255, 0, 0]);
+    expect(parseHexColorAsColorArray("123456")).toEqual([18, 52, 86]);
+    expect(parseHexColorAsColorArray("7890ab")).toEqual([120, 144, 171]);
+    expect(parseHexColorAsColorArray("cdefef")).toEqual([205, 239, 239]);
+    expect(parseHexColorAsColorArray("ABCDEF")).toEqual([171, 205, 239]);
+  });
+
+  it("ignores unrecognized formats", () => {
+    expect(parseHexColorAsColorArray("f")).toBeUndefined();
+    expect(parseHexColorAsColorArray("fff")).toBeUndefined();
+    expect(parseHexColorAsColorArray("fffffff")).toBeUndefined();
+    expect(parseHexColorAsColorArray("hjklmn")).toBeUndefined();
+  });
+});
+
+describe("parseStringEnum", () => {
+  enum TestEnum {
+    SOME_VALUE = "some_value",
+    ANOTHER_VALUE = "another_value",
+  }
+
+  it("recognizes enum values", () => {
+    expect(parseStringEnum("some_value", TestEnum)).toEqual(TestEnum.SOME_VALUE);
+    expect(parseStringEnum("another_value", TestEnum)).toEqual(TestEnum.ANOTHER_VALUE);
+  });
+
+  it("returns default values for unrecognized enum values", () => {
+    expect(parseStringEnum("unexpected", TestEnum, undefined)).toEqual(undefined);
+    expect(parseStringEnum("unexpected", TestEnum, TestEnum.SOME_VALUE)).toEqual(TestEnum.SOME_VALUE);
+  });
+});
+
+describe("parseStringInt", () => {
+  it("parses int and undefined values", () => {
+    expect(parseStringInt("0", 0, 1000)).toEqual(0);
+    expect(parseStringInt("1", 0, 1000)).toEqual(1);
+    expect(parseStringInt("100", 0, 1000)).toEqual(100);
+    expect(parseStringInt("255", 0, 1000)).toEqual(255);
+    expect(parseStringInt("-1", -1000, 1000)).toEqual(-1);
+  });
+
+  it("returns undefined for undefined and NaN values", () => {
+    expect(parseStringInt("bad", -1000, 1000)).toEqual(undefined);
+    expect(parseStringInt("NaN", -1000, 1000)).toEqual(undefined);
+    expect(parseStringInt(undefined, -1000, 1000)).toEqual(undefined);
+  });
+
+  it("casts float values to integers", () => {
+    expect(parseStringInt("0.5", 0, 1000)).toEqual(0);
+    expect(parseStringInt("99.5", 0, 1000)).toEqual(99);
+    expect(parseStringInt("-10.5", -1000, 1000)).toEqual(-10);
+  });
+
+  it("applies clamping", () => {
+    expect(parseStringInt("0", 0, 255)).toEqual(0);
+    expect(parseStringInt("-1", 0, 255)).toEqual(0);
+    expect(parseStringInt("128", 0, 255)).toEqual(128);
+    expect(parseStringInt("255", 0, 255)).toEqual(255);
+    expect(parseStringInt("256", 0, 255)).toEqual(255);
+  });
+});
+
+describe("parseStringFloat", () => {
+  it("parses strings to float values", () => {
+    expect(parseStringFloat("0", -1000, 1000)).toEqual(0);
+    expect(parseStringFloat("1.0", -1000, 1000)).toEqual(1.0);
+    expect(parseStringFloat("0.5", -1000, 1000)).toEqual(0.5);
+    expect(parseStringFloat("128.5", -1000, 1000)).toEqual(128.5);
+    expect(parseStringFloat("495.344", -1000, 1000)).toEqual(495.344);
+    expect(parseStringFloat("-1", -1000, 1000)).toEqual(-1);
+  });
+
+  it("returns undefined for NaN or undefined values", () => {
+    expect(parseStringFloat("bad", -1000, 1000)).toEqual(undefined);
+    expect(parseStringFloat("NaN", -1000, 1000)).toEqual(undefined);
+    expect(parseStringFloat(undefined, -1000, 1000)).toEqual(undefined);
+  });
+
+  it("applies clamping", () => {
+    expect(parseStringFloat("0.5", 0, 1.0)).toEqual(0.5);
+    expect(parseStringFloat("1.0", 0, 1.0)).toEqual(1.0);
+    expect(parseStringFloat("1.1", 0, 1.0)).toEqual(1.0);
+    expect(parseStringFloat("0", 0, 1.0)).toEqual(0);
+    expect(parseStringFloat("-0.1", 0, 1.0)).toEqual(0);
   });
 });
 
