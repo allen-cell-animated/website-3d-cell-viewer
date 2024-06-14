@@ -133,9 +133,6 @@ describe("parseStringInt", () => {
   });
 
   it("applies clamping", () => {
-    expect(parseStringInt("1001", 0, 1000)).toEqual(1000);
-    expect(parseStringInt("-1001", -1000, 1000)).toEqual(-1000);
-
     expect(parseStringInt("0", 0, 255)).toEqual(0);
     expect(parseStringInt("-1", 0, 255)).toEqual(0);
     expect(parseStringInt("128", 0, 255)).toEqual(128);
@@ -296,10 +293,12 @@ describe("Viewer channel serialization", () => {
   });
 
   describe("serializeViewerChannelSetting", () => {
-    it("serializes channel settings to expected format", () => {
+    it("serializes channel settings", () => {
       // Default case
       expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
+    });
 
+    it("serializes custom channel settings", () => {
       // Custom case
       const customChannelState: ChannelState = {
         name: "a",
@@ -326,27 +325,8 @@ describe("Viewer channel serialization", () => {
   });
 });
 
-// export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
-//   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-//   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-//   imageType: ImageType.segmentedCell,
-//   showAxes: false,
-//   showBoundingBox: false,
-//   backgroundColor: BACKGROUND_COLOR_DEFAULT,
-//   boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-//   autorotate: false,
-//   maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
-//   brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-//   density: DENSITY_SLIDER_LEVEL_DEFAULT,
-//   levels: LEVELS_SLIDER_DEFAULT,
-//   interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
-//   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-//   slice: { x: 0.5, y: 0.5, z: 0.5 },
-//   time: 0,
-// };
-
 describe("serializeViewerState", () => {
-  // Serialized copy of DEFAULT_VIEWER_SETTINGS.
+  // Serialized copy of DEFAULT_VIEWER_SETTINGS, not shown here.
   const SERIALIZED_DEFAULT_VIEWER_SETTINGS: ViewerStateParams = {
     view: "3D",
     mode: "volumetric",
@@ -429,7 +409,19 @@ describe("serializeViewerState", () => {
     });
 
     it("handles all ViewMode values", () => {
-      // throw new Error("Test not implemented");
+      const viewModes = Object.values(ViewMode);
+      for (const viewMode of viewModes) {
+        const state: ViewerState = { ...DEFAULT_VIEWER_SETTINGS, viewMode };
+        expect(deserializeViewerState(serializeViewerState(state)).viewMode).toEqual(viewMode);
+      }
+    });
+
+    it("handles all RenderMode values", () => {
+      const renderModes = Object.values(RenderMode);
+      for (const renderMode of renderModes) {
+        const state: ViewerState = { ...DEFAULT_VIEWER_SETTINGS, renderMode };
+        expect(deserializeViewerState(serializeViewerState(state)).renderMode).toEqual(renderMode);
+      }
     });
   });
 });

@@ -152,20 +152,48 @@ type DeprecatedParams = {
 type Params = ViewerStateParams & DataParams & DeprecatedParams & ChannelParams;
 const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
-// /**
-//  * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
-//  * Non-matching keys are discarded.
-//  * @param searchParams Input URL search parameters.
-//  * @returns a dictionary object matching the type of `Params`.
-//  */
-// export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
-//   const result: Params = {};
-//   for (const [key, value] of searchParams.entries()) {
-//     if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
-//       result[key] = value;
-//     }
-//   }
-//   return result;
+// TODO: This is somewhat cleaner than the old types, but violates DRY. Is there a better way to do this?
+const allowedParamKeys = [
+  "url",
+  "dataset",
+  "id",
+  "ch",
+  "luts",
+  "colors",
+  "view",
+  "mode",
+  "mask",
+  "image",
+  "axes",
+  "bb",
+  "bbcol",
+  "bgcol",
+  "rot",
+  "bright",
+  "dens",
+  "lvl",
+  "interp",
+  "reg",
+  "slice",
+  "t",
+];
+const isParamKey = (key: string): key is keyof ViewerStateParams => key in allowedParamKeys;
+
+/**
+ * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
+ * Non-matching keys are discarded.
+ * @param searchParams Input URL search parameters.
+ * @returns a dictionary object matching the type of `Params`.
+ */
+export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
+  const result: Params = {};
+  for (const [key, value] of searchParams.entries()) {
+    if (isParamKey(key) || isChannelKey(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
 
 const decodeURL = (url: string): string => {
   const decodedUrl = decodeURIComponent(url);
@@ -265,6 +293,13 @@ export function parseStringEnum<E extends string, T extends E | undefined>(
     return defaultValue;
   }
   return value as T;
+}
+
+function parseStringBoolean(value: string | undefined): boolean | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return value === "1";
 }
 
 export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
@@ -368,16 +403,16 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
 export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
   const result: Partial<ViewerState> = {
     maskAlpha: parseStringInt(params.mask, 0, 100),
-    imageType: parseStringEnum(params.image, ImageType, ImageType.segmentedCell),
-    showAxes: params.axes === "1",
-    showBoundingBox: params.bb === "1",
+    imageType: parseStringEnum(params.image, ImageType),
+    showAxes: parseStringBoolean(params.axes),
+    showBoundingBox: parseStringBoolean(params.bb),
     boundingBoxColor: parseHexColorAsColorArray(params.bbcol),
     backgroundColor: parseHexColorAsColorArray(params.bgcol),
-    autorotate: params.rot === "1",
+    autorotate: parseStringBoolean(params.rot),
     brightness: parseStringFloat(params.bright, 0, 100),
     density: parseStringFloat(params.dens, 0, 100),
     levels: params.lvl?.split(",").map((val) => parseStringFloat(val, 0, 255)) as [number, number, number],
-    interpolationEnabled: params.interp === "1",
+    interpolationEnabled: parseStringBoolean(params.interp),
     region: parseStringRegion(params.reg),
     slice: parseStringSlice(params.slice),
     time: parseStringInt(params.t, 0, Number.POSITIVE_INFINITY),
@@ -484,7 +519,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
 }> {
-  const params = urlSearchParams as unknown as Params;
+  const params = urlSearchParamsToParams(urlSearchParams);
   let args: Partial<AppProps> = {};
   const viewerSettings: Partial<ViewerState> = {};
 
