@@ -34,7 +34,7 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 /**
  * The serialized form of a ViewerChannelSetting, as a dictionary object.
  */
-export type ViewerChannelSettingParams = {
+export class ViewerChannelSettingParams {
   /** Color, as a 6-digit hex color.  */
   col?: string;
   /** Colorize. "1" is enabled. Disabled by default. */
@@ -68,7 +68,7 @@ export type ViewerChannelSettingParams = {
   sen?: "1" | "0";
   /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
   isv?: string;
-};
+}
 /**
  * Channels, matching the pattern `c0`, `c1`, etc. corresponding to the index of the channel being configured.
  * The channel parameter should have a value that is a comma-separated list of `key:value` pairs, with keys
@@ -77,7 +77,7 @@ export type ViewerChannelSettingParams = {
 type ChannelParams = { [_ in `c${number}`]?: string };
 
 /** Serialized version of `ViewerState`. */
-export type ViewerStateParams = {
+export class ViewerStateParams {
   /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
   view?: string;
   /**
@@ -121,10 +121,10 @@ export type ViewerStateParams = {
   slice?: string;
   /** Frame number, for time-series volumes. 0 by default. */
   t?: string;
-};
+}
 
 /** URL parameters that define data sources when loading volumes. */
-type DataParams = {
+class DataParams {
   /**
    * One or more volume URLs to load. If multiple URLs are provided, they should
    * be separated by commas.
@@ -138,44 +138,24 @@ type DataParams = {
    * The ID of a cell within the loaded dataset. Used with `dataset`.
    */
   id?: string;
-};
+}
 
-type DeprecatedParams = {
+class DeprecatedParams {
   /** Deprecated query parameter for channel settings. */
   ch?: string;
   /** Deprecated query parameter for LUT settings. */
   luts?: string;
   /** Deprecated query parameter for channel colors. */
   colors?: string;
-};
+}
 
 type Params = ViewerStateParams & DataParams & DeprecatedParams & ChannelParams;
 
-// TODO: This is somewhat cleaner than the old types, but violates DRY. Is there a better way to do this?
-const allowedParamKeys = [
-  "url",
-  "dataset",
-  "id",
-  "ch",
-  "luts",
-  "colors",
-  "view",
-  "mode",
-  "mask",
-  "image",
-  "axes",
-  "bb",
-  "bbcol",
-  "bgcol",
-  "rot",
-  "bright",
-  "dens",
-  "lvl",
-  "interp",
-  "reg",
-  "slice",
-  "t",
-] as const;
+const allowedParamKeys: Array<keyof Params> = [
+  ...Object.keys(new ViewerStateParams()),
+  ...Object.keys(new DataParams()),
+  ...Object.keys(new DeprecatedParams()),
+] as Array<keyof Params>;
 const isParamKey = (key: string): key is keyof ViewerStateParams => key in allowedParamKeys;
 const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
