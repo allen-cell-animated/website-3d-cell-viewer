@@ -614,4 +614,15 @@ describe("parseViewerUrlParams", () => {
     expect(channelSettings.channels[2].enabled).toEqual(true);
     expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
   });
+
+  // Test existing viewer settings as a regression test
+  // TODO: Replace this with a full integration test, testing serializing + deserializing all viewer state
+  // when URLs are fully implemented.
+  it("parses viewer settings", async () => {
+    const queryString = "mask=30&view=X";
+    const params = new URLSearchParams(queryString);
+    const { viewerSettings } = await parseViewerUrlParams(params);
+    expect(viewerSettings.viewMode).toEqual(ViewMode.yz);
+    expect(viewerSettings.maskAlpha).toEqual(30);
+  });
 });
