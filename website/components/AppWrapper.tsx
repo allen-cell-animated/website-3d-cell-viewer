@@ -2,10 +2,10 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FlexRowAlignCenter } from "./LandingPage/utils";
-import LoadModal from "./LoadModal";
+import LoadModal from "./Modals/LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
-import ShareModal from "./ShareModal";
+import ShareModal from "./Modals/ShareModal";
 import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";

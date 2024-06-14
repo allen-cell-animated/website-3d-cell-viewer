@@ -4,11 +4,11 @@ import Fuse from "fuse.js";
 import React, { ReactElement, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
 
-import MiddleTruncatedText from "./MiddleTruncatedText";
-import { FlexRow } from "./LandingPage/utils";
-import { AppDataProps } from "../types";
-import { RecentDataUrl, useRecentDataUrls } from "../utils/react_utils";
-import { isValidUrl } from "../utils/url_utils";
+import MiddleTruncatedText from "../MiddleTruncatedText";
+import { FlexRow } from "../LandingPage/utils";
+import { AppDataProps } from "../../types";
+import { RecentDataUrl, useRecentDataUrls } from "../../utils/react_utils";
+import { isValidUrl } from "../../utils/url_utils";
 
 const MAX_RECENT_URLS_TO_DISPLAY = 20;
 

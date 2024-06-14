@@ -2,8 +2,8 @@ import { Button, Input, Modal, notification } from "antd";
 import React, { ReactElement, useState, useRef } from "react";
 import styled from "styled-components";
 
-import { FlexRow } from "./LandingPage/utils";
-import { AppDataProps } from "../types";
+import { FlexRow } from "../LandingPage/utils";
+import { AppDataProps } from "../../types";
 import { ShareAltOutlined } from "@ant-design/icons";
 
 type LoadModalProps = {
