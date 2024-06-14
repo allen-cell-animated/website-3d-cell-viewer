@@ -17,7 +17,8 @@ import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepres
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
-/** Match colon-separated pairs of alphanumeric strings */ const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+/** Match colon-separated pairs of alphanumeric strings */
+const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
 /**
  * Match colon-separated pair of numeric strings in the [0, 1] range.
  * Values will be clamped to the [0, 1] range and sorted.
@@ -30,7 +31,10 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
-export type ViewerChannelSettingJson = {
+/**
+ * The serialized form of a ViewerChannelSetting, as a dictionary object.
+ */
+export type ViewerChannelSettingParams = {
   /** Color, as a 6-digit hex color.  */
   col?: string;
   /** Colorize. "1" is enabled. Disabled by default. */
@@ -65,7 +69,14 @@ export type ViewerChannelSettingJson = {
   /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
   isv?: string;
 };
+/**
+ * Channels, matching the pattern `c0`, `c1`, etc. corresponding to the index of the channel being configured.
+ * The channel parameter should have a value that is a comma-separated list of `key:value` pairs, with keys
+ * defined in `ViewerChannelSettingJson`.
+ */
+type ChannelParams = { [_ in `c${number}`]?: string };
 
+/** Serialized version of `ViewerState`. */
 export type ViewerStateParams = {
   /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
   view?: string;
@@ -112,30 +123,7 @@ export type ViewerStateParams = {
   t?: string;
 };
 
-/**
- * Maps from ViewerState to URL query parameter keys. This allows for data mapping, but also
- * ensures that the URL query parameter keys are consistent with the ViewerState keys.
- */
-const ViewerStateToParamKey: Record<ViewerStateKey, keyof ViewerStateParams> = {
-  viewMode: "view",
-  renderMode: "mode",
-  imageType: "image",
-  showAxes: "axes",
-  showBoundingBox: "bb",
-  boundingBoxColor: "bbcol",
-  backgroundColor: "bgcol",
-  autorotate: "rot",
-  maskAlpha: "mask",
-  brightness: "bright",
-  density: "dens",
-  levels: "lvl",
-  interpolationEnabled: "interp",
-  region: "reg",
-  slice: "slice",
-  time: "t",
-} as const;
-
-/** Parameters that define loaded datasets. */
+/** URL parameters that define data sources when loading volumes. */
 type DataParams = {
   /**
    * One or more volume URLs to load. If multiple URLs are provided, they should
@@ -152,58 +140,32 @@ type DataParams = {
   id?: string;
 };
 
-// Copy of keys for above params. Both types are defined so that spec comments can be provided.
-// TODO: Remove redundant `baseParamKeys` type.
-const baseParamKeys = [
-  "view",
-  "mode",
-  "mask",
-  "image",
-  "axes",
-  "bb",
-  "bbcol",
-  "bgcol",
-  "rot",
-  "bright",
-  "dens",
-  "lvl",
-  "interp",
-  "reg",
-  "slice",
-  "t",
-] as const;
-const dataParamKeys = ["url", "dataset", "id"] as const;
-const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
+type DeprecatedParams = {
+  /** Deprecated query parameter for channel settings. */
+  ch?: string;
+  /** Deprecated query parameter for LUT settings. */
+  luts?: string;
+  /** Deprecated query parameter for channel colors. */
+  colors?: string;
+};
 
-type BaseParamKeys = (typeof baseParamKeys)[number];
-type DataParamKeys = (typeof dataParamKeys)[number];
-type ChannelKey = `c${number}`;
-type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
-type AllParamKeys = DataParamKeys | BaseParamKeys | DeprecatedParamKeys | ChannelKey;
+type Params = ViewerStateParams & DataParams & DeprecatedParams & ChannelParams;
+const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
-type Params = ViewerStateParams & DataParams & { [_ in AllParamKeys]?: string };
-
-const isParamKey = (key: string): key is BaseParamKeys =>
-  baseParamKeys.includes(key as BaseParamKeys) || dataParamKeys.includes(key as DataParamKeys);
-const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
-  deprecatedParamKeys.includes(key as DeprecatedParamKeys);
-const isChannelKey = (key: string): key is ChannelKey => CHANNEL_STATE_KEY_REGEX.test(key);
-
-/**
- * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
- * Non-matching keys are discarded.
- * @param searchParams Input URL search parameters.
- * @returns a dictionary object matching the type of `Params`.
- */
-export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
-  const result: Params = {};
-  for (const [key, value] of searchParams.entries()) {
-    if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
-      result[key] = value;
-    }
-  }
-  return result;
-}
+// /**
+//  * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
+//  * Non-matching keys are discarded.
+//  * @param searchParams Input URL search parameters.
+//  * @returns a dictionary object matching the type of `Params`.
+//  */
+// export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
+//   const result: Params = {};
+//   for (const [key, value] of searchParams.entries()) {
+//     if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
+//       result[key] = value;
+//     }
+//   }
+//   return result;
 
 const decodeURL = (url: string): string => {
   const decodedUrl = decodeURIComponent(url);
@@ -291,17 +253,18 @@ export function parseStringInt(value: string | undefined, min: number, max: numb
  * @param value String to parse.
  * @param enumValues Enum. Cannot be a `const enum`, as these are removed at compile time.
  * @param defaultValue Default value to return if the string is not in the enum.
- * @returns A value from the enum or the default value.
+ * @returns A value from the enum or the default value. Note that the return type includes `undefined`
+ * if the `defaultValue` is `undefined`.
  */
-export function parseStringEnum<E extends string>(
+export function parseStringEnum<E extends string, T extends E | undefined>(
   value: string | undefined,
   enumValues: Record<string | number | symbol, E>,
-  defaultValue: E | undefined = undefined
-): E | undefined {
+  defaultValue: T = undefined as T
+): T {
   if (value === undefined || !Object.values(enumValues).includes(value as E)) {
     return defaultValue;
   }
-  return value as E;
+  return value as T;
 }
 
 export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
@@ -365,7 +328,7 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
  */
 export function deserializeViewerChannelSetting(
   channelIndex: number,
-  jsonState: ViewerChannelSettingJson
+  jsonState: ViewerChannelSettingParams
 ): ViewerChannelSetting {
   // Missing/undefined fields should be handled downstream.
   const result: ViewerChannelSetting = {
@@ -387,7 +350,7 @@ export function deserializeViewerChannelSetting(
   return result;
 }
 
-export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingJson {
+export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingParams {
   return removeUndefinedProperties({
     ven: channelSetting.volumeEnabled ? "1" : "0",
     sen: channelSetting.isosurfaceEnabled ? "1" : "0",
@@ -478,6 +441,7 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
   return result;
 }
 
+//// FULL URL PARSING //////////////////////
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
   const args: Partial<AppProps> = {};
@@ -511,8 +475,6 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   return args;
 }
 
-//// FULL URL PARSING //////////////////////
-
 /**
  * Parses a set of URL search parameters into a set of args/props for the viewer.
  * @param urlSearchParams
@@ -522,7 +484,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
 }> {
-  const params = urlSearchParamsToParams(urlSearchParams);
+  const params = urlSearchParams as unknown as Params;
   let args: Partial<AppProps> = {};
   const viewerSettings: Partial<ViewerState> = {};
 
@@ -573,7 +535,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
       const channelIndex = Number.parseInt(key.slice(1), 10);
       try {
         const channelData = parseKeyValueList(params[key]!);
-        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
+        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingParams);
         channelIndexToSettings.set(channelIndex, channelSetting);
       } catch (e) {
         console.warn(
@@ -634,15 +596,16 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * @param state ViewerStateContext to serialize.
  */
 export function serializeViewerUrlParams(state: ViewerStateContextType): Params {
+  // TODO: Unit tests for this function
   const params = serializeViewerState(state);
 
-  const channelParams: Record<string, ViewerChannelSettingJson> = state.channelSettings.reduce<
-    Record<string, ViewerChannelSettingJson>
-  >((acc, channelSetting, index): Record<string, ViewerChannelSettingJson> => {
+  const channelParams: Record<string, ViewerChannelSettingParams> = state.channelSettings.reduce<
+    Record<string, ViewerChannelSettingParams>
+  >((acc, channelSetting, index): Record<string, ViewerChannelSettingParams> => {
     const key = `c${index}`;
     acc[key] = serializeViewerChannelSetting(channelSetting);
     return acc;
-  }, {} as Record<string, ViewerChannelSettingJson>);
+  }, {} as Record<string, ViewerChannelSettingParams>);
 
   return { ...params, ...channelParams };
 }

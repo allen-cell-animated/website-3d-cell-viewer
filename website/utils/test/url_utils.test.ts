@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 import {
-  ViewerChannelSettingJson,
+  ViewerChannelSettingParams,
   deserializeViewerChannelSetting,
   parseViewerUrlParams,
   parseKeyValueList,
@@ -11,7 +11,6 @@ import {
   serializeViewerChannelSetting,
   serializeViewerState,
   deserializeViewerState,
-  urlSearchParamsToParams,
   ViewerStateParams,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
@@ -104,8 +103,8 @@ describe("parseStringEnum", () => {
   }
 
   it("recognizes enum values", () => {
-    expect(parseStringEnum("some_value", TestEnum, undefined)).toEqual(TestEnum.SOME_VALUE);
-    expect(parseStringEnum("another_value", TestEnum, undefined)).toEqual(TestEnum.ANOTHER_VALUE);
+    expect(parseStringEnum("some_value", TestEnum)).toEqual(TestEnum.SOME_VALUE);
+    expect(parseStringEnum("another_value", TestEnum)).toEqual(TestEnum.ANOTHER_VALUE);
   });
 
   it("returns default values for unrecognized enum values", () => {
@@ -184,7 +183,7 @@ describe("Viewer channel serialization", () => {
     colorizeAlpha: 0.5,
     controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
   };
-  const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingJson = {
+  const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingParams = {
     col: "ff0000",
     ven: "1",
     sen: "1",
@@ -211,7 +210,7 @@ describe("Viewer channel serialization", () => {
     });
 
     it("ignores unexpected keys", () => {
-      const data = { badKey: "badValue", ven: "1", sen: "1" } as ViewerChannelSettingJson;
+      const data = { badKey: "badValue", ven: "1", sen: "1" } as ViewerChannelSettingParams;
       const result = deserializeViewerChannelSetting(0, data);
       expect(result).toEqual({ ...defaultSettings, enabled: true, surfaceEnabled: true });
     });
@@ -226,7 +225,7 @@ describe("Viewer channel serialization", () => {
         sen: "1",
         isv: "128",
         lut: "0:255",
-      } as ViewerChannelSettingJson;
+      } as ViewerChannelSettingParams;
       expect(deserializeViewerChannelSetting(0, data)).toEqual({
         match: 0,
         color: "FF0000",
@@ -254,7 +253,7 @@ describe("Viewer channel serialization", () => {
         ["p10: p90", ["p10", "p90"]], // handle spaces
       ];
       for (const [encodedLut, decodedLut] of luts) {
-        const data = { lut: encodedLut } as ViewerChannelSettingJson;
+        const data = { lut: encodedLut } as ViewerChannelSettingParams;
         const result = deserializeViewerChannelSetting(0, data);
         expect(result.lut).toEqual(decodedLut);
       }
@@ -263,7 +262,7 @@ describe("Viewer channel serialization", () => {
     it("ignores unexpected lut formats", () => {
       const luts = ["!:0", "0:9:93", "255", ""];
       for (const lut of luts) {
-        const data = { lut } as ViewerChannelSettingJson;
+        const data = { lut } as ViewerChannelSettingParams;
         const result = deserializeViewerChannelSetting(0, data);
         expect(result.lut).toBeUndefined();
       }
@@ -272,7 +271,7 @@ describe("Viewer channel serialization", () => {
     it("handles hex color formats", () => {
       const colors = ["000000", "FFFFFF", "ffffff", "012345", "6789AB", "CDEF01", "abcdef"];
       for (const color of colors) {
-        const data = { col: color } as ViewerChannelSettingJson;
+        const data = { col: color } as ViewerChannelSettingParams;
         const result = deserializeViewerChannelSetting(0, data);
         expect(result.color).toEqual(color);
       }
@@ -281,14 +280,14 @@ describe("Viewer channel serialization", () => {
     it("ignores bad color formats", () => {
       const badColors = ["f", "ff00", "red", "rgb(255,0,0)"];
       for (const color of badColors) {
-        const data = { col: color } as ViewerChannelSettingJson;
+        const data = { col: color } as ViewerChannelSettingParams;
         const result = deserializeViewerChannelSetting(0, data);
         expect(result.color).toBeUndefined();
       }
     });
 
     it("ignores bad float data", () => {
-      const data = { cza: "NaN", isa: "bad", isv: "f8" } as ViewerChannelSettingJson;
+      const data = { cza: "NaN", isa: "bad", isv: "f8" } as ViewerChannelSettingParams;
       const result = deserializeViewerChannelSetting(0, data);
       expect(result.colorizeAlpha).toBeUndefined();
       expect(result.surfaceOpacity).toBeUndefined();
@@ -313,7 +312,7 @@ describe("Viewer channel serialization", () => {
         colorizeAlpha: 1.0,
         controlPoints: [],
       };
-      const serializedCustomChannelState: ViewerChannelSettingJson = {
+      const serializedCustomChannelState: ViewerChannelSettingParams = {
         col: "03ff9d",
         ven: "0",
         sen: "0",
@@ -415,13 +414,17 @@ describe("serializeViewerState", () => {
   });
 
   describe("deserializeViewerState", () => {
+    it("returns an empty object for empty input", () => {
+      expect(deserializeViewerState({})).toEqual({});
+    });
+
     it("deserializes the default viewer settings", () => {
-      const params = urlSearchParamsToParams(new URLSearchParams(SERIALIZED_DEFAULT_VIEWER_SETTINGS));
+      const params = SERIALIZED_DEFAULT_VIEWER_SETTINGS;
       expect(deserializeViewerState(params)).toEqual(DEFAULT_VIEWER_SETTINGS);
     });
 
     it("deserializes custom viewer settings", () => {
-      const params = urlSearchParamsToParams(new URLSearchParams(SERIALIZED_CUSTOM_VIEWER_SETTINGS));
+      const params = SERIALIZED_CUSTOM_VIEWER_SETTINGS;
       expect(deserializeViewerState(params)).toEqual(CUSTOM_VIEWER_SETTINGS);
     });
 
