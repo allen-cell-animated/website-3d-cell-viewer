@@ -442,7 +442,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
 }
 
 export function serializeViewerState(state: ViewerState): ViewerStateParams {
-  // TODO: Enforce number formatting for floats/decimals?
+  // TODO: Enforce decimal places for floats/decimals?
   const result: ViewerStateParams = {
     mode: state.renderMode,
     mask: state.maskAlpha.toString(),

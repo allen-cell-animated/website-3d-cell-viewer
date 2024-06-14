@@ -192,11 +192,11 @@ describe("Viewer channel serialization", () => {
   };
 
   // Note that the serialization + deserialization are NOT direct inverses.
-  // Serializing converts a ChannelState object to a ViewerChannelSettingJson object,
-  // deserializing converts a ViewerChannelSettingJson object to a ViewerChannelSetting object.
+  // Serializing converts a ChannelState object to a ViewerChannelSettingParams object,
+  // deserializing converts a ViewerChannelSettingParams object to a **ViewerChannelSetting** object.
 
-  // ViewerChannelSettings are input into the viewer and support grouping/matching to multiple channels,
-  // while ChannelStates are per-channel and are used internally.
+  //  ChannelStates are per-channel and are used internally, while ViewerChannelSettings are
+  // input into the viewer and support grouping/matching to multiple channels.
   // TODO: refactor these to all be the same state?
 
   describe("deserializeViewerChannelSetting", () => {
@@ -294,12 +294,10 @@ describe("Viewer channel serialization", () => {
 
   describe("serializeViewerChannelSetting", () => {
     it("serializes channel settings", () => {
-      // Default case
       expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
     });
 
     it("serializes custom channel settings", () => {
-      // Custom case
       const customChannelState: ChannelState = {
         name: "a",
         color: [3, 255, 157],
@@ -326,10 +324,28 @@ describe("Viewer channel serialization", () => {
 });
 
 describe("serializeViewerState", () => {
-  // Serialized copy of DEFAULT_VIEWER_SETTINGS, not shown here.
-  const SERIALIZED_DEFAULT_VIEWER_SETTINGS: ViewerStateParams = {
-    view: "3D",
+  // Copy of DEFAULT_VIEWER_SETTINGS.
+  const DEFAULT_VIEWER_STATE: ViewerState = {
+    viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+    renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+    imageType: ImageType.segmentedCell,
+    showAxes: false,
+    showBoundingBox: false,
+    backgroundColor: [0, 0, 0],
+    boundingBoxColor: [255, 255, 255],
+    autorotate: false,
+    maskAlpha: 0,
+    brightness: 70,
+    density: 50,
+    levels: [35, 140, 255],
+    interpolationEnabled: true,
+    region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+    slice: { x: 0.5, y: 0.5, z: 0.5 },
+    time: 0,
+  };
+  const SERIALIZED_DEFAULT_VIEWER_STATE: ViewerStateParams = {
     mode: "volumetric",
+    view: "3D",
     image: "cell",
     axes: "0",
     bb: "0",
@@ -346,7 +362,7 @@ describe("serializeViewerState", () => {
     t: "0",
   };
 
-  const CUSTOM_VIEWER_SETTINGS: ViewerState = {
+  const CUSTOM_VIEWER_STATE: ViewerState = {
     renderMode: RenderMode.pathTrace,
     viewMode: ViewMode.xy,
     imageType: ImageType.fullField,
@@ -364,9 +380,9 @@ describe("serializeViewerState", () => {
     slice: { x: 0.25, y: 0.75, z: 0.5 },
     time: 100,
   };
-  const SERIALIZED_CUSTOM_VIEWER_SETTINGS: ViewerStateParams = {
-    view: "Z",
+  const SERIALIZED_CUSTOM_VIEWER_STATE: ViewerStateParams = {
     mode: "pathtrace",
+    view: "Z",
     image: "fov",
     axes: "1",
     bb: "1",
@@ -385,11 +401,11 @@ describe("serializeViewerState", () => {
 
   describe("serializeViewerState", () => {
     it("serializes the default viewer settings", () => {
-      expect(serializeViewerState(DEFAULT_VIEWER_SETTINGS)).toEqual(SERIALIZED_DEFAULT_VIEWER_SETTINGS);
+      expect(serializeViewerState(DEFAULT_VIEWER_STATE)).toEqual(SERIALIZED_DEFAULT_VIEWER_STATE);
     });
 
     it("serializes custom viewer settings", () => {
-      expect(serializeViewerState(CUSTOM_VIEWER_SETTINGS)).toEqual(SERIALIZED_CUSTOM_VIEWER_SETTINGS);
+      expect(serializeViewerState(CUSTOM_VIEWER_STATE)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
   });
 
@@ -399,19 +415,19 @@ describe("serializeViewerState", () => {
     });
 
     it("deserializes the default viewer settings", () => {
-      const params = SERIALIZED_DEFAULT_VIEWER_SETTINGS;
-      expect(deserializeViewerState(params)).toEqual(DEFAULT_VIEWER_SETTINGS);
+      const params = SERIALIZED_DEFAULT_VIEWER_STATE;
+      expect(deserializeViewerState(params)).toEqual(DEFAULT_VIEWER_STATE);
     });
 
     it("deserializes custom viewer settings", () => {
-      const params = SERIALIZED_CUSTOM_VIEWER_SETTINGS;
-      expect(deserializeViewerState(params)).toEqual(CUSTOM_VIEWER_SETTINGS);
+      const params = SERIALIZED_CUSTOM_VIEWER_STATE;
+      expect(deserializeViewerState(params)).toEqual(CUSTOM_VIEWER_STATE);
     });
 
     it("handles all ViewMode values", () => {
       const viewModes = Object.values(ViewMode);
       for (const viewMode of viewModes) {
-        const state: ViewerState = { ...DEFAULT_VIEWER_SETTINGS, viewMode };
+        const state: ViewerState = { ...DEFAULT_VIEWER_STATE, viewMode };
         expect(deserializeViewerState(serializeViewerState(state)).viewMode).toEqual(viewMode);
       }
     });
@@ -419,7 +435,7 @@ describe("serializeViewerState", () => {
     it("handles all RenderMode values", () => {
       const renderModes = Object.values(RenderMode);
       for (const renderMode of renderModes) {
-        const state: ViewerState = { ...DEFAULT_VIEWER_SETTINGS, renderMode };
+        const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
         expect(deserializeViewerState(serializeViewerState(state)).renderMode).toEqual(renderMode);
       }
     });
