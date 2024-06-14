@@ -14,7 +14,6 @@ import {
   ViewerStateParams,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import { DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 
@@ -86,6 +85,7 @@ describe("parseHexColorAsColorArray", () => {
     expect(parseHexColorAsColorArray("123456")).toEqual([18, 52, 86]);
     expect(parseHexColorAsColorArray("7890ab")).toEqual([120, 144, 171]);
     expect(parseHexColorAsColorArray("cdefef")).toEqual([205, 239, 239]);
+    expect(parseHexColorAsColorArray("ABCDEF")).toEqual([171, 205, 239]);
   });
 
   it("ignores unrecognized formats", () => {
@@ -130,6 +130,8 @@ describe("parseStringInt", () => {
 
   it("casts float values to integers", () => {
     expect(parseStringInt("0.5", 0, 1000)).toEqual(0);
+    expect(parseStringInt("99.5", 0, 1000)).toEqual(99);
+    expect(parseStringInt("-10.5", -1000, 1000)).toEqual(-10);
   });
 
   it("applies clamping", () => {
@@ -168,7 +170,7 @@ describe("parseStringFloat", () => {
 
 //// SERIALIZE STATES ///////////////////////
 
-describe("Viewer channel serialization", () => {
+describe("Channel state serialization", () => {
   const DEFAULT_CHANNEL_STATE: ChannelState = {
     name: "",
     color: [255, 0, 0],
@@ -323,7 +325,7 @@ describe("Viewer channel serialization", () => {
   });
 });
 
-describe("serializeViewerState", () => {
+describe("Viewer state serialization", () => {
   // Copy of DEFAULT_VIEWER_SETTINGS.
   const DEFAULT_VIEWER_STATE: ViewerState = {
     viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"

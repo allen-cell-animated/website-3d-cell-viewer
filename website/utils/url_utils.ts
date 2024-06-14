@@ -1,11 +1,10 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 import { clamp } from "lodash";
 
-import {
-  DEFAULT_VIEWER_SETTINGS,
-  type ChannelState,
-  type ViewerState,
-  type ViewerStateContextType,
+import type {
+  ChannelState,
+  ViewerState,
+  ViewerStateContextType,
 } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
 import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
@@ -232,11 +231,11 @@ export function parseKeyValueList(data: string): Record<string, string> {
 }
 
 /**
- * Parses a string to a number, clamping the result to the [min, max] range.
+ * Parses a string to a float and clamps the result to the [min, max] range.
  * Returns `undefined` if the string is undefined or NaN.
  * @param value String to parse as a float. Will be parsed with `Number.parseFloat`.
- * @param min Minimum clamping value, inclusive.
- * @param max Maximum clamping value, inclusive.
+ * @param min Minimum value, inclusive.
+ * @param max Maximum value, inclusive.
  * @returns
  * - The parsed number, clamped to the [min, max] range.
  * - `undefined` if the string is undefined or NaN.
@@ -249,6 +248,15 @@ export function parseStringFloat(value: string | undefined, min: number, max: nu
   return Number.isNaN(number) ? undefined : clamp(number, min, max);
 }
 
+/**
+ * Parses a string to an integer and clamps the result to the [min, max] range.
+ * @param value String to parse as a float. Assumes base 10, parses with `Number.parseInt(value, 10)`.
+ * @param min Minimum value, inclusive.
+ * @param max Maximum value, inclusive.
+ * @returns
+ * - The parsed number, clamped to the [min, max] range.
+ * - `undefined` if the string is undefined or NaN.
+ */
 export function parseStringInt(value: string | undefined, min: number, max: number): number | undefined {
   if (value === undefined) {
     return undefined;
