@@ -1,11 +1,11 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 import { clamp } from "lodash";
 
-import type {
-  ChannelState,
-  ViewerState,
-  ViewerStateContextType,
-  ViewerStateKey,
+import {
+  DEFAULT_VIEWER_SETTINGS,
+  type ChannelState,
+  type ViewerState,
+  type ViewerStateContextType,
 } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
 import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
@@ -31,18 +31,21 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
+// Classes have default `undefined` values for all properties
+// to ensure the keys exist when the object is created with no arguments.
+// This allows us to iterate over the keys and turn them into a string list of allowed keys.
 /**
  * The serialized form of a ViewerChannelSetting, as a dictionary object.
  */
 export class ViewerChannelSettingParams {
   /** Color, as a 6-digit hex color.  */
-  col?: string;
+  col?: string = undefined;
   /** Colorize. "1" is enabled. Disabled by default. */
-  clz?: "1" | "0";
+  clz?: "1" | "0" = undefined;
   /** Colorize alpha, in the [0, 1] range. Set to `1.0` by default. */
-  cza?: string;
+  cza?: string = undefined;
   /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
-  isa?: string;
+  isa?: string = undefined;
   /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
    * by a colon. The first value is the minimum and the second is the maximum.
    * Defaults to [0, 255].
@@ -61,13 +64,13 @@ export class ViewerChannelSettingParams {
    * "autoij:0" // use Auto-IJ to calculate min and max.
    * ```
    */
-  lut?: string;
+  lut?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
-  ven?: "1" | "0";
+  ven?: "1" | "0" = undefined;
   /** Isosurface enabled. "1" is enabled. Disabled by default. */
-  sen?: "1" | "0";
+  sen?: "1" | "0" = undefined;
   /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
-  isv?: string;
+  isv?: string = undefined;
 }
 /**
  * Channels, matching the pattern `c0`, `c1`, etc. corresponding to the index of the channel being configured.
@@ -79,48 +82,48 @@ type ChannelParams = { [_ in `c${number}`]?: string };
 /** Serialized version of `ViewerState`. */
 export class ViewerStateParams {
   /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
-  view?: string;
+  view?: string = undefined;
   /**
    * Render mode. Valid values are "volumetric", "maxproject", and "pathtrace".
    * Defaults to "volumetric".
    */
-  mode?: string;
+  mode?: string = undefined;
   /** The opacity of the mask channel, an integer in the range [0, 100]. Defaults to 50. */
-  mask?: string;
+  mask?: string = undefined;
   /** The type of image to display. Valid values are "cell" and "fov". Defaults to "cell". */
-  image?: string;
+  image?: string = undefined;
   /** Whether to show the axes helper. "1" is enabled. Disabled by default. */
-  axes?: string;
+  axes?: string = undefined;
   /** Whether to show the bounding box. "1" is enabled. Disabled by default. */
-  bb?: string;
+  bb?: string = undefined;
   /** The color of the bounding box, as a 6-digit hex color. */
-  bbcol?: string;
+  bbcol?: string = undefined;
   /** The background color, as a 6-digit hex color. */
-  bgcol?: string;
+  bgcol?: string = undefined;
   /** Whether to autorotate the view. "1" is enabled. Disabled by default. */
-  rot?: string;
+  rot?: string = undefined;
   /** The brightness of the image, an float in the range [0, 100]. Defaults to 70. */
-  bright?: string;
+  bright?: string = undefined;
   /** Density, a float in the range [0, 100]. Defaults to 50. */
-  dens?: string;
+  dens?: string = undefined;
   /**
    * Levels for image intensity adjustment. Should be three numeric values separated
    * by commas, representing the low, middle, and high values in a [0, 255] range.
    * Values will be sorted in ascending order; empty values will be parsed as 0.
    */
-  lvl?: string;
+  lvl?: string = undefined;
   /** Whether to enable interpolation. "1" is enabled. Enabled by default. */
-  interp?: string;
+  interp?: string = undefined;
   /** Subregions per axis, as min:max pairs separated by commas.
    * Defaults to full range (`0:1`) for each axis.
    */
-  reg?: string;
+  reg?: string = undefined;
   /** Slice position per X, Y, and Z axes, as a list of comma-separated floats.
    * 0.5 for all axes by default (e.g. `0.5,0.5,0.5`)
    */
-  slice?: string;
+  slice?: string = undefined;
   /** Frame number, for time-series volumes. 0 by default. */
-  t?: string;
+  t?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -129,34 +132,35 @@ class DataParams {
    * One or more volume URLs to load. If multiple URLs are provided, they should
    * be separated by commas.
    */
-  url?: string;
+  url?: string = undefined;
   /**
    * The name of a dataset in the Cell Feature Explorer database. Used with `id`.
    */
-  dataset?: string;
+  dataset?: string = undefined;
   /**
    * The ID of a cell within the loaded dataset. Used with `dataset`.
    */
-  id?: string;
+  id?: string = undefined;
 }
 
 class DeprecatedParams {
   /** Deprecated query parameter for channel settings. */
-  ch?: string;
+  ch?: string = undefined;
   /** Deprecated query parameter for LUT settings. */
-  luts?: string;
+  luts?: string = undefined;
   /** Deprecated query parameter for channel colors. */
-  colors?: string;
+  colors?: string = undefined;
 }
 
-type Params = ViewerStateParams & DataParams & DeprecatedParams & ChannelParams;
+type Params = Partial<ViewerStateParams & DataParams & DeprecatedParams & ChannelParams>;
 
 const allowedParamKeys: Array<keyof Params> = [
   ...Object.keys(new ViewerStateParams()),
   ...Object.keys(new DataParams()),
   ...Object.keys(new DeprecatedParams()),
 ] as Array<keyof Params>;
-const isParamKey = (key: string): key is keyof ViewerStateParams => key in allowedParamKeys;
+console.log(allowedParamKeys);
+const isParamKey = (key: string): key is keyof Params => allowedParamKeys.indexOf(key as keyof Params) !== -1;
 const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
 /**
@@ -292,6 +296,13 @@ export function parseHexColorAsColorArray(hexColor: string | undefined): ColorAr
   return [r, g, b];
 }
 
+function colorArrayToHex(color: ColorArray): string {
+  return color
+    .map((c) => c.toString(16).padStart(2, "0"))
+    .join("")
+    .toLowerCase();
+}
+
 function removeUndefinedProperties<T>(obj: T): Partial<T> {
   const result: Partial<T> = {};
   for (const key in obj) {
@@ -374,7 +385,7 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     clz: channelSetting.colorizeEnabled ? "1" : "0",
     cza: channelSetting.colorizeAlpha?.toString(),
     // Convert to hex string
-    col: channelSetting.color.map((c) => c.toString(16).padStart(2, "0")).join(""),
+    col: colorArrayToHex(channelSetting.color),
     // TODO: Serialize control points....
     // lut: channelSetting.lut?.join(":"),
   });
@@ -429,14 +440,8 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
     image: state.imageType,
     axes: state.showAxes ? "1" : "0",
     bb: state.showBoundingBox ? "1" : "0",
-    bbcol: state.boundingBoxColor
-      .map((c) => c.toString(16).padStart(2, "0"))
-      .join("")
-      .toLowerCase(),
-    bgcol: state.backgroundColor
-      .map((c) => c.toString(16).padStart(2, "0"))
-      .join("")
-      .toLowerCase(),
+    bbcol: colorArrayToHex(state.boundingBoxColor),
+    bgcol: colorArrayToHex(state.backgroundColor),
     rot: state.autorotate ? "1" : "0",
     bright: state.brightness.toString(),
     dens: state.density.toString(),
@@ -572,6 +577,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
   viewerSettings: Partial<ViewerState>;
 }> {
   const params = urlSearchParamsToParams(urlSearchParams);
+  console.log(params);
   let args: Partial<AppProps> = {};
   // Parse viewer state
   const viewerSettings: Partial<ViewerState> = deserializeViewerState(params);

@@ -575,4 +575,17 @@ describe("parseViewerUrlParams", () => {
       expect(channelSetting).toEqual({ ...defaultSettings, match: channelSetting.match });
     }
   });
+
+  it("enables first three channels by default if no channel settings are provided", async () => {
+    const queryString = "url=https://example.com/image.tiff";
+    const params = new URLSearchParams(queryString);
+    const { args } = await parseViewerUrlParams(params);
+
+    // Should have one group
+    const channelSettingsGroups = args.viewerChannelSettings?.groups!;
+    expect(channelSettingsGroups).toHaveLength(1);
+    const channelSettings = channelSettingsGroups[0].channels;
+    expect(channelSettings[0]).toEqual({ match: [0, 1, 2], enabled: true });
+    expect(channelSettings[1]).toEqual({ match: "(.+)", enabled: false });
+  });
 });
