@@ -588,4 +588,30 @@ describe("parseViewerUrlParams", () => {
     expect(channelSettings[0]).toEqual({ match: [0, 1, 2], enabled: true });
     expect(channelSettings[1]).toEqual({ match: "(.+)", enabled: false });
   });
+
+  it("parses default nucmorph settings", async () => {
+    const queryString =
+      "url=https://example.com/image1.ome.zarr,https://example.com/image2.ome.zarr&c0=ven:0&c1=ven:1,lut:autoij:&c2=ven:1,clz:1&view=Z";
+    const params = new URLSearchParams(queryString);
+    const { args, viewerSettings } = await parseViewerUrlParams(params);
+
+    expect(viewerSettings.viewMode).toEqual(ViewMode.xy);
+    expect(args.imageUrl).toEqual(["https://example.com/image1.ome.zarr", "https://example.com/image2.ome.zarr"]);
+
+    // Check that channel settings have been loaded in.
+    // Should be one group with three channels.
+    let channelSettings = args.viewerChannelSettings?.groups[0];
+    expect(channelSettings).toBeDefined();
+    channelSettings = channelSettings!;
+
+    expect(channelSettings.channels).toHaveLength(3);
+    expect(channelSettings.channels[0].match).toEqual(0);
+    expect(channelSettings.channels[0].enabled).toEqual(false);
+    expect(channelSettings.channels[1].match).toEqual(1);
+    expect(channelSettings.channels[1].enabled).toEqual(true);
+    expect(channelSettings.channels[1].lut).toEqual(["autoij", ""]);
+    expect(channelSettings.channels[2].match).toEqual(2);
+    expect(channelSettings.channels[2].enabled).toEqual(true);
+    expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
+  });
 });
