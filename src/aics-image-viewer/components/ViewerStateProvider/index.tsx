@@ -1,21 +1,48 @@
 import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
-import {
-  type ViewerStateContextType,
-  type ViewerState,
-  type ViewerSettingChangeHandlers,
-  type ViewerSettingUpdater,
-  type ChannelSettingUpdater,
-  type ChannelState,
-  type MultipleChannelSettingsUpdater,
-  type PartialIfObject,
-  DEFAULT_VIEWER_SETTINGS,
+import type {
+  ViewerStateContextType,
+  ViewerState,
+  ViewerSettingChangeHandlers,
+  ViewerSettingUpdater,
+  ChannelSettingUpdater,
+  ChannelState,
+  MultipleChannelSettingsUpdater,
+  PartialIfObject,
 } from "./types";
-import { RenderMode, ViewMode } from "../../shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
+import {
+  ALPHA_MASK_SLIDER_DEFAULT,
+  BACKGROUND_COLOR_DEFAULT,
+  BOUNDING_BOX_COLOR_DEFAULT,
+  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  DENSITY_SLIDER_LEVEL_DEFAULT,
+  INTERPOLATION_ENABLED_DEFAULT,
+  LEVELS_SLIDER_DEFAULT,
+} from "../../shared/constants";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
+
+const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+  imageType: ImageType.segmentedCell,
+  showAxes: false,
+  showBoundingBox: false,
+  backgroundColor: BACKGROUND_COLOR_DEFAULT,
+  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
+  autorotate: false,
+  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
+  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  density: DENSITY_SLIDER_LEVEL_DEFAULT,
+  levels: LEVELS_SLIDER_DEFAULT,
+  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
+  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+  slice: { x: 0.5, y: 0.5, z: 0.5 },
+  time: 0,
+};
 
 // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
 // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.

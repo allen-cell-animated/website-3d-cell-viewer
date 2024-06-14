@@ -2,15 +2,6 @@ import { ControlPoint } from "@aics/volume-viewer";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
-import {
-  BACKGROUND_COLOR_DEFAULT,
-  BOUNDING_BOX_COLOR_DEFAULT,
-  ALPHA_MASK_SLIDER_DEFAULT,
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  DENSITY_SLIDER_LEVEL_DEFAULT,
-  LEVELS_SLIDER_DEFAULT,
-  INTERPOLATION_ENABLED_DEFAULT,
-} from "../../shared/constants";
 
 /** Global (not per-channel) viewer state which may be changed in the UI */
 export interface ViewerState {
@@ -36,25 +27,6 @@ export interface ViewerState {
   slice: PerAxis<number>;
   time: number;
 }
-
-export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
-  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-  imageType: ImageType.segmentedCell,
-  showAxes: false,
-  showBoundingBox: false,
-  backgroundColor: BACKGROUND_COLOR_DEFAULT,
-  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-  autorotate: false,
-  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
-  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  density: DENSITY_SLIDER_LEVEL_DEFAULT,
-  levels: LEVELS_SLIDER_DEFAULT,
-  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
-  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  slice: { x: 0.5, y: 0.5, z: 0.5 },
-  time: 0,
-};
 
 export type ViewerStateKey = keyof ViewerState;
 
