@@ -287,6 +287,9 @@ export function parseStringEnum<E extends string, T extends E | undefined>(
   return value as T;
 }
 
+/**
+ * Parses a string boolean value ("1" as true, "0" as false), and returns `undefined` if the value is `undefined`.
+ */
 function parseStringBoolean(value: string | undefined): boolean | undefined {
   if (value === undefined) {
     return undefined;
@@ -356,9 +359,9 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
 
 /**
  * Parses a ViewerChannelSetting from a JSON object.
- * @param channelIndex
- * @param jsonState
- * @returns
+ * @param channelIndex Index of the channel, to be turned into a `match` value.
+ * @param jsonState The serialized ViewerChannelSetting to parse, as an object.
+ * @returns A ViewerChannelSetting object.
  */
 export function deserializeViewerChannelSetting(
   channelIndex: number,
