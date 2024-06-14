@@ -150,7 +150,6 @@ type DeprecatedParams = {
 };
 
 type Params = ViewerStateParams & DataParams & DeprecatedParams & ChannelParams;
-const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
 // TODO: This is somewhat cleaner than the old types, but violates DRY. Is there a better way to do this?
 const allowedParamKeys = [
@@ -176,8 +175,9 @@ const allowedParamKeys = [
   "reg",
   "slice",
   "t",
-];
+] as const;
 const isParamKey = (key: string): key is keyof ViewerStateParams => key in allowedParamKeys;
+const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
 /**
  * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
@@ -476,6 +476,79 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
   return result;
 }
 
+function parseDeprecatedChannelSettings(params: DeprecatedParams): ViewerChannelSettings | undefined {
+  // old, deprecated channels model
+  if (params.ch) {
+    // ?ch=1,2
+    // ?luts=0,255,0,255
+    // ?colors=ff0000,00ff00
+    const initialChannelSettings: ViewerChannelSettings = {
+      groups: [{ name: "Channels", channels: [] }],
+    };
+    const ch = initialChannelSettings.groups[0].channels;
+
+    const channelsOn = params.ch.split(",").map((numstr) => Number.parseInt(numstr, 10));
+    for (let i = 0; i < channelsOn.length; ++i) {
+      ch.push({ match: channelsOn[i], enabled: true });
+    }
+    // look for luts or color
+    if (params.luts) {
+      const luts = params.luts.split(",");
+      if (luts.length !== ch.length * 2) {
+        console.warn("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
+      } else {
+        for (let i = 0; i < ch.length; ++i) {
+          ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
+        }
+      }
+    }
+    if (params.colors) {
+      const colors = params.colors.split(",");
+      if (colors.length !== ch.length) {
+        console.warn("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
+      } else {
+        for (let i = 0; i < ch.length; ++i) {
+          ch[i]["color"] = colors[i];
+        }
+      }
+    }
+    return initialChannelSettings;
+  }
+  return undefined;
+}
+
+function parseChannelSettings(params: ChannelParams): ViewerChannelSettings | undefined {
+  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
+  // a comma-separated list of key-value pairs.
+  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
+  Object.keys(params).forEach((key) => {
+    if (isChannelKey(key)) {
+      const channelIndex = Number.parseInt(key.slice(1), 10);
+      try {
+        const channelData = parseKeyValueList(params[key]!);
+        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingParams);
+        channelIndexToSettings.set(channelIndex, channelSetting);
+      } catch (e) {
+        console.warn(
+          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
+          e
+        );
+      }
+    }
+  });
+  if (channelIndexToSettings.size > 0) {
+    const groups: ViewerChannelSettings["groups"] = [
+      {
+        name: "Channels",
+        channels: Array.from(channelIndexToSettings.values()),
+      },
+    ];
+    return { groups };
+  }
+
+  return undefined;
+}
+
 //// FULL URL PARSING //////////////////////
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
@@ -513,7 +586,6 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
 /**
  * Parses a set of URL search parameters into a set of args/props for the viewer.
  * @param urlSearchParams
- * @returns
  */
 export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
@@ -521,75 +593,16 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
 }> {
   const params = urlSearchParamsToParams(urlSearchParams);
   let args: Partial<AppProps> = {};
-  const viewerSettings: Partial<ViewerState> = {};
+  // Parse viewer state
+  const viewerSettings: Partial<ViewerState> = deserializeViewerState(params);
 
-  // old, deprecated channels model
-  if (params.ch) {
-    // ?ch=1,2
-    // ?luts=0,255,0,255
-    // ?colors=ff0000,00ff00
-    const initialChannelSettings: ViewerChannelSettings = {
-      groups: [{ name: "Channels", channels: [] }],
-    };
-    const ch = initialChannelSettings.groups[0].channels;
+  // Parse channel settings. If per-channel settings are provided, they will override
+  // the old `ch` query parameter.
+  const deprecatedChannelSettings = parseDeprecatedChannelSettings(params);
+  const channelSettings = parseChannelSettings(params);
+  args.viewerChannelSettings = channelSettings ?? deprecatedChannelSettings;
 
-    const channelsOn = params.ch.split(",").map((numstr) => Number.parseInt(numstr, 10));
-    for (let i = 0; i < channelsOn.length; ++i) {
-      ch.push({ match: channelsOn[i], enabled: true });
-    }
-    // look for luts or color
-    if (params.luts) {
-      const luts = params.luts.split(",");
-      if (luts.length !== ch.length * 2) {
-        console.warn("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
-      } else {
-        for (let i = 0; i < ch.length; ++i) {
-          ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
-        }
-      }
-    }
-    if (params.colors) {
-      const colors = params.colors.split(",");
-      if (colors.length !== ch.length) {
-        console.warn("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
-      } else {
-        for (let i = 0; i < ch.length; ++i) {
-          ch[i]["color"] = colors[i];
-        }
-      }
-    }
-    args.viewerChannelSettings = initialChannelSettings;
-  }
-  // Check for per-channel settings; this will override the old channel settings (`ch`)
-  // if present.
-  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
-  // a comma-separated list of key-value pairs.
-  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
-  Object.keys(params).forEach((key) => {
-    if (isChannelKey(key)) {
-      const channelIndex = Number.parseInt(key.slice(1), 10);
-      try {
-        const channelData = parseKeyValueList(params[key]!);
-        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingParams);
-        channelIndexToSettings.set(channelIndex, channelSetting);
-      } catch (e) {
-        console.warn(
-          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
-          e
-        );
-      }
-    }
-  });
-  if (channelIndexToSettings.size > 0) {
-    const groups: ViewerChannelSettings["groups"] = [
-      {
-        name: "Channels",
-        channels: Array.from(channelIndexToSettings.values()),
-      },
-    ];
-    args.viewerChannelSettings = { groups };
-  }
-
+  // Parse data sources (URL or dataset/id pair)
   if (params.url) {
     const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
     const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
@@ -603,7 +616,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
     // Check if channel settings are already provided (through per-channel settings or
     // old `ch` query param, or included in JSON files). If not, make first three
     // channels visible by default.
-    if (!firstUrl.endsWith("json") && !params.ch && channelIndexToSettings.size === 0) {
+    if (!firstUrl.endsWith("json") && !args.viewerChannelSettings) {
       args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!
