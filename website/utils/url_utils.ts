@@ -158,7 +158,6 @@ const allowedParamKeys: Array<keyof Params> = [
   ...Object.keys(new DataParams()),
   ...Object.keys(new DeprecatedParams()),
 ] as Array<keyof Params>;
-console.log(allowedParamKeys);
 const isParamKey = (key: string): key is keyof Params => allowedParamKeys.indexOf(key as keyof Params) !== -1;
 const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
@@ -588,7 +587,6 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
   viewerSettings: Partial<ViewerState>;
 }> {
   const params = urlSearchParamsToParams(urlSearchParams);
-  console.log(params);
   let args: Partial<AppProps> = {};
   // Parse viewer state
   const viewerSettings: Partial<ViewerState> = deserializeViewerState(params);
