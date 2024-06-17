@@ -3,7 +3,8 @@ import React from "react";
 import ColorPicker from "./ColorPicker";
 import { ColorArray, colorArrayToObject, colorObjectToArray } from "../shared/utils/colorRepresentations";
 import { Styles } from "../shared/types";
-import { ViewerSettingUpdater } from "./App/types";
+import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
+import { connectToViewerState } from "./ViewerStateProvider";
 
 const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: ColorArray) => void }> = ({
   color,
@@ -24,21 +25,23 @@ const ColorPickerRow: React.FC<{ color: ColorArray; onColorChange: (color: Color
 );
 
 export interface CustomizeWidgetProps {
+  // From parent
+  visibleControls: {
+    backgroundColorPicker: boolean;
+    boundingBoxColorPicker: boolean;
+  };
+
+  // From viewer state
   showBoundingBox: boolean;
   backgroundColor: ColorArray;
   boundingBoxColor: ColorArray;
 
   changeViewerSetting: ViewerSettingUpdater;
-
-  showControls: {
-    backgroundColorPicker: boolean;
-    boundingBoxColorPicker: boolean;
-  };
 }
 
 const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
   <>
-    {props.showControls.backgroundColorPicker && (
+    {props.visibleControls.backgroundColorPicker && (
       <ColorPickerRow
         color={props.backgroundColor}
         onColorChange={(color) => props.changeViewerSetting("backgroundColor", color)}
@@ -46,7 +49,7 @@ const CustomizeWidget: React.FC<CustomizeWidgetProps> = (props) => (
         Background color
       </ColorPickerRow>
     )}
-    {props.showControls.boundingBoxColorPicker && (
+    {props.visibleControls.boundingBoxColorPicker && (
       <ColorPickerRow
         color={props.boundingBoxColor}
         onColorChange={(color) => props.changeViewerSetting("boundingBoxColor", color)}
@@ -70,4 +73,9 @@ const STYLES: Styles = {
   },
 };
 
-export default CustomizeWidget;
+export default connectToViewerState(CustomizeWidget, [
+  "showBoundingBox",
+  "backgroundColor",
+  "boundingBoxColor",
+  "changeViewerSetting",
+]);

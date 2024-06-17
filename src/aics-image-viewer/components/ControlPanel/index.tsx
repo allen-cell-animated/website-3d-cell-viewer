@@ -3,7 +3,7 @@ import React from "react";
 import { Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
-import ChannelsWidget, { ChannelsWidgetProps } from "../ChannelsWidget";
+import ChannelsWidget from "../ChannelsWidget";
 import GlobalVolumeControls, { GlobalVolumeControlsProps } from "../GlobalVolumeControls";
 import CustomizeWidget, { CustomizeWidgetProps } from "../CustomizeWidget";
 import MetadataViewer from "../MetadataViewer";
@@ -14,10 +14,15 @@ import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
 import { MetadataRecord } from "../../shared/types";
 
-interface ControlPanelProps extends ChannelsWidgetProps, GlobalVolumeControlsProps, CustomizeWidgetProps {
+type PropsOf<T> = T extends React.ComponentType<infer P> ? P : never;
+
+interface ControlPanelProps
+  extends PropsOf<typeof ChannelsWidget>,
+    PropsOf<typeof GlobalVolumeControls>,
+    PropsOf<typeof CustomizeWidget> {
   hasImage: boolean;
-  showControls: GlobalVolumeControlsProps["showControls"] &
-    CustomizeWidgetProps["showControls"] & {
+  visibleControls: GlobalVolumeControlsProps["visibleControls"] &
+    CustomizeWidgetProps["visibleControls"] & {
       colorPresetsDropdown: boolean;
       metadataViewer: boolean;
     };
@@ -38,13 +43,13 @@ const ControlTabNames = {
   [ControlTab.Metadata]: "Metadata",
 };
 
-export default function ControlPanel(props: ControlPanelProps): React.ReactElement {
+function ControlPanel(props: ControlPanelProps): React.ReactElement {
   const [tab, setTab] = React.useState(ControlTab.Channels);
 
   const controlPanelContainerRef = React.useRef<HTMLDivElement>(null);
   const getDropdownContainer = controlPanelContainerRef.current ? () => controlPanelContainerRef.current! : undefined;
 
-  const { viewerChannelSettings, showControls, hasImage } = props;
+  const { viewerChannelSettings, visibleControls, hasImage } = props;
 
   // TODO key is a number, but MenuInfo assumes keys will always be strings
   //   if future versions of antd make this type more permissive, remove ugly double-cast
@@ -93,32 +98,18 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
           <GlobalVolumeControls
             imageName={props.imageName}
             pixelSize={props.pixelSize}
-            changeViewerSetting={props.changeViewerSetting}
-            maskAlpha={props.maskAlpha}
-            brightness={props.brightness}
-            density={props.density}
-            levels={props.levels}
-            interpolationEnabled={props.interpolationEnabled}
-            showControls={showControls}
+            visibleControls={visibleControls}
           />
         ),
       },
     ];
-    const showCustomize = showControls.backgroundColorPicker || showControls.boundingBoxColorPicker;
+    const showCustomize = visibleControls.backgroundColorPicker || visibleControls.boundingBoxColorPicker;
 
     if (showCustomize) {
       items.push({
         key: 1,
         label: "Customize",
-        children: (
-          <CustomizeWidget
-            backgroundColor={props.backgroundColor}
-            boundingBoxColor={props.boundingBoxColor}
-            changeViewerSetting={props.changeViewerSetting}
-            showBoundingBox={props.showBoundingBox}
-            showControls={props.showControls}
-          />
-        ),
+        children: <CustomizeWidget visibleControls={props.visibleControls} />,
       });
     }
 
@@ -139,21 +130,18 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
 
         {renderTab(ControlTab.Channels, <ViewerIcon type="channels" />)}
         {renderTab(ControlTab.Advanced, <ViewerIcon type="preferences" />)}
-        {props.showControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
+        {props.visibleControls.metadataViewer && renderTab(ControlTab.Metadata, <ViewerIcon type="metadata" />)}
       </div>
       <div className="control-panel-col" style={{ flex: "0 0 450px" }}>
         <h2 className="control-panel-title">{ControlTabNames[tab]}</h2>
-        {showControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
+        {visibleControls.colorPresetsDropdown && tab === ControlTab.Channels && renderColorPresetsDropdown()}
         {hasImage && (
           <div className="channel-rows-list">
             {tab === ControlTab.Channels && (
               <ChannelsWidget
-                channelSettings={props.channelSettings}
                 channelDataChannels={props.channelDataChannels}
                 channelGroupedByType={props.channelGroupedByType}
-                changeMultipleChannelSettings={props.changeMultipleChannelSettings}
                 saveIsosurface={props.saveIsosurface}
-                changeChannelSetting={props.changeChannelSetting}
                 onColorChangeComplete={props.onColorChangeComplete}
                 onApplyColorPresets={props.onApplyColorPresets}
                 filterFunc={props.filterFunc}
@@ -168,3 +156,5 @@ export default function ControlPanel(props: ControlPanelProps): React.ReactEleme
     </div>
   );
 }
+
+export default React.memo(ControlPanel);

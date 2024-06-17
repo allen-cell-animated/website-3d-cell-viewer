@@ -45,7 +45,7 @@ export default class PlayControls {
    * Pause playback on the currently playing axis.
    * `willResume` marks this as a temporary suspension, e.g. while the user is scrubbing along the playing axis.
    */
-  pause(willResume = false): void {
+  pause(willResume: boolean = false): void {
     window.clearTimeout(this.playTimeoutId);
     this.playTimeoutId = 0;
     this.playWaitingForLoad = false;

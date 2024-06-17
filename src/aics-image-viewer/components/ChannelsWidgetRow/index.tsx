@@ -15,7 +15,7 @@ import {
   ColorArray,
   colorArrayToObject,
 } from "../../shared/utils/colorRepresentations";
-import { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../../shared/utils/viewerChannelSettings";
+import type { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../ViewerStateProvider/types";
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
