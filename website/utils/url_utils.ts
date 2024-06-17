@@ -229,6 +229,14 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
+export function objectToKeyValueList(obj: Record<string, string>): string {
+  const keyValuePairs: string[] = [];
+  for (const key in obj) {
+    keyValuePairs.push(`${encodeURIComponent(key)}:${encodeURIComponent(obj[key].trim())}`);
+  }
+  return keyValuePairs.join(",");
+}
+
 /**
  * Parses a string to a float and clamps the result to the [min, max] range.
  * Returns `undefined` if the string is undefined or NaN.
@@ -642,13 +650,14 @@ export function serializeViewerUrlParams(state: ViewerStateContextType): Params 
   // TODO: Unit tests for this function
   const params = serializeViewerState(state);
 
-  const channelParams: Record<string, ViewerChannelSettingParams> = state.channelSettings.reduce<
-    Record<string, ViewerChannelSettingParams>
-  >((acc, channelSetting, index): Record<string, ViewerChannelSettingParams> => {
-    const key = `c${index}`;
-    acc[key] = serializeViewerChannelSetting(channelSetting);
-    return acc;
-  }, {} as Record<string, ViewerChannelSettingParams>);
+  const channelParams = state.channelSettings.reduce<Record<string, string>>(
+    (acc, channelSetting, index): Record<string, string> => {
+      const key = `c${index}`;
+      acc[key] = objectToKeyValueList(serializeViewerChannelSetting(channelSetting) as Record<string, string>);
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
   return { ...params, ...channelParams };
 }

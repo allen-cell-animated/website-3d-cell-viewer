@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FlexRowAlignCenter } from "./LandingPage/utils";
@@ -37,7 +37,7 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState> | null>(null);
+  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState>>({});
   const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
@@ -47,7 +47,9 @@ export default function AppWrapper(): ReactElement {
     parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...urlViewerSettings });
+        setViewerSettings((prevValue) => {
+          return { ...prevValue, ...urlViewerSettings };
+        });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
@@ -89,20 +91,20 @@ export default function AppWrapper(): ReactElement {
 
   return (
     <div>
-      <Header noNavigate>
-        <FlexRowAlignCenter $gap={12}>
-          <FlexRowAlignCenter $gap={2}>
-            <LoadModal onLoad={onLoad} />
-            {viewerProps && <ShareModal appProps={viewerProps} />}
+      <ViewerStateProvider viewerSettings={viewerSettings} onViewerSettingsChange={setViewerSettings}>
+        <Header noNavigate>
+          <FlexRowAlignCenter $gap={12}>
+            <FlexRowAlignCenter $gap={2}>
+              <LoadModal onLoad={onLoad} />
+              {viewerProps && <ShareModal appProps={viewerProps} />}
+            </FlexRowAlignCenter>
+            <HelpDropdown />
           </FlexRowAlignCenter>
-          <HelpDropdown />
-        </FlexRowAlignCenter>
-      </Header>
-      {viewerProps && viewerSettings && (
-        <ViewerStateProvider viewerSettings={viewerSettings}>
+        </Header>
+        {viewerProps && (
           <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
-        </ViewerStateProvider>
-      )}
+        )}
+      </ViewerStateProvider>
     </div>
   );
 }

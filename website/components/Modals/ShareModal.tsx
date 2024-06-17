@@ -9,12 +9,12 @@ import {
   ALL_VIEWER_STATE_KEYS,
   connectToViewerState,
 } from "../../../src/aics-image-viewer/components/ViewerStateProvider";
-import { ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import { deserializeViewerState, serializeViewerState } from "../../utils/url_utils";
+import { ViewerStateContextType } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import { serializeViewerUrlParams } from "../../utils/url_utils";
 
 type ShareModalProps = {
   appProps: AppDataProps;
-} & ViewerState;
+} & ViewerStateContextType;
 
 const ModalContainer = styled.div``;
 
@@ -30,7 +30,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
 
   // location.pathname will include up to `.../viewer`
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
-  const params: URLSearchParams = new URLSearchParams(serializeViewerState(props) as Record<string, string>);
+  const params: URLSearchParams = new URLSearchParams(serializeViewerUrlParams(props) as Record<string, string>);
 
   if (props.appProps.imageUrl) {
     if (props.appProps.imageUrl instanceof Array) {
