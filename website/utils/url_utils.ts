@@ -631,7 +631,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
     args = { ...args, ...datasetArgs };
   }
 
-  return { args, viewerSettings };
+  return { args: removeUndefinedProperties(args), viewerSettings: removeUndefinedProperties(viewerSettings) };
 }
 
 /**
