@@ -450,24 +450,24 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
   return removeUndefinedProperties(result);
 }
 
-export function serializeViewerState(state: ViewerState): ViewerStateParams {
+export function serializeViewerState(state: Partial<ViewerState>): ViewerStateParams {
   // TODO: Enforce decimal places for floats/decimals?
   const result: ViewerStateParams = {
     mode: state.renderMode,
-    mask: state.maskAlpha.toString(),
+    mask: state.maskAlpha?.toString(),
     image: state.imageType,
     axes: state.showAxes ? "1" : "0",
     bb: state.showBoundingBox ? "1" : "0",
-    bbcol: colorArrayToHex(state.boundingBoxColor),
-    bgcol: colorArrayToHex(state.backgroundColor),
+    bbcol: state.boundingBoxColor && colorArrayToHex(state.boundingBoxColor),
+    bgcol: state.backgroundColor && colorArrayToHex(state.backgroundColor),
     rot: state.autorotate ? "1" : "0",
-    bright: state.brightness.toString(),
-    dens: state.density.toString(),
+    bright: state.brightness?.toString(),
+    dens: state.density?.toString(),
     interp: state.interpolationEnabled ? "1" : "0",
-    reg: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
-    slice: `${state.slice.x},${state.slice.y},${state.slice.z}`,
-    lvl: state.levels.join(","),
-    t: state.time.toString(),
+    reg: state.region && `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
+    slice: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
+    lvl: state.levels?.join(","),
+    t: state.time?.toString(),
   };
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
@@ -475,8 +475,8 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
     [ViewMode.xz]: "Y",
     [ViewMode.yz]: "X",
   };
-  result.view = viewModeToViewParam[state.viewMode];
-  return result;
+  result.view = state.viewMode && viewModeToViewParam[state.viewMode];
+  return removeUndefinedProperties(result);
 }
 
 function parseDeprecatedChannelSettings(params: DeprecatedParams): ViewerChannelSettings | undefined {
@@ -646,11 +646,11 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  */
-export function serializeViewerUrlParams(state: ViewerStateContextType): Params {
+export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>): Params {
   // TODO: Unit tests for this function
   const params = serializeViewerState(state);
 
-  const channelParams = state.channelSettings.reduce<Record<string, string>>(
+  const channelParams = state.channelSettings?.reduce<Record<string, string>>(
     (acc, channelSetting, index): Record<string, string> => {
       const key = `c${index}`;
       acc[key] = objectToKeyValueList(serializeViewerChannelSetting(channelSetting) as Record<string, string>);

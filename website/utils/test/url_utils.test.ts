@@ -639,3 +639,34 @@ describe("parseViewerUrlParams", () => {
     expect(viewerSettings).toEqual({});
   });
 });
+
+// describe("serializeViewerUrlParams", () => {
+//   it("serializes channel settings to key-value list format", () => {
+//     const channelStates: ChannelState[] = [
+//       {
+//         name: "channel0",
+//         color: [255, 0, 0],
+//         volumeEnabled: true,
+//         isosurfaceEnabled: true,
+//         isovalue: 128,
+//         opacity: 0.75,
+//         colorizeEnabled: true,
+//         colorizeAlpha: 0.5,
+//         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+//       },
+//       {
+//         name: "channel1",
+//         color: [128, 128, 128],
+//         volumeEnabled: true,
+//         isosurfaceEnabled: true,
+//         isovalue: 128,
+//         opacity: 0.75,
+//         colorizeEnabled: true,
+//         colorizeAlpha: 0.5,
+//         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+//       },
+//     ];
+//     const channel0;
+//     // throw new Error("Test not implemented");
+//   });
+// });
