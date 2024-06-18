@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FlexRowAlignCenter } from "./LandingPage/utils";
@@ -37,8 +37,8 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState>>({});
-  const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
+  const [initialViewerSettings, setInitialViewerSettings] = useState<Partial<ViewerState>>({});
+  const [initialViewerProps, setInitialViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -46,13 +46,13 @@ export default function AppWrapper(): ReactElement {
     const locationArgs = location.state as AppDataProps;
     parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-        setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...urlViewerSettings });
+        setInitialViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
+        setInitialViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
-        setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
-        setViewerSettings({});
+        setInitialViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
+        setInitialViewerSettings({});
       }
     );
   }, []);
@@ -71,8 +71,8 @@ export default function AppWrapper(): ReactElement {
   // }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
-    // Force a page reload. This prevents a bug where a desync in the number of channels
-    // in the viewer can cause a crash. The root cause is React immediately forcing a
+    // Force a page reload when loading new data. This prevents a bug where a desync in the
+    // number of channels in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
     const url = appProps.imageUrl;
     if (Array.isArray(url)) {
@@ -87,22 +87,24 @@ export default function AppWrapper(): ReactElement {
     navigation(0);
   };
 
-  console.log("viewerSettings: ", viewerSettings);
-
   return (
     <div>
-      <ViewerStateProvider viewerSettings={viewerSettings} onViewerSettingsChange={setViewerSettings}>
+      <ViewerStateProvider viewerSettings={initialViewerSettings}>
         <Header noNavigate>
           <FlexRowAlignCenter $gap={12}>
             <FlexRowAlignCenter $gap={2}>
               <LoadModal onLoad={onLoad} />
-              {viewerProps && <ShareModal appProps={viewerProps} />}
+              {initialViewerProps && <ShareModal appProps={initialViewerProps} />}
             </FlexRowAlignCenter>
             <HelpDropdown />
           </FlexRowAlignCenter>
         </Header>
-        {viewerProps && (
-          <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
+        {initialViewerProps && (
+          <ImageViewerApp
+            {...initialViewerProps}
+            appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+            canvasMargin="0 0 0 0"
+          />
         )}
       </ViewerStateProvider>
     </div>

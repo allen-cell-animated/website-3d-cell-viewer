@@ -42,7 +42,7 @@ const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-} as const;
+};
 
 // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
 // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
@@ -128,7 +128,6 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 type ViewerStateProviderProps = {
   viewerSettings?: Partial<ViewerState>;
-  onViewerSettingsChange?: (settings: ViewerState) => void;
 };
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
@@ -166,11 +165,7 @@ const ViewerStateProvider: React.FC<ViewerStateProviderProps> = (props) => {
     setChannelSettings(newChannelSettings);
   }, []);
 
-  // Sync viewer settings prop with state
-  // React docs seem to be fine with syncing state with props directly in the render function:
-  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  // Changing to useEffect to prevent state updates from causing infinite loops...
-  // TBD whether this is needed
+  // State updates are only allowed once the component is mounted.
   useEffect(() => {
     if (props.viewerSettings) {
       let newSettings = viewerSettings;
@@ -184,7 +179,6 @@ const ViewerStateProvider: React.FC<ViewerStateProviderProps> = (props) => {
 
       if (newSettings !== viewerSettings) {
         setViewerSettings(newSettings);
-        props.onViewerSettingsChange?.(newSettings);
       }
     }
   }, [props.viewerSettings]);
