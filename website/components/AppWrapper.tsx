@@ -47,9 +47,7 @@ export default function AppWrapper(): ReactElement {
     parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings((prevValue) => {
-          return { ...prevValue, ...urlViewerSettings };
-        });
+        setViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
@@ -88,6 +86,8 @@ export default function AppWrapper(): ReactElement {
     }
     navigation(0);
   };
+
+  console.log("viewerSettings: ", viewerSettings);
 
   return (
     <div>

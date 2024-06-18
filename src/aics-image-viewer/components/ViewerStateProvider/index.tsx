@@ -178,7 +178,7 @@ const ViewerStateProvider: React.FC<ViewerStateProviderProps> = (props) => {
       for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
         if (viewerSettings[key] !== props.viewerSettings[key]) {
           // Update viewer settings one at a time to allow change handlers to keep state valid
-          newSettings = applyChangeToViewerSettings(viewerSettings, key, props.viewerSettings[key] as any);
+          newSettings = applyChangeToViewerSettings(newSettings, key, props.viewerSettings[key] as any);
         }
       }
 
