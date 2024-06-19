@@ -30,16 +30,20 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
 
   // location.pathname will include up to `.../viewer`
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
-  const params: URLSearchParams = new URLSearchParams(serializeViewerUrlParams(props) as Record<string, string>);
+  let serializedViewerParams = serializeViewerUrlParams(props) as Record<string, string>;
 
   if (props.appProps.imageUrl) {
+    let serializedUrl;
     if (props.appProps.imageUrl instanceof Array) {
-      params.append("url", props.appProps.imageUrl.map((url) => encodeURIComponent(url)).join(","));
+      serializedUrl = props.appProps.imageUrl.map((url) => encodeURIComponent(url)).join(",");
     } else {
-      params.append("url", encodeURIComponent(props.appProps.imageUrl));
+      serializedUrl = encodeURIComponent(props.appProps.imageUrl);
     }
+    // Place URL at front of serialized params
+    serializedViewerParams = { url: serializedUrl, ...serializedViewerParams };
   }
-  // TODO: Include additional app props in `params`
+
+  const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
 
   const shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
 
