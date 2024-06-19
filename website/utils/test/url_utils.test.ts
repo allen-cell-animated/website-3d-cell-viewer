@@ -669,7 +669,7 @@ describe("serializeViewerUrlParams", () => {
     ];
     const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
     // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
-    // is not guaranteed. Parse the string and check that the values match what's expected.
+    // is not guaranteed. Parse the string and check that the values match the expected values.
     const expectedChannel0 = {
       ven: "1",
       col: "ff0000",
