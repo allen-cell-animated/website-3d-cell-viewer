@@ -44,7 +44,6 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
   }
 
   const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
-
   const shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
 
   const onClickCopy = (): void => {
