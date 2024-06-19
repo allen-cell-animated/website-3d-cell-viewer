@@ -37,8 +37,8 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [initialViewerSettings, setInitialViewerSettings] = useState<Partial<ViewerState>>({});
-  const [initialViewerProps, setInitialViewerProps] = useState<AppDataProps | null>(null);
+  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState>>({});
+  const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -46,13 +46,13 @@ export default function AppWrapper(): ReactElement {
     const locationArgs = location.state as AppDataProps;
     parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
-        setInitialViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setInitialViewerSettings({ ...urlViewerSettings });
+        setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
+        setViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
-        setInitialViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
-        setInitialViewerSettings({});
+        setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
+        setViewerSettings({});
       }
     );
   }, []);
@@ -89,22 +89,18 @@ export default function AppWrapper(): ReactElement {
 
   return (
     <div>
-      <ViewerStateProvider viewerSettings={initialViewerSettings}>
+      <ViewerStateProvider viewerSettings={viewerSettings}>
         <Header noNavigate>
           <FlexRowAlignCenter $gap={12}>
             <FlexRowAlignCenter $gap={2}>
               <LoadModal onLoad={onLoad} />
-              {initialViewerProps && <ShareModal appProps={initialViewerProps} />}
+              {viewerProps && <ShareModal appProps={viewerProps} />}
             </FlexRowAlignCenter>
             <HelpDropdown />
           </FlexRowAlignCenter>
         </Header>
-        {initialViewerProps && (
-          <ImageViewerApp
-            {...initialViewerProps}
-            appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
-            canvasMargin="0 0 0 0"
-          />
+        {viewerProps && (
+          <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
         )}
       </ViewerStateProvider>
     </div>
