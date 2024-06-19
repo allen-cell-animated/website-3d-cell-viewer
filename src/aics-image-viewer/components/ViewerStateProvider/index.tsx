@@ -126,12 +126,8 @@ type ContextRefType = NoNull<React.MutableRefObject<ViewerStateContextType>>;
 
 export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(DEFAULT_VIEWER_CONTEXT_OUTER);
 
-type ViewerStateProviderProps = {
-  viewerSettings?: Partial<ViewerState>;
-};
-
 /** Provides a central store for the state of the viewer, and the methods to update it. */
-const ViewerStateProvider: React.FC<ViewerStateProviderProps> = (props) => {
+const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, setViewerSettings] = useState<ViewerState>({ ...DEFAULT_VIEWER_SETTINGS });
   const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
@@ -165,7 +161,6 @@ const ViewerStateProvider: React.FC<ViewerStateProviderProps> = (props) => {
     setChannelSettings(newChannelSettings);
   }, []);
 
-  // State updates are only allowed once the component is mounted.
   useEffect(() => {
     if (props.viewerSettings) {
       let newSettings = viewerSettings;

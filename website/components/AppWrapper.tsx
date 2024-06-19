@@ -71,8 +71,8 @@ export default function AppWrapper(): ReactElement {
   // }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
-    // Force a page reload when loading new data. This prevents a bug where a desync in the
-    // number of channels in the viewer can cause a crash. The root cause is React immediately forcing a
+    // Force a page reload when loading new data. This prevents a bug where a desync in the number
+    // of channels in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
     const url = appProps.imageUrl;
     if (Array.isArray(url)) {
