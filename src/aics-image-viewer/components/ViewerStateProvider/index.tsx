@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useState, useRef, useEffect } from "react";
 
 import type {
   ViewerStateContextType,
@@ -117,6 +117,8 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   applyColorPresets: nullfn,
 };
 
+export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
+
 const DEFAULT_VIEWER_CONTEXT_OUTER = { ref: { current: DEFAULT_VIEWER_CONTEXT } };
 
 type NoNull<T> = { [K in keyof T]: NonNullable<T[K]> };
@@ -159,23 +161,22 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     setChannelSettings(newChannelSettings);
   }, []);
 
-  // Sync viewer settings prop with state
-  // React docs seem to be fine with syncing state with props directly in the render function:
-  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  if (props.viewerSettings) {
-    let newSettings = viewerSettings;
+  useEffect(() => {
+    if (props.viewerSettings) {
+      let newSettings = viewerSettings;
 
-    for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
-      if (viewerSettings[key] !== props.viewerSettings[key]) {
-        // Update viewer settings one at a time to allow change handlers to keep state valid
-        newSettings = applyChangeToViewerSettings(viewerSettings, key, props.viewerSettings[key] as any);
+      for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
+        if (viewerSettings[key] !== props.viewerSettings[key]) {
+          // Update viewer settings one at a time to allow change handlers to keep state valid
+          newSettings = applyChangeToViewerSettings(newSettings, key, props.viewerSettings[key] as any);
+        }
+      }
+
+      if (newSettings !== viewerSettings) {
+        setViewerSettings(newSettings);
       }
     }
-
-    if (newSettings !== viewerSettings) {
-      setViewerSettings(newSettings);
-    }
-  }
+  }, [props.viewerSettings]);
 
   const context = useMemo(() => {
     ref.current = {

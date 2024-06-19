@@ -8,7 +8,7 @@ import styled from "styled-components";
 
 import { landingPageContent } from "./content";
 import Header from "../Header";
-import LoadModal from "../LoadModal";
+import LoadModal from "../Modals/LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
 import { parseViewerUrlParams } from "../../utils/url_utils";

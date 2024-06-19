@@ -13,6 +13,7 @@ import {
   serializeViewerState,
   deserializeViewerState,
   ViewerStateParams,
+  serializeViewerUrlParams,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
@@ -637,5 +638,62 @@ describe("parseViewerUrlParams", () => {
     expect(args).toEqual({});
     expect(Object.keys(viewerSettings).length === 0);
     expect(viewerSettings).toEqual({});
+  });
+});
+
+describe("serializeViewerUrlParams", () => {
+  it("serializes channel settings to key-value list format", () => {
+    const channelStates: ChannelState[] = [
+      {
+        name: "channel0",
+        color: [255, 0, 0],
+        volumeEnabled: true,
+        isosurfaceEnabled: true,
+        isovalue: 128,
+        opacity: 0.75,
+        colorizeEnabled: true,
+        colorizeAlpha: 0.5,
+        controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+      },
+      {
+        name: "channel1",
+        color: [128, 128, 128],
+        volumeEnabled: false,
+        isosurfaceEnabled: false,
+        isovalue: 57,
+        opacity: 0.0,
+        colorizeEnabled: false,
+        colorizeAlpha: 0.2,
+        controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+      },
+    ];
+    const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
+    // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
+    // is not guaranteed. Parse the string and check that the values match the expected values.
+    const expectedChannel0 = {
+      ven: "1",
+      col: "ff0000",
+      clz: "1",
+      cza: "0.5",
+      isa: "0.75",
+      // lut: "0:255",
+      sen: "1",
+      isv: "128",
+    };
+    const expectedChannel1 = {
+      ven: "0",
+      col: "808080",
+      clz: "0",
+      cza: "0.2",
+      isa: "0",
+      // lut: "0:255",
+      sen: "0",
+      isv: "57",
+    };
+
+    expect(serialized["c0"]).toBeDefined();
+    expect(parseKeyValueList(serialized["c0"]!)).toEqual(expectedChannel0);
+    expect(serialized["c1"]).toBeDefined();
+    expect(parseKeyValueList(serialized["c1"]!)).toEqual(expectedChannel1);
   });
 });
