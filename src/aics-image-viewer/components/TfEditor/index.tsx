@@ -82,6 +82,28 @@ const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
   resetXF: (_histo) => new Lut().createFullRange(),
 };
 
+// *---*
+// |   |
+// |   |
+//  \ /
+//   *
+// width: 0.65 * height; height of rectangle: 0.6 * height; height of triangle: 0.4 * height
+const handleSymbol: d3.SymbolType = {
+  draw: (context, size) => {
+    // size is symbol area in px^2
+    const height = Math.sqrt(size * 1.9);
+    const triangleHeight = height * 0.4;
+    const halfWidth = height * 0.325;
+
+    context.moveTo(-halfWidth, -height);
+    context.lineTo(halfWidth, -height);
+    context.lineTo(halfWidth, -triangleHeight);
+    context.lineTo(0, 0);
+    context.lineTo(-halfWidth, -triangleHeight);
+    context.closePath();
+  },
+};
+
 export default class MyTfEditor extends React.Component<MyTfEditorProps, MyTfEditorState> {
   id: string;
   private width: number;
