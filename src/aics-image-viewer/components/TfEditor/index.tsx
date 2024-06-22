@@ -748,3 +748,61 @@ const STYLES: Styles = {
     zIndex: "9999",
   },
 };
+
+const TF_EDITOR_MARGINS = {
+  top: 5,
+  right: 20,
+  bottom: 5,
+  left: 25,
+};
+
+const TF_EDITOR_BINS = 256;
+
+const TfEditor: React.FC<MyTfEditorProps> = (props) => {
+  const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
+
+  // createElements
+  const xScale = d3.scaleLinear().domain([0, 255]);
+  const yScale = d3.scaleLinear();
+  const dataScale = d3.scaleLinear().domain([0, 255]);
+  const binScale = d3.scaleLog();
+  const canvasScale = d3.scaleLinear();
+  const area = d3.area<ControlPoint>();
+  // dragged, selected, last_color?
+
+  const applyTFGenerator = (generator: string): void => {}; // TODO
+
+  const createTFGeneratorButton = (generator: string, name: string, description: string): React.ReactNode => (
+    <Tooltip title={description} placement="top">
+      <Button onClick={() => applyTFGenerator(generator)}>{name}</Button>
+    </Tooltip>
+  );
+
+  const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
+
+  return (
+    <div>
+      <div className="button-row">
+        {createTFGeneratorButton("resetXF", "None", "Reset transfer function to full range.")}
+        {createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
+        {createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
+        {createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
+      </div>
+      {colorPickerPosition !== null && (
+        <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
+          <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
+          <StatefulSketchPicker
+            color={colorArrayToObject(this.last_color)}
+            onChange={this.handleChangeColor}
+            disableAlpha={true}
+          />
+        </div>
+      )}
+      <svg className="tf-editor-svg" width={props.width} height={props.height}>
+        
+      </svg>
+    </div>
+  );
+};
+
+export TfEditor;
