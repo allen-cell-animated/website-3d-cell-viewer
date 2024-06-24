@@ -749,6 +749,35 @@ const STYLES: Styles = {
   },
 };
 
+const useRefAttachedEffect = <El extends HTMLElement>(
+  fn: (el: El | null) => void | (() => void),
+  deps: React.DependencyList
+): React.RefCallback<El> => {
+  const ref = React.useRef<El | null>(null);
+  React.useEffect(() => fn(ref.current), deps);
+  return React.useCallback((node: El | null) => {
+    ref.current = node;
+    fn(node);
+  }, deps);
+};
+
+const GRADIENT_MAX_OPACITY = 0.9;
+
+const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: string }> = ({ controlPoints, id }) => {
+  const range = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
+  return (
+    <defs>
+      <linearGradient id={id} gradientUnits="objectBoundingBox" spreadMethod="pad" x1="0%" y1="0%" x2="100%" y2="0%">
+        {controlPoints.map((cp, i) => {
+          const offset = "" + ((cp.x - controlPoints[0].x) / range) * 100 + "%";
+          const opacity = Math.min(cp.opacity, GRADIENT_MAX_OPACITY);
+          return <stop key={i} stopColor={colorArrayToString(cp.color)} stopOpacity={opacity} offset={offset} />;
+        })}
+      </linearGradient>
+    </defs>
+  );
+};
+
 const TF_EDITOR_MARGINS = {
   top: 5,
   right: 20,
@@ -761,16 +790,24 @@ const TF_EDITOR_BINS = 256;
 const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
 
-  // createElements
-  const xScale = d3.scaleLinear().domain([0, 255]);
-  const yScale = d3.scaleLinear();
-  const dataScale = d3.scaleLinear().domain([0, 255]);
-  const binScale = d3.scaleLog();
-  const canvasScale = d3.scaleLinear();
-  const area = d3.area<ControlPoint>();
+  // createElements, initializeElements
+  const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, props.width]);
+  const yScale = d3.scaleLinear().domain([0, 1]).range([props.height, 0]);
+  const dataScale = d3.scaleLinear().domain([0, 255]).range([0, 255]);
+  const binScale = d3.scaleLog().domain([1, 10]).range([props.height, 0]).base(2).clamp(true);
+  const canvasScale = d3.scaleLinear().range([0, 1]);
+  const area = d3
+    .area<ControlPoint>()
+    .x((d) => xScale(d.x))
+    .y0((d) => yScale(d.opacity))
+    .y1(props.height)
+    .curve(d3.curveLinear);
   // dragged, selected, last_color?
 
-  const applyTFGenerator = (generator: string): void => {}; // TODO
+  const applyTFGenerator = (generator: string): void => {
+    // const lut = TF_GENERATORS[generator](props.channelData.histogram);
+    // updateControlPointsWithoutColor(lut.controlPoints);
+  };
 
   const createTFGeneratorButton = (generator: string, name: string, description: string): React.ReactNode => (
     <Tooltip title={description} placement="top">
@@ -782,13 +819,16 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
 
   return (
     <div>
+      {/* ----- BUTTONS ----- */}
       <div className="button-row">
         {createTFGeneratorButton("resetXF", "None", "Reset transfer function to full range.")}
         {createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
         {createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
         {createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
       </div>
-      {colorPickerPosition !== null && (
+
+      {/* ----- COLOR PICKER ----- */}
+      {/* {colorPickerPosition !== null && (
         <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
           <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
           <StatefulSketchPicker
@@ -797,12 +837,33 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
             disableAlpha={true}
           />
         </div>
-      )}
+      )} */}
+
+      {/* ----- PLOT SVG ----- */}
       <svg className="tf-editor-svg" width={props.width} height={props.height}>
-        
+        <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
+        <g transform={`translate(${TF_EDITOR_MARGINS.left},${TF_EDITOR_MARGINS.top})`}>
+          <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" />
+          {/* click target */}
+          {/* <rect y={-10} x={-10} width={props.width + 20} height={props.height + 20} style={{ opacity: 0 }} onMouseDown={mousedown} /> */}
+          {/* axes */}
+          <g className="axis axis--x" transform={`translate(0,${props.height})`} />
+          <g className="axis axis--y" transform="translate(0, 0)" />
+          {/* control point circles */}
+          {props.controlPoints.map((cp, i) => (
+            <circle
+              key={i}
+              cx={xScale(cp.x)}
+              cy={yScale(cp.opacity)}
+              style={{ fill: colorArrayToString(cp.color) }}
+              r={5}
+              // TODO: onMouseDown, onContextMenu, transition - see makeCirclesForControlPoints
+            />
+          ))}
+        </g>
       </svg>
     </div>
   );
 };
 
-export TfEditor;
+export { TfEditor };
