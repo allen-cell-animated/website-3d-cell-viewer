@@ -17,6 +17,7 @@ import {
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { Styles } from "../../shared/types";
+import { last } from "lodash";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 const COLOR_PICKER_MARGIN = 2;
@@ -795,14 +796,18 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const innerWidth = props.width - TF_EDITOR_MARGINS.left - TF_EDITOR_MARGINS.right;
   const innerHeight = props.height - TF_EDITOR_MARGINS.top - TF_EDITOR_MARGINS.bottom;
 
-  const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
-
   const [selectedPointIdx, setSelectedPointIdx] = React.useState<number | null>(null);
   const draggedPointIdxRef = React.useRef<number | null>(null);
 
-  const svgRef = React.useRef<SVGSVGElement>(null);
+  // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
+  // Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
+  const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
+  const lastColorRef = React.useRef<ColorArray>(TFEDITOR_DEFAULT_COLOR);
 
-  const controlPointsRef = React.useRef<ControlPoint[]>(props.controlPoints);
+  const svgRef = React.useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
+
+  const controlPointsRef = React.useRef<ControlPoint[]>(props.controlPoints); // for breaking stale `mouseMove` closure
+
   const setControlPoints = (newControlPoints: ControlPoint[]): void => {
     controlPointsRef.current = newControlPoints;
     props.updateChannelLutControlPoints(newControlPoints);
@@ -819,7 +824,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
     ];
   };
 
-  const mouseMove = (event: MouseEvent): void => {
+  const handleControlPointDrag = (event: MouseEvent): void => {
     if (draggedPointIdxRef.current === null) {
       return;
     }
@@ -827,7 +832,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
 
     // Update dragged control point
     const [x, opacity] = mouseEventToControlPointValues(event);
-    const newControlPoints = [...controlPointsRef.current]; // TODO closure stuff here
+    const newControlPoints = [...controlPointsRef.current];
     const draggedPoint = newControlPoints[draggedIdx];
     draggedPoint.x = x;
     draggedPoint.opacity = opacity;
@@ -849,13 +854,11 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
     setControlPoints(newControlPoints);
   };
 
-  const plotMouseDown: React.MouseEventHandler<SVGSVGElement> = (event) => {
-    if (draggedPointIdxRef.current === null) {
-      // create new control point
+  const handlePlotMouseDown: React.MouseEventHandler<SVGSVGElement> = (event) => {
+    if (draggedPointIdxRef.current === null && event.button === 0) {
+      // this click is not on an existing point - create a new one
       const [x, opacity] = mouseEventToControlPointValues(event);
-
-      // TODO use last_color
-      const point = { x, opacity, color: props.controlPoints[0].color };
+      const point = { x, opacity, color: lastColorRef.current };
 
       // add new control point to controlPoints
       const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
@@ -867,15 +870,50 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
     }
 
     setSelectedPointIdx(draggedPointIdxRef.current);
-    document.addEventListener("mousemove", mouseMove);
-    document.addEventListener(
-      "mouseup",
-      () => {
-        draggedPointIdxRef.current = null;
-        document.removeEventListener("mousemove", mouseMove);
-      },
-      { once: true }
-    );
+
+    if (event.button === 0) {
+      // get set up to drag the point around, even if the mouse leaves the SVG element
+      document.addEventListener("mousemove", handleControlPointDrag);
+      document.addEventListener(
+        "mouseup",
+        () => {
+          draggedPointIdxRef.current = null;
+          document.removeEventListener("mousemove", handleControlPointDrag);
+        },
+        { once: true }
+      );
+    } else {
+      draggedPointIdxRef.current = null;
+    }
+  };
+
+  const handleControlPointContextMenu: React.MouseEventHandler<SVGCircleElement> = (event) => {
+    event.preventDefault();
+    if (!event.target || !svgRef.current) {
+      setColorPickerPosition(0);
+      return;
+    }
+
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const cpRect = (event.target as SVGCircleElement).getBoundingClientRect();
+    const cpRectCenter = cpRect.left + cpRect.width / 2;
+
+    if (cpRectCenter - svgRect.left < svgRect.width / 2) {
+      // Control point is towards the left of the plot; open color picker to its right
+      setColorPickerPosition(cpRect.right - svgRect.left + COLOR_PICKER_MARGIN);
+    } else {
+      // Control point is towards the right of the plot; open color picker to its left
+      setColorPickerPosition(-(svgRect.right - cpRect.left + COLOR_PICKER_MARGIN));
+    }
+  };
+
+  const handleChangeColor = (color: ColorResult): void => {
+    lastColorRef.current = colorObjectToArray(color.rgb);
+    if (selectedPointIdx !== null) {
+      const newControlPoints = [...props.controlPoints];
+      newControlPoints[selectedPointIdx].color = lastColorRef.current;
+      setControlPoints(newControlPoints);
+    }
   };
 
   /** d3-generated svg data string representing the line between points and the region filled with gradient */
@@ -888,7 +926,6 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       .curve(d3.curveLinear);
     return areaGenerator(props.controlPoints) ?? undefined;
   }, [props.controlPoints]);
-  // dragged, selected, last_color?
 
   // The below `useCallback`s are used as "ref callbacks" - passed as the `ref` prop of SVG elements in order to fill
   // these elements using D3. They are called when the ref'd component mounts and unmounts, and whenever their identity
@@ -917,22 +954,32 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       const barWidth = innerWidth / props.channelData.histogram.getNumBins();
       const binScale = d3.scaleLog().domain([0.1, max]).range([innerHeight, 0]).base(2).clamp(true);
 
-      d3.select(el)
+      const select = d3
+        .select(el)
         .selectAll(".bar") // select all the bars of the histogram
-        .data(binLengths) // bind the histogram bins to this selection
-        .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
+        .data(binLengths); // bind the histogram bins to this selection
+      // .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
+      select
+        .enter()
+        .append("rect")
+        .merge(select)
         .attr("class", "bar")
         .attr("width", barWidth)
         .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
         .attr("y", (len) => binScale(len))
         .attr("height", (len) => innerHeight - binScale(len));
+
+      select.exit().remove();
     },
     [props.channelData.histogram]
   );
 
   const applyTFGenerator = (generator: string): void => {
-    // const lut = TF_GENERATORS[generator](props.channelData.histogram);
-    // updateControlPointsWithoutColor(lut.controlPoints);
+    setSelectedPointIdx(null);
+
+    lastColorRef.current = TFEDITOR_DEFAULT_COLOR;
+    const lut = TF_GENERATORS[generator](props.channelData.histogram);
+    setControlPoints(lut.controlPoints.map((cp) => ({ ...cp, color: TFEDITOR_DEFAULT_COLOR })));
   };
 
   const createTFGeneratorButton = (generator: string, name: string, description: string): React.ReactNode => (
@@ -954,27 +1001,35 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       </div>
 
       {/* ----- CONTROL POINT COLOR PICKER ----- */}
-      {/* {colorPickerPosition !== null && (
+      {colorPickerPosition !== null && (
         <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
-          <div style={STYLES.cover} onClick={this.handleCloseColorPicker} />
+          <div style={STYLES.cover} onClick={() => setColorPickerPosition(null)} />
           <StatefulSketchPicker
-            color={colorArrayToObject(this.last_color)}
-            onChange={this.handleChangeColor}
+            color={colorArrayToObject(lastColorRef.current)}
+            onChange={handleChangeColor}
             disableAlpha={true}
           />
         </div>
-      )} */}
+      )}
 
       {/* ----- PLOT SVG ----- */}
-      <svg className="tf-editor-svg" ref={svgRef} width={props.width} height={props.height} onMouseDown={plotMouseDown}>
+      <svg
+        className="tf-editor-svg"
+        ref={svgRef}
+        width={props.width}
+        height={props.height}
+        onMouseDown={handlePlotMouseDown}
+      >
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TF_EDITOR_MARGINS.left},${TF_EDITOR_MARGINS.top})`}>
+          {/* histogram bars */}
           <g ref={histogramRef} />
+          {/* line between control points and gradient under it */}
           <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" d={area} />
           {/* plot axes */}
-          <g ref={xAxisRef} className="axis axis--x" transform={`translate(0,${innerHeight})`} />
-          <g ref={yAxisRef} className="axis axis--y" transform="translate(0, 0)" />
-          {/* control point circles */}
+          <g ref={xAxisRef} className="axis" transform={`translate(0,${innerHeight})`} />
+          <g ref={yAxisRef} className="axis" transform="translate(0, 0)" />
+          {/* control points */}
           {props.controlPoints.map((cp, i) => (
             <circle
               key={i}
@@ -984,7 +1039,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
               style={{ fill: colorArrayToString(cp.color) }}
               r={5}
               onMouseDown={() => (draggedPointIdxRef.current = i)}
-              // TODO: onMouseDown, onContextMenu, transition - see makeCirclesForControlPoints
+              onContextMenu={handleControlPointContextMenu}
             />
           ))}
         </g>
