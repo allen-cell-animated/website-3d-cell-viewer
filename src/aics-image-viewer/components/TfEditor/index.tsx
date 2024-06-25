@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
 import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
@@ -126,30 +126,30 @@ const TF_EDITOR_MARGINS = {
 };
 
 const TF_EDITOR_NUM_TICKS = 4;
-const TF_EDITOR_BINS = 256;
+const TF_EDITOR_MAX_BIN = 256;
 
 const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const innerWidth = props.width - TF_EDITOR_MARGINS.left - TF_EDITOR_MARGINS.right;
   const innerHeight = props.height - TF_EDITOR_MARGINS.top - TF_EDITOR_MARGINS.bottom;
 
-  const [selectedPointIdx, setSelectedPointIdx] = React.useState<number | null>(null);
-  const draggedPointIdxRef = React.useRef<number | null>(null);
+  const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
+  const draggedPointIdxRef = useRef<number | null>(null);
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
   // Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
-  const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
-  const lastColorRef = React.useRef<ColorArray>(TFEDITOR_DEFAULT_COLOR);
+  const [colorPickerPosition, setColorPickerPosition] = useState<number | null>(null);
+  const lastColorRef = useRef<ColorArray>(TFEDITOR_DEFAULT_COLOR);
 
-  const svgRef = React.useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
+  const svgRef = useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
 
-  const controlPointsRef = React.useRef<ControlPoint[]>(props.controlPoints); // for breaking stale `mouseMove` closure
+  const controlPointsRef = useRef<ControlPoint[]>(props.controlPoints); // for breaking stale `mouseMove` closure
 
   const setControlPoints = (newControlPoints: ControlPoint[]): void => {
     controlPointsRef.current = newControlPoints;
     props.updateChannelLutControlPoints(newControlPoints);
   };
 
-  const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, innerWidth]);
+  const xScale = d3.scaleLinear().domain([0, TF_EDITOR_MAX_BIN]).rangeRound([0, innerWidth]);
   const yScale = d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]);
 
   const mouseEventToControlPointValues = (event: MouseEvent | React.MouseEvent): [number, number] => {
@@ -253,7 +253,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   };
 
   /** d3-generated svg data string representing the line between points and the region filled with gradient */
-  const area = React.useMemo(() => {
+  const area = useMemo(() => {
     const areaGenerator = d3
       .area<ControlPoint>()
       .x((d) => xScale(d.x))
@@ -267,7 +267,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   // these elements using D3. They are called when the ref'd component mounts and unmounts, and whenever their identity
   // changes (i.e. whenever their dependencies change).
 
-  const xAxisRef = React.useCallback(
+  const xAxisRef = useCallback(
     (el: SVGGElement) => {
       const ticks = xScale.ticks(TF_EDITOR_NUM_TICKS);
       ticks[ticks.length - 1] = xScale.domain()[1];
@@ -276,12 +276,12 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
     [props.width]
   );
 
-  const yAxisRef = React.useCallback(
+  const yAxisRef = useCallback(
     (el: SVGGElement) => d3.select(el).call(d3.axisLeft(yScale).ticks(TF_EDITOR_NUM_TICKS)),
     [props.height]
   );
 
-  const histogramRef = React.useCallback(
+  const histogramRef = useCallback(
     (el: SVGGElement) => {
       if (el === null) {
         return;
@@ -293,12 +293,8 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       const select = d3
         .select(el)
         .selectAll(".bar") // select all the bars of the histogram
-        .data(binLengths); // bind the histogram bins to this selection
-      // .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
-      select
-        .enter()
-        .append("rect")
-        .merge(select)
+        .data(binLengths) // bind the histogram bins to this selection
+        .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
         .attr("class", "bar")
         .attr("width", barWidth)
         .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
@@ -397,4 +393,4 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   );
 };
 
-export { TfEditor };
+export default TfEditor;
