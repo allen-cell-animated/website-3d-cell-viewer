@@ -9,7 +9,9 @@
     display: block;
   }
 
-  .bar rect {
+  /* TODO style will become redundant after class tfeditor is removed */
+  .bar rect,
+  rect.bar {
     fill: var(--color-controlpanel-border);
   }
 

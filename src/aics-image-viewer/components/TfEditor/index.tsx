@@ -749,13 +749,17 @@ const STYLES: Styles = {
   },
 };
 
-const useRefAttachedEffect = <El extends HTMLElement>(
+const useRefAttachedEffect = <El extends Element>(
   fn: (el: El | null) => void | (() => void),
   deps: React.DependencyList
 ): React.RefCallback<El> => {
   const ref = React.useRef<El | null>(null);
-  React.useEffect(() => fn(ref.current), deps);
+  React.useEffect(() => {
+    console.log("effect by deps with", ref.current);
+    fn(ref.current);
+  }, deps);
   return React.useCallback((node: El | null) => {
+    console.log("effect by ref with", ref.current);
     ref.current = node;
     fn(node);
   }, deps);
@@ -778,31 +782,87 @@ const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: str
   );
 };
 
+function getHistogramBinLengths(histogram: Histogram): { binLengths: number[]; max: number } {
+  const binLengths = [];
+  // TODO: Change `histogram.bins` to be readable/readonly
+  // so we don't have to copy it here!
+  let max = Number.NEGATIVE_INFINITY;
+  for (let i = 0; i < histogram.getNumBins(); i++) {
+    const binLength = histogram.getBin(i);
+    binLengths.push(binLength);
+    max = Math.max(max, binLength);
+  }
+  return { binLengths, max };
+}
+
 const TF_EDITOR_MARGINS = {
-  top: 5,
+  top: 10,
   right: 20,
   bottom: 5,
   left: 25,
 };
 
+const TF_EDITOR_X_AXIS_HEIGHT = 15;
+const TF_EDITOR_NUM_TICKS = 4;
 const TF_EDITOR_BINS = 256;
 
 const TfEditor: React.FC<MyTfEditorProps> = (props) => {
+  const innerWidth = props.width - TF_EDITOR_MARGINS.left - TF_EDITOR_MARGINS.right;
+  const innerHeight = props.height - TF_EDITOR_MARGINS.top - TF_EDITOR_MARGINS.bottom;
+  const plotInnerHeight = innerHeight - TF_EDITOR_X_AXIS_HEIGHT;
+
   const [colorPickerPosition, setColorPickerPosition] = React.useState<number | null>(null);
 
   // createElements, initializeElements
-  const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, props.width]);
-  const yScale = d3.scaleLinear().domain([0, 1]).range([props.height, 0]);
+  const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, innerWidth]);
+  const yScale = d3.scaleLinear().domain([0, 1]).range([plotInnerHeight, 0]);
   const dataScale = d3.scaleLinear().domain([0, 255]).range([0, 255]);
-  const binScale = d3.scaleLog().domain([1, 10]).range([props.height, 0]).base(2).clamp(true);
+  const binScale = d3.scaleLog().domain([1, 10]).range([plotInnerHeight, 0]).base(2).clamp(true);
   const canvasScale = d3.scaleLinear().range([0, 1]);
-  const area = d3
-    .area<ControlPoint>()
-    .x((d) => xScale(d.x))
-    .y0((d) => yScale(d.opacity))
-    .y1(props.height)
-    .curve(d3.curveLinear);
+  const area = React.useMemo(() => {
+    const areaGenerator = d3
+      .area<ControlPoint>()
+      .x((d) => xScale(d.x))
+      .y0((d) => yScale(d.opacity))
+      .y1(plotInnerHeight)
+      .curve(d3.curveLinear);
+    return areaGenerator(props.controlPoints) ?? undefined;
+  }, [props.controlPoints]);
   // dragged, selected, last_color?
+
+  const xAxisRef = React.useCallback((el) => {
+    const ticks = xScale.ticks(TF_EDITOR_NUM_TICKS);
+    ticks[ticks.length - 1] = xScale.domain()[1];
+    d3.select(el).call(d3.axisBottom(xScale).tickValues(ticks));
+  }, []);
+
+  const yAxisRef = React.useCallback((el) => d3.select(el).call(d3.axisLeft(yScale).ticks(TF_EDITOR_NUM_TICKS)), []);
+
+  const histogramRef = React.useCallback(
+    (el) => {
+      console.log(el);
+      if (el === null) {
+        return;
+      }
+      const { binLengths, max } = getHistogramBinLengths(props.channelData.histogram);
+      const barWidth = innerWidth / props.channelData.histogram.getNumBins();
+      console.log(barWidth);
+      const binScale = d3.scaleLog().domain([0.1, max]).range([plotInnerHeight, 0]).base(2).clamp(true);
+
+      console.log(d3.select(el).selectAll(".bar"));
+
+      d3.select(el)
+        .selectAll(".bar") // select all the bars of the histogram
+        .data(binLengths) // bind the histogram bins to this selection
+        .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
+        .attr("class", "bar")
+        .attr("width", barWidth)
+        .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
+        .attr("y", (len) => binScale(len))
+        .attr("height", (len) => plotInnerHeight - binScale(len));
+    },
+    [props.channelData.histogram]
+  );
 
   const applyTFGenerator = (generator: string): void => {
     // const lut = TF_GENERATORS[generator](props.channelData.histogram);
@@ -843,12 +903,13 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       <svg className="tf-editor-svg" width={props.width} height={props.height}>
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TF_EDITOR_MARGINS.left},${TF_EDITOR_MARGINS.top})`}>
-          <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" />
+          <g ref={histogramRef} />
+          <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" d={area} />
           {/* click target */}
-          {/* <rect y={-10} x={-10} width={props.width + 20} height={props.height + 20} style={{ opacity: 0 }} onMouseDown={mousedown} /> */}
+          {/* <rect y={-10} x={-10} width={props.width} height={props.height} style={{ opacity: 0 }} onMouseDown={mousedown} /> */}
           {/* axes */}
-          <g className="axis axis--x" transform={`translate(0,${props.height})`} />
-          <g className="axis axis--y" transform="translate(0, 0)" />
+          <g ref={xAxisRef} className="axis axis--x" transform={`translate(0,${plotInnerHeight})`} />
+          <g ref={yAxisRef} className="axis axis--y" transform="translate(0, 0)" />
           {/* control point circles */}
           {props.controlPoints.map((cp, i) => (
             <circle
