@@ -840,16 +840,12 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
 
   const histogramRef = React.useCallback(
     (el) => {
-      console.log(el);
       if (el === null) {
         return;
       }
       const { binLengths, max } = getHistogramBinLengths(props.channelData.histogram);
       const barWidth = innerWidth / props.channelData.histogram.getNumBins();
-      console.log(barWidth);
       const binScale = d3.scaleLog().domain([0.1, max]).range([plotInnerHeight, 0]).base(2).clamp(true);
-
-      console.log(d3.select(el).selectAll(".bar"));
 
       d3.select(el)
         .selectAll(".bar") // select all the bars of the histogram
