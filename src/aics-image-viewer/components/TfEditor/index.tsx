@@ -802,7 +802,6 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
 
   const svgRef = React.useRef<SVGSVGElement>(null);
 
-  // TODO necessary?
   const controlPointsRef = React.useRef<ControlPoint[]>(props.controlPoints);
   const setControlPoints = (newControlPoints: ControlPoint[]): void => {
     controlPointsRef.current = newControlPoints;
@@ -824,16 +823,28 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
     if (draggedPointIdxRef.current === null) {
       return;
     }
+    const draggedIdx = draggedPointIdxRef.current;
 
     // Update dragged control point
     const [x, opacity] = mouseEventToControlPointValues(event);
-    const newControlPoints = [...props.controlPoints]; // TODO closure stuff here
-    const draggedPoint = newControlPoints[draggedPointIdxRef.current];
+    const newControlPoints = [...controlPointsRef.current]; // TODO closure stuff here
+    const draggedPoint = newControlPoints[draggedIdx];
     draggedPoint.x = x;
     draggedPoint.opacity = opacity;
 
     // Remove control points to keep the list sorted by x value
-    // TODO
+    const bisector = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x);
+    const idxLeft = bisector.left(newControlPoints, draggedPoint);
+    const idxRight = bisector.right(newControlPoints, draggedPoint);
+
+    if (idxLeft < draggedIdx) {
+      const numPointsToRemove = draggedIdx - idxLeft; // should almost always be 1
+      newControlPoints.splice(idxLeft, numPointsToRemove);
+      draggedPointIdxRef.current -= numPointsToRemove;
+      setSelectedPointIdx(draggedPointIdxRef.current);
+    } else if (idxRight > draggedIdx + 1) {
+      newControlPoints.splice(draggedIdx + 1, idxRight - draggedIdx - 1);
+    }
 
     setControlPoints(newControlPoints);
   };
