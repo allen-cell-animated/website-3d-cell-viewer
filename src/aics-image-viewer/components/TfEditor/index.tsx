@@ -749,22 +749,6 @@ const STYLES: Styles = {
   },
 };
 
-const useRefAttachedEffect = <El extends Element>(
-  fn: (el: El | null) => void | (() => void),
-  deps: React.DependencyList
-): React.RefCallback<El> => {
-  const ref = React.useRef<El | null>(null);
-  React.useEffect(() => {
-    console.log("effect by deps with", ref.current);
-    fn(ref.current);
-  }, deps);
-  return React.useCallback((node: El | null) => {
-    console.log("effect by ref with", ref.current);
-    ref.current = node;
-    fn(node);
-  }, deps);
-};
-
 const GRADIENT_MAX_OPACITY = 0.9;
 
 const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: string }> = ({ controlPoints, id }) => {
@@ -816,6 +800,8 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const [selectedPointIdx, setSelectedPointIdx] = React.useState<number | null>(null);
   const draggedPointIdxRef = React.useRef<number | null>(null);
 
+  const svgRef = React.useRef<SVGSVGElement>(null);
+
   // TODO necessary?
   const controlPointsRef = React.useRef<ControlPoint[]>(props.controlPoints);
   const setControlPoints = (newControlPoints: ControlPoint[]): void => {
@@ -826,10 +812,13 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, innerWidth]);
   const yScale = d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]);
 
-  const mouseEventToControlPointValues = (event: MouseEvent): [number, number] => [
-    xScale.invert(clamp(event.offsetX - TF_EDITOR_MARGINS.left, 0, innerWidth)),
-    yScale.invert(clamp(event.offsetY - TF_EDITOR_MARGINS.top, 0, innerHeight)),
-  ];
+  const mouseEventToControlPointValues = (event: MouseEvent | React.MouseEvent): [number, number] => {
+    const svgRect = svgRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 };
+    return [
+      xScale.invert(clamp(event.clientX - svgRect.x - TF_EDITOR_MARGINS.left, 0, innerWidth)),
+      yScale.invert(clamp(event.clientY - svgRect.y - TF_EDITOR_MARGINS.top, 0, innerHeight)),
+    ];
+  };
 
   const mouseMove = (event: MouseEvent): void => {
     if (draggedPointIdxRef.current === null) {
@@ -852,7 +841,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const plotMouseDown: React.MouseEventHandler<SVGSVGElement> = (event) => {
     if (draggedPointIdxRef.current === null) {
       // create new control point
-      const [x, opacity] = mouseEventToControlPointValues(event.nativeEvent);
+      const [x, opacity] = mouseEventToControlPointValues(event);
 
       // TODO use last_color
       const point = { x, opacity, color: props.controlPoints[0].color };
@@ -966,7 +955,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
       )} */}
 
       {/* ----- PLOT SVG ----- */}
-      <svg className="tf-editor-svg" width={props.width} height={props.height} onMouseDown={plotMouseDown}>
+      <svg className="tf-editor-svg" ref={svgRef} width={props.width} height={props.height} onMouseDown={plotMouseDown}>
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TF_EDITOR_MARGINS.left},${TF_EDITOR_MARGINS.top})`}>
           <g ref={histogramRef} />
