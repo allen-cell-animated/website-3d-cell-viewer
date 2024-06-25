@@ -817,8 +817,6 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const xScale = d3.scaleLinear().domain([0, 255]).rangeRound([0, innerWidth]);
   const yScale = d3.scaleLinear().domain([0, 1]).range([plotInnerHeight, 0]);
   const dataScale = d3.scaleLinear().domain([0, 255]).range([0, 255]);
-  const binScale = d3.scaleLog().domain([1, 10]).range([plotInnerHeight, 0]).base(2).clamp(true);
-  const canvasScale = d3.scaleLinear().range([0, 1]);
   const area = React.useMemo(() => {
     const areaGenerator = d3
       .area<ControlPoint>()
@@ -830,19 +828,25 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   }, [props.controlPoints]);
   // dragged, selected, last_color?
 
-  const xAxisRef = React.useCallback((el) => {
+  const xAxisRef = React.useCallback((el: SVGGElement) => {
+    console.time("xAxis");
     const ticks = xScale.ticks(TF_EDITOR_NUM_TICKS);
     ticks[ticks.length - 1] = xScale.domain()[1];
     d3.select(el).call(d3.axisBottom(xScale).tickValues(ticks));
+    console.timeEnd("xAxis");
   }, []);
 
-  const yAxisRef = React.useCallback((el) => d3.select(el).call(d3.axisLeft(yScale).ticks(TF_EDITOR_NUM_TICKS)), []);
+  const yAxisRef = React.useCallback(
+    (el: SVGGElement) => d3.select(el).call(d3.axisLeft(yScale).ticks(TF_EDITOR_NUM_TICKS)),
+    []
+  );
 
   const histogramRef = React.useCallback(
-    (el) => {
+    (el: SVGGElement) => {
       if (el === null) {
         return;
       }
+      console.time("histogram");
       const { binLengths, max } = getHistogramBinLengths(props.channelData.histogram);
       const barWidth = innerWidth / props.channelData.histogram.getNumBins();
       const binScale = d3.scaleLog().domain([0.1, max]).range([plotInnerHeight, 0]).base(2).clamp(true);
@@ -856,6 +860,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
         .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
         .attr("y", (len) => binScale(len))
         .attr("height", (len) => plotInnerHeight - binScale(len));
+      console.timeEnd("histogram");
     },
     [props.channelData.histogram]
   );
@@ -919,6 +924,19 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
           ))}
         </g>
       </svg>
+
+      {/* ----- COLORIZE SLIDER ----- */}
+      <SliderRow
+        label={
+          <Checkbox checked={props.colorizeEnabled} onChange={(e) => props.updateColorizeMode(e.target.checked)}>
+            Colorize
+          </Checkbox>
+        }
+        max={1}
+        start={props.colorizeAlpha}
+        onUpdate={(values) => props.updateColorizeAlpha(values[0])}
+        hideSlider={!props.colorizeEnabled}
+      />
     </div>
   );
 };
