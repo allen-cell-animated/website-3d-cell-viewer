@@ -19,9 +19,19 @@ import {
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
-const COLOR_PICKER_MARGIN = 2;
+const TFEDITOR_COLOR_PICKER_MARGIN = 2;
+const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
+const TF_EDITOR_NUM_TICKS = 4;
+const TF_EDITOR_MAX_BIN = 256;
 
-interface MyTfEditorProps {
+const TFEDITOR_MARGINS = {
+  top: 10,
+  right: 20,
+  bottom: 20, // includes space for x-axis
+  left: 25,
+};
+
+type TfEditorProps = {
   id: string;
   width: number;
   height: number;
@@ -33,8 +43,7 @@ interface MyTfEditorProps {
   updateColorizeAlpha: (colorizeAlpha: number) => void;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
-  fitToData?: boolean;
-}
+};
 
 /** Wrapper to convince color picker interface to update while open */
 const StatefulSketchPicker: React.FC<{
@@ -86,8 +95,6 @@ const STYLES: Styles = {
   },
 };
 
-const GRADIENT_MAX_OPACITY = 0.9;
-
 const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: string }> = ({ controlPoints, id }) => {
   const range = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
   return (
@@ -95,7 +102,7 @@ const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: str
       <linearGradient id={id} gradientUnits="objectBoundingBox" spreadMethod="pad" x1="0%" y1="0%" x2="100%" y2="0%">
         {controlPoints.map((cp, i) => {
           const offset = "" + ((cp.x - controlPoints[0].x) / range) * 100 + "%";
-          const opacity = Math.min(cp.opacity, GRADIENT_MAX_OPACITY);
+          const opacity = Math.min(cp.opacity, TFEDITOR_GRADIENT_MAX_OPACITY);
           return <stop key={i} stopColor={colorArrayToString(cp.color)} stopOpacity={opacity} offset={offset} />;
         })}
       </linearGradient>
@@ -118,19 +125,9 @@ function getHistogramBinLengths(histogram: Histogram): { binLengths: number[]; m
 
 const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
-const TF_EDITOR_MARGINS = {
-  top: 10,
-  right: 20,
-  bottom: 20, // includes space for x-axis
-  left: 25,
-};
-
-const TF_EDITOR_NUM_TICKS = 4;
-const TF_EDITOR_MAX_BIN = 256;
-
-const TfEditor: React.FC<MyTfEditorProps> = (props) => {
-  const innerWidth = props.width - TF_EDITOR_MARGINS.left - TF_EDITOR_MARGINS.right;
-  const innerHeight = props.height - TF_EDITOR_MARGINS.top - TF_EDITOR_MARGINS.bottom;
+const TfEditor: React.FC<TfEditorProps> = (props) => {
+  const innerWidth = props.width - TFEDITOR_MARGINS.left - TFEDITOR_MARGINS.right;
+  const innerHeight = props.height - TFEDITOR_MARGINS.top - TFEDITOR_MARGINS.bottom;
 
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
   const draggedPointIdxRef = useRef<number | null>(null);
@@ -155,8 +152,8 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
   const mouseEventToControlPointValues = (event: MouseEvent | React.MouseEvent): [number, number] => {
     const svgRect = svgRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 };
     return [
-      xScale.invert(clamp(event.clientX - svgRect.x - TF_EDITOR_MARGINS.left, 0, innerWidth)),
-      yScale.invert(clamp(event.clientY - svgRect.y - TF_EDITOR_MARGINS.top, 0, innerHeight)),
+      xScale.invert(clamp(event.clientX - svgRect.x - TFEDITOR_MARGINS.left, 0, innerWidth)),
+      yScale.invert(clamp(event.clientY - svgRect.y - TFEDITOR_MARGINS.top, 0, innerHeight)),
     ];
   };
 
@@ -236,10 +233,10 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
 
     if (cpRectCenter - svgRect.left < svgRect.width / 2) {
       // Control point is towards the left of the plot; open color picker to its right
-      setColorPickerPosition(cpRect.right - svgRect.left + COLOR_PICKER_MARGIN);
+      setColorPickerPosition(cpRect.right - svgRect.left + TFEDITOR_COLOR_PICKER_MARGIN);
     } else {
       // Control point is towards the right of the plot; open color picker to its left
-      setColorPickerPosition(-(svgRect.right - cpRect.left + COLOR_PICKER_MARGIN));
+      setColorPickerPosition(-(svgRect.right - cpRect.left + TFEDITOR_COLOR_PICKER_MARGIN));
     }
   };
 
@@ -353,7 +350,7 @@ const TfEditor: React.FC<MyTfEditorProps> = (props) => {
         onMouseDown={handlePlotMouseDown}
       >
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
-        <g transform={`translate(${TF_EDITOR_MARGINS.left},${TF_EDITOR_MARGINS.top})`}>
+        <g transform={`translate(${TFEDITOR_MARGINS.left},${TFEDITOR_MARGINS.top})`}>
           {/* histogram bars */}
           <g ref={histogramRef} />
           {/* line between control points and gradient under it */}
