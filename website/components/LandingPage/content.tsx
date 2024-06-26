@@ -2,55 +2,94 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 
-import { ProjectEntry } from "../../types";
+import { AppDataProps, ProjectEntry } from "../../types";
+import { ViewMode } from "../../../src";
 
-const BASE_URL = "https://s3-us-west-2.amazonaws.com/bisque.allencell.org/v1.4.0/Cell-Viewer_Thumbnails/";
+const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
+  viewerChannelSettings: {
+    maskChannelName: "low_EGFP",
+    groups: [
+      {
+        name: "Channels",
+        channels: [
+          { match: [0], enabled: true, lut: ["autoij", "autoij"], color: "C3C3C3" },
+          { match: [1], enabled: false },
+          { match: [2], enabled: true, colorizeEnabled: true },
+        ],
+      },
+    ],
+  },
+  viewerSettings: {
+    viewMode: ViewMode.xy,
+    region: { x: [0, 1], y: [0, 1], z: [0.3, 0.3] },
+  },
+};
+
 export const landingPageContent: ProjectEntry[] = [
   {
     name: "Tracked hiPSC FOV-nuclei timelapse datasets",
     inReview: true,
     description: (
       <p>
-        Maximum projections of tracked 3D segmentations of nuclei in growing hiPS cell colonies, with quantitative
-        features of nuclear shape, size and more. The exploratory dataset includes all tracked nuclei, with the baseline
-        colonies, full-interphase, and lineage-annotated datasets as subsets of this dataset, analyzed in the study of
-        nuclear growth{" "}
+        3D timelapses of nuclei in growing hiPS cell colonies of three different starting sizes. Timelapse datasets
+        include 3D transmitted-light bright-field and lamin B1-mEGFP fluorescence 20x images and 3D nuclear segmentation
+        images. These datasets are available for download on{" "}
+        <a
+          href="https://open.quiltdata.com/b/allencell/tree/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          {"Quilt"}
+          <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
+        </a>{" "}
+        and analyzed in the study at{" "}
         <a href="https://www.biorxiv.org/" rel="noopener noreferrer" target="_blank">
           {"<Biorxiv ref>"}
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>
-        . For documentation on the features available in these datasets, visit{" "}
-        <a
-          href="https://open.quiltdata.com/b/allencell/tree/aics/nuc-morph-dataset/timelapse_feature_explorer_datasets/"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {"our datasets hosted on Quilt"}
-          <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
-        </a>
-        .
+        .{" "}
       </p>
     ),
-    // publicationLink: new URL("https://google.com"),
-    // publicationName: "This is the name of the associated publication that the user can click to open in a new tab",
-    loadParams: {
-      cellId: "2025",
-      imageUrl: BASE_URL + "AICS-22/AICS-22_8319_2025_atlas.json",
-      parentImageUrl: BASE_URL + "AICS-22/AICS-22_8319_atlas.json",
-      parentImageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=F8319",
-      imageDownloadHref: "https://files.allencell.org/api/2.0/file/download?collection=cellviewer-1-4/?id=C2025",
-      viewerChannelSettings: {
-        groups: [
-          // first 3 channels on by default!
-          {
-            name: "Channels",
-            channels: [
-              { match: [0, 1, 2], enabled: true },
-              { match: "(.+)", enabled: false },
-            ],
-          },
-        ],
+    datasets: [
+      {
+        name: "Small colony",
+        loadParams: {
+          imageUrl: [
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_09_small/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_09_small/seg.ome.zarr",
+          ],
+          cellId: "",
+          imageDownloadHref: "",
+          parentImageDownloadHref: "",
+          ...nucmorphBaseViewerSettings,
+        },
       },
-    },
+      {
+        name: "Medium colony",
+        loadParams: {
+          imageUrl: [
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_06_mid/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_06_mid/seg.ome.zarr",
+          ],
+          cellId: "",
+          imageDownloadHref: "",
+          parentImageDownloadHref: "",
+          ...nucmorphBaseViewerSettings,
+        },
+      },
+      {
+        name: "Large colony",
+        loadParams: {
+          imageUrl: [
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_05_large/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_05_large/seg.ome.zarr",
+          ],
+          cellId: "",
+          imageDownloadHref: "",
+          parentImageDownloadHref: "",
+          ...nucmorphBaseViewerSettings,
+        },
+      },
+    ],
   },
 ];
