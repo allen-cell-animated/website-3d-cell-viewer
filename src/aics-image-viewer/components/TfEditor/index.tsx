@@ -145,8 +145,37 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     ];
   };
 
-  const handleControlPointDrag = (event: MouseEvent): void => {
+  const handlePlotPointerDown: React.PointerEventHandler<SVGSVGElement> = (event) => {
+    if (draggedPointIdxRef.current === null && event.button === 0) {
+      // this click is not on an existing point - create a new one
+      const [x, opacity] = mouseEventToControlPointValues(event);
+      const point = { x, opacity, color: lastColorRef.current };
+
+      // add new control point to controlPoints
+      const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
+      setDraggedPointIdx(index);
+
+      const newControlPoints = [...props.controlPoints];
+      newControlPoints.splice(index, 0, point);
+      setControlPoints(newControlPoints);
+    }
+
+    setSelectedPointIdx(draggedPointIdxRef.current);
+
+    if (event.button === 0) {
+      // get set up to drag the point around, even if the mouse leaves the SVG element
+      // event.currentTarget.setPointerCapture(event.nativeEvent.pointerId);
+    } else {
+      setDraggedPointIdx(null);
+    }
+  };
+
+  const handleControlPointDrag: React.PointerEventHandler<SVGSVGElement> = (event) => {
     if (draggedPointIdxRef.current === null) {
+      return;
+    }
+    if ((event.buttons & 1) === 0) {
+      handleControlPointDragEnd(event);
       return;
     }
     const draggedIdx = draggedPointIdxRef.current;
@@ -175,37 +204,9 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     setControlPoints(newControlPoints);
   };
 
-  const handlePlotMouseDown: React.MouseEventHandler<SVGSVGElement> = (event) => {
-    if (draggedPointIdxRef.current === null && event.button === 0) {
-      // this click is not on an existing point - create a new one
-      const [x, opacity] = mouseEventToControlPointValues(event);
-      const point = { x, opacity, color: lastColorRef.current };
-
-      // add new control point to controlPoints
-      const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
-      setDraggedPointIdx(index);
-
-      const newControlPoints = [...props.controlPoints];
-      newControlPoints.splice(index, 0, point);
-      setControlPoints(newControlPoints);
-    }
-
-    setSelectedPointIdx(draggedPointIdxRef.current);
-
-    if (event.button === 0) {
-      // get set up to drag the point around, even if the mouse leaves the SVG element
-      document.addEventListener("mousemove", handleControlPointDrag);
-      document.addEventListener(
-        "mouseup",
-        () => {
-          setDraggedPointIdx(null);
-          document.removeEventListener("mousemove", handleControlPointDrag);
-        },
-        { once: true }
-      );
-    } else {
-      setDraggedPointIdx(null);
-    }
+  const handleControlPointDragEnd: React.PointerEventHandler<SVGSVGElement> = (event) => {
+    setDraggedPointIdx(null);
+    // event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const handleControlPointContextMenu: React.MouseEventHandler<SVGCircleElement> = (event) => {
@@ -334,7 +335,9 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         ref={svgRef}
         width={props.width}
         height={props.height}
-        onMouseDown={handlePlotMouseDown}
+        onPointerDown={handlePlotPointerDown}
+        onPointerMove={handleControlPointDrag}
+        onPointerUp={handleControlPointDragEnd}
       >
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TFEDITOR_MARGINS.left},${TFEDITOR_MARGINS.top})`}>
@@ -354,7 +357,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
               cy={yScale(cp.opacity)}
               style={{ fill: colorArrayToString(cp.color) }}
               r={5}
-              onMouseDown={() => setDraggedPointIdx(i)}
+              onPointerDown={() => setDraggedPointIdx(i)}
               onContextMenu={handleControlPointContextMenu}
             />
           ))}
