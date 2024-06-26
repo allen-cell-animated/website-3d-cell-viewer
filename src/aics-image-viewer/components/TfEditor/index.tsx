@@ -16,7 +16,6 @@ import {
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { useRefWithSetter } from "../../shared/utils/hooks";
-import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 const TFEDITOR_COLOR_PICKER_MARGIN = 2;
@@ -64,20 +63,6 @@ const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
     return new Lut().createFromMinMax(hmin, hmax);
   },
   resetXF: (_histo) => new Lut().createFullRange(),
-};
-
-const STYLES: Styles = {
-  cover: {
-    position: "fixed",
-    top: "0px",
-    right: "0px",
-    bottom: "0px",
-    left: "0px",
-  },
-  popover: {
-    position: "absolute",
-    zIndex: "9999",
-  },
 };
 
 /** Defines an SVG gradient with id `id` based on the provided `controlPoints` */
@@ -321,8 +306,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
       {/* ----- CONTROL POINT COLOR PICKER ----- */}
       {colorPickerPosition !== null && (
-        <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
-          <div style={STYLES.cover} onClick={() => setColorPickerPosition(null)} />
+        <div className="tf-editor-popover" style={{ [cpDirection]: Math.abs(colorPickerPosition) }}>
+          <div className="tf-editor-cover" onClick={() => setColorPickerPosition(null)} />
           <SketchPicker
             color={colorArrayToObject(lastColorRef.current)}
             onChange={handleChangeColor}
