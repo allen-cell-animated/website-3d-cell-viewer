@@ -15,13 +15,14 @@ import {
   colorArrayToString,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
+import { useRefWithSetter } from "../../shared/utils/hooks";
 import { Styles } from "../../shared/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 const TFEDITOR_COLOR_PICKER_MARGIN = 2;
 const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
-const TF_EDITOR_NUM_TICKS = 4;
-const TF_EDITOR_MAX_BIN = 256;
+const TFEDITOR_NUM_TICKS = 4;
+const TFEDITOR_MAX_BIN = 255;
 
 const TFEDITOR_MARGINS = {
   top: 10,
@@ -36,7 +37,7 @@ type TfEditorProps = {
   height: number;
   channelData: Channel;
   controlPoints: ControlPoint[];
-  updateChannelLutControlPoints: (controlPoints: ControlPoint[]) => void;
+  updateLutControlPoints: (controlPoints: ControlPoint[]) => void;
   updateColorizeMode: (colorizeEnabled: boolean) => void;
   updateColorizeAlpha: (colorizeAlpha: number) => void;
   colorizeEnabled: boolean;
@@ -45,7 +46,7 @@ type TfEditorProps = {
 
 const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
   autoXF: (histo) => {
-    // Currently unused. min and max are the first and last bins whose values are >=10% of max bin
+    // Currently unused. min and max are the first and last bins whose values are >=10% that of the max bin
     const [hmin, hmax] = histo.findAutoMinMax();
     return new Lut().createFromMinMax(hmin, hmax);
   },
@@ -95,6 +96,7 @@ const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: str
   );
 };
 
+/** Retrieves the bin contents and max bin value from `histogram` */
 function getHistogramBinLengths(histogram: Histogram): { binLengths: number[]; max: number } {
   const binLengths = [];
   // TODO: Change `histogram.bins` to be readable/readonly
@@ -115,7 +117,11 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const innerHeight = props.height - TFEDITOR_MARGINS.top - TFEDITOR_MARGINS.bottom;
 
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
-  const draggedPointIdxRef = useRef<number | null>(null);
+  const [draggedPointIdx, _setDraggedPointIdx] = useState<number | null>(null);
+
+  // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
+  const [controlPointsRef, setControlPoints] = useRefWithSetter(props.updateLutControlPoints, props.controlPoints);
+  const [draggedPointIdxRef, setDraggedPointIdx] = useRefWithSetter(_setDraggedPointIdx, draggedPointIdx);
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
   // Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
@@ -124,15 +130,12 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   const svgRef = useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
 
-  // for breaking stale `mouseMove` closure
-  const controlPointsRef = useRef<ControlPoint[]>(props.controlPoints);
-  const setControlPoints = (newControlPoints: ControlPoint[]): void => {
-    controlPointsRef.current = newControlPoints;
-    props.updateChannelLutControlPoints(newControlPoints);
-  };
-
-  const xScale = d3.scaleLinear().domain([0, TF_EDITOR_MAX_BIN]).rangeRound([0, innerWidth]);
-  const yScale = d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]);
+  // d3 scales define the mapping between data and screen space (and do the heavy lifting of generating plot axes)
+  const xScale = useMemo(
+    () => d3.scaleLinear().domain([0, TFEDITOR_MAX_BIN]).rangeRound([0, innerWidth]),
+    [innerWidth]
+  );
+  const yScale = useMemo(() => d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]), [innerHeight]);
 
   const mouseEventToControlPointValues = (event: MouseEvent | React.MouseEvent): [number, number] => {
     const svgRect = svgRef.current?.getBoundingClientRect() ?? { x: 0, y: 0 };
@@ -180,7 +183,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
       // add new control point to controlPoints
       const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
-      draggedPointIdxRef.current = index;
+      setDraggedPointIdx(index);
 
       const newControlPoints = [...props.controlPoints];
       newControlPoints.splice(index, 0, point);
@@ -195,13 +198,13 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       document.addEventListener(
         "mouseup",
         () => {
-          draggedPointIdxRef.current = null;
+          setDraggedPointIdx(null);
           document.removeEventListener("mousemove", handleControlPointDrag);
         },
         { once: true }
       );
     } else {
-      draggedPointIdxRef.current = null;
+      setDraggedPointIdx(null);
     }
   };
 
@@ -243,24 +246,24 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       .y1(innerHeight)
       .curve(d3.curveLinear);
     return areaGenerator(props.controlPoints) ?? undefined;
-  }, [props.controlPoints]);
+  }, [props.controlPoints, xScale, yScale, innerHeight]);
 
-  // The below `useCallback`s are used as "ref callbacks" - passed as the `ref` prop of SVG elements in order to fill
-  // these elements using D3. They are called when the ref'd component mounts and unmounts, and whenever their identity
-  // changes (i.e. whenever their dependencies change).
+  // The below `useCallback`s are used as "ref callbacks" - passed as the `ref` prop of SVG elements in order to render
+  // these elements' content using D3. They are called when the ref'd component mounts and unmounts, and whenever their
+  // identity changes (i.e. whenever their dependencies change).
 
   const xAxisRef = useCallback(
     (el: SVGGElement) => {
-      const ticks = xScale.ticks(TF_EDITOR_NUM_TICKS);
+      const ticks = xScale.ticks(TFEDITOR_NUM_TICKS);
       ticks[ticks.length - 1] = xScale.domain()[1];
       d3.select(el).call(d3.axisBottom(xScale).tickValues(ticks));
     },
-    [props.width]
+    [xScale]
   );
 
   const yAxisRef = useCallback(
-    (el: SVGGElement) => d3.select(el).call(d3.axisLeft(yScale).ticks(TF_EDITOR_NUM_TICKS)),
-    [props.height]
+    (el: SVGGElement) => d3.select(el).call(d3.axisLeft(yScale).ticks(TFEDITOR_NUM_TICKS)),
+    [yScale]
   );
 
   const histogramRef = useCallback(
@@ -272,8 +275,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       const barWidth = innerWidth / props.channelData.histogram.getNumBins();
       const binScale = d3.scaleLog().domain([0.1, max]).range([innerHeight, 0]).base(2).clamp(true);
 
-      const select = d3
-        .select(el)
+      d3.select(el)
         .selectAll(".bar") // select all the bars of the histogram
         .data(binLengths) // bind the histogram bins to this selection
         .join("rect") // ensure we have exactly as many bound `rect` elements in the DOM as we have histogram bins
@@ -282,19 +284,19 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
         .attr("y", (len) => binScale(len))
         .attr("height", (len) => innerHeight - binScale(len));
+    },
+    [props.channelData.histogram, innerWidth, innerHeight]
+  );
 
-      select.exit().remove();
+  const applyTFGenerator = useCallback(
+    (generator: string): void => {
+      setSelectedPointIdx(null);
+      lastColorRef.current = TFEDITOR_DEFAULT_COLOR;
+      const lut = TF_GENERATORS[generator](props.channelData.histogram);
+      setControlPoints(lut.controlPoints.map((cp) => ({ ...cp, color: TFEDITOR_DEFAULT_COLOR })));
     },
     [props.channelData.histogram]
   );
-
-  const applyTFGenerator = (generator: string): void => {
-    setSelectedPointIdx(null);
-
-    lastColorRef.current = TFEDITOR_DEFAULT_COLOR;
-    const lut = TF_GENERATORS[generator](props.channelData.histogram);
-    setControlPoints(lut.controlPoints.map((cp) => ({ ...cp, color: TFEDITOR_DEFAULT_COLOR })));
-  };
 
   const createTFGeneratorButton = (generator: string, name: string, description: string): React.ReactNode => (
     <Tooltip title={description} placement="top">
@@ -328,7 +330,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
       {/* ----- PLOT SVG ----- */}
       <svg
-        className="tf-editor-svg"
+        className={draggedPointIdx !== null ? "tf-editor-svg dragging" : "tf-editor-svg"}
         ref={svgRef}
         width={props.width}
         height={props.height}
@@ -338,7 +340,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         <g transform={`translate(${TFEDITOR_MARGINS.left},${TFEDITOR_MARGINS.top})`}>
           {/* histogram bars */}
           <g ref={histogramRef} />
-          {/* line between control points and gradient under it */}
+          {/* line between control points, and the gradient under it */}
           <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" d={area} />
           {/* plot axes */}
           <g ref={xAxisRef} className="axis" transform={`translate(0,${innerHeight})`} />
@@ -352,7 +354,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
               cy={yScale(cp.opacity)}
               style={{ fill: colorArrayToString(cp.color) }}
               r={5}
-              onMouseDown={() => (draggedPointIdxRef.current = i)}
+              onMouseDown={() => setDraggedPointIdx(i)}
               onContextMenu={handleControlPointContextMenu}
             />
           ))}

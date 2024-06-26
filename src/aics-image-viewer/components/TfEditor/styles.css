@@ -3,6 +3,10 @@
 .channel-row {
   .tf-editor-svg {
     margin-bottom: 8px;
+
+    &.dragging {
+      cursor: move;
+    }
   }
 
   :host {
