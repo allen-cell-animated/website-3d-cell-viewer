@@ -17,9 +17,9 @@ export function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: 
  * of some state accessible to a closure that might be called after the value is updated.
  */
 // TODO should this replace `useStateWithGetter`?
-export function useSetterWithRef<T>(setter: (value: T) => void): [MutableRefObject<T | undefined>, (value: T) => void];
-export function useSetterWithRef<T>(setter: (value: T) => void, init: T): [MutableRefObject<T>, (value: T) => void];
-export function useSetterWithRef<T>(
+export function useRefWithSetter<T>(setter: (value: T) => void): [MutableRefObject<T | undefined>, (value: T) => void];
+export function useRefWithSetter<T>(setter: (value: T) => void, init: T): [MutableRefObject<T>, (value: T) => void];
+export function useRefWithSetter<T>(
   setter: (value: T) => void,
   init?: T
 ): [MutableRefObject<T | undefined>, (value: T) => void] {
