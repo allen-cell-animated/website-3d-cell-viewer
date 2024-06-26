@@ -234,7 +234,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     }
   };
 
-  /** d3-generated svg data string representing the line between points and the region filled with gradient */
+  /** d3-generated svg data string representing both the line between points and the region filled with gradient */
   const area = useMemo(() => {
     const areaGenerator = d3
       .area<ControlPoint>()
@@ -276,7 +276,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         .select(el)
         .selectAll(".bar") // select all the bars of the histogram
         .data(binLengths) // bind the histogram bins to this selection
-        .join("rect") // ensure we have exactly as many bound `rect` elements as we have histogram bins
+        .join("rect") // ensure we have exactly as many bound `rect` elements in the DOM as we have histogram bins
         .attr("class", "bar")
         .attr("width", barWidth)
         .attr("x", (_len, idx) => xScale(idx)) // set position and height from data
