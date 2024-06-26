@@ -214,7 +214,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const handleControlPointContextMenu: React.MouseEventHandler<SVGCircleElement> = (event) => {
     event.preventDefault();
     if (!event.target || !svgRef.current) {
-      setColorPickerPosition(0);
+      setColorPickerPosition(null);
       return;
     }
 
@@ -349,7 +349,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
           <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" d={area} />
           {/* plot axes */}
           <g ref={xAxisRef} className="axis" transform={`translate(0,${innerHeight})`} />
-          <g ref={yAxisRef} className="axis" transform="translate(0, 0)" />
+          <g ref={yAxisRef} className="axis" />
           {/* control points */}
           {props.controlPoints.map((cp, i) => (
             <circle

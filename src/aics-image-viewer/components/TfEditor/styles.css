@@ -9,16 +9,7 @@
     }
   }
 
-  :host {
-    display: block;
-  }
-
-  /* TODO style will become redundant after class tfeditor is removed */
-  .bar rect,
-  rect.bar {
-    fill: var(--color-controlpanel-border);
-  }
-
+  rect.bar,
   .tick text {
     fill: var(--color-controlpanel-text);
   }
@@ -43,10 +34,10 @@
     cursor: move;
     stroke: $light-gray;
     stroke-width: 1.5px;
-  }
 
-  .selected {
-    fill: white;
-    stroke: white;
+    &.selected {
+      fill: white;
+      stroke: white;
+    }
   }
 }
