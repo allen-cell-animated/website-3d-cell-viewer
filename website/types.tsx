@@ -6,7 +6,7 @@ export type AppDataProps = Omit<AppProps, "appHeight" | "canvasMargin">;
 
 export type DatasetEntry = {
   name: string;
-  description: string;
+  description?: string;
   loadParams: AppDataProps;
 };
 

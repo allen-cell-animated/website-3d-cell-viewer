@@ -169,17 +169,16 @@ const DatasetCard = styled.li`
   min-width: 180px;
   padding: 5px;
 
-  & > h4 {
-    text-align: center;
+  & > h3 {
     display: grid;
     margin: 0;
   }
   & > p {
-    text-align: center;
     display: grid;
   }
-  & > a {
-    margin: auto;
+  & > a,
+  & > button {
+    margin: 0 auto 0 0;
     display: grid;
   }
 `;
@@ -241,8 +240,8 @@ export default function LandingPage(): ReactElement {
     // TODO: Use links here instead of button onClicks.
     return (
       <DatasetCard key={index}>
-        <h4>{dataset.name}</h4>
-        <p>{dataset.description}</p>
+        <h3>{dataset.name}</h3>
+        {dataset.description && <p>{dataset.description}</p>}
         <Button type="primary" onClick={() => onClickLoad(dataset.loadParams)}>
           Load<VisuallyHidden> dataset {dataset.name}</VisuallyHidden>
         </Button>
