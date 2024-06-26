@@ -27,7 +27,7 @@ const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
 
 export const landingPageContent: ProjectEntry[] = [
   {
-    name: "Tracked hiPSC FOV-nuclei timelapse datasets",
+    name: "hiPSC FOV-nuclei timelapse datasets",
     inReview: true,
     description: (
       <p>
