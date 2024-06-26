@@ -35,7 +35,6 @@ type TfEditorProps = {
   id: string;
   width: number;
   height: number;
-  volumeData: Uint8Array;
   channelData: Channel;
   controlPoints: ControlPoint[];
   updateChannelLutControlPoints: (controlPoints: ControlPoint[]) => void;
@@ -95,6 +94,7 @@ const STYLES: Styles = {
   },
 };
 
+/** Defines an SVG gradient with id `id` based on the provided `controlPoints` */
 const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: string }> = ({ controlPoints, id }) => {
   const range = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
   return (
@@ -139,8 +139,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   const svgRef = useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
 
-  const controlPointsRef = useRef<ControlPoint[]>(props.controlPoints); // for breaking stale `mouseMove` closure
-
+  // for breaking stale `mouseMove` closure
+  const controlPointsRef = useRef<ControlPoint[]>(props.controlPoints);
   const setControlPoints = (newControlPoints: ControlPoint[]): void => {
     controlPointsRef.current = newControlPoints;
     props.updateChannelLutControlPoints(newControlPoints);

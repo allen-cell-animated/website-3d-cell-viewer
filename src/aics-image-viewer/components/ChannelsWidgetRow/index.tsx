@@ -100,7 +100,6 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
         id={"TFEditor" + index}
         width={418}
         height={125}
-        volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
         updateChannelLutControlPoints={createChannelSettingHandler("controlPoints")}
