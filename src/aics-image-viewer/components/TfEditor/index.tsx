@@ -71,7 +71,7 @@ const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
 //  \ /
 //   *
 // width: 0.65 * height; height of rectangle: 0.6 * height; height of triangle: 0.4 * height
-const handleSymbol: d3.SymbolType = {
+const sliderHandleSymbol: d3.SymbolType = {
   draw: (context, size) => {
     // size is symbol area in px^2
     const height = Math.sqrt(size * 1.9);
