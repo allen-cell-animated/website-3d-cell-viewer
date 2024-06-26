@@ -164,7 +164,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
     if (event.button === 0) {
       // get set up to drag the point around, even if the mouse leaves the SVG element
-      // event.currentTarget.setPointerCapture(event.nativeEvent.pointerId);
+      event.currentTarget.setPointerCapture(event.nativeEvent.pointerId);
     } else {
       setDraggedPointIdx(null);
     }
@@ -179,6 +179,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       return;
     }
     const draggedIdx = draggedPointIdxRef.current;
+    event.stopPropagation();
+    event.preventDefault();
 
     // Update dragged control point
     const [x, opacity] = mouseEventToControlPointValues(event);
@@ -206,7 +208,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   const handleControlPointDragEnd: React.PointerEventHandler<SVGSVGElement> = (event) => {
     setDraggedPointIdx(null);
-    // event.currentTarget.releasePointerCapture(event.pointerId);
+    event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const handleControlPointContextMenu: React.MouseEventHandler<SVGCircleElement> = (event) => {
