@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, MutableRefObject } from "react";
 
 /** A `useState` that also creates a getter function for breaking through closures. */
 export function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: T) => void, () => T] {
@@ -10,6 +10,28 @@ export function useStateWithGetter<T>(initialState: T | (() => T)): [T, (value: 
   }, []);
   const getState = useCallback(() => stateRef.current, []);
   return [state, wrappedSetState, getState];
+}
+
+/**
+ * Wraps a setter function and keeps a ref updated to follow the set value. Useful for making the most up-to-date value
+ * of some state accessible to a closure that might be called after the value is updated.
+ */
+// TODO should this replace `useStateWithGetter`?
+export function useSetterWithRef<T>(setter: (value: T) => void): [MutableRefObject<T | undefined>, (value: T) => void];
+export function useSetterWithRef<T>(setter: (value: T) => void, init: T): [MutableRefObject<T>, (value: T) => void];
+export function useSetterWithRef<T>(
+  setter: (value: T) => void,
+  init?: T
+): [MutableRefObject<T | undefined>, (value: T) => void] {
+  const value = init === undefined ? useRef() : useRef<T>(init);
+  const wrappedSetter = useCallback(
+    (newValue: T) => {
+      value.current = newValue;
+      setter(newValue);
+    },
+    [setter]
+  );
+  return [value, wrappedSetter];
 }
 
 /**
