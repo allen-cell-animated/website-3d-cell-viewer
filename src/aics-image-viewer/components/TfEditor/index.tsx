@@ -292,6 +292,24 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     </Tooltip>
   );
 
+  // Create one svg circle element for each control point
+  const controlPointCircles = props.controlPoints.map((cp, i) => (
+    <circle
+      key={i}
+      className={i === selectedPointIdx ? "selected" : ""}
+      cx={xScale(cp.x)}
+      cy={yScale(cp.opacity)}
+      style={{ fill: colorArrayToString(cp.color) }}
+      r={5}
+      onPointerDown={() => setDraggedPointIdx(i)}
+      onContextMenu={handleControlPointContextMenu}
+    />
+  ));
+  // Move selected control point to the end so it's not occluded by other nearby points
+  if (selectedPointIdx !== null) {
+    controlPointCircles.push(controlPointCircles.splice(selectedPointIdx, 1)[0]);
+  }
+
   const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
 
   return (
@@ -336,18 +354,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
           <g ref={xAxisRef} className="axis" transform={`translate(0,${innerHeight})`} />
           <g ref={yAxisRef} className="axis" />
           {/* control points */}
-          {props.controlPoints.map((cp, i) => (
-            <circle
-              key={i}
-              className={i === selectedPointIdx ? "selected" : ""}
-              cx={xScale(cp.x)}
-              cy={yScale(cp.opacity)}
-              style={{ fill: colorArrayToString(cp.color) }}
-              r={5}
-              onPointerDown={() => setDraggedPointIdx(i)}
-              onContextMenu={handleControlPointContextMenu}
-            />
-          ))}
+          {controlPointCircles}
         </g>
       </svg>
 
