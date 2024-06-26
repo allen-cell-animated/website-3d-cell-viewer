@@ -13,7 +13,6 @@ import {
   ColorArray,
   colorArrayToObject,
   colorArrayToString,
-  ColorObject,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { Styles } from "../../shared/types";
@@ -42,20 +41,6 @@ type TfEditorProps = {
   updateColorizeAlpha: (colorizeAlpha: number) => void;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
-};
-
-/** Wrapper to convince color picker interface to update while open */
-const StatefulSketchPicker: React.FC<{
-  color: ColorObject;
-  onChange: (newColor: ColorResult) => void;
-  disableAlpha: boolean;
-}> = ({ color, onChange, disableAlpha }) => {
-  const [colorState, updateColorState] = React.useState(color);
-  const wrappedOnChange = (newColor: ColorResult): void => {
-    updateColorState(newColor.rgb);
-    onChange(newColor);
-  };
-  return <SketchPicker color={colorState} onChange={wrappedOnChange} disableAlpha={disableAlpha} />;
 };
 
 const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
@@ -333,7 +318,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       {colorPickerPosition !== null && (
         <div style={{ ...STYLES.popover, ...{ [cpDirection]: Math.abs(colorPickerPosition) } }}>
           <div style={STYLES.cover} onClick={() => setColorPickerPosition(null)} />
-          <StatefulSketchPicker
+          <SketchPicker
             color={colorArrayToObject(lastColorRef.current)}
             onChange={handleChangeColor}
             disableAlpha={true}
