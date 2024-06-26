@@ -7,7 +7,7 @@ import { ViewMode } from "../../../src";
 
 const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
   viewerChannelSettings: {
-    maskChannelName: "low_EGFP",
+    maskChannelName: "",
     groups: [
       {
         name: "Channels",
