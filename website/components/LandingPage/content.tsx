@@ -42,12 +42,12 @@ export const landingPageContent: ProjectEntry[] = [
           {"Quilt"}
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>{" "}
-        and analyzed in the study at{" "}
+        and analyzed in the study{" "}
         <a href="https://www.biorxiv.org/" rel="noopener noreferrer" target="_blank">
-          {"<Biorxiv ref>"}
+          {"Dixon et al. 2024"}
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>
-        .{" "}
+        .
       </p>
     ),
     datasets: [
