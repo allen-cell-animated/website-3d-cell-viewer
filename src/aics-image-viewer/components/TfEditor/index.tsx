@@ -18,7 +18,7 @@ import {
 import { useRefWithSetter } from "../../shared/utils/hooks";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
-const TFEDITOR_COLOR_PICKER_MARGIN = 2;
+const TFEDITOR_COLOR_PICKER_MARGIN_PX = 2;
 const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
 const TFEDITOR_NUM_TICKS = 4;
 const TFEDITOR_MAX_BIN = 255;
@@ -29,6 +29,8 @@ const TFEDITOR_MARGINS = {
   bottom: 20, // includes space for x-axis
   left: 25,
 };
+
+const MOUSE_EVENT_BUTTONS_PRIMARY = 1;
 
 type TfEditorProps = {
   id: string;
@@ -159,7 +161,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     if (draggedPointIdxRef.current === null) {
       return;
     }
-    if ((event.buttons & 1) === 0) {
+    if ((event.buttons & MOUSE_EVENT_BUTTONS_PRIMARY) === 0) {
       handleControlPointDragEnd(event);
       return;
     }
@@ -209,10 +211,10 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
     if (cpRectCenter - svgRect.left < svgRect.width / 2) {
       // Control point is towards the left of the plot; open color picker to its right
-      setColorPickerPosition(cpRect.right - svgRect.left + TFEDITOR_COLOR_PICKER_MARGIN);
+      setColorPickerPosition(cpRect.right - svgRect.left + TFEDITOR_COLOR_PICKER_MARGIN_PX);
     } else {
       // Control point is towards the right of the plot; open color picker to its left
-      setColorPickerPosition(-(svgRect.right - cpRect.left + TFEDITOR_COLOR_PICKER_MARGIN));
+      setColorPickerPosition(-(svgRect.right - cpRect.left + TFEDITOR_COLOR_PICKER_MARGIN_PX));
     }
   };
 
