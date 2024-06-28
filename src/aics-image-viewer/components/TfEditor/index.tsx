@@ -190,7 +190,6 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   };
 
   const dragRampSlider = (handle: TfEditorRampSliderHandle, x: number): void => {
-    console.log("hey there!");
     if (handle === TfEditorRampSliderHandle.Min) {
       const max = rampRef.current[1];
       setRamp([Math.min(x, max), max]);
