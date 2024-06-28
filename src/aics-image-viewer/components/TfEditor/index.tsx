@@ -26,7 +26,7 @@ const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
 const TFEDITOR_NUM_TICKS = 4;
 
 const TFEDITOR_MARGINS = {
-  top: 10,
+  top: 18,
   right: 20,
   bottom: 20, // includes space for x-axis
   left: 25,
@@ -447,7 +447,6 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
                   onPointerDown={() => setDraggedPointIdx(TfEditorRampSliderHandle.Min)}
                 />
               </g>
-              {/* TODO FIXME upper slider handle is cut off by SVG edge */}
               <g transform={`translate(${xScale(props.ramp[1])})`}>
                 <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
                 <path d={sliderHandlePath} onPointerDown={() => setDraggedPointIdx(TfEditorRampSliderHandle.Max)} />

@@ -31,10 +31,6 @@
     justify-content: start;
     align-items: end;
     gap: 6px;
-
-    &:not(:last-child) {
-      margin-bottom: 8px;
-    }
   }
 
   &.controls-closed .ant-btn-text:not(:focus-visible) {
