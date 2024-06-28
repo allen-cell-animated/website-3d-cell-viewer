@@ -31,6 +31,11 @@ const TFEDITOR_MARGINS = {
   left: 25,
 };
 
+const enum TfEditorRampSliderHandle {
+  Min = "min",
+  Max = "max",
+}
+
 type TfEditorProps = {
   id: string;
   width: number;
@@ -93,9 +98,9 @@ const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: str
   const range = controlPoints[controlPoints.length - 1].x - controlPoints[0].x;
   return (
     <defs>
-      <linearGradient id={id} gradientUnits="objectBoundingBox" spreadMethod="pad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <linearGradient id={id} gradientUnits="objectBoundingBox" spreadMethod="pad" x2="100%">
         {controlPoints.map((cp, i) => {
-          const offset = "" + ((cp.x - controlPoints[0].x) / range) * 100 + "%";
+          const offset = ((cp.x - controlPoints[0].x) / range) * 100 + "%";
           const opacity = Math.min(cp.opacity, TFEDITOR_GRADIENT_MAX_OPACITY);
           return <stop key={i} stopColor={colorArrayToString(cp.color)} stopOpacity={opacity} offset={offset} />;
         })}
@@ -127,14 +132,13 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const innerHeight = props.height - TFEDITOR_MARGINS.top - TFEDITOR_MARGINS.bottom;
 
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
-  const [draggedPointIdx, _setDraggedPointIdx] = useState<number | null>(null);
+  const [draggedPointIdx, _setDraggedPointIdx] = useState<number | TfEditorRampSliderHandle | null>(null);
 
   // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
-  const _setControlPoints = useCallback(
-    (newControlPoints: ControlPoint[]) => changeChannelSetting("controlPoints", newControlPoints),
-    [changeChannelSetting]
-  );
-  const [controlPointsRef, setControlPoints] = useRefWithSetter(_setControlPoints, props.controlPoints);
+  const _setCPs = useCallback((p: ControlPoint[]) => changeChannelSetting("controlPoints", p), [changeChannelSetting]);
+  const _setRamp = useCallback((ramp: [number, number]) => changeChannelSetting("ramp", ramp), [changeChannelSetting]);
+  const [controlPointsRef, setControlPoints] = useRefWithSetter(_setCPs, props.controlPoints);
+  const [rampRef, setRamp] = useRefWithSetter(_setRamp, props.ramp);
   const [draggedPointIdxRef, setDraggedPointIdx] = useRefWithSetter(_setDraggedPointIdx, draggedPointIdx);
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
@@ -159,45 +163,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     ];
   };
 
-  const handlePlotPointerDown: React.PointerEventHandler<SVGSVGElement> = (event) => {
-    if (draggedPointIdxRef.current === null && event.button === 0) {
-      // this click is not on an existing point - create a new one
-      const [x, opacity] = mouseEventToControlPointValues(event);
-      const point = { x, opacity, color: lastColorRef.current };
-
-      // add new control point to controlPoints
-      const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
-      setDraggedPointIdx(index);
-
-      const newControlPoints = [...props.controlPoints];
-      newControlPoints.splice(index, 0, point);
-      setControlPoints(newControlPoints);
-    }
-
-    setSelectedPointIdx(draggedPointIdxRef.current);
-
-    if (event.button === 0) {
-      // get set up to drag the point around, even if the mouse leaves the SVG element
-      event.currentTarget.setPointerCapture(event.nativeEvent.pointerId);
-    } else {
-      setDraggedPointIdx(null);
-    }
-  };
-
-  const handleControlPointDrag: React.PointerEventHandler<SVGSVGElement> = (event) => {
-    if (draggedPointIdxRef.current === null) {
-      return;
-    }
-    if ((event.buttons & 1) === 0) {
-      handleControlPointDragEnd(event);
-      return;
-    }
-    const draggedIdx = draggedPointIdxRef.current;
-    event.stopPropagation();
-    event.preventDefault();
-
-    // Update dragged control point
-    const [x, opacity] = mouseEventToControlPointValues(event);
+  const dragControlPoint = (draggedIdx: number, x: number, opacity: number): void => {
     const newControlPoints = [...controlPointsRef.current];
     const draggedPoint = newControlPoints[draggedIdx];
     draggedPoint.x = x;
@@ -211,8 +177,10 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     if (idxLeft < draggedIdx) {
       const numPointsToRemove = draggedIdx - idxLeft; // should almost always be 1
       newControlPoints.splice(idxLeft, numPointsToRemove);
-      draggedPointIdxRef.current -= numPointsToRemove;
-      setSelectedPointIdx(draggedPointIdxRef.current);
+
+      const newIdx = draggedIdx - numPointsToRemove;
+      setDraggedPointIdx(newIdx);
+      setSelectedPointIdx(newIdx);
     } else if (idxRight > draggedIdx + 1) {
       newControlPoints.splice(draggedIdx + 1, idxRight - draggedIdx - 1);
     }
@@ -220,7 +188,69 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     setControlPoints(newControlPoints);
   };
 
-  const handleControlPointDragEnd: React.PointerEventHandler<SVGSVGElement> = (event) => {
+  const dragRampSlider = (handle: TfEditorRampSliderHandle, x: number): void => {
+    console.log("hey there!");
+    if (handle === TfEditorRampSliderHandle.Min) {
+      const max = rampRef.current[1];
+      setRamp([Math.min(x, max), max]);
+    } else {
+      const min = rampRef.current[0];
+      setRamp([min, Math.max(x, min)]);
+    }
+  };
+
+  const handlePlotPointerDown: React.PointerEventHandler<SVGSVGElement> = (event) => {
+    if (props.useControlPoints) {
+      // Advanced mode - we're either creating a new control point or selecting/dragging an existing one
+      if (draggedPointIdxRef.current === null && event.button === 0) {
+        // this click is not on an existing point - create a new one
+        const [x, opacity] = mouseEventToControlPointValues(event);
+        const point = { x, opacity, color: lastColorRef.current };
+
+        // add new control point to controlPoints
+        const index = d3.bisector<ControlPoint, ControlPoint>((a, b) => a.x - b.x).left(props.controlPoints, point);
+        setDraggedPointIdx(index);
+
+        const newControlPoints = [...props.controlPoints];
+        newControlPoints.splice(index, 0, point);
+        setControlPoints(newControlPoints);
+      }
+
+      if (typeof draggedPointIdxRef.current !== "string") {
+        setSelectedPointIdx(draggedPointIdxRef.current);
+      }
+    }
+
+    if (event.button === 0 && draggedPointIdxRef.current !== null) {
+      // get set up to drag the point around, even if the mouse leaves the SVG element
+      event.currentTarget.setPointerCapture(event.nativeEvent.pointerId);
+    } else {
+      setDraggedPointIdx(null);
+    }
+  };
+
+  const handlePlotPointerMove: React.PointerEventHandler<SVGSVGElement> = (event) => {
+    if (draggedPointIdxRef.current === null) {
+      return;
+    }
+
+    if ((event.buttons & 1) === 0) {
+      handleDragEnd(event);
+      return;
+    }
+
+    event.stopPropagation();
+    event.preventDefault();
+    const [x, opacity] = mouseEventToControlPointValues(event);
+
+    if (typeof draggedPointIdxRef.current === "number") {
+      dragControlPoint(draggedPointIdxRef.current, x, opacity);
+    } else {
+      dragRampSlider(draggedPointIdxRef.current, x);
+    }
+  };
+
+  const handleDragEnd: React.PointerEventHandler<SVGSVGElement> = (event) => {
     setDraggedPointIdx(null);
     event.currentTarget.releasePointerCapture(event.pointerId);
   };
@@ -323,7 +353,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     </Tooltip>
   );
 
-  // Create one svg circle element for each control point
+  // create one svg circle element for each control point
   const controlPointCircles = props.useControlPoints
     ? props.controlPoints.map((cp, i) => (
         <circle
@@ -338,7 +368,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         />
       ))
     : null;
-  // Move selected control point to the end so it's not occluded by other nearby points
+  // move selected control point to the end so it's not occluded by other nearby points
   if (controlPointCircles !== null && selectedPointIdx !== null) {
     controlPointCircles.push(controlPointCircles.splice(selectedPointIdx, 1)[0]);
   }
@@ -381,8 +411,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         width={props.width}
         height={props.height}
         onPointerDown={handlePlotPointerDown}
-        onPointerMove={handleControlPointDrag}
-        onPointerUp={handleControlPointDragEnd}
+        onPointerMove={handlePlotPointerMove}
+        onPointerUp={handleDragEnd}
       >
         <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TFEDITOR_MARGINS.left},${TFEDITOR_MARGINS.top})`}>
@@ -400,12 +430,16 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
             <g className="ramp-sliders">
               <g transform={`translate(${xScale(props.ramp[0])})`}>
                 <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
-                <path d={sliderHandlePath} transform={`translate(0,${innerHeight}) rotate(180)`} />
+                <path
+                  d={sliderHandlePath}
+                  transform={`translate(0,${innerHeight}) rotate(180)`}
+                  onPointerDown={() => setDraggedPointIdx(TfEditorRampSliderHandle.Min)}
+                />
               </g>
               {/* TODO FIXME upper slider handle is cut off by SVG edge */}
               <g transform={`translate(${xScale(props.ramp[1])})`}>
                 <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
-                <path d={sliderHandlePath} />
+                <path d={sliderHandlePath} onPointerDown={() => setDraggedPointIdx(TfEditorRampSliderHandle.Max)} />
               </g>
             </g>
           )}
