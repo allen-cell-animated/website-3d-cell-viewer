@@ -15,6 +15,7 @@ import {
   colorArrayToString,
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
+import { controlPointsToRamp, rampToControlPoints } from "../../shared/utils/controlPointsToLut";
 import { useRefWithSetter } from "../../shared/utils/hooks";
 import type { SingleChannelSettingUpdater } from "../ViewerStateProvider/types";
 
@@ -292,8 +293,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       .y0((d) => yScale(d.opacity))
       .y1(innerHeight)
       .curve(d3.curveLinear);
-    return areaGenerator(props.controlPoints) ?? undefined;
-  }, [props.controlPoints, xScale, yScale, innerHeight]);
+    return areaGenerator(props.useControlPoints ? props.controlPoints : rampToControlPoints(props.ramp)) ?? undefined;
+  }, [props.controlPoints, props.ramp, props.useControlPoints, xScale, yScale, innerHeight]);
 
   const sliderHandlePath = useMemo(() => d3.symbol().type(sliderHandleSymbol).size(80)() ?? undefined, []);
 
@@ -342,9 +343,13 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       setSelectedPointIdx(null);
       lastColorRef.current = TFEDITOR_DEFAULT_COLOR;
       const lut = TF_GENERATORS[generator](props.channelData.histogram);
-      setControlPoints(lut.controlPoints.map((cp) => ({ ...cp, color: TFEDITOR_DEFAULT_COLOR })));
+      if (props.useControlPoints) {
+        setControlPoints(lut.controlPoints.map((cp) => ({ ...cp, color: TFEDITOR_DEFAULT_COLOR })));
+      } else {
+        setRamp(controlPointsToRamp(lut.controlPoints));
+      }
     },
-    [props.channelData.histogram]
+    [props.channelData.histogram, props.useControlPoints]
   );
 
   const createTFGeneratorButton = (generator: string, name: string, description: string): React.ReactNode => (
