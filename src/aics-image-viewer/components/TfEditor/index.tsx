@@ -402,6 +402,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
                 <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
                 <path d={sliderHandlePath} transform={`translate(0,${innerHeight}) rotate(180)`} />
               </g>
+              {/* TODO FIXME upper slider handle is cut off by SVG edge */}
               <g transform={`translate(${xScale(props.ramp[1])})`}>
                 <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
                 <path d={sliderHandlePath} />
