@@ -286,6 +286,11 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     }
   };
 
+  const controlPointsToRender = useMemo(
+    () => (props.useControlPoints ? props.controlPoints : rampToControlPoints(props.ramp)),
+    [props.controlPoints, props.ramp, props.useControlPoints]
+  );
+
   /** d3-generated svg data string representing both the line between points and the region filled with gradient */
   const areaPath = useMemo(() => {
     const areaGenerator = d3
@@ -294,8 +299,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       .y0((d) => yScale(d.opacity))
       .y1(innerHeight)
       .curve(d3.curveLinear);
-    return areaGenerator(props.useControlPoints ? props.controlPoints : rampToControlPoints(props.ramp)) ?? undefined;
-  }, [props.controlPoints, props.ramp, props.useControlPoints, xScale, yScale, innerHeight]);
+    return areaGenerator(controlPointsToRender) ?? undefined;
+  }, [controlPointsToRender, xScale, yScale, innerHeight]);
 
   const sliderHandlePath = useMemo(() => d3.symbol().type(sliderHandleSymbol).size(80)() ?? undefined, []);
 
@@ -420,7 +425,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         onPointerMove={handlePlotPointerMove}
         onPointerUp={handleDragEnd}
       >
-        <ControlPointGradientDef controlPoints={props.controlPoints} id={`tfGradient-${props.id}`} />
+        <ControlPointGradientDef controlPoints={controlPointsToRender} id={`tfGradient-${props.id}`} />
         <g transform={`translate(${TFEDITOR_MARGINS.left},${TFEDITOR_MARGINS.top})`}>
           {/* histogram bars */}
           <g ref={histogramRef} />
