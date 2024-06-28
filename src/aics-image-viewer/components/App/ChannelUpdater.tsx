@@ -74,18 +74,18 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
     [colorizeEnabled]
   );
 
-  const { controlPoints, rampMin, rampMax, useControlPoints } = channelState;
+  const { controlPoints, ramp, useControlPoints } = channelState;
   useImageEffect(
     (currentImage) => {
       if (useControlPoints && controlPoints.length < 2) {
         return;
       }
-      const controlPointsToUse = useControlPoints ? controlPoints : rampToControlPoints(rampMin, rampMax);
+      const controlPointsToUse = useControlPoints ? controlPoints : rampToControlPoints(ramp);
       const gradient = controlPointsToLut(controlPointsToUse);
       currentImage.setLut(index, gradient);
       view3d.updateLuts(currentImage);
     },
-    [controlPoints, rampMin, rampMax, useControlPoints]
+    [controlPoints, ramp, useControlPoints]
   );
 
   useImageEffect(

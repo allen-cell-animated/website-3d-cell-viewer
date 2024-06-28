@@ -62,8 +62,7 @@ export interface ChannelState {
   colorizeAlpha: number;
   opacity: number;
   color: ColorArray;
-  rampMin: number;
-  rampMax: number;
+  ramp: [number, number];
   useControlPoints: boolean;
   controlPoints: ControlPoint[];
 }

@@ -130,8 +130,7 @@ const DEFAULT_CHANNEL_STATE: ChannelState = {
   opacity: 1.0,
   color: [226, 205, 179] as ColorArray,
   useControlPoints: false,
-  rampMin: 0,
-  rampMax: TFEDITOR_MAX_BIN,
+  ramp: [0, TFEDITOR_MAX_BIN],
   controlPoints: [],
 };
 
@@ -268,10 +267,9 @@ const App: React.FC<AppProps> = (props) => {
     // If this is the first load of this image, auto-generate initial LUTs
     if (initialLoadRef.current || !thisChannelsSettings.controlPoints) {
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      const [rampMin, rampMax] = controlPointsToRamp(newControlPoints);
+      const ramp = controlPointsToRamp(newControlPoints);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
-      changeChannelSetting(channelIndex, "rampMin", rampMin);
-      changeChannelSetting(channelIndex, "rampMax", rampMax);
+      changeChannelSetting(channelIndex, "ramp", ramp);
     } else {
       // try not to update lut from here if we are in play mode
       if (playingAxis !== null) {
@@ -311,7 +309,7 @@ const App: React.FC<AppProps> = (props) => {
   ): ChannelState => {
     // note that this modifies aimg also
     const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
-    const [rampMin, rampMax] = newControlPoints ? controlPointsToRamp(newControlPoints) : [0, TFEDITOR_MAX_BIN];
+    const ramp = newControlPoints ? controlPointsToRamp(newControlPoints) : ([0, TFEDITOR_MAX_BIN] as [number, number]);
 
     let initSettings = {} as Partial<ViewerChannelSetting>;
     if (viewerChannelSettings) {
@@ -328,8 +326,7 @@ const App: React.FC<AppProps> = (props) => {
       isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
       opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
       color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-      rampMin,
-      rampMax,
+      ramp,
       useControlPoints: defaultChannelState.useControlPoints,
       controlPoints: newControlPoints ?? defaultChannelState.controlPoints,
     };

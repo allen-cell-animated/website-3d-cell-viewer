@@ -79,7 +79,7 @@ export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, num
   return [controlPoints[1].x, controlPoints[2].x];
 }
 
-export function rampToControlPoints(min: number, max: number): ControlPoint[] {
+export function rampToControlPoints([min, max]: [number, number]): ControlPoint[] {
   return [
     { x: 0, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
     { x: min, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
