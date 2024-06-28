@@ -22,7 +22,10 @@
     bottom: 0;
   }
 
-  rect.bar,
+  rect.bar {
+    fill: var(--color-controlpanel-border);
+  }
+
   .tick text {
     fill: var(--color-controlpanel-text);
   }
@@ -40,6 +43,16 @@
   .line {
     stroke: $light-gray;
     stroke-width: 1.5px;
+  }
+
+  .ramp-sliders {
+    path {
+      fill: var(--color-controlpanel-ramp-slider);
+    }
+
+    line {
+      stroke: var(--color-controlpanel-ramp-slider);
+    }
   }
 
   circle {
