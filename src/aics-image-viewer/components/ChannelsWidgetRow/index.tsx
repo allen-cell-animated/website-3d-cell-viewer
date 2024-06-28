@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel } from "@aics/volume-viewer";
@@ -10,7 +10,11 @@ import ColorPicker from "../ColorPicker";
 import "./styles.css";
 
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
-import type { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../ViewerStateProvider/types";
+import {
+  type ChannelState,
+  type ChannelSettingUpdater,
+  type SingleChannelSettingUpdater,
+} from "../ViewerStateProvider/types";
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
@@ -31,6 +35,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const { index, changeChannelSetting, saveIsosurface, channelState } = props;
   const [controlsOpen, setControlsOpen] = useState(false);
 
+  const changeSettingForThisChannel = useCallback<SingleChannelSettingUpdater>(
+    (key, value) => changeChannelSetting(index, key, value),
+    [changeChannelSetting, index]
+  );
+
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
     changeChannelSetting(index, "volumeEnabled", target.checked);
   };
@@ -39,14 +48,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     changeChannelSetting(index, "isosurfaceEnabled", target.checked);
   };
 
-  const createChannelSettingHandler = <K extends ChannelStateKey>(settingKey: K) => {
-    return (newValue: ChannelState[K]) => changeChannelSetting(index, settingKey, newValue);
-  };
-
-  const _onIsovalueChange = createChannelSettingHandler("isovalue");
-  const onIsovalueChange = ([newValue]: number[]): void => _onIsovalueChange(newValue);
-  const _onOpacityChange = createChannelSettingHandler("opacity");
-  const onOpacityChange = ([newValue]: number[]): void => _onOpacityChange(newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+  const onIsovalueChange = ([newValue]: number[]): void => changeSettingForThisChannel("isovalue", newValue);
+  const onOpacityChange = ([newValue]: number[]): void =>
+    changeSettingForThisChannel("opacity", newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
 
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
@@ -82,7 +86,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const createTFEditor = (): React.ReactNode => {
-    const { controlPoints, colorizeEnabled, colorizeAlpha } = channelState;
+    const { controlPoints, colorizeEnabled, colorizeAlpha, useControlPoints, ramp } = channelState;
     return (
       <TfEditor
         id={"TFEditor" + index}
@@ -90,11 +94,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
         height={125}
         channelData={props.channelDataForChannel}
         controlPoints={controlPoints}
-        updateLutControlPoints={createChannelSettingHandler("controlPoints")}
-        updateColorizeMode={createChannelSettingHandler("colorizeEnabled")}
-        updateColorizeAlpha={createChannelSettingHandler("colorizeAlpha")}
+        changeChannelSetting={changeSettingForThisChannel}
         colorizeEnabled={colorizeEnabled}
         colorizeAlpha={colorizeAlpha}
+        useControlPoints={useControlPoints}
+        ramp={ramp}
       />
     );
   };

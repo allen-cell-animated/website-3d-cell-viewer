@@ -16,12 +16,13 @@ import {
   colorObjectToArray,
 } from "../../shared/utils/colorRepresentations";
 import { useRefWithSetter } from "../../shared/utils/hooks";
+import type { SingleChannelSettingUpdater } from "../ViewerStateProvider/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
+export const TFEDITOR_MAX_BIN = 255;
 const TFEDITOR_COLOR_PICKER_MARGIN = 2;
 const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
 const TFEDITOR_NUM_TICKS = 4;
-const TFEDITOR_MAX_BIN = 255;
 
 const TFEDITOR_MARGINS = {
   top: 10,
@@ -35,12 +36,12 @@ type TfEditorProps = {
   width: number;
   height: number;
   channelData: Channel;
-  controlPoints: ControlPoint[];
-  updateLutControlPoints: (controlPoints: ControlPoint[]) => void;
-  updateColorizeMode: (colorizeEnabled: boolean) => void;
-  updateColorizeAlpha: (colorizeAlpha: number) => void;
+  changeChannelSetting: SingleChannelSettingUpdater;
   colorizeEnabled: boolean;
   colorizeAlpha: number;
+  useControlPoints: boolean;
+  controlPoints: ControlPoint[];
+  ramp: [number, number];
 };
 
 const TF_GENERATORS: Record<string, (histogram: Histogram) => Lut> = {
@@ -120,6 +121,8 @@ function getHistogramBinLengths(histogram: Histogram): { binLengths: number[]; m
 const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
 const TfEditor: React.FC<TfEditorProps> = (props) => {
+  const { changeChannelSetting } = props;
+
   const innerWidth = props.width - TFEDITOR_MARGINS.left - TFEDITOR_MARGINS.right;
   const innerHeight = props.height - TFEDITOR_MARGINS.top - TFEDITOR_MARGINS.bottom;
 
@@ -127,7 +130,11 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const [draggedPointIdx, _setDraggedPointIdx] = useState<number | null>(null);
 
   // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
-  const [controlPointsRef, setControlPoints] = useRefWithSetter(props.updateLutControlPoints, props.controlPoints);
+  const _setControlPoints = useCallback(
+    (newControlPoints: ControlPoint[]) => changeChannelSetting("controlPoints", newControlPoints),
+    [changeChannelSetting]
+  );
+  const [controlPointsRef, setControlPoints] = useRefWithSetter(_setControlPoints, props.controlPoints);
   const [draggedPointIdxRef, setDraggedPointIdx] = useRefWithSetter(_setDraggedPointIdx, draggedPointIdx);
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
@@ -342,6 +349,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         {createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
         {createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
         {createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
+        <Checkbox style={{ marginLeft: "auto" }}>Advanced</Checkbox>
       </div>
 
       {/* ----- CONTROL POINT COLOR PICKER ----- */}
@@ -383,13 +391,16 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       {/* ----- COLORIZE SLIDER ----- */}
       <SliderRow
         label={
-          <Checkbox checked={props.colorizeEnabled} onChange={(e) => props.updateColorizeMode(e.target.checked)}>
+          <Checkbox
+            checked={props.colorizeEnabled}
+            onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
+          >
             Colorize
           </Checkbox>
         }
         max={1}
         start={props.colorizeAlpha}
-        onUpdate={(values) => props.updateColorizeAlpha(values[0])}
+        onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
         hideSlider={!props.colorizeEnabled}
       />
     </div>
