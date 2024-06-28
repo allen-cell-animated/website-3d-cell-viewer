@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 import { Lut, View3d, Volume } from "@aics/volume-viewer";
 
-import { controlPointsToLut } from "../../shared/utils/controlPointsToLut";
+import { controlPointsToLut, rampToControlPoints } from "../../shared/utils/controlPointsToLut";
 import { ChannelState } from "../ViewerStateProvider/types";
 import { UseImageEffectType } from "./types";
 
@@ -19,8 +19,7 @@ interface ChannelUpdaterProps {
  * and keeps it in sync with the viewer.
  */
 const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, view3d, image, version }) => {
-  const { volumeEnabled, isosurfaceEnabled, isovalue, colorizeEnabled, colorizeAlpha, opacity, color, controlPoints } =
-    channelState;
+  const { volumeEnabled, isosurfaceEnabled, isovalue, colorizeEnabled, colorizeAlpha, opacity, color } = channelState;
 
   // Effects to update channel settings should check if image is present and channel is loaded first
   const useImageEffect: UseImageEffectType = (effect, deps) => {
@@ -75,16 +74,18 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
     [colorizeEnabled]
   );
 
+  const { controlPoints, rampMin, rampMax, useControlPoints } = channelState;
   useImageEffect(
     (currentImage) => {
-      if (controlPoints.length < 2) {
+      if (useControlPoints && controlPoints.length < 2) {
         return;
       }
-      const gradient = controlPointsToLut(controlPoints);
+      const controlPointsToUse = useControlPoints ? controlPoints : rampToControlPoints(rampMin, rampMax);
+      const gradient = controlPointsToLut(controlPointsToUse);
       currentImage.setLut(index, gradient);
       view3d.updateLuts(currentImage);
     },
-    [controlPoints]
+    [controlPoints, rampMin, rampMax, useControlPoints]
   );
 
   useImageEffect(

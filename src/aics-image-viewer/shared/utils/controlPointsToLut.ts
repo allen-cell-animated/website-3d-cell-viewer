@@ -1,7 +1,7 @@
 import { ControlPoint, Lut, Volume } from "@aics/volume-viewer";
 import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
-import { TFEDITOR_DEFAULT_COLOR } from "../../components/TfEditor";
+import { TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../../components/TfEditor";
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
@@ -70,4 +70,20 @@ export function initializeLut(
   }));
   aimg.setLut(channelIndex, lutObject);
   return newControlPoints;
+}
+
+export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, number] {
+  if (controlPoints.length < 3) {
+    return [0, TFEDITOR_MAX_BIN];
+  }
+  return [controlPoints[1].x, controlPoints[2].x];
+}
+
+export function rampToControlPoints(min: number, max: number): ControlPoint[] {
+  return [
+    { x: 0, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: min, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: max, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+    { x: TFEDITOR_MAX_BIN, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+  ];
 }
