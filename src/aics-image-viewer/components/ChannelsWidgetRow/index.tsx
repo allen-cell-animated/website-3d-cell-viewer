@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { Channel, ControlPoint } from "@aics/volume-viewer";
+import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
@@ -9,12 +9,7 @@ import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
 
-import {
-  ColorObject,
-  colorObjectToArray,
-  ColorArray,
-  colorArrayToObject,
-} from "../../shared/utils/colorRepresentations";
+import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import type { ChannelStateKey, ChannelState, ChannelSettingUpdater } from "../ViewerStateProvider/types";
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
@@ -23,14 +18,7 @@ import SliderRow from "../shared/SliderRow";
 interface ChannelsWidgetRowProps {
   index: number;
   name: string;
-  volumeChecked: boolean;
-  isosurfaceChecked: boolean;
-  isovalue: number;
-  isosurfaceOpacity: number;
-  colorizeEnabled: boolean;
-  colorizeAlpha: number;
-  color: ColorArray;
-  channelControlPoints: ControlPoint[];
+  channelState: ChannelState;
   channelDataForChannel: Channel;
 
   changeChannelSetting: ChannelSettingUpdater;
@@ -40,7 +28,7 @@ interface ChannelsWidgetRowProps {
 }
 
 const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidgetRowProps) => {
-  const { index, changeChannelSetting, isosurfaceChecked, volumeChecked, saveIsosurface } = props;
+  const { index, changeChannelSetting, saveIsosurface, channelState } = props;
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
@@ -67,7 +55,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const createColorPicker = (): React.ReactNode => (
     <ColorPicker
-      color={colorArrayToObject(props.color)}
+      color={colorArrayToObject(channelState.color)}
       onColorChange={onColorChange}
       onColorChangeComplete={props.onColorChangeComplete}
       disableAlpha={true}
@@ -78,10 +66,10 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const visibilityControls = (
     <div className="channel-visibility-controls">
-      <Checkbox checked={volumeChecked} onChange={volumeCheckHandler}>
+      <Checkbox checked={channelState.volumeEnabled} onChange={volumeCheckHandler}>
         Vol
       </Checkbox>
-      <Checkbox checked={isosurfaceChecked} onChange={isosurfaceCheckHandler}>
+      <Checkbox checked={channelState.isosurfaceEnabled} onChange={isosurfaceCheckHandler}>
         Surf
       </Checkbox>
       <Button
@@ -94,14 +82,14 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const createTFEditor = (): React.ReactNode => {
-    const { channelControlPoints, channelDataForChannel, colorizeEnabled, colorizeAlpha } = props;
+    const { controlPoints, colorizeEnabled, colorizeAlpha } = channelState;
     return (
       <TfEditor
         id={"TFEditor" + index}
         width={418}
         height={125}
-        channelData={channelDataForChannel}
-        controlPoints={channelControlPoints}
+        channelData={props.channelDataForChannel}
+        controlPoints={controlPoints}
         updateLutControlPoints={createChannelSettingHandler("controlPoints")}
         updateColorizeMode={createChannelSettingHandler("colorizeEnabled")}
         updateColorizeAlpha={createChannelSettingHandler("colorizeAlpha")}
@@ -113,11 +101,17 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
 
   const renderSurfaceControls = (): React.ReactNode => (
     <div>
-      <SliderRow label="Isovalue" max={255} start={props.isovalue} onChange={onIsovalueChange} formatInteger={true} />
+      <SliderRow
+        label="Isovalue"
+        max={255}
+        start={channelState.isovalue}
+        onChange={onIsovalueChange}
+        formatInteger={true}
+      />
       <SliderRow
         label="Opacity"
         max={ISOSURFACE_OPACITY_SLIDER_MAX}
-        start={props.isosurfaceOpacity * ISOSURFACE_OPACITY_SLIDER_MAX}
+        start={channelState.opacity * ISOSURFACE_OPACITY_SLIDER_MAX}
         onChange={onOpacityChange}
         formatInteger={true}
       />
@@ -129,18 +123,18 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const renderControls = (): React.ReactNode => {
-    if (!volumeChecked && !isosurfaceChecked) {
+    if (!channelState.volumeEnabled && !channelState.isosurfaceEnabled) {
       return <h4 style={{ fontStyle: "italic" }}>Not currently visible</h4>;
     }
     return (
       <>
-        {volumeChecked && (
+        {channelState.volumeEnabled && (
           <>
             <h4>Volume settings:</h4>
             {createTFEditor()}
           </>
         )}
-        {isosurfaceChecked && (
+        {channelState.isosurfaceEnabled && (
           <>
             <h4>Surface settings:</h4>
             {renderSurfaceControls()}
