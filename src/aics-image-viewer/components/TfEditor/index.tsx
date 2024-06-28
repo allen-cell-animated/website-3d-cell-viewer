@@ -322,20 +322,22 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   );
 
   // Create one svg circle element for each control point
-  const controlPointCircles = props.controlPoints.map((cp, i) => (
-    <circle
-      key={i}
-      className={i === selectedPointIdx ? "selected" : ""}
-      cx={xScale(cp.x)}
-      cy={yScale(cp.opacity)}
-      style={{ fill: colorArrayToString(cp.color) }}
-      r={5}
-      onPointerDown={() => setDraggedPointIdx(i)}
-      onContextMenu={handleControlPointContextMenu}
-    />
-  ));
+  const controlPointCircles = props.useControlPoints
+    ? props.controlPoints.map((cp, i) => (
+        <circle
+          key={i}
+          className={i === selectedPointIdx ? "selected" : ""}
+          cx={xScale(cp.x)}
+          cy={yScale(cp.opacity)}
+          style={{ fill: colorArrayToString(cp.color) }}
+          r={5}
+          onPointerDown={() => setDraggedPointIdx(i)}
+          onContextMenu={handleControlPointContextMenu}
+        />
+      ))
+    : null;
   // Move selected control point to the end so it's not occluded by other nearby points
-  if (selectedPointIdx !== null) {
+  if (controlPointCircles !== null && selectedPointIdx !== null) {
     controlPointCircles.push(controlPointCircles.splice(selectedPointIdx, 1)[0]);
   }
 
@@ -349,7 +351,13 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         {createTFGeneratorButton("auto98XF", "Default", "Ramp from 50th percentile to 98th.")}
         {createTFGeneratorButton("auto2XF", "IJ Auto", `Emulates ImageJ's "auto" button.`)}
         {createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
-        <Checkbox style={{ marginLeft: "auto" }}>Advanced</Checkbox>
+        <Checkbox
+          checked={props.useControlPoints}
+          onChange={(e) => changeChannelSetting("useControlPoints", e.target.checked)}
+          style={{ marginLeft: "auto" }}
+        >
+          Advanced
+        </Checkbox>
       </div>
 
       {/* ----- CONTROL POINT COLOR PICKER ----- */}
@@ -389,20 +397,22 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       </svg>
 
       {/* ----- COLORIZE SLIDER ----- */}
-      <SliderRow
-        label={
-          <Checkbox
-            checked={props.colorizeEnabled}
-            onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
-          >
-            Colorize
-          </Checkbox>
-        }
-        max={1}
-        start={props.colorizeAlpha}
-        onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
-        hideSlider={!props.colorizeEnabled}
-      />
+      {props.useControlPoints && (
+        <SliderRow
+          label={
+            <Checkbox
+              checked={props.colorizeEnabled}
+              onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
+            >
+              Colorize
+            </Checkbox>
+          }
+          max={1}
+          start={props.colorizeAlpha}
+          onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
+          hideSlider={!props.colorizeEnabled}
+        />
+      )}
     </div>
   );
 };
