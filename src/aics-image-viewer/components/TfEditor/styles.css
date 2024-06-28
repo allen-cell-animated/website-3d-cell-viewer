@@ -48,6 +48,7 @@
   .ramp-sliders {
     path {
       fill: var(--color-controlpanel-ramp-slider);
+      cursor: pointer;
     }
 
     line {
