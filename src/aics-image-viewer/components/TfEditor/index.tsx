@@ -255,7 +255,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   };
 
   /** d3-generated svg data string representing both the line between points and the region filled with gradient */
-  const area = useMemo(() => {
+  const areaPath = useMemo(() => {
     const areaGenerator = d3
       .area<ControlPoint>()
       .x((d) => xScale(d.x))
@@ -264,6 +264,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       .curve(d3.curveLinear);
     return areaGenerator(props.controlPoints) ?? undefined;
   }, [props.controlPoints, xScale, yScale, innerHeight]);
+
+  const sliderHandlePath = useMemo(() => d3.symbol().type(sliderHandleSymbol).size(80)() ?? undefined, []);
 
   // The below `useCallback`s are used as "ref callbacks" - passed as the `ref` prop of SVG elements in order to render
   // these elements' content using D3. They are called when the ref'd component mounts and unmounts, and whenever their
@@ -387,12 +389,25 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
           {/* histogram bars */}
           <g ref={histogramRef} />
           {/* line between control points, and the gradient under it */}
-          <path className="line" fill={`url(#tfGradient-${props.id})`} stroke="white" d={area} />
+          <path className="line" fill={`url(#tfGradient-${props.id})`} d={areaPath} />
           {/* plot axes */}
           <g ref={xAxisRef} className="axis" transform={`translate(0,${innerHeight})`} />
           <g ref={yAxisRef} className="axis" />
           {/* control points */}
           {controlPointCircles}
+          {/* "basic mode" sliders */}
+          {!props.useControlPoints && (
+            <g className="ramp-sliders">
+              <g transform={`translate(${xScale(props.ramp[0])})`}>
+                <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
+                <path d={sliderHandlePath} transform={`translate(0,${innerHeight}) rotate(180)`} />
+              </g>
+              <g transform={`translate(${xScale(props.ramp[1])})`}>
+                <line y1={innerHeight} strokeDasharray="5,5" strokeWidth={2} />
+                <path d={sliderHandlePath} />
+              </g>
+            </g>
+          )}
         </g>
       </svg>
 
