@@ -156,7 +156,7 @@ const ProjectCard = styled.li`
 
   & a {
     // Add 2px margin to maintain the same visual gap that text has
-    margin: 2px 0 0 0;
+    margin-top: 2px;
   }
 `;
 
@@ -188,7 +188,7 @@ const DatasetCard = styled.li`
   }
   & > a,
   & > button {
-    margin: 0 auto 0 0;
+    margin-right: auto;
     display: grid;
   }
 `;
