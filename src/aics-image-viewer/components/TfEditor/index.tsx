@@ -386,6 +386,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   }
 
   const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
+  const viewerModeString = props.useControlPoints ? "advanced" : "basic";
 
   return (
     <div>
@@ -418,7 +419,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
       {/* ----- PLOT SVG ----- */}
       <svg
-        className={draggedPointIdx !== null ? "tf-editor-svg dragging" : "tf-editor-svg"}
+        className={`tf-editor-svg ${viewerModeString}${draggedPointIdx !== null ? " dragging" : ""}`}
         ref={svgRef}
         width={props.width}
         height={props.height}

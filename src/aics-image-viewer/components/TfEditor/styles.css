@@ -5,7 +5,13 @@
     margin-bottom: 8px;
 
     &.dragging {
-      cursor: move;
+      &.basic {
+        cursor: pointer;
+      }
+
+      &.advanced {
+        cursor: move;
+      }
     }
   }
 
