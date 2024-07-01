@@ -43,7 +43,7 @@ export const landingPageContent: ProjectEntry[] = [
         </a>{" "}
         and analyzed in the study{" "}
         <a href="https://www.biorxiv.org/content/10.1101/2024.06.28.601071v1" rel="noopener noreferrer" target="_blank">
-          {"Dixon et al. 2024"}
+          {"Dixon et al. 2024 (bioRxiv)"}
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>
         .
