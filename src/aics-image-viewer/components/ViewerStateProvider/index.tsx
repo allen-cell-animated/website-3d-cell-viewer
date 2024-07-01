@@ -160,7 +160,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, []);
 
   // Sync viewer settings prop with state
-  // React docs seem to be fine with syncing state with props directly in the render function:
+  // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
+  // infinite render loop, so now it's in a `useMemo`:
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   useMemo(() => {
     let newSettings = { ...viewerSettings };
