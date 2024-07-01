@@ -22,6 +22,14 @@
     bottom: 0;
   }
 
+  .tick text {
+    user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+  }
+
   rect.bar,
   .tick text {
     fill: var(--color-controlpanel-text);
