@@ -30,7 +30,11 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
-export enum AppParam {
+/**
+ * Enum keys for URL parameters. These are stored as enums for better readability,
+ * and are mapped to types in `ViewerStateParams`.
+ */
+export enum ViewerStateKeys {
   View = "view",
   Mode = "mode",
   Mask = "mask",
@@ -49,7 +53,10 @@ export enum AppParam {
   Time = "t",
 }
 
-export enum ChannelParam {
+/**
+ * Mapped to types in `ViewerChannelSettingParams`
+ */
+export enum ViewerChannelSettingKeys {
   Color = "col",
   Colorize = "clz",
   ColorizeAlpha = "cza",
@@ -65,13 +72,13 @@ export enum ChannelParam {
  */
 export class ViewerChannelSettingParams {
   /** Color, as a 6-digit hex color.  */
-  [ChannelParam.Color]?: string = undefined;
+  [ViewerChannelSettingKeys.Color]?: string = undefined;
   /** Colorize. "1" is enabled. Disabled by default. */
-  [ChannelParam.Colorize]?: "1" | "0" = undefined;
+  [ViewerChannelSettingKeys.Colorize]?: "1" | "0" = undefined;
   /** Colorize alpha, in the [0, 1] range. Set to `1.0` by default. */
-  [ChannelParam.ColorizeAlpha]?: string = undefined;
+  [ViewerChannelSettingKeys.ColorizeAlpha]?: string = undefined;
   /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
-  [ChannelParam.IsosurfaceAlpha]?: string = undefined;
+  [ViewerChannelSettingKeys.IsosurfaceAlpha]?: string = undefined;
   /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
    * by a colon. The first value is the minimum and the second is the maximum.
    * Defaults to [0, 255].
@@ -90,13 +97,13 @@ export class ViewerChannelSettingParams {
    * "autoij:0" // use Auto-IJ to calculate min and max.
    * ```
    */
-  [ChannelParam.Lut]?: string = undefined;
+  [ViewerChannelSettingKeys.Lut]?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
-  [ChannelParam.VolumeEnabled]?: "1" | "0" = undefined;
+  [ViewerChannelSettingKeys.VolumeEnabled]?: "1" | "0" = undefined;
   /** Isosurface enabled. "1" is enabled. Disabled by default. */
-  [ChannelParam.SurfaceEnabled]?: "1" | "0" = undefined;
+  [ViewerChannelSettingKeys.SurfaceEnabled]?: "1" | "0" = undefined;
   /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
-  [ChannelParam.IsosurfaceValue]?: string = undefined;
+  [ViewerChannelSettingKeys.IsosurfaceValue]?: string = undefined;
 }
 /**
  * Channels, matching the pattern `c0`, `c1`, etc. corresponding to the index of the channel being configured.
@@ -108,48 +115,48 @@ type ChannelParams = { [_ in `c${number}`]?: string };
 /** Serialized version of `ViewerState`. */
 export class ViewerStateParams {
   /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
-  [AppParam.View]?: string = undefined;
+  [ViewerStateKeys.View]?: string = undefined;
   /**
    * Render mode. Valid values are "volumetric", "maxproject", and "pathtrace".
    * Defaults to "volumetric".
    */
-  [AppParam.Mode]?: string = undefined;
+  [ViewerStateKeys.Mode]?: string = undefined;
   /** The opacity of the mask channel, an integer in the range [0, 100]. Defaults to 50. */
-  [AppParam.Mask]?: string = undefined;
+  [ViewerStateKeys.Mask]?: string = undefined;
   /** The type of image to display. Valid values are "cell" and "fov". Defaults to "cell". */
-  [AppParam.Image]?: string = undefined;
+  [ViewerStateKeys.Image]?: string = undefined;
   /** Whether to show the axes helper. "1" is enabled. Disabled by default. */
-  [AppParam.Axes]?: string = undefined;
+  [ViewerStateKeys.Axes]?: string = undefined;
   /** Whether to show the bounding box. "1" is enabled. Disabled by default. */
-  [AppParam.BoundingBox]?: string = undefined;
+  [ViewerStateKeys.BoundingBox]?: string = undefined;
   /** The color of the bounding box, as a 6-digit hex color. */
-  [AppParam.BoundingBoxColor]?: string = undefined;
+  [ViewerStateKeys.BoundingBoxColor]?: string = undefined;
   /** The background color, as a 6-digit hex color. */
-  [AppParam.BackgroundColor]?: string = undefined;
+  [ViewerStateKeys.BackgroundColor]?: string = undefined;
   /** Whether to autorotate the view. "1" is enabled. Disabled by default. */
-  [AppParam.Autorotate]?: string = undefined;
+  [ViewerStateKeys.Autorotate]?: string = undefined;
   /** The brightness of the image, an float in the range [0, 100]. Defaults to 70. */
-  [AppParam.Brightness]?: string = undefined;
+  [ViewerStateKeys.Brightness]?: string = undefined;
   /** Density, a float in the range [0, 100]. Defaults to 50. */
-  [AppParam.Density]?: string = undefined;
+  [ViewerStateKeys.Density]?: string = undefined;
   /**
    * Levels for image intensity adjustment. Should be three numeric values separated
    * by commas, representing the low, middle, and high values in a [0, 255] range.
    * Values will be sorted in ascending order; empty values will be parsed as 0.
    */
-  [AppParam.Levels]?: string = undefined;
+  [ViewerStateKeys.Levels]?: string = undefined;
   /** Whether to enable interpolation. "1" is enabled. Enabled by default. */
-  [AppParam.Interpolation]?: string = undefined;
+  [ViewerStateKeys.Interpolation]?: string = undefined;
   /** Subregions per axis, as min:max pairs separated by commas.
    * Defaults to full range (`0:1`) for each axis.
    */
-  [AppParam.Region]?: string = undefined;
+  [ViewerStateKeys.Region]?: string = undefined;
   /** Slice position per X, Y, and Z axes, as a list of comma-separated floats.
    * 0.5 for all axes by default (e.g. `0.5,0.5,0.5`)
    */
-  [AppParam.Slice]?: string = undefined;
+  [ViewerStateKeys.Slice]?: string = undefined;
   /** Frame number, for time-series volumes. 0 by default. */
-  [AppParam.Time]?: string = undefined;
+  [ViewerStateKeys.Time]?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -178,14 +185,14 @@ class DeprecatedParams {
   colors?: string = undefined;
 }
 
-type Params = Partial<ViewerStateParams & DataParams & DeprecatedParams & ChannelParams>;
+type AppParams = Partial<ViewerStateParams & DataParams & DeprecatedParams & ChannelParams>;
 
-const allowedParamKeys: Array<keyof Params> = [
+const allowedParamKeys: Array<keyof AppParams> = [
   ...Object.keys(new ViewerStateParams()),
   ...Object.keys(new DataParams()),
   ...Object.keys(new DeprecatedParams()),
-] as Array<keyof Params>;
-const isParamKey = (key: string): key is keyof Params => allowedParamKeys.indexOf(key as keyof Params) !== -1;
+] as Array<keyof AppParams>;
+const isParamKey = (key: string): key is keyof AppParams => allowedParamKeys.indexOf(key as keyof AppParams) !== -1;
 const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
 /**
@@ -194,8 +201,8 @@ const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_
  * @param searchParams Input URL search parameters.
  * @returns a dictionary object matching the type of `Params`.
  */
-export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
-  const result: Params = {};
+export function getAllowedParams(searchParams: URLSearchParams): AppParams {
+  const result: AppParams = {};
   for (const [key, value] of searchParams.entries()) {
     if (isParamKey(key) || isChannelKey(key)) {
       result[key] = value;
@@ -407,55 +414,55 @@ export function deserializeViewerChannelSetting(
   // Missing/undefined fields should be handled downstream.
   const result: ViewerChannelSetting = {
     match: channelIndex,
-    enabled: parseStringBoolean(jsonState[ChannelParam.VolumeEnabled]),
-    surfaceEnabled: parseStringBoolean(jsonState[ChannelParam.SurfaceEnabled]),
-    isovalue: parseStringFloat(jsonState[ChannelParam.IsosurfaceValue], 0, 255),
-    surfaceOpacity: parseStringFloat(jsonState[ChannelParam.IsosurfaceAlpha], 0, 1),
-    colorizeEnabled: parseStringBoolean(jsonState[ChannelParam.Colorize]),
-    colorizeAlpha: parseStringFloat(jsonState[ChannelParam.ColorizeAlpha], 0, 1),
+    enabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.VolumeEnabled]),
+    surfaceEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.SurfaceEnabled]),
+    isovalue: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceValue], 0, 255),
+    surfaceOpacity: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceAlpha], 0, 1),
+    colorizeEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.Colorize]),
+    colorizeAlpha: parseStringFloat(jsonState[ViewerChannelSettingKeys.ColorizeAlpha], 0, 1),
   };
-  if (jsonState[ChannelParam.Color] && HEX_COLOR_REGEX.test(jsonState.col)) {
-    result.color = jsonState[ChannelParam.Color];
+  if (jsonState[ViewerChannelSettingKeys.Color] && HEX_COLOR_REGEX.test(jsonState.col)) {
+    result.color = jsonState[ViewerChannelSettingKeys.Color];
   }
-  if (jsonState[ChannelParam.Lut] && LUT_REGEX.test(jsonState.lut)) {
-    const [min, max] = jsonState[ChannelParam.Lut].split(":");
+  if (jsonState[ViewerChannelSettingKeys.Lut] && LUT_REGEX.test(jsonState.lut)) {
+    const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
   }
   return result;
 }
 
 export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingParams {
-  return removeUndefinedProperties({
-    [ChannelParam.VolumeEnabled]: channelSetting.volumeEnabled ? "1" : "0",
-    [ChannelParam.SurfaceEnabled]: channelSetting.isosurfaceEnabled ? "1" : "0",
-    [ChannelParam.IsosurfaceValue]: channelSetting.isovalue.toString(),
-    [ChannelParam.IsosurfaceAlpha]: channelSetting.opacity.toString(),
-    [ChannelParam.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
-    [ChannelParam.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
+  return {
+    [ViewerChannelSettingKeys.VolumeEnabled]: channelSetting.volumeEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.SurfaceEnabled]: channelSetting.isosurfaceEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue.toString(),
+    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
+    [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
     // Convert to hex string
-    [ChannelParam.Color]: colorArrayToHex(channelSetting.color),
+    [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
     // TODO: Serialize control points....
     // lut: channelSetting.lut?.join(":"),
-  });
+  };
 }
 
 export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
   const result: Partial<ViewerState> = {
-    maskAlpha: parseStringInt(params[AppParam.Mask], 0, 100),
-    imageType: parseStringEnum(params[AppParam.Image], ImageType),
-    showAxes: parseStringBoolean(params[AppParam.Axes]),
-    showBoundingBox: parseStringBoolean(params[AppParam.BoundingBox]),
-    boundingBoxColor: parseHexColorAsColorArray(params[AppParam.BoundingBoxColor]),
-    backgroundColor: parseHexColorAsColorArray(params[AppParam.BackgroundColor]),
-    autorotate: parseStringBoolean(params[AppParam.Autorotate]),
-    brightness: parseStringFloat(params[AppParam.Brightness], 0, 100),
-    density: parseStringFloat(params[AppParam.Density], 0, 100),
-    levels: parseStringLevels(params[AppParam.Levels]),
-    interpolationEnabled: parseStringBoolean(params[AppParam.Interpolation]),
-    region: parseStringRegion(params[AppParam.Region]),
-    slice: parseStringSlice(params[AppParam.Slice]),
-    time: parseStringInt(params[AppParam.Time], 0, Number.POSITIVE_INFINITY),
-    renderMode: parseStringEnum(params[AppParam.Mode], RenderMode),
+    maskAlpha: parseStringInt(params[ViewerStateKeys.Mask], 0, 100),
+    imageType: parseStringEnum(params[ViewerStateKeys.Image], ImageType),
+    showAxes: parseStringBoolean(params[ViewerStateKeys.Axes]),
+    showBoundingBox: parseStringBoolean(params[ViewerStateKeys.BoundingBox]),
+    boundingBoxColor: parseHexColorAsColorArray(params[ViewerStateKeys.BoundingBoxColor]),
+    backgroundColor: parseHexColorAsColorArray(params[ViewerStateKeys.BackgroundColor]),
+    autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
+    brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
+    density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
+    levels: parseStringLevels(params[ViewerStateKeys.Levels]),
+    interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
+    region: parseStringRegion(params[ViewerStateKeys.Region]),
+    slice: parseStringSlice(params[ViewerStateKeys.Slice]),
+    time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
+    renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
   };
 
   // Handle viewmode, since they use different mappings
@@ -483,21 +490,21 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
 export function serializeViewerState(state: ViewerState): ViewerStateParams {
   // TODO: Enforce decimal places for floats/decimals?
   const result: ViewerStateParams = {
-    [AppParam.Mode]: state.renderMode,
-    [AppParam.Mask]: state.maskAlpha.toString(),
-    [AppParam.Image]: state.imageType,
-    [AppParam.Axes]: state.showAxes ? "1" : "0",
-    [AppParam.BoundingBox]: state.showBoundingBox ? "1" : "0",
-    [AppParam.BoundingBoxColor]: colorArrayToHex(state.boundingBoxColor),
-    [AppParam.BackgroundColor]: colorArrayToHex(state.backgroundColor),
-    [AppParam.Autorotate]: state.autorotate ? "1" : "0",
-    [AppParam.Brightness]: state.brightness.toString(),
-    [AppParam.Density]: state.density.toString(),
-    [AppParam.Interpolation]: state.interpolationEnabled ? "1" : "0",
-    [AppParam.Region]: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
-    [AppParam.Slice]: `${state.slice.x},${state.slice.y},${state.slice.z}`,
-    [AppParam.Levels]: state.levels.join(","),
-    [AppParam.Time]: state.time.toString(),
+    [ViewerStateKeys.Mode]: state.renderMode,
+    [ViewerStateKeys.Mask]: state.maskAlpha.toString(),
+    [ViewerStateKeys.Image]: state.imageType,
+    [ViewerStateKeys.Axes]: state.showAxes ? "1" : "0",
+    [ViewerStateKeys.BoundingBox]: state.showBoundingBox ? "1" : "0",
+    [ViewerStateKeys.BoundingBoxColor]: colorArrayToHex(state.boundingBoxColor),
+    [ViewerStateKeys.BackgroundColor]: colorArrayToHex(state.backgroundColor),
+    [ViewerStateKeys.Autorotate]: state.autorotate ? "1" : "0",
+    [ViewerStateKeys.Brightness]: state.brightness.toString(),
+    [ViewerStateKeys.Density]: state.density.toString(),
+    [ViewerStateKeys.Interpolation]: state.interpolationEnabled ? "1" : "0",
+    [ViewerStateKeys.Region]: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
+    [ViewerStateKeys.Slice]: `${state.slice.x},${state.slice.y},${state.slice.z}`,
+    [ViewerStateKeys.Levels]: state.levels.join(","),
+    [ViewerStateKeys.Time]: state.time.toString(),
   };
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
@@ -505,7 +512,7 @@ export function serializeViewerState(state: ViewerState): ViewerStateParams {
     [ViewMode.xz]: "Y",
     [ViewMode.yz]: "X",
   };
-  result[AppParam.View] = viewModeToViewParam[state.viewMode];
+  result[ViewerStateKeys.View] = viewModeToViewParam[state.viewMode];
   return result;
 }
 
@@ -624,7 +631,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
 }> {
-  const params = urlSearchParamsToParams(urlSearchParams);
+  const params = getAllowedParams(urlSearchParams);
   let args: Partial<AppProps> = {};
   // Parse viewer state
   const viewerSettings: Partial<ViewerState> = deserializeViewerState(params);
@@ -676,7 +683,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  */
-export function serializeViewerUrlParams(state: ViewerStateContextType): Params {
+export function serializeViewerUrlParams(state: ViewerStateContextType): AppParams {
   // TODO: Unit tests for this function
   const params = serializeViewerState(state);
 
