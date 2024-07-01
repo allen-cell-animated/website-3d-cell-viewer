@@ -302,6 +302,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     return areaGenerator(controlPointsToRender) ?? undefined;
   }, [controlPointsToRender, xScale, yScale, innerHeight]);
 
+  /** d3-generated svg data string representing the "basic mode" min/max slider handles */
   const sliderHandlePath = useMemo(() => d3.symbol().type(sliderHandleSymbol).size(80)() ?? undefined, []);
 
   // The below `useCallback`s are used as "ref callbacks" - passed as the `ref` prop of SVG elements in order to render
