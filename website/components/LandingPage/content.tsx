@@ -43,7 +43,7 @@ export const landingPageContent: ProjectEntry[] = [
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>{" "}
         and analyzed in the study{" "}
-        <a href="https://www.biorxiv.org/" rel="noopener noreferrer" target="_blank">
+        <a href="https://www.biorxiv.org/content/10.1101/2024.06.28.601071v1" rel="noopener noreferrer" target="_blank">
           {"Dixon et al. 2024"}
           <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
         </a>
