@@ -39,7 +39,6 @@ export interface AppProps {
   imageUrl: string | string[];
   parentImageUrl?: string | string[];
 
-  // replaces / obviates groupToChannelNameMap, channelNameClean, channelNameMapping, filterFunc, initialChannelSettings, defaultSurfacesOn and defaultVolumesOn
   viewerChannelSettings?: ViewerChannelSettings;
 
   appHeight: string;

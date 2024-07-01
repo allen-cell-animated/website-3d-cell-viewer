@@ -9,7 +9,7 @@ import ShareModal from "./ShareModal";
 import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
-import { getArgsFromParams } from "../utils/url_utils";
+import { parseViewerUrlParams } from "../utils/url_utils";
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
@@ -44,7 +44,7 @@ export default function AppWrapper(): ReactElement {
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    getArgsFromParams(searchParams).then(
+    parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
         setViewerSettings({ ...urlViewerSettings });

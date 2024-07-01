@@ -38,7 +38,7 @@ export default function ErrorPage(props: ErrorPageProps): ReactElement {
   return (
     <ErrorPageWrapper style={{ background: "var(--color-landingpage-bg)", height: "100%" }}>
       <Header></Header>
-      <FlexColumnAlignCenter style={{ width: "100%", padding: "40px" }}>
+      <FlexColumnAlignCenter style={{ width: "100%", padding: "40px 0" }}>
         <h1>Sorry, something went wrong.</h1>
         <FlexColumnAlignCenter>
           <p>We encountered the following error:</p>

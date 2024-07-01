@@ -1,17 +1,17 @@
-export const enum ViewMode {
+export enum ViewMode {
   threeD = "3D",
   xy = "XY",
   xz = "XZ",
   yz = "YZ",
 }
 
-export const enum RenderMode {
+export enum RenderMode {
   volumetric = "volumetric",
   maxProject = "maxproject",
   pathTrace = "pathtrace",
 }
 
-export const enum ImageType {
+export enum ImageType {
   segmentedCell = "cell",
   fullField = "fov",
 }
