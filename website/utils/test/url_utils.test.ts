@@ -21,11 +21,11 @@ import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/util
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
   color: undefined,
-  enabled: false,
-  surfaceEnabled: false,
+  enabled: undefined,
+  surfaceEnabled: undefined,
   isovalue: undefined,
   surfaceOpacity: undefined,
-  colorizeEnabled: false,
+  colorizeEnabled: undefined,
   colorizeAlpha: undefined,
 };
 
