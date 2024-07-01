@@ -26,6 +26,7 @@
     "no-array-constructor": 1,
     "no-mixed-spaces-and-tabs": 1,
     "no-new-object": 1,
+    "no-redeclare": 0,
     "no-shadow-restricted-names": 1,
     "@typescript-eslint/no-unused-vars": ["error", { "args": "none", "varsIgnorePattern": "^_" }],
     "no-unused-vars": 0, // Rely on typescript-eslint rule above

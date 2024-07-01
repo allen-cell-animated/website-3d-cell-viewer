@@ -98,13 +98,11 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     return (
       <TfEditor
         id={"TFEditor" + index}
-        fit-to-data={false}
         width={418}
         height={125}
-        volumeData={channelDataForChannel.volumeData}
         channelData={channelDataForChannel}
         controlPoints={channelControlPoints}
-        updateChannelLutControlPoints={createChannelSettingHandler("controlPoints")}
+        updateLutControlPoints={createChannelSettingHandler("controlPoints")}
         updateColorizeMode={createChannelSettingHandler("colorizeEnabled")}
         updateColorizeAlpha={createChannelSettingHandler("colorizeAlpha")}
         colorizeEnabled={colorizeEnabled}
