@@ -21,7 +21,6 @@ const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
   },
   viewerSettings: {
     viewMode: ViewMode.xy,
-    region: { x: [0, 1], y: [0, 1], z: [0.3, 0.3] },
   },
 };
 
