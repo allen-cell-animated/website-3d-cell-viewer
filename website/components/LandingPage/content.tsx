@@ -1,9 +1,8 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import React from "react";
 
 import { AppDataProps, ProjectEntry } from "../../types";
 import { ViewMode } from "../../../src";
+import { ExternalLink } from "./utils";
 
 const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
   viewerChannelSettings: {
@@ -33,19 +32,13 @@ export const landingPageContent: ProjectEntry[] = [
         3D timelapses of nuclei in growing hiPS cell colonies of three different starting sizes. Timelapse datasets
         include 3D transmitted-light bright-field and lamin B1-mEGFP fluorescence 20x images and 3D nuclear segmentation
         images. These datasets are available for download on{" "}
-        <a
-          href="https://open.quiltdata.com/b/allencell/tree/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {"Quilt"}
-          <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
-        </a>{" "}
+        <ExternalLink href="https://open.quiltdata.com/b/allencell/tree/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/">
+          Quilt
+        </ExternalLink>{" "}
         and analyzed in the study{" "}
-        <a href="https://www.biorxiv.org/content/10.1101/2024.06.28.601071v1" rel="noopener noreferrer" target="_blank">
-          {"Dixon et al. 2024 (bioRxiv)"}
-          <FontAwesomeIcon icon={faUpRightFromSquare} size="sm" style={{ marginBottom: "-1px", marginLeft: "3px" }} />
-        </a>
+        <ExternalLink href="https://www.biorxiv.org/content/10.1101/2024.06.28.601071v1">
+          Dixon et al. 2024 (bioRxiv)
+        </ExternalLink>
         .
       </p>
     ),
