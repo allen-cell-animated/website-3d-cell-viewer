@@ -11,7 +11,7 @@ import Header from "../Header";
 import LoadModal from "../LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { getArgsFromParams } from "../../utils/url_utils";
+import { parseViewerUrlParams } from "../../utils/url_utils";
 import HelpDropdown from "../HelpDropdown";
 import { BannerVideo } from "../../assets/videos";
 
@@ -55,10 +55,20 @@ const BannerVideoContainer = styled.div`
   background-color: #000;
   z-index: -1;
 
-  & > video {
+  & > div {
+    position: absolute;
     width: 100%;
     height: 100%;
-    object-position: 50% 40%;
+    background-image: linear-gradient(90deg, rgba(35, 25, 50, 0.5) 50%, rgba(0, 0, 0, 0) 70%);
+    z-index: 3;
+  }
+
+  & > video {
+    position: absolute;
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    left: 35%;
     object-fit: cover;
   }
 `;
@@ -202,7 +212,7 @@ export default function LandingPage(): ReactElement {
     // Check if the URL used to open the landing page has arguments;
     // if so, assume that this is an old URL intended to go to the viewer.
     // Navigate to the viewer while preserving URL arguments.
-    getArgsFromParams(searchParams).then(({ args }) => {
+    parseViewerUrlParams(searchParams).then(({ args }) => {
       if (Object.keys(args).length > 0) {
         console.log("Detected URL parameters. Redirecting from landing page to viewer.");
         navigation("viewer" + "?" + searchParams.toString(), {
@@ -326,6 +336,7 @@ export default function LandingPage(): ReactElement {
           <video autoPlay={allowMotion} loop muted>
             <source src={BannerVideo} type="video/mp4" />
           </video>
+          <div></div>
         </BannerVideoContainer>
         <BannerTextContainer style={{ zIndex: 1 }}>
           <h1>Welcome to 3D Volume Viewer</h1>

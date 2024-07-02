@@ -1,9 +1,13 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
 import { clamp } from "lodash";
 
-import type { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
+import type {
+  ChannelState,
+  ViewerState,
+  ViewerStateContextType,
+} from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
-import { ViewMode } from "../../src/aics-image-viewer/shared/enums";
+import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
 import {
   ViewerChannelSetting,
   ViewerChannelSettings,
@@ -26,15 +30,55 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 
-export type ViewerChannelSettingJson = {
+/**
+ * Enum keys for URL parameters. These are stored as enums for better readability,
+ * and are mapped to types in `ViewerStateParams`.
+ */
+export enum ViewerStateKeys {
+  View = "view",
+  Mode = "mode",
+  Mask = "mask",
+  Image = "image",
+  Axes = "axes",
+  BoundingBox = "bb",
+  BoundingBoxColor = "bbcol",
+  BackgroundColor = "bgcol",
+  Autorotate = "rot",
+  Brightness = "bright",
+  Density = "dens",
+  Levels = "lvl",
+  Interpolation = "interp",
+  Region = "reg",
+  Slice = "slice",
+  Time = "t",
+}
+
+/**
+ * Mapped to types in `ViewerChannelSettingParams`
+ */
+export enum ViewerChannelSettingKeys {
+  Color = "col",
+  Colorize = "clz",
+  ColorizeAlpha = "cza",
+  IsosurfaceAlpha = "isa",
+  Lut = "lut",
+  VolumeEnabled = "ven",
+  SurfaceEnabled = "sen",
+  IsosurfaceValue = "isv",
+}
+
+/**
+ * The serialized form of a ViewerChannelSetting, as a dictionary object.
+ */
+export class ViewerChannelSettingParams {
   /** Color, as a 6-digit hex color.  */
-  col?: string;
+  [ViewerChannelSettingKeys.Color]?: string = undefined;
   /** Colorize. "1" is enabled. Disabled by default. */
-  clz?: "1" | "0";
+  [ViewerChannelSettingKeys.Colorize]?: "1" | "0" = undefined;
   /** Colorize alpha, in the [0, 1] range. Set to `1.0` by default. */
-  cza?: string;
+  [ViewerChannelSettingKeys.ColorizeAlpha]?: string = undefined;
   /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
-  isa?: string;
+  [ViewerChannelSettingKeys.IsosurfaceAlpha]?: string = undefined;
   /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
    * by a colon. The first value is the minimum and the second is the maximum.
    * Defaults to [0, 255].
@@ -53,59 +97,114 @@ export type ViewerChannelSettingJson = {
    * "autoij:0" // use Auto-IJ to calculate min and max.
    * ```
    */
-  lut?: string;
+  [ViewerChannelSettingKeys.Lut]?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
-  ven?: "1" | "0";
+  [ViewerChannelSettingKeys.VolumeEnabled]?: "1" | "0" = undefined;
   /** Isosurface enabled. "1" is enabled. Disabled by default. */
-  sen?: "1" | "0";
+  [ViewerChannelSettingKeys.SurfaceEnabled]?: "1" | "0" = undefined;
   /** Isosurface value, in the [0, 255] range. Set to `128` by default. */
-  isv?: string;
-};
+  [ViewerChannelSettingKeys.IsosurfaceValue]?: string = undefined;
+}
+/**
+ * Channels, matching the pattern `c0`, `c1`, etc. corresponding to the index of the channel being configured.
+ * The channel parameter should have a value that is a comma-separated list of `key:value` pairs, with keys
+ * defined in `ViewerChannelSettingJson`.
+ */
+type ChannelParams = { [_ in `c${number}`]?: string };
 
-type BaseParams = {
+/** Serialized version of `ViewerState`. */
+export class ViewerStateParams {
+  /** Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D". */
+  [ViewerStateKeys.View]?: string = undefined;
   /**
-   * The opacity of the mask channel, an integer in the range [0, 100]. Set to `50` by default.
+   * Render mode. Valid values are "volumetric", "maxproject", and "pathtrace".
+   * Defaults to "volumetric".
    */
-  mask?: string;
+  [ViewerStateKeys.Mode]?: string = undefined;
+  /** The opacity of the mask channel, an integer in the range [0, 100]. Defaults to 50. */
+  [ViewerStateKeys.Mask]?: string = undefined;
+  /** The type of image to display. Valid values are "cell" and "fov". Defaults to "cell". */
+  [ViewerStateKeys.Image]?: string = undefined;
+  /** Whether to show the axes helper. "1" is enabled. Disabled by default. */
+  [ViewerStateKeys.Axes]?: string = undefined;
+  /** Whether to show the bounding box. "1" is enabled. Disabled by default. */
+  [ViewerStateKeys.BoundingBox]?: string = undefined;
+  /** The color of the bounding box, as a 6-digit hex color. */
+  [ViewerStateKeys.BoundingBoxColor]?: string = undefined;
+  /** The background color, as a 6-digit hex color. */
+  [ViewerStateKeys.BackgroundColor]?: string = undefined;
+  /** Whether to autorotate the view. "1" is enabled. Disabled by default. */
+  [ViewerStateKeys.Autorotate]?: string = undefined;
+  /** The brightness of the image, an float in the range [0, 100]. Defaults to 70. */
+  [ViewerStateKeys.Brightness]?: string = undefined;
+  /** Density, a float in the range [0, 100]. Defaults to 50. */
+  [ViewerStateKeys.Density]?: string = undefined;
+  /**
+   * Levels for image intensity adjustment. Should be three numeric values separated
+   * by commas, representing the low, middle, and high values in a [0, 255] range.
+   * Values will be sorted in ascending order; empty values will be parsed as 0.
+   */
+  [ViewerStateKeys.Levels]?: string = undefined;
+  /** Whether to enable interpolation. "1" is enabled. Enabled by default. */
+  [ViewerStateKeys.Interpolation]?: string = undefined;
+  /** Subregions per axis, as min:max pairs separated by commas.
+   * Defaults to full range (`0:1`) for each axis.
+   */
+  [ViewerStateKeys.Region]?: string = undefined;
+  /** Slice position per X, Y, and Z axes, as a list of comma-separated floats.
+   * 0.5 for all axes by default (e.g. `0.5,0.5,0.5`)
+   */
+  [ViewerStateKeys.Slice]?: string = undefined;
+  /** Frame number, for time-series volumes. 0 by default. */
+  [ViewerStateKeys.Time]?: string = undefined;
+}
+
+/** URL parameters that define data sources when loading volumes. */
+class DataParams {
   /**
    * One or more volume URLs to load. If multiple URLs are provided, they should
    * be separated by commas.
    */
-  url?: string;
+  url?: string = undefined;
   /**
    * The name of a dataset in the Cell Feature Explorer database. Used with `id`.
    */
-  dataset?: string;
+  dataset?: string = undefined;
   /**
    * The ID of a cell within the loaded dataset. Used with `dataset`.
    */
-  id?: string;
-  /**
-   * Axis to view. Valid values are "3D", "X", "Y", and "Z". Defaults to "3D".
-   */
-  view?: string;
-};
-// Copy of keys for above params. Both types are defined so that spec comments can be provided.
-// TODO: Remove redundant `baseParamKeys` type.
-const baseParamKeys = ["mask", "url", "dataset", "id", "view"] as const;
-const deprecatedParamKeys = ["ch", "luts", "colors"] as const;
+  id?: string = undefined;
+}
 
-type BaseParamKeys = (typeof baseParamKeys)[number];
-type ChannelKey = `c${number}`;
-type DeprecatedParamKeys = (typeof deprecatedParamKeys)[number];
-type AllParamKeys = BaseParamKeys | DeprecatedParamKeys | ChannelKey;
+class DeprecatedParams {
+  /** Deprecated query parameter for channel settings. */
+  ch?: string = undefined;
+  /** Deprecated query parameter for LUT settings. */
+  luts?: string = undefined;
+  /** Deprecated query parameter for channel colors. */
+  colors?: string = undefined;
+}
 
-type Params = BaseParams & { [_ in AllParamKeys]?: string };
+type AppParams = Partial<ViewerStateParams & DataParams & DeprecatedParams & ChannelParams>;
 
-const isParamKey = (key: string): key is BaseParamKeys => baseParamKeys.includes(key as BaseParamKeys);
-const isDeprecatedParamKey = (key: string): key is DeprecatedParamKeys =>
-  deprecatedParamKeys.includes(key as DeprecatedParamKeys);
-const isChannelKey = (key: string): key is ChannelKey => CHANNEL_STATE_KEY_REGEX.test(key);
+const allowedParamKeys: Array<keyof AppParams> = [
+  ...Object.keys(new ViewerStateParams()),
+  ...Object.keys(new DataParams()),
+  ...Object.keys(new DeprecatedParams()),
+] as Array<keyof AppParams>;
+const isParamKey = (key: string): key is keyof AppParams => allowedParamKeys.indexOf(key as keyof AppParams) !== -1;
+const isChannelKey = (key: string): key is keyof ChannelParams => CHANNEL_STATE_KEY_REGEX.test(key);
 
-export function urlSearchParamsToParams(searchParams: URLSearchParams): Params {
-  const result: Params = {};
+/**
+ * Filters a set of URLSearchParams for only the keys that are valid parameters for the viewer.
+ * Non-matching keys are discarded.
+ * @param searchParams Input URL search parameters.
+ * @returns a dictionary object matching the type of `Params`.
+ */
+export function getAllowedParams(searchParams: URLSearchParams): AppParams {
+  const result: AppParams = {};
   for (const [key, value] of searchParams.entries()) {
-    if (isParamKey(key) || isChannelKey(key) || isDeprecatedParamKey(key)) {
+    if (isParamKey(key) || isChannelKey(key)) {
       result[key] = value;
     }
   }
@@ -224,7 +323,6 @@ export function parseStringEnum<E extends string, T extends E | undefined>(
 /**
  * Parses a string boolean value ("1" as true, "0" as false), and returns `undefined` if the value is `undefined`.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseStringBoolean(value: string | undefined): boolean | undefined {
   if (value === undefined) {
     return undefined;
@@ -242,7 +340,6 @@ export function parseHexColorAsColorArray(hexColor: string | undefined): ColorAr
   return [r, g, b];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function colorArrayToHex(color: ColorArray): string {
   return color
     .map((c) => c.toString(16).padStart(2, "0"))
@@ -250,7 +347,6 @@ function colorArrayToHex(color: ColorArray): string {
     .toLowerCase();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function removeUndefinedProperties<T>(obj: T): Partial<T> {
   const result: Partial<T> = {};
   for (const key in obj) {
@@ -261,7 +357,6 @@ function removeUndefinedProperties<T>(obj: T): Partial<T> {
   return result;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
   if (!region || !SLICE_REGEX.test(region)) {
     return undefined;
@@ -273,7 +368,17 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parseStringLevels(levels: string | undefined): [number, number, number] | undefined {
+  if (!levels) {
+    return undefined;
+  }
+  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, 0, 255));
+  if (low === undefined || middle === undefined || high === undefined) {
+    return undefined;
+  }
+  return [low, middle, high];
+}
+
 function parseStringRegion(region: string | undefined): PerAxis<[number, number]> | undefined {
   if (!region || !REGION_REGEX.test(region)) {
     return undefined;
@@ -296,30 +401,195 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
 
 //// DATA SERIALIZATION //////////////////////
 
+/**
+ * Parses a ViewerChannelSetting from a JSON object.
+ * @param channelIndex Index of the channel, to be turned into a `match` value.
+ * @param jsonState The serialized ViewerChannelSetting to parse, as an object.
+ * @returns A ViewerChannelSetting object.
+ */
 export function deserializeViewerChannelSetting(
   channelIndex: number,
-  jsonState: ViewerChannelSettingJson
+  jsonState: ViewerChannelSettingParams
 ): ViewerChannelSetting {
   // Missing/undefined fields should be handled downstream.
   const result: ViewerChannelSetting = {
     match: channelIndex,
-    enabled: jsonState.ven === "1",
-    surfaceEnabled: jsonState.sen === "1",
-    isovalue: parseStringFloat(jsonState.isv, 0, 255),
-    surfaceOpacity: parseStringFloat(jsonState.isa, 0, 1),
-    colorizeEnabled: jsonState.clz === "1",
-    colorizeAlpha: parseStringFloat(jsonState.cza, 0, 1),
+    enabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.VolumeEnabled]),
+    surfaceEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.SurfaceEnabled]),
+    isovalue: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceValue], 0, 255),
+    surfaceOpacity: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceAlpha], 0, 1),
+    colorizeEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.Colorize]),
+    colorizeAlpha: parseStringFloat(jsonState[ViewerChannelSettingKeys.ColorizeAlpha], 0, 1),
   };
-  if (jsonState.col && HEX_COLOR_REGEX.test(jsonState.col)) {
-    result.color = jsonState.col;
+  if (jsonState[ViewerChannelSettingKeys.Color] && HEX_COLOR_REGEX.test(jsonState.col)) {
+    result.color = jsonState[ViewerChannelSettingKeys.Color];
   }
-  if (jsonState.lut && LUT_REGEX.test(jsonState.lut)) {
-    const [min, max] = jsonState.lut.split(":");
+  if (jsonState[ViewerChannelSettingKeys.Lut] && LUT_REGEX.test(jsonState.lut)) {
+    const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
   }
   return result;
 }
 
+export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingParams {
+  return {
+    [ViewerChannelSettingKeys.VolumeEnabled]: channelSetting.volumeEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.SurfaceEnabled]: channelSetting.isosurfaceEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue.toString(),
+    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
+    [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
+    [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
+    // Convert to hex string
+    [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
+    // TODO: Serialize control points....
+    // lut: channelSetting.lut?.join(":"),
+  };
+}
+
+export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
+  const result: Partial<ViewerState> = {
+    maskAlpha: parseStringInt(params[ViewerStateKeys.Mask], 0, 100),
+    imageType: parseStringEnum(params[ViewerStateKeys.Image], ImageType),
+    showAxes: parseStringBoolean(params[ViewerStateKeys.Axes]),
+    showBoundingBox: parseStringBoolean(params[ViewerStateKeys.BoundingBox]),
+    boundingBoxColor: parseHexColorAsColorArray(params[ViewerStateKeys.BoundingBoxColor]),
+    backgroundColor: parseHexColorAsColorArray(params[ViewerStateKeys.BackgroundColor]),
+    autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
+    brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
+    density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
+    levels: parseStringLevels(params[ViewerStateKeys.Levels]),
+    interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
+    region: parseStringRegion(params[ViewerStateKeys.Region]),
+    slice: parseStringSlice(params[ViewerStateKeys.Slice]),
+    time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
+    renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
+  };
+
+  // Handle viewmode, since they use different mappings
+  // TODO: Allow lowercase
+  if (params.view) {
+    const viewParamToViewMode = {
+      "3D": ViewMode.threeD,
+      Z: ViewMode.xy,
+      Y: ViewMode.xz,
+      X: ViewMode.yz,
+    };
+    const allowedViews = Object.keys(viewParamToViewMode);
+    let view: "3D" | "X" | "Y" | "Z";
+    if (allowedViews.includes(params.view.toUpperCase())) {
+      view = params.view.toUpperCase() as "3D" | "X" | "Y" | "Z";
+    } else {
+      view = "3D";
+    }
+    result.viewMode = viewParamToViewMode[view];
+  }
+
+  return removeUndefinedProperties(result);
+}
+
+export function serializeViewerState(state: ViewerState): ViewerStateParams {
+  // TODO: Enforce decimal places for floats/decimals?
+  const result: ViewerStateParams = {
+    [ViewerStateKeys.Mode]: state.renderMode,
+    [ViewerStateKeys.Mask]: state.maskAlpha.toString(),
+    [ViewerStateKeys.Image]: state.imageType,
+    [ViewerStateKeys.Axes]: state.showAxes ? "1" : "0",
+    [ViewerStateKeys.BoundingBox]: state.showBoundingBox ? "1" : "0",
+    [ViewerStateKeys.BoundingBoxColor]: colorArrayToHex(state.boundingBoxColor),
+    [ViewerStateKeys.BackgroundColor]: colorArrayToHex(state.backgroundColor),
+    [ViewerStateKeys.Autorotate]: state.autorotate ? "1" : "0",
+    [ViewerStateKeys.Brightness]: state.brightness.toString(),
+    [ViewerStateKeys.Density]: state.density.toString(),
+    [ViewerStateKeys.Interpolation]: state.interpolationEnabled ? "1" : "0",
+    [ViewerStateKeys.Region]: `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
+    [ViewerStateKeys.Slice]: `${state.slice.x},${state.slice.y},${state.slice.z}`,
+    [ViewerStateKeys.Levels]: state.levels.join(","),
+    [ViewerStateKeys.Time]: state.time.toString(),
+  };
+  const viewModeToViewParam = {
+    [ViewMode.threeD]: "3D",
+    [ViewMode.xy]: "Z",
+    [ViewMode.xz]: "Y",
+    [ViewMode.yz]: "X",
+  };
+  result[ViewerStateKeys.View] = viewModeToViewParam[state.viewMode];
+  return result;
+}
+
+function parseDeprecatedChannelSettings(params: DeprecatedParams): ViewerChannelSettings | undefined {
+  // old, deprecated channels model
+  if (params.ch) {
+    // ?ch=1,2
+    // ?luts=0,255,0,255
+    // ?colors=ff0000,00ff00
+    const initialChannelSettings: ViewerChannelSettings = {
+      groups: [{ name: "Channels", channels: [] }],
+    };
+    const ch = initialChannelSettings.groups[0].channels;
+
+    const channelsOn = params.ch.split(",").map((numstr) => Number.parseInt(numstr, 10));
+    for (let i = 0; i < channelsOn.length; ++i) {
+      ch.push({ match: channelsOn[i], enabled: true });
+    }
+    // look for luts or color
+    if (params.luts) {
+      const luts = params.luts.split(",");
+      if (luts.length !== ch.length * 2) {
+        console.warn("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
+      } else {
+        for (let i = 0; i < ch.length; ++i) {
+          ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
+        }
+      }
+    }
+    if (params.colors) {
+      const colors = params.colors.split(",");
+      if (colors.length !== ch.length) {
+        console.warn("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
+      } else {
+        for (let i = 0; i < ch.length; ++i) {
+          ch[i]["color"] = colors[i];
+        }
+      }
+    }
+    return initialChannelSettings;
+  }
+  return undefined;
+}
+
+function parseChannelSettings(params: ChannelParams): ViewerChannelSettings | undefined {
+  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
+  // a comma-separated list of key-value pairs.
+  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
+  Object.keys(params).forEach((key) => {
+    if (isChannelKey(key)) {
+      const channelIndex = Number.parseInt(key.slice(1), 10);
+      try {
+        const channelData = parseKeyValueList(params[key]!);
+        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingParams);
+        channelIndexToSettings.set(channelIndex, channelSetting);
+      } catch (e) {
+        console.warn(
+          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
+          e
+        );
+      }
+    }
+  });
+  if (channelIndexToSettings.size > 0) {
+    const groups: ViewerChannelSettings["groups"] = [
+      {
+        name: "Channels",
+        channels: Array.from(channelIndexToSettings.values()),
+      },
+    ];
+    return { groups };
+  }
+
+  return undefined;
+}
+
+//// FULL URL PARSING //////////////////////
 async function loadDataset(dataset: string, id: string): Promise<Partial<AppProps>> {
   const db = new FirebaseRequest();
   const args: Partial<AppProps> = {};
@@ -353,100 +623,26 @@ async function loadDataset(dataset: string, id: string): Promise<Partial<AppProp
   return args;
 }
 
-export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promise<{
+/**
+ * Parses a set of URL search parameters into a set of args/props for the viewer.
+ * @param urlSearchParams
+ */
+export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Promise<{
   args: Partial<AppProps>;
   viewerSettings: Partial<ViewerState>;
 }> {
-  const params = urlSearchParamsToParams(urlSearchParams);
+  const params = getAllowedParams(urlSearchParams);
   let args: Partial<AppProps> = {};
-  const viewerSettings: Partial<ViewerState> = {};
+  // Parse viewer state
+  const viewerSettings: Partial<ViewerState> = deserializeViewerState(params);
 
-  if (params.mask) {
-    viewerSettings.maskAlpha = parseInt(params.mask, 10);
-  }
-  if (params.view) {
-    const mapping = {
-      "3D": ViewMode.threeD,
-      Z: ViewMode.xy,
-      Y: ViewMode.xz,
-      X: ViewMode.yz,
-    };
-    const allowedViews = Object.keys(mapping);
-    let view: "3D" | "X" | "Y" | "Z";
-    if (allowedViews.includes(params.view)) {
-      view = params.view as "3D" | "X" | "Y" | "Z";
-    } else {
-      view = "3D";
-    }
-    viewerSettings.viewMode = mapping[view];
-  }
-  // old, deprecated channels model
-  if (params.ch) {
-    // ?ch=1,2
-    // ?luts=0,255,0,255
-    // ?colors=ff0000,00ff00
-    const initialChannelSettings: ViewerChannelSettings = {
-      groups: [{ name: "Channels", channels: [] }],
-    };
-    const ch = initialChannelSettings.groups[0].channels;
+  // Parse channel settings. If per-channel settings are provided, they will override
+  // the old `ch` query parameter.
+  const deprecatedChannelSettings = parseDeprecatedChannelSettings(params);
+  const channelSettings = parseChannelSettings(params);
+  args.viewerChannelSettings = channelSettings ?? deprecatedChannelSettings;
 
-    const channelsOn = params.ch.split(",").map((numstr) => parseInt(numstr, 10));
-    for (let i = 0; i < channelsOn.length; ++i) {
-      ch.push({ match: channelsOn[i], enabled: true });
-    }
-    // look for luts or color
-    if (params.luts) {
-      const luts = params.luts.split(",");
-      if (luts.length !== ch.length * 2) {
-        console.warn("ILL-FORMED QUERYSTRING: luts must have a min/max for each ch");
-      } else {
-        for (let i = 0; i < ch.length; ++i) {
-          ch[i]["lut"] = [luts[i * 2], luts[i * 2 + 1]];
-        }
-      }
-    }
-    if (params.colors) {
-      const colors = params.colors.split(",");
-      if (colors.length !== ch.length) {
-        console.warn("ILL-FORMED QUERYSTRING: if colors specified, must have a color for each ch");
-      } else {
-        for (let i = 0; i < ch.length; ++i) {
-          ch[i]["color"] = colors[i];
-        }
-      }
-    }
-    args.viewerChannelSettings = initialChannelSettings;
-  }
-  // Check for per-channel settings; this will override the old channel settings (`ch`)
-  // if present.
-  // Channels keys are formatted as `c0`, `c1`, etc., and the value is string containing
-  // a comma-separated list of key-value pairs.
-  const channelIndexToSettings: Map<number, ViewerChannelSetting> = new Map();
-  Object.keys(params).forEach((key) => {
-    if (isChannelKey(key)) {
-      const channelIndex = parseInt(key.slice(1), 10);
-      try {
-        const channelData = parseKeyValueList(params[key]!);
-        const channelSetting = deserializeViewerChannelSetting(channelIndex, channelData as ViewerChannelSettingJson);
-        channelIndexToSettings.set(channelIndex, channelSetting);
-      } catch (e) {
-        console.warn(
-          `url_utils.getArgsFromParams: Failed to parse channel settings for channel ${channelIndex} from URL parameters.`,
-          e
-        );
-      }
-    }
-  });
-  if (channelIndexToSettings.size > 0) {
-    const groups: ViewerChannelSettings["groups"] = [
-      {
-        name: "Channels",
-        channels: Array.from(channelIndexToSettings.values()),
-      },
-    ];
-    args.viewerChannelSettings = { groups };
-  }
-
+  // Parse data sources (URL or dataset/id pair)
   if (params.url) {
     const imageUrls = tryDecodeURLList(params.url) ?? decodeURL(params.url);
     const firstUrl = Array.isArray(imageUrls) ? imageUrls[0] : imageUrls;
@@ -460,7 +656,7 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     // Check if channel settings are already provided (through per-channel settings or
     // old `ch` query param, or included in JSON files). If not, make first three
     // channels visible by default.
-    if (!firstUrl.endsWith("json") && !params.ch && channelIndexToSettings.size === 0) {
+    if (!firstUrl.endsWith("json") && !args.viewerChannelSettings) {
       args.viewerChannelSettings = {
         groups: [
           // first 3 channels on by default!
@@ -480,7 +676,26 @@ export async function getArgsFromParams(urlSearchParams: URLSearchParams): Promi
     args = { ...args, ...datasetArgs };
   }
 
-  return { args, viewerSettings };
+  return { args: removeUndefinedProperties(args), viewerSettings: removeUndefinedProperties(viewerSettings) };
+}
+
+/**
+ * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
+ * @param state ViewerStateContext to serialize.
+ */
+export function serializeViewerUrlParams(state: ViewerStateContextType): AppParams {
+  // TODO: Unit tests for this function
+  const params = serializeViewerState(state);
+
+  const channelParams: Record<string, ViewerChannelSettingParams> = state.channelSettings.reduce<
+    Record<string, ViewerChannelSettingParams>
+  >((acc, channelSetting, index): Record<string, ViewerChannelSettingParams> => {
+    const key = `c${index}`;
+    acc[key] = serializeViewerChannelSetting(channelSetting);
+    return acc;
+  }, {} as Record<string, ViewerChannelSettingParams>);
+
+  return { ...params, ...channelParams };
 }
 
 export function isValidUrl(url: string): boolean {
