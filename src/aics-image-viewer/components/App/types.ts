@@ -5,7 +5,7 @@ import type { ViewerChannelSettings } from "../../shared/utils/viewerChannelSett
 import type { ViewerState } from "../ViewerStateProvider/types";
 
 /** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
-export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: ReadonlyArray<any>) => void;
+export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: React.DependencyList) => void;
 
 type ControlNames =
   | "alphaMaskSlider"
