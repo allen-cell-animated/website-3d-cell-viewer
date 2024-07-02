@@ -691,7 +691,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  */
-export function serializeViewerUrlParams(state: ViewerStateContextType): AppParams {
+export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>): AppParams {
   // TODO: Unit tests for this function
   const params = serializeViewerState(state);
 

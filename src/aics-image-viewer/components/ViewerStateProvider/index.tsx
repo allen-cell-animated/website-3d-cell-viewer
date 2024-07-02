@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState, useRef, useEffect } from "react";
+import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
 
 import type {
   ViewerStateContextType,
