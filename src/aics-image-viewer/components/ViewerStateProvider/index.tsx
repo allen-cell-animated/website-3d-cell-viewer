@@ -117,6 +117,8 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   applyColorPresets: nullfn,
 };
 
+export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
+
 const DEFAULT_VIEWER_CONTEXT_OUTER = { ref: { current: DEFAULT_VIEWER_CONTEXT } };
 
 type NoNull<T> = { [K in keyof T]: NonNullable<T[K]> };
