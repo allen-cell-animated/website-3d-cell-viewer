@@ -1,5 +1,4 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
-import { clamp } from "lodash";
 
 import type {
   ChannelState,
@@ -14,18 +13,18 @@ import {
 } from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
+import { clamp } from "./math_utils";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
 const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
 /**
- * Match colon-separated pair of numeric strings in the [0, 1] range.
- * Values will be clamped to the [0, 1] range and sorted.
+ * Match comma-separated triplet of numeric strings.
  */
 const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 /**
  * Matches a sequence of three comma-separated min:max number pairs, representing
- * the x, y, and z axes. Values will be clamped to the [0, 1] range and sorted.
+ * the x, y, and z axes.
  */
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
