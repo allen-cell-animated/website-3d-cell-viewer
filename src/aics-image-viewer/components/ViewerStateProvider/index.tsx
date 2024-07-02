@@ -161,21 +161,21 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     setChannelSettings(newChannelSettings);
   }, []);
 
-  useEffect(() => {
+  // Sync viewer settings prop with state
+  // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
+  // infinite render loop, so now it's in a `useMemo`:
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  useMemo(() => {
+    let newSettings = { ...viewerSettings };
     if (props.viewerSettings) {
-      let newSettings = viewerSettings;
-
       for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
-        if (viewerSettings[key] !== props.viewerSettings[key]) {
+        if (newSettings[key] !== props.viewerSettings[key]) {
           // Update viewer settings one at a time to allow change handlers to keep state valid
           newSettings = applyChangeToViewerSettings(newSettings, key, props.viewerSettings[key] as any);
         }
       }
-
-      if (newSettings !== viewerSettings) {
-        setViewerSettings(newSettings);
-      }
     }
+    setViewerSettings(newSettings);
   }, [props.viewerSettings]);
 
   const context = useMemo(() => {

@@ -6,7 +6,6 @@ import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
-import { landingPageContent } from "./content";
 import Header from "../Header";
 import LoadModal from "../Modals/LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
@@ -14,6 +13,8 @@ import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, 
 import { parseViewerUrlParams } from "../../utils/url_utils";
 import HelpDropdown from "../HelpDropdown";
 import { BannerVideo } from "../../assets/videos";
+
+import { landingPageContent } from "./content";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -25,7 +26,7 @@ const Banner = styled(FlexColumnAlignCenter)`
   margin: 0;
 `;
 
-const BannerTextContainer = styled(FlexColumn)`
+const BannerTextContainer = styled(FlexColumnAlignCenter)`
   --padding-x: 30px;
   padding: 26px var(--padding-x);
   max-width: calc(${MAX_CONTENT_WIDTH_PX}px - 2 * var(--padding-x));
@@ -55,10 +56,20 @@ const BannerVideoContainer = styled.div`
   background-color: #000;
   z-index: -1;
 
-  & > video {
+  & > div {
+    position: absolute;
     width: 100%;
     height: 100%;
-    object-position: 50% 40%;
+    background-image: linear-gradient(90deg, rgba(35, 25, 50, 0.5) 50%, rgba(0, 0, 0, 0) 70%);
+    z-index: 3;
+  }
+
+  & > video {
+    position: absolute;
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    left: 35%;
     object-fit: cover;
   }
 `;
@@ -82,7 +93,7 @@ const FeatureHighlightsContainer = styled.li`
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   padding: 0;
   justify-content: space-evenly;
-  gap: 12px 24px;
+  gap: 20px;
   margin: 30px 0 0 0;
 `;
 
@@ -123,7 +134,7 @@ const ProjectList = styled.ul`
     width: 100%;
     height: 1px;
     background-color: var(--color-layout-dividers);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
 `;
 
@@ -131,15 +142,21 @@ const ProjectCard = styled.li`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 
   & h3 {
     font-weight: 600;
   }
 
   & p,
-  & h3 {
+  & h3,
+  & span {
     margin: 0;
+  }
+
+  & a {
+    // Add 2px margin to maintain the same visual gap that text has
+    margin-top: 2px;
   }
 `;
 
@@ -162,17 +179,16 @@ const DatasetCard = styled.li`
   min-width: 180px;
   padding: 5px;
 
-  & > h4 {
-    text-align: center;
+  & > h3 {
     display: grid;
     margin: 0;
   }
   & > p {
-    text-align: center;
     display: grid;
   }
-  & > a {
-    margin: auto;
+  & > a,
+  & > button {
+    margin-right: auto;
     display: grid;
   }
 `;
@@ -231,10 +247,11 @@ export default function LandingPage(): ReactElement {
   // TODO: Should the load buttons be link elements or buttons?
   // Currently both the link and the button inside can be tab-selected.
   const renderDataset = (dataset: DatasetEntry, index: number): ReactElement => {
+    // TODO: Use links here instead of button onClicks.
     return (
       <DatasetCard key={index}>
-        <h4>{dataset.name}</h4>
-        <p>{dataset.description}</p>
+        <h3>{dataset.name}</h3>
+        {dataset.description && <p>{dataset.description}</p>}
         <Button type="primary" onClick={() => onClickLoad(dataset.loadParams)}>
           Load<VisuallyHidden> dataset {dataset.name}</VisuallyHidden>
         </Button>
@@ -288,10 +305,8 @@ export default function LandingPage(): ReactElement {
     return (
       <ProjectCard key={index}>
         {projectNameElement}
-        <FlexColumn $gap={6}>
-          <p>{project.description}</p>
-          {publicationElement}
-        </FlexColumn>
+        <p>{project.description}</p>
+        {publicationElement}
         {loadButton}
         {datasetList}
       </ProjectCard>
@@ -326,6 +341,7 @@ export default function LandingPage(): ReactElement {
           <video autoPlay={allowMotion} loop muted>
             <source src={BannerVideo} type="video/mp4" />
           </video>
+          <div></div>
         </BannerVideoContainer>
         <BannerTextContainer style={{ zIndex: 1 }}>
           <h1>Welcome to 3D Volume Viewer</h1>
@@ -337,7 +353,7 @@ export default function LandingPage(): ReactElement {
         </BannerTextContainer>
       </Banner>
 
-      <ContentContainer $gap={10}>
+      <ContentContainer $gap={30} style={{ paddingBottom: "400px" }}>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
             <h3>Multiresolution OME-Zarr support</h3>
