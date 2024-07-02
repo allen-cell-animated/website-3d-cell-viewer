@@ -10,7 +10,7 @@ import Header from "../Header";
 import LoadModal from "../LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
 import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
-import { getArgsFromParams } from "../../utils/url_utils";
+import { parseViewerUrlParams } from "../../utils/url_utils";
 import HelpDropdown from "../HelpDropdown";
 import { BannerVideo } from "../../assets/videos";
 
@@ -218,7 +218,7 @@ export default function LandingPage(): ReactElement {
     // Check if the URL used to open the landing page has arguments;
     // if so, assume that this is an old URL intended to go to the viewer.
     // Navigate to the viewer while preserving URL arguments.
-    getArgsFromParams(searchParams).then(({ args }) => {
+    parseViewerUrlParams(searchParams).then(({ args }) => {
       if (Object.keys(args).length > 0) {
         console.log("Detected URL parameters. Redirecting from landing page to viewer.");
         navigation("viewer" + "?" + searchParams.toString(), {
