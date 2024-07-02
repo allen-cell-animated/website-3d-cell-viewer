@@ -20,6 +20,7 @@ const nucmorphBaseViewerSettings: Partial<AppDataProps> = {
   },
   viewerSettings: {
     viewMode: ViewMode.xy,
+    density: 2.5,
   },
 };
 
