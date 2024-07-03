@@ -18,7 +18,9 @@ const SmarterSlider: React.FC<NouisliderProps> = (props) => {
     };
   };
 
-  const onStart = wrapEventHandler(true, props.onStart);
+  // TODO: Disabled for now because it causes a bug where the time slider does not update.
+  // The onStart wrapEventHandler should be set to `true` for memoization.
+  const onStart = wrapEventHandler(false, props.onStart);
   const onEnd = wrapEventHandler(false, props.onEnd);
   return <MemoedNouislider {...{ ...props, noUpdate, onStart, onEnd }} />;
 };
