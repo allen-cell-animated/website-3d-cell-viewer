@@ -282,15 +282,34 @@
     margin-bottom:8px;
   }
 
-.channel-row :host{
-    display:block;
+.channel-row .tf-editor-svg.dragging{
+      cursor:move;
+    }
+
+.channel-row .tf-editor-popover{
+    position:absolute;
+    z-index:9999;
+    width:100%;
   }
 
-.channel-row .bar rect{
-    fill:var(--color-controlpanel-border);
+.channel-row .tf-editor-cover{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
   }
 
 .channel-row .tick text{
+    user-select:none;
+    -o-user-select:none;
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    -webkit-user-select:none;
+  }
+
+.channel-row rect.bar,
+  .channel-row .tick text{
     fill:var(--color-controlpanel-text);
   }
 
@@ -316,10 +335,10 @@
     stroke-width:1.5px;
   }
 
-.channel-row .selected{
-    fill:white;
-    stroke:white;
-  }
+.channel-row circle.selected{
+      fill:white;
+      stroke:white;
+    }
 
 /*!**********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/shared/SliderRow/styles.css ***!
@@ -383,7 +402,7 @@
   }
 
 .channel-rows-list .ant-list-item.channel-row .button-row:not(:last-child){
-      margin-bottom:16px;
+      margin-bottom:8px;
     }
 
 .channel-rows-list .ant-list-item.channel-row.controls-closed .ant-btn-text:not(:focus-visible){
