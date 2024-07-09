@@ -137,7 +137,9 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
   } else {
     // ChannelSettingUniformUpdateAction on a single channel
     const newSettings = channelSettings.slice();
-    newSettings[index] = { ...newSettings[index], [key]: value };
+    if (index >= 0 && index < channelSettings.length) {
+      newSettings[index] = { ...newSettings[index], [key]: value };
+    }
     return newSettings;
   }
 };
