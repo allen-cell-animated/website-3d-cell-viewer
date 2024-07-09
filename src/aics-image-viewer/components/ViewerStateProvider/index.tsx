@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useRef, useState } from "react";
 
 import type {
   ViewerStateContextType,
@@ -70,23 +70,15 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
   }),
 };
 
-const extractViewerSettings = (context: ViewerStateContextType): ViewerState => {
-  const {
-    channelSettings: _channelSettings,
-    changeViewerSetting: _changeViewerSetting,
-    changeChannelSetting: _changeChannelSetting,
-    changeMultipleChannelSettings: _changeMultipleChannelSettings,
-    applyColorPresets: _applyColorPresets,
-    ...settings
-  } = context;
-  return settings;
+type ViewerStateAction<K extends keyof ViewerState> = {
+  key: K;
+  value: PartialIfObject<ViewerState[K]>;
 };
 
 /** Changes a key in a given `ViewerState` object, keeping the object in a valid state and applying partial values */
-const applyChangeToViewerSettings = <K extends keyof ViewerState>(
+const viewerSettingsReducer = <K extends keyof ViewerState>(
   viewerSettings: ViewerState,
-  key: K,
-  value: PartialIfObject<ViewerState[K]>
+  { key, value }: ViewerStateAction<K>
 ): ViewerState => {
   const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
 
@@ -128,7 +120,7 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, setViewerSettings] = useState<ViewerState>({ ...DEFAULT_VIEWER_SETTINGS });
+  const [viewerSettings, vsDispatch] = useReducer(viewerSettingsReducer, { ...DEFAULT_VIEWER_SETTINGS });
   const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -136,10 +128,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   // Below callbacks get no dependencies since we're accessing state via the ref
 
-  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => {
-    const currentSettings = extractViewerSettings(ref.current);
-    setViewerSettings(applyChangeToViewerSettings(currentSettings, key, value));
-  }, []);
+  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => vsDispatch({ key, value }), []);
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
     const newChannelSettings = ref.current.channelSettings.slice();
@@ -170,12 +159,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     if (props.viewerSettings) {
       for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
         if (newSettings[key] !== props.viewerSettings[key]) {
-          // Update viewer settings one at a time to allow change handlers to keep state valid
-          newSettings = applyChangeToViewerSettings(newSettings, key, props.viewerSettings[key] as any);
+          changeViewerSetting(key, props.viewerSettings[key] as any);
         }
       }
     }
-    setViewerSettings(newSettings);
   }, [props.viewerSettings]);
 
   const context = useMemo(() => {
