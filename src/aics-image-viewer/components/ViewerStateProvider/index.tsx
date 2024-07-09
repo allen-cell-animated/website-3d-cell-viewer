@@ -95,43 +95,47 @@ const viewerSettingsReducer = <K extends keyof ViewerState>(
   }
 };
 
+/** Utility type to explicitly assert that one or more properties will *not* be defined on an object */
+type WithExplicitlyUndefined<K extends keyof any, T> = T & { [key in K]?: never };
+
+/** Set channel setting `key` on one or more channels specified by `index` to value `value`. */
+type ChannelSettingUniformUpdateAction<K extends keyof ChannelState> = {
+  index: number | number[];
+  key: K;
+  value: ChannelState[K];
+};
+/** Set the values of channel setting `key` for all channels from an array of values ordered by channel index */
+type ChannelSettingArrayUpdateAction<K extends keyof ChannelState> = {
+  key: K;
+  value: ChannelState[K][];
+};
+/** Initialize list of channel states */
+type ChannelSettingInitAction = {
+  value: ChannelState[];
+};
+
 type ChannelStateAction<K extends keyof ChannelState> =
-  | {
-      // Update a single setting for one channel, or uniformly for multiple channels
-      index: number | number[];
-      key: K;
-      value: ChannelState[K];
-    }
-  | {
-      // Update a single setting for all channels from an ordered array of values
-      index?: undefined;
-      key: K;
-      value: ChannelState[K][];
-    }
-  | {
-      // Initialize channel settings
-      index?: undefined;
-      key?: undefined;
-      value: ChannelState[];
-    };
+  | ChannelSettingUniformUpdateAction<K>
+  | WithExplicitlyUndefined<"index", ChannelSettingArrayUpdateAction<K>>
+  | WithExplicitlyUndefined<"index" | "key", ChannelSettingInitAction>;
 
 const channelSettingsReducer = <K extends keyof ChannelState>(
   channelSettings: ChannelState[],
   { index, key, value }: ChannelStateAction<K>
 ): ChannelState[] => {
   if (key === undefined) {
-    // Initialize channel settings
+    // ChannelSettingInitAction
     return value as ChannelState[];
   } else if (index === undefined) {
-    // Update a single setting for all channels from an ordered array of values
+    // ChannelSettingArrayUpdateAction
     return channelSettings.map((channel, idx) => {
       return value[idx] ? { ...channel, [key]: value[idx] } : channel;
     });
   } else if (Array.isArray(index)) {
-    // Update a single setting for one or more channels
+    // ChannelSettingUniformUpdateAction on potentially multiple channels
     return channelSettings.map((channel, idx) => (index.includes(idx) ? { ...channel, [key]: value } : channel));
   } else {
-    // Update a single setting for one channel
+    // ChannelSettingUniformUpdateAction on a single channel
     const newSettings = channelSettings.slice();
     newSettings[index] = { ...newSettings[index], [key]: value };
     return newSettings;
