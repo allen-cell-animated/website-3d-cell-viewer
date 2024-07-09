@@ -295,16 +295,12 @@ const App: React.FC<AppProps> = (props) => {
 
   // TODO: Refactor this out of App index?
   const initializeOneChannelSetting = (
-    aimg: Volume | null,
     channel: string,
     index: number,
     defaultColor: ColorArray,
     viewerChannelSettings?: ViewerChannelSettings,
     defaultChannelState = DEFAULT_CHANNEL_STATE
   ): ChannelState => {
-    // note that this modifies aimg also
-    const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
-
     let initSettings = {} as Partial<ViewerChannelSetting>;
     if (viewerChannelSettings) {
       // search for channel in settings using groups, names and match values
@@ -320,7 +316,7 @@ const App: React.FC<AppProps> = (props) => {
       isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
       opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
       color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-      controlPoints: newControlPoints ?? defaultChannelState.controlPoints,
+      controlPoints: defaultChannelState.controlPoints,
     };
   };
 
@@ -335,7 +331,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      return initializeOneChannelSetting(null, channel, index, color, props.viewerChannelSettings);
+      return initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
