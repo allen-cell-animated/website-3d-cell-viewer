@@ -98,14 +98,16 @@ const viewerSettingsReducer = <K extends keyof ViewerState>(
 
 type ChannelStateAction<K extends keyof ChannelState> =
   | {
+      // Update a single setting for one channel, or uniformly for multiple channels
       index: number | number[];
       key: K;
-      value: PartialIfObject<ChannelState[K]>;
+      value: ChannelState[K];
     }
   | {
+      // Update a single setting for all channels from an ordered array of values
       index?: undefined;
       key: K;
-      value: PartialIfObject<ChannelState[K]>[];
+      value: ChannelState[K][];
     };
 
 const channelSettingsReducer = <K extends keyof ChannelState>(
