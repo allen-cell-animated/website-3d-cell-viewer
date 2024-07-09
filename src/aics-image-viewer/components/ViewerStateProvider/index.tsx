@@ -170,10 +170,9 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   // infinite render loop, so now it's in a `useMemo`:
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   useMemo(() => {
-    let newSettings = { ...viewerSettings };
     if (props.viewerSettings) {
       for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
-        if (newSettings[key] !== props.viewerSettings[key]) {
+        if (viewerSettings[key] !== props.viewerSettings[key]) {
           changeViewerSetting(key, props.viewerSettings[key] as any);
         }
       }
