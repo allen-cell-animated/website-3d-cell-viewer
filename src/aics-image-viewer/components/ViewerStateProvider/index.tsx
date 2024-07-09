@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
 
 import type {
   ViewerStateContextType,
@@ -7,7 +7,6 @@ import type {
   ViewerSettingUpdater,
   ChannelSettingUpdater,
   ChannelState,
-  MultipleChannelSettingsUpdater,
   PartialIfObject,
 } from "./types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
@@ -97,6 +96,35 @@ const viewerSettingsReducer = <K extends keyof ViewerState>(
   }
 };
 
+type ChannelStateAction<K extends keyof ChannelState> =
+  | {
+      index: number | number[];
+      key: K;
+      value: PartialIfObject<ChannelState[K]>;
+    }
+  | {
+      index?: undefined;
+      key: K;
+      value: PartialIfObject<ChannelState[K]>[];
+    };
+
+const channelSettingsReducer = <K extends keyof ChannelState>(
+  channelSettings: ChannelState[],
+  { index, key, value }: ChannelStateAction<K>
+): ChannelState[] => {
+  if (index === undefined) {
+    return channelSettings.map((channel, idx) => {
+      return value[idx] ? { ...channel, [key]: value[idx] } : channel;
+    });
+  } else if (Array.isArray(index)) {
+    return channelSettings.map((channel, idx) => (index.includes(idx) ? { ...channel, [key]: value } : channel));
+  } else {
+    const newSettings = channelSettings.slice();
+    newSettings[index] = { ...newSettings[index], [key]: value };
+    return newSettings;
+  }
+};
+
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
@@ -105,7 +133,6 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
   changeChannelSetting: nullfn,
-  changeMultipleChannelSettings: nullfn,
   applyColorPresets: nullfn,
 };
 
@@ -120,35 +147,23 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, vsDispatch] = useReducer(viewerSettingsReducer, { ...DEFAULT_VIEWER_SETTINGS });
-  const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
+  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...DEFAULT_VIEWER_SETTINGS });
+  const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
 
-  // Below callbacks get no dependencies since we're accessing state via the ref
+  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
-  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => vsDispatch({ key, value }), []);
+  const changeChannelSetting = useCallback<ChannelSettingUpdater>(
+    (index, key, value) => channelDispatch({ index, key, value }),
+    []
+  );
 
-  const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
-    const newChannelSettings = ref.current.channelSettings.slice();
-    newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
-    setChannelSettings(newChannelSettings);
-  }, []);
-
-  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>((indices, key, value) => {
-    const newChannelSettings = ref.current.channelSettings.map((settings, idx) =>
-      indices.includes(idx) ? { ...settings, [key]: value } : settings
-    );
-    setChannelSettings(newChannelSettings);
-  }, []);
-
-  const applyColorPresets = useCallback((presets: ColorArray[]): void => {
-    const newChannelSettings = ref.current.channelSettings.map((channel, idx) =>
-      presets[idx] ? { ...channel, color: presets[idx] } : channel
-    );
-    setChannelSettings(newChannelSettings);
-  }, []);
+  const applyColorPresets = useCallback(
+    (presets: ColorArray[]): void => channelDispatch({ key: "color", value: presets }),
+    []
+  );
 
   // Sync viewer settings prop with state
   // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
@@ -170,9 +185,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       ...viewerSettings,
       channelSettings,
       changeViewerSetting,
-      setChannelSettings,
+      setChannelSettings: channelDispatch,
       changeChannelSetting,
-      changeMultipleChannelSettings,
       applyColorPresets,
     };
 
