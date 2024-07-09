@@ -74,7 +74,6 @@ type ViewerStateAction<K extends keyof ViewerState> = {
   value: PartialIfObject<ViewerState[K]>;
 };
 
-/** Changes a key in a given `ViewerState` object, keeping the object in a valid state and applying partial values */
 const viewerSettingsReducer = <K extends keyof ViewerState>(
   viewerSettings: ViewerState,
   { key, value }: ViewerStateAction<K>
