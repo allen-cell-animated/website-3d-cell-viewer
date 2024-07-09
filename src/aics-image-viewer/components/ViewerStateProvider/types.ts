@@ -75,7 +75,7 @@ export type ChannelSettingUpdater = <K extends ChannelStateKey>(
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
   changeViewerSetting: ViewerSettingUpdater;
-  setChannelSettings: React.Dispatch<React.SetStateAction<ChannelState[]>>;
   changeChannelSetting: ChannelSettingUpdater;
+  setChannelSettings: (settings: ChannelState[]) => void;
   applyColorPresets: (presets: ColorArray[]) => void;
 };

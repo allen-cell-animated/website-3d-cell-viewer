@@ -108,19 +108,31 @@ type ChannelStateAction<K extends keyof ChannelState> =
       index?: undefined;
       key: K;
       value: ChannelState[K][];
+    }
+  | {
+      // Initialize channel settings
+      index?: undefined;
+      key?: undefined;
+      value: ChannelState[];
     };
 
 const channelSettingsReducer = <K extends keyof ChannelState>(
   channelSettings: ChannelState[],
   { index, key, value }: ChannelStateAction<K>
 ): ChannelState[] => {
-  if (index === undefined) {
+  if (key === undefined) {
+    // Initialize channel settings
+    return value as ChannelState[];
+  } else if (index === undefined) {
+    // Update a single setting for all channels from an ordered array of values
     return channelSettings.map((channel, idx) => {
       return value[idx] ? { ...channel, [key]: value[idx] } : channel;
     });
   } else if (Array.isArray(index)) {
+    // Update a single setting for one or more channels
     return channelSettings.map((channel, idx) => (index.includes(idx) ? { ...channel, [key]: value } : channel));
   } else {
+    // Update a single setting for one channel
     const newSettings = channelSettings.slice();
     newSettings[index] = { ...newSettings[index], [key]: value };
     return newSettings;
@@ -157,15 +169,13 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
-  const changeChannelSetting = useCallback<ChannelSettingUpdater>(
-    (index, key, value) => channelDispatch({ index, key, value }),
-    []
-  );
+  const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
+    channelDispatch({ index, key, value });
+  }, []);
 
-  const applyColorPresets = useCallback(
-    (presets: ColorArray[]): void => channelDispatch({ key: "color", value: presets }),
-    []
-  );
+  const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ key: "color", value }), []);
+
+  const setChannelSettings = useCallback((channels: ChannelState[]) => channelDispatch({ value: channels }), []);
 
   // Sync viewer settings prop with state
   // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
@@ -186,7 +196,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       ...viewerSettings,
       channelSettings,
       changeViewerSetting,
-      setChannelSettings: channelDispatch,
+      setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
     };
