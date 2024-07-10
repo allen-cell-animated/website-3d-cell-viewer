@@ -300,12 +300,17 @@ const App: React.FC<AppProps> = (props) => {
       changeChannelSetting(channelIndex, "ramp", ramp);
     } else {
       // try not to update lut from here if we are in play mode
-      if (playingAxis !== null) {
-        // do nothing here?
-        // tell gui that we have updated control pts?
-        //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      // if (playingAxis !== null) {
+      // do nothing here?
+      // tell gui that we have updated control pts?
+      //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      // }
+      if (thisChannelsSettings.useControlPoints) {
+        changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      } else {
+        const ramp = controlPointsToRamp(aimg.getChannel(channelIndex).lut.controlPoints);
+        changeChannelSetting(channelIndex, "ramp", ramp);
       }
-      changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
     }
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
