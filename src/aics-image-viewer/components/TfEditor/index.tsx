@@ -21,7 +21,12 @@ import type { SingleChannelSettingUpdater } from "../ViewerStateProvider/types";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 export const TFEDITOR_MAX_BIN = 255;
-const TFEDITOR_COLOR_PICKER_MARGIN_PX = 2;
+
+/**The color picker opens next to control points like a context menu. This constant gives it a bit of space. */
+const TFEDITOR_COLOR_PICKER_MARGIN_X_PX = 2;
+/** If a control point is within this distance of the bottom of the screen, open the color picker upward */
+const TFEDITOR_COLOR_PICKER_OPEN_UPWARD_MARGIN_PX = 310;
+
 const TFEDITOR_GRADIENT_MAX_OPACITY = 0.9;
 const TFEDITOR_NUM_TICKS = 4;
 
@@ -126,6 +131,12 @@ function getHistogramBinLengths(histogram: Histogram): { binLengths: number[]; m
   return { binLengths, max };
 }
 
+const colorPickerPositionToStyle = ([x, y]: [number, number]): React.CSSProperties => ({
+  position: "absolute",
+  [x < 0 ? "right" : "left"]: Math.abs(x),
+  [y < 0 ? "bottom" : "top"]: y,
+});
+
 const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
 const TfEditor: React.FC<TfEditorProps> = (props) => {
@@ -146,7 +157,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
   // Positive: offset right from the left edge of the plot; negative: offset left from the right edge of the plot.
-  const [colorPickerPosition, setColorPickerPosition] = useState<number | null>(null);
+  const [colorPickerPosition, setColorPickerPosition] = useState<[number, number] | null>(null);
   const lastColorRef = useRef<ColorArray>(TFEDITOR_DEFAULT_COLOR);
 
   const svgRef = useRef<SVGSVGElement>(null); // need access to SVG element to measure mouse position
@@ -268,13 +279,16 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     const cpRect = (event.target as SVGCircleElement).getBoundingClientRect();
     const cpRectCenter = cpRect.left + cpRect.width / 2;
 
-    if (cpRectCenter - svgRect.left < svgRect.width / 2) {
-      // Control point is towards the left of the plot; open color picker to its right
-      setColorPickerPosition(cpRect.right - svgRect.left + TFEDITOR_COLOR_PICKER_MARGIN_PX);
-    } else {
-      // Control point is towards the right of the plot; open color picker to its left
-      setColorPickerPosition(-(svgRect.right - cpRect.left + TFEDITOR_COLOR_PICKER_MARGIN_PX));
-    }
+    // If the control point is closer to the left edge of the SVG, open the color picker to the right
+    const openLeft = cpRectCenter - svgRect.left < svgRect.width / 2;
+    const xPosition = openLeft
+      ? cpRect.right - svgRect.left + TFEDITOR_COLOR_PICKER_MARGIN_X_PX
+      : cpRect.left - svgRect.right - TFEDITOR_COLOR_PICKER_MARGIN_X_PX;
+
+    // If the control point is too close to the bottom of the screen, open the color picker upward
+    const openUp = window.innerHeight - cpRect.bottom < TFEDITOR_COLOR_PICKER_OPEN_UPWARD_MARGIN_PX;
+    const yPosition = openUp ? svgRect.top - cpRect.bottom : cpRect.top - svgRect.top;
+    setColorPickerPosition([xPosition, yPosition]);
   };
 
   const handleChangeColor = (color: ColorResult): void => {
@@ -385,7 +399,6 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     controlPointCircles.push(controlPointCircles.splice(selectedPointIdx, 1)[0]);
   }
 
-  const cpDirection = (colorPickerPosition ?? 0) < 0 ? "right" : "left";
   const viewerModeString = props.useControlPoints ? "advanced" : "basic";
 
   return (
@@ -407,13 +420,15 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
       {/* ----- CONTROL POINT COLOR PICKER ----- */}
       {colorPickerPosition !== null && (
-        <div className="tf-editor-popover" style={{ [cpDirection]: Math.abs(colorPickerPosition) }}>
+        <div className="tf-editor-popover">
           <div className="tf-editor-cover" onClick={() => setColorPickerPosition(null)} />
-          <SketchPicker
-            color={colorArrayToObject(lastColorRef.current)}
-            onChange={handleChangeColor}
-            disableAlpha={true}
-          />
+          <div style={colorPickerPositionToStyle(colorPickerPosition)}>
+            <SketchPicker
+              color={colorArrayToObject(lastColorRef.current)}
+              onChange={handleChangeColor}
+              disableAlpha={true}
+            />
+          </div>
         </div>
       )}
 

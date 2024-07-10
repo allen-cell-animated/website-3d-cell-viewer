@@ -68,19 +68,17 @@ export interface ChannelState {
 }
 
 export type ChannelStateKey = keyof ChannelState;
-export type ChannelSettingUpdater = <K extends ChannelStateKey>(index: number, key: K, value: ChannelState[K]) => void;
-export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
-export type MultipleChannelSettingsUpdater = <K extends ChannelStateKey>(
-  indices: number[],
+export type ChannelSettingUpdater = <K extends ChannelStateKey>(
+  index: number | number[],
   key: K,
   value: ChannelState[K]
 ) => void;
+export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
   changeViewerSetting: ViewerSettingUpdater;
-  setChannelSettings: React.Dispatch<React.SetStateAction<ChannelState[]>>;
   changeChannelSetting: ChannelSettingUpdater;
-  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
+  setChannelSettings: (settings: ChannelState[]) => void;
   applyColorPresets: (presets: ColorArray[]) => void;
 };

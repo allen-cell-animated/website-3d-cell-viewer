@@ -11,12 +11,7 @@ import type { IsosurfaceFormat } from "../shared/types";
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
-import type {
-  ChannelSettingUpdater,
-  ChannelState,
-  ChannelStateKey,
-  MultipleChannelSettingsUpdater,
-} from "./ViewerStateProvider/types";
+import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
 
 export type ChannelsWidgetProps = {
   // From parent
@@ -33,14 +28,13 @@ export type ChannelsWidgetProps = {
   // From viewer state
   channelSettings: ChannelState[];
   changeChannelSetting: ChannelSettingUpdater;
-  changeMultipleChannelSettings: MultipleChannelSettingsUpdater;
 };
 
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
-    props.changeMultipleChannelSettings(channelArray, key, value);
+    props.changeChannelSetting(channelArray, key, value);
   };
 
   const showVolumes = createCheckboxHandler("volumeEnabled", true);
@@ -126,8 +120,4 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
 };
 
-export default connectToViewerState(ChannelsWidget, [
-  "channelSettings",
-  "changeChannelSetting",
-  "changeMultipleChannelSettings",
-]);
+export default connectToViewerState(ChannelsWidget, ["channelSettings", "changeChannelSetting"]);

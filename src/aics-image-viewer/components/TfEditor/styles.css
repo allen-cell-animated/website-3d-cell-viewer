@@ -18,6 +18,7 @@
   .tf-editor-popover {
     position: absolute;
     z-index: 9999;
+    width: 100%;
   }
 
   .tf-editor-cover {
@@ -28,12 +29,17 @@
     bottom: 0;
   }
 
-  rect.bar {
-    fill: var(--color-controlpanel-border);
-  }
-
   .tick text {
     fill: var(--color-controlpanel-text);
+    user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+  }
+
+  rect.bar {
+    fill: var(--color-controlpanel-border);
   }
 
   .axis path,

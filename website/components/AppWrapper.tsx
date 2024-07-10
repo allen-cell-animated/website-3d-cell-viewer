@@ -2,14 +2,14 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { FlexRowAlignCenter } from "./LandingPage/utils";
-import LoadModal from "./LoadModal";
+import LoadModal from "./Modals/LoadModal";
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
-import ShareModal from "./ShareModal";
+import ShareModal from "./Modals/ShareModal";
 import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
-import { getArgsFromParams } from "../utils/url_utils";
+import { parseViewerUrlParams } from "../utils/url_utils";
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
@@ -37,22 +37,22 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
-  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState> | null>(null);
+  const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState>>({});
   const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // On load, fetch parameters from the URL and location state, then merge.
     const locationArgs = location.state as AppDataProps;
-    getArgsFromParams(searchParams).then(
+    parseViewerUrlParams(searchParams).then(
       ({ args: urlArgs, viewerSettings: urlViewerSettings }) => {
+        setViewerSettings({ ...urlViewerSettings, ...locationArgs?.viewerSettings });
         setViewerProps({ ...DEFAULT_APP_PROPS, ...urlArgs, ...locationArgs });
-        setViewerSettings({ ...urlViewerSettings });
       },
       (reason) => {
         console.warn("Failed to parse URL parameters: ", reason);
-        setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
         setViewerSettings({});
+        setViewerProps({ ...DEFAULT_APP_PROPS, ...locationArgs });
       }
     );
   }, []);
@@ -71,8 +71,8 @@ export default function AppWrapper(): ReactElement {
   // }, [viewerArgs]);
 
   const onLoad = (appProps: AppDataProps): void => {
-    // Force a page reload. This prevents a bug where a desync in the number of channels
-    // in the viewer can cause a crash. The root cause is React immediately forcing a
+    // Force a page reload when loading new data. This prevents a bug where a desync in the number
+    // of channels in the viewer can cause a crash. The root cause is React immediately forcing a
     // re-render every time `setState` is called in an async function.
     const url = appProps.imageUrl;
     if (Array.isArray(url)) {
@@ -89,20 +89,20 @@ export default function AppWrapper(): ReactElement {
 
   return (
     <div>
-      <Header noNavigate>
-        <FlexRowAlignCenter $gap={12}>
-          <FlexRowAlignCenter $gap={2}>
-            <LoadModal onLoad={onLoad} />
-            {viewerProps && <ShareModal appProps={viewerProps} />}
+      <ViewerStateProvider viewerSettings={viewerSettings}>
+        <Header noNavigate>
+          <FlexRowAlignCenter $gap={12}>
+            <FlexRowAlignCenter $gap={2}>
+              <LoadModal onLoad={onLoad} />
+              {viewerProps && <ShareModal appProps={viewerProps} />}
+            </FlexRowAlignCenter>
+            <HelpDropdown />
           </FlexRowAlignCenter>
-          <HelpDropdown />
-        </FlexRowAlignCenter>
-      </Header>
-      {viewerProps && viewerSettings && (
-        <ViewerStateProvider viewerSettings={viewerSettings}>
+        </Header>
+        {viewerProps && (
           <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
-        </ViewerStateProvider>
-      )}
+        )}
+      </ViewerStateProvider>
     </div>
   );
 }

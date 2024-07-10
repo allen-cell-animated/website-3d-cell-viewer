@@ -160,6 +160,34 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
   x: PrefetchDirection.X_PLUS,
 };
 
+const initializeOneChannelSetting = (
+  channel: string,
+  index: number,
+  defaultColor: ColorArray,
+  viewerChannelSettings?: ViewerChannelSettings,
+  defaultChannelState = DEFAULT_CHANNEL_STATE
+): ChannelState => {
+  let initSettings = {} as Partial<ViewerChannelSetting>;
+  if (viewerChannelSettings) {
+    // search for channel in settings using groups, names and match values
+    initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
+  }
+
+  return {
+    name: initSettings.name ?? channel ?? "Channel " + index,
+    volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
+    isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
+    colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
+    colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
+    isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
+    opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
+    color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
+    useControlPoints: defaultChannelState.useControlPoints,
+    controlPoints: defaultChannelState.controlPoints,
+    ramp: defaultChannelState.ramp,
+  };
+};
+
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
   const CLIPPING_PANEL_HEIGHT = 150;
   // Move scale bars this far to the left when showing time series, to make room for timestep indicator
@@ -298,40 +326,6 @@ const App: React.FC<AppProps> = (props) => {
     }
   };
 
-  // TODO: Refactor this out of App index?
-  const initializeOneChannelSetting = (
-    aimg: Volume | null,
-    channel: string,
-    index: number,
-    defaultColor: ColorArray,
-    viewerChannelSettings?: ViewerChannelSettings,
-    defaultChannelState = DEFAULT_CHANNEL_STATE
-  ): ChannelState => {
-    // note that this modifies aimg also
-    const newControlPoints = aimg ? initializeLut(aimg, index) : undefined;
-    const ramp = newControlPoints ? controlPointsToRamp(newControlPoints) : ([0, TFEDITOR_MAX_BIN] as [number, number]);
-
-    let initSettings = {} as Partial<ViewerChannelSetting>;
-    if (viewerChannelSettings) {
-      // search for channel in settings using groups, names and match values
-      initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
-    }
-
-    return {
-      name: initSettings.name ?? channel ?? "Channel " + index,
-      volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
-      isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
-      colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
-      colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
-      isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
-      opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
-      color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-      ramp,
-      useControlPoints: defaultChannelState.useControlPoints,
-      controlPoints: newControlPoints ?? defaultChannelState.controlPoints,
-    };
-  };
-
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
     const grouping = makeChannelIndexGrouping(channelNames, props.viewerChannelSettings);
     setChannelGroupedByType(grouping);
@@ -343,7 +337,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      return initializeOneChannelSetting(null, channel, index, color, props.viewerChannelSettings);
+      return initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;

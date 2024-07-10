@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
 
 import type {
   ViewerStateContextType,
@@ -7,7 +7,6 @@ import type {
   ViewerSettingUpdater,
   ChannelSettingUpdater,
   ChannelState,
-  MultipleChannelSettingsUpdater,
   PartialIfObject,
 } from "./types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
@@ -70,23 +69,14 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
   }),
 };
 
-const extractViewerSettings = (context: ViewerStateContextType): ViewerState => {
-  const {
-    channelSettings: _channelSettings,
-    changeViewerSetting: _changeViewerSetting,
-    changeChannelSetting: _changeChannelSetting,
-    changeMultipleChannelSettings: _changeMultipleChannelSettings,
-    applyColorPresets: _applyColorPresets,
-    ...settings
-  } = context;
-  return settings;
+type ViewerStateAction<K extends keyof ViewerState> = {
+  key: K;
+  value: PartialIfObject<ViewerState[K]>;
 };
 
-/** Changes a key in a given `ViewerState` object, keeping the object in a valid state and applying partial values */
-const applyChangeToViewerSettings = <K extends keyof ViewerState>(
+const viewerSettingsReducer = <K extends keyof ViewerState>(
   viewerSettings: ViewerState,
-  key: K,
-  value: PartialIfObject<ViewerState[K]>
+  { key, value }: ViewerStateAction<K>
 ): ViewerState => {
   const changeHandler = VIEWER_SETTINGS_CHANGE_HANDLERS[key];
 
@@ -105,6 +95,55 @@ const applyChangeToViewerSettings = <K extends keyof ViewerState>(
   }
 };
 
+/** Utility type to explicitly assert that one or more properties will *not* be defined on an object */
+type WithExplicitlyUndefined<K extends keyof any, T> = T & { [key in K]?: never };
+
+/** Set channel setting `key` on one or more channels specified by `index` to value `value`. */
+type ChannelSettingUniformUpdateAction<K extends keyof ChannelState> = {
+  index: number | number[];
+  key: K;
+  value: ChannelState[K];
+};
+/** Set the values of channel setting `key` for all channels from an array of values ordered by channel index */
+type ChannelSettingArrayUpdateAction<K extends keyof ChannelState> = {
+  key: K;
+  value: ChannelState[K][];
+};
+/** Initialize list of channel states */
+type ChannelSettingInitAction = {
+  value: ChannelState[];
+};
+
+type ChannelStateAction<K extends keyof ChannelState> =
+  | ChannelSettingUniformUpdateAction<K>
+  | WithExplicitlyUndefined<"index", ChannelSettingArrayUpdateAction<K>>
+  | WithExplicitlyUndefined<"index" | "key", ChannelSettingInitAction>;
+
+const channelSettingsReducer = <K extends keyof ChannelState>(
+  channelSettings: ChannelState[],
+  { index, key, value }: ChannelStateAction<K>
+): ChannelState[] => {
+  if (key === undefined) {
+    // ChannelSettingInitAction
+    return value as ChannelState[];
+  } else if (index === undefined) {
+    // ChannelSettingArrayUpdateAction
+    return channelSettings.map((channel, idx) => {
+      return value[idx] ? { ...channel, [key]: value[idx] } : channel;
+    });
+  } else if (Array.isArray(index)) {
+    // ChannelSettingUniformUpdateAction on potentially multiple channels
+    return channelSettings.map((channel, idx) => (index.includes(idx) ? { ...channel, [key]: value } : channel));
+  } else {
+    // ChannelSettingUniformUpdateAction on a single channel
+    const newSettings = channelSettings.slice();
+    if (index >= 0 && index < channelSettings.length) {
+      newSettings[index] = { ...newSettings[index], [key]: value };
+    }
+    return newSettings;
+  }
+};
+
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
@@ -113,9 +152,10 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
   changeChannelSetting: nullfn,
-  changeMultipleChannelSettings: nullfn,
   applyColorPresets: nullfn,
 };
+
+export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
 
 const DEFAULT_VIEWER_CONTEXT_OUTER = { ref: { current: DEFAULT_VIEWER_CONTEXT } };
 
@@ -126,56 +166,35 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, setViewerSettings] = useState<ViewerState>({ ...DEFAULT_VIEWER_SETTINGS });
-  const [channelSettings, setChannelSettings] = useState<ChannelState[]>([]);
+  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...DEFAULT_VIEWER_SETTINGS });
+  const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
 
-  // Below callbacks get no dependencies since we're accessing state via the ref
-
-  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => {
-    const currentSettings = extractViewerSettings(ref.current);
-    setViewerSettings(applyChangeToViewerSettings(currentSettings, key, value));
-  }, []);
+  const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
-    const newChannelSettings = ref.current.channelSettings.slice();
-    newChannelSettings[index] = { ...newChannelSettings[index], [key]: value };
-    setChannelSettings(newChannelSettings);
+    channelDispatch({ index, key, value });
   }, []);
 
-  const changeMultipleChannelSettings = useCallback<MultipleChannelSettingsUpdater>((indices, key, value) => {
-    const newChannelSettings = ref.current.channelSettings.map((settings, idx) =>
-      indices.includes(idx) ? { ...settings, [key]: value } : settings
-    );
-    setChannelSettings(newChannelSettings);
-  }, []);
+  const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ key: "color", value }), []);
 
-  const applyColorPresets = useCallback((presets: ColorArray[]): void => {
-    const newChannelSettings = ref.current.channelSettings.map((channel, idx) =>
-      presets[idx] ? { ...channel, color: presets[idx] } : channel
-    );
-    setChannelSettings(newChannelSettings);
-  }, []);
+  const setChannelSettings = useCallback((channels: ChannelState[]) => channelDispatch({ value: channels }), []);
 
   // Sync viewer settings prop with state
-  // React docs seem to be fine with syncing state with props directly in the render function:
+  // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
+  // infinite render loop, so now it's in a `useMemo`:
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
-  if (props.viewerSettings) {
-    let newSettings = viewerSettings;
-
-    for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
-      if (viewerSettings[key] !== props.viewerSettings[key]) {
-        // Update viewer settings one at a time to allow change handlers to keep state valid
-        newSettings = applyChangeToViewerSettings(viewerSettings, key, props.viewerSettings[key] as any);
+  useMemo(() => {
+    if (props.viewerSettings) {
+      for (const key of Object.keys(props.viewerSettings) as (keyof ViewerState)[]) {
+        if (viewerSettings[key] !== props.viewerSettings[key]) {
+          changeViewerSetting(key, props.viewerSettings[key] as any);
+        }
       }
     }
-
-    if (newSettings !== viewerSettings) {
-      setViewerSettings(newSettings);
-    }
-  }
+  }, [props.viewerSettings]);
 
   const context = useMemo(() => {
     ref.current = {
@@ -184,7 +203,6 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       changeViewerSetting,
       setChannelSettings,
       changeChannelSetting,
-      changeMultipleChannelSettings,
       applyColorPresets,
     };
 
