@@ -18,7 +18,6 @@ import {
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { TFEDITOR_MAX_BIN } from "../../../src/aics-image-viewer/components/TfEditor";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -185,7 +184,7 @@ describe("Channel state serialization", () => {
     colorizeAlpha: 0.5,
     useControlPoints: false,
     controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
-    ramp: [0, TFEDITOR_MAX_BIN],
+    ramp: [0, 255],
   };
   const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingParams = {
     col: "ff0000",
@@ -316,7 +315,7 @@ describe("Channel state serialization", () => {
         colorizeAlpha: 1.0,
         useControlPoints: false,
         controlPoints: [],
-        ramp: [0, TFEDITOR_MAX_BIN],
+        ramp: [0, 255],
       };
       const serializedCustomChannelState: ViewerChannelSettingParams = {
         col: "03ff9d",
@@ -660,7 +659,7 @@ describe("serializeViewerUrlParams", () => {
         colorizeAlpha: 0.5,
         useControlPoints: false,
         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
-        ramp: [0, TFEDITOR_MAX_BIN],
+        ramp: [0, 255],
       },
       {
         name: "channel1",
@@ -673,7 +672,7 @@ describe("serializeViewerUrlParams", () => {
         colorizeAlpha: 0.2,
         useControlPoints: false,
         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
-        ramp: [0, TFEDITOR_MAX_BIN],
+        ramp: [0, 255],
       },
     ];
     const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
