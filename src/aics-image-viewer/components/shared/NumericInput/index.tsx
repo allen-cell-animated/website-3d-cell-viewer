@@ -42,20 +42,22 @@ const NumericInput: React.FC<NumericInputProps> = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const clamp = (newValue: number): number => Math.min(Math.max(newValue, min), max);
-  const roundToPrecision = (newValue: number): number => clamp(Math.round(newValue * precision) / precision);
+  const roundToPrecision = (newValue: number): number => clamp(Math.round(newValue / precision) * precision);
   const shouldChange = (newValue: number): boolean => !(isNaN(newValue) || newValue === value || disabled);
+
+  const displayedValue = roundToPrecision(value);
 
   const onFocus = (): void => {
     if (!hasFocusRef.current) {
       // propagate current value to `textContent` on focus
-      setTextContent(value.toString());
+      setTextContent(displayedValue.toString());
       setHasFocus(true);
     }
   };
 
   const changeByStep = (up: boolean): void => {
     const delta = up ? step : -step;
-    const newValue = clamp(value + delta);
+    const newValue = clamp(displayedValue + delta);
 
     if (shouldChange(newValue)) {
       onChange(newValue);
@@ -95,7 +97,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
   return (
     <div className={fullClassName} onKeyDown={onKeyDown}>
       <input
-        value={hasFocus ? textContent : value}
+        value={hasFocus ? textContent : displayedValue}
         step={step}
         min={min}
         max={max}
@@ -103,7 +105,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
         className="numinput-input"
         autoComplete="off"
         role="spinbutton"
-        aria-valuenow={value}
+        aria-valuenow={displayedValue}
         aria-valuemin={min}
         aria-valuemax={max}
         ref={inputRef}
