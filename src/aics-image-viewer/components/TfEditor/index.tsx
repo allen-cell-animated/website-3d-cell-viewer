@@ -333,7 +333,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         d3
           .axisBottom(xScale)
           .tickValues(ticks)
-          .tickPadding(props.useControlPoints ? 3 : 10)
+          .tickPadding(props.useControlPoints ? 3 : 10) // get tick labels out of the way of sliders in "basic" mode
       );
     },
     [xScale, props.useControlPoints]
