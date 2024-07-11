@@ -1,8 +1,9 @@
 import React from "react";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 
-import "./styles.css";
 import { useRefWithSetter } from "../../../shared/utils/hooks";
+
+import "./styles.css";
 
 interface NumericInputProps {
   value: number;
