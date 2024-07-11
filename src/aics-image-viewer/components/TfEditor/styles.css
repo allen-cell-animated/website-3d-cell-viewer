@@ -1,17 +1,13 @@
 @import "../../assets/styles/variables";
 
 .channel-row {
-  .tf-editor-svg {
-    margin-bottom: 8px;
+  .tf-editor-svg.dragging {
+    &.basic {
+      cursor: pointer;
+    }
 
-    &.dragging {
-      &.basic {
-        cursor: pointer;
-      }
-
-      &.advanced {
-        cursor: move;
-      }
+    &.advanced {
+      cursor: move;
     }
   }
 

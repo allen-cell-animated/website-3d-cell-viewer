@@ -34,7 +34,7 @@ const TFEDITOR_NUM_TICKS = 4;
 const TFEDITOR_MARGINS = {
   top: 18,
   right: 20,
-  bottom: 20, // includes space for x-axis
+  bottom: 30, // includes space for x-axis
   left: 25,
 };
 
@@ -328,9 +328,14 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     (el: SVGGElement) => {
       const ticks = xScale.ticks(TFEDITOR_NUM_TICKS);
       ticks[ticks.length - 1] = xScale.domain()[1];
-      d3.select(el).call(d3.axisBottom(xScale).tickValues(ticks));
+      d3.select(el).call(
+        d3
+          .axisBottom(xScale)
+          .tickValues(ticks)
+          .tickPadding(props.useControlPoints ? 3 : 10)
+      );
     },
-    [xScale]
+    [xScale, props.useControlPoints]
   );
 
   const yAxisRef = useCallback(
