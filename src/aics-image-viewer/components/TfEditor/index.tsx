@@ -5,9 +5,8 @@ import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
 import { Button, Checkbox, Tooltip } from "antd";
 import "nouislider/distribute/nouislider.css";
 
-import "./styles.css";
-
 import SliderRow from "../shared/SliderRow";
+import NumericInput from "../shared/NumericInput";
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
   ColorArray,
@@ -18,6 +17,8 @@ import {
 import { controlPointsToRamp, rampToControlPoints } from "../../shared/utils/controlPointsToLut";
 import { useRefWithSetter } from "../../shared/utils/hooks";
 import type { SingleChannelSettingUpdater } from "../ViewerStateProvider/types";
+
+import "./styles.css";
 
 export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
 export const TFEDITOR_MAX_BIN = 255;
@@ -472,6 +473,30 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
           )}
         </g>
       </svg>
+
+      {/* ----- MIN/MAX SPINBOXES ----- */}
+      {!props.useControlPoints && (
+        <div className="tf-editor-numeric-input-row">
+          <span>
+            Min{" "}
+            <NumericInput
+              value={props.ramp[0]}
+              onChange={(v) => setRamp([v, props.ramp[1]])}
+              min={0}
+              max={TFEDITOR_MAX_BIN}
+            />
+          </span>
+          <span>
+            Max{" "}
+            <NumericInput
+              value={props.ramp[1]}
+              onChange={(v) => setRamp([props.ramp[0], v])}
+              min={0}
+              max={TFEDITOR_MAX_BIN}
+            />
+          </span>
+        </div>
+      )}
 
       {/* ----- COLORIZE SLIDER ----- */}
       <SliderRow

@@ -29,6 +29,14 @@
     bottom: 0;
   }
 
+  .tf-editor-numeric-input-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    color: var(--color-controlpanel-text);
+  }
+
   .tick text {
     fill: var(--color-controlpanel-text);
     user-select: none;
