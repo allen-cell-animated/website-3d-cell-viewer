@@ -75,7 +75,7 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
 
   useImageEffect(
     (currentImage) => {
-      if (colorizeEnabled && useControlPoints) {
+      if (colorizeEnabled) {
         // TODO get the labelColors from the tf editor component
         const lut = new Lut().createLabelColors(currentImage.getHistogram(index));
         currentImage.setColorPalette(index, lut.lut);
@@ -85,7 +85,7 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
       }
       view3d.updateLuts(currentImage);
     },
-    [colorizeEnabled, useControlPoints]
+    [colorizeEnabled]
   );
 
   useImageEffect(

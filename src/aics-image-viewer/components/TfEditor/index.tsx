@@ -474,22 +474,20 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
       </svg>
 
       {/* ----- COLORIZE SLIDER ----- */}
-      {props.useControlPoints && (
-        <SliderRow
-          label={
-            <Checkbox
-              checked={props.colorizeEnabled}
-              onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
-            >
-              Colorize
-            </Checkbox>
-          }
-          max={1}
-          start={props.colorizeAlpha}
-          onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
-          hideSlider={!props.colorizeEnabled}
-        />
-      )}
+      <SliderRow
+        label={
+          <Checkbox
+            checked={props.colorizeEnabled}
+            onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
+          >
+            Colorize
+          </Checkbox>
+        }
+        max={1}
+        start={props.colorizeAlpha}
+        onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
+        hideSlider={!props.colorizeEnabled}
+      />
     </div>
   );
 };
