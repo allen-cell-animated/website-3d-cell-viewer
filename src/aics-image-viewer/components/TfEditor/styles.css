@@ -31,6 +31,11 @@
     justify-content: space-between;
     margin-bottom: 20px;
     color: var(--color-controlpanel-text);
+
+    .ant-input-number {
+      border-color: var(--color-button-tertiary-outline);
+      width: 60px;
+    }
   }
 
   .tick text {

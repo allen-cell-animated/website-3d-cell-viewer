@@ -2,11 +2,10 @@ import React, { useCallback, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import { SketchPicker, ColorResult } from "react-color";
 import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
-import { Button, Checkbox, Tooltip } from "antd";
+import { Button, Checkbox, InputNumber, Tooltip } from "antd";
 import "nouislider/distribute/nouislider.css";
 
 import SliderRow from "../shared/SliderRow";
-import NumericInput from "../shared/NumericInput";
 import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
 import {
   ColorArray,
@@ -137,6 +136,8 @@ const colorPickerPositionToStyle = ([x, y]: [number, number]): React.CSSProperti
   [x < 0 ? "right" : "left"]: Math.abs(x),
   [y < 0 ? "bottom" : "top"]: y,
 });
+
+const numberFormatter = (v: number | string | undefined): string => (v === undefined ? "" : Number(v).toFixed(0));
 
 const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
 
@@ -484,20 +485,25 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         <div className="tf-editor-numeric-input-row">
           <span>
             Min{" "}
-            <NumericInput
+            <InputNumber
               value={props.ramp[0]}
-              onChange={(v) => setRamp([v, props.ramp[1]])}
+              onChange={(v) => v !== null && setRamp([v, props.ramp[1]])}
+              formatter={numberFormatter}
               min={0}
-              max={TFEDITOR_MAX_BIN}
+              max={Math.min(props.ramp[1], TFEDITOR_MAX_BIN)}
+              size="small"
             />
           </span>
           <span>
             Max{" "}
-            <NumericInput
+            <InputNumber
               value={props.ramp[1]}
-              onChange={(v) => setRamp([props.ramp[0], v])}
-              min={0}
+              onChange={(v) => v !== null && setRamp([props.ramp[0], v])}
+              formatter={numberFormatter}
+              min={Math.max(0, props.ramp[0])}
               max={TFEDITOR_MAX_BIN}
+              size="small"
+              width={45}
             />
           </span>
         </div>
