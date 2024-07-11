@@ -95,7 +95,6 @@ export function remapControlPointsForChannel(
   { rawMin, rawMax }: Channel
 ): ControlPoint[] {
   if (oldRange === undefined) {
-    console.log("undefined!");
     return controlPoints;
   }
 
