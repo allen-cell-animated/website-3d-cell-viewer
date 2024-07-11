@@ -2,6 +2,7 @@ import React from "react";
 import { CaretDownOutlined, CaretUpOutlined } from "@ant-design/icons";
 
 import "./styles.css";
+import { useRefWithSetter } from "../../../shared/utils/hooks";
 
 interface NumericInputProps {
   value: number;
@@ -32,11 +33,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
   // While the input has focus, allow invalid input, just don't call `onChange` with it
   const [hasFocus, _setHasFocus] = React.useState(false);
   // State doesn't update before focus handler runs - keep a ref following focus state
-  const hasFocusRef = React.useRef(false);
-  const setHasFocus = (focus: boolean): void => {
-    _setHasFocus(focus);
-    hasFocusRef.current = focus;
-  };
+  const [hasFocusRef, setHasFocus] = useRefWithSetter(_setHasFocus, hasFocus);
 
   // Hold the potentially invalid contents of the focused input here
   const [textContent, setTextContent] = React.useState("");
