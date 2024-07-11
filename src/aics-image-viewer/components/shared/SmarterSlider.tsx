@@ -5,7 +5,7 @@ type CallbackArgs = Parameters<NonNullable<NouisliderProps["onStart"]>>;
 
 const MemoedNouislider = React.memo(
   Nouislider as React.ComponentType<NouisliderProps & { noUpdate: boolean }>,
-  ({ noUpdate }) => noUpdate
+  (_prevProps, { noUpdate }) => noUpdate
 );
 
 /** A wrapper around `Nouislider` that prevents updates while the slider is being dragged. */
