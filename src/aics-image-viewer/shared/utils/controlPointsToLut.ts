@@ -1,4 +1,4 @@
-import { ControlPoint, Lut, Volume } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Lut, Volume } from "@aics/volume-viewer";
 import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
 import { TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../../components/TfEditor";
@@ -86,4 +86,21 @@ export function rampToControlPoints([min, max]: [number, number]): ControlPoint[
     { x: max, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
     { x: TFEDITOR_MAX_BIN, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
   ];
+}
+
+/** Remaps an array of control points from an old range (as a 2-tuple) to a new one (extracted from a `Channel`) */
+export function remapControlPointsForChannel(
+  controlPoints: ControlPoint[],
+  oldRange: [number, number] | undefined,
+  { rawMin, rawMax }: Channel
+): ControlPoint[] {
+  if (oldRange === undefined) {
+    console.log("undefined!");
+    return controlPoints;
+  }
+
+  // TODO: this creates a redundant Uint8Array and algorithmically fills it twice. Can we avoid this?
+  const remapLut = new Lut().createFromControlPoints(controlPoints);
+  remapLut.remapDomains(oldRange[0], oldRange[1], rawMin, rawMax);
+  return remapLut.controlPoints;
 }
