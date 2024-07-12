@@ -89,22 +89,23 @@ const ContentContainer = styled(FlexColumn)`
 const FeatureHighlightsContainer = styled.li`
   display: grid;
   width: 100%;
-  grid-template-rows: repeat(2, auto);
+  // Add a 20px dummy row to act as the gap
+  grid-template-rows: auto auto 20px;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   padding: 0;
   justify-content: space-evenly;
-  gap: 20px;
+  column-gap: 20px;
   margin: 30px 0 0 0;
 `;
 
 const FeatureHighlightsItem = styled(FlexColumn)`
   display: grid;
   grid-template-rows: subgrid;
-  grid-row: span 2;
+  grid-row: span 3;
 
   & > h3 {
     font-weight: 600;
-    margin: 0;
+    margin: 0 0 4px 0;
   }
 
   & > p {
@@ -142,14 +143,18 @@ const ProjectCard = styled.li`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 8px;
+  gap: 0px;
 
   & h3 {
     font-weight: 600;
   }
 
+  & h2 {
+    font-size: 20px;
+  }
+
   & p,
-  & h3,
+  & h2,
   & span {
     margin: 0;
   }
@@ -158,18 +163,25 @@ const ProjectCard = styled.li`
     // Add 2px margin to maintain the same visual gap that text has
     margin-top: 2px;
   }
+
+  & :first-child {
+    // Add some visual separation beneath title element
+    margin-bottom: 2px;
+  }
 `;
 
 const DatasetList = styled.ul`
   padding: 0;
   width: 100%;
   display: grid;
+  margin: 4px 0 0 0;
+
   // Use grid + subgrid to align the title, description, and button for each horizontal
   // row of cards. repeat is used to tile the layout if the cards wrap to a new line.
   grid-template-rows: repeat(3, auto);
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   justify-content: space-around;
-  gap: 10px 20px;
+  gap: 0px 20px;
 `;
 
 const DatasetCard = styled.li`
@@ -177,7 +189,7 @@ const DatasetCard = styled.li`
   grid-template-rows: subgrid;
   grid-row: span 3;
   min-width: 180px;
-  padding: 5px;
+  margin-top: 20px;
 
   & > h3 {
     display: grid;
@@ -188,7 +200,7 @@ const DatasetCard = styled.li`
   }
   & > a,
   & > button {
-    margin-right: auto;
+    margin: 4px auto 0 0;
     display: grid;
   }
 `;
@@ -261,16 +273,16 @@ export default function LandingPage(): ReactElement {
 
   const renderProject = (project: ProjectEntry, index: number): ReactElement => {
     const projectNameElement = project.inReview ? (
-      <FlexRow $gap={10}>
-        <h3>{project.name}</h3>
+      <FlexRowAlignCenter $gap={10}>
+        <h2>{project.name}</h2>
         <Tooltip title="Final version of dataset will be released when associated paper is published">
           <InReviewFlag>
             <p>IN REVIEW</p>
           </InReviewFlag>
         </Tooltip>
-      </FlexRow>
+      </FlexRowAlignCenter>
     ) : (
-      <h3>{project.name}</h3>
+      <h2>{project.name}</h2>
     );
 
     const publicationElement = project.publicationLink ? (
@@ -353,7 +365,7 @@ export default function LandingPage(): ReactElement {
         </BannerTextContainer>
       </Banner>
 
-      <ContentContainer $gap={30} style={{ paddingBottom: "400px" }}>
+      <ContentContainer $gap={30}>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
             <h3>Multiresolution OME-Zarr support</h3>
@@ -374,10 +386,15 @@ export default function LandingPage(): ReactElement {
             </p>
           </FeatureHighlightsItem>
         </FeatureHighlightsContainer>
-        <Divider />
-        <FlexColumnAlignCenter>
-          <h2>Load an example below or your own data to get started.</h2>
-        </FlexColumnAlignCenter>
+      </ContentContainer>
+
+      <FlexColumnAlignCenter
+        style={{ backgroundColor: "var(--color-landingpage-bg-alt)", padding: "30px", margin: "30px 0" }}
+      >
+        <h2 style={{ margin: 0 }}>Load dataset(s) below or your own data to get started</h2>
+      </FlexColumnAlignCenter>
+
+      <ContentContainer style={{ paddingBottom: "400px" }}>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
       </ContentContainer>
     </div>
