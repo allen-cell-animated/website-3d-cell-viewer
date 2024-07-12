@@ -9,7 +9,7 @@ import styled from "styled-components";
 import Header from "../Header";
 import LoadModal from "../Modals/LoadModal";
 import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
-import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden, FlexRow } from "./utils";
+import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden } from "./utils";
 import { parseViewerUrlParams } from "../../utils/url_utils";
 import HelpDropdown from "../HelpDropdown";
 import { BannerVideo } from "../../assets/videos";
