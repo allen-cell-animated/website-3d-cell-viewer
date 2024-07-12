@@ -89,8 +89,7 @@ const ContentContainer = styled(FlexColumn)`
 const FeatureHighlightsContainer = styled.li`
   display: grid;
   width: 100%;
-  // Add a 20px dummy row to act as the gap
-  grid-template-rows: auto auto 20px;
+  grid-template-rows: repeat(2, auto);
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   padding: 0;
   justify-content: space-evenly;
@@ -101,7 +100,7 @@ const FeatureHighlightsContainer = styled.li`
 const FeatureHighlightsItem = styled(FlexColumn)`
   display: grid;
   grid-template-rows: subgrid;
-  grid-row: span 3;
+  grid-row: span 2;
 
   & > h3 {
     font-weight: 600;
@@ -109,14 +108,14 @@ const FeatureHighlightsItem = styled(FlexColumn)`
   }
 
   & > p {
-    margin: 0;
+    margin: 0 0 20px 0;
   }
 `;
 
 const LoadPromptContainer = styled(FlexColumnAlignCenter)`
   background-color: var(--color-landingpage-bg-alt);
-  // The 20px margin on the top is required because of the 20px row gap after the FeatureHighlightsContainer
-  margin: 20px 0 30px 0;
+  // The lower margin on the top is required because of the 20px row gap after the FeatureHighlightsContainer
+  margin: 10px 0 30px 0;
   padding: 30px;
   & h2 {
     color: var(--color-text-header);
@@ -145,7 +144,6 @@ const ProjectCard = styled.li`
   display: flex;
   width: 100%;
   flex-direction: column;
-  gap: 0px;
 
   & h3 {
     font-weight: 600;
