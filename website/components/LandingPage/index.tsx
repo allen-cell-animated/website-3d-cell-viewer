@@ -101,6 +101,7 @@ const FeatureHighlightsItem = styled(FlexColumn)`
   display: grid;
   grid-template-rows: subgrid;
   grid-row: span 2;
+  margin-bottom: 20px;
 
   & > h3 {
     font-weight: 600;
@@ -108,13 +109,13 @@ const FeatureHighlightsItem = styled(FlexColumn)`
   }
 
   & > p {
-    margin: 0 0 20px 0;
+    margin: 0;
   }
 `;
 
 const LoadPromptContainer = styled(FlexColumnAlignCenter)`
   background-color: var(--color-landingpage-bg-alt);
-  // The lower margin on the top is required because of the 20px row gap after the FeatureHighlightsContainer
+  // The lower margin on the top is required because of the 20px margin after FeatureHighlightsItem
   margin: 10px 0 30px 0;
   padding: 30px;
   & h2 {
