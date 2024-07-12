@@ -113,12 +113,12 @@ const FeatureHighlightsItem = styled(FlexColumn)`
   }
 `;
 
-const Divider = styled.hr`
-  display: block;
-  width: 100%;
-  height: 1px;
-  background-color: var(--color-layout-dividers);
-  border-style: none;
+const LoadPromptContainer = styled(FlexRowAlignCenter)`
+  background-color: var(--color-landingpage-bg-alt);
+  // The 20px margin on the top is required because of the 20px row gap after the FeatureHighlightsContainer
+  margin: 20px 0 30px 0;
+  padding: 30px;
+  color: var(--color-text-header);
 `;
 
 const ProjectList = styled.ul`
@@ -365,7 +365,7 @@ export default function LandingPage(): ReactElement {
         </BannerTextContainer>
       </Banner>
 
-      <ContentContainer $gap={30}>
+      <ContentContainer>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
             <h3>Multiresolution OME-Zarr support</h3>
@@ -388,11 +388,9 @@ export default function LandingPage(): ReactElement {
         </FeatureHighlightsContainer>
       </ContentContainer>
 
-      <FlexColumnAlignCenter
-        style={{ backgroundColor: "var(--color-landingpage-bg-alt)", padding: "30px", margin: "30px 0" }}
-      >
+      <LoadPromptContainer>
         <h2 style={{ margin: 0 }}>Load dataset(s) below or your own data to get started</h2>
-      </FlexColumnAlignCenter>
+      </LoadPromptContainer>
 
       <ContentContainer style={{ paddingBottom: "400px" }}>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
