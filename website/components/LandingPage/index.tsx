@@ -113,12 +113,14 @@ const FeatureHighlightsItem = styled(FlexColumn)`
   }
 `;
 
-const LoadPromptContainer = styled(FlexRowAlignCenter)`
+const LoadPromptContainer = styled(FlexColumnAlignCenter)`
   background-color: var(--color-landingpage-bg-alt);
   // The 20px margin on the top is required because of the 20px row gap after the FeatureHighlightsContainer
   margin: 20px 0 30px 0;
   padding: 30px;
-  color: var(--color-text-header);
+  & h2 {
+    color: var(--color-text-header);
+  }
 `;
 
 const ProjectList = styled.ul`
