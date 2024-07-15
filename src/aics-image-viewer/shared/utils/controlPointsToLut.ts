@@ -81,10 +81,10 @@ export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, num
 
 export function rampToControlPoints([min, max]: [number, number]): ControlPoint[] {
   return [
-    { x: 0, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: Math.min(min, 0), opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
     { x: min, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
     { x: max, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
-    { x: TFEDITOR_MAX_BIN, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+    { x: Math.max(max, TFEDITOR_MAX_BIN), opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
   ];
 }
 
