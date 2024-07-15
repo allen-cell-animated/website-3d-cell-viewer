@@ -152,9 +152,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
   const _setCPs = useCallback((p: ControlPoint[]) => changeChannelSetting("controlPoints", p), [changeChannelSetting]);
-  const _setRamp = useCallback((ramp: [number, number]) => changeChannelSetting("ramp", ramp), [changeChannelSetting]);
+  const setRamp = useCallback((ramp: [number, number]) => changeChannelSetting("ramp", ramp), [changeChannelSetting]);
   const [controlPointsRef, setControlPoints] = useRefWithSetter(_setCPs, props.controlPoints);
-  const [rampRef, setRamp] = useRefWithSetter(_setRamp, props.ramp);
   const [draggedPointIdxRef, setDraggedPointIdx] = useRefWithSetter(_setDraggedPointIdx, draggedPointIdx);
 
   // Either `null` when the control panel is closed, or an x offset into the plot to position the color picker.
@@ -206,10 +205,10 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
 
   const dragRampSlider = (handle: TfEditorRampSliderHandle, x: number): void => {
     if (handle === TfEditorRampSliderHandle.Min) {
-      const max = rampRef.current[1];
+      const max = props.ramp[1];
       setRamp([Math.min(x, max), max]);
     } else {
-      const min = rampRef.current[0];
+      const min = props.ramp[0];
       setRamp([min, Math.max(x, min)]);
     }
   };
