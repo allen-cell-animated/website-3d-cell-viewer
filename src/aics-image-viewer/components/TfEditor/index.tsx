@@ -150,9 +150,10 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
   const [draggedPointIdx, _setDraggedPointIdx] = useState<number | TfEditorRampSliderHandle | null>(null);
 
-  // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
   const _setCPs = useCallback((p: ControlPoint[]) => changeChannelSetting("controlPoints", p), [changeChannelSetting]);
   const setRamp = useCallback((ramp: [number, number]) => changeChannelSetting("ramp", ramp), [changeChannelSetting]);
+
+  // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
   const [controlPointsRef, setControlPoints] = useRefWithSetter(_setCPs, props.controlPoints);
   const [draggedPointIdxRef, setDraggedPointIdx] = useRefWithSetter(_setDraggedPointIdx, draggedPointIdx);
 
