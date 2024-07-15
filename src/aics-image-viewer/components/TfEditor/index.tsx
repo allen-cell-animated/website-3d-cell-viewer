@@ -108,7 +108,7 @@ const ControlPointGradientDef: React.FC<{ controlPoints: ControlPoint[]; id: str
     <defs>
       <linearGradient id={id} gradientUnits="objectBoundingBox" spreadMethod="pad" x2="100%">
         {controlPoints.map((cp, i) => {
-          const offset = ((cp.x - controlPoints[0].x) / range) * 100 + "%";
+          const offset = `${((cp.x - controlPoints[0].x) / range) * 100}%`;
           const opacity = Math.min(cp.opacity, TFEDITOR_GRADIENT_MAX_OPACITY);
           return <stop key={i} stopColor={colorArrayToString(cp.color)} stopOpacity={opacity} offset={offset} />;
         })}
