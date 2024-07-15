@@ -229,6 +229,9 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         const newControlPoints = [...props.controlPoints];
         newControlPoints.splice(index, 0, point);
         setControlPoints(newControlPoints);
+      } else {
+        // this click is on an existing point - update current points to ref (may have been remapped since last edit)
+        controlPointsRef.current = props.controlPoints;
       }
 
       if (typeof draggedPointIdxRef.current !== "string") {
