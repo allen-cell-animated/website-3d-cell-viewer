@@ -14,6 +14,7 @@ import {
   deserializeViewerState,
   ViewerStateParams,
   serializeViewerUrlParams,
+  CONTROL_POINTS_REGEX,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
@@ -31,6 +32,23 @@ const defaultSettings: ViewerChannelSetting = {
 };
 
 //// VALUE PARSING ///////////////////////////////////////
+
+describe("CONTROL_POINTS_REGEX", () => {
+  it("accepts single control points", () => {
+    const data = "1:0.5:ffffff";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts multiple control points", () => {
+    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts negative numbers", () => {
+    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+});
 
 describe("parseKeyValueList", () => {
   it("returns expected key value pairs", () => {
