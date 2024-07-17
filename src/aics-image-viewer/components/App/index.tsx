@@ -187,8 +187,8 @@ const initializeOneChannelSetting = (
     isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
     opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
     color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-    useControlPoints: defaultChannelState.useControlPoints,
-    controlPoints: defaultChannelState.controlPoints,
+    useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
+    controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
     ramp: defaultChannelState.ramp,
   };
 };

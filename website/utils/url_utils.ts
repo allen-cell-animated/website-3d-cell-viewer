@@ -441,7 +441,8 @@ function parseControlPoints(controlPoints: string | undefined): ControlPoint[] |
   const newControlPoints = controlPoints.split(",").map((cp) => {
     const [x, opacity, color] = cp.split(":");
     return {
-      x: parseStringFloat(x, 0, 1) ?? 0,
+      // TODO: Is there a good range of values for x?
+      x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
       color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
     };
@@ -471,6 +472,7 @@ export function deserializeViewerChannelSetting(
     surfaceOpacity: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceAlpha], 0, 1),
     colorizeEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.Colorize]),
     colorizeAlpha: parseStringFloat(jsonState[ViewerChannelSettingKeys.ColorizeAlpha], 0, 1),
+    controlPointsEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.ControlPointsEnabled]),
   };
   if (jsonState[ViewerChannelSettingKeys.Color] && HEX_COLOR_REGEX.test(jsonState.col)) {
     result.color = jsonState[ViewerChannelSettingKeys.Color];
@@ -478,6 +480,9 @@ export function deserializeViewerChannelSetting(
   if (jsonState[ViewerChannelSettingKeys.Lut] && LUT_REGEX.test(jsonState.lut)) {
     const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
+  }
+  if (jsonState[ViewerChannelSettingKeys.ControlPoints] && CONTROL_POINTS_REGEX.test(jsonState.cps)) {
+    result.controlPoints = parseControlPoints(jsonState[ViewerChannelSettingKeys.ControlPoints]);
   }
   return result;
 }

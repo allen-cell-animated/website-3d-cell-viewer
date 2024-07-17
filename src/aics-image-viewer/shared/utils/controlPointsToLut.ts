@@ -27,6 +27,13 @@ export function initializeLut(
   if (channelSettings) {
     const initSettings = findFirstChannelMatch(name, channelIndex, channelSettings);
     if (initSettings) {
+      // Use control points if provided; otherwise calculate from `lut` values.
+      if (initSettings.controlPoints) {
+        const controlPoints = initSettings.controlPoints;
+        lutObject = new Lut().createFromControlPoints(controlPoints);
+        aimg.setLut(channelIndex, lutObject);
+        return initSettings.controlPoints;
+      }
       if (initSettings.lut !== undefined && initSettings.lut.length === 2) {
         let lutmod = "";
         let lvalue = 0;
