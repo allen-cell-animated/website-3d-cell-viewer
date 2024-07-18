@@ -19,6 +19,8 @@ import { ControlPoint } from "@aics/volume-viewer";
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
 const LUT_REGEX = /^-?[a-z0-9.]*:[ ]*-?[a-z0-9.]*$/;
+/** Match colon-separated pairs of numeric strings */
+const RAMP_REGEX = /^-?[0-9.]*:-?[0-9.]*$/;
 /**
  * Match comma-separated triplet of numeric strings.
  */
@@ -88,8 +90,8 @@ export class ViewerChannelSettingParams {
   /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
   [ViewerChannelSettingKeys.IsosurfaceAlpha]?: string = undefined;
   /**
-   * LUT to map from intensity to opacity. Should be two alphanumeric values separated
-   * by a colon. The first value is the minimum and the second is the maximum.
+   * Lookup table (LUT) to map from volume intensity to opacity. Should be two alphanumeric values
+   * separated by a colon, where the first value is the minimum and the second is the maximum.
    * Defaults to [0, 255].
    *
    * - Plain numbers are treated as direct intensity values.
@@ -98,7 +100,8 @@ export class ViewerChannelSettingParams {
    * - `autoij` in either the min or max fields will use the "auto" algorithm
    * from ImageJ to select the min and max.
    *
-   * Values will be shown in the viewer as a ramp in the channel settings.
+   * Values will be used to determine the initial control points and ramp if those
+   * fields are not provided.
    *
    * @example
    * ```
@@ -111,8 +114,8 @@ export class ViewerChannelSettingParams {
   [ViewerChannelSettingKeys.Lut]?: string = undefined;
   /**
    * Control points for the transfer function. If provided, overrides the
-   * `lut` field. Should be a list of `x:opacity:color` triplets, separated
-   * by comma.
+   * `lut` field when calculating the control points. Should be a list
+   * of `x:opacity:color` triplets, separated by comma.
    * - `x` is a numeric intensity value.
    * - `opacity` is a float in the [0, 1] range.
    * - `color` is a 6-digit hex color, e.g. `ff0000`.
@@ -125,7 +128,7 @@ export class ViewerChannelSettingParams {
   [ViewerChannelSettingKeys.ControlPointsEnabled]?: "1" | "0" = undefined;
   /**
    * Raw ramp values, which should be two numeric values separated by a colon.
-   * If provided, overrides the `lut` field.
+   * If provided, overrides the `lut` field when calculating the ramp values.
    */
   [ViewerChannelSettingKeys.Ramp]?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
@@ -448,7 +451,7 @@ function parseControlPoints(controlPoints: string | undefined): ControlPoint[] |
   const newControlPoints = controlPoints.split(",").map((cp) => {
     const [x, opacity, color] = cp.split(":");
     return {
-      // TODO: Is there a good range of values for x?
+      // TODO: Is there an expected range of values for x?
       x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
       color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
@@ -488,7 +491,7 @@ export function deserializeViewerChannelSetting(
     const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
   }
-  if (jsonState[ViewerChannelSettingKeys.Ramp] && LUT_REGEX.test(jsonState.rmp)) {
+  if (jsonState[ViewerChannelSettingKeys.Ramp] && RAMP_REGEX.test(jsonState.rmp)) {
     const [min, max] = jsonState[ViewerChannelSettingKeys.Ramp].split(":");
     result.ramp = [Number.parseFloat(min), Number.parseFloat(max)];
   }
@@ -507,11 +510,11 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
     [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
     [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
-    // Lut is only used as an input; the ramp and control points capture the same information.
-    // [ViewerChannelSettingKeys.Lut]: channelSetting.ramp.join(":"),
     [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
     [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
     [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.join(":"),
+    // Note that Lut is not saved here, as it is expected as user input and is redundant with
+    // the control points and ramp.
   };
 }
 

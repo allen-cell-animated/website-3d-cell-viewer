@@ -20,14 +20,14 @@ function getDefaultLut(histogram: Histogram): Lut {
  * Parses a lookup table (LUT) from a `ViewerChannelSetting` object, where the `lut` field is an
  * array of two alphanumeric strings.
  *
- * @returns a Lut object if the `lut` field is valid; otherwise, undefined.
+ * @returns a Lut object if the `lut` field is valid; otherwise, returns undefined.
  *
  * Min and max values are determined as following:
- * - Plain numbers are treated as direct intensity values.
+ * - Plain numbers are direct intensity values.
  * - `p{n}` represents a percentile, where `n` is a percentile in the [0, 100] range.
  * - `m{n}` represents the median multiplied by `n / 100`.
  * - `autoij` in either the min or max fields will use the "auto" algorithm
- * from ImageJ to select the min and max.
+ * from ImageJ to select the min AND max.
  *
  * @example
  * ```
@@ -42,54 +42,47 @@ export function parseLutFromSettings(histogram: Histogram, initSettings: ViewerC
     return undefined;
   }
 
-  let lutmod = "";
-  let lvalue = 0;
-  let lutvalues = [0, 0];
+  let lutValues = [0, 0];
   for (let i = 0; i < 2; ++i) {
     const lstr = initSettings.lut[i];
     if (lstr === "autoij") {
-      lutvalues = histogram.findAutoIJBins();
+      lutValues = histogram.findAutoIJBins();
       break;
     }
 
     // look at first char of string.
-    let firstchar = lstr.charAt(0);
-    if (firstchar === "m" || firstchar === "p") {
-      lutmod = firstchar;
-      lvalue = parseFloat(lstr.substring(1)) / 100.0;
+    const firstChar = lstr.charAt(0);
+    if (firstChar === "m") {
+      const value = parseFloat(lstr.substring(1)) / 100.0;
+      lutValues[i] = histogram.maxBin * value;
+    } else if (firstChar === "p") {
+      const value = parseFloat(lstr.substring(1)) / 100.0;
+      lutValues[i] = histogram.findBinOfPercentile(value);
     } else {
-      lutmod = "";
-      lvalue = parseFloat(lstr);
-    }
-    if (lutmod === "m") {
-      lutvalues[i] = histogram.maxBin * lvalue;
-    } else if (lutmod === "p") {
-      lutvalues[i] = histogram.findBinOfPercentile(lvalue);
-    } else {
-      lutvalues[i] = lvalue;
+      lutValues[i] = parseFloat(lstr);
     }
   } // end for
 
-  return new Lut().createFromMinMax(Math.min(lutvalues[0], lutvalues[1]), Math.max(lutvalues[0], lutvalues[1]));
+  return new Lut().createFromMinMax(Math.min(lutValues[0], lutValues[1]), Math.max(lutValues[0], lutValues[1]));
 }
 
 /**
- * Initializes the lookup table (lut) that maps from volume intensity values to color + opacity and applies the lut to the volume.
+ * Initializes the lookup table (LUT) that maps from volume intensity values to color + opacity and applies the LUT to the volume.
  *
  * @param aimg The loaded volume data.
  * @param channelIndex The index of the channel to initialize the LUT for.
  * @param channelSettings The ViewerChannelSettings object that may contain settings for this channel. If relevant
  * settings are not found, a default LUT will be used.
- * @returns an object containing the retrieved lut control points for the ramp and control points.
+ * @returns an object containing the retrieved ramp control points and "advanced mode" control points.
  *
- * Lut values will be determined using the following rules:
+ * LUT values will be determined using the following rules:
  * - If no `lut` is provided in the `channelSettings`, a default LUT is calculated using min/max percentiles of the data.
  * - Otherwise, `lut` will be parsed as described in `ViewerChannelSettingParams.lut`.
- * - The `controlPoints` and `ramp` fields in the `channelSettings` will be used to override the returned control points and ramp,
- * respectively.
+ * - The `controlPoints` and `ramp` fields in the `channelSettings` will be used to override the returned "advanced mode"
+ * control points and ramp, respectively.
  *
- * If `controlPointsEnabled` is set to true in the `channelSettings`, the control points will be applied to the volume;
- * otherwise, the ramp will be applied.
+ * If `controlPointsEnabled` is set to true in the `channelSettings`, the "advanced mode" control points will be applied
+ * to the volume; otherwise, the ramp will be applied.
  */
 export function initializeLut(
   aimg: Volume,
@@ -106,6 +99,8 @@ export function initializeLut(
   const name = aimg.channelNames[channelIndex];
   const initSettings = channelSettings && findFirstChannelMatch(name, channelIndex, channelSettings);
 
+  // Attempt to load a lut from the settings, which will be used to initialize the control points and ramp
+  // if they are not defined.
   if (initSettings && initSettings.lut) {
     lut = parseLutFromSettings(histogram, initSettings) ?? defaultLut;
   }
