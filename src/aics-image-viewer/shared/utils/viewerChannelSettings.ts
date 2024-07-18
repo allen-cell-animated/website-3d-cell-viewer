@@ -35,6 +35,7 @@ export interface ViewerChannelSetting {
    */
   controlPointsEnabled?: boolean;
   controlPoints?: ControlPoint[];
+  ramp?: [number, number];
   // valid when surfaceEnabled = true. default 128 or 0.5 of max intensity range
   isovalue?: number;
   // valid when surfaceEnabled = true. default 1.0 fully opaque

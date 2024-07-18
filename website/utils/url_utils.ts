@@ -67,6 +67,7 @@ export enum ViewerChannelSettingKeys {
   ColorizeAlpha = "cza",
   IsosurfaceAlpha = "isa",
   Lut = "lut",
+  Ramp = "rmp",
   ControlPoints = "cps",
   ControlPointsEnabled = "cpe",
   VolumeEnabled = "ven",
@@ -109,8 +110,9 @@ export class ViewerChannelSettingParams {
    */
   [ViewerChannelSettingKeys.Lut]?: string = undefined;
   /**
-   * Control points for the transfer function. Should be a list of
-   * `x:opacity:color` triplets, separated by comma.
+   * Control points for the transfer function. If provided, overrides the
+   * `lut` field. Should be a list of `x:opacity:color` triplets, separated
+   * by comma.
    * - `x` is a numeric intensity value.
    * - `opacity` is a float in the [0, 1] range.
    * - `color` is a 6-digit hex color, e.g. `ff0000`.
@@ -121,6 +123,11 @@ export class ViewerChannelSettingParams {
    * ramp values defined by the LUT. "1" is enabled, disabled by default.
    */
   [ViewerChannelSettingKeys.ControlPointsEnabled]?: "1" | "0" = undefined;
+  /**
+   * Raw ramp values, which should be two numeric values separated by a colon.
+   * If provided, overrides the `lut` field.
+   */
+  [ViewerChannelSettingKeys.Ramp]?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
   [ViewerChannelSettingKeys.VolumeEnabled]?: "1" | "0" = undefined;
   /** Isosurface enabled. "1" is enabled. Disabled by default. */
@@ -481,6 +488,10 @@ export function deserializeViewerChannelSetting(
     const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
   }
+  if (jsonState[ViewerChannelSettingKeys.Ramp] && LUT_REGEX.test(jsonState.rmp)) {
+    const [min, max] = jsonState[ViewerChannelSettingKeys.Ramp].split(":");
+    result.ramp = [Number.parseFloat(min), Number.parseFloat(max)];
+  }
   if (jsonState[ViewerChannelSettingKeys.ControlPoints] && CONTROL_POINTS_REGEX.test(jsonState.cps)) {
     result.controlPoints = parseControlPoints(jsonState[ViewerChannelSettingKeys.ControlPoints]);
   }
@@ -495,11 +506,12 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
     [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
     [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
-    // Convert to hex string
     [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
-    [ViewerChannelSettingKeys.Lut]: channelSetting.ramp.join(":"),
+    // Lut is only used as an input; the ramp and control points capture the same information.
+    // [ViewerChannelSettingKeys.Lut]: channelSetting.ramp.join(":"),
     [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
     [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.join(":"),
   };
 }
 

@@ -217,7 +217,7 @@ describe("Channel state serialization", () => {
     cza: "0.5",
     cpe: "0",
     cps: "0:0.5:ffffff,255:1:ffffff",
-    lut: "0:255",
+    rmp: "0:255",
   };
 
   // Note that the serialization + deserialization are NOT direct inverses.
@@ -340,7 +340,7 @@ describe("Channel state serialization", () => {
         controlPoints: [],
         ramp: [0, 255],
       };
-      const serializedCustomChannelState: Required<ViewerChannelSettingParams> = {
+      const serializedCustomChannelState: Required<Omit<ViewerChannelSettingParams, "lut">> = {
         col: "03ff9d",
         ven: "0",
         sen: "0",
@@ -350,7 +350,7 @@ describe("Channel state serialization", () => {
         cza: "1",
         cpe: "0",
         cps: "",
-        lut: "0:255",
+        rmp: "0:255",
       };
       expect(serializeViewerChannelSetting(customChannelState)).toEqual(serializedCustomChannelState);
     });
@@ -713,7 +713,8 @@ describe("serializeViewerUrlParams", () => {
     const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
     // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
     // is not guaranteed. Parse the string and check that the values match the expected values.
-    const expectedChannel0: Required<ViewerChannelSettingParams> = {
+    // Note that `lut` is not included when serializing from existing viewer state.
+    const expectedChannel0: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "1",
       col: "ff0000",
       clz: "1",
@@ -721,11 +722,11 @@ describe("serializeViewerUrlParams", () => {
       isa: "0.75",
       sen: "1",
       isv: "128",
-      lut: "-10:260.1",
+      rmp: "-10:260.1",
       cps: "0:0:808080,1:1:ff0000",
       cpe: "0",
     };
-    const expectedChannel1: Required<ViewerChannelSettingParams> = {
+    const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "0",
       col: "808080",
       clz: "0",
@@ -733,7 +734,7 @@ describe("serializeViewerUrlParams", () => {
       isa: "0",
       sen: "0",
       isv: "57",
-      lut: "50:140",
+      rmp: "50:140",
       cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
       cpe: "1",
     };
