@@ -18,7 +18,7 @@ import { ControlPoint } from "@aics/volume-viewer";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
-const LUT_REGEX = /^\-?[a-z0-9.]*:[ ]*\-?[a-z0-9.]*$/;
+const LUT_REGEX = /^-?[a-z0-9.]*:[ ]*-?[a-z0-9.]*$/;
 /**
  * Match comma-separated triplet of numeric strings.
  */
@@ -33,7 +33,7 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
  * Matches a comma-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
-export const CONTROL_POINTS_REGEX = /^(\-?[\-0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,\-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const CONTROL_POINTS_REGEX = /^(-?[-0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
