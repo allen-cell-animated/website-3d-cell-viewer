@@ -30,8 +30,7 @@ export interface ViewerChannelSetting {
   lut?: [string, string];
   /**
    * Whether to show control point controls instead of a simpler ramp control.
-   * If no control points are provided, control points will be derived from the
-   * `lut` values. Defaults to false.
+   * Defaults to false.
    */
   controlPointsEnabled?: boolean;
   controlPoints?: ControlPoint[];
