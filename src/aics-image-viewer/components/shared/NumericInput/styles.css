@@ -19,7 +19,7 @@
     font-size: 12px;
     text-align: right;
     padding-right: 6px;
-    background-color: #222222;
+    background-color: transparent;
     border: 1px solid #4b4b4b;
 
     &:focus {

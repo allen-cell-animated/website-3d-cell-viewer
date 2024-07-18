@@ -62,6 +62,8 @@ export interface ChannelState {
   colorizeAlpha: number;
   opacity: number;
   color: ColorArray;
+  ramp: [number, number];
+  useControlPoints: boolean;
   controlPoints: ControlPoint[];
 }
 
@@ -71,6 +73,7 @@ export type ChannelSettingUpdater = <K extends ChannelStateKey>(
   key: K,
   value: ChannelState[K]
 ) => void;
+export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];

@@ -1,7 +1,7 @@
-import { ControlPoint, Lut, Volume } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Lut, Volume } from "@aics/volume-viewer";
 import { findFirstChannelMatch, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
-import { TFEDITOR_DEFAULT_COLOR } from "../../components/TfEditor";
+import { TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../../components/TfEditor";
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient
@@ -70,4 +70,38 @@ export function initializeLut(
   }));
   aimg.setLut(channelIndex, lutObject);
   return newControlPoints;
+}
+
+export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, number] {
+  if (controlPoints.length === 1 || controlPoints.length === 3) {
+    return [0, TFEDITOR_MAX_BIN];
+  } else if (controlPoints.length === 2) {
+    return [controlPoints[0].x, controlPoints[1].x];
+  }
+  return [controlPoints[1].x, controlPoints[controlPoints.length - 2].x];
+}
+
+export function rampToControlPoints([min, max]: [number, number]): ControlPoint[] {
+  return [
+    { x: Math.min(min - 1, 0), opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: min, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: max, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+    { x: Math.max(max + 1, TFEDITOR_MAX_BIN), opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+  ];
+}
+
+/** Remaps an array of control points from an old range (as a 2-tuple) to a new one (extracted from a `Channel`) */
+export function remapControlPointsForChannel(
+  controlPoints: ControlPoint[],
+  oldRange: [number, number] | undefined,
+  { rawMin, rawMax }: Channel
+): ControlPoint[] {
+  if (oldRange === undefined) {
+    return controlPoints;
+  }
+
+  // TODO: this creates a redundant Uint8Array and algorithmically fills it twice. Can we avoid this?
+  const remapLut = new Lut().createFromControlPoints(controlPoints);
+  remapLut.remapDomains(oldRange[0], oldRange[1], rawMin, rawMax);
+  return remapLut.controlPoints;
 }

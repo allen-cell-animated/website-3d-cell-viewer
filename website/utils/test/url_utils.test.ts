@@ -182,7 +182,9 @@ describe("Channel state serialization", () => {
     opacity: 0.75,
     colorizeEnabled: true,
     colorizeAlpha: 0.5,
+    useControlPoints: false,
     controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+    ramp: [0, 255],
   };
   const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingParams = {
     col: "ff0000",
@@ -311,7 +313,9 @@ describe("Channel state serialization", () => {
         opacity: 0.54,
         colorizeEnabled: false,
         colorizeAlpha: 1.0,
+        useControlPoints: false,
         controlPoints: [],
+        ramp: [0, 255],
       };
       const serializedCustomChannelState: ViewerChannelSettingParams = {
         col: "03ff9d",
@@ -653,7 +657,9 @@ describe("serializeViewerUrlParams", () => {
         opacity: 0.75,
         colorizeEnabled: true,
         colorizeAlpha: 0.5,
+        useControlPoints: false,
         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+        ramp: [0, 255],
       },
       {
         name: "channel1",
@@ -664,7 +670,9 @@ describe("serializeViewerUrlParams", () => {
         opacity: 0.0,
         colorizeEnabled: false,
         colorizeAlpha: 0.2,
+        useControlPoints: false,
         controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+        ramp: [0, 255],
       },
     ];
     const serialized = serializeViewerUrlParams({ channelSettings: channelStates });

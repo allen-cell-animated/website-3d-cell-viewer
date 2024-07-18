@@ -19,7 +19,12 @@ import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./typ
 import type { ViewerState, ChannelState } from "../ViewerStateProvider/types";
 
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
-import { initializeLut } from "../../shared/utils/controlPointsToLut";
+import {
+  controlPointsToRamp,
+  initializeLut,
+  rampToControlPoints,
+  remapControlPointsForChannel,
+} from "../../shared/utils/controlPointsToLut";
 import {
   findFirstChannelMatch,
   makeChannelIndexGrouping,
@@ -54,6 +59,7 @@ import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
+import { TFEDITOR_MAX_BIN } from "../TfEditor";
 
 import "../../assets/styles/globals.css";
 import {
@@ -128,6 +134,8 @@ const DEFAULT_CHANNEL_STATE: ChannelState = {
   isovalue: 128,
   opacity: 1.0,
   color: [226, 205, 179] as ColorArray,
+  useControlPoints: false,
+  ramp: [0, TFEDITOR_MAX_BIN],
   controlPoints: [],
 };
 
@@ -179,7 +187,9 @@ const initializeOneChannelSetting = (
     isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
     opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
     color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
+    useControlPoints: defaultChannelState.useControlPoints,
     controlPoints: defaultChannelState.controlPoints,
+    ramp: defaultChannelState.ramp,
   };
 };
 
@@ -249,6 +259,8 @@ const App: React.FC<AppProps> = (props) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   // tracks which channels have been loaded
   const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
+  // we need to keep track of channel ranges for remapping
+  const channelRangesRef = useRef<([number, number] | undefined)[]>([]);
 
   const [channelGroupedByType, setChannelGroupedByType] = useState<ChannelGrouping>({});
   const [controlPanelClosed, setControlPanelClosed] = useState(() => window.innerWidth < CONTROL_PANEL_CLOSE_WIDTH);
@@ -287,19 +299,42 @@ const App: React.FC<AppProps> = (props) => {
   // Image loading/initialization functions ///////////////////////////////////
 
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+    const thisChannel = aimg.getChannel(channelIndex);
+
     // If this is the first load of this image, auto-generate initial LUTs
-    if (initialLoadRef.current || !thisChannelsSettings.controlPoints) {
+    if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
       const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
+      const ramp = controlPointsToRamp(newControlPoints);
       changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
+      changeChannelSetting(channelIndex, "ramp", ramp);
     } else {
       // try not to update lut from here if we are in play mode
-      if (playingAxis !== null) {
-        // do nothing here?
-        // tell gui that we have updated control pts?
-        //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      // if (playingAxis !== null) {
+      // do nothing here?
+      // tell gui that we have updated control pts?
+      //changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
+      // }
+      const oldRange = channelRangesRef.current[channelIndex];
+      if (thisChannelsSettings.useControlPoints) {
+        // control points were just automatically remapped - update in state
+        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
+        // now manually remap ramp using the channel's old range
+        const controlPoints = rampToControlPoints(thisChannelsSettings.ramp);
+        const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
+        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(newControlPoints));
+      } else {
+        // ramp was just automatically remapped - update in state
+        const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
+        changeChannelSetting(channelIndex, "ramp", ramp);
+        // now manually remap control points using the channel's old range
+        const { controlPoints } = thisChannelsSettings;
+        const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
+        changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
       }
-      changeChannelSetting(channelIndex, "controlPoints", aimg.getChannel(channelIndex).lut.controlPoints);
     }
+    // save the channel's new range for remapping next time
+    channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
+
     view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
 
@@ -419,6 +454,7 @@ const App: React.FC<AppProps> = (props) => {
     const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
     setAllChannelsUnloaded(channelNames.length);
+    channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
