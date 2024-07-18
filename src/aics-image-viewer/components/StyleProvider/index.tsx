@@ -100,6 +100,7 @@ const theme = {
     },
     landingPage: {
       bg: palette.veryDarkGrey,
+      bgAlt: palette.darkGrey,
       text: palette.ltGrey,
       bannerBg: "#020202DB",
     },
@@ -199,6 +200,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-controlpanel-ramp-slider: ${$theme.colors.controlPanel.rampSlider};
 
       --color-landingpage-bg: ${$theme.colors.landingPage.bg};
+      --color-landingpage-bg-alt: ${$theme.colors.landingPage.bgAlt};
       --color-landingpage-text: ${$theme.colors.landingPage.text};
       --color-landingpage-banner-highlight-bg: ${$theme.colors.landingPage.bannerBg};
 
