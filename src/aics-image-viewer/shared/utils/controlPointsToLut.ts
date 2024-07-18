@@ -99,12 +99,12 @@ export function initializeLut(
   const name = aimg.channelNames[channelIndex];
   const initSettings = channelSettings && findFirstChannelMatch(name, channelIndex, channelSettings);
 
-  // Attempt to load a lut from the settings, which will be used to initialize the control points and ramp
-  // if they are not defined.
+  // Attempt to load a LUT from the settings, which will be used to initialize the control points and ramp
   if (initSettings && initSettings.lut) {
     lut = parseLutFromSettings(histogram, initSettings) ?? defaultLut;
   }
-  // Override the lut's control points with the provided control points and/or ramp
+  // Initialize the control points + ramp using the LUT.
+  // Optionally, override the LUT's control points with the provided control points and/or ramp.
   controlPoints = initSettings?.controlPoints ? initSettings.controlPoints : [...lut.controlPoints];
   ramp = initSettings?.ramp ? rampToControlPoints(initSettings.ramp) : [...lut.controlPoints];
 
