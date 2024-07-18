@@ -261,6 +261,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
     event.preventDefault();
     const [x, opacity] = mouseEventToControlPointValues(event);
 
+    // `draggedPointIdxRef` may either be a number (control point index) or a string (ramp slider handle).
+    // The result of this check should always be the same as `props.useControlPoints`, but this narrows the type for TS
     if (typeof draggedPointIdxRef.current === "number") {
       dragControlPoint(draggedPointIdxRef.current, x, opacity);
     } else {

@@ -126,18 +126,20 @@ export function initializeLut(
 }
 
 export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, number] {
-  if (controlPoints.length < 3) {
+  if (controlPoints.length === 1 || controlPoints.length === 3) {
     return [0, TFEDITOR_MAX_BIN];
+  } else if (controlPoints.length === 2) {
+    return [controlPoints[0].x, controlPoints[1].x];
   }
-  return [controlPoints[1].x, controlPoints[2].x];
+  return [controlPoints[1].x, controlPoints[controlPoints.length - 2].x];
 }
 
 export function rampToControlPoints([min, max]: [number, number]): ControlPoint[] {
   return [
-    { x: Math.min(min, 0), opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
+    { x: Math.min(min - 1, 0), opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
     { x: min, opacity: 0, color: TFEDITOR_DEFAULT_COLOR },
     { x: max, opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
-    { x: Math.max(max, TFEDITOR_MAX_BIN), opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
+    { x: Math.max(max + 1, TFEDITOR_MAX_BIN), opacity: 1, color: TFEDITOR_DEFAULT_COLOR },
   ];
 }
 
