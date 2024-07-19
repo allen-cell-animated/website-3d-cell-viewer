@@ -275,71 +275,6 @@
   right:28px;
 }
 
-/*!**************************************************************************************************************************************************!*\
-  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/TfEditor/styles.css ***!
-  \**************************************************************************************************************************************************/
-.channel-row .tf-editor-svg{
-    margin-bottom:8px;
-  }
-
-.channel-row .tf-editor-svg.dragging{
-      cursor:move;
-    }
-
-.channel-row .tf-editor-popover{
-    position:absolute;
-    z-index:9999;
-    width:100%;
-  }
-
-.channel-row .tf-editor-cover{
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-  }
-
-.channel-row .tick text{
-    user-select:none;
-    -o-user-select:none;
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    -webkit-user-select:none;
-  }
-
-.channel-row rect.bar,
-  .channel-row .tick text{
-    fill:var(--color-controlpanel-text);
-  }
-
-.channel-row .axis path,
-  .channel-row .axis line{
-    stroke:var(--color-controlpanel-border);
-  }
-
-.channel-row rect{
-    fill:none;
-    pointer-events:all;
-  }
-
-.channel-row .line{
-    stroke:#aeacae;
-    stroke-width:1.5px;
-  }
-
-.channel-row circle{
-    fill-opacity:0.6;
-    cursor:move;
-    stroke:#aeacae;
-    stroke-width:1.5px;
-  }
-
-.channel-row circle.selected{
-      fill:white;
-      stroke:white;
-    }
-
 /*!**********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/shared/SliderRow/styles.css ***!
   \**********************************************************************************************************************************************************/
@@ -362,6 +297,93 @@
   .viewer-control-row .control{
     flex:5;
   }
+
+/*!**************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/TfEditor/styles.css ***!
+  \**************************************************************************************************************************************************/
+.channel-row .tf-editor-svg.dragging.basic{
+      cursor:pointer;
+    }
+
+.channel-row .tf-editor-svg.dragging.advanced{
+      cursor:move;
+    }
+
+.channel-row .tf-editor-popover{
+    position:absolute;
+    z-index:9999;
+    width:100%;
+  }
+
+.channel-row .tf-editor-cover{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+  }
+
+.channel-row .tf-editor-numeric-input-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:20px;
+    color:var(--color-controlpanel-text);
+  }
+
+.channel-row .tf-editor-numeric-input-row .ant-input-number{
+      border-color:var(--color-button-tertiary-outline);
+      width:60px;
+    }
+
+.channel-row .tick text{
+    fill:var(--color-controlpanel-text);
+    user-select:none;
+    -o-user-select:none;
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    -webkit-user-select:none;
+  }
+
+.channel-row rect.bar{
+    fill:var(--color-controlpanel-border);
+  }
+
+.channel-row .axis path,
+  .channel-row .axis line{
+    stroke:var(--color-controlpanel-border);
+  }
+
+.channel-row rect{
+    fill:none;
+    pointer-events:all;
+  }
+
+.channel-row .line{
+    stroke:#aeacae;
+    stroke-width:1.5px;
+  }
+
+.channel-row .ramp-sliders path{
+      fill:var(--color-controlpanel-ramp-slider);
+      cursor:pointer;
+    }
+
+.channel-row .ramp-sliders line{
+      stroke:var(--color-controlpanel-ramp-slider);
+    }
+
+.channel-row circle{
+    fill-opacity:0.6;
+    cursor:move;
+    stroke:#aeacae;
+    stroke-width:1.5px;
+  }
+
+.channel-row circle.selected{
+      fill:white;
+      stroke:white;
+    }
 
 /*!***********************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./src/aics-image-viewer/components/ChannelsWidgetRow/styles.css ***!
@@ -400,10 +422,6 @@
     align-items:end;
     gap:6px;
   }
-
-.channel-rows-list .ant-list-item.channel-row .button-row:not(:last-child){
-      margin-bottom:8px;
-    }
 
 .channel-rows-list .ant-list-item.channel-row.controls-closed .ant-btn-text:not(:focus-visible){
     color:var(--color-controlpanel-text);
@@ -940,7 +958,7 @@
     font-size:12px;
     text-align:right;
     padding-right:6px;
-    background-color:#222222;
+    background-color:transparent;
     border:1px solid #4b4b4b;
   }
 
