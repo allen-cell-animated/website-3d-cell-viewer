@@ -19,6 +19,7 @@ interface ViewerWrapperProps {
   loadingImage: boolean;
   appHeight: string;
   hasImage: boolean;
+  imageName: string | undefined;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
   playControls: PlayControls;
@@ -90,6 +91,7 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
           {visibleControls.axisClipSliders && this.props.hasImage && (
             <AxisClipSliders
               mode={viewMode}
+              imageName={this.props.imageName}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
               numSlicesLoaded={this.props.numSlicesLoaded}

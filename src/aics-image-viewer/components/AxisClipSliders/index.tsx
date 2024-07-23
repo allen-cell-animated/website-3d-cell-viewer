@@ -163,6 +163,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
 
 type AxisClipSlidersProps = {
   mode: ViewMode;
+  imageName: string | undefined;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
@@ -206,7 +207,10 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   // Pause when view mode or volume size has changed
-  useEffect(() => props.playControls.pause(), [props.mode]);
+  useEffect(() => {
+    console.log(props.imageName);
+    props.playControls.pause();
+  }, [props.mode, props.imageName]);
 
   const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
     if (willPlay) {
