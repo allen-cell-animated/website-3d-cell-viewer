@@ -428,11 +428,15 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
-function parseThreeNumberArray(levels: string | undefined): [number, number, number] | undefined {
+function parseThreeNumberArray(
+  levels: string | undefined,
+  min?: number,
+  max?: number
+): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, 0, 255));
+  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min ?? -Infinity, max ?? Infinity));
   if (low === undefined || middle === undefined || high === undefined) {
     return undefined;
   }
@@ -571,7 +575,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels]),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], 0, 255),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
