@@ -14,6 +14,7 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
+import { CameraTransform } from "@aics/volume-viewer";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -50,6 +51,14 @@ export enum ViewerStateKeys {
   Region = "reg",
   Slice = "slice",
   Time = "t",
+  CameraTransform = "cam",
+}
+
+export enum CameraTransformKeys {
+  Position = "pos",
+  Target = "tar",
+  Up = "up",
+  Rotation = "rot",
 }
 
 /**
@@ -156,6 +165,17 @@ export class ViewerStateParams {
   [ViewerStateKeys.Slice]?: string = undefined;
   /** Frame number, for time-series volumes. 0 by default. */
   [ViewerStateKeys.Time]?: string = undefined;
+  /**
+   * Camera transform settings, as a list of `key:value` pairs separated by commas.
+   * Valid keys are defined in `CameraTransformKeys`:
+   * - `pos`: position
+   * - `tar`: target
+   * - `up`: up
+   * - `rot`: rotation
+   *
+   * All values are an array of three floats, separated by commas.
+   */
+  [ViewerStateKeys.CameraTransform]?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -375,7 +395,7 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
-function parseStringLevels(levels: string | undefined): [number, number, number] | undefined {
+function parseThreeNumberArray(levels: string | undefined): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
@@ -404,6 +424,29 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
     return undefined;
   }
   return { x, y, z };
+}
+
+function parseCameraTransform(cameraSettings: string | undefined): Partial<CameraTransform> | undefined {
+  if (!cameraSettings) {
+    return undefined;
+  }
+  const parsedCameraSettings = parseKeyValueList(cameraSettings);
+  const result: Partial<CameraTransform> = {
+    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
+    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
+    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
+    rotation: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Rotation]),
+  };
+  return removeUndefinedProperties(result);
+}
+
+function serializeCameraTransform(cameraTransform: CameraTransform): string {
+  return objectToKeyValueList({
+    [CameraTransformKeys.Position]: cameraTransform.position.join(","),
+    [CameraTransformKeys.Target]: cameraTransform.target.join(","),
+    [CameraTransformKeys.Up]: cameraTransform.up.join(","),
+    [CameraTransformKeys.Rotation]: cameraTransform.rotation.join(","),
+  });
 }
 
 //// DATA SERIALIZATION //////////////////////
@@ -464,12 +507,13 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseStringLevels(params[ViewerStateKeys.Levels]),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels]),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
     time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
     renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
+    cameraTransform: parseCameraTransform(params[ViewerStateKeys.CameraTransform]),
   };
 
   // Handle viewmode, since they use different mappings
@@ -513,6 +557,9 @@ export function serializeViewerState(state: Partial<ViewerState>): ViewerStatePa
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
+    // All CameraTransform properties will be provided when serializing viewer state
+    [ViewerStateKeys.CameraTransform]:
+      state.cameraTransform && serializeCameraTransform(state.cameraTransform as CameraTransform),
   };
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
