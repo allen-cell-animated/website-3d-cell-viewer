@@ -207,10 +207,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   // Pause when view mode or volume size has changed
-  useEffect(() => {
-    console.log(props.imageName);
-    props.playControls.pause();
-  }, [props.mode, props.imageName]);
+  useEffect(() => props.playControls.pause(), [props.mode, props.imageName]);
 
   const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
     if (willPlay) {
