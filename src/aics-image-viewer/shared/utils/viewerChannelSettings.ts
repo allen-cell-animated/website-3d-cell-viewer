@@ -1,3 +1,4 @@
+import { ControlPoint } from "@aics/volume-viewer";
 import { OTHER_CHANNEL_KEY, SINGLE_GROUP_CHANNEL_KEY } from "../constants";
 
 /** Settings for a single channel, as passed in via props by App users */
@@ -16,10 +17,9 @@ export interface ViewerChannelSetting {
   enabled?: boolean;
   // default to false
   surfaceEnabled?: boolean;
-  // min and max. these are shorthand expressions.
-  // a plain number (intensity), or a "p##", or a "m##" for percentile or median
   /**
-   * Min and max, shorthand expressions. Defaults to [0, 255].
+   * Min and max values for the intensity lookup table, which maps from raw intensity values
+   * in the volume to opacity and color. Defaults to [0, 255].
    *
    * - Plain numbers are treated as direct intensity values.
    * - `p{n}` represents a percentile, where `n` is a percentile in the [0, 100] range.
@@ -28,6 +28,13 @@ export interface ViewerChannelSetting {
    * from ImageJ to select the min and max.
    */
   lut?: [string, string];
+  /**
+   * Whether to show control point controls instead of a simpler ramp control.
+   * Defaults to false.
+   */
+  controlPointsEnabled?: boolean;
+  controlPoints?: ControlPoint[];
+  ramp?: [number, number];
   // valid when surfaceEnabled = true. default 128 or 0.5 of max intensity range
   isovalue?: number;
   // valid when surfaceEnabled = true. default 1.0 fully opaque

@@ -189,8 +189,8 @@ const initializeOneChannelSetting = (
     isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
     opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
     color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-    useControlPoints: defaultChannelState.useControlPoints,
-    controlPoints: defaultChannelState.controlPoints,
+    useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
+    controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
     ramp: defaultChannelState.ramp,
   };
 };
@@ -309,10 +309,9 @@ const App: React.FC<AppProps> = (props) => {
 
     // If this is the first load of this image, auto-generate initial LUTs
     if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
-      const newControlPoints = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      const ramp = controlPointsToRamp(newControlPoints);
-      changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
-      changeChannelSetting(channelIndex, "ramp", ramp);
+      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
+      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
+      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
