@@ -277,6 +277,9 @@ const App: React.FC<AppProps> = (props) => {
   playControls.onPlayingAxisChanged = (axis) => {
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
     loader.current?.syncMultichannelLoading(axis ? true : false);
+    if (image) {
+      view3d.setScaleLevelBias(image, axis ? 1 : 0);
+    }
     setPlayingAxis(axis);
   };
 
