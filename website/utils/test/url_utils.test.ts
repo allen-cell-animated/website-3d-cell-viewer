@@ -376,6 +376,7 @@ describe("Viewer state serialization", () => {
     region: { x: [0, 1], y: [0, 1], z: [0, 1] },
     slice: { x: 0.5, y: 0.5, z: 0.5 },
     time: 0,
+    cameraTransform: undefined,
   };
   const SERIALIZED_DEFAULT_VIEWER_STATE: ViewerStateParams = {
     mode: "volumetric",
@@ -413,6 +414,12 @@ describe("Viewer state serialization", () => {
     region: { x: [0, 0.5], y: [0, 1], z: [0, 1] },
     slice: { x: 0.25, y: 0.75, z: 0.5 },
     time: 100,
+    cameraTransform: {
+      position: [-1, -4, 45],
+      target: [0, 0, 0],
+      rotation: [-56, 14, 6],
+      up: [0, 1, 0],
+    },
   };
   const SERIALIZED_CUSTOM_VIEWER_STATE: ViewerStateParams = {
     mode: "pathtrace",
@@ -431,6 +438,7 @@ describe("Viewer state serialization", () => {
     reg: "0:0.5,0:1,0:1",
     slice: "0.25,0.75,0.5",
     t: "100",
+    cam: "pos:-1%2C-4%2C45,tar:0%2C0%2C0,up:0%2C1%2C0,rot:-56%2C14%2C6",
   };
 
   describe("serializeViewerState", () => {
