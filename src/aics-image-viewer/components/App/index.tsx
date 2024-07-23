@@ -123,6 +123,7 @@ const defaultViewerSettings: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
+  cameraTransform: undefined,
 };
 
 const DEFAULT_CHANNEL_STATE: ChannelState = {
@@ -156,6 +157,7 @@ const defaultProps: AppProps = {
   parentImageDownloadHref: "",
   pixelSize: undefined,
   canvasMargin: "0 0 0 0",
+  view3dRef: undefined,
 };
 
 const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
@@ -227,6 +229,9 @@ const App: React.FC<AppProps> = (props) => {
     viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
+  if (props.view3dRef !== undefined) {
+    props.view3dRef.current = view3d;
+  }
   const loadContext = useConstructor(
     () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
   );
@@ -239,6 +244,7 @@ const App: React.FC<AppProps> = (props) => {
     _showError(error);
     setSendingQueryRequest(false);
   };
+
   useEffect(() => {
     // Get notifications of loading errors which occur after the initial load, e.g. on time change or new channel load
     view3d.setLoadErrorHandler((_vol, e) => showError(e));
@@ -585,7 +591,6 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   // Effects to imperatively sync `viewerSettings` to `view3d`
-
   useImageEffect(
     (_currentImage) => {
       view3d.setCameraMode(viewerSettings.viewMode);
@@ -593,6 +598,13 @@ const App: React.FC<AppProps> = (props) => {
     },
     [viewerSettings.viewMode]
   );
+
+  useImageEffect((_currentImage) => {
+    // Set camera transform on initial load only
+    if (viewerSettings.cameraTransform) {
+      view3d.setCameraTransform(viewerSettings.cameraTransform);
+    }
+  }, []);
 
   useImageEffect((_currentImage) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
 

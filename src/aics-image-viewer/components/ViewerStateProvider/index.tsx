@@ -41,6 +41,7 @@ const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
+  cameraTransform: undefined,
 };
 
 // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
