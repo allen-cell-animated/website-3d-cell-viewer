@@ -206,7 +206,8 @@ export class ViewerStateParams {
    * - `up`: up
    * - `rot`: rotation
    *
-   * All values are an array of three floats, separated by commas.
+   * All values are an array of three floats, separated by commas and
+   * encoded using `encodeURIComponent`.
    */
   [ViewerStateKeys.CameraTransform]?: string = undefined;
 }
@@ -428,15 +429,18 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
+/**
+ * Parses a Vector3-like array of three numbers from a string.
+ */
 function parseThreeNumberArray(
   levels: string | undefined,
-  min?: number,
-  max?: number
+  min: number = -Infinity,
+  max: number = Infinity
 ): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min ?? -Infinity, max ?? Infinity));
+  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min, max));
   if (low === undefined || middle === undefined || high === undefined) {
     return undefined;
   }
