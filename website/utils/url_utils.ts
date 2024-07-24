@@ -62,10 +62,16 @@ export enum ViewerStateKeys {
 }
 
 export enum CameraTransformKeys {
+  /** Camera position in 3D coordinates. */
   Position = "pos",
+  /** Target position of the trackball controls in 3D coordinates. */
   Target = "tar",
+  /** The up vector of the camera. Will be normalized to magnitude of 1. */
   Up = "up",
+  /** Euler rotation in radians. */
   Rotation = "rot",
+  /** Scale factor for the X, Y, and Z orthographic cameras. */
+  OrthoScales = "ort",
 }
 
 /**
@@ -205,6 +211,7 @@ export class ViewerStateParams {
    * - `tar`: target
    * - `up`: up
    * - `rot`: rotation
+   * - `ort`: orthographic scales
    *
    * All values are an array of three floats, separated by commas and
    * encoded using `encodeURIComponent`.
@@ -477,6 +484,7 @@ function parseCameraTransform(cameraSettings: string | undefined): Partial<Camer
     target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
     up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
     rotation: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Rotation]),
+    orthoScales: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.OrthoScales]),
   };
   return removeUndefinedProperties(result);
 }
@@ -487,6 +495,7 @@ function serializeCameraTransform(cameraTransform: CameraTransform): string {
     [CameraTransformKeys.Target]: cameraTransform.target.join(","),
     [CameraTransformKeys.Up]: cameraTransform.up.join(","),
     [CameraTransformKeys.Rotation]: cameraTransform.rotation.join(","),
+    [CameraTransformKeys.OrthoScales]: cameraTransform.orthoScales.join(","),
   });
 }
 
