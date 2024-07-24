@@ -437,7 +437,7 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
 }
 
 /**
- * Parses a Vector3-like array of three numbers from a string.
+ * Parses an array of three numbers from a string.
  */
 function parseThreeNumberArray(
   levels: string | undefined,
@@ -484,7 +484,8 @@ function parseCameraTransform(cameraSettings: string | undefined): Partial<Camer
     target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
     up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
     rotation: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Rotation]),
-    orthoScales: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.OrthoScales]),
+    // Orthographic scales cannot be negative
+    orthoScales: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.OrthoScales], 0, Infinity),
   };
   return removeUndefinedProperties(result);
 }
