@@ -14,10 +14,13 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
+import { CameraTransform, ControlPoint } from "@aics/volume-viewer";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
-const LUT_REGEX = /^[a-z0-9.]*:[ ]*[a-z0-9.]*$/;
+const LUT_REGEX = /^-?[a-z0-9.]*:[ ]*-?[a-z0-9.]*$/;
+/** Match colon-separated pairs of numeric strings */
+const RAMP_REGEX = /^-?[0-9.]*:-?[0-9.]*$/;
 /**
  * Match comma-separated triplet of numeric strings.
  */
@@ -28,6 +31,11 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
  */
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
+/**
+ * Matches a comma-separated list of control points, where each control point is represented
+ * by a triplet of `{x}:{opacity}:{hex color}`.
+ */
+export const CONTROL_POINTS_REGEX = /^(-?[-0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
@@ -50,6 +58,20 @@ export enum ViewerStateKeys {
   Region = "reg",
   Slice = "slice",
   Time = "t",
+  CameraTransform = "cam",
+}
+
+export enum CameraTransformKeys {
+  /** Camera position in 3D coordinates. */
+  Position = "pos",
+  /** Target position of the trackball controls in 3D coordinates. */
+  Target = "tar",
+  /** The up vector of the camera. Will be normalized to magnitude of 1. */
+  Up = "up",
+  /** Euler rotation in radians. */
+  Rotation = "rot",
+  /** Scale factor for the X, Y, and Z orthographic cameras. */
+  OrthoScales = "ort",
 }
 
 /**
@@ -61,6 +83,9 @@ export enum ViewerChannelSettingKeys {
   ColorizeAlpha = "cza",
   IsosurfaceAlpha = "isa",
   Lut = "lut",
+  Ramp = "rmp",
+  ControlPoints = "cps",
+  ControlPointsEnabled = "cpe",
   VolumeEnabled = "ven",
   SurfaceEnabled = "sen",
   IsosurfaceValue = "isv",
@@ -78,8 +103,9 @@ export class ViewerChannelSettingParams {
   [ViewerChannelSettingKeys.ColorizeAlpha]?: string = undefined;
   /** Isosurface alpha, in the [0, 1 range]. Set to `1.0` by default.*/
   [ViewerChannelSettingKeys.IsosurfaceAlpha]?: string = undefined;
-  /** LUT to map from intensity to opacity. Should be two alphanumeric values separated
-   * by a colon. The first value is the minimum and the second is the maximum.
+  /**
+   * Lookup table (LUT) to map from volume intensity to opacity. Should be two alphanumeric values
+   * separated by a colon, where the first value is the minimum and the second is the maximum.
    * Defaults to [0, 255].
    *
    * - Plain numbers are treated as direct intensity values.
@@ -87,6 +113,9 @@ export class ViewerChannelSettingParams {
    * - `m{n}` represents the median multiplied by `n / 100`.
    * - `autoij` in either the min or max fields will use the "auto" algorithm
    * from ImageJ to select the min and max.
+   *
+   * Values will be used to determine the initial control points and ramp if those
+   * fields are not provided.
    *
    * @example
    * ```
@@ -97,6 +126,25 @@ export class ViewerChannelSettingParams {
    * ```
    */
   [ViewerChannelSettingKeys.Lut]?: string = undefined;
+  /**
+   * Control points for the transfer function. If provided, overrides the
+   * `lut` field when calculating the control points. Should be a list
+   * of `x:opacity:color` triplets, separated by comma.
+   * - `x` is a numeric intensity value.
+   * - `opacity` is a float in the [0, 1] range.
+   * - `color` is a 6-digit hex color, e.g. `ff0000`.
+   */
+  [ViewerChannelSettingKeys.ControlPoints]?: string = undefined;
+  /**
+   * Whether to show advanced mode, which will show control points instead of
+   * ramp values defined by the LUT. "1" is enabled, disabled by default.
+   */
+  [ViewerChannelSettingKeys.ControlPointsEnabled]?: "1" | "0" = undefined;
+  /**
+   * Raw ramp values, which should be two numeric values separated by a colon.
+   * If provided, overrides the `lut` field when calculating the ramp values.
+   */
+  [ViewerChannelSettingKeys.Ramp]?: string = undefined;
   /** Volume enabled. "1" is enabled. Disabled by default. */
   [ViewerChannelSettingKeys.VolumeEnabled]?: "1" | "0" = undefined;
   /** Isosurface enabled. "1" is enabled. Disabled by default. */
@@ -156,6 +204,19 @@ export class ViewerStateParams {
   [ViewerStateKeys.Slice]?: string = undefined;
   /** Frame number, for time-series volumes. 0 by default. */
   [ViewerStateKeys.Time]?: string = undefined;
+  /**
+   * Camera transform settings, as a list of `key:value` pairs separated by commas.
+   * Valid keys are defined in `CameraTransformKeys`:
+   * - `pos`: position
+   * - `tar`: target
+   * - `up`: up
+   * - `rot`: rotation
+   * - `ort`: orthographic scales
+   *
+   * All values are an array of three floats, separated by commas and
+   * encoded using `encodeURIComponent`.
+   */
+  [ViewerStateKeys.CameraTransform]?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -375,11 +436,18 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
-function parseStringLevels(levels: string | undefined): [number, number, number] | undefined {
+/**
+ * Parses an array of three numbers from a string.
+ */
+function parseThreeNumberArray(
+  levels: string | undefined,
+  min: number = -Infinity,
+  max: number = Infinity
+): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, 0, 255));
+  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min, max));
   if (low === undefined || middle === undefined || high === undefined) {
     return undefined;
   }
@@ -406,6 +474,53 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
+function parseCameraTransform(cameraSettings: string | undefined): Partial<CameraTransform> | undefined {
+  if (!cameraSettings) {
+    return undefined;
+  }
+  const parsedCameraSettings = parseKeyValueList(cameraSettings);
+  const result: Partial<CameraTransform> = {
+    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
+    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
+    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
+    rotation: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Rotation]),
+    // Orthographic scales cannot be negative
+    orthoScales: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.OrthoScales], 0, Infinity),
+  };
+  return removeUndefinedProperties(result);
+}
+
+function serializeCameraTransform(cameraTransform: CameraTransform): string {
+  return objectToKeyValueList({
+    [CameraTransformKeys.Position]: cameraTransform.position.join(","),
+    [CameraTransformKeys.Target]: cameraTransform.target.join(","),
+    [CameraTransformKeys.Up]: cameraTransform.up.join(","),
+    [CameraTransformKeys.Rotation]: cameraTransform.rotation.join(","),
+    [CameraTransformKeys.OrthoScales]: cameraTransform.orthoScales.join(","),
+  });
+}
+
+function serializeControlPoints(controlPoints: ControlPoint[]): string {
+  return controlPoints.map((cp) => `${cp.x}:${cp.opacity}:${colorArrayToHex(cp.color)}`).join(",");
+}
+
+function parseControlPoints(controlPoints: string | undefined): ControlPoint[] | undefined {
+  if (!controlPoints || !CONTROL_POINTS_REGEX.test(controlPoints)) {
+    return undefined;
+  }
+  const newControlPoints = controlPoints.split(",").map((cp) => {
+    const [x, opacity, color] = cp.split(":");
+    return {
+      // TODO: Is there an expected range of values for x?
+      x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
+      opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
+      color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
+    };
+  });
+  // Sort control points by x value
+  return newControlPoints.sort((a, b) => a.x - b.x);
+}
+
 //// DATA SERIALIZATION //////////////////////
 
 /**
@@ -427,6 +542,7 @@ export function deserializeViewerChannelSetting(
     surfaceOpacity: parseStringFloat(jsonState[ViewerChannelSettingKeys.IsosurfaceAlpha], 0, 1),
     colorizeEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.Colorize]),
     colorizeAlpha: parseStringFloat(jsonState[ViewerChannelSettingKeys.ColorizeAlpha], 0, 1),
+    controlPointsEnabled: parseStringBoolean(jsonState[ViewerChannelSettingKeys.ControlPointsEnabled]),
   };
   if (jsonState[ViewerChannelSettingKeys.Color] && HEX_COLOR_REGEX.test(jsonState.col)) {
     result.color = jsonState[ViewerChannelSettingKeys.Color];
@@ -434,6 +550,13 @@ export function deserializeViewerChannelSetting(
   if (jsonState[ViewerChannelSettingKeys.Lut] && LUT_REGEX.test(jsonState.lut)) {
     const [min, max] = jsonState[ViewerChannelSettingKeys.Lut].split(":");
     result.lut = [min.trim(), max.trim()];
+  }
+  if (jsonState[ViewerChannelSettingKeys.Ramp] && RAMP_REGEX.test(jsonState.rmp)) {
+    const [min, max] = jsonState[ViewerChannelSettingKeys.Ramp].split(":");
+    result.ramp = [Number.parseFloat(min), Number.parseFloat(max)];
+  }
+  if (jsonState[ViewerChannelSettingKeys.ControlPoints] && CONTROL_POINTS_REGEX.test(jsonState.cps)) {
+    result.controlPoints = parseControlPoints(jsonState[ViewerChannelSettingKeys.ControlPoints]);
   }
   return result;
 }
@@ -446,10 +569,12 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
     [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
     [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
-    // Convert to hex string
     [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
-    // TODO: Serialize control points....
-    // lut: channelSetting.lut?.join(":"),
+    [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
+    [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.join(":"),
+    // Note that Lut is not saved here, as it is expected as user input and is redundant with
+    // the control points and ramp.
   };
 }
 
@@ -464,12 +589,13 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseStringLevels(params[ViewerStateKeys.Levels]),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], 0, 255),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
     time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
     renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
+    cameraTransform: parseCameraTransform(params[ViewerStateKeys.CameraTransform]),
   };
 
   // Handle viewmode, since they use different mappings
@@ -513,6 +639,9 @@ export function serializeViewerState(state: Partial<ViewerState>): ViewerStatePa
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
+    // All CameraTransform properties will be provided when serializing viewer state
+    [ViewerStateKeys.CameraTransform]:
+      state.cameraTransform && serializeCameraTransform(state.cameraTransform as CameraTransform),
   };
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
