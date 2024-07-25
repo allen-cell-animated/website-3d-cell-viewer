@@ -31,7 +31,8 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     duration: 2,
   });
 
-  // location.pathname will include up to `.../viewer`
+  // location.pathname (under browser routing) will include up to `.../viewer`
+  // /viewer/ is missing with hash routing.
   const baseUrl = location.protocol + "//" + location.host + location.pathname + "#/viewer/";
   const paramProps = {
     ...props,
