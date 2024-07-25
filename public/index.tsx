@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, createHashRouter, RouterProvider } from "react-router-dom";
 
 // Components
 import AppWrapper from "../website/components/AppWrapper";
@@ -42,7 +42,7 @@ const routes = [
   },
 ];
 
-const router = createBrowserRouter(routes, { basename: basename });
+const router = createHashRouter(routes, { basename: basename });
 
 ReactDOM.render(
   <StyleProvider>

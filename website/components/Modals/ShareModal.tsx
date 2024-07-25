@@ -28,8 +28,8 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     duration: 2,
   });
 
-  // location.pathname will include up to `.../viewer`
-  const baseUrl = location.protocol + "//" + location.host + location.pathname;
+  // location.pathname (under normal routing) will include up to `.../viewer`
+  const baseUrl = location.protocol + "//" + location.host + location.pathname + "#/viewer/";
   let serializedViewerParams = serializeViewerUrlParams(props) as Record<string, string>;
 
   if (props.appProps.imageUrl) {
