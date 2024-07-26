@@ -14,6 +14,7 @@ import {
   deserializeViewerState,
   ViewerStateParams,
   serializeViewerUrlParams,
+  CONTROL_POINTS_REGEX,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
@@ -31,6 +32,23 @@ const defaultSettings: ViewerChannelSetting = {
 };
 
 //// VALUE PARSING ///////////////////////////////////////
+
+describe("CONTROL_POINTS_REGEX", () => {
+  it("accepts single control points", () => {
+    const data = "1:0.5:ffffff";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts multiple control points", () => {
+    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts negative numbers", () => {
+    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+});
 
 describe("parseKeyValueList", () => {
   it("returns expected key value pairs", () => {
@@ -183,7 +201,10 @@ describe("Channel state serialization", () => {
     colorizeEnabled: true,
     colorizeAlpha: 0.5,
     useControlPoints: false,
-    controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
+    controlPoints: [
+      { x: 0, opacity: 0.5, color: [255, 255, 255] },
+      { x: 255, opacity: 1.0, color: [255, 255, 255] },
+    ],
     ramp: [0, 255],
   };
   const DEFAULT_SERIALIZED_CHANNEL_STATE: ViewerChannelSettingParams = {
@@ -194,7 +215,9 @@ describe("Channel state serialization", () => {
     isa: "0.75",
     clz: "1",
     cza: "0.5",
-    // TODO: include LUT and name
+    cpe: "0",
+    cps: "0:0.5:ffffff,255:1:ffffff",
+    rmp: "0:255",
   };
 
   // Note that the serialization + deserialization are NOT direct inverses.
@@ -317,7 +340,7 @@ describe("Channel state serialization", () => {
         controlPoints: [],
         ramp: [0, 255],
       };
-      const serializedCustomChannelState: ViewerChannelSettingParams = {
+      const serializedCustomChannelState: Required<Omit<ViewerChannelSettingParams, "lut">> = {
         col: "03ff9d",
         ven: "0",
         sen: "0",
@@ -325,6 +348,9 @@ describe("Channel state serialization", () => {
         isa: "0.54",
         clz: "0",
         cza: "1",
+        cpe: "0",
+        cps: "",
+        rmp: "0:255",
       };
       expect(serializeViewerChannelSetting(customChannelState)).toEqual(serializedCustomChannelState);
     });
@@ -658,8 +684,11 @@ describe("serializeViewerUrlParams", () => {
         colorizeEnabled: true,
         colorizeAlpha: 0.5,
         useControlPoints: false,
-        controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
-        ramp: [0, 255],
+        controlPoints: [
+          { x: 0, opacity: 0, color: [128, 128, 128] },
+          { x: 1, opacity: 1, color: [255, 0, 0] },
+        ],
+        ramp: [-10, 260.1],
       },
       {
         name: "channel1",
@@ -670,33 +699,44 @@ describe("serializeViewerUrlParams", () => {
         opacity: 0.0,
         colorizeEnabled: false,
         colorizeAlpha: 0.2,
-        useControlPoints: false,
-        controlPoints: [{ x: 0, opacity: 0.5, color: [255, 255, 255] }],
-        ramp: [0, 255],
+        useControlPoints: true,
+        controlPoints: [
+          { x: -10, opacity: 0, color: [0, 0, 0] },
+          { x: 50, opacity: 0, color: [0, 0, 0] },
+          { x: 100, opacity: 0.3, color: [0, 16, 255] },
+          { x: 140, opacity: 0.8, color: [0, 255, 255] },
+          { x: 260, opacity: 1.0, color: [0, 255, 180] },
+        ],
+        ramp: [50, 140],
       },
     ];
     const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
     // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
     // is not guaranteed. Parse the string and check that the values match the expected values.
-    const expectedChannel0 = {
+    // Note that `lut` is not included when serializing from existing viewer state.
+    const expectedChannel0: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "1",
       col: "ff0000",
       clz: "1",
       cza: "0.5",
       isa: "0.75",
-      // lut: "0:255",
       sen: "1",
       isv: "128",
+      rmp: "-10:260.1",
+      cps: "0:0:808080,1:1:ff0000",
+      cpe: "0",
     };
-    const expectedChannel1 = {
+    const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "0",
       col: "808080",
       clz: "0",
       cza: "0.2",
       isa: "0",
-      // lut: "0:255",
       sen: "0",
       isv: "57",
+      rmp: "50:140",
+      cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
+      cpe: "1",
     };
 
     expect(serialized["c0"]).toBeDefined();
