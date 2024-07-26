@@ -1,4 +1,5 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
+import { ControlPoint } from "@aics/volume-viewer";
 
 import type {
   ChannelState,
@@ -14,7 +15,6 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
-import { ControlPoint } from "@aics/volume-viewer";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -35,7 +35,7 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
  * Matches a comma-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
-export const CONTROL_POINTS_REGEX = /^(-?[-0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
@@ -451,7 +451,6 @@ function parseControlPoints(controlPoints: string | undefined): ControlPoint[] |
   const newControlPoints = controlPoints.split(",").map((cp) => {
     const [x, opacity, color] = cp.split(":");
     return {
-      // TODO: Is there an expected range of values for x?
       x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
       color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
