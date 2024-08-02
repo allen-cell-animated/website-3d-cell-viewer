@@ -16,6 +16,27 @@ function getDefaultLut(histogram: Histogram): Lut {
   const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
   return new Lut().createFromMinMax(hmin, hmax);
 }
+
+/**
+ * Parses a single LUT value from a string, where the value is either a number, a percentile, or a median multiplier.
+ */
+function parseLutValue(value: string, histogram: Histogram): number {
+  // look at first char of string.
+  const firstChar = value.charAt(0);
+  if (firstChar === "m") {
+    // median
+    const parsedValue = parseFloat(value.substring(1)) / 100.0;
+    return histogram.maxBin * parsedValue;
+  } else if (firstChar === "p") {
+    // percentile
+    const parsedValue = parseFloat(value.substring(1)) / 100.0;
+    return histogram.findBinOfPercentile(parsedValue);
+  } else {
+    // plain number
+    return parseFloat(value);
+  }
+}
+
 /**
  * Parses a lookup table (LUT) from a `ViewerChannelSetting` object, where the `lut` field is an
  * array of two alphanumeric strings.
@@ -42,27 +63,12 @@ export function parseLutFromSettings(histogram: Histogram, initSettings: ViewerC
     return undefined;
   }
 
-  let lutValues = [0, 0];
-  for (let i = 0; i < 2; ++i) {
-    const lstr = initSettings.lut[i];
-    if (lstr === "autoij") {
-      lutValues = histogram.findAutoIJBins();
-      break;
-    }
-
-    // look at first char of string.
-    const firstChar = lstr.charAt(0);
-    if (firstChar === "m") {
-      const value = parseFloat(lstr.substring(1)) / 100.0;
-      lutValues[i] = histogram.maxBin * value;
-    } else if (firstChar === "p") {
-      const value = parseFloat(lstr.substring(1)) / 100.0;
-      lutValues[i] = histogram.findBinOfPercentile(value);
-    } else {
-      lutValues[i] = parseFloat(lstr);
-    }
-  } // end for
-
+  let lutValues: [number, number];
+  if (initSettings.lut[0] === "autoij" || initSettings.lut[1] === "autoij") {
+    lutValues = histogram.findAutoIJBins();
+  } else {
+    lutValues = [parseLutValue(initSettings.lut[0], histogram), parseLutValue(initSettings.lut[1], histogram)];
+  }
   return new Lut().createFromMinMax(Math.min(lutValues[0], lutValues[1]), Math.max(lutValues[0], lutValues[1]));
 }
 
@@ -105,7 +111,7 @@ export function initializeLut(
   }
   // Initialize the control points + ramp using the LUT.
   // Optionally, override the LUT's control points with the provided control points and/or ramp.
-  controlPoints = initSettings?.controlPoints ? initSettings.controlPoints : [...lut.controlPoints];
+  controlPoints = initSettings?.controlPoints ?? [...lut.controlPoints];
   ramp = initSettings?.ramp ? rampToControlPoints(initSettings.ramp) : [...lut.controlPoints];
 
   // Apply whatever lut is currently visible
