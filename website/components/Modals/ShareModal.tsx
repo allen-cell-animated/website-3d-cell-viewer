@@ -35,8 +35,9 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
   const paramProps = {
     ...props,
-    cameraTransform: props.view3dRef?.current?.getCameraTransform(),
+    cameraState: props.view3dRef?.current?.getCameraState(),
   };
+  console.log(paramProps.cameraState);
   let serializedViewerParams = serializeViewerUrlParams(paramProps) as Record<string, string>;
 
   if (props.appProps.imageUrl) {

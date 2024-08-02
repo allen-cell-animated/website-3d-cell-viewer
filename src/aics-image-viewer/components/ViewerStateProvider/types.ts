@@ -1,4 +1,4 @@
-import { CameraTransform, ControlPoint } from "@aics/volume-viewer";
+import { CameraState, ControlPoint } from "@aics/volume-viewer";
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
@@ -26,7 +26,7 @@ export interface ViewerState {
   // This state is active in x,y,z single slice modes.
   slice: PerAxis<number>;
   time: number;
-  cameraTransform: Partial<CameraTransform> | undefined;
+  cameraState: Partial<CameraState> | undefined;
 }
 
 export type ViewerStateKey = keyof ViewerState;

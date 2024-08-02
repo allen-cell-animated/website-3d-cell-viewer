@@ -14,7 +14,7 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
-import { CameraTransform, ControlPoint } from "@aics/volume-viewer";
+import { CameraState, ControlPoint } from "@aics/volume-viewer";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -58,7 +58,7 @@ export enum ViewerStateKeys {
   Region = "reg",
   Slice = "slice",
   Time = "t",
-  CameraTransform = "cam",
+  CameraState = "cam",
 }
 
 export enum CameraTransformKeys {
@@ -68,10 +68,10 @@ export enum CameraTransformKeys {
   Target = "tar",
   /** The up vector of the camera. Will be normalized to magnitude of 1. */
   Up = "up",
-  /** Euler rotation in radians. */
-  Rotation = "rot",
-  /** Scale factor for the X, Y, and Z orthographic cameras. */
-  OrthoScales = "ort",
+  /** Scale factor for orthographic cameras. */
+  OrthoScale = "ort",
+  /** Vertical FOV of the camera view frustum, from top to bottom, in degrees. */
+  Fov = "fov",
 }
 
 /**
@@ -216,7 +216,7 @@ export class ViewerStateParams {
    * All values are an array of three floats, separated by commas and
    * encoded using `encodeURIComponent`.
    */
-  [ViewerStateKeys.CameraTransform]?: string = undefined;
+  [ViewerStateKeys.CameraState]?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -323,10 +323,14 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
-export function objectToKeyValueList(obj: Record<string, string>): string {
+export function objectToKeyValueList(obj: Record<string, string | undefined>): string {
   const keyValuePairs: string[] = [];
   for (const key in obj) {
-    keyValuePairs.push(`${encodeURIComponent(key)}:${encodeURIComponent(obj[key].trim())}`);
+    const value = obj[key];
+    if (value === undefined) {
+      continue;
+    }
+    keyValuePairs.push(`${encodeURIComponent(key)}:${encodeURIComponent(value.trim())}`);
   }
   return keyValuePairs.join(",");
 }
@@ -474,29 +478,29 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
-function parseCameraTransform(cameraSettings: string | undefined): Partial<CameraTransform> | undefined {
+function parseCameraState(cameraSettings: string | undefined): Partial<CameraState> | undefined {
   if (!cameraSettings) {
     return undefined;
   }
   const parsedCameraSettings = parseKeyValueList(cameraSettings);
-  const result: Partial<CameraTransform> = {
+  const result: Partial<CameraState> = {
     position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
     target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
     up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
-    rotation: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Rotation]),
     // Orthographic scales cannot be negative
-    orthoScales: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.OrthoScales], 0, Infinity),
+    orthoScale: parseStringFloat(parsedCameraSettings[CameraTransformKeys.OrthoScale], 0, Infinity),
+    fov: parseStringFloat(parsedCameraSettings[CameraTransformKeys.Fov], 0, 180),
   };
   return removeUndefinedProperties(result);
 }
 
-function serializeCameraTransform(cameraTransform: CameraTransform): string {
+function serializeCameraState(cameraState: CameraState): string {
   return objectToKeyValueList({
-    [CameraTransformKeys.Position]: cameraTransform.position.join(","),
-    [CameraTransformKeys.Target]: cameraTransform.target.join(","),
-    [CameraTransformKeys.Up]: cameraTransform.up.join(","),
-    [CameraTransformKeys.Rotation]: cameraTransform.rotation.join(","),
-    [CameraTransformKeys.OrthoScales]: cameraTransform.orthoScales.join(","),
+    [CameraTransformKeys.Position]: cameraState.position.join(","),
+    [CameraTransformKeys.Target]: cameraState.target.join(","),
+    [CameraTransformKeys.Up]: cameraState.up.join(","),
+    [CameraTransformKeys.OrthoScale]: cameraState.orthoScale?.toString(),
+    [CameraTransformKeys.Fov]: cameraState.fov?.toString(),
   });
 }
 
@@ -595,7 +599,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
     time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
     renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
-    cameraTransform: parseCameraTransform(params[ViewerStateKeys.CameraTransform]),
+    cameraState: parseCameraState(params[ViewerStateKeys.CameraState]),
   };
 
   // Handle viewmode, since they use different mappings
@@ -640,8 +644,7 @@ export function serializeViewerState(state: Partial<ViewerState>): ViewerStatePa
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
     // All CameraTransform properties will be provided when serializing viewer state
-    [ViewerStateKeys.CameraTransform]:
-      state.cameraTransform && serializeCameraTransform(state.cameraTransform as CameraTransform),
+    [ViewerStateKeys.CameraState]: state.cameraState && serializeCameraState(state.cameraState as CameraState),
   };
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
@@ -813,6 +816,8 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
     args = { ...args, ...datasetArgs };
   }
 
+  console.log("args", args);
+  console.log("viewer settings", viewerSettings);
   return { args: removeUndefinedProperties(args), viewerSettings: removeUndefinedProperties(viewerSettings) };
 }
 

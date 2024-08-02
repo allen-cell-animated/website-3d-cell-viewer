@@ -123,7 +123,7 @@ const defaultViewerSettings: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-  cameraTransform: undefined,
+  cameraState: undefined,
 };
 
 const DEFAULT_CHANNEL_STATE: ChannelState = {
@@ -600,8 +600,8 @@ const App: React.FC<AppProps> = (props) => {
 
   useImageEffect((_currentImage) => {
     // Set camera transform on initial load only
-    if (viewerSettings.cameraTransform) {
-      view3d.setCameraTransform(viewerSettings.cameraTransform);
+    if (viewerSettings.cameraState) {
+      view3d.setCameraState(viewerSettings.cameraState);
     }
   }, []);
 
