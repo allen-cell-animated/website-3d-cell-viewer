@@ -37,7 +37,6 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     ...props,
     cameraState: props.view3dRef?.current?.getCameraState(),
   };
-  console.log(paramProps.cameraState);
   let serializedViewerParams = serializeViewerUrlParams(paramProps) as Record<string, string>;
 
   if (props.appProps.imageUrl) {
