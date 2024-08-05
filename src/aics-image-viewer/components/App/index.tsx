@@ -278,7 +278,14 @@ const App: React.FC<AppProps> = (props) => {
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
     loader.current?.syncMultichannelLoading(axis ? true : false);
     if (image) {
-      view3d.setScaleLevelBias(image, axis ? 1 : 0);
+      if (axis === null) {
+        // Playback has stopped - reset scale level bias
+        view3d.setScaleLevelBias(image, 0);
+      } else {
+        // Playback has started - decide whether to lower the scale level to speed up loading
+        const shouldDownlevel = axis === "t" || numSlices[axis] !== numSlicesLoaded[axis];
+        view3d.setScaleLevelBias(image, shouldDownlevel ? 1 : 0);
+      }
     }
     setPlayingAxis(axis);
   };
