@@ -792,7 +792,6 @@ const App: React.FC<AppProps> = (props) => {
             />
             <CellViewerCanvasWrapper
               view3d={view3d}
-              hasImage={!!image}
               image={image}
               loadingImage={sendingQueryRequest}
               numSlices={numSlices}
