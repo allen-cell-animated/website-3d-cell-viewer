@@ -1,5 +1,5 @@
 import React from "react";
-import { View3d } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/volume-viewer";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
@@ -19,7 +19,7 @@ interface ViewerWrapperProps {
   loadingImage: boolean;
   appHeight: string;
   hasImage: boolean;
-  imageName: string | undefined;
+  image: Volume | null;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
   playControls: PlayControls;
@@ -91,7 +91,7 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
           {visibleControls.axisClipSliders && this.props.hasImage && (
             <AxisClipSliders
               mode={viewMode}
-              imageName={this.props.imageName}
+              image={this.props.image}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
               numSlicesLoaded={this.props.numSlicesLoaded}
