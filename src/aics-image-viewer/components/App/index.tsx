@@ -282,7 +282,7 @@ const App: React.FC<AppProps> = (props) => {
         // Playback has stopped - reset scale level bias
         view3d.setScaleLevelBias(image, 0);
       } else {
-        // Playback has started - decide whether to lower the scale level to speed up loading
+        // Playback has started - unless entire axis is in memory (typical in X and Y), downlevel to speed things up
         const shouldDownlevel = axis === "t" || numSlices[axis] !== numSlicesLoaded[axis];
         view3d.setScaleLevelBias(image, shouldDownlevel ? 1 : 0);
       }
