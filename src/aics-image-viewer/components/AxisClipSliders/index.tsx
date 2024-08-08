@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Tooltip } from "antd";
 import { CaretRightOutlined, PauseOutlined } from "@ant-design/icons";
+import { Volume } from "@aics/volume-viewer";
 
 import NumericInput from "../shared/NumericInput";
 import SmarterSlider from "../shared/SmarterSlider";
@@ -163,6 +164,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
 
 type AxisClipSlidersProps = {
   mode: ViewMode;
+  image: Volume | null;
   changeViewerSetting: ViewerSettingUpdater;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
@@ -206,7 +208,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
   };
 
   // Pause when view mode or volume size has changed
-  useEffect(() => props.playControls.pause(), [props.mode, ...Object.values(props.numSlices)]);
+  useEffect(() => props.playControls.pause(), [props.mode, props.image]);
 
   const handlePlayPause = (axis: AxisName | "t", willPlay: boolean): void => {
     if (willPlay) {

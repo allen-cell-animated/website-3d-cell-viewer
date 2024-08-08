@@ -1,5 +1,5 @@
 import React from "react";
-import { View3d } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/volume-viewer";
 import { LoadingOutlined } from "@ant-design/icons";
 
 import { AxisName, PerAxis, Styles } from "../../shared/types";
@@ -18,7 +18,7 @@ interface ViewerWrapperProps {
   view3d: View3d;
   loadingImage: boolean;
   appHeight: string;
-  hasImage: boolean;
+  image: Volume | null;
   numSlices: PerAxis<number>;
   numSlicesLoaded: PerAxis<number>;
   playControls: PlayControls;
@@ -68,7 +68,7 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
     ) : null;
 
     const noImageText =
-      !this.props.loadingImage && !this.props.hasImage ? <div style={STYLES.noImage}>No image selected</div> : null;
+      !this.props.loadingImage && !this.props.image ? <div style={STYLES.noImage}>No image selected</div> : null;
     if (!!noImageText && this.props.view3d) {
       this.props.view3d.removeAllVolumes();
     }
@@ -87,9 +87,10 @@ class ViewerWrapper extends React.Component<ViewerWrapperProps, ViewerWrapperSta
           onVisibleChange={(visible) => this.props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1)}
           onVisibleChangeEnd={this.props.onClippingPanelVisibleChangeEnd}
         >
-          {visibleControls.axisClipSliders && this.props.hasImage && (
+          {visibleControls.axisClipSliders && !!this.props.image && (
             <AxisClipSliders
               mode={viewMode}
+              image={this.props.image}
               changeViewerSetting={changeViewerSetting}
               numSlices={numSlices}
               numSlicesLoaded={this.props.numSlicesLoaded}
