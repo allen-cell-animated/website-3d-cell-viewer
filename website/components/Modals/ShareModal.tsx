@@ -11,9 +11,12 @@ import {
 } from "../../../src/aics-image-viewer/components/ViewerStateProvider";
 import { ViewerStateContextType } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { serializeViewerUrlParams } from "../../utils/url_utils";
+import { View3d } from "@aics/volume-viewer";
 
 type ShareModalProps = {
   appProps: AppDataProps;
+  // Used to retrieve the current camera position information
+  view3dRef?: React.RefObject<View3d | null>;
 } & ViewerStateContextType;
 
 const ModalContainer = styled.div``;
@@ -30,7 +33,11 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
 
   // location.pathname will include up to `.../viewer`
   const baseUrl = location.protocol + "//" + location.host + location.pathname;
-  let serializedViewerParams = serializeViewerUrlParams(props) as Record<string, string>;
+  const paramProps = {
+    ...props,
+    cameraState: props.view3dRef?.current?.getCameraState(),
+  };
+  let serializedViewerParams = serializeViewerUrlParams(paramProps) as Record<string, string>;
 
   if (props.appProps.imageUrl) {
     let serializedUrl;

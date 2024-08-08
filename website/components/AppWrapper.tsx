@@ -10,6 +10,7 @@ import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { AppDataProps } from "../types";
 import { parseViewerUrlParams } from "../utils/url_utils";
+import { View3d } from "@aics/volume-viewer";
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
@@ -37,6 +38,7 @@ export default function AppWrapper(): ReactElement {
   const location = useLocation();
   const navigation = useNavigate();
 
+  const view3dRef = React.useRef<View3d | null>(null);
   const [viewerSettings, setViewerSettings] = useState<Partial<ViewerState>>({});
   const [viewerProps, setViewerProps] = useState<AppDataProps | null>(null);
   const [searchParams] = useSearchParams();
@@ -94,13 +96,18 @@ export default function AppWrapper(): ReactElement {
           <FlexRowAlignCenter $gap={12}>
             <FlexRowAlignCenter $gap={2}>
               <LoadModal onLoad={onLoad} />
-              {viewerProps && <ShareModal appProps={viewerProps} />}
+              {viewerProps && <ShareModal appProps={viewerProps} view3dRef={view3dRef} />}
             </FlexRowAlignCenter>
             <HelpDropdown />
           </FlexRowAlignCenter>
         </Header>
         {viewerProps && (
-          <ImageViewerApp {...viewerProps} appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`} canvasMargin="0 0 0 0" />
+          <ImageViewerApp
+            {...viewerProps}
+            appHeight={`calc(100vh - ${HEADER_HEIGHT_PX}px)`}
+            canvasMargin="0 0 0 0"
+            view3dRef={view3dRef}
+          />
         )}
       </ViewerStateProvider>
     </div>
