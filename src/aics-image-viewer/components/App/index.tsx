@@ -283,6 +283,16 @@ const App: React.FC<AppProps> = (props) => {
   playControls.onPlayingAxisChanged = (axis) => {
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
     loader.current?.syncMultichannelLoading(axis ? true : false);
+    if (image) {
+      if (axis === null) {
+        // Playback has stopped - reset scale level bias
+        view3d.setScaleLevelBias(image, 0);
+      } else {
+        // Playback has started - unless entire axis is in memory (typical in X and Y), downlevel to speed things up
+        const shouldDownlevel = axis === "t" || numSlices[axis] !== numSlicesLoaded[axis];
+        view3d.setScaleLevelBias(image, shouldDownlevel ? 1 : 0);
+      }
+    }
     setPlayingAxis(axis);
   };
 
@@ -794,7 +804,7 @@ const App: React.FC<AppProps> = (props) => {
             />
             <CellViewerCanvasWrapper
               view3d={view3d}
-              hasImage={!!image}
+              image={image}
               loadingImage={sendingQueryRequest}
               numSlices={numSlices}
               numSlicesLoaded={numSlicesLoaded}
