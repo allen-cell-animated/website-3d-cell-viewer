@@ -1,4 +1,4 @@
-import { Channel, ControlPoint, Histogram, Lut, Volume } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Histogram, Lut, Volume, remapControlPoints } from "@aics/volume-viewer";
 import { findFirstChannelMatch, ViewerChannelSetting, ViewerChannelSettings } from "./viewerChannelSettings";
 import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
 import { TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../../components/TfEditor";
@@ -154,8 +154,5 @@ export function remapControlPointsForChannel(
     return controlPoints;
   }
 
-  // TODO: this creates a redundant Uint8Array and algorithmically fills it twice. Can we avoid this?
-  const remapLut = new Lut().createFromControlPoints(controlPoints);
-  remapLut.remapDomains(oldRange[0], oldRange[1], rawMin, rawMax);
-  return remapLut.controlPoints;
+  return remapControlPoints(controlPoints, oldRange[0], oldRange[1], rawMin, rawMax);
 }
