@@ -118,7 +118,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  const resetChannelsToDefaults = () => {
+  const resetChannelsToDefaults = (): void => {
     // Enable the first three volumes and leave the name unchanged
     const channelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
     channelSettings.forEach((channelSetting, index) => {

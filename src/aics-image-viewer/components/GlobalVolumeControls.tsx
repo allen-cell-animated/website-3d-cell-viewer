@@ -53,7 +53,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
 
   const { visibleControls: showControls, maskAlpha, brightness, density, levels } = props;
 
-  const resetToDefaults = () => {
+  const resetToDefaults = (): void => {
     props.changeViewerSetting("maskAlpha", ALPHA_MASK_SLIDER_DEFAULT);
     props.changeViewerSetting("brightness", BRIGHTNESS_SLIDER_LEVEL_DEFAULT);
     props.changeViewerSetting("density", DENSITY_SLIDER_LEVEL_DEFAULT);
