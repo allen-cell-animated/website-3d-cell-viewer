@@ -49,6 +49,7 @@ import {
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
+  TFEDITOR_MAX_BIN,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 
@@ -59,7 +60,6 @@ import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
-import { TFEDITOR_MAX_BIN } from "../TfEditor";
 
 import "../../assets/styles/globals.css";
 import {

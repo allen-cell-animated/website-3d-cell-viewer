@@ -1,7 +1,6 @@
 import { Channel, ControlPoint, Histogram, Lut, Volume, remapControlPoints } from "@aics/volume-viewer";
 import { findFirstChannelMatch, ViewerChannelSetting, ViewerChannelSettings } from "./viewerChannelSettings";
-import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE } from "../constants";
-import { TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../../components/TfEditor";
+import { LUT_MAX_PERCENTILE, LUT_MIN_PERCENTILE, TFEDITOR_DEFAULT_COLOR, TFEDITOR_MAX_BIN } from "../constants";
 
 // @param {Object[]} controlPoints - array of {x:number, opacity:number, color:string}
 // @return {Uint8Array} array of length 256*4 representing the rgba values of the gradient

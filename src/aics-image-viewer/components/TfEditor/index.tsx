@@ -6,7 +6,12 @@ import { Button, Checkbox, InputNumber, Tooltip } from "antd";
 import "nouislider/distribute/nouislider.css";
 
 import SliderRow from "../shared/SliderRow";
-import { LUT_MIN_PERCENTILE, LUT_MAX_PERCENTILE } from "../../shared/constants";
+import {
+  LUT_MIN_PERCENTILE,
+  LUT_MAX_PERCENTILE,
+  TFEDITOR_DEFAULT_COLOR,
+  TFEDITOR_MAX_BIN,
+} from "../../shared/constants";
 import {
   ColorArray,
   colorArrayToObject,
@@ -18,9 +23,6 @@ import { useRefWithSetter } from "../../shared/utils/hooks";
 import type { SingleChannelSettingUpdater } from "../ViewerStateProvider/types";
 
 import "./styles.css";
-
-export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
-export const TFEDITOR_MAX_BIN = 255;
 
 /**The color picker opens next to control points like a context menu. This constant gives it a bit of space. */
 const TFEDITOR_COLOR_PICKER_MARGIN_X_PX = 2;

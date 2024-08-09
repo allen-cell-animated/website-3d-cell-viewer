@@ -1,3 +1,5 @@
+import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
+import { ViewMode, RenderMode, ImageType } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
 
 // Add all exported constants here to prevent circular dependencies
@@ -20,6 +22,9 @@ export const // Control panel will automatically close if viewport is less than 
   INTERPOLATION_ENABLED_DEFAULT = true,
   OTHER_CHANNEL_KEY = "Other",
   SINGLE_GROUP_CHANNEL_KEY = "Channels";
+
+export const TFEDITOR_DEFAULT_COLOR: ColorArray = [255, 255, 255];
+export const TFEDITOR_MAX_BIN = 255;
 
 export const CACHE_MAX_SIZE = 1_000_000_000;
 export const QUEUE_MAX_SIZE = 10;
@@ -87,3 +92,36 @@ export const PRESET_COLOR_MAP = Object.freeze([
     name: "White structure",
   },
 ]);
+
+export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
+  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
+  imageType: ImageType.segmentedCell,
+  showAxes: false,
+  showBoundingBox: false,
+  backgroundColor: BACKGROUND_COLOR_DEFAULT,
+  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
+  autorotate: false,
+  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
+  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  density: DENSITY_SLIDER_LEVEL_DEFAULT,
+  levels: LEVELS_SLIDER_DEFAULT,
+  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
+  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
+  slice: { x: 0.5, y: 0.5, z: 0.5 },
+  time: 0,
+};
+
+export const DEFAULT_CHANNEL_STATE: ChannelState = {
+  name: "",
+  volumeEnabled: false,
+  isosurfaceEnabled: false,
+  colorizeEnabled: false,
+  colorizeAlpha: 1.0,
+  isovalue: 128,
+  opacity: 1.0,
+  color: [226, 205, 179] as ColorArray,
+  useControlPoints: false,
+  ramp: [0, TFEDITOR_MAX_BIN],
+  controlPoints: [],
+};
