@@ -123,5 +123,8 @@ export const DEFAULT_CHANNEL_STATE: ChannelState = {
   color: [226, 205, 179] as ColorArray,
   useControlPoints: false,
   ramp: [0, TFEDITOR_MAX_BIN],
-  controlPoints: [],
+  controlPoints: [
+    { x: 0, opacity: 0, color: [255, 255, 255] },
+    { x: 255, opacity: 1, color: [255, 255, 255] },
+  ],
 };

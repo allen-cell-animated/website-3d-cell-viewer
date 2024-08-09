@@ -1,10 +1,16 @@
 import React, { useState, useCallback } from "react";
 import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { Channel } from "@aics/volume-viewer";
+import { Channel, ControlPoint } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
+import {
+  DEFAULT_CHANNEL_STATE,
+  ISOSURFACE_OPACITY_SLIDER_MAX,
+  LUT_MAX_PERCENTILE,
+  LUT_MIN_PERCENTILE,
+  TFEDITOR_MAX_BIN,
+} from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 
 import "./styles.css";
@@ -85,6 +91,41 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </div>
   );
 
+  /**
+   * Resets currently visible settings for this channel to their defaults.
+   */
+  const resetChannelToDefaults = (): void => {
+    // Only modify settings that are currently visible to the user.
+    if (props.channelState.volumeEnabled) {
+      // Copied from Auto98XF example in TFEditor
+      const histogram = props.channelDataForChannel.histogram;
+      const hmin = histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
+      const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
+
+      if (props.channelState.useControlPoints) {
+        const controlPoints: ControlPoint[] = [
+          { x: Math.min(hmin - 1, 0), opacity: 0, color: [255, 255, 255] },
+          { x: hmin, opacity: 0, color: [255, 255, 255] },
+          { x: hmax, opacity: 1, color: [255, 255, 255] },
+          { x: Math.max(hmax + 1, TFEDITOR_MAX_BIN), opacity: 1, color: [255, 255, 255] },
+        ];
+        props.changeChannelSetting(index, "controlPoints", controlPoints);
+      } else {
+        const ramp: [number, number] = [hmin, hmax];
+        props.changeChannelSetting(index, "ramp", ramp);
+      }
+
+      if (props.channelState.colorizeEnabled) {
+        props.changeChannelSetting(index, "colorizeAlpha", DEFAULT_CHANNEL_STATE.colorizeAlpha);
+      }
+    }
+
+    if (props.channelState.isosurfaceEnabled) {
+      props.changeChannelSetting(index, "isovalue", DEFAULT_CHANNEL_STATE.isovalue);
+      props.changeChannelSetting(index, "opacity", DEFAULT_CHANNEL_STATE.opacity);
+    }
+  };
+
   const createTFEditor = (): React.ReactNode => {
     const { controlPoints, colorizeEnabled, colorizeAlpha, useControlPoints, ramp } = channelState;
     return (
@@ -144,6 +185,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
             {renderSurfaceControls()}
           </>
         )}
+        <div style={{ marginTop: "15px" }}>
+          <Button onClick={resetChannelToDefaults}>Reset to defaults</Button>
+        </div>
       </>
     );
   };
