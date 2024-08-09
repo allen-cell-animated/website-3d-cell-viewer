@@ -815,8 +815,6 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
     args = { ...args, ...datasetArgs };
   }
 
-  console.log("args", args);
-  console.log("viewer settings", viewerSettings);
   return { args: removeUndefinedProperties(args), viewerSettings: removeUndefinedProperties(viewerSettings) };
 }
 

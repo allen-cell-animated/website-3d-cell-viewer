@@ -450,6 +450,18 @@ describe("Viewer state serialization", () => {
     it("serializes custom viewer settings", () => {
       expect(serializeViewerState(CUSTOM_VIEWER_STATE)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
+
+    it("deserializes partial camera settings", () => {
+      const state: Partial<ViewerState> = {
+        cameraState: {
+          position: [1.0, -1.4, 45],
+          up: [0, 1, 0],
+          fov: 43.5,
+        },
+      };
+      const serializedState = "pos:1%2C-1.4%2C45,up:0%2C1%2C0,fov:43.5";
+      expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
+    });
   });
 
   describe("deserializeViewerState", () => {

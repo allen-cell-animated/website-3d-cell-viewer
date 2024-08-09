@@ -1,9 +1,9 @@
 import type { RawArrayData, RawArrayInfo, View3d, Volume } from "@aics/volume-viewer";
+import { MutableRefObject } from "react";
 
 import type { MetadataRecord } from "../../shared/types";
 import type { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 import type { ViewerState } from "../ViewerStateProvider/types";
-import { MutableRefObject } from "react";
 
 /** `typeof useEffect`, but the effect handler takes a `Volume` as an argument */
 export type UseImageEffectType = (effect: (image: Volume) => void | (() => void), deps: React.DependencyList) => void;
