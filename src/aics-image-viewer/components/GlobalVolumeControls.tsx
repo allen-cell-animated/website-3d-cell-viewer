@@ -1,9 +1,16 @@
 import React from "react";
-import { Checkbox } from "antd";
+import { Button, Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
 import { connectToViewerState } from "./ViewerStateProvider";
 import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
+import {
+  ALPHA_MASK_SLIDER_DEFAULT,
+  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
+  DENSITY_SLIDER_LEVEL_DEFAULT,
+  INTERPOLATION_ENABLED_DEFAULT,
+  LEVELS_SLIDER_DEFAULT,
+} from "../shared/constants";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
@@ -46,6 +53,14 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
 
   const { visibleControls: showControls, maskAlpha, brightness, density, levels } = props;
 
+  const resetToDefaults = () => {
+    props.changeViewerSetting("maskAlpha", ALPHA_MASK_SLIDER_DEFAULT);
+    props.changeViewerSetting("brightness", BRIGHTNESS_SLIDER_LEVEL_DEFAULT);
+    props.changeViewerSetting("density", DENSITY_SLIDER_LEVEL_DEFAULT);
+    props.changeViewerSetting("levels", LEVELS_SLIDER_DEFAULT);
+    props.changeViewerSetting("interpolationEnabled", INTERPOLATION_ENABLED_DEFAULT);
+  };
+
   return (
     <div style={{ paddingTop: 18, paddingBottom: 22 }}>
       {showControls.alphaMaskSlider && createSliderRow("mask cell", maskAlpha, 100, "maskAlpha")}
@@ -60,6 +75,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
           />
         </SliderRow>
       )}
+      <Button onClick={resetToDefaults}>Reset to defaults</Button>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { find } from "lodash";
-import { Collapse, CollapseProps, List } from "antd";
+import { Button, Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
 import type { ChannelGrouping, ViewerChannelSettings } from "../shared/utils/viewerChannelSettings";
@@ -12,6 +12,7 @@ import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
+import { DEFAULT_CHANNEL_STATE, PRESET_COLOR_MAP } from "../shared/constants";
 
 export type ChannelsWidgetProps = {
   // From parent
@@ -117,7 +118,35 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
+  const resetChannelsToDefaults = () => {
+    // Enable the first three volumes and leave the name unchanged
+    const channelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
+    channelSettings.forEach((channelSetting, index) => {
+      for (const key of channelStateKeys) {
+        if (key === "name") {
+          // Do not override name field
+          continue;
+        } else if (key === "volumeEnabled" && index < 3) {
+          // Enable volumes on the first three channels
+          props.changeChannelSetting(index, key, true);
+          continue;
+        }
+        props.changeChannelSetting(index, key, DEFAULT_CHANNEL_STATE[key]);
+      }
+    });
+
+    // Apply default color map
+    props.onApplyColorPresets(PRESET_COLOR_MAP[0].colors);
+  };
+
+  return (
+    <div>
+      <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />
+      <div style={{ padding: "20px 15px" }}>
+        <Button onClick={resetChannelsToDefaults}>Reset to defaults</Button>
+      </div>
+    </div>
+  );
 };
 
 export default connectToViewerState(ChannelsWidget, ["channelSettings", "changeChannelSetting"]);
