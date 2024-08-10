@@ -99,16 +99,12 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     // Only modify settings that are currently visible to the user.
     if (props.channelState.volumeEnabled) {
       const defaultLut = getDefaultLut(props.channelDataForChannel.histogram);
+      props.changeChannelSetting(index, "controlPoints", defaultLut.controlPoints);
+      props.changeChannelSetting(index, "ramp", controlPointsToRamp(defaultLut.controlPoints));
+      props.changeChannelSetting(index, "useControlPoints", DEFAULT_CHANNEL_STATE.useControlPoints);
 
-      if (props.channelState.useControlPoints) {
-        props.changeChannelSetting(index, "controlPoints", defaultLut.controlPoints);
-      } else {
-        props.changeChannelSetting(index, "ramp", controlPointsToRamp(defaultLut.controlPoints));
-      }
-
-      if (props.channelState.colorizeEnabled) {
-        props.changeChannelSetting(index, "colorizeAlpha", DEFAULT_CHANNEL_STATE.colorizeAlpha);
-      }
+      props.changeChannelSetting(index, "colorizeAlpha", DEFAULT_CHANNEL_STATE.colorizeAlpha);
+      props.changeChannelSetting(index, "colorizeEnabled", DEFAULT_CHANNEL_STATE.colorizeEnabled);
     }
 
     if (props.channelState.isosurfaceEnabled) {
