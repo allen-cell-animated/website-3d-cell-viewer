@@ -13,6 +13,7 @@ import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
 import { DEFAULT_CHANNEL_STATE, PRESET_COLOR_MAP } from "../shared/constants";
+import { controlPointsToRamp, getDefaultLut } from "../shared/utils/controlPointsToLut";
 
 export type ChannelsWidgetProps = {
   // From parent
@@ -118,16 +119,27 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  const resetChannelsToDefaults = (): void => {
-    // Enable the first three volumes and leave the name unchanged
-    const channelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
-    channelSettings.forEach((channelSetting, index) => {
+  const resetAllChannelsToDefaults = (): void => {
+    if (!channelDataChannels) {
+      return;
+    }
+    const allChannelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
+    const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
+
+    const channelStateKeys = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
+
+    // Reset control points and ramp for each channel
+    for (let i = 0; i < channelDataChannels.length; i++) {
+      const channelData = channelDataChannels[i];
+      const defaultLut = getDefaultLut(channelData.getHistogram());
+      props.changeChannelSetting(i, "controlPoints", defaultLut.controlPoints);
+      props.changeChannelSetting(i, "ramp", controlPointsToRamp(defaultLut.controlPoints));
+      props.changeChannelSetting(i, "useControlPoints", false);
+    }
+    // Reset all other settings. Also, enable volumes on only the first three channels.
+    channelSettings.forEach((_channelSetting, index) => {
       for (const key of channelStateKeys) {
-        if (key === "name") {
-          // Do not override name field
-          continue;
-        } else if (key === "volumeEnabled" && index < 3) {
-          // Enable volumes on the first three channels
+        if (key === "volumeEnabled" && index < 3) {
           props.changeChannelSetting(index, key, true);
           continue;
         }
@@ -143,7 +155,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     <div>
       <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />
       <div style={{ padding: "20px 15px" }}>
-        <Button onClick={resetChannelsToDefaults}>Reset to defaults</Button>
+        <Button onClick={resetAllChannelsToDefaults}>Reset all channels</Button>
       </div>
     </div>
   );

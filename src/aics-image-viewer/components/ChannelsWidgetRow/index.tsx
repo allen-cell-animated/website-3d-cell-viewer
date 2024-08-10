@@ -24,6 +24,7 @@ import {
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
+import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
 
 interface ChannelsWidgetRowProps {
   index: number;
@@ -97,22 +98,12 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const resetChannelToDefaults = (): void => {
     // Only modify settings that are currently visible to the user.
     if (props.channelState.volumeEnabled) {
-      // Copied from Auto98XF example in TFEditor
-      const histogram = props.channelDataForChannel.histogram;
-      const hmin = histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
-      const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
+      const defaultLut = getDefaultLut(props.channelDataForChannel.histogram);
 
       if (props.channelState.useControlPoints) {
-        const controlPoints: ControlPoint[] = [
-          { x: Math.min(hmin - 1, 0), opacity: 0, color: [255, 255, 255] },
-          { x: hmin, opacity: 0, color: [255, 255, 255] },
-          { x: hmax, opacity: 1, color: [255, 255, 255] },
-          { x: Math.max(hmax + 1, TFEDITOR_MAX_BIN), opacity: 1, color: [255, 255, 255] },
-        ];
-        props.changeChannelSetting(index, "controlPoints", controlPoints);
+        props.changeChannelSetting(index, "controlPoints", defaultLut.controlPoints);
       } else {
-        const ramp: [number, number] = [hmin, hmax];
-        props.changeChannelSetting(index, "ramp", ramp);
+        props.changeChannelSetting(index, "ramp", controlPointsToRamp(defaultLut.controlPoints));
       }
 
       if (props.channelState.colorizeEnabled) {

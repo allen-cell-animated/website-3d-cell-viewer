@@ -10,7 +10,7 @@ export function controlPointsToLut(controlPoints: ControlPoint[]): Lut {
 }
 
 /** Returns a default lookup table based on a min/max percentile of the current volume's data. */
-function getDefaultLut(histogram: Histogram): Lut {
+export function getDefaultLut(histogram: Histogram): Lut {
   const hmin = histogram.findBinOfPercentile(LUT_MIN_PERCENTILE);
   const hmax = histogram.findBinOfPercentile(LUT_MAX_PERCENTILE);
   return new Lut().createFromMinMax(hmin, hmax);
