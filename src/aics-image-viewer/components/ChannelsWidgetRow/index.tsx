@@ -1,20 +1,11 @@
 import React, { useState, useCallback } from "react";
 import { Button, List, Checkbox } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { Channel, ControlPoint } from "@aics/volume-viewer";
+import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-import {
-  DEFAULT_CHANNEL_STATE,
-  ISOSURFACE_OPACITY_SLIDER_MAX,
-  LUT_MAX_PERCENTILE,
-  LUT_MIN_PERCENTILE,
-  TFEDITOR_MAX_BIN,
-} from "../../shared/constants";
+import { DEFAULT_CHANNEL_STATE, ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
-
-import "./styles.css";
-
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import {
   type ChannelState,
@@ -25,6 +16,8 @@ import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
 import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
+
+import "./styles.css";
 
 interface ChannelsWidgetRowProps {
   index: number;
