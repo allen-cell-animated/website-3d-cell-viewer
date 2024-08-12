@@ -15,6 +15,7 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
+import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -407,6 +408,16 @@ function removeUndefinedProperties<T>(obj: T): Partial<T> {
   return result;
 }
 
+function removeDefaultProperties<T>(obj: Partial<T>, defaults: T): Partial<T> {
+  const result: Partial<T> = {};
+  for (const key in obj) {
+    if (obj[key] !== defaults[key]) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
 function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
   if (!region || !SLICE_REGEX.test(region)) {
     return undefined;
@@ -453,6 +464,13 @@ function formatFloat(value: number): string {
   // TODO: Make this smarter for integers, precision, etc.
   // Ideally should have a fixed max precision
   return value.toFixed(2);
+}
+
+function serializeBoolean(value: boolean | undefined): "1" | "0" | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return value ? "1" : "0";
 }
 
 function serializeControlPoints(controlPoints: ControlPoint[]): string {
@@ -540,21 +558,28 @@ export function deserializeViewerChannelSetting(
   return result;
 }
 
-export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingParams {
-  return {
-    [ViewerChannelSettingKeys.VolumeEnabled]: channelSetting.volumeEnabled ? "1" : "0",
-    [ViewerChannelSettingKeys.SurfaceEnabled]: channelSetting.isosurfaceEnabled ? "1" : "0",
-    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue.toString(),
-    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
-    [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
+export function serializeViewerChannelSetting(
+  channelSetting: Partial<ChannelState>,
+  removeDefaults = true
+): Partial<ViewerChannelSettingParams> {
+  if (removeDefaults) {
+    channelSetting = removeDefaultProperties(channelSetting, DEFAULT_CHANNEL_STATE);
+  }
+  return removeUndefinedProperties({
+    [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
+    [ViewerChannelSettingKeys.SurfaceEnabled]: serializeBoolean(channelSetting.isosurfaceEnabled),
+    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue?.toString(),
+    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity?.toString(),
+    [ViewerChannelSettingKeys.Colorize]: serializeBoolean(channelSetting.colorizeEnabled),
     [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
-    [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
-    [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
-    [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
-    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.map(formatFloat).join(":"),
+    [ViewerChannelSettingKeys.Color]: channelSetting.color && colorArrayToHex(channelSetting.color),
+    [ViewerChannelSettingKeys.ControlPoints]:
+      channelSetting.controlPoints && serializeControlPoints(channelSetting.controlPoints),
+    [ViewerChannelSettingKeys.ControlPointsEnabled]: serializeBoolean(channelSetting.useControlPoints),
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp?.map(formatFloat).join(":"),
     // Note that Lut is not saved here, as it is expected as user input and is redundant with
     // the control points and ramp.
-  };
+  });
 }
 
 export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
@@ -598,20 +623,28 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
   return removeUndefinedProperties(result);
 }
 
-export function serializeViewerState(state: Partial<ViewerState>): ViewerStateParams {
+/**
+ *
+ * @param state
+ * @param removeDefaults If true, remove properties that match the `DEFAULT_VIEWER_SETTINGS` value.
+ */
+export function serializeViewerState(state: Partial<ViewerState>, removeDefaults = true): ViewerStateParams {
   // TODO: Enforce decimal places for floats/decimals?
+  if (removeDefaults) {
+    state = removeDefaultProperties(state, DEFAULT_VIEWER_SETTINGS);
+  }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,
     [ViewerStateKeys.Mask]: state.maskAlpha?.toString(),
     [ViewerStateKeys.Image]: state.imageType,
-    [ViewerStateKeys.Axes]: state.showAxes ? "1" : "0",
-    [ViewerStateKeys.BoundingBox]: state.showBoundingBox ? "1" : "0",
+    [ViewerStateKeys.Axes]: serializeBoolean(state.showAxes),
+    [ViewerStateKeys.BoundingBox]: serializeBoolean(state.showBoundingBox),
     [ViewerStateKeys.BoundingBoxColor]: state.boundingBoxColor && colorArrayToHex(state.boundingBoxColor),
     [ViewerStateKeys.BackgroundColor]: state.backgroundColor && colorArrayToHex(state.backgroundColor),
-    [ViewerStateKeys.Autorotate]: state.autorotate ? "1" : "0",
+    [ViewerStateKeys.Autorotate]: serializeBoolean(state.autorotate),
     [ViewerStateKeys.Brightness]: state.brightness?.toString(),
     [ViewerStateKeys.Density]: state.density?.toString(),
-    [ViewerStateKeys.Interpolation]: state.interpolationEnabled ? "1" : "0",
+    [ViewerStateKeys.Interpolation]: serializeBoolean(state.interpolationEnabled),
     [ViewerStateKeys.Region]:
       state.region && `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
