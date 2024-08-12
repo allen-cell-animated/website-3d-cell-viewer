@@ -1,6 +1,6 @@
 import React from "react";
 import { find } from "lodash";
-import { Collapse, CollapseProps, List } from "antd";
+import { Button, Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
 import type { ChannelGrouping, ViewerChannelSettings } from "../shared/utils/viewerChannelSettings";
@@ -12,6 +12,8 @@ import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
+import { DEFAULT_CHANNEL_STATE, PRESET_COLOR_MAP } from "../shared/constants";
+import { controlPointsToRamp, getDefaultLut } from "../shared/utils/controlPointsToLut";
 
 export type ChannelsWidgetProps = {
   // From parent
@@ -117,7 +119,52 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
+  const resetAllChannelsToDefaults = (): void => {
+    if (!channelDataChannels) {
+      return;
+    }
+    const allChannelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
+    const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
+    const channelStateKeysToReset = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
+
+    // Reset control points and ramp for each channel
+    for (let i = 0; i < channelDataChannels.length; i++) {
+      const channelData = channelDataChannels[i];
+      const defaultLut = getDefaultLut(channelData.getHistogram());
+      props.changeChannelSetting(i, "controlPoints", defaultLut.controlPoints);
+      props.changeChannelSetting(i, "ramp", controlPointsToRamp(defaultLut.controlPoints));
+      props.changeChannelSetting(i, "useControlPoints", false);
+    }
+    // Reset all other settings. Also, enable volumes on only the first three channels.
+    channelSettings.forEach((_channelSetting, index) => {
+      for (const key of channelStateKeysToReset) {
+        if (key === "volumeEnabled" && index < 3) {
+          props.changeChannelSetting(index, key, true);
+          continue;
+        }
+        props.changeChannelSetting(index, key, DEFAULT_CHANNEL_STATE[key]);
+      }
+    });
+
+    // Apply default color map
+    props.onApplyColorPresets(PRESET_COLOR_MAP[0].colors);
+    // `onApplyColorPresets` will fail to reset colors if the number of channels exceeds
+    // the color map length, so we need to reset the colors manually.
+    if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
+      for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
+        props.changeChannelSetting(i, "color", DEFAULT_CHANNEL_STATE["color"]);
+      }
+    }
+  };
+
+  return (
+    <div>
+      <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />
+      <div style={{ padding: "20px 15px" }}>
+        <Button onClick={resetAllChannelsToDefaults}>Reset all channels</Button>
+      </div>
+    </div>
+  );
 };
 
 export default connectToViewerState(ChannelsWidget, ["channelSettings", "changeChannelSetting"]);
