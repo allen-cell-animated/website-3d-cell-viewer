@@ -4,7 +4,7 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-import { DEFAULT_CHANNEL_STATE, ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
+import { DEFAULT_CHANNEL_STATE, ISOSURFACE_OPACITY_SLIDER_MAX, PRESET_COLOR_MAP } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import {
@@ -104,6 +104,8 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
       props.changeChannelSetting(index, "isovalue", DEFAULT_CHANNEL_STATE.isovalue);
       props.changeChannelSetting(index, "opacity", DEFAULT_CHANNEL_STATE.opacity);
     }
+
+    props.changeChannelSetting(index, "color", PRESET_COLOR_MAP[0].colors[index] ?? DEFAULT_CHANNEL_STATE.color);
   };
 
   const createTFEditor = (): React.ReactNode => {

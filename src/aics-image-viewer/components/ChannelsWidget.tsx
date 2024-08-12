@@ -148,6 +148,13 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
 
     // Apply default color map
     props.onApplyColorPresets(PRESET_COLOR_MAP[0].colors);
+    // `onApplyColorPresets` will fail to reset colors if the number of channels exceeds
+    // the color map length, so we need to reset the colors manually.
+    if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
+      for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
+        props.changeChannelSetting(i, "color", DEFAULT_CHANNEL_STATE["color"]);
+      }
+    }
   };
 
   return (
