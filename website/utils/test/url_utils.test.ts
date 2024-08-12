@@ -15,6 +15,7 @@ import {
   ViewerStateParams,
   serializeViewerUrlParams,
   CONTROL_POINTS_REGEX,
+  LEGACY_CONTROL_POINTS_REGEX,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
@@ -33,6 +34,23 @@ const defaultSettings: ViewerChannelSetting = {
 
 //// VALUE PARSING ///////////////////////////////////////
 
+describe("LEGACY_CONTROL_POINTS_REGEX", () => {
+  it("accepts single control points", () => {
+    const data = "1:0.5:ffffff";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts multiple control points", () => {
+    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts negative numbers", () => {
+    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+});
+
 describe("CONTROL_POINTS_REGEX", () => {
   it("accepts single control points", () => {
     const data = "1:0.5:ffffff";
@@ -40,12 +58,12 @@ describe("CONTROL_POINTS_REGEX", () => {
   });
 
   it("accepts multiple control points", () => {
-    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    const data = "1:0.5:ff0000:128:0.7:ffff00:255:1:ff0000";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 
   it("accepts negative numbers", () => {
-    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    const data = "-1:0.5:ff0000:-255:1:ff0000";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 });
@@ -216,7 +234,7 @@ describe("Channel state serialization", () => {
     clz: "1",
     cza: "0.5",
     cpe: "0",
-    cps: "0:0.5:ffffff,255:1:ffffff",
+    cps: "0:0.5:ffffff:255:1:ffffff",
     rmp: "0:255",
   };
 
@@ -323,7 +341,7 @@ describe("Channel state serialization", () => {
 
   describe("serializeViewerChannelSetting", () => {
     it("serializes channel settings", () => {
-      expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
+      expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE, false)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
     });
 
     it("serializes custom channel settings", () => {
@@ -352,7 +370,7 @@ describe("Channel state serialization", () => {
         cps: "",
         rmp: "0:255",
       };
-      expect(serializeViewerChannelSetting(customChannelState)).toEqual(serializedCustomChannelState);
+      expect(serializeViewerChannelSetting(customChannelState, false)).toEqual(serializedCustomChannelState);
     });
   });
 });
@@ -435,11 +453,11 @@ describe("Viewer state serialization", () => {
 
   describe("serializeViewerState", () => {
     it("serializes the default viewer settings", () => {
-      expect(serializeViewerState(DEFAULT_VIEWER_STATE)).toEqual(SERIALIZED_DEFAULT_VIEWER_STATE);
+      expect(serializeViewerState(DEFAULT_VIEWER_STATE, false)).toEqual(SERIALIZED_DEFAULT_VIEWER_STATE);
     });
 
     it("serializes custom viewer settings", () => {
-      expect(serializeViewerState(CUSTOM_VIEWER_STATE)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
+      expect(serializeViewerState(CUSTOM_VIEWER_STATE, false)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
   });
 
@@ -462,7 +480,7 @@ describe("Viewer state serialization", () => {
       const viewModes = Object.values(ViewMode);
       for (const viewMode of viewModes) {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, viewMode };
-        expect(deserializeViewerState(serializeViewerState(state)).viewMode).toEqual(viewMode);
+        expect(deserializeViewerState(serializeViewerState(state, false)).viewMode).toEqual(viewMode);
       }
     });
 
@@ -470,7 +488,7 @@ describe("Viewer state serialization", () => {
       const renderModes = Object.values(RenderMode);
       for (const renderMode of renderModes) {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
-        expect(deserializeViewerState(serializeViewerState(state)).renderMode).toEqual(renderMode);
+        expect(deserializeViewerState(serializeViewerState(state, false)).renderMode).toEqual(renderMode);
       }
     });
   });
@@ -710,7 +728,7 @@ describe("serializeViewerUrlParams", () => {
         ramp: [50, 140],
       },
     ];
-    const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
+    const serialized = serializeViewerUrlParams({ channelSettings: channelStates }, false);
     // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
     // is not guaranteed. Parse the string and check that the values match the expected values.
     // Note that `lut` is not included when serializing from existing viewer state.
@@ -723,7 +741,7 @@ describe("serializeViewerUrlParams", () => {
       sen: "1",
       isv: "128",
       rmp: "-10:260.1",
-      cps: "0:0:808080,1:1:ff0000",
+      cps: "0:0:808080:1:1:ff0000",
       cpe: "0",
     };
     const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {

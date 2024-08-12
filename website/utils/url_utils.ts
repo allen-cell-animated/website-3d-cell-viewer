@@ -460,10 +460,13 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
-function formatFloat(value: number): string {
+function formatFloat(value: number, maxPrecision = 5): string {
   // TODO: Make this smarter for integers, precision, etc.
   // Ideally should have a fixed max precision
-  return value.toFixed(2);
+  if (Number.isInteger(value)) {
+    return value.toString();
+  }
+  return Number(value.toPrecision(maxPrecision)).toString();
 }
 
 function serializeBoolean(value: boolean | undefined): "1" | "0" | undefined {
@@ -829,14 +832,16 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  */
-export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>): AppParams {
+export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>, removeDefaults = true): AppParams {
   // TODO: Unit tests for this function
-  const params = serializeViewerState(state);
+  const params = serializeViewerState(state, removeDefaults);
 
   const channelParams = state.channelSettings?.reduce<Record<string, string>>(
     (acc, channelSetting, index): Record<string, string> => {
       const key = `c${index}`;
-      acc[key] = objectToKeyValueList(serializeViewerChannelSetting(channelSetting) as Record<string, string>);
+      acc[key] = objectToKeyValueList(
+        serializeViewerChannelSetting(channelSetting, removeDefaults) as Record<string, string>
+      );
       return acc;
     },
     {} as Record<string, string>
