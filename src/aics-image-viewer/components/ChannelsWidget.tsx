@@ -125,8 +125,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     }
     const allChannelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
     const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
-
-    const channelStateKeys = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
+    const channelStateKeysToReset = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
 
     // Reset control points and ramp for each channel
     for (let i = 0; i < channelDataChannels.length; i++) {
@@ -138,7 +137,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     }
     // Reset all other settings. Also, enable volumes on only the first three channels.
     channelSettings.forEach((_channelSetting, index) => {
-      for (const key of channelStateKeys) {
+      for (const key of channelStateKeysToReset) {
         if (key === "volumeEnabled" && index < 3) {
           props.changeChannelSetting(index, key, true);
           continue;

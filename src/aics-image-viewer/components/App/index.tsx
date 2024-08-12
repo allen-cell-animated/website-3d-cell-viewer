@@ -50,6 +50,8 @@ import {
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
   TFEDITOR_MAX_BIN,
+  DEFAULT_VIEWER_SETTINGS,
+  DEFAULT_CHANNEL_STATE,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 
@@ -106,39 +108,6 @@ const defaultVisibleControls: ControlVisibilityFlags = {
   metadataViewer: true,
 };
 
-const defaultViewerSettings: ViewerState = {
-  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-  imageType: ImageType.segmentedCell,
-  showAxes: false,
-  showBoundingBox: false,
-  backgroundColor: BACKGROUND_COLOR_DEFAULT,
-  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-  autorotate: false,
-  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
-  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  density: DENSITY_SLIDER_LEVEL_DEFAULT,
-  levels: LEVELS_SLIDER_DEFAULT,
-  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
-  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  slice: { x: 0.5, y: 0.5, z: 0.5 },
-  time: 0,
-};
-
-const DEFAULT_CHANNEL_STATE: ChannelState = {
-  name: "",
-  volumeEnabled: false,
-  isosurfaceEnabled: false,
-  colorizeEnabled: false,
-  colorizeAlpha: 1.0,
-  isovalue: 128,
-  opacity: 1.0,
-  color: [226, 205, 179] as ColorArray,
-  useControlPoints: false,
-  ramp: [0, TFEDITOR_MAX_BIN],
-  controlPoints: [],
-};
-
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
@@ -150,7 +119,7 @@ const defaultProps: AppProps = {
 
   appHeight: "100vh",
   visibleControls: defaultVisibleControls,
-  viewerSettings: defaultViewerSettings,
+  viewerSettings: DEFAULT_VIEWER_SETTINGS,
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
