@@ -16,7 +16,7 @@ import {
 } from "@aics/volume-viewer";
 
 import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
-import type { ViewerState, ChannelState } from "../ViewerStateProvider/types";
+import type { ChannelState } from "../ViewerStateProvider/types";
 
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import {
@@ -36,20 +36,12 @@ import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } fr
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
-  ALPHA_MASK_SLIDER_DEFAULT,
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  DENSITY_SLIDER_LEVEL_DEFAULT,
-  LEVELS_SLIDER_DEFAULT,
-  BACKGROUND_COLOR_DEFAULT,
-  BOUNDING_BOX_COLOR_DEFAULT,
   CONTROL_PANEL_CLOSE_WIDTH,
-  INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
-  TFEDITOR_MAX_BIN,
   DEFAULT_VIEWER_SETTINGS,
   DEFAULT_CHANNEL_STATE,
 } from "../../shared/constants";
