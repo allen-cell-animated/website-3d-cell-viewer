@@ -579,7 +579,11 @@ export function serializeViewerChannelSetting(
     [ViewerChannelSettingKeys.ControlPoints]:
       channelSetting.controlPoints && serializeControlPoints(channelSetting.controlPoints),
     [ViewerChannelSettingKeys.ControlPointsEnabled]: serializeBoolean(channelSetting.useControlPoints),
-    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp?.map(formatFloat).join(":"),
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp
+      ?.map((value) => {
+        return formatFloat(value);
+      })
+      .join(":"),
     // Note that Lut is not saved here, as it is expected as user input and is redundant with
     // the control points and ramp.
   });

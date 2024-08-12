@@ -744,6 +744,7 @@ describe("serializeViewerUrlParams", () => {
       cps: "0:0:808080:1:1:ff0000",
       cpe: "0",
     };
+    // TODO: Check that this can handle control points (cps) with comma separators.
     const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "0",
       col: "808080",
@@ -753,7 +754,7 @@ describe("serializeViewerUrlParams", () => {
       sen: "0",
       isv: "57",
       rmp: "50:140",
-      cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
+      cps: "-10:0:000000:50:0:000000:100:0.3:0010ff:140:0.8:00ffff:260:1:00ffb4",
       cpe: "1",
     };
 
