@@ -32,10 +32,15 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 /**
- * Matches a comma-separated list of control points, where each control point is represented
+ * LEGACY: Matches a comma-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
-export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const LEGACY_CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+/**
+ * Matches a colon-separated list of control points, where each control point is represented
+ * by a triplet of `{x}:{opacity}:{hex color}`.
+ */
+export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(:-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
@@ -276,8 +281,8 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
  * a key-value object.
  *
  * @param data The string to parse. Expected to be in the format
- * "key1:value1,key2:value2,...". Colons and commas in keys or values
- * should be encoded using `encodeURIComponent`.
+ * "key1:value1,key2:value2,...". Commas in keys or values
+ * must be encoded using `encodeURIComponent`.
  * @returns An object with the parsed key-value pairs. Key and value strings
  *  will be decoded using `decodeURIComponent`.
  */
@@ -296,10 +301,14 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
+function escapeCommas(str: string): string {
+  return str.replace(/,/g, "%2C");
+}
+
 export function objectToKeyValueList(obj: Record<string, string>): string {
   const keyValuePairs: string[] = [];
   for (const key in obj) {
-    keyValuePairs.push(`${encodeURIComponent(key)}:${encodeURIComponent(obj[key].trim())}`);
+    keyValuePairs.push(`${encodeURIComponent(key)}:${escapeCommas(obj[key].trim())}`);
   }
   return keyValuePairs.join(",");
 }
@@ -440,16 +449,47 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
+function formatFloat(value: number): string {
+  // TODO: Make this smarter for integers, precision, etc.
+  // Ideally should have a fixed max precision
+  return value.toFixed(2);
+}
+
 function serializeControlPoints(controlPoints: ControlPoint[]): string {
-  return controlPoints.map((cp) => `${cp.x}:${cp.opacity}:${colorArrayToHex(cp.color)}`).join(",");
+  return controlPoints
+    .map((cp) => {
+      const x = formatFloat(cp.x);
+      const opacity = formatFloat(cp.opacity);
+      const color = colorArrayToHex(cp.color);
+      return `${x}:${opacity}:${color}`;
+    })
+    .join(":");
 }
 
 function parseControlPoints(controlPoints: string | undefined): ControlPoint[] | undefined {
-  if (!controlPoints || !CONTROL_POINTS_REGEX.test(controlPoints)) {
+  if (
+    !(controlPoints && (CONTROL_POINTS_REGEX.test(controlPoints) || LEGACY_CONTROL_POINTS_REGEX.test(controlPoints)))
+  ) {
     return undefined;
   }
-  const newControlPoints = controlPoints.split(",").map((cp) => {
-    const [x, opacity, color] = cp.split(":");
+
+  // Parse raw control point data from the string into an array of [x, opacity, color] triplets.
+  let rawControlPointData: string[][];
+  if (LEGACY_CONTROL_POINTS_REGEX.test(controlPoints)) {
+    // Legacy format uses commas to separate control points.
+    rawControlPointData = controlPoints.split(",").map((cp) => cp.split(":"));
+  } else {
+    // New format is all colon-separated, where every three elements represent a control point.
+    rawControlPointData = controlPoints.split(":").reduce((acc, _val, i, array) => {
+      if ((i + 1) % 3 === 0) {
+        acc.push([array[i - 2], array[i - 1], array[i]]);
+      }
+      return acc;
+    }, [] as string[][]);
+  }
+
+  const newControlPoints = rawControlPointData.map((cp) => {
+    const [x, opacity, color] = cp;
     return {
       x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
@@ -511,7 +551,7 @@ export function serializeViewerChannelSetting(channelSetting: ChannelState): Vie
     [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
     [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
     [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
-    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.join(":"),
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.map(formatFloat).join(":"),
     // Note that Lut is not saved here, as it is expected as user input and is redundant with
     // the control points and ramp.
   };
@@ -578,6 +618,7 @@ export function serializeViewerState(state: Partial<ViewerState>): ViewerStatePa
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
   };
+
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
     [ViewMode.xy]: "Z",

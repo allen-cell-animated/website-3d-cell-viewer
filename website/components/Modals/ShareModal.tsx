@@ -43,8 +43,13 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     serializedViewerParams = { url: serializedUrl, ...serializedViewerParams };
   }
 
+  console.log("serializedViewerParams", serializedViewerParams);
+  // TODO: Don't use URLSearchParams here because it will encode commas and colons?
   const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
-  const shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
+  let shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+  // Decode specifically colons and commas
+  shareUrl = shareUrl.replace(/%3A/g, ":").replace(/%2C/g, ",");
 
   const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
