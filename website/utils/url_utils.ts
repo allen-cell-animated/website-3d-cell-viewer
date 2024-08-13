@@ -1,5 +1,5 @@
 import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
-import { ControlPoint } from "@aics/volume-viewer";
+import { CameraState, ControlPoint } from "@aics/volume-viewer";
 
 import type {
   ChannelState,
@@ -64,6 +64,20 @@ export enum ViewerStateKeys {
   Region = "reg",
   Slice = "slice",
   Time = "t",
+  CameraState = "cam",
+}
+
+export enum CameraTransformKeys {
+  /** Camera position in 3D coordinates. */
+  Position = "pos",
+  /** Target position of the trackball controls in 3D coordinates. */
+  Target = "tar",
+  /** The up vector of the camera. Will be normalized to magnitude of 1. */
+  Up = "up",
+  /** Scale factor for orthographic cameras. */
+  OrthoScale = "ort",
+  /** Vertical FOV of the camera view frustum, from top to bottom, in degrees. */
+  Fov = "fov",
 }
 
 /**
@@ -196,6 +210,19 @@ export class ViewerStateParams {
   [ViewerStateKeys.Slice]?: string = undefined;
   /** Frame number, for time-series volumes. 0 by default. */
   [ViewerStateKeys.Time]?: string = undefined;
+  /**
+   * Camera transform settings, as a list of `key:value` pairs separated by commas.
+   * Valid keys are defined in `CameraTransformKeys`:
+   * - `pos`: position
+   * - `tar`: target
+   * - `up`: up
+   * - `rot`: rotation
+   * - `ort`: orthographic scales
+   *
+   * All values are an array of three floats, separated by commas and
+   * encoded using `encodeURIComponent`.
+   */
+  [ViewerStateKeys.CameraState]?: string = undefined;
 }
 
 /** URL parameters that define data sources when loading volumes. */
@@ -306,10 +333,14 @@ function escapeCommas(str: string): string {
   return str.replace(/,/g, "%2C");
 }
 
-export function objectToKeyValueList(obj: Record<string, string>): string {
+export function objectToKeyValueList(obj: Record<string, string | undefined>): string {
   const keyValuePairs: string[] = [];
   for (const key in obj) {
-    keyValuePairs.push(`${encodeURIComponent(key)}:${escapeCommas(obj[key].trim())}`);
+    const value = obj[key];
+    if (value === undefined) {
+      continue;
+    }
+    keyValuePairs.push(`${encodeURIComponent(key)}:${escapeCommas(value.trim())}`);
   }
   return keyValuePairs.join(",");
 }
@@ -429,11 +460,18 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
   return { x, y, z };
 }
 
-function parseStringLevels(levels: string | undefined): [number, number, number] | undefined {
+/**
+ * Parses an array of three numbers from a string.
+ */
+function parseThreeNumberArray(
+  levels: string | undefined,
+  min: number = -Infinity,
+  max: number = Infinity
+): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, 0, 255));
+  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min, max));
   if (low === undefined || middle === undefined || high === undefined) {
     return undefined;
   }
@@ -474,6 +512,32 @@ function serializeBoolean(value: boolean | undefined): "1" | "0" | undefined {
     return undefined;
   }
   return value ? "1" : "0";
+}
+
+function parseCameraState(cameraSettings: string | undefined): Partial<CameraState> | undefined {
+  if (!cameraSettings) {
+    return undefined;
+  }
+  const parsedCameraSettings = parseKeyValueList(cameraSettings);
+  const result: Partial<CameraState> = {
+    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
+    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
+    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
+    // Orthographic scales cannot be negative
+    orthoScale: parseStringFloat(parsedCameraSettings[CameraTransformKeys.OrthoScale], 0, Infinity),
+    fov: parseStringFloat(parsedCameraSettings[CameraTransformKeys.Fov], 0, 180),
+  };
+  return removeUndefinedProperties(result);
+}
+
+function serializeCameraState(cameraState: CameraState): string {
+  return objectToKeyValueList({
+    [CameraTransformKeys.Position]: cameraState.position.join(","),
+    [CameraTransformKeys.Target]: cameraState.target.join(","),
+    [CameraTransformKeys.Up]: cameraState.up.join(","),
+    [CameraTransformKeys.OrthoScale]: cameraState.orthoScale?.toString(),
+    [CameraTransformKeys.Fov]: cameraState.fov?.toString(),
+  });
 }
 
 function serializeControlPoints(controlPoints: ControlPoint[]): string {
@@ -600,12 +664,13 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseStringLevels(params[ViewerStateKeys.Levels]),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], 0, 255),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
     time: parseStringInt(params[ViewerStateKeys.Time], 0, Number.POSITIVE_INFINITY),
     renderMode: parseStringEnum(params[ViewerStateKeys.Mode], RenderMode),
+    cameraState: parseCameraState(params[ViewerStateKeys.CameraState]),
   };
 
   // Handle viewmode, since they use different mappings
@@ -657,6 +722,8 @@ export function serializeViewerState(state: Partial<ViewerState>, removeDefaults
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
+    // All CameraTransform properties will be provided when serializing viewer state
+    [ViewerStateKeys.CameraState]: state.cameraState && serializeCameraState(state.cameraState as CameraState),
   };
 
   const viewModeToViewParam = {
