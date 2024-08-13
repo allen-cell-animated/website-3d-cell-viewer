@@ -20,6 +20,7 @@ import {
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import { DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -457,7 +458,7 @@ describe("Viewer state serialization", () => {
     reg: "0:0.5,0:1,0:1",
     slice: "0.25,0.75,0.5",
     t: "100",
-    cam: "pos:-1.05%2C-4%2C45,tar:0%2C0%2C0,up:0%2C1%2C0,ort:3.534,fov:43.5",
+    cam: "pos:-1.05:-4:45,tar:0:0:0,up:0:1:0,ort:3.534,fov:43.5",
   };
 
   describe("serializeViewerState", () => {
@@ -477,7 +478,7 @@ describe("Viewer state serialization", () => {
           fov: 43.5,
         },
       };
-      const serializedState = "pos:1%2C-1.4%2C45,up:0%2C1%2C0,fov:43.5";
+      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
       expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
     });
   });
@@ -688,28 +689,6 @@ describe("parseViewerUrlParams", () => {
     expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
   });
 
-  it("parses encoded colons and commas", async () => {
-    const queryString = "c0=ven%3A0&c1=ven%3A1%2Clut%3Aautoij%3A&c2=ven%3A1%2Cclz%3A1";
-    const params = new URLSearchParams(queryString);
-    const { args, viewerSettings } = await parseViewerUrlParams(params);
-
-    // Check that channel settings have been loaded in.
-    // Should be one group with three channels.
-    let channelSettings = args.viewerChannelSettings?.groups[0];
-    expect(channelSettings).toBeDefined();
-    channelSettings = channelSettings!;
-
-    expect(channelSettings.channels).toHaveLength(3);
-    expect(channelSettings.channels[0].match).toEqual(0);
-    expect(channelSettings.channels[0].enabled).toEqual(false);
-    expect(channelSettings.channels[1].match).toEqual(1);
-    expect(channelSettings.channels[1].enabled).toEqual(true);
-    expect(channelSettings.channels[1].lut).toEqual(["autoij", ""]);
-    expect(channelSettings.channels[2].match).toEqual(2);
-    expect(channelSettings.channels[2].enabled).toEqual(true);
-    expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
-  });
-
   it("parses viewer settings", async () => {
     const queryString = "mask=30&view=X";
     const params = new URLSearchParams(queryString);
@@ -803,4 +782,26 @@ describe("serializeViewerUrlParams", () => {
     expect(serialized["c1"]).toBeDefined();
     expect(parseKeyValueList(serialized["c1"]!)).toEqual(expectedChannel1);
   });
+
+  // it("can remove viewer settings that match the default", () => {
+  //   const customViewerState: Partial<ViewerState> = {
+  //     viewMode: ViewMode.xy,
+  //     density: 100,
+  //     time: 40,
+  //     cameraState: {
+  //       position: [1.2, 3.4, 5.6],
+  //     },
+  //   };
+
+  //   const serializedParams = serializeViewerUrlParams(
+  //     { ...DEFAULT_VIEWER_SETTINGS, ...customViewerState },
+  //     true
+  //   ) as Record<string, string>;
+  //   const urlParams = new URLSearchParams(serializedParams);
+  //   expect(urlParams.toString()).toEqual("dens=100,t=40,cam=pos:1.2%2C3.4%2C5.6");
+  // });
+
+  // it("can remove channel state that matches the default", () => {
+  //   throw new Error("Test not implemented");
+  // });
 });

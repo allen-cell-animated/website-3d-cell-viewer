@@ -470,13 +470,17 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
  */
 function parseThreeNumberArray(
   levels: string | undefined,
-  min: number = -Infinity,
-  max: number = Infinity
+  options?: { min?: number; max?: number; separator?: string }
 ): [number, number, number] | undefined {
   if (!levels) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min, max));
+
+  const min = options?.min ?? Number.NEGATIVE_INFINITY;
+  const max = options?.max ?? Number.POSITIVE_INFINITY;
+  const separator = options?.separator ?? ",";
+
+  const [low, middle, high] = levels.split(separator).map((val) => parseStringFloat(val, min, max));
   if (low === undefined || middle === undefined || high === undefined) {
     return undefined;
   }
@@ -525,9 +529,9 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   }
   const parsedCameraSettings = parseKeyValueList(cameraSettings);
   const result: Partial<CameraState> = {
-    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
-    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
-    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
+    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position], { separator: ":" }),
+    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target], { separator: ":" }),
+    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up], { separator: ":" }),
     // Orthographic scales cannot be negative
     orthoScale: parseStringFloat(parsedCameraSettings[CameraTransformKeys.OrthoScale], 0, Infinity),
     fov: parseStringFloat(parsedCameraSettings[CameraTransformKeys.Fov], 0, 180),
@@ -535,11 +539,12 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   return removeUndefinedProperties(result);
 }
 
-function serializeCameraState(cameraState: CameraState): string {
+function serializeCameraState(cameraState: Partial<CameraState>): string {
   return objectToKeyValueList({
-    [CameraTransformKeys.Position]: cameraState.position.map((value) => formatFloat(value)).join(","),
-    [CameraTransformKeys.Target]: cameraState.target.map((value) => formatFloat(value)).join(","),
-    [CameraTransformKeys.Up]: cameraState.up.map((value) => formatFloat(value)).join(","),
+    [CameraTransformKeys.Position]:
+      cameraState.position && cameraState.position.map((value) => formatFloat(value)).join(":"),
+    [CameraTransformKeys.Target]: cameraState.target && cameraState.target.map((value) => formatFloat(value)).join(":"),
+    [CameraTransformKeys.Up]: cameraState.up && cameraState.up.map((value) => formatFloat(value)).join(":"),
     [CameraTransformKeys.OrthoScale]:
       cameraState.orthoScale === undefined ? undefined : formatFloat(cameraState.orthoScale),
     [CameraTransformKeys.Fov]: cameraState.fov === undefined ? undefined : formatFloat(cameraState.fov),
@@ -677,7 +682,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], 0, 255),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], { min: 0, max: 255 }),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
