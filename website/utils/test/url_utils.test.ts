@@ -688,9 +688,28 @@ describe("parseViewerUrlParams", () => {
     expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
   });
 
-  // Test existing viewer settings as a regression test
-  // TODO: Replace this with a full integration test, testing serializing + deserializing all viewer state
-  // when URLs are fully implemented.
+  it("parses encoded colons and commas", async () => {
+    const queryString = "c0=ven%3A0&c1=ven%3A1%2Clut%3Aautoij%3A&c2=ven%3A1%2Cclz%3A1";
+    const params = new URLSearchParams(queryString);
+    const { args, viewerSettings } = await parseViewerUrlParams(params);
+
+    // Check that channel settings have been loaded in.
+    // Should be one group with three channels.
+    let channelSettings = args.viewerChannelSettings?.groups[0];
+    expect(channelSettings).toBeDefined();
+    channelSettings = channelSettings!;
+
+    expect(channelSettings.channels).toHaveLength(3);
+    expect(channelSettings.channels[0].match).toEqual(0);
+    expect(channelSettings.channels[0].enabled).toEqual(false);
+    expect(channelSettings.channels[1].match).toEqual(1);
+    expect(channelSettings.channels[1].enabled).toEqual(true);
+    expect(channelSettings.channels[1].lut).toEqual(["autoij", ""]);
+    expect(channelSettings.channels[2].match).toEqual(2);
+    expect(channelSettings.channels[2].enabled).toEqual(true);
+    expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
+  });
+
   it("parses viewer settings", async () => {
     const queryString = "mask=30&view=X";
     const params = new URLSearchParams(queryString);

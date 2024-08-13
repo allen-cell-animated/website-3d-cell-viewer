@@ -329,8 +329,8 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
-function escapeCommas(str: string): string {
-  return str.replace(/,/g, "%2C");
+function decodeColons(str: string): string {
+  return str.replace(/%3A/g, ":");
 }
 
 export function objectToKeyValueList(obj: Record<string, string | undefined>): string {
@@ -340,7 +340,9 @@ export function objectToKeyValueList(obj: Record<string, string | undefined>): s
     if (value === undefined) {
       continue;
     }
-    keyValuePairs.push(`${encodeURIComponent(key)}:${escapeCommas(value.trim())}`);
+    // Allow colon separators to remain unencoded to save URL character length.
+    const escapedValue = decodeColons(encodeURIComponent(value.trim()));
+    keyValuePairs.push(`${encodeURIComponent(key.trim())}:${escapedValue}`);
   }
   return keyValuePairs.join(",");
 }
@@ -532,11 +534,12 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
 
 function serializeCameraState(cameraState: CameraState): string {
   return objectToKeyValueList({
-    [CameraTransformKeys.Position]: cameraState.position.join(","),
-    [CameraTransformKeys.Target]: cameraState.target.join(","),
-    [CameraTransformKeys.Up]: cameraState.up.join(","),
-    [CameraTransformKeys.OrthoScale]: cameraState.orthoScale?.toString(),
-    [CameraTransformKeys.Fov]: cameraState.fov?.toString(),
+    [CameraTransformKeys.Position]: cameraState.position.map((value) => formatFloat(value)).join(","),
+    [CameraTransformKeys.Target]: cameraState.target.map((value) => formatFloat(value)).join(","),
+    [CameraTransformKeys.Up]: cameraState.up.map((value) => formatFloat(value)).join(","),
+    [CameraTransformKeys.OrthoScale]:
+      cameraState.orthoScale === undefined ? undefined : formatFloat(cameraState.orthoScale),
+    [CameraTransformKeys.Fov]: cameraState.fov === undefined ? undefined : formatFloat(cameraState.fov),
   });
 }
 
