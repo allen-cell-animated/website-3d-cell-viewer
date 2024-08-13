@@ -33,12 +33,12 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
 /**
- * LEGACY: Matches a comma-separated list of control points, where each control point is represented
+ * LEGACY: Matches a COMMA-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
 export const LEGACY_CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
 /**
- * Matches a colon-separated list of control points, where each control point is represented
+ * Matches a COLON-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
 export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(:-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
@@ -441,10 +441,13 @@ function removeUndefinedProperties<T>(obj: T): Partial<T> {
   return result;
 }
 
-function removeDefaultProperties<T>(obj: Partial<T>, defaults: T): Partial<T> {
+/**
+ * Returns a copy of `obj` where all properties with values that match the properties of `match` are removed.
+ */
+function removeMatchingProperties<T>(obj: Partial<T>, match: T): Partial<T> {
   const result: Partial<T> = {};
   for (const key in obj) {
-    if (obj[key] !== defaults[key]) {
+    if (obj[key] !== match[key]) {
       result[key] = obj[key];
     }
   }
@@ -500,7 +503,7 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
-function formatFloat(value: number, maxPrecision = 5): string {
+function formatFloat(value: number, maxPrecision: number = 5): string {
   // TODO: Make this smarter for integers, precision, etc.
   // Ideally should have a fixed max precision
   if (Number.isInteger(value)) {
@@ -628,12 +631,19 @@ export function deserializeViewerChannelSetting(
   return result;
 }
 
+/**
+ * Serializes a single viewer channel setting into a dictionary of URL parameters
+ * (`ViewerChannelSettingParams`).
+ * @param channelSetting The channel state object to serialize.
+ * @param removeDefaults Whether to remove properties that match the `DEFAULT_CHANNEL_STATE`.
+ * @returns A `ViewerChannelSettingParams` object with the serialized parameters. Undefined values are removed.
+ */
 export function serializeViewerChannelSetting(
   channelSetting: Partial<ChannelState>,
-  removeDefaults = true
+  removeDefaults: boolean
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
-    channelSetting = removeDefaultProperties(channelSetting, DEFAULT_CHANNEL_STATE);
+    channelSetting = removeMatchingProperties(channelSetting, DEFAULT_CHANNEL_STATE);
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
@@ -699,14 +709,15 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
 }
 
 /**
- *
- * @param state
+ * Serializes a ViewerState object into a dictionary of URL parameters.
+ * @param state The ViewerState to serialize.
  * @param removeDefaults If true, remove properties that match the `DEFAULT_VIEWER_SETTINGS` value.
+ * @returns A `ViewerStateParams` object with the serialized parameters. Undefined values are removed.
  */
-export function serializeViewerState(state: Partial<ViewerState>, removeDefaults = true): ViewerStateParams {
+export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
   // TODO: Enforce decimal places for floats/decimals?
   if (removeDefaults) {
-    state = removeDefaultProperties(state, DEFAULT_VIEWER_SETTINGS);
+    state = removeMatchingProperties(state, DEFAULT_VIEWER_SETTINGS);
   }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,
@@ -906,7 +917,10 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  */
-export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>, removeDefaults = true): AppParams {
+export function serializeViewerUrlParams(
+  state: Partial<ViewerStateContextType>,
+  removeDefaults: boolean = true
+): AppParams {
   // TODO: Unit tests for this function
   const params = serializeViewerState(state, removeDefaults);
 
