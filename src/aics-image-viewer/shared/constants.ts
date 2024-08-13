@@ -110,7 +110,13 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-  cameraState: undefined,
+  cameraState: {
+    position: [0, 0, 5],
+    target: [0, 0, 0],
+    up: [0, 1, 0],
+    fov: 20,
+    orthoScale: 0.5,
+  },
 };
 
 export const DEFAULT_CHANNEL_STATE: ChannelState = {

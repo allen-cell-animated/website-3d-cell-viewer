@@ -442,12 +442,25 @@ function removeUndefinedProperties<T>(obj: T): Partial<T> {
 }
 
 /**
+ * Checks if two (1-dimensional) arrays have values that are equal.
+ * Does not handle nested arrays.
+ */
+function isArrayEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every((val, i) => val === b[i]);
+}
+
+/**
  * Returns a copy of `obj` where all properties with values that match the properties of `match` are removed.
  */
 function removeMatchingProperties<T>(obj: Partial<T>, match: T): Partial<T> {
   const result: Partial<T> = {};
   for (const key in obj) {
-    if (obj[key] !== match[key]) {
+    const valueMatches = obj[key] === match[key];
+    const arrayMatches = Array.isArray(obj[key]) && Array.isArray(match[key]) && isArrayEqual(obj[key], match[key]);
+    if (!valueMatches && !arrayMatches) {
       result[key] = obj[key];
     }
   }
@@ -539,8 +552,14 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   return removeUndefinedProperties(result);
 }
 
-function serializeCameraState(cameraState: Partial<CameraState>): string {
-  return objectToKeyValueList({
+function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
+  if (removeDefaults) {
+    cameraState = removeMatchingProperties(cameraState, DEFAULT_VIEWER_SETTINGS.cameraState ?? {});
+    if (Object.keys(cameraState).length === 0) {
+      return undefined;
+    }
+  }
+  const cameraString = objectToKeyValueList({
     [CameraTransformKeys.Position]:
       cameraState.position && cameraState.position.map((value) => formatFloat(value)).join(":"),
     [CameraTransformKeys.Target]: cameraState.target && cameraState.target.map((value) => formatFloat(value)).join(":"),
@@ -549,6 +568,7 @@ function serializeCameraState(cameraState: Partial<CameraState>): string {
       cameraState.orthoScale === undefined ? undefined : formatFloat(cameraState.orthoScale),
     [CameraTransformKeys.Fov]: cameraState.fov === undefined ? undefined : formatFloat(cameraState.fov),
   });
+  return cameraString === "" ? undefined : cameraString;
 }
 
 function serializeControlPoints(controlPoints: ControlPoint[]): string {
@@ -741,9 +761,12 @@ export function serializeViewerState(state: Partial<ViewerState>, removeDefaults
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
-    // All CameraTransform properties will be provided when serializing viewer state
-    [ViewerStateKeys.CameraState]: state.cameraState && serializeCameraState(state.cameraState as CameraState),
+    [ViewerStateKeys.CameraState]:
+      state.cameraState && serializeCameraState(state.cameraState as CameraState, removeDefaults),
   };
+
+  console.log("state.cameraState", state.cameraState);
+  console.log("result.cam", result[ViewerStateKeys.CameraState]);
 
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
