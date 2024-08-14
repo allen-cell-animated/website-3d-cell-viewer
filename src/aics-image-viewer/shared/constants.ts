@@ -93,9 +93,6 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
-export const ENCODED_COMMA_REGEX = /%2C/g;
-export const ENCODED_COLON_REGEX = /%3A/g;
-
 export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -122,6 +119,8 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   },
 };
 
+// TODO: Make this and the default viewer settings lambda functions that return
+// new objects to prevent accidental mutation of the default state.
 export const DEFAULT_CHANNEL_STATE: ChannelState = {
   name: "",
   volumeEnabled: false,

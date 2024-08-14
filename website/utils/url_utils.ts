@@ -15,12 +15,11 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
-import {
-  DEFAULT_CHANNEL_STATE,
-  DEFAULT_VIEWER_SETTINGS,
-  ENCODED_COLON_REGEX,
-} from "../../src/aics-image-viewer/shared/constants";
+import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
+import { removeMatchingProperties, isArrayEqual, removeUndefinedProperties } from "./datatype_utils";
 
+export const ENCODED_COMMA_REGEX = /%2C/g;
+export const ENCODED_COLON_REGEX = /%3A/g;
 const DEFAULT_CONTROL_POINT_COLOR: [number, number, number] = [255, 255, 255];
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
@@ -437,42 +436,6 @@ function colorArrayToHex(color: ColorArray): string {
     .toLowerCase();
 }
 
-function removeUndefinedProperties<T>(obj: T): Partial<T> {
-  const result: Partial<T> = {};
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
-
-/**
- * Checks if two (1-dimensional) arrays have values that are equal.
- * Does not handle nested arrays.
- */
-function isArrayEqual<T>(a: T[], b: T[]): boolean {
-  if (a.length !== b.length) {
-    return false;
-  }
-  return a.every((val, i) => val === b[i]);
-}
-
-/**
- * Returns a copy of `obj` where all properties with values that match the properties of `match` are removed.
- */
-function removeMatchingProperties<T>(obj: Partial<T>, match: T): Partial<T> {
-  const result: Partial<T> = {};
-  for (const key in obj) {
-    const valueMatches = obj[key] === match[key];
-    const arrayMatches = Array.isArray(obj[key]) && Array.isArray(match[key]) && isArrayEqual(obj[key], match[key]);
-    if (!valueMatches && !arrayMatches) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
-
 function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
   if (!region || !SLICE_REGEX.test(region)) {
     return undefined;
@@ -676,6 +639,29 @@ export function serializeViewerChannelSetting(
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
     channelSetting = removeMatchingProperties(channelSetting, DEFAULT_CHANNEL_STATE);
+    // NOTE: Control points are not checked using deep object equality, and only by
+    // object reference. Because control points are
+    if (
+      channelSetting.controlPoints &&
+      channelSetting.controlPoints.length === DEFAULT_CHANNEL_STATE.controlPoints.length
+    ) {
+      let areControlPointsEqual = true;
+      for (let i = 0; i < channelSetting.controlPoints.length; i++) {
+        const controlPoint = channelSetting.controlPoints[i];
+        const defaultControlPoint = DEFAULT_CHANNEL_STATE.controlPoints[i];
+        if (
+          controlPoint.x !== defaultControlPoint.x ||
+          controlPoint.opacity !== defaultControlPoint.opacity ||
+          !isArrayEqual(controlPoint.color, defaultControlPoint.color)
+        ) {
+          areControlPointsEqual = false;
+          break;
+        }
+      }
+      if (areControlPointsEqual) {
+        channelSetting.controlPoints = undefined;
+      }
+    }
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),

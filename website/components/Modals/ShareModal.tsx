@@ -11,8 +11,7 @@ import {
   connectToViewerState,
 } from "../../../src/aics-image-viewer/components/ViewerStateProvider";
 import { ViewerStateContextType } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import { serializeViewerUrlParams } from "../../utils/url_utils";
-import { ENCODED_COLON_REGEX, ENCODED_COMMA_REGEX } from "../../../src/aics-image-viewer/shared/constants";
+import { ENCODED_COLON_REGEX, ENCODED_COMMA_REGEX, serializeViewerUrlParams } from "../../utils/url_utils";
 
 type ShareModalProps = {
   appProps: AppDataProps;

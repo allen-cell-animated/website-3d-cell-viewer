@@ -20,7 +20,7 @@ import {
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/shared/constants";
+import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -235,7 +235,7 @@ describe("Channel state serialization", () => {
     clz: "1",
     cza: "0.5",
     cpe: "0",
-    cps: "0:0.5:ffffff:255:1:ffffff",
+    cps: "0:0.5::255:1:",
     rmp: "0:255",
   };
 
@@ -783,25 +783,56 @@ describe("serializeViewerUrlParams", () => {
     expect(parseKeyValueList(serialized["c1"]!)).toEqual(expectedChannel1);
   });
 
-  // it("can remove viewer settings that match the default", () => {
-  //   const customViewerState: Partial<ViewerState> = {
-  //     viewMode: ViewMode.xy,
-  //     density: 100,
-  //     time: 40,
-  //     cameraState: {
-  //       position: [1.2, 3.4, 5.6],
-  //     },
+  it("can remove viewer settings that match the default", () => {
+    const customViewerState: Partial<ViewerState> = {
+      viewMode: ViewMode.xy,
+      density: 100,
+      time: 40,
+      cameraState: {
+        position: [1.2, 3.4, 5.6],
+        target: DEFAULT_VIEWER_SETTINGS.cameraState?.target,
+        up: DEFAULT_VIEWER_SETTINGS.cameraState?.up,
+      },
+    };
+
+    const serializedParams = serializeViewerUrlParams(
+      { ...DEFAULT_VIEWER_SETTINGS, ...customViewerState },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+    // Pos is 1.2:3.4:5.6 but escaped
+    const expectedCameraPosition = encodeURIComponent("pos:1.2:3.4:5.6");
+    expect(urlParams.toString()).toEqual(`dens=100&t=40&cam=${expectedCameraPosition}&view=Z`);
+  });
+
+  it("can remove channel state fields that matches the default", () => {
+    // Note that this unit test will break if the
+    const customChannelState: Partial<ChannelState> = {
+      color: [255, 0, 0],
+      useControlPoints: true,
+      isovalue: 49,
+    };
+    const serializedParams = serializeViewerUrlParams(
+      { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+
+    const expectedEncodedParams = encodeURIComponent("isv:49,col:ff0000,cpe:1");
+    expect(urlParams.toString()).toEqual("c0=" + expectedEncodedParams);
+  });
+
+  // it("does not use object reference comparison on control points when excluding defaults", () => {
+  //   // Expand control points so it isn't comparing an object reference
+  //   const customChannelState: Partial<ChannelState> = {
+  //     controlPoints: [{ ...DEFAULT_CHANNEL_STATE.controlPoints[0] }, { ...DEFAULT_CHANNEL_STATE.controlPoints[1] }],
   //   };
 
   //   const serializedParams = serializeViewerUrlParams(
-  //     { ...DEFAULT_VIEWER_SETTINGS, ...customViewerState },
+  //     { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
   //     true
   //   ) as Record<string, string>;
   //   const urlParams = new URLSearchParams(serializedParams);
-  //   expect(urlParams.toString()).toEqual("dens=100,t=40,cam=pos:1.2%2C3.4%2C5.6");
-  // });
-
-  // it("can remove channel state that matches the default", () => {
-  //   throw new Error("Test not implemented");
+  //   expect(urlParams.toString()).toEqual("c0=");
   // });
 });
