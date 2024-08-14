@@ -1,17 +1,18 @@
 import { Button, Input, Modal, notification } from "antd";
+import { ShareAltOutlined } from "@ant-design/icons";
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
+import { View3d } from "@aics/volume-viewer";
 
 import { FlexRow } from "../LandingPage/utils";
 import { AppDataProps } from "../../types";
-import { ShareAltOutlined } from "@ant-design/icons";
 import {
   ALL_VIEWER_STATE_KEYS,
   connectToViewerState,
 } from "../../../src/aics-image-viewer/components/ViewerStateProvider";
 import { ViewerStateContextType } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { serializeViewerUrlParams } from "../../utils/url_utils";
-import { View3d } from "@aics/volume-viewer";
+import { ENCODED_COLON_REGEX, ENCODED_COMMA_REGEX } from "../../../src/aics-image-viewer/shared/constants";
 
 type ShareModalProps = {
   appProps: AppDataProps;
@@ -55,7 +56,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
   let shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
 
   // Decode specifically colons and commas
-  shareUrl = shareUrl.replace(/%3A/g, ":").replace(/%2C/g, ",");
+  shareUrl = shareUrl.replace(ENCODED_COLON_REGEX, ":").replace(ENCODED_COMMA_REGEX, ",");
 
   const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);

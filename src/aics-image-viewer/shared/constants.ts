@@ -93,6 +93,9 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
+export const ENCODED_COMMA_REGEX = /%2C/g;
+export const ENCODED_COLON_REGEX = /%3A/g;
+
 export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"

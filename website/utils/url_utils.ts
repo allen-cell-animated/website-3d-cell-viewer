@@ -15,7 +15,13 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
-import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
+import {
+  DEFAULT_CHANNEL_STATE,
+  DEFAULT_VIEWER_SETTINGS,
+  ENCODED_COLON_REGEX,
+} from "../../src/aics-image-viewer/shared/constants";
+
+const DEFAULT_CONTROL_POINT_COLOR: [number, number, number] = [255, 255, 255];
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -330,7 +336,7 @@ export function parseKeyValueList(data: string): Record<string, string> {
 }
 
 function decodeColons(str: string): string {
-  return str.replace(/%3A/g, ":");
+  return str.replace(ENCODED_COLON_REGEX, ":");
 }
 
 export function objectToKeyValueList(obj: Record<string, string | undefined>): string {
@@ -576,7 +582,8 @@ function serializeControlPoints(controlPoints: ControlPoint[]): string {
     .map((cp) => {
       const x = formatFloat(cp.x);
       const opacity = formatFloat(cp.opacity);
-      const color = colorArrayToHex(cp.color);
+      // Default color is empty string
+      const color = isArrayEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
       return `${x}:${opacity}:${color}`;
     })
     .join(":");
@@ -609,7 +616,7 @@ function parseControlPoints(controlPoints: string | undefined): ControlPoint[] |
     return {
       x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
-      color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
+      color: parseHexColorAsColorArray(color) ?? DEFAULT_CONTROL_POINT_COLOR,
     };
   });
   // Sort control points by x value
