@@ -1,3 +1,5 @@
+import { ControlPoint } from "@aics/volume-viewer";
+
 /**
  * Returns a (shallow) copy of an object with all properties that are
  * `undefined` removed.
@@ -14,7 +16,8 @@ export function removeUndefinedProperties<T>(obj: T): Partial<T> {
 
 /**
  * Returns whether two (1-dimensional) arrays have values that are
- * strictly equal. Note that this does not handle nested arrays.
+ * strictly equal. Note that this does not handle nested arrays and will only
+ * compare objects by reference.
  */
 export function isArrayEqual(a: unknown[], b: unknown[]): boolean {
   if (a.length !== b.length) {
@@ -41,4 +44,13 @@ export function removeMatchingProperties<T extends Object>(obj: Partial<T>, matc
     }
   }
   return result;
+}
+
+export function areControlPointsEqual(a: ControlPoint[], b: ControlPoint[]): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  return a.every((val, i) => {
+    return val.x === b[i].x && val.opacity === b[i].opacity && isArrayEqual(val.color, b[i].color);
+  });
 }

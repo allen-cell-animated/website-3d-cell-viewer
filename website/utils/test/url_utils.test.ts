@@ -822,17 +822,17 @@ describe("serializeViewerUrlParams", () => {
     expect(urlParams.toString()).toEqual("c0=" + expectedEncodedParams);
   });
 
-  // it("does not use object reference comparison on control points when excluding defaults", () => {
-  //   // Expand control points so it isn't comparing an object reference
-  //   const customChannelState: Partial<ChannelState> = {
-  //     controlPoints: [{ ...DEFAULT_CHANNEL_STATE.controlPoints[0] }, { ...DEFAULT_CHANNEL_STATE.controlPoints[1] }],
-  //   };
+  it("does not use object reference comparison on control points when excluding defaults", () => {
+    // Expand control points so it isn't comparing an object reference
+    const customChannelState: Partial<ChannelState> = {
+      controlPoints: [{ ...DEFAULT_CHANNEL_STATE.controlPoints[0] }, { ...DEFAULT_CHANNEL_STATE.controlPoints[1] }],
+    };
 
-  //   const serializedParams = serializeViewerUrlParams(
-  //     { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
-  //     true
-  //   ) as Record<string, string>;
-  //   const urlParams = new URLSearchParams(serializedParams);
-  //   expect(urlParams.toString()).toEqual("c0=");
-  // });
+    const serializedParams = serializeViewerUrlParams(
+      { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+    expect(urlParams.toString()).toEqual("c0=");
+  });
 });

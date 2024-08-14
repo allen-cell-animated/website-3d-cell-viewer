@@ -16,7 +16,12 @@ import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepres
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
 import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
-import { removeMatchingProperties, isArrayEqual, removeUndefinedProperties } from "./datatype_utils";
+import {
+  removeMatchingProperties,
+  isArrayEqual,
+  removeUndefinedProperties,
+  areControlPointsEqual,
+} from "./datatype_utils";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
@@ -639,28 +644,11 @@ export function serializeViewerChannelSetting(
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
     channelSetting = removeMatchingProperties(channelSetting, DEFAULT_CHANNEL_STATE);
-    // NOTE: Control points are not checked using deep object equality, and only by
-    // object reference. Because control points are
-    if (
-      channelSetting.controlPoints &&
-      channelSetting.controlPoints.length === DEFAULT_CHANNEL_STATE.controlPoints.length
-    ) {
-      let areControlPointsEqual = true;
-      for (let i = 0; i < channelSetting.controlPoints.length; i++) {
-        const controlPoint = channelSetting.controlPoints[i];
-        const defaultControlPoint = DEFAULT_CHANNEL_STATE.controlPoints[i];
-        if (
-          controlPoint.x !== defaultControlPoint.x ||
-          controlPoint.opacity !== defaultControlPoint.opacity ||
-          !isArrayEqual(controlPoint.color, defaultControlPoint.color)
-        ) {
-          areControlPointsEqual = false;
-          break;
-        }
-      }
-      if (areControlPointsEqual) {
-        channelSetting.controlPoints = undefined;
-      }
+    // NOTE: `removeMatchingProperties` does not do deep equality checking, so we need to handle
+    // control points separately.
+    const controlPoints = channelSetting.controlPoints;
+    if (controlPoints && areControlPointsEqual(controlPoints, DEFAULT_CHANNEL_STATE.controlPoints)) {
+      channelSetting.controlPoints = undefined;
     }
   }
   return removeUndefinedProperties({
