@@ -119,8 +119,6 @@ export const getDefaultViewerState = (): ViewerState => ({
   },
 });
 
-// TODO: Make this and the default viewer settings lambda functions that return
-// new objects to prevent accidental mutation of the default state.
 export const getDefaultChannelState = (): ChannelState => ({
   name: "",
   volumeEnabled: false,
