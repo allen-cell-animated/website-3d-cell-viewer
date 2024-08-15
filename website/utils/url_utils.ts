@@ -39,18 +39,28 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
  * the x, y, and z axes.
  */
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
-const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
+
+const HEX_COLOR_REGEX = /(([0-9a-fA-F]{6})|(w))/;
+const NUMERIC_REGEX = /-?[0-9.]*/;
+const CONTROL_POINT_REGEX = new RegExp(`(${NUMERIC_REGEX.source}:${NUMERIC_REGEX.source}:${HEX_COLOR_REGEX.source})`);
+
+const HEX_COLOR_STR_REGEX = new RegExp(`^${HEX_COLOR_REGEX.source}$`);
+
+// TODO: refactor regexes to be composed of one another rather than duplicating code
 /**
  * LEGACY: Matches a COMMA-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
+ * The hex color can be replaced with `w` to represent white, or `ffffff`.
  */
-export const LEGACY_CONTROL_POINTS_REGEX =
-  /^(-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)(,-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)*$/;
+export const LEGACY_CONTROL_POINTS_REGEX = new RegExp(
+  `^${CONTROL_POINT_REGEX.source}(,${CONTROL_POINT_REGEX.source})*$`
+);
 /**
  * Matches a COLON-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
+ * The hex color can be replaced with `w` to represent white, or `ffffff`.
  */
-export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)(:-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)*$/;
+export const CONTROL_POINTS_REGEX = new RegExp(`^${CONTROL_POINT_REGEX.source}(:${CONTROL_POINT_REGEX.source})*$`);
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
@@ -424,8 +434,11 @@ function parseStringBoolean(value: string | undefined): boolean | undefined {
 }
 
 export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
-  if (!hexColor || !HEX_COLOR_REGEX.test(hexColor)) {
+  if (!hexColor || !HEX_COLOR_STR_REGEX.test(hexColor)) {
     return undefined;
+  }
+  if (hexColor === DEFAULT_CONTROL_POINT_COLOR_CODE) {
+    return DEFAULT_CONTROL_POINT_COLOR;
   }
   const r = Number.parseInt(hexColor.slice(0, 2), 16);
   const g = Number.parseInt(hexColor.slice(2, 4), 16);
@@ -573,7 +586,9 @@ function serializeControlPoints(controlPoints: ControlPoint[]): string {
       const x = formatFloat(cp.x);
       const opacity = formatFloat(cp.opacity);
       // Default color is empty string
-      const color = isEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
+      const color = isEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR)
+        ? DEFAULT_CONTROL_POINT_COLOR_CODE
+        : colorArrayToHex(cp.color);
       return `${x}:${opacity}:${color}`;
     })
     .join(":");
