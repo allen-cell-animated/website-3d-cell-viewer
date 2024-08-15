@@ -50,11 +50,10 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     serializedViewerParams = { url: serializedUrl, ...serializedViewerParams };
   }
 
-  // TODO: Don't use URLSearchParams here because it will encode commas and colons?
   const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
   let shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
 
-  // Decode specifically colons and commas
+  // Decode specifically colons and commas for better readability + decreased char count
   shareUrl = shareUrl.replace(ENCODED_COLON_REGEX, ":").replace(ENCODED_COMMA_REGEX, ",");
 
   const onClickCopy = (): void => {

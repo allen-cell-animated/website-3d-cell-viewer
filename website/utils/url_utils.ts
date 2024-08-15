@@ -16,12 +16,7 @@ import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepres
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
 import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
-import {
-  removeMatchingProperties,
-  isArrayEqual,
-  removeUndefinedProperties,
-  areControlPointsEqual,
-} from "./datatype_utils";
+import { removeMatchingProperties, removeUndefinedProperties, isDeepEqual } from "./datatype_utils";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
@@ -551,7 +546,7 @@ function serializeControlPoints(controlPoints: ControlPoint[]): string {
       const x = formatFloat(cp.x);
       const opacity = formatFloat(cp.opacity);
       // Default color is empty string
-      const color = isArrayEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
+      const color = isDeepEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
       return `${x}:${opacity}:${color}`;
     })
     .join(":");
@@ -644,12 +639,6 @@ export function serializeViewerChannelSetting(
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
     channelSetting = removeMatchingProperties(channelSetting, DEFAULT_CHANNEL_STATE);
-    // NOTE: `removeMatchingProperties` does not do deep equality checking, so we need to handle
-    // control points separately.
-    const controlPoints = channelSetting.controlPoints;
-    if (controlPoints && areControlPointsEqual(controlPoints, DEFAULT_CHANNEL_STATE.controlPoints)) {
-      channelSetting.controlPoints = undefined;
-    }
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
@@ -745,9 +734,6 @@ export function serializeViewerState(state: Partial<ViewerState>, removeDefaults
     [ViewerStateKeys.CameraState]:
       state.cameraState && serializeCameraState(state.cameraState as CameraState, removeDefaults),
   };
-
-  console.log("state.cameraState", state.cameraState);
-  console.log("result.cam", result[ViewerStateKeys.CameraState]);
 
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
