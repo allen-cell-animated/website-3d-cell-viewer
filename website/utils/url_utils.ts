@@ -16,11 +16,14 @@ import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepres
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
 import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
-import { removeMatchingProperties, removeUndefinedProperties, isDeepEqual } from "./datatype_utils";
+import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
+import { isEqual } from "lodash";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
 const DEFAULT_CONTROL_POINT_COLOR: [number, number, number] = [255, 255, 255];
+// Substitutes for default control point color (ffffff)
+const DEFAULT_CONTROL_POINT_COLOR_CODE = "w";
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -450,7 +453,7 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
 
 /**
  * Parses an array of three numbers from a string.
- * @param levels The string to parse. Should be three numbers separated by a separator.
+ * @param stringArr The string to parse. Should be three numbers separated by a separator.
  * @param options Optional parameters for parsing:
  * - `min`: Minimum value for each number. Default is negative infinity.
  * - `max`: Maximum value for each number. Default is positive infinity.
@@ -460,10 +463,10 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
  * - An array of three numbers, clamped to the [min, max] range.
  */
 function parseThreeNumberArray(
-  levels: string | undefined,
+  stringArr: string | undefined,
   options?: { min?: number; max?: number; separator?: string }
 ): [number, number, number] | undefined {
-  if (!levels) {
+  if (!stringArr) {
     return undefined;
   }
 
@@ -471,11 +474,11 @@ function parseThreeNumberArray(
   const max = options?.max ?? Number.POSITIVE_INFINITY;
   const separator = options?.separator ?? ",";
 
-  const [low, middle, high] = levels.split(separator).map((val) => parseStringFloat(val, min, max));
-  if (low === undefined || middle === undefined || high === undefined) {
+  const [x, y, z] = stringArr.split(separator).map((val) => parseStringFloat(val, min, max));
+  if (x === undefined || y === undefined || z === undefined) {
     return undefined;
   }
-  return [low, middle, high];
+  return [x, y, z];
 }
 
 function parseStringRegion(region: string | undefined): PerAxis<[number, number]> | undefined {
@@ -570,7 +573,7 @@ function serializeControlPoints(controlPoints: ControlPoint[]): string {
       const x = formatFloat(cp.x);
       const opacity = formatFloat(cp.opacity);
       // Default color is empty string
-      const color = isDeepEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
+      const color = isEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR) ? "" : colorArrayToHex(cp.color);
       return `${x}:${opacity}:${color}`;
     })
     .join(":");
@@ -934,6 +937,8 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
 /**
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
+ * @param removeDefaults If true, shortens parameters by removing any properties that match the default state.
+ * This includes DEFAULT_VIEWER_SETTINGS and DEFAULT_CHANNEL_STATE.
  */
 export function serializeViewerUrlParams(
   state: Partial<ViewerStateContextType>,
