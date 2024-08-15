@@ -39,8 +39,6 @@ function isObjectDeepEqual(a: Record<string, unknown>, b: Record<string, unknown
 
 /**
  * Recursively checks for deep equality between two elements, including objects or arrays.
- * @param a
- * @param b
  * @returns true if `a` and `b` are deeply equal, false otherwise. Handles NaN values
  * and nested arrays.
  */
@@ -65,8 +63,8 @@ export function isDeepEqual(a: unknown, b: unknown): boolean {
 }
 
 /**
- * Returns a copy of `obj` where all properties with values that match the properties of `match` are removed.
- * Matching is determined by deep equality (see `isDeepEqual()`).
+ * Returns a copy of `obj` where all properties with values that match the properties of `match`
+ * are removed. Matching is determined by deep equality (see `isDeepEqual()`).
  */
 export function removeMatchingProperties<T extends Object>(obj: Partial<T>, match: T): Partial<T> {
   const result: Partial<T> = {};

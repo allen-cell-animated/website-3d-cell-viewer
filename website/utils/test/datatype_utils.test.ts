@@ -20,6 +20,11 @@ describe("isDeepEqual", () => {
     expect(isDeepEqual(NaN, 1)).toBe(false);
   });
 
+  it("handles undefined and null", () => {
+    expect(isDeepEqual(undefined, undefined)).toBe(true);
+    expect(isDeepEqual(null, null)).toBe(true);
+  });
+
   it("handles empty object", () => {
     expect(isDeepEqual({}, {})).toBe(true);
   });

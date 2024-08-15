@@ -449,6 +449,14 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
 
 /**
  * Parses an array of three numbers from a string.
+ * @param levels The string to parse. Should be three numbers separated by a separator.
+ * @param options Optional parameters for parsing:
+ * - `min`: Minimum value for each number. Default is negative infinity.
+ * - `max`: Maximum value for each number. Default is positive infinity.
+ * - `separator`: Separator between numbers. Default is `,`.
+ * @returns
+ * - undefined if the string is undefined or could not be parsed.
+ * - An array of three numbers, clamped to the [min, max] range.
  */
 function parseThreeNumberArray(
   levels: string | undefined,
@@ -489,9 +497,24 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
+/**
+ * Formats a float or integer value to a string with a maximum precision for float values.
+ * @param value The number to format.
+ * @param maxPrecision The maximum number of significant digits to display for float values.
+ * Default is 5.
+ * @returns
+ * - For integers, the integer value as a string.
+ * - For floats, the float value as a string with a maximum of `maxPrecision` significant digits
+ * and any trailing zeroes removed.
+ *
+ * @example
+ * ```
+ * formatFloat(1.23456, 3) // "1.23"
+ * formatFloat(123456, 3) // "123456"
+ * formatFloat(1.3999999999999999, 3) // "1.4"
+ * ```
+ */
 function formatFloat(value: number, maxPrecision: number = 5): string {
-  // TODO: Make this smarter for integers, precision, etc.
-  // Ideally should have a fixed max precision
   if (Number.isInteger(value)) {
     return value.toString();
   }
