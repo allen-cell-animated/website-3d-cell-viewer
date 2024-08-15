@@ -22,8 +22,18 @@ import { isEqual } from "lodash";
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
 const DEFAULT_CONTROL_POINT_COLOR: [number, number, number] = [255, 255, 255];
-// Substitutes for default control point color (ffffff)
-const DEFAULT_CONTROL_POINT_COLOR_CODE = "w";
+const DEFAULT_CONTROL_POINT_COLOR_CODE = "1";
+
+// TODO: refactor regexes to be composed of one another rather than duplicating code
+// const COLOR_CODES: Record<string, ColorArray> = {
+//   "0": [0, 0, 0],
+//   "1": [255, 255, 255],
+//   "-1": [255, 255, 255],
+//   w: [255, 255, 255],
+//   k: [0, 0, 0],
+// };
+// const COLOR_CODE_REGEX = new RegExp(`(${Object.keys(COLOR_CODES).join("|")})`);
+// const HEX_COLOR_REGEX = new RegExp(`(([0-9a-fA-F]{6})|${COLOR_CODE_REGEX.source})`);
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -40,13 +50,12 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
  */
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
 
-const HEX_COLOR_REGEX = /(([0-9a-fA-F]{6})|(w))/;
+const HEX_COLOR_REGEX = new RegExp(`(([0-9a-fA-F]{6})|${DEFAULT_CONTROL_POINT_COLOR_CODE})`);
 const NUMERIC_REGEX = /-?[0-9.]*/;
 const CONTROL_POINT_REGEX = new RegExp(`(${NUMERIC_REGEX.source}:${NUMERIC_REGEX.source}:${HEX_COLOR_REGEX.source})`);
 
 const HEX_COLOR_STR_REGEX = new RegExp(`^${HEX_COLOR_REGEX.source}$`);
 
-// TODO: refactor regexes to be composed of one another rather than duplicating code
 /**
  * LEGACY: Matches a COMMA-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
@@ -437,6 +446,9 @@ export function parseHexColorAsColorArray(hexColor: string | undefined): ColorAr
   if (!hexColor || !HEX_COLOR_STR_REGEX.test(hexColor)) {
     return undefined;
   }
+  // if (hexColor in COLOR_CODES) {
+  //   return COLOR_CODES[hexColor];
+  // }
   if (hexColor === DEFAULT_CONTROL_POINT_COLOR_CODE) {
     return DEFAULT_CONTROL_POINT_COLOR;
   }
@@ -586,6 +598,7 @@ function serializeControlPoints(controlPoints: ControlPoint[]): string {
       const x = formatFloat(cp.x);
       const opacity = formatFloat(cp.opacity);
       // Default color is empty string
+      // TODO: Substitute
       const color = isEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR)
         ? DEFAULT_CONTROL_POINT_COLOR_CODE
         : colorArrayToHex(cp.color);

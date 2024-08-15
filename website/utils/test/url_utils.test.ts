@@ -52,7 +52,7 @@ describe("LEGACY_CONTROL_POINTS_REGEX", () => {
   });
 
   it("allows 'w' as a placeholder for color strings", () => {
-    const data = "1:0.5:w,255:1:w";
+    const data = "1:0.5:1,255:1:1";
     expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 });
@@ -74,7 +74,7 @@ describe("CONTROL_POINTS_REGEX", () => {
   });
 
   it("allows empty color strings", () => {
-    const data = "1:0.5:w:255:1:w";
+    const data = "1:0.5:1:255:1:1";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 });
@@ -144,8 +144,8 @@ describe("parseHexColorAsColorArray", () => {
     expect(parseHexColorAsColorArray("hjklmn")).toBeUndefined();
   });
 
-  it("parses the 'w' code for white", () => {
-    expect(parseHexColorAsColorArray("w")).toEqual([255, 255, 255]);
+  it("parses the '1' code as white", () => {
+    expect(parseHexColorAsColorArray("1")).toEqual([255, 255, 255]);
   });
 });
 
@@ -249,7 +249,7 @@ describe("Channel state serialization", () => {
     clz: "1",
     cza: "0.5",
     cpe: "0",
-    cps: "0:0.5:w:255:1:w",
+    cps: "0:0.5:1:255:1:1",
     rmp: "0:255",
   };
 
@@ -555,9 +555,9 @@ describe("Channel state deserialization", () => {
     expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
   });
 
-  it("replaces empty color strings with default color #ffffff", () => {
+  it("replaces '1' color strings with default color #ffffff", () => {
     const result = deserializeViewerChannelSetting(0, {
-      cps: "0:0:w:50:1:w",
+      cps: "0:0:1:50:1:1",
     });
     expect(result.controlPoints).toEqual([
       { x: 0, opacity: 0, color: [255, 255, 255] },
