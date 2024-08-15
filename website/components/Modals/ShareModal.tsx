@@ -37,7 +37,8 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     ...props,
     cameraState: props.view3dRef?.current?.getCameraState(),
   };
-  let serializedViewerParams = serializeViewerUrlParams(paramProps) as Record<string, string>;
+
+  const urlParams: string[] = [];
 
   if (props.appProps.imageUrl) {
     let serializedUrl;
@@ -46,15 +47,20 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     } else {
       serializedUrl = encodeURIComponent(props.appProps.imageUrl);
     }
-    // Place URL at front of serialized params
-    serializedViewerParams = { url: serializedUrl, ...serializedViewerParams };
+    urlParams.push(`url=${serializedUrl}`);
   }
 
-  const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
-  let shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
+  let serializedViewerParams = new URLSearchParams(serializeViewerUrlParams(paramProps) as Record<string, string>);
+  if (serializedViewerParams.size > 0) {
+    // Decode specifically colons and commas for better readability + decreased char count
+    let viewerParamString = serializedViewerParams
+      .toString()
+      .replace(ENCODED_COLON_REGEX, ":")
+      .replace(ENCODED_COMMA_REGEX, ",");
+    urlParams.push(viewerParamString);
+  }
 
-  // Decode specifically colons and commas for better readability + decreased char count
-  shareUrl = shareUrl.replace(ENCODED_COLON_REGEX, ":").replace(ENCODED_COMMA_REGEX, ",");
+  const shareUrl = urlParams.length > 0 ? `${baseUrl}?${urlParams.join("&")}` : baseUrl;
 
   const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
