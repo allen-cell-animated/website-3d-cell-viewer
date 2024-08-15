@@ -516,11 +516,37 @@ describe("Viewer state serialization", () => {
   });
 });
 
+//// DESERIALIZE STATES ///////////////////////
+
+describe("Channel state deserialization", () => {
+  const DEFAULT_CONTROL_POINTS = [
+    { x: -10, opacity: 0, color: [0, 0, 0] },
+    { x: 50, opacity: 0, color: [0, 0, 0] },
+    { x: 100, opacity: 0.3, color: [0, 16, 255] },
+    { x: 140, opacity: 0.8, color: [0, 255, 255] },
+    { x: 260, opacity: 1, color: [0, 255, 180] },
+  ];
+
+  it("parses comma-separated control points", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
+    });
+    expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
+  });
+
+  it("parses colon-separated control points", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "-10:0:000000:50:0:000000:100:0.3:0010ff:140:0.8:00ffff:260:1:00ffb4",
+    });
+    expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
+  });
+});
+
 //// URL parsing /////////////////////////////////
 
 describe("parseViewerUrlParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
-  const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
+  const channelParamToSetting: [string, string, Partial<ViewerChannelSetting>][] = [
     [
       "c3=ven:1,col:ff00ff,clz:0,cza:0.9,isa:0.4,lut:p50:p99,sen:1,isv:129",
       "c3=ven%3A1%2Ccol%3Aff00ff%2Cclz%3A0%2Ccza%3A0.9%2Cisa%3A0.4%2Clut%3Ap50%3Ap99%2Csen%3A1%2Cisv%3A129",
@@ -763,7 +789,6 @@ describe("serializeViewerUrlParams", () => {
       cps: "0:0:808080:1:1:ff0000",
       cpe: "0",
     };
-    // TODO: Check that this can handle control points (cps) with comma separators.
     const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {
       ven: "0",
       col: "808080",

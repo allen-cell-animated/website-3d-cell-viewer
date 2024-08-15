@@ -643,7 +643,7 @@ export function deserializeViewerChannelSetting(
     const [min, max] = jsonState[ViewerChannelSettingKeys.Ramp].split(":");
     result.ramp = [Number.parseFloat(min), Number.parseFloat(max)];
   }
-  if (jsonState[ViewerChannelSettingKeys.ControlPoints] && CONTROL_POINTS_REGEX.test(jsonState.cps)) {
+  if (jsonState[ViewerChannelSettingKeys.ControlPoints]) {
     result.controlPoints = parseControlPoints(jsonState[ViewerChannelSettingKeys.ControlPoints]);
   }
   return result;
@@ -733,7 +733,6 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
  * @returns A `ViewerStateParams` object with the serialized parameters. Undefined values are removed.
  */
 export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
-  // TODO: Enforce decimal places for floats/decimals?
   if (removeDefaults) {
     state = removeMatchingProperties(state, DEFAULT_VIEWER_SETTINGS);
   }
@@ -939,7 +938,6 @@ export function serializeViewerUrlParams(
   state: Partial<ViewerStateContextType>,
   removeDefaults: boolean = true
 ): AppParams {
-  // TODO: Unit tests for this function
   const params = serializeViewerState(state, removeDefaults);
 
   const channelParams = state.channelSettings?.reduce<Record<string, string>>(
