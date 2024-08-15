@@ -20,7 +20,7 @@ import {
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../../src/aics-image-viewer/shared/constants";
+import { getDefaultChannelState, getDefaultViewerState } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -391,7 +391,6 @@ describe("Channel state serialization", () => {
 });
 
 describe("Viewer state serialization", () => {
-  // Copy of DEFAULT_VIEWER_SETTINGS.
   const DEFAULT_VIEWER_STATE: ViewerState = {
     viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
     renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -833,19 +832,20 @@ describe("serializeViewerUrlParams", () => {
   });
 
   it("can remove viewer settings that match the default", () => {
+    const defaultViewerSettings = getDefaultViewerState();
     const customViewerState: Partial<ViewerState> = {
       viewMode: ViewMode.xy,
       density: 100,
       time: 40,
       cameraState: {
         position: [1.2, 3.4, 5.6],
-        target: DEFAULT_VIEWER_SETTINGS.cameraState?.target,
-        up: DEFAULT_VIEWER_SETTINGS.cameraState?.up,
+        target: defaultViewerSettings.cameraState?.target,
+        up: defaultViewerSettings.cameraState?.up,
       },
     };
 
     const serializedParams = serializeViewerUrlParams(
-      { ...DEFAULT_VIEWER_SETTINGS, ...customViewerState },
+      { ...defaultViewerSettings, ...customViewerState },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);
@@ -862,7 +862,7 @@ describe("serializeViewerUrlParams", () => {
       isovalue: 49,
     };
     const serializedParams = serializeViewerUrlParams(
-      { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
+      { ...getDefaultViewerState(), channelSettings: [{ ...getDefaultChannelState(), ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);
@@ -873,12 +873,13 @@ describe("serializeViewerUrlParams", () => {
 
   it("does not use object reference comparison on control points when excluding defaults", () => {
     // Expand control points so it isn't comparing an object reference
+    const defaultChannelState = getDefaultChannelState();
     const customChannelState: Partial<ChannelState> = {
-      controlPoints: [{ ...DEFAULT_CHANNEL_STATE.controlPoints[0] }, { ...DEFAULT_CHANNEL_STATE.controlPoints[1] }],
+      controlPoints: [{ ...defaultChannelState.controlPoints[0] }, { ...defaultChannelState.controlPoints[1] }],
     };
 
     const serializedParams = serializeViewerUrlParams(
-      { ...DEFAULT_VIEWER_SETTINGS, channelSettings: [{ ...DEFAULT_CHANNEL_STATE, ...customChannelState }] },
+      { ...getDefaultViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);

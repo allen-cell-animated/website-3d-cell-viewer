@@ -15,9 +15,9 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
-import { DEFAULT_CHANNEL_STATE, DEFAULT_VIEWER_SETTINGS } from "../../src/aics-image-viewer/shared/constants";
 import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
 import { isEqual } from "lodash";
+import { getDefaultChannelState, getDefaultViewerState } from "../../src/aics-image-viewer/shared/constants";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
@@ -575,7 +575,7 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
 
 function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
   if (removeDefaults) {
-    cameraState = removeMatchingProperties(cameraState, DEFAULT_VIEWER_SETTINGS.cameraState ?? {});
+    cameraState = removeMatchingProperties(cameraState, getDefaultViewerState().cameraState ?? {});
     if (Object.keys(cameraState).length === 0) {
       return undefined;
     }
@@ -685,7 +685,7 @@ export function deserializeViewerChannelSetting(
  * Serializes a single viewer channel setting into a dictionary of URL parameters
  * (`ViewerChannelSettingParams`).
  * @param channelSetting The channel state object to serialize.
- * @param removeDefaults Whether to remove properties that match the `DEFAULT_CHANNEL_STATE`.
+ * @param removeDefaults Whether to remove properties that match the output of `GET_DEFAULT_CHANNEL_STATE`.
  * @returns A `ViewerChannelSettingParams` object with the serialized parameters. Undefined values are removed.
  */
 export function serializeViewerChannelSetting(
@@ -693,7 +693,7 @@ export function serializeViewerChannelSetting(
   removeDefaults: boolean
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
-    channelSetting = removeMatchingProperties(channelSetting, DEFAULT_CHANNEL_STATE);
+    channelSetting = removeMatchingProperties(channelSetting, getDefaultChannelState());
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
@@ -761,12 +761,12 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
 /**
  * Serializes a ViewerState object into a dictionary of URL parameters.
  * @param state The ViewerState to serialize.
- * @param removeDefaults If true, remove properties that match the `DEFAULT_VIEWER_SETTINGS` value.
+ * @param removeDefaults If true, remove properties that match the output of `GET_DEFAULT_VIEWER_STATE`.
  * @returns A `ViewerStateParams` object with the serialized parameters. Undefined values are removed.
  */
 export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
   if (removeDefaults) {
-    state = removeMatchingProperties(state, DEFAULT_VIEWER_SETTINGS);
+    state = removeMatchingProperties(state, getDefaultViewerState());
   }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,
@@ -966,7 +966,7 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
  * @param removeDefaults If true, shortens parameters by removing any properties that match the default state.
- * This includes DEFAULT_VIEWER_SETTINGS and DEFAULT_CHANNEL_STATE.
+ * This includes the output of GET_DEFAULT_VIEWER_STATE and GET_DEFAULT_CHANNEL_STATE.
  */
 export function serializeViewerUrlParams(
   state: Partial<ViewerStateContextType>,

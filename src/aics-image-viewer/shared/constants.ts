@@ -93,7 +93,7 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
-export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+export const getDefaultViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -117,11 +117,11 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
     fov: 20,
     orthoScale: 0.5,
   },
-};
+});
 
 // TODO: Make this and the default viewer settings lambda functions that return
 // new objects to prevent accidental mutation of the default state.
-export const DEFAULT_CHANNEL_STATE: ChannelState = {
+export const getDefaultChannelState = (): ChannelState => ({
   name: "",
   volumeEnabled: false,
   isosurfaceEnabled: false,
@@ -136,4 +136,4 @@ export const DEFAULT_CHANNEL_STATE: ChannelState = {
     { x: 0, opacity: 0, color: [255, 255, 255] },
     { x: 255, opacity: 1, color: [255, 255, 255] },
   ],
-};
+});

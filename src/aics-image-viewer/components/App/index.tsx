@@ -42,8 +42,8 @@ import {
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
-  DEFAULT_VIEWER_SETTINGS,
-  DEFAULT_CHANNEL_STATE,
+  getDefaultChannelState,
+  getDefaultViewerState,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 
@@ -111,7 +111,7 @@ const defaultProps: AppProps = {
 
   appHeight: "100vh",
   visibleControls: defaultVisibleControls,
-  viewerSettings: DEFAULT_VIEWER_SETTINGS,
+  viewerSettings: getDefaultViewerState(),
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
@@ -132,7 +132,7 @@ const initializeOneChannelSetting = (
   index: number,
   defaultColor: ColorArray,
   viewerChannelSettings?: ViewerChannelSettings,
-  defaultChannelState = DEFAULT_CHANNEL_STATE
+  defaultChannelState = getDefaultChannelState()
 ): ChannelState => {
   let initSettings = {} as Partial<ViewerChannelSetting>;
   if (viewerChannelSettings) {
