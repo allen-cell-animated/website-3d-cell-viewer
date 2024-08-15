@@ -93,7 +93,7 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
-export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
+export const getDefaultViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -110,10 +110,16 @@ export const DEFAULT_VIEWER_SETTINGS: ViewerState = {
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-  cameraState: undefined,
-};
+  cameraState: {
+    position: [0, 0, 5],
+    target: [0, 0, 0],
+    up: [0, 1, 0],
+    fov: 20,
+    orthoScale: 0.5,
+  },
+});
 
-export const DEFAULT_CHANNEL_STATE: ChannelState = {
+export const getDefaultChannelState = (): ChannelState => ({
   name: "",
   volumeEnabled: false,
   isosurfaceEnabled: false,
@@ -128,4 +134,4 @@ export const DEFAULT_CHANNEL_STATE: ChannelState = {
     { x: 0, opacity: 0, color: [255, 255, 255] },
     { x: 255, opacity: 1, color: [255, 255, 255] },
   ],
-};
+});

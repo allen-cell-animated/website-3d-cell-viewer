@@ -15,10 +15,12 @@ import {
   ViewerStateParams,
   serializeViewerUrlParams,
   CONTROL_POINTS_REGEX,
+  LEGACY_CONTROL_POINTS_REGEX,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import { getDefaultChannelState, getDefaultViewerState } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -33,6 +35,28 @@ const defaultSettings: ViewerChannelSetting = {
 
 //// VALUE PARSING ///////////////////////////////////////
 
+describe("LEGACY_CONTROL_POINTS_REGEX", () => {
+  it("accepts single control points", () => {
+    const data = "1:0.5:ffffff";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts multiple control points", () => {
+    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("accepts negative numbers", () => {
+    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("allows 'w' as a placeholder for color strings", () => {
+    const data = "1:0.5:1,255:1:1";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+});
+
 describe("CONTROL_POINTS_REGEX", () => {
   it("accepts single control points", () => {
     const data = "1:0.5:ffffff";
@@ -40,12 +64,17 @@ describe("CONTROL_POINTS_REGEX", () => {
   });
 
   it("accepts multiple control points", () => {
-    const data = "1:0.5:ff0000,128:0.7:ffff00,255:1:ff0000";
+    const data = "1:0.5:ff0000:128:0.7:ffff00:255:1:ff0000";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 
   it("accepts negative numbers", () => {
-    const data = "-1:0.5:ff0000,-255:1:ff0000";
+    const data = "-1:0.5:ff0000:-255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("allows empty color strings", () => {
+    const data = "1:0.5:1:255:1:1";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 });
@@ -113,6 +142,10 @@ describe("parseHexColorAsColorArray", () => {
     expect(parseHexColorAsColorArray("fff")).toBeUndefined();
     expect(parseHexColorAsColorArray("fffffff")).toBeUndefined();
     expect(parseHexColorAsColorArray("hjklmn")).toBeUndefined();
+  });
+
+  it("parses the '1' code as white", () => {
+    expect(parseHexColorAsColorArray("1")).toEqual([255, 255, 255]);
   });
 });
 
@@ -216,7 +249,7 @@ describe("Channel state serialization", () => {
     clz: "1",
     cza: "0.5",
     cpe: "0",
-    cps: "0:0.5:ffffff,255:1:ffffff",
+    cps: "0:0.5:1:255:1:1",
     rmp: "0:255",
   };
 
@@ -323,7 +356,7 @@ describe("Channel state serialization", () => {
 
   describe("serializeViewerChannelSetting", () => {
     it("serializes channel settings", () => {
-      expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
+      expect(serializeViewerChannelSetting(DEFAULT_CHANNEL_STATE, false)).toEqual(DEFAULT_SERIALIZED_CHANNEL_STATE);
     });
 
     it("serializes custom channel settings", () => {
@@ -352,13 +385,12 @@ describe("Channel state serialization", () => {
         cps: "",
         rmp: "0:255",
       };
-      expect(serializeViewerChannelSetting(customChannelState)).toEqual(serializedCustomChannelState);
+      expect(serializeViewerChannelSetting(customChannelState, false)).toEqual(serializedCustomChannelState);
     });
   });
 });
 
 describe("Viewer state serialization", () => {
-  // Copy of DEFAULT_VIEWER_SETTINGS.
   const DEFAULT_VIEWER_STATE: ViewerState = {
     viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
     renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -439,16 +471,16 @@ describe("Viewer state serialization", () => {
     reg: "0:0.5,0:1,0:1",
     slice: "0.25,0.75,0.5",
     t: "100",
-    cam: "pos:-1.05%2C-4%2C45,tar:0%2C0%2C0,up:0%2C1%2C0,ort:3.534,fov:43.5",
+    cam: "pos:-1.05:-4:45,tar:0:0:0,up:0:1:0,ort:3.534,fov:43.5",
   };
 
   describe("serializeViewerState", () => {
     it("serializes the default viewer settings", () => {
-      expect(serializeViewerState(DEFAULT_VIEWER_STATE)).toEqual(SERIALIZED_DEFAULT_VIEWER_STATE);
+      expect(serializeViewerState(DEFAULT_VIEWER_STATE, false)).toEqual(SERIALIZED_DEFAULT_VIEWER_STATE);
     });
 
     it("serializes custom viewer settings", () => {
-      expect(serializeViewerState(CUSTOM_VIEWER_STATE)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
+      expect(serializeViewerState(CUSTOM_VIEWER_STATE, false)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
 
     it("deserializes partial camera settings", () => {
@@ -459,7 +491,7 @@ describe("Viewer state serialization", () => {
           fov: 43.5,
         },
       };
-      const serializedState = "pos:1%2C-1.4%2C45,up:0%2C1%2C0,fov:43.5";
+      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
       expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
     });
   });
@@ -483,7 +515,7 @@ describe("Viewer state serialization", () => {
       const viewModes = Object.values(ViewMode);
       for (const viewMode of viewModes) {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, viewMode };
-        expect(deserializeViewerState(serializeViewerState(state)).viewMode).toEqual(viewMode);
+        expect(deserializeViewerState(serializeViewerState(state, false)).viewMode).toEqual(viewMode);
       }
     });
 
@@ -491,9 +523,45 @@ describe("Viewer state serialization", () => {
       const renderModes = Object.values(RenderMode);
       for (const renderMode of renderModes) {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
-        expect(deserializeViewerState(serializeViewerState(state)).renderMode).toEqual(renderMode);
+        expect(deserializeViewerState(serializeViewerState(state, false)).renderMode).toEqual(renderMode);
       }
     });
+  });
+});
+
+//// DESERIALIZE STATES ///////////////////////
+
+describe("Channel state deserialization", () => {
+  const DEFAULT_CONTROL_POINTS = [
+    { x: -10, opacity: 0, color: [0, 0, 0] },
+    { x: 50, opacity: 0, color: [0, 0, 0] },
+    { x: 100, opacity: 0.3, color: [0, 16, 255] },
+    { x: 140, opacity: 0.8, color: [0, 255, 255] },
+    { x: 260, opacity: 1, color: [0, 255, 180] },
+  ];
+
+  it("parses comma-separated control points", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
+    });
+    expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
+  });
+
+  it("parses colon-separated control points", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "-10:0:000000:50:0:000000:100:0.3:0010ff:140:0.8:00ffff:260:1:00ffb4",
+    });
+    expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
+  });
+
+  it("replaces '1' color strings with default color #ffffff", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "0:0:1:50:1:1",
+    });
+    expect(result.controlPoints).toEqual([
+      { x: 0, opacity: 0, color: [255, 255, 255] },
+      { x: 50, opacity: 1, color: [255, 255, 255] },
+    ]);
   });
 });
 
@@ -501,7 +569,7 @@ describe("Viewer state serialization", () => {
 
 describe("parseViewerUrlParams", () => {
   // Tests will try parsing both unencoded and encoded URL params.
-  const channelParamToSetting: [string, string, ViewerChannelSetting][] = [
+  const channelParamToSetting: [string, string, Partial<ViewerChannelSetting>][] = [
     [
       "c3=ven:1,col:ff00ff,clz:0,cza:0.9,isa:0.4,lut:p50:p99,sen:1,isv:129",
       "c3=ven%3A1%2Ccol%3Aff00ff%2Cclz%3A0%2Ccza%3A0.9%2Cisa%3A0.4%2Clut%3Ap50%3Ap99%2Csen%3A1%2Cisv%3A129",
@@ -670,9 +738,6 @@ describe("parseViewerUrlParams", () => {
     expect(channelSettings.channels[2].colorizeEnabled).toEqual(true);
   });
 
-  // Test existing viewer settings as a regression test
-  // TODO: Replace this with a full integration test, testing serializing + deserializing all viewer state
-  // when URLs are fully implemented.
   it("parses viewer settings", async () => {
     const queryString = "mask=30&view=X";
     const params = new URLSearchParams(queryString);
@@ -731,7 +796,7 @@ describe("serializeViewerUrlParams", () => {
         ramp: [50, 140],
       },
     ];
-    const serialized = serializeViewerUrlParams({ channelSettings: channelStates });
+    const serialized = serializeViewerUrlParams({ channelSettings: channelStates }, false);
     // Format should look like "ven:1,col:ff0000,clz:1,cza:0.75,isa:0.5,sen:1,isv:128", but ordering
     // is not guaranteed. Parse the string and check that the values match the expected values.
     // Note that `lut` is not included when serializing from existing viewer state.
@@ -744,7 +809,7 @@ describe("serializeViewerUrlParams", () => {
       sen: "1",
       isv: "128",
       rmp: "-10:260.1",
-      cps: "0:0:808080,1:1:ff0000",
+      cps: "0:0:808080:1:1:ff0000",
       cpe: "0",
     };
     const expectedChannel1: Required<Omit<ViewerChannelSettingParams, "lut">> = {
@@ -756,7 +821,7 @@ describe("serializeViewerUrlParams", () => {
       sen: "0",
       isv: "57",
       rmp: "50:140",
-      cps: "-10:0:000000,50:0:000000,100:0.3:0010ff,140:0.8:00ffff,260:1:00ffb4",
+      cps: "-10:0:000000:50:0:000000:100:0.3:0010ff:140:0.8:00ffff:260:1:00ffb4",
       cpe: "1",
     };
 
@@ -764,5 +829,60 @@ describe("serializeViewerUrlParams", () => {
     expect(parseKeyValueList(serialized["c0"]!)).toEqual(expectedChannel0);
     expect(serialized["c1"]).toBeDefined();
     expect(parseKeyValueList(serialized["c1"]!)).toEqual(expectedChannel1);
+  });
+
+  it("can remove viewer settings that match the default", () => {
+    const defaultViewerSettings = getDefaultViewerState();
+    const customViewerState: Partial<ViewerState> = {
+      viewMode: ViewMode.xy,
+      density: 100,
+      time: 40,
+      cameraState: {
+        position: [1.2, 3.4, 5.6],
+        target: defaultViewerSettings.cameraState?.target,
+        up: defaultViewerSettings.cameraState?.up,
+      },
+    };
+
+    const serializedParams = serializeViewerUrlParams(
+      { ...defaultViewerSettings, ...customViewerState },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+    // Pos is 1.2:3.4:5.6 but escaped
+    const expectedCameraPosition = encodeURIComponent("pos:1.2:3.4:5.6");
+    expect(urlParams.toString()).toEqual(`dens=100&t=40&cam=${expectedCameraPosition}&view=Z`);
+  });
+
+  it("can remove channel state fields that matches the default", () => {
+    // Note that this unit test will break if the
+    const customChannelState: Partial<ChannelState> = {
+      color: [255, 0, 0],
+      useControlPoints: true,
+      isovalue: 49,
+    };
+    const serializedParams = serializeViewerUrlParams(
+      { ...getDefaultViewerState(), channelSettings: [{ ...getDefaultChannelState(), ...customChannelState }] },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+
+    const expectedEncodedParams = encodeURIComponent("isv:49,col:ff0000,cpe:1");
+    expect(urlParams.toString()).toEqual("c0=" + expectedEncodedParams);
+  });
+
+  it("does not use object reference comparison on control points when excluding defaults", () => {
+    // Expand control points so it isn't comparing an object reference
+    const defaultChannelState = getDefaultChannelState();
+    const customChannelState: Partial<ChannelState> = {
+      controlPoints: [{ ...defaultChannelState.controlPoints[0] }, { ...defaultChannelState.controlPoints[1] }],
+    };
+
+    const serializedParams = serializeViewerUrlParams(
+      { ...getDefaultViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
+      true
+    ) as Record<string, string>;
+    const urlParams = new URLSearchParams(serializedParams);
+    expect(urlParams.toString()).toEqual("c0=");
   });
 });

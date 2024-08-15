@@ -15,6 +15,25 @@ import {
 import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
 import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
+import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
+import { isEqual } from "lodash";
+import { getDefaultChannelState, getDefaultViewerState } from "../../src/aics-image-viewer/shared/constants";
+
+export const ENCODED_COMMA_REGEX = /%2C/g;
+export const ENCODED_COLON_REGEX = /%3A/g;
+const DEFAULT_CONTROL_POINT_COLOR: [number, number, number] = [255, 255, 255];
+const DEFAULT_CONTROL_POINT_COLOR_CODE = "1";
+
+// TODO: refactor regexes to be composed of one another rather than duplicating code
+// const COLOR_CODES: Record<string, ColorArray> = {
+//   "0": [0, 0, 0],
+//   "1": [255, 255, 255],
+//   "-1": [255, 255, 255],
+//   w: [255, 255, 255],
+//   k: [0, 0, 0],
+// };
+// const COLOR_CODE_REGEX = new RegExp(`(${Object.keys(COLOR_CODES).join("|")})`);
+// const HEX_COLOR_REGEX = new RegExp(`(([0-9a-fA-F]{6})|${COLOR_CODE_REGEX.source})`);
 
 const CHANNEL_STATE_KEY_REGEX = /^c[0-9]+$/;
 /** Match colon-separated pairs of alphanumeric strings */
@@ -30,12 +49,27 @@ const SLICE_REGEX = /^[0-9.]*,[0-9.]*,[0-9.]*$/;
  * the x, y, and z axes.
  */
 const REGION_REGEX = /^([0-9.]*:[0-9.]*)(,[0-9.]*:[0-9.]*){2}$/;
-const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
+
+const HEX_COLOR_REGEX = new RegExp(`(([0-9a-fA-F]{6})|${DEFAULT_CONTROL_POINT_COLOR_CODE})`);
+const NUMERIC_REGEX = /-?[0-9.]*/;
+const CONTROL_POINT_REGEX = new RegExp(`(${NUMERIC_REGEX.source}:${NUMERIC_REGEX.source}:${HEX_COLOR_REGEX.source})`);
+
+const HEX_COLOR_STR_REGEX = new RegExp(`^${HEX_COLOR_REGEX.source}$`);
+
 /**
- * Matches a comma-separated list of control points, where each control point is represented
+ * LEGACY: Matches a COMMA-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
+ * The hex color can be replaced with `w` to represent white (`ffffff`).
  */
-export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const LEGACY_CONTROL_POINTS_REGEX = new RegExp(
+  `^${CONTROL_POINT_REGEX.source}(,${CONTROL_POINT_REGEX.source})*$`
+);
+/**
+ * Matches a COLON-separated list of control points, where each control point is represented
+ * by a triplet of `{x}:{opacity}:{hex color}`.
+ * The hex color can be replaced with `w` to represent white (`ffffff`).
+ */
+export const CONTROL_POINTS_REGEX = new RegExp(`^${CONTROL_POINT_REGEX.source}(:${CONTROL_POINT_REGEX.source})*$`);
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
@@ -303,8 +337,8 @@ const tryDecodeURLList = (url: string, delim = ","): string[] | undefined => {
  * a key-value object.
  *
  * @param data The string to parse. Expected to be in the format
- * "key1:value1,key2:value2,...". Colons and commas in keys or values
- * should be encoded using `encodeURIComponent`.
+ * "key1:value1,key2:value2,...". Commas in keys or values
+ * must be encoded using `encodeURIComponent`.
  * @returns An object with the parsed key-value pairs. Key and value strings
  *  will be decoded using `decodeURIComponent`.
  */
@@ -323,6 +357,10 @@ export function parseKeyValueList(data: string): Record<string, string> {
   return result;
 }
 
+function decodeColons(str: string): string {
+  return str.replace(ENCODED_COLON_REGEX, ":");
+}
+
 export function objectToKeyValueList(obj: Record<string, string | undefined>): string {
   const keyValuePairs: string[] = [];
   for (const key in obj) {
@@ -330,7 +368,9 @@ export function objectToKeyValueList(obj: Record<string, string | undefined>): s
     if (value === undefined) {
       continue;
     }
-    keyValuePairs.push(`${encodeURIComponent(key)}:${encodeURIComponent(value.trim())}`);
+    // Allow colon separators to remain unencoded to save URL character length.
+    const escapedValue = decodeColons(encodeURIComponent(value.trim()));
+    keyValuePairs.push(`${encodeURIComponent(key.trim())}:${escapedValue}`);
   }
   return keyValuePairs.join(",");
 }
@@ -403,8 +443,14 @@ function parseStringBoolean(value: string | undefined): boolean | undefined {
 }
 
 export function parseHexColorAsColorArray(hexColor: string | undefined): ColorArray | undefined {
-  if (!hexColor || !HEX_COLOR_REGEX.test(hexColor)) {
+  if (!hexColor || !HEX_COLOR_STR_REGEX.test(hexColor)) {
     return undefined;
+  }
+  // if (hexColor in COLOR_CODES) {
+  //   return COLOR_CODES[hexColor];
+  // }
+  if (hexColor === DEFAULT_CONTROL_POINT_COLOR_CODE) {
+    return DEFAULT_CONTROL_POINT_COLOR;
   }
   const r = Number.parseInt(hexColor.slice(0, 2), 16);
   const g = Number.parseInt(hexColor.slice(2, 4), 16);
@@ -417,16 +463,6 @@ function colorArrayToHex(color: ColorArray): string {
     .map((c) => c.toString(16).padStart(2, "0"))
     .join("")
     .toLowerCase();
-}
-
-function removeUndefinedProperties<T>(obj: T): Partial<T> {
-  const result: Partial<T> = {};
-  for (const key in obj) {
-    if (obj[key] !== undefined) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
 }
 
 function parseStringSlice(region: string | undefined): PerAxis<number> | undefined {
@@ -442,20 +478,32 @@ function parseStringSlice(region: string | undefined): PerAxis<number> | undefin
 
 /**
  * Parses an array of three numbers from a string.
+ * @param stringArr The string to parse. Should be three numbers separated by a separator.
+ * @param options Optional parameters for parsing:
+ * - `min`: Minimum value for each number. Default is negative infinity.
+ * - `max`: Maximum value for each number. Default is positive infinity.
+ * - `separator`: Separator between numbers. Default is `,`.
+ * @returns
+ * - undefined if the string is undefined or could not be parsed.
+ * - An array of three numbers, clamped to the [min, max] range.
  */
 function parseThreeNumberArray(
-  levels: string | undefined,
-  min: number = -Infinity,
-  max: number = Infinity
+  stringArr: string | undefined,
+  options?: { min?: number; max?: number; separator?: string }
 ): [number, number, number] | undefined {
-  if (!levels) {
+  if (!stringArr) {
     return undefined;
   }
-  const [low, middle, high] = levels.split(",").map((val) => parseStringFloat(val, min, max));
-  if (low === undefined || middle === undefined || high === undefined) {
+
+  const min = options?.min ?? Number.NEGATIVE_INFINITY;
+  const max = options?.max ?? Number.POSITIVE_INFINITY;
+  const separator = options?.separator ?? ",";
+
+  const [x, y, z] = stringArr.split(separator).map((val) => parseStringFloat(val, min, max));
+  if (x === undefined || y === undefined || z === undefined) {
     return undefined;
   }
-  return [low, middle, high];
+  return [x, y, z];
 }
 
 function parseStringRegion(region: string | undefined): PerAxis<[number, number]> | undefined {
@@ -478,15 +526,46 @@ function parseStringRegion(region: string | undefined): PerAxis<[number, number]
   return { x, y, z };
 }
 
+/**
+ * Formats a float or integer value to a string with a maximum precision for float values.
+ * @param value The number to format.
+ * @param maxPrecision The maximum number of significant digits to display for float values.
+ * Default is 5.
+ * @returns
+ * - For integers, the integer value as a string.
+ * - For floats, the float value as a string with a maximum of `maxPrecision` significant digits
+ * and any trailing zeroes removed.
+ *
+ * @example
+ * ```
+ * formatFloat(1.23456, 3) // "1.23"
+ * formatFloat(123456, 3) // "123456"
+ * formatFloat(1.3999999999999999, 3) // "1.4"
+ * ```
+ */
+function formatFloat(value: number, maxPrecision: number = 5): string {
+  if (Number.isInteger(value)) {
+    return value.toString();
+  }
+  return Number(value.toPrecision(maxPrecision)).toString();
+}
+
+function serializeBoolean(value: boolean | undefined): "1" | "0" | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return value ? "1" : "0";
+}
+
 function parseCameraState(cameraSettings: string | undefined): Partial<CameraState> | undefined {
   if (!cameraSettings) {
     return undefined;
   }
   const parsedCameraSettings = parseKeyValueList(cameraSettings);
   const result: Partial<CameraState> = {
-    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position]),
-    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target]),
-    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up]),
+    position: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Position], { separator: ":" }),
+    target: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Target], { separator: ":" }),
+    up: parseThreeNumberArray(parsedCameraSettings[CameraTransformKeys.Up], { separator: ":" }),
     // Orthographic scales cannot be negative
     orthoScale: parseStringFloat(parsedCameraSettings[CameraTransformKeys.OrthoScale], 0, Infinity),
     fov: parseStringFloat(parsedCameraSettings[CameraTransformKeys.Fov], 0, 180),
@@ -494,30 +573,68 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   return removeUndefinedProperties(result);
 }
 
-function serializeCameraState(cameraState: CameraState): string {
-  return objectToKeyValueList({
-    [CameraTransformKeys.Position]: cameraState.position.join(","),
-    [CameraTransformKeys.Target]: cameraState.target.join(","),
-    [CameraTransformKeys.Up]: cameraState.up.join(","),
-    [CameraTransformKeys.OrthoScale]: cameraState.orthoScale?.toString(),
-    [CameraTransformKeys.Fov]: cameraState.fov?.toString(),
+function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
+  if (removeDefaults) {
+    cameraState = removeMatchingProperties(cameraState, getDefaultViewerState().cameraState ?? {});
+    if (Object.keys(cameraState).length === 0) {
+      return undefined;
+    }
+  }
+  const cameraString = objectToKeyValueList({
+    [CameraTransformKeys.Position]:
+      cameraState.position && cameraState.position.map((value) => formatFloat(value)).join(":"),
+    [CameraTransformKeys.Target]: cameraState.target && cameraState.target.map((value) => formatFloat(value)).join(":"),
+    [CameraTransformKeys.Up]: cameraState.up && cameraState.up.map((value) => formatFloat(value)).join(":"),
+    [CameraTransformKeys.OrthoScale]:
+      cameraState.orthoScale === undefined ? undefined : formatFloat(cameraState.orthoScale),
+    [CameraTransformKeys.Fov]: cameraState.fov === undefined ? undefined : formatFloat(cameraState.fov),
   });
+  return cameraString === "" ? undefined : cameraString;
 }
 
 function serializeControlPoints(controlPoints: ControlPoint[]): string {
-  return controlPoints.map((cp) => `${cp.x}:${cp.opacity}:${colorArrayToHex(cp.color)}`).join(",");
+  return controlPoints
+    .map((cp) => {
+      const x = formatFloat(cp.x);
+      const opacity = formatFloat(cp.opacity);
+      // Default color is empty string
+      // TODO: Substitute
+      const color = isEqual(cp.color, DEFAULT_CONTROL_POINT_COLOR)
+        ? DEFAULT_CONTROL_POINT_COLOR_CODE
+        : colorArrayToHex(cp.color);
+      return `${x}:${opacity}:${color}`;
+    })
+    .join(":");
 }
 
 function parseControlPoints(controlPoints: string | undefined): ControlPoint[] | undefined {
-  if (!controlPoints || !CONTROL_POINTS_REGEX.test(controlPoints)) {
+  if (
+    !(controlPoints && (CONTROL_POINTS_REGEX.test(controlPoints) || LEGACY_CONTROL_POINTS_REGEX.test(controlPoints)))
+  ) {
     return undefined;
   }
-  const newControlPoints = controlPoints.split(",").map((cp) => {
-    const [x, opacity, color] = cp.split(":");
+
+  // Parse raw control point data from the string into an array of [x, opacity, color] triplets.
+  let rawControlPointData: string[][];
+  if (LEGACY_CONTROL_POINTS_REGEX.test(controlPoints)) {
+    // Legacy format uses commas to separate control points.
+    rawControlPointData = controlPoints.split(",").map((cp) => cp.split(":"));
+  } else {
+    // New format is all colon-separated, where every three elements represent a control point.
+    rawControlPointData = controlPoints.split(":").reduce((acc, _val, i, array) => {
+      if ((i + 1) % 3 === 0) {
+        acc.push([array[i - 2], array[i - 1], array[i]]);
+      }
+      return acc;
+    }, [] as string[][]);
+  }
+
+  const newControlPoints = rawControlPointData.map((cp) => {
+    const [x, opacity, color] = cp;
     return {
       x: parseStringFloat(x, -Infinity, Infinity) ?? 0,
       opacity: parseStringFloat(opacity, 0, 1) ?? 1.0,
-      color: parseHexColorAsColorArray(color) ?? [255, 255, 255],
+      color: parseHexColorAsColorArray(color) ?? DEFAULT_CONTROL_POINT_COLOR,
     };
   });
   // Sort control points by x value
@@ -558,27 +675,45 @@ export function deserializeViewerChannelSetting(
     const [min, max] = jsonState[ViewerChannelSettingKeys.Ramp].split(":");
     result.ramp = [Number.parseFloat(min), Number.parseFloat(max)];
   }
-  if (jsonState[ViewerChannelSettingKeys.ControlPoints] && CONTROL_POINTS_REGEX.test(jsonState.cps)) {
+  if (jsonState[ViewerChannelSettingKeys.ControlPoints]) {
     result.controlPoints = parseControlPoints(jsonState[ViewerChannelSettingKeys.ControlPoints]);
   }
   return result;
 }
 
-export function serializeViewerChannelSetting(channelSetting: ChannelState): ViewerChannelSettingParams {
-  return {
-    [ViewerChannelSettingKeys.VolumeEnabled]: channelSetting.volumeEnabled ? "1" : "0",
-    [ViewerChannelSettingKeys.SurfaceEnabled]: channelSetting.isosurfaceEnabled ? "1" : "0",
-    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue.toString(),
-    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity.toString(),
-    [ViewerChannelSettingKeys.Colorize]: channelSetting.colorizeEnabled ? "1" : "0",
+/**
+ * Serializes a single viewer channel setting into a dictionary of URL parameters
+ * (`ViewerChannelSettingParams`).
+ * @param channelSetting The channel state object to serialize.
+ * @param removeDefaults Whether to remove properties that match the output of `GET_DEFAULT_CHANNEL_STATE`.
+ * @returns A `ViewerChannelSettingParams` object with the serialized parameters. Undefined values are removed.
+ */
+export function serializeViewerChannelSetting(
+  channelSetting: Partial<ChannelState>,
+  removeDefaults: boolean
+): Partial<ViewerChannelSettingParams> {
+  if (removeDefaults) {
+    channelSetting = removeMatchingProperties(channelSetting, getDefaultChannelState());
+  }
+  return removeUndefinedProperties({
+    [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
+    [ViewerChannelSettingKeys.SurfaceEnabled]: serializeBoolean(channelSetting.isosurfaceEnabled),
+    [ViewerChannelSettingKeys.IsosurfaceValue]: channelSetting.isovalue?.toString(),
+    [ViewerChannelSettingKeys.IsosurfaceAlpha]: channelSetting.opacity?.toString(),
+    [ViewerChannelSettingKeys.Colorize]: serializeBoolean(channelSetting.colorizeEnabled),
     [ViewerChannelSettingKeys.ColorizeAlpha]: channelSetting.colorizeAlpha?.toString(),
-    [ViewerChannelSettingKeys.Color]: colorArrayToHex(channelSetting.color),
-    [ViewerChannelSettingKeys.ControlPoints]: serializeControlPoints(channelSetting.controlPoints),
-    [ViewerChannelSettingKeys.ControlPointsEnabled]: channelSetting.useControlPoints ? "1" : "0",
-    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp.join(":"),
+    [ViewerChannelSettingKeys.Color]: channelSetting.color && colorArrayToHex(channelSetting.color),
+    [ViewerChannelSettingKeys.ControlPoints]:
+      channelSetting.controlPoints && serializeControlPoints(channelSetting.controlPoints),
+    [ViewerChannelSettingKeys.ControlPointsEnabled]: serializeBoolean(channelSetting.useControlPoints),
+    [ViewerChannelSettingKeys.Ramp]: channelSetting.ramp
+      ?.map((value) => {
+        return formatFloat(value);
+      })
+      .join(":"),
     // Note that Lut is not saved here, as it is expected as user input and is redundant with
     // the control points and ramp.
-  };
+  });
 }
 
 export function deserializeViewerState(params: ViewerStateParams): Partial<ViewerState> {
@@ -592,7 +727,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
     autorotate: parseStringBoolean(params[ViewerStateKeys.Autorotate]),
     brightness: parseStringFloat(params[ViewerStateKeys.Brightness], 0, 100),
     density: parseStringFloat(params[ViewerStateKeys.Density], 0, 100),
-    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], 0, 255),
+    levels: parseThreeNumberArray(params[ViewerStateKeys.Levels], { min: 0, max: 255 }),
     interpolationEnabled: parseStringBoolean(params[ViewerStateKeys.Interpolation]),
     region: parseStringRegion(params[ViewerStateKeys.Region]),
     slice: parseStringSlice(params[ViewerStateKeys.Slice]),
@@ -623,28 +758,37 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
   return removeUndefinedProperties(result);
 }
 
-export function serializeViewerState(state: Partial<ViewerState>): ViewerStateParams {
-  // TODO: Enforce decimal places for floats/decimals?
+/**
+ * Serializes a ViewerState object into a dictionary of URL parameters.
+ * @param state The ViewerState to serialize.
+ * @param removeDefaults If true, remove properties that match the output of `GET_DEFAULT_VIEWER_STATE`.
+ * @returns A `ViewerStateParams` object with the serialized parameters. Undefined values are removed.
+ */
+export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
+  if (removeDefaults) {
+    state = removeMatchingProperties(state, getDefaultViewerState());
+  }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,
     [ViewerStateKeys.Mask]: state.maskAlpha?.toString(),
     [ViewerStateKeys.Image]: state.imageType,
-    [ViewerStateKeys.Axes]: state.showAxes ? "1" : "0",
-    [ViewerStateKeys.BoundingBox]: state.showBoundingBox ? "1" : "0",
+    [ViewerStateKeys.Axes]: serializeBoolean(state.showAxes),
+    [ViewerStateKeys.BoundingBox]: serializeBoolean(state.showBoundingBox),
     [ViewerStateKeys.BoundingBoxColor]: state.boundingBoxColor && colorArrayToHex(state.boundingBoxColor),
     [ViewerStateKeys.BackgroundColor]: state.backgroundColor && colorArrayToHex(state.backgroundColor),
-    [ViewerStateKeys.Autorotate]: state.autorotate ? "1" : "0",
+    [ViewerStateKeys.Autorotate]: serializeBoolean(state.autorotate),
     [ViewerStateKeys.Brightness]: state.brightness?.toString(),
     [ViewerStateKeys.Density]: state.density?.toString(),
-    [ViewerStateKeys.Interpolation]: state.interpolationEnabled ? "1" : "0",
+    [ViewerStateKeys.Interpolation]: serializeBoolean(state.interpolationEnabled),
     [ViewerStateKeys.Region]:
       state.region && `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
     [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
-    // All CameraTransform properties will be provided when serializing viewer state
-    [ViewerStateKeys.CameraState]: state.cameraState && serializeCameraState(state.cameraState as CameraState),
+    [ViewerStateKeys.CameraState]:
+      state.cameraState && serializeCameraState(state.cameraState as CameraState, removeDefaults),
   };
+
   const viewModeToViewParam = {
     [ViewMode.threeD]: "3D",
     [ViewMode.xy]: "Z",
@@ -821,15 +965,21 @@ export async function parseViewerUrlParams(urlSearchParams: URLSearchParams): Pr
 /**
  * Serializes the ViewerState and ChannelState of a ViewerStateContext into a URLSearchParams object.
  * @param state ViewerStateContext to serialize.
+ * @param removeDefaults If true, shortens parameters by removing any properties that match the default state.
+ * This includes the output of GET_DEFAULT_VIEWER_STATE and GET_DEFAULT_CHANNEL_STATE.
  */
-export function serializeViewerUrlParams(state: Partial<ViewerStateContextType>): AppParams {
-  // TODO: Unit tests for this function
-  const params = serializeViewerState(state);
+export function serializeViewerUrlParams(
+  state: Partial<ViewerStateContextType>,
+  removeDefaults: boolean = true
+): AppParams {
+  const params = serializeViewerState(state, removeDefaults);
 
   const channelParams = state.channelSettings?.reduce<Record<string, string>>(
     (acc, channelSetting, index): Record<string, string> => {
       const key = `c${index}`;
-      acc[key] = objectToKeyValueList(serializeViewerChannelSetting(channelSetting) as Record<string, string>);
+      acc[key] = objectToKeyValueList(
+        serializeViewerChannelSetting(channelSetting, removeDefaults) as Record<string, string>
+      );
       return acc;
     },
     {} as Record<string, string>

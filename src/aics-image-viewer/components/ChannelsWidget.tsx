@@ -12,7 +12,7 @@ import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
-import { DEFAULT_CHANNEL_STATE, PRESET_COLOR_MAP } from "../shared/constants";
+import { getDefaultChannelState, PRESET_COLOR_MAP } from "../shared/constants";
 import { controlPointsToRamp, getDefaultLut } from "../shared/utils/controlPointsToLut";
 
 export type ChannelsWidgetProps = {
@@ -123,7 +123,8 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     if (!channelDataChannels) {
       return;
     }
-    const allChannelStateKeys = Object.keys(DEFAULT_CHANNEL_STATE) as ChannelStateKey[];
+    const defaultChannelState = getDefaultChannelState();
+    const allChannelStateKeys = Object.keys(defaultChannelState) as ChannelStateKey[];
     const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
     const channelStateKeysToReset = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
 
@@ -142,7 +143,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
           props.changeChannelSetting(index, key, true);
           continue;
         }
-        props.changeChannelSetting(index, key, DEFAULT_CHANNEL_STATE[key]);
+        props.changeChannelSetting(index, key, defaultChannelState[key]);
       }
     });
 
@@ -152,7 +153,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     // the color map length, so we need to reset the colors manually.
     if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
       for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
-        props.changeChannelSetting(i, "color", DEFAULT_CHANNEL_STATE["color"]);
+        props.changeChannelSetting(i, "color", defaultChannelState["color"]);
       }
     }
   };
