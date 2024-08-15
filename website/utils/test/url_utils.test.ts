@@ -50,6 +50,11 @@ describe("LEGACY_CONTROL_POINTS_REGEX", () => {
     const data = "-1:0.5:ff0000,-255:1:ff0000";
     expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
+
+  it("allows empty color strings", () => {
+    const data = "1:0.5:,255:1:";
+    expect(LEGACY_CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
 });
 
 describe("CONTROL_POINTS_REGEX", () => {
@@ -65,6 +70,11 @@ describe("CONTROL_POINTS_REGEX", () => {
 
   it("accepts negative numbers", () => {
     const data = "-1:0.5:ff0000:-255:1:ff0000";
+    expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
+  });
+
+  it("allows empty color strings", () => {
+    const data = "1:0.5::255:1:";
     expect(CONTROL_POINTS_REGEX.test(data)).toBe(true);
   });
 });
@@ -539,6 +549,16 @@ describe("Channel state deserialization", () => {
       cps: "-10:0:000000:50:0:000000:100:0.3:0010ff:140:0.8:00ffff:260:1:00ffb4",
     });
     expect(result.controlPoints).toEqual(DEFAULT_CONTROL_POINTS);
+  });
+
+  it("replaces empty color strings with default color #ffffff", () => {
+    const result = deserializeViewerChannelSetting(0, {
+      cps: "0:0::50:1:",
+    });
+    expect(result.controlPoints).toEqual([
+      { x: 0, opacity: 0, color: [255, 255, 255] },
+      { x: 50, opacity: 1, color: [255, 255, 255] },
+    ]);
   });
 });
 

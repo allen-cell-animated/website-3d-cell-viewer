@@ -41,12 +41,13 @@ const HEX_COLOR_REGEX = /^[0-9a-fA-F]{6}$/;
  * LEGACY: Matches a COMMA-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
-export const LEGACY_CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(,-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const LEGACY_CONTROL_POINTS_REGEX =
+  /^(-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)(,-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)*$/;
 /**
  * Matches a COLON-separated list of control points, where each control point is represented
  * by a triplet of `{x}:{opacity}:{hex color}`.
  */
-export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})(:-?[0-9.]*:[0-9.]*:[0-9a-fA-F]{6})*$/;
+export const CONTROL_POINTS_REGEX = /^(-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)(:-?[0-9.]*:[0-9.]*:([0-9a-fA-F]{6})?)*$/;
 
 /**
  * Enum keys for URL parameters. These are stored as enums for better readability,
