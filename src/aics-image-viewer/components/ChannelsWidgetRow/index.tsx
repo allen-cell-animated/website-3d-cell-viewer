@@ -4,11 +4,8 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
+import { getDefaultChannelState, ISOSURFACE_OPACITY_SLIDER_MAX, PRESET_COLOR_MAP } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
-
-import "./styles.css";
-
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import {
   type ChannelState,
@@ -18,6 +15,9 @@ import {
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
+import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
+
+import "./styles.css";
 
 interface ChannelsWidgetRowProps {
   index: number;
@@ -85,6 +85,30 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
     </div>
   );
 
+  /**
+   * Resets currently visible settings for this channel to their defaults.
+   */
+  const resetChannelToDefaults = (): void => {
+    // Only modify settings that are currently visible to the user.'
+    const defaultChannelState = getDefaultChannelState();
+    if (props.channelState.volumeEnabled) {
+      const defaultLut = getDefaultLut(props.channelDataForChannel.histogram);
+      props.changeChannelSetting(index, "controlPoints", defaultLut.controlPoints);
+      props.changeChannelSetting(index, "ramp", controlPointsToRamp(defaultLut.controlPoints));
+      props.changeChannelSetting(index, "useControlPoints", defaultChannelState.useControlPoints);
+
+      props.changeChannelSetting(index, "colorizeAlpha", defaultChannelState.colorizeAlpha);
+      props.changeChannelSetting(index, "colorizeEnabled", defaultChannelState.colorizeEnabled);
+    }
+
+    if (props.channelState.isosurfaceEnabled) {
+      props.changeChannelSetting(index, "isovalue", defaultChannelState.isovalue);
+      props.changeChannelSetting(index, "opacity", defaultChannelState.opacity);
+    }
+
+    props.changeChannelSetting(index, "color", PRESET_COLOR_MAP[0].colors[index] ?? defaultChannelState.color);
+  };
+
   const createTFEditor = (): React.ReactNode => {
     const { controlPoints, colorizeEnabled, colorizeAlpha, useControlPoints, ramp } = channelState;
     return (
@@ -144,6 +168,9 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
             {renderSurfaceControls()}
           </>
         )}
+        <div style={{ marginTop: "15px" }}>
+          <Button onClick={resetChannelToDefaults}>Reset to defaults</Button>
+        </div>
       </>
     );
   };

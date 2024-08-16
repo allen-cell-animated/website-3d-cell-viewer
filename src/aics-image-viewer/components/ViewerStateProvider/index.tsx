@@ -9,40 +9,12 @@ import type {
   ChannelState,
   PartialIfObject,
 } from "./types";
-import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
-import {
-  ALPHA_MASK_SLIDER_DEFAULT,
-  BACKGROUND_COLOR_DEFAULT,
-  BOUNDING_BOX_COLOR_DEFAULT,
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  DENSITY_SLIDER_LEVEL_DEFAULT,
-  INTERPOLATION_ENABLED_DEFAULT,
-  LEVELS_SLIDER_DEFAULT,
-} from "../../shared/constants";
+import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
+import { getDefaultViewerState } from "../../shared/constants";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
-
-const DEFAULT_VIEWER_SETTINGS: ViewerState = {
-  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-  imageType: ImageType.segmentedCell,
-  showAxes: false,
-  showBoundingBox: false,
-  backgroundColor: BACKGROUND_COLOR_DEFAULT,
-  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-  autorotate: false,
-  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
-  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  density: DENSITY_SLIDER_LEVEL_DEFAULT,
-  levels: LEVELS_SLIDER_DEFAULT,
-  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
-  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  slice: { x: 0.5, y: 0.5, z: 0.5 },
-  time: 0,
-  cameraState: undefined,
-};
 
 // Some viewer settings require custom change behaviors to change related settings simultaneously or guard against
 // entering an illegal state (e.g. autorotate must not be on in pathtrace mode). Those behaviors are defined here.
@@ -148,7 +120,7 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
-  ...DEFAULT_VIEWER_SETTINGS,
+  ...getDefaultViewerState(),
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -167,7 +139,7 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...DEFAULT_VIEWER_SETTINGS });
+  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.

@@ -16,7 +16,7 @@ import {
 } from "@aics/volume-viewer";
 
 import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
-import type { ViewerState, ChannelState } from "../ViewerStateProvider/types";
+import type { ChannelState } from "../ViewerStateProvider/types";
 
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import {
@@ -36,19 +36,14 @@ import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } fr
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
   PRESET_COLORS_0,
-  ALPHA_MASK_SLIDER_DEFAULT,
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  DENSITY_SLIDER_LEVEL_DEFAULT,
-  LEVELS_SLIDER_DEFAULT,
-  BACKGROUND_COLOR_DEFAULT,
-  BOUNDING_BOX_COLOR_DEFAULT,
   CONTROL_PANEL_CLOSE_WIDTH,
-  INTERPOLATION_ENABLED_DEFAULT,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
+  getDefaultChannelState,
+  getDefaultViewerState,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 
@@ -59,7 +54,6 @@ import Toolbar from "../Toolbar";
 import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
-import { TFEDITOR_MAX_BIN } from "../TfEditor";
 
 import "../../assets/styles/globals.css";
 import {
@@ -106,40 +100,6 @@ const defaultVisibleControls: ControlVisibilityFlags = {
   metadataViewer: true,
 };
 
-const defaultViewerSettings: ViewerState = {
-  viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
-  renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
-  imageType: ImageType.segmentedCell,
-  showAxes: false,
-  showBoundingBox: false,
-  backgroundColor: BACKGROUND_COLOR_DEFAULT,
-  boundingBoxColor: BOUNDING_BOX_COLOR_DEFAULT,
-  autorotate: false,
-  maskAlpha: ALPHA_MASK_SLIDER_DEFAULT,
-  brightness: BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  density: DENSITY_SLIDER_LEVEL_DEFAULT,
-  levels: LEVELS_SLIDER_DEFAULT,
-  interpolationEnabled: INTERPOLATION_ENABLED_DEFAULT,
-  region: { x: [0, 1], y: [0, 1], z: [0, 1] },
-  slice: { x: 0.5, y: 0.5, z: 0.5 },
-  time: 0,
-  cameraState: undefined,
-};
-
-const DEFAULT_CHANNEL_STATE: ChannelState = {
-  name: "",
-  volumeEnabled: false,
-  isosurfaceEnabled: false,
-  colorizeEnabled: false,
-  colorizeAlpha: 1.0,
-  isovalue: 128,
-  opacity: 1.0,
-  color: [226, 205, 179] as ColorArray,
-  useControlPoints: false,
-  ramp: [0, TFEDITOR_MAX_BIN],
-  controlPoints: [],
-};
-
 const defaultProps: AppProps = {
   // rawData has a "dtype" which is expected to be "uint8", a "shape":[c,z,y,x] and a "buffer" which is a DataView
   rawData: undefined,
@@ -151,7 +111,7 @@ const defaultProps: AppProps = {
 
   appHeight: "100vh",
   visibleControls: defaultVisibleControls,
-  viewerSettings: defaultViewerSettings,
+  viewerSettings: getDefaultViewerState(),
   cellId: "",
   imageDownloadHref: "",
   parentImageDownloadHref: "",
@@ -172,7 +132,7 @@ const initializeOneChannelSetting = (
   index: number,
   defaultColor: ColorArray,
   viewerChannelSettings?: ViewerChannelSettings,
-  defaultChannelState = DEFAULT_CHANNEL_STATE
+  defaultChannelState = getDefaultChannelState()
 ): ChannelState => {
   let initSettings = {} as Partial<ViewerChannelSetting>;
   if (viewerChannelSettings) {

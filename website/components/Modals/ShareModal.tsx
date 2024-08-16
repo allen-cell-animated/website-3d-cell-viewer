@@ -1,17 +1,17 @@
 import { Button, Input, Modal, notification } from "antd";
+import { ShareAltOutlined } from "@ant-design/icons";
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
+import { View3d } from "@aics/volume-viewer";
 
 import { FlexRow } from "../LandingPage/utils";
 import { AppDataProps } from "../../types";
-import { ShareAltOutlined } from "@ant-design/icons";
 import {
   ALL_VIEWER_STATE_KEYS,
   connectToViewerState,
 } from "../../../src/aics-image-viewer/components/ViewerStateProvider";
 import { ViewerStateContextType } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import { serializeViewerUrlParams } from "../../utils/url_utils";
-import { View3d } from "@aics/volume-viewer";
+import { ENCODED_COLON_REGEX, ENCODED_COMMA_REGEX, serializeViewerUrlParams } from "../../utils/url_utils";
 
 type ShareModalProps = {
   appProps: AppDataProps;
@@ -37,7 +37,8 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     ...props,
     cameraState: props.view3dRef?.current?.getCameraState(),
   };
-  let serializedViewerParams = serializeViewerUrlParams(paramProps) as Record<string, string>;
+
+  const urlParams: string[] = [];
 
   if (props.appProps.imageUrl) {
     let serializedUrl;
@@ -46,12 +47,20 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     } else {
       serializedUrl = encodeURIComponent(props.appProps.imageUrl);
     }
-    // Place URL at front of serialized params
-    serializedViewerParams = { url: serializedUrl, ...serializedViewerParams };
+    urlParams.push(`url=${serializedUrl}`);
   }
 
-  const params: URLSearchParams = new URLSearchParams(serializedViewerParams);
-  const shareUrl = params.size > 0 ? `${baseUrl}?${params.toString()}` : baseUrl;
+  let serializedViewerParams = new URLSearchParams(serializeViewerUrlParams(paramProps) as Record<string, string>);
+  if (serializedViewerParams.size > 0) {
+    // Decode specifically colons and commas for better readability + decreased char count
+    let viewerParamString = serializedViewerParams
+      .toString()
+      .replace(ENCODED_COLON_REGEX, ":")
+      .replace(ENCODED_COMMA_REGEX, ",");
+    urlParams.push(viewerParamString);
+  }
+
+  const shareUrl = urlParams.length > 0 ? `${baseUrl}?${urlParams.join("&")}` : baseUrl;
 
   const onClickCopy = (): void => {
     navigator.clipboard.writeText(shareUrl);
