@@ -1,3 +1,5 @@
+import { CameraState } from "@aics/volume-viewer";
+
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
 import { ViewMode, RenderMode, ImageType } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
@@ -93,6 +95,18 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
+/**
+ * Reflects the default camera settings the 3D viewer uses on volume load.
+ * These SHOULD NOT be changed.
+ */
+export const getDefaultCameraState = (): CameraState => ({
+  position: [0, 0, 5],
+  target: [0, 0, 0],
+  up: [0, 1, 0],
+  fov: 20,
+  orthoScale: 0.5,
+});
+
 export const getDefaultViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -110,13 +124,7 @@ export const getDefaultViewerState = (): ViewerState => ({
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-  cameraState: {
-    position: [0, 0, 5],
-    target: [0, 0, 0],
-    up: [0, 1, 0],
-    fov: 20,
-    orthoScale: 0.5,
-  },
+  cameraState: undefined,
 });
 
 export const getDefaultChannelState = (): ChannelState => ({

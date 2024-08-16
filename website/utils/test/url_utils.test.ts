@@ -16,11 +16,17 @@ import {
   serializeViewerUrlParams,
   CONTROL_POINTS_REGEX,
   LEGACY_CONTROL_POINTS_REGEX,
+  serializeCameraState,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { getDefaultChannelState, getDefaultViewerState } from "../../../src/aics-image-viewer/shared/constants";
+import {
+  getDefaultCameraState,
+  getDefaultChannelState,
+  getDefaultViewerState,
+} from "../../../src/aics-image-viewer/shared/constants";
+import { CameraState } from "@aics/volume-viewer";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -390,7 +396,7 @@ describe("Channel state serialization", () => {
   });
 });
 
-describe("Viewer state serialization", () => {
+describe("Viewer state", () => {
   const DEFAULT_VIEWER_STATE: ViewerState = {
     viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
     renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -525,6 +531,31 @@ describe("Viewer state serialization", () => {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
         expect(deserializeViewerState(serializeViewerState(state, false)).renderMode).toEqual(renderMode);
       }
+    });
+  });
+});
+
+describe("Camera state", () => {
+  it("uses default camera state when choosing elements to exclude/ignore", () => {
+    let cameraState: CameraState = {
+      ...getDefaultCameraState(),
+    };
+    // No changes from default
+    expect(serializeCameraState(cameraState, true)).toEqual(undefined);
+
+    cameraState = { ...cameraState, position: [1, 2, 3] };
+    expect(serializeCameraState(cameraState, true)).toEqual("pos:1:2:3");
+  });
+
+  it("default camera state has not been changed", () => {
+    // The default camera state should NOT change unless backwards compatibility
+    // is added to ensure old links still work.
+    expect(getDefaultCameraState()).toEqual({
+      position: [0, 0, 5],
+      target: [0, 0, 0],
+      up: [0, 1, 0],
+      fov: 20,
+      orthoScale: 0.5,
     });
   });
 });
