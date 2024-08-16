@@ -1,3 +1,4 @@
+import { CameraState } from "@aics/volume-viewer";
 import { describe, expect, it } from "@jest/globals";
 
 import {
@@ -26,7 +27,6 @@ import {
   getDefaultChannelState,
   getDefaultViewerState,
 } from "../../../src/aics-image-viewer/shared/constants";
-import { CameraState } from "@aics/volume-viewer";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
