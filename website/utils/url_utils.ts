@@ -580,9 +580,8 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
 export function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
   if (removeDefaults) {
     // Note that we use the `getDefaultCameraState()` to get the defaults here,
-    // instead of `getDefaultViewerState().cameraState`. The default viewer state's camera state
-    // is undefined, which signals that the camera should not be modified for backwards compatibility
-    // with old URLs that don't specify it.
+    // instead of `getDefaultViewerState().cameraState`. The latter is undefined, which signals
+    // that the camera should not be modified for URLs that don't specify it.
     cameraState = removeMatchingProperties(cameraState, getDefaultCameraState());
     if (Object.keys(cameraState).length === 0) {
       return undefined;
