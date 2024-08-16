@@ -483,16 +483,15 @@ describe("Viewer state serialization", () => {
       expect(serializeViewerState(CUSTOM_VIEWER_STATE, false)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
 
-    it("deserializes partial camera settings", () => {
-      const state: Partial<ViewerState> = {
-        cameraState: {
-          position: [1.0, -1.4, 45],
-          up: [0, 1, 0],
-          fov: 43.5,
-        },
+    it("shortens long numbers in the slice and region parameters", () => {
+      // Floats should be rounded to 5 significant digits or less
+      let state: Partial<ViewerState> = {
+        region: { x: [0.4566666666, 0.8667332], y: [0.49999999, 0.8999999], z: [0.3000000001, 0.16467883] },
+        slice: { x: 0.41111186, y: 0.49999999, z: 0.677402 },
       };
-      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
-      expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
+      let serializedState = serializeViewerState(state, true);
+      expect(serializedState.reg).toEqual("0.45667:0.86673,0.5:0.9,0.3:0.16468");
+      expect(serializedState.slice).toEqual("0.41111,0.5,0.6774");
     });
   });
 
@@ -525,6 +524,18 @@ describe("Viewer state serialization", () => {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
         expect(deserializeViewerState(serializeViewerState(state, false)).renderMode).toEqual(renderMode);
       }
+    });
+
+    it("deserializes partial camera settings", () => {
+      const state: Partial<ViewerState> = {
+        cameraState: {
+          position: [1.0, -1.4, 45],
+          up: [0, 1, 0],
+          fov: 43.5,
+        },
+      };
+      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
+      expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
     });
   });
 });

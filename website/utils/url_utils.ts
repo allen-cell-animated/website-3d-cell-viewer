@@ -550,6 +550,24 @@ function formatFloat(value: number, maxPrecision: number = 5): string {
   return Number(value.toPrecision(maxPrecision)).toString();
 }
 
+function perAxisToArray<T>(perAxis: PerAxis<T>): T[] {
+  return [perAxis.x, perAxis.y, perAxis.z];
+}
+
+/** Serializes a region into a `x1:x2,y1:y2,z1:z2` string format. */
+function serializeRegion(region: PerAxis<[number, number]>): string {
+  return perAxisToArray(region)
+    .map((axis) => axis.map((val) => formatFloat(val)).join(":"))
+    .join(",");
+}
+
+/** Serializes a slice parameter into a `x,y,z` string format. */
+function serializeSlice(slice: PerAxis<number>): string {
+  return perAxisToArray(slice)
+    .map((val) => formatFloat(val))
+    .join(",");
+}
+
 function serializeBoolean(value: boolean | undefined): "1" | "0" | undefined {
   if (value === undefined) {
     return undefined;
@@ -780,9 +798,8 @@ export function serializeViewerState(state: Partial<ViewerState>, removeDefaults
     [ViewerStateKeys.Brightness]: state.brightness?.toString(),
     [ViewerStateKeys.Density]: state.density?.toString(),
     [ViewerStateKeys.Interpolation]: serializeBoolean(state.interpolationEnabled),
-    [ViewerStateKeys.Region]:
-      state.region && `${state.region.x.join(":")},${state.region.y.join(":")},${state.region.z.join(":")}`,
-    [ViewerStateKeys.Slice]: state.slice && `${state.slice.x},${state.slice.y},${state.slice.z}`,
+    [ViewerStateKeys.Region]: state.region && serializeRegion(state.region),
+    [ViewerStateKeys.Slice]: state.slice && serializeSlice(state.slice),
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
     [ViewerStateKeys.CameraState]:
