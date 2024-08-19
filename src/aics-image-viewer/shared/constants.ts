@@ -93,7 +93,11 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
-export const getDefaultViewerState = (): ViewerState => ({
+/**
+ * Returns the blank, default viewer state. Note that this is named differently from
+ * `getDefaultViewerState` in `ViewerStateProvider`, since the 'default' state can be overridden.
+ */
+export const getEmptyViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -119,7 +123,11 @@ export const getDefaultViewerState = (): ViewerState => ({
   },
 });
 
-export const getDefaultChannelState = (): ChannelState => ({
+/**
+ * Returns the blank, default channel state. Note that this is named differently from
+ * `getDefaultChannelState` in `ViewerStateProvider`, since the 'default' state can be overridden.
+ */
+export const getEmptyChannelState = (): ChannelState => ({
   name: "",
   volumeEnabled: false,
   isosurfaceEnabled: false,

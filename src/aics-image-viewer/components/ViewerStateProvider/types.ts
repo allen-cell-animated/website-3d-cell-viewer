@@ -78,6 +78,8 @@ export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, va
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
+  getDefaultViewerState: () => ViewerState;
+  getDefaultChannelState: (index: number) => ChannelState;
   changeViewerSetting: ViewerSettingUpdater;
   changeChannelSetting: ChannelSettingUpdater;
   setChannelSettings: (settings: ChannelState[]) => void;

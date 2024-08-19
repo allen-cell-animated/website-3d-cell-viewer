@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { find } from "lodash";
 import { Button, Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
@@ -10,9 +10,9 @@ import type { IsosurfaceFormat } from "../shared/types";
 
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
-import { connectToViewerState } from "./ViewerStateProvider";
+import { connectToViewerState, ViewerStateContext } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
-import { getDefaultChannelState, PRESET_COLOR_MAP } from "../shared/constants";
+import { PRESET_COLOR_MAP } from "../shared/constants";
 import { controlPointsToRamp, getDefaultLut } from "../shared/utils/controlPointsToLut";
 
 export type ChannelsWidgetProps = {
@@ -30,10 +30,18 @@ export type ChannelsWidgetProps = {
   // From viewer state
   channelSettings: ChannelState[];
   changeChannelSetting: ChannelSettingUpdater;
+  getDefaultChannelState: (index: number) => ChannelState;
 };
 
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
-  const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
+  const {
+    channelGroupedByType,
+    channelSettings,
+    channelDataChannels,
+    filterFunc,
+    viewerChannelSettings,
+    getDefaultChannelState,
+  } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
     props.changeChannelSetting(channelArray, key, value);
@@ -123,8 +131,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     if (!channelDataChannels) {
       return;
     }
-    const defaultChannelState = getDefaultChannelState();
-    const allChannelStateKeys = Object.keys(defaultChannelState) as ChannelStateKey[];
+    const allChannelStateKeys = Object.keys(getDefaultChannelState(0)) as ChannelStateKey[];
     const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
     const channelStateKeysToReset = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
 
@@ -138,6 +145,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     }
     // Reset all other settings. Also, enable volumes on only the first three channels.
     channelSettings.forEach((_channelSetting, index) => {
+      const defaultChannelState = getDefaultChannelState(index);
       for (const key of channelStateKeysToReset) {
         if (key === "volumeEnabled" && index < 3) {
           props.changeChannelSetting(index, key, true);
@@ -153,6 +161,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     // the color map length, so we need to reset the colors manually.
     if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
       for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
+        const defaultChannelState = getDefaultChannelState(i);
         props.changeChannelSetting(i, "color", defaultChannelState["color"]);
       }
     }
@@ -168,4 +177,8 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   );
 };
 
-export default connectToViewerState(ChannelsWidget, ["channelSettings", "changeChannelSetting"]);
+export default connectToViewerState(ChannelsWidget, [
+  "channelSettings",
+  "changeChannelSetting",
+  "getDefaultChannelState",
+]);

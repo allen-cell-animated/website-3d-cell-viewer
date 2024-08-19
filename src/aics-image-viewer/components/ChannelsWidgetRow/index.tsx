@@ -4,7 +4,7 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 import { Channel } from "@aics/volume-viewer";
 
 import TfEditor from "../TfEditor";
-import { getDefaultChannelState, ISOSURFACE_OPACITY_SLIDER_MAX, PRESET_COLOR_MAP } from "../../shared/constants";
+import { ISOSURFACE_OPACITY_SLIDER_MAX, PRESET_COLOR_MAP } from "../../shared/constants";
 import ColorPicker from "../ColorPicker";
 import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
 import {
@@ -16,6 +16,7 @@ import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
 import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
+import { connectToViewerState } from "../ViewerStateProvider";
 
 import "./styles.css";
 
@@ -26,13 +27,14 @@ interface ChannelsWidgetRowProps {
   channelDataForChannel: Channel;
 
   changeChannelSetting: ChannelSettingUpdater;
+  getDefaultChannelState: (index: number) => ChannelState;
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
 const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidgetRowProps) => {
-  const { index, changeChannelSetting, saveIsosurface, channelState } = props;
+  const { index, changeChannelSetting, saveIsosurface, channelState, getDefaultChannelState } = props;
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const changeSettingForThisChannel = useCallback<SingleChannelSettingUpdater>(
@@ -90,7 +92,7 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
    */
   const resetChannelToDefaults = (): void => {
     // Only modify settings that are currently visible to the user.'
-    const defaultChannelState = getDefaultChannelState();
+    const defaultChannelState = getDefaultChannelState(index);
     if (props.channelState.volumeEnabled) {
       const defaultLut = getDefaultLut(props.channelDataForChannel.histogram);
       props.changeChannelSetting(index, "controlPoints", defaultLut.controlPoints);
@@ -185,4 +187,4 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 };
 
-export default ChannelsWidgetRow;
+export default connectToViewerState(ChannelsWidgetRow, ["getDefaultChannelState"]);

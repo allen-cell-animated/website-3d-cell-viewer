@@ -3,14 +3,7 @@ import { Button, Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
 import { connectToViewerState } from "./ViewerStateProvider";
-import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
-import {
-  ALPHA_MASK_SLIDER_DEFAULT,
-  BRIGHTNESS_SLIDER_LEVEL_DEFAULT,
-  DENSITY_SLIDER_LEVEL_DEFAULT,
-  INTERPOLATION_ENABLED_DEFAULT,
-  LEVELS_SLIDER_DEFAULT,
-} from "../shared/constants";
+import { ViewerSettingUpdater, ViewerState } from "./ViewerStateProvider/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 
@@ -32,6 +25,7 @@ export interface GlobalVolumeControlsProps {
   density: number;
   levels: [number, number, number];
   interpolationEnabled: boolean;
+  getDefaultViewerState: () => ViewerState;
 
   changeViewerSetting: ViewerSettingUpdater;
 }
@@ -51,14 +45,15 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
     return <SliderRow label={label} start={start} max={max} onUpdate={onUpdate} />;
   };
 
-  const { visibleControls: showControls, maskAlpha, brightness, density, levels } = props;
+  const { visibleControls: showControls, maskAlpha, brightness, density, levels, getDefaultViewerState } = props;
 
   const resetToDefaults = (): void => {
-    props.changeViewerSetting("maskAlpha", ALPHA_MASK_SLIDER_DEFAULT);
-    props.changeViewerSetting("brightness", BRIGHTNESS_SLIDER_LEVEL_DEFAULT);
-    props.changeViewerSetting("density", DENSITY_SLIDER_LEVEL_DEFAULT);
-    props.changeViewerSetting("levels", LEVELS_SLIDER_DEFAULT);
-    props.changeViewerSetting("interpolationEnabled", INTERPOLATION_ENABLED_DEFAULT);
+    const { maskAlpha, brightness, density, levels, interpolationEnabled } = getDefaultViewerState();
+    props.changeViewerSetting("maskAlpha", maskAlpha);
+    props.changeViewerSetting("brightness", brightness);
+    props.changeViewerSetting("density", density);
+    props.changeViewerSetting("levels", levels);
+    props.changeViewerSetting("interpolationEnabled", interpolationEnabled);
   };
 
   return (
@@ -87,4 +82,5 @@ export default connectToViewerState(GlobalVolumeControls, [
   "levels",
   "interpolationEnabled",
   "changeViewerSetting",
+  "getDefaultViewerState",
 ]);

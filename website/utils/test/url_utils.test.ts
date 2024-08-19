@@ -20,7 +20,7 @@ import {
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { getDefaultChannelState, getDefaultViewerState } from "../../../src/aics-image-viewer/shared/constants";
+import { getEmptyChannelState, getEmptyViewerState } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -832,7 +832,7 @@ describe("serializeViewerUrlParams", () => {
   });
 
   it("can remove viewer settings that match the default", () => {
-    const defaultViewerSettings = getDefaultViewerState();
+    const defaultViewerSettings = getEmptyViewerState();
     const customViewerState: Partial<ViewerState> = {
       viewMode: ViewMode.xy,
       density: 100,
@@ -862,7 +862,7 @@ describe("serializeViewerUrlParams", () => {
       isovalue: 49,
     };
     const serializedParams = serializeViewerUrlParams(
-      { ...getDefaultViewerState(), channelSettings: [{ ...getDefaultChannelState(), ...customChannelState }] },
+      { ...getEmptyViewerState(), channelSettings: [{ ...getEmptyChannelState(), ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);
@@ -873,13 +873,13 @@ describe("serializeViewerUrlParams", () => {
 
   it("does not use object reference comparison on control points when excluding defaults", () => {
     // Expand control points so it isn't comparing an object reference
-    const defaultChannelState = getDefaultChannelState();
+    const defaultChannelState = getEmptyChannelState();
     const customChannelState: Partial<ChannelState> = {
       controlPoints: [{ ...defaultChannelState.controlPoints[0] }, { ...defaultChannelState.controlPoints[1] }],
     };
 
     const serializedParams = serializeViewerUrlParams(
-      { ...getDefaultViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
+      { ...getEmptyViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);

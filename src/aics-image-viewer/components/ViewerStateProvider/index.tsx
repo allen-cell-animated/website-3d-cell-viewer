@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultViewerState } from "../../shared/constants";
+import { getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -120,7 +120,9 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
-  ...getDefaultViewerState(),
+  ...getEmptyViewerState(),
+  getDefaultViewerState: getEmptyViewerState,
+  getDefaultChannelState: (index: number) => getEmptyChannelState(),
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -139,7 +141,7 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
+  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -177,6 +179,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
+      getDefaultViewerState: getEmptyViewerState,
+      getDefaultChannelState: getEmptyChannelState,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.

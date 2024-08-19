@@ -17,7 +17,7 @@ import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
 import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
 import { isEqual } from "lodash";
-import { getDefaultChannelState, getDefaultViewerState } from "../../src/aics-image-viewer/shared/constants";
+import { getEmptyChannelState, getEmptyViewerState } from "../../src/aics-image-viewer/shared/constants";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
@@ -575,7 +575,7 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
 
 function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
   if (removeDefaults) {
-    cameraState = removeMatchingProperties(cameraState, getDefaultViewerState().cameraState ?? {});
+    cameraState = removeMatchingProperties(cameraState, getEmptyViewerState().cameraState ?? {});
     if (Object.keys(cameraState).length === 0) {
       return undefined;
     }
@@ -693,7 +693,7 @@ export function serializeViewerChannelSetting(
   removeDefaults: boolean
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
-    channelSetting = removeMatchingProperties(channelSetting, getDefaultChannelState());
+    channelSetting = removeMatchingProperties(channelSetting, getEmptyChannelState());
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
@@ -766,7 +766,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
  */
 export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
   if (removeDefaults) {
-    state = removeMatchingProperties(state, getDefaultViewerState());
+    state = removeMatchingProperties(state, getEmptyViewerState());
   }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,
