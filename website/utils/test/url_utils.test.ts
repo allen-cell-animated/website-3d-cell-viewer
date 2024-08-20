@@ -549,7 +549,8 @@ describe("Camera state", () => {
 
   it("default camera state has not been changed", () => {
     // The default camera state should NOT change unless backwards compatibility
-    // is added to ensure old links still work.
+    // is added to ensure old links still maintain the same camera orientation;
+    // otherwise, cameras will appear in the new default orientation unexpectedly.
     expect(getDefaultCameraState()).toEqual({
       position: [0, 0, 5],
       target: [0, 0, 0],
