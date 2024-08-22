@@ -48,8 +48,8 @@ export const landingPageContent: ProjectEntry[] = [
         name: "Small colony",
         loadParams: {
           imageUrl: [
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_09_small/raw.ome.zarr",
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_09_small/seg.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_09_small/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_09_small/seg.ome.zarr",
           ],
           cellId: "",
           imageDownloadHref: "",
@@ -61,8 +61,8 @@ export const landingPageContent: ProjectEntry[] = [
         name: "Medium colony",
         loadParams: {
           imageUrl: [
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_06_mid/raw.ome.zarr",
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_06_mid/seg.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_06_medium/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_06_medium/seg.ome.zarr",
           ],
           cellId: "",
           imageDownloadHref: "",
@@ -74,8 +74,8 @@ export const landingPageContent: ProjectEntry[] = [
         name: "Large colony",
         loadParams: {
           imageUrl: [
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_05_large/raw.ome.zarr",
-            "https://allencell.s3.amazonaws.com/aics/nuc_morph_data/data_for_analysis/baseline_colonies/20200323_05_large/seg.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_05_large/raw.ome.zarr",
+            "https://allencell.s3.amazonaws.com/aics/nuc-morph-dataset/hipsc_fov_nuclei_timelapse_dataset/hipsc_fov_nuclei_timelapse_data_used_for_analysis/baseline_colonies_fov_timelapse_dataset/20200323_05_large/seg.ome.zarr",
           ],
           cellId: "",
           imageDownloadHref: "",
