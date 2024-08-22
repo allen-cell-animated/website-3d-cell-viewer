@@ -17,7 +17,11 @@ import { PerAxis } from "../../src/aics-image-viewer/shared/types";
 import { clamp } from "./math_utils";
 import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
 import { isEqual } from "lodash";
-import { getDefaultChannelState, getDefaultViewerState } from "../../src/aics-image-viewer/shared/constants";
+import {
+  getDefaultCameraState,
+  getDefaultChannelState,
+  getDefaultViewerState,
+} from "../../src/aics-image-viewer/shared/constants";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;
@@ -591,9 +595,12 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   return removeUndefinedProperties(result);
 }
 
-function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
+export function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
   if (removeDefaults) {
-    cameraState = removeMatchingProperties(cameraState, getDefaultViewerState().cameraState ?? {});
+    // Note that we use the `getDefaultCameraState()` to get the defaults here,
+    // instead of `getDefaultViewerState().cameraState`. The latter is undefined, which signals
+    // that the camera should not be modified for URLs that don't specify it.
+    cameraState = removeMatchingProperties(cameraState, getDefaultCameraState());
     if (Object.keys(cameraState).length === 0) {
       return undefined;
     }
