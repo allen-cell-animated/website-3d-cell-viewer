@@ -1,6 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Tooltip } from "antd";
+import { Button, Divider, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
@@ -222,6 +222,13 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   }
 `;
 
+const CookieSettingsButton = styled(Button)`
+  color: var(--color-text-body);
+  &:hover > span {
+    text-decoration: underline;
+  }
+`;
+
 export default function LandingPage(): ReactElement {
   // Rendering
   const navigation = useNavigate();
@@ -365,7 +372,6 @@ export default function LandingPage(): ReactElement {
           </p>
         </BannerTextContainer>
       </Banner>
-
       <ContentContainer>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
@@ -388,13 +394,21 @@ export default function LandingPage(): ReactElement {
           </FeatureHighlightsItem>
         </FeatureHighlightsContainer>
       </ContentContainer>
-
       <LoadPromptContainer>
         <h2 style={{ margin: 0 }}>Load dataset(s) below or your own data to get started</h2>
       </LoadPromptContainer>
 
       <ContentContainer style={{ paddingBottom: "400px" }}>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
+      </ContentContainer>
+
+      <ContentContainer style={{ padding: "0 30px 40px 30px" }}>
+        <Divider />
+        <FlexColumnAlignCenter style={{ paddingTop: "20px" }}>
+          <CookieSettingsButton type="text" className="ot-sdk-show-settings">
+            Cookie settings
+          </CookieSettingsButton>
+        </FlexColumnAlignCenter>
       </ContentContainer>
     </div>
   );
