@@ -372,6 +372,7 @@ export default function LandingPage(): ReactElement {
           </p>
         </BannerTextContainer>
       </Banner>
+
       <ContentContainer>
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
@@ -394,6 +395,7 @@ export default function LandingPage(): ReactElement {
           </FeatureHighlightsItem>
         </FeatureHighlightsContainer>
       </ContentContainer>
+
       <LoadPromptContainer>
         <h2 style={{ margin: 0 }}>Load dataset(s) below or your own data to get started</h2>
       </LoadPromptContainer>
