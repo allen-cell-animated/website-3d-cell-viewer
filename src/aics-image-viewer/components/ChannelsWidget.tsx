@@ -127,54 +127,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
         };
       });
 
-  const resetAllChannelsToDefaults = (): void => {
-    if (!channelDataChannels) {
-      return;
-    }
-    const allChannelStateKeys = Object.keys(getDefaultChannelState(0)) as ChannelStateKey[];
-    const excludedKeys: ChannelStateKey[] = ["name", "controlPoints", "ramp", "useControlPoints"];
-    const channelStateKeysToReset = allChannelStateKeys.filter((key) => !excludedKeys.includes(key));
-
-    // Reset control points and ramp for each channel
-    for (let i = 0; i < channelDataChannels.length; i++) {
-      const channelData = channelDataChannels[i];
-      const defaultLut = getDefaultLut(channelData.getHistogram());
-      props.changeChannelSetting(i, "controlPoints", defaultLut.controlPoints);
-      props.changeChannelSetting(i, "ramp", controlPointsToRamp(defaultLut.controlPoints));
-      props.changeChannelSetting(i, "useControlPoints", false);
-    }
-    // Reset all other settings. Also, enable volumes on only the first three channels.
-    channelSettings.forEach((_channelSetting, index) => {
-      const defaultChannelState = getDefaultChannelState(index);
-      for (const key of channelStateKeysToReset) {
-        if (key === "volumeEnabled" && index < 3) {
-          props.changeChannelSetting(index, key, true);
-          continue;
-        }
-        props.changeChannelSetting(index, key, defaultChannelState[key]);
-      }
-    });
-
-    // Apply default color map
-    props.onApplyColorPresets(PRESET_COLOR_MAP[0].colors);
-    // `onApplyColorPresets` will fail to reset colors if the number of channels exceeds
-    // the color map length, so we need to reset the colors manually.
-    if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
-      for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
-        const defaultChannelState = getDefaultChannelState(i);
-        props.changeChannelSetting(i, "color", defaultChannelState["color"]);
-      }
-    }
-  };
-
-  return (
-    <div>
-      <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />
-      <div style={{ padding: "20px 15px" }}>
-        <Button onClick={resetAllChannelsToDefaults}>Reset all channels</Button>
-      </div>
-    </div>
-  );
+  return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
 };
 
 export default connectToViewerState(ChannelsWidget, [
