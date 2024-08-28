@@ -78,8 +78,20 @@ export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, va
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
+  /** Returns the default viewer state for the current session.
+   * Use `constants.getEmptyViewerState()` to get the global default viewer state.
+   */
   getDefaultViewerState: () => ViewerState;
+  /** Returns the default channel state for channel index `index` for the current session.
+   * Use `constants.getEmptyChannelState()` to get the global default channel state.
+   */
   getDefaultChannelState: (index: number) => ChannelState;
+  /** Overrides the default viewer state returned by `getDefaultViewerState()`. */
+  setDefaultViewerState: (state: ViewerState) => void;
+  /** Overrides the default channel state returned by `getDefaultChannelState()` for
+   * channel index `index`.
+   */
+  setDefaultChannelState: (index: number, state: ChannelState) => void;
   changeViewerSetting: ViewerSettingUpdater;
   changeChannelSetting: ChannelSettingUpdater;
   setChannelSettings: (settings: ChannelState[]) => void;

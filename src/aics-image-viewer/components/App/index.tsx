@@ -13,6 +13,7 @@ import {
   IVolumeLoader,
   PrefetchDirection,
   VolumeFileFormat,
+  ControlPoint,
 } from "@aics/volume-viewer";
 
 import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
@@ -185,8 +186,14 @@ const App: React.FC<AppProps> = (props) => {
   // State management /////////////////////////////////////////////////////////
 
   const viewerState = useContext(ViewerStateContext).ref;
-  const { channelSettings, setChannelSettings, changeViewerSetting, changeChannelSetting, applyColorPresets } =
-    viewerState.current;
+  const {
+    channelSettings,
+    setChannelSettings,
+    changeViewerSetting,
+    changeChannelSetting,
+    applyColorPresets,
+    setDefaultChannelState,
+  } = viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
   if (props.view3dRef !== undefined) {
@@ -282,6 +289,7 @@ const App: React.FC<AppProps> = (props) => {
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      setDefaultChannelState(channelIndex, { ...thisChannelsSettings, ramp: controlPointsToRamp(ramp), controlPoints });
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {

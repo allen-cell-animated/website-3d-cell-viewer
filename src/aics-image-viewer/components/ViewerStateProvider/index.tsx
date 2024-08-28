@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useRef, useState } from "react";
 
 import type {
   ViewerStateContextType,
@@ -122,7 +122,9 @@ const nullfn = (): void => {};
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getEmptyViewerState(),
   getDefaultViewerState: getEmptyViewerState,
-  getDefaultChannelState: (index: number) => getEmptyChannelState(),
+  getDefaultChannelState: (_index: number) => getEmptyChannelState(),
+  setDefaultViewerState: nullfn,
+  setDefaultChannelState: (_index: number) => nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -143,6 +145,7 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
+
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
@@ -171,6 +174,18 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     }
   }, [props.viewerSettings]);
 
+  // Getters and setters for default viewer and channel states
+  const [defaultViewerState, setDefaultViewerState] = useState(viewerSettings);
+  const getDefaultViewerState = useCallback(() => defaultViewerState, [defaultViewerState]);
+  const defaultChannelSettings = useRef<Record<number, ChannelState>>({}).current;
+  const getDefaultChannelState = useCallback(
+    (index: number) => defaultChannelSettings[index] || getEmptyChannelState(),
+    [defaultChannelSettings]
+  );
+  const setDefaultChannelState = useCallback((index: number, state: ChannelState) => {
+    defaultChannelSettings[index] = state;
+  }, []);
+
   const context = useMemo(() => {
     ref.current = {
       ...viewerSettings,
@@ -179,8 +194,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
-      getDefaultViewerState: getEmptyViewerState,
-      getDefaultChannelState: getEmptyChannelState,
+      getDefaultViewerState,
+      getDefaultChannelState,
+      setDefaultViewerState,
+      setDefaultChannelState,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.
