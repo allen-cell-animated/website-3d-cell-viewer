@@ -1,3 +1,4 @@
+import { CameraState } from "@aics/volume-viewer";
 import { describe, expect, it } from "@jest/globals";
 
 import {
@@ -16,11 +17,16 @@ import {
   serializeViewerUrlParams,
   CONTROL_POINTS_REGEX,
   LEGACY_CONTROL_POINTS_REGEX,
+  serializeCameraState,
 } from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { getEmptyChannelState, getEmptyViewerState } from "../../../src/aics-image-viewer/shared/constants";
+import {
+  getDefaultCameraState,
+  getEmptyChannelState,
+  getEmptyViewerState,
+} from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -390,7 +396,7 @@ describe("Channel state serialization", () => {
   });
 });
 
-describe("Viewer state serialization", () => {
+describe("Viewer state", () => {
   const DEFAULT_VIEWER_STATE: ViewerState = {
     viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
     renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
@@ -483,16 +489,15 @@ describe("Viewer state serialization", () => {
       expect(serializeViewerState(CUSTOM_VIEWER_STATE, false)).toEqual(SERIALIZED_CUSTOM_VIEWER_STATE);
     });
 
-    it("deserializes partial camera settings", () => {
-      const state: Partial<ViewerState> = {
-        cameraState: {
-          position: [1.0, -1.4, 45],
-          up: [0, 1, 0],
-          fov: 43.5,
-        },
+    it("shortens long numbers in the slice and region parameters", () => {
+      // Floats should be rounded to 5 significant digits or less
+      let state: Partial<ViewerState> = {
+        region: { x: [0.4566666666, 0.8667332], y: [0.49999999, 0.8999999], z: [0.3000000001, 0.16467883] },
+        slice: { x: 0.41111186, y: 0.49999999, z: 0.677402 },
       };
-      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
-      expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
+      let serializedState = serializeViewerState(state, true);
+      expect(serializedState.reg).toEqual("0.45667:0.86673,0.5:0.9,0.3:0.16468");
+      expect(serializedState.slice).toEqual("0.41111,0.5,0.6774");
     });
   });
 
@@ -525,6 +530,44 @@ describe("Viewer state serialization", () => {
         const state: ViewerState = { ...DEFAULT_VIEWER_STATE, renderMode };
         expect(deserializeViewerState(serializeViewerState(state, false)).renderMode).toEqual(renderMode);
       }
+    });
+
+    it("deserializes partial camera settings", () => {
+      const state: Partial<ViewerState> = {
+        cameraState: {
+          position: [1.0, -1.4, 45],
+          up: [0, 1, 0],
+          fov: 43.5,
+        },
+      };
+      const serializedState = "pos:1:-1.4:45,up:0:1:0,fov:43.5";
+      expect(deserializeViewerState({ cam: serializedState })).toEqual(state);
+    });
+  });
+});
+
+describe("Camera state", () => {
+  it("uses default camera state when choosing elements to exclude/ignore", () => {
+    let cameraState: CameraState = {
+      ...getDefaultCameraState(),
+    };
+    // No changes from default
+    expect(serializeCameraState(cameraState, true)).toEqual(undefined);
+
+    cameraState = { ...cameraState, position: [1, 2, 3] };
+    expect(serializeCameraState(cameraState, true)).toEqual("pos:1:2:3");
+  });
+
+  it("default camera state has not been changed", () => {
+    // The default camera state should NOT change unless backwards compatibility
+    // is added to ensure old links still maintain the same camera orientation;
+    // otherwise, cameras will appear in the new default orientation unexpectedly.
+    expect(getDefaultCameraState()).toEqual({
+      position: [0, 0, 5],
+      target: [0, 0, 0],
+      up: [0, 1, 0],
+      fov: 20,
+      orthoScale: 0.5,
     });
   });
 });

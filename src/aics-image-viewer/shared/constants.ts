@@ -1,3 +1,5 @@
+import { CameraState } from "@aics/volume-viewer";
+
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
 import { ViewMode, RenderMode, ImageType } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
@@ -93,6 +95,22 @@ export const PRESET_COLOR_MAP = Object.freeze([
   },
 ]);
 
+/** Allows the 3D viewer to apply the default camera settings for the view mode. */
+const USE_VIEW_MODE_DEFAULT_CAMERA = undefined;
+
+/**
+ * Reflects the default camera settings the 3D viewer uses on volume load.
+ * These SHOULD NOT be changed; otherwise, existing shared links that don't specify the
+ * camera settings will use the new defaults and may be in unexpected orientations or positions.
+ */
+export const getDefaultCameraState = (): CameraState => ({
+  position: [0, 0, 5],
+  target: [0, 0, 0],
+  up: [0, 1, 0],
+  fov: 20,
+  orthoScale: 0.5,
+});
+
 /**
  * Returns the blank, default viewer state. Note that this is named differently from
  * `getDefaultViewerState` in `ViewerStateProvider`, since the 'default' state can be overridden.
@@ -114,13 +132,11 @@ export const getEmptyViewerState = (): ViewerState => ({
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
-  cameraState: {
-    position: [0, 0, 5],
-    target: [0, 0, 0],
-    up: [0, 1, 0],
-    fov: 20,
-    orthoScale: 0.5,
-  },
+  // Do not override camera position, target, etc. by default;
+  // instead, let the viewer apply default camera settings based on the view mode.
+  // This prevents a bug where the camera's position and view mode are set to
+  // incompatible states and the viewport becomes blank.
+  cameraState: USE_VIEW_MODE_DEFAULT_CAMERA,
 });
 
 /**
