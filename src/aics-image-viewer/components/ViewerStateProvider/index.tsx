@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
+import { getDefaultCameraState, getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -29,11 +29,17 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
     };
   },
   // Render mode: if we're switching to pathtrace, turn off autorotate
-  renderMode: (prevSettings, renderMode) => ({
-    ...prevSettings,
-    renderMode,
-    autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
-  }),
+  // Also, do not change the mode if the view mode is not 3D
+  renderMode: (prevSettings, renderMode) => {
+    if (renderMode === RenderMode.pathTrace && prevSettings.viewMode !== ViewMode.threeD) {
+      return { ...prevSettings };
+    }
+    return {
+      ...prevSettings,
+      renderMode,
+      autorotate: renderMode === RenderMode.pathTrace ? false : prevSettings.autorotate,
+    };
+  },
   // Autorotate: do not enable autorotate while in pathtrace mode
   autorotate: (prevSettings, autorotate) => ({
     ...prevSettings,
@@ -123,7 +129,6 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getEmptyViewerState(),
   getDefaultViewerState: getEmptyViewerState,
   getDefaultChannelState: (_index: number) => getEmptyChannelState(),
-  setDefaultViewerState: nullfn,
   setDefaultChannelState: (_index: number) => nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
@@ -175,8 +180,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, [props.viewerSettings]);
 
   // Getters and setters for default viewer and channel states
-  const [defaultViewerState, setDefaultViewerState] = useState(viewerSettings);
-  const getDefaultViewerState = useCallback(() => defaultViewerState, [defaultViewerState]);
+  const getDefaultViewerState = useCallback(
+    () => ({ ...getEmptyViewerState(), cameraState: getDefaultCameraState(), ...props.viewerSettings }),
+    [props.viewerSettings]
+  );
   const defaultChannelSettings = useRef<Record<number, ChannelState>>({}).current;
   const getDefaultChannelState = useCallback(
     (index: number) => defaultChannelSettings[index] || getEmptyChannelState(),
@@ -196,7 +203,6 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       applyColorPresets,
       getDefaultViewerState,
       getDefaultChannelState,
-      setDefaultViewerState,
       setDefaultChannelState,
     };
 

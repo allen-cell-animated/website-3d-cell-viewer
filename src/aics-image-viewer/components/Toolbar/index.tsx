@@ -6,11 +6,14 @@ import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
 
-import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
+import { ChannelSettingUpdater, ChannelState, ViewerSettingUpdater, ViewerState } from "../ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
 import "./styles.css";
+import { UndoOutlined } from "@ant-design/icons";
+import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
+import { resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
 
 interface ToolbarProps {
   // From parent
@@ -40,6 +43,10 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
   changeViewerSetting: ViewerSettingUpdater;
+  getDefaultChannelState: (index: number) => ChannelState;
+  getDefaultViewerState: () => ViewerState;
+  channelSettings: ChannelState[];
+  changeChannelSetting: ChannelSettingUpdater;
 }
 
 interface ToolbarState {
@@ -135,7 +142,15 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
   render(): React.ReactElement {
     const { props } = this;
-    const { changeViewerSetting, visibleControls, showAxes, showBoundingBox, autorotate } = props;
+    const {
+      changeViewerSetting,
+      changeChannelSetting,
+      channelSettings,
+      visibleControls,
+      showAxes,
+      showBoundingBox,
+      autorotate,
+    } = props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
@@ -148,6 +163,16 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
     const turntableToggleTitle = autorotate ? "Turn off turntable" : "Turn on turntable";
 
     const getPopupContainer = this.containerRef.current ? () => this.containerRef.current! : undefined;
+
+    const resetToInitialView = (): void => {
+      const initialDefault = props.getDefaultViewerState();
+      resetViewerState(changeViewerSetting, initialDefault);
+
+      for (let i = 0; i < channelSettings.length; i++) {
+        const channelState = props.getDefaultChannelState(i);
+        resetChannelState(changeChannelSetting, i, channelState);
+      }
+    };
 
     return (
       <div className={`viewer-toolbar-container${scrollMode ? " viewer-toolbar-scroll" : ""}`} ref={this.containerRef}>
@@ -164,7 +189,14 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
           onWheel={this.wheelHandler}
           onScroll={this.checkScrollBtnVisible}
         >
-          <div className="viewer-toolbar-left" ref={this.leftRef} />
+          <div className="viewer-toolbar-left" ref={this.leftRef}>
+            <Tooltip placement="bottom" title="Reset to initial settings">
+              <Button className="ant-btn-icon-only btn-borderless" onClick={resetToInitialView}>
+                <UndoOutlined />
+                <VisuallyHidden>Reset to initial settings</VisuallyHidden>
+              </Button>
+            </Tooltip>
+          </div>
           <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <div className="viewer-toolbar-group">
@@ -284,4 +316,8 @@ export default connectToViewerState(Toolbar, [
   "showAxes",
   "showBoundingBox",
   "changeViewerSetting",
+  "changeChannelSetting",
+  "channelSettings",
+  "getDefaultChannelState",
+  "getDefaultViewerState",
 ]);
