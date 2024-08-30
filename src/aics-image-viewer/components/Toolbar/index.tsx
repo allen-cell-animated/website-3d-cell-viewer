@@ -14,6 +14,7 @@ import "./styles.css";
 import { UndoOutlined } from "@ant-design/icons";
 import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
 import { resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
+import { getEmptyChannelState } from "../../shared/constants";
 
 interface ToolbarProps {
   // From parent
@@ -43,7 +44,7 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
   changeViewerSetting: ViewerSettingUpdater;
-  getDefaultChannelState: (index: number) => ChannelState;
+  getDefaultChannelState: (index: number) => ChannelState | undefined;
   getDefaultViewerState: () => ViewerState;
   channelSettings: ChannelState[];
   changeChannelSetting: ChannelSettingUpdater;
@@ -170,7 +171,12 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
       for (let i = 0; i < channelSettings.length; i++) {
         const channelState = props.getDefaultChannelState(i);
-        resetChannelState(changeChannelSetting, i, channelState);
+        // Don't override name on reset, otherwise this can delete the channel from the UI.
+        resetChannelState(
+          changeChannelSetting,
+          i,
+          channelState ?? { ...getEmptyChannelState(), name: props.channelSettings[i].name }
+        );
       }
     };
 
