@@ -15,7 +15,6 @@ import {
 import { IsosurfaceFormat } from "../../shared/types";
 import ViewerIcon from "../shared/ViewerIcon";
 import SliderRow from "../shared/SliderRow";
-import { connectToViewerState } from "../ViewerStateProvider";
 
 import "./styles.css";
 
@@ -26,14 +25,13 @@ interface ChannelsWidgetRowProps {
   channelDataForChannel: Channel;
 
   changeChannelSetting: ChannelSettingUpdater;
-  getDefaultChannelState: (index: number) => ChannelState;
 
   saveIsosurface: (channelIndex: number, type: IsosurfaceFormat) => void;
   onColorChangeComplete?: (newRGB: ColorObject, oldRGB?: ColorObject, index?: number) => void;
 }
 
 const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidgetRowProps) => {
-  const { index, changeChannelSetting, saveIsosurface, channelState, getDefaultChannelState } = props;
+  const { index, changeChannelSetting, saveIsosurface, channelState } = props;
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const changeSettingForThisChannel = useCallback<SingleChannelSettingUpdater>(
@@ -159,4 +157,4 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 };
 
-export default connectToViewerState(ChannelsWidgetRow, ["getDefaultChannelState"]);
+export default ChannelsWidgetRow;
