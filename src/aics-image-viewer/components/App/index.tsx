@@ -193,6 +193,7 @@ const App: React.FC<AppProps> = (props) => {
     changeChannelSetting,
     applyColorPresets,
     setDefaultChannelState,
+    getDefaultChannelState,
   } = viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
@@ -284,12 +285,16 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    // If this is the first load of this image, auto-generate initial LUTs
+    if (aimg.loadSpec.time === 0) {
+      console.log("Volume loaded", channelIndex, aimg.imageInfo.subregionSize);
+    }
+    let currentControlPoints: ControlPoint[] = [];
     if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
+      // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
+      currentControlPoints = controlPoints;
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
-      setDefaultChannelState(channelIndex, { ...thisChannelsSettings, ramp: controlPointsToRamp(ramp), controlPoints });
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -304,6 +309,7 @@ const App: React.FC<AppProps> = (props) => {
         // now manually remap ramp using the channel's old range
         const controlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
+        currentControlPoints = newControlPoints;
         changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(newControlPoints));
       } else {
         // ramp was just automatically remapped - update in state
@@ -312,9 +318,33 @@ const App: React.FC<AppProps> = (props) => {
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
+        currentControlPoints = newControlPoints;
         changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
       }
     }
+
+    // Check for 3D vs. 2D and only save control points/channel state if the volume is the
+    // right type
+    if (getDefaultChannelState(channelIndex) === undefined && viewerSettings.time === aimg.loadSpec.time) {
+      // TODO: Does this fail if data is chunked in a way that does not allow for subregions where z=1? Is that possible?
+      const isXyAndLoadingXy = viewerSettings.viewMode === ViewMode.xy && aimg.imageInfo.subregionSize.z === 1;
+      const is3dAndLoading3d = viewerSettings.viewMode === ViewMode.threeD && aimg.imageInfo.subregionSize.z > 1;
+      if (isXyAndLoadingXy || is3dAndLoading3d) {
+        const newState = {
+          ...thisChannelsSettings,
+          ramp: controlPointsToRamp(currentControlPoints),
+          controlPoints: currentControlPoints,
+        };
+        console.log(
+          "Saving default channel state ",
+          channelIndex,
+          " with control points ",
+          newState.controlPoints.map((cp) => cp.x)
+        );
+        setDefaultChannelState(channelIndex, newState);
+      }
+    }
+
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 

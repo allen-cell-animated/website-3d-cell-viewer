@@ -102,6 +102,17 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
   channelSettings: ChannelState[],
   { index, key, value }: ChannelStateAction<K>
 ): ChannelState[] => {
+  if (key === "controlPoints") {
+    console.log(
+      "ViewerStateProvider: Updating controlPoints for channel ",
+      index,
+      " to ",
+      value.map((cp) => cp.x)
+    );
+  }
+  if (key === "ramp") {
+    console.log("ViewerStateProvider: Updating ramp for channel ", index, " to ", value);
+  }
   if (key === undefined) {
     // ChannelSettingInitAction
     return value as ChannelState[];
@@ -128,8 +139,8 @@ const nullfn = (): void => {};
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getEmptyViewerState(),
   getDefaultViewerState: getEmptyViewerState,
-  getDefaultChannelState: (_index: number) => getEmptyChannelState(),
-  setDefaultChannelState: (_index: number) => nullfn,
+  getDefaultChannelState: (_index: number) => undefined,
+  setDefaultChannelState: nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -186,7 +197,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   );
   const defaultChannelSettings = useRef<Record<number, ChannelState>>({}).current;
   const getDefaultChannelState = useCallback(
-    (index: number) => defaultChannelSettings[index] || getEmptyChannelState(),
+    (index: number) => defaultChannelSettings[index],
     [defaultChannelSettings]
   );
   const setDefaultChannelState = useCallback((index: number, state: ChannelState) => {

@@ -85,7 +85,7 @@ export type ViewerStateContextType = ViewerState & {
   /** Returns the default channel state for channel index `index` for the current session.
    * Use `constants.getEmptyChannelState()` to get the global default channel state.
    */
-  getDefaultChannelState: (index: number) => ChannelState;
+  getDefaultChannelState: (index: number) => ChannelState | undefined;
   /** Overrides the default channel state returned by `getDefaultChannelState()` for
    * channel index `index`.
    */
