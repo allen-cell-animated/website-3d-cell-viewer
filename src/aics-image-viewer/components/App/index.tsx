@@ -325,13 +325,13 @@ const App: React.FC<AppProps> = (props) => {
       }
     }
 
-    // TODO: Move to onVolumeLoaded callback in ViewerStateProvider?
-    // Check for 3D vs. 2D and only save control points/channel state if the volume is the
-    // right type
-    if (getSavedChannelState(channelIndex) === undefined && viewerSettings.time === aimg.loadSpec.time) {
-      if (doesVolumeMatchViewMode(viewerSettings.viewMode, aimg)) {
+    // If we haven't initialized the control points for this channel yet and the view mode
+    // and time match, update the saved state.
+    const savedChannelState = getSavedChannelState(channelIndex);
+    if (savedChannelState && savedChannelState.controlPoints.length === 0) {
+      if (viewerSettings.time === aimg.loadSpec.time && doesVolumeMatchViewMode(viewerSettings.viewMode, aimg)) {
         const newState = {
-          ...thisChannelsSettings,
+          ...savedChannelState,
           ramp: controlPointsToRamp(currentControlPoints),
           controlPoints: currentControlPoints,
         };
@@ -344,6 +344,7 @@ const App: React.FC<AppProps> = (props) => {
         setSavedChannelState(channelIndex, newState);
       }
     }
+    // Callback to notify the viewer state that a channel has loaded.
     onChannelLoaded(aimg, channelIndex);
 
     // save the channel's new range for remapping next time
@@ -379,7 +380,10 @@ const App: React.FC<AppProps> = (props) => {
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      return initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
+      const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
+      // Initialize saved channel state, but don't include control points to flag that the LUT has not yet been set.
+      setSavedChannelState(index, { ...channelState, controlPoints: [] });
+      return channelState;
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
