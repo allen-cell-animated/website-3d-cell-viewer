@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef, useState } from "react";
+import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
 
 import type {
   ViewerStateContextType,
@@ -12,8 +12,8 @@ import type {
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { getDefaultCameraState, getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
-import { resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
-import { ControlPoint } from "@aics/volume-viewer";
+import { doesVolumeMatchViewMode, resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
+import { Volume } from "@aics/volume-viewer";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -104,17 +104,6 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
   channelSettings: ChannelState[],
   { index, key, value }: ChannelStateAction<K>
 ): ChannelState[] => {
-  if (key === "controlPoints") {
-    console.log(
-      "ViewerStateProvider: Updating controlPoints for channel ",
-      index,
-      " to ",
-      (value as ControlPoint[]).map((cp) => cp.x)
-    );
-  }
-  if (key === "ramp") {
-    console.log("ViewerStateProvider: Updating ramp for channel ", index, " to ", value);
-  }
   if (key === undefined) {
     // ChannelSettingInitAction
     return value as ChannelState[];
@@ -143,8 +132,8 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   resetToSavedViewerState: nullfn,
   // resetToDefaultViewerState: nullfn,
   setSavedChannelState: nullfn,
-  getSavedChannelState: () => getEmptyChannelState(),
-  // onVolumeLoaded: nullfn,
+  getSavedChannelState: (index) => getEmptyChannelState(index),
+  onChannelLoaded: nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -165,6 +154,11 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
+  /** Flag indicating that a reset was initiated while the loaded view mode was not that of the
+   * original saved state. If set, the viewer should perform a second reset after the correct
+   * volume is loaded.
+   */
+  const channelsToResetAfterLoad = useRef(new Set<number>());
 
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -202,22 +196,61 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, []);
   const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
 
+  /** Resets to the initial saved state of the viewer, as shown to the user on load. */
   const resetToSavedViewerState = useCallback(() => {
     const savedViewerState = {
       ...getEmptyViewerState(),
       cameraState: getDefaultCameraState(),
       ...props.viewerSettings,
     };
+    // Needs reset on reload if one of the view modes is 2D while the other is 3D
+    // TODO: or if playback is currently enabled in 2D mode
+    const willNeedResetOnLoad =
+      viewerSettings.viewMode !== savedViewerState.viewMode &&
+      (viewerSettings.viewMode === ViewMode.xy || savedViewerState.viewMode === ViewMode.xy);
+
     resetViewerState(changeViewerSetting, savedViewerState);
 
-    // Reset each channel
+    // Get channel states and reset each.
+    const enabledChannels = new Set<number>();
     const newChannelSettings = channelSettings.map((_, index) => {
-      return savedChannelSettings[index] || getEmptyChannelState();
+      const savedChannelState = savedChannelSettings[index] || getEmptyChannelState(index);
+      if (savedChannelState.volumeEnabled || savedChannelState.isosurfaceEnabled) {
+        enabledChannels.add(index);
+      }
+      return savedChannelState;
     });
+    console.log("resetToSavedViewerState: resetting ", newChannelSettings);
     for (let i = 0; i < channelSettings.length; i++) {
       resetChannelState(changeChannelSetting, i, newChannelSettings[i]);
     }
-  }, [props.viewerSettings, channelSettings, changeViewerSetting, changeChannelSetting]);
+
+    if (willNeedResetOnLoad) {
+      console.log("Needs reset for channels ", enabledChannels);
+      channelsToResetAfterLoad.current = enabledChannels;
+    }
+  }, [props.viewerSettings, viewerSettings, channelSettings, changeViewerSetting, changeChannelSetting]);
+
+  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(nullfn);
+
+  const onChannelLoaded = useCallback(
+    (volume: Volume, channelIndex: number) => {
+      console.log("onChannelLoaded", channelIndex);
+      if (
+        channelsToResetAfterLoad.current.has(channelIndex) &&
+        doesVolumeMatchViewMode(viewerSettings.viewMode, volume)
+      ) {
+        console.log("onChannelLoaded: Found match for ", channelIndex, " after load");
+        channelsToResetAfterLoad.current.delete(channelIndex);
+        if (channelsToResetAfterLoad.current.size === 0) {
+          console.log("onChannelLoaded: Resetting after load");
+          resetToSavedViewerState();
+        }
+      }
+    },
+    [resetToSavedViewerState, viewerSettings, channelSettings]
+  );
+  onChannelLoadedRef.current = onChannelLoaded;
 
   const context = useMemo(() => {
     ref.current = {
@@ -226,6 +259,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       resetToSavedViewerState,
       changeViewerSetting,
       setChannelSettings,
+      onChannelLoaded: (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),
       changeChannelSetting,
       applyColorPresets,
       setSavedChannelState,

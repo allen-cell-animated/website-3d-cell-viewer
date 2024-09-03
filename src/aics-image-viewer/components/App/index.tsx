@@ -66,6 +66,7 @@ import {
 import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 
 import "./styles.css";
+import { doesVolumeMatchViewMode } from "../../shared/utils/viewerState";
 
 const { Sider, Content } = Layout;
 
@@ -194,6 +195,7 @@ const App: React.FC<AppProps> = (props) => {
     applyColorPresets,
     setSavedChannelState,
     getSavedChannelState,
+    onChannelLoaded,
   } = viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
@@ -327,10 +329,7 @@ const App: React.FC<AppProps> = (props) => {
     // Check for 3D vs. 2D and only save control points/channel state if the volume is the
     // right type
     if (getSavedChannelState(channelIndex) === undefined && viewerSettings.time === aimg.loadSpec.time) {
-      // TODO: Does this fail if data is chunked in a way that does not allow for subregions where z=1? Is that possible?
-      const isXyAndLoadingXy = viewerSettings.viewMode === ViewMode.xy && aimg.imageInfo.subregionSize.z === 1;
-      const is3dAndLoading3d = viewerSettings.viewMode === ViewMode.threeD && aimg.imageInfo.subregionSize.z > 1;
-      if (isXyAndLoadingXy || is3dAndLoading3d) {
+      if (doesVolumeMatchViewMode(viewerSettings.viewMode, aimg)) {
         const newState = {
           ...thisChannelsSettings,
           ramp: controlPointsToRamp(currentControlPoints),
@@ -345,6 +344,7 @@ const App: React.FC<AppProps> = (props) => {
         setSavedChannelState(channelIndex, newState);
       }
     }
+    onChannelLoaded(aimg, channelIndex);
 
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
@@ -425,6 +425,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const openImage = async (): Promise<void> => {
+    console.log("openImage");
     const { imageUrl, parentImageUrl, rawData, rawDims } = props;
     const showParentImage = viewerState.current.imageType === ImageType.fullField && parentImageUrl !== undefined;
     const path = showParentImage ? parentImageUrl : imageUrl;

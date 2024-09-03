@@ -143,19 +143,23 @@ export const getEmptyViewerState = (): ViewerState => ({
  * Returns the blank, default channel state. Note that this is named differently from
  * `getDefaultChannelState` in `ViewerStateProvider`, since the 'default' state can be overridden.
  */
-export const getEmptyChannelState = (): ChannelState => ({
-  name: "",
-  volumeEnabled: false,
-  isosurfaceEnabled: false,
-  colorizeEnabled: false,
-  colorizeAlpha: 1.0,
-  isovalue: 128,
-  opacity: 1.0,
-  color: [226, 205, 179] as ColorArray,
-  useControlPoints: false,
-  ramp: [0, TFEDITOR_MAX_BIN],
-  controlPoints: [
-    { x: 0, opacity: 0, color: [255, 255, 255] },
-    { x: 255, opacity: 1, color: [255, 255, 255] },
-  ],
-});
+export const getEmptyChannelState = (index: number = 0): ChannelState => {
+  const color = PRESET_COLORS_0[index % PRESET_COLORS_0.length];
+
+  return {
+    name: "",
+    volumeEnabled: false,
+    isosurfaceEnabled: false,
+    colorizeEnabled: false,
+    colorizeAlpha: 1.0,
+    isovalue: 128,
+    opacity: 1.0,
+    color: color,
+    useControlPoints: false,
+    ramp: [0, TFEDITOR_MAX_BIN],
+    controlPoints: [
+      { x: 0, opacity: 0, color: [255, 255, 255] },
+      { x: 255, opacity: 1, color: [255, 255, 255] },
+    ],
+  };
+};

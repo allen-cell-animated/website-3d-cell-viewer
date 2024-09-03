@@ -94,7 +94,7 @@ export type ViewerStateContextType = ViewerState & {
    */
   setSavedChannelState: (index: number, state: ChannelState) => void;
   getSavedChannelState: (index: number) => ChannelState;
-  // onVolumeLoaded: (volume: Volume) => void;
+  onChannelLoaded: (volume: Volume, channelIndex: number) => void;
   changeViewerSetting: ViewerSettingUpdater;
   changeChannelSetting: ChannelSettingUpdater;
   setChannelSettings: (settings: ChannelState[]) => void;

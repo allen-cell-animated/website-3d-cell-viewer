@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { find } from "lodash";
-import { Button, Collapse, CollapseProps, List } from "antd";
+import { Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
 import type { ChannelGrouping, ViewerChannelSettings } from "../shared/utils/viewerChannelSettings";
@@ -10,10 +10,8 @@ import type { IsosurfaceFormat } from "../shared/types";
 
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
-import { connectToViewerState, ViewerStateContext } from "./ViewerStateProvider";
+import { connectToViewerState } from "./ViewerStateProvider";
 import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
-import { PRESET_COLOR_MAP } from "../shared/constants";
-import { controlPointsToRamp, getDefaultLut } from "../shared/utils/controlPointsToLut";
 
 export type ChannelsWidgetProps = {
   // From parent

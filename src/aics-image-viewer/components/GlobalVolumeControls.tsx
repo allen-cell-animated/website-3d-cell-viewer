@@ -1,9 +1,9 @@
 import React from "react";
-import { Button, Checkbox } from "antd";
+import { Checkbox } from "antd";
 
 import SliderRow from "./shared/SliderRow";
 import { connectToViewerState } from "./ViewerStateProvider";
-import { ViewerSettingUpdater, ViewerState } from "./ViewerStateProvider/types";
+import { ViewerSettingUpdater } from "./ViewerStateProvider/types";
 
 type GlobalVolumeControlKey = "maskAlpha" | "brightness" | "density" | "levels";
 

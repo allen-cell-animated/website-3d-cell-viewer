@@ -6,16 +6,13 @@ import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
 
-import { ChannelSettingUpdater, ChannelState, ViewerSettingUpdater, ViewerState } from "../ViewerStateProvider/types";
+import { ChannelSettingUpdater, ChannelState, ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
 import "./styles.css";
 import { UndoOutlined } from "@ant-design/icons";
 import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
-import { resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
-import { getEmptyChannelState } from "../../shared/constants";
-
 interface ToolbarProps {
   // From parent
   cellDownloadHref: string;
