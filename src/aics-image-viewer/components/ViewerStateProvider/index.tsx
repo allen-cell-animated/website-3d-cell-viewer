@@ -245,6 +245,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const resetToDefaultViewerState = useCallback(() => {
     const defaultChannelStates = channelSettings.map((_, index) => getEmptyChannelState(index));
+    // TODO: How to apply "default" LUT here?
+    for (let i = 0; i < 3; i++) {
+      defaultChannelStates[i].volumeEnabled = true;
+    }
     resetToState({ ...getEmptyViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
   }, [props.viewerSettings, resetToState, channelSettings]);
 
