@@ -203,11 +203,14 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       cameraState: getDefaultCameraState(),
       ...props.viewerSettings,
     };
-    // Needs reset on reload if one of the view modes is 2D while the other is 3D
+    // Needs reset on reload if one of the view modes is 2D while the other is 3D,
+    // if the timestamp is different,
     // TODO: or if playback is currently enabled in 2D mode
-    const willNeedResetOnLoad =
+    const isInDifferentViewMode =
       viewerSettings.viewMode !== savedViewerState.viewMode &&
       (viewerSettings.viewMode === ViewMode.xy || savedViewerState.viewMode === ViewMode.xy);
+    const isAtDifferentTime = viewerSettings.time !== savedViewerState.time;
+    const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime;
 
     resetViewerState(changeViewerSetting, savedViewerState);
 
