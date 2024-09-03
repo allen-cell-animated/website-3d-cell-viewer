@@ -612,12 +612,14 @@ const App: React.FC<AppProps> = (props) => {
     [viewerSettings.viewMode]
   );
 
-  useImageEffect((_currentImage) => {
-    // Set camera transform on initial load only
-    if (viewerSettings.cameraState) {
-      view3d.setCameraState(viewerSettings.cameraState);
-    }
-  }, []);
+  useImageEffect(
+    (_currentImage) => {
+      if (viewerSettings.cameraState) {
+        view3d.setCameraState(viewerSettings.cameraState);
+      }
+    },
+    [viewerSettings.cameraState]
+  );
 
   useImageEffect((_currentImage) => view3d.setAutoRotate(viewerSettings.autorotate), [viewerSettings.autorotate]);
 
