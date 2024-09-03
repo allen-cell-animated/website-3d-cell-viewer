@@ -212,8 +212,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
         viewerSettings.viewMode !== newState.viewMode &&
         (viewerSettings.viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
       const isAtDifferentTime = viewerSettings.time !== newState.time;
-      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy;
-      const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime;
+      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy && newState.region.z !== viewerSettings.region.z;
+      const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
       resetViewerState(changeViewerSetting, newState);
 
