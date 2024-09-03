@@ -1,4 +1,4 @@
-import { CameraState, ControlPoint } from "@aics/volume-viewer";
+import { CameraState, ControlPoint, Volume } from "@aics/volume-viewer";
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
@@ -78,18 +78,23 @@ export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, va
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
-  /** Returns the default viewer state for the current session.
-   * Use `constants.getEmptyViewerState()` to get the global default viewer state.
+  /**
+   * Resets the viewer and all channels to a saved initial state, determined
+   * by the initial parameters passed to the viewer.
+   * Saved states for channels can be set with `setSavedChannelState()`.
    */
-  getDefaultViewerState: () => ViewerState;
-  /** Returns the default channel state for channel index `index` for the current session.
-   * Use `constants.getEmptyChannelState()` to get the global default channel state.
+  resetToSavedViewerState: () => void;
+  /**
+   * Resets the viewer and all channels to the default state, as though
+   * loaded from scratch with no initial parameters set.
    */
-  getDefaultChannelState: (index: number) => ChannelState | undefined;
+  // resetToDefaultViewerState: () => void;
   /** Overrides the default channel state returned by `getDefaultChannelState()` for
    * channel index `index`.
    */
-  setDefaultChannelState: (index: number, state: ChannelState) => void;
+  setSavedChannelState: (index: number, state: ChannelState) => void;
+  getSavedChannelState: (index: number) => ChannelState;
+  // onVolumeLoaded: (volume: Volume) => void;
   changeViewerSetting: ViewerSettingUpdater;
   changeChannelSetting: ChannelSettingUpdater;
   setChannelSettings: (settings: ChannelState[]) => void;

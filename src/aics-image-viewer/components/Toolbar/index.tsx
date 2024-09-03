@@ -44,8 +44,7 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
   changeViewerSetting: ViewerSettingUpdater;
-  getDefaultChannelState: (index: number) => ChannelState | undefined;
-  getDefaultViewerState: () => ViewerState;
+  resetToSavedViewerState: () => void;
   channelSettings: ChannelState[];
   changeChannelSetting: ChannelSettingUpdater;
 }
@@ -143,15 +142,8 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
   render(): React.ReactElement {
     const { props } = this;
-    const {
-      changeViewerSetting,
-      changeChannelSetting,
-      channelSettings,
-      visibleControls,
-      showAxes,
-      showBoundingBox,
-      autorotate,
-    } = props;
+    const { changeViewerSetting, resetToSavedViewerState, visibleControls, showAxes, showBoundingBox, autorotate } =
+      props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
@@ -164,21 +156,6 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
     const turntableToggleTitle = autorotate ? "Turn off turntable" : "Turn on turntable";
 
     const getPopupContainer = this.containerRef.current ? () => this.containerRef.current! : undefined;
-
-    const resetToInitialView = (): void => {
-      const initialDefault = props.getDefaultViewerState();
-      resetViewerState(changeViewerSetting, initialDefault);
-
-      for (let i = 0; i < channelSettings.length; i++) {
-        const channelState = props.getDefaultChannelState(i);
-        // Don't override name on reset, otherwise this can delete the channel from the UI.
-        resetChannelState(
-          changeChannelSetting,
-          i,
-          channelState ?? { ...getEmptyChannelState(), name: props.channelSettings[i].name }
-        );
-      }
-    };
 
     return (
       <div className={`viewer-toolbar-container${scrollMode ? " viewer-toolbar-scroll" : ""}`} ref={this.containerRef}>
@@ -197,7 +174,7 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
         >
           <div className="viewer-toolbar-left" ref={this.leftRef}>
             <Tooltip placement="bottom" title="Reset to initial settings">
-              <Button className="ant-btn-icon-only btn-borderless" onClick={resetToInitialView}>
+              <Button className="ant-btn-icon-only btn-borderless" onClick={resetToSavedViewerState}>
                 <UndoOutlined />
                 <VisuallyHidden>Reset to initial settings</VisuallyHidden>
               </Button>
@@ -324,6 +301,5 @@ export default connectToViewerState(Toolbar, [
   "changeViewerSetting",
   "changeChannelSetting",
   "channelSettings",
-  "getDefaultChannelState",
-  "getDefaultViewerState",
+  "resetToSavedViewerState",
 ]);

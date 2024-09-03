@@ -12,6 +12,8 @@ import type {
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { getDefaultCameraState, getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
+import { resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
+import { ControlPoint } from "@aics/volume-viewer";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -107,7 +109,7 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
       "ViewerStateProvider: Updating controlPoints for channel ",
       index,
       " to ",
-      value.map((cp) => cp.x)
+      (value as ControlPoint[]).map((cp) => cp.x)
     );
   }
   if (key === "ramp") {
@@ -138,9 +140,11 @@ const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getEmptyViewerState(),
-  getDefaultViewerState: getEmptyViewerState,
-  getDefaultChannelState: (_index: number) => undefined,
-  setDefaultChannelState: nullfn,
+  resetToSavedViewerState: nullfn,
+  // resetToDefaultViewerState: nullfn,
+  setSavedChannelState: nullfn,
+  getSavedChannelState: () => getEmptyChannelState(),
+  // onVolumeLoaded: nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
@@ -191,30 +195,41 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, [props.viewerSettings]);
 
   // Getters and setters for default viewer and channel states
-  const getDefaultViewerState = useCallback(
-    () => ({ ...getEmptyViewerState(), cameraState: getDefaultCameraState(), ...props.viewerSettings }),
-    [props.viewerSettings]
-  );
-  const defaultChannelSettings = useRef<Record<number, ChannelState>>({}).current;
-  const getDefaultChannelState = useCallback(
-    (index: number) => defaultChannelSettings[index],
-    [defaultChannelSettings]
-  );
-  const setDefaultChannelState = useCallback((index: number, state: ChannelState) => {
-    defaultChannelSettings[index] = state;
+
+  const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
+  const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
+    savedChannelSettings[index] = state;
   }, []);
+  const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
+
+  const resetToSavedViewerState = useCallback(() => {
+    const savedViewerState = {
+      ...getEmptyViewerState(),
+      cameraState: getDefaultCameraState(),
+      ...props.viewerSettings,
+    };
+    resetViewerState(changeViewerSetting, savedViewerState);
+
+    // Reset each channel
+    const newChannelSettings = channelSettings.map((_, index) => {
+      return savedChannelSettings[index] || getEmptyChannelState();
+    });
+    for (let i = 0; i < channelSettings.length; i++) {
+      resetChannelState(changeChannelSetting, i, newChannelSettings[i]);
+    }
+  }, [props.viewerSettings, channelSettings, changeViewerSetting, changeChannelSetting]);
 
   const context = useMemo(() => {
     ref.current = {
       ...viewerSettings,
       channelSettings,
+      resetToSavedViewerState,
       changeViewerSetting,
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
-      getDefaultViewerState,
-      getDefaultChannelState,
-      setDefaultChannelState,
+      setSavedChannelState,
+      getSavedChannelState,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.

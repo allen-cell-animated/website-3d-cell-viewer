@@ -192,8 +192,8 @@ const App: React.FC<AppProps> = (props) => {
     changeViewerSetting,
     changeChannelSetting,
     applyColorPresets,
-    setDefaultChannelState,
-    getDefaultChannelState,
+    setSavedChannelState,
+    getSavedChannelState,
   } = viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
@@ -323,9 +323,10 @@ const App: React.FC<AppProps> = (props) => {
       }
     }
 
+    // TODO: Move to onVolumeLoaded callback in ViewerStateProvider?
     // Check for 3D vs. 2D and only save control points/channel state if the volume is the
     // right type
-    if (getDefaultChannelState(channelIndex) === undefined && viewerSettings.time === aimg.loadSpec.time) {
+    if (getSavedChannelState(channelIndex) === undefined && viewerSettings.time === aimg.loadSpec.time) {
       // TODO: Does this fail if data is chunked in a way that does not allow for subregions where z=1? Is that possible?
       const isXyAndLoadingXy = viewerSettings.viewMode === ViewMode.xy && aimg.imageInfo.subregionSize.z === 1;
       const is3dAndLoading3d = viewerSettings.viewMode === ViewMode.threeD && aimg.imageInfo.subregionSize.z > 1;
@@ -341,7 +342,7 @@ const App: React.FC<AppProps> = (props) => {
           " with control points ",
           newState.controlPoints.map((cp) => cp.x)
         );
-        setDefaultChannelState(channelIndex, newState);
+        setSavedChannelState(channelIndex, newState);
       }
     }
 

@@ -30,18 +30,10 @@ export type ChannelsWidgetProps = {
   // From viewer state
   channelSettings: ChannelState[];
   changeChannelSetting: ChannelSettingUpdater;
-  getDefaultChannelState: (index: number) => ChannelState;
 };
 
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
-  const {
-    channelGroupedByType,
-    channelSettings,
-    channelDataChannels,
-    filterFunc,
-    viewerChannelSettings,
-    getDefaultChannelState,
-  } = props;
+  const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
     props.changeChannelSetting(channelArray, key, value);
@@ -130,8 +122,4 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   return <Collapse bordered={false} defaultActiveKey={firstKey} items={rows} collapsible="icon" />;
 };
 
-export default connectToViewerState(ChannelsWidget, [
-  "channelSettings",
-  "changeChannelSetting",
-  "getDefaultChannelState",
-]);
+export default connectToViewerState(ChannelsWidget, ["channelSettings", "changeChannelSetting"]);

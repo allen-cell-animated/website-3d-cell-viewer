@@ -20,7 +20,13 @@ export function resetChannelState(
   index: number,
   newState: ChannelState
 ): void {
+  console.log("Resetting channel ", index);
   for (const key of Object.keys(newState) as (keyof ChannelState)[]) {
+    // Skip resetting name to default, since this causes channels to be dropped from the
+    // UI altogether.
+    if (key === "name") {
+      continue;
+    }
     changeChannelSetting(index, key, newState[key] as any);
   }
 }

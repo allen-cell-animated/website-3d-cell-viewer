@@ -25,7 +25,6 @@ export interface GlobalVolumeControlsProps {
   density: number;
   levels: [number, number, number];
   interpolationEnabled: boolean;
-  getDefaultViewerState: () => ViewerState;
 
   changeViewerSetting: ViewerSettingUpdater;
 }
@@ -45,16 +44,7 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
     return <SliderRow label={label} start={start} max={max} onUpdate={onUpdate} />;
   };
 
-  const { visibleControls: showControls, maskAlpha, brightness, density, levels, getDefaultViewerState } = props;
-
-  const resetToDefaults = (): void => {
-    const { maskAlpha, brightness, density, levels, interpolationEnabled } = getDefaultViewerState();
-    props.changeViewerSetting("maskAlpha", maskAlpha);
-    props.changeViewerSetting("brightness", brightness);
-    props.changeViewerSetting("density", density);
-    props.changeViewerSetting("levels", levels);
-    props.changeViewerSetting("interpolationEnabled", interpolationEnabled);
-  };
+  const { visibleControls: showControls, maskAlpha, brightness, density, levels } = props;
 
   return (
     <div style={{ paddingTop: 18, paddingBottom: 22 }}>
@@ -70,7 +60,6 @@ const GlobalVolumeControls: React.FC<GlobalVolumeControlsProps> = (props) => {
           />
         </SliderRow>
       )}
-      <Button onClick={resetToDefaults}>Reset to defaults</Button>
     </div>
   );
 };
@@ -82,5 +71,4 @@ export default connectToViewerState(GlobalVolumeControls, [
   "levels",
   "interpolationEnabled",
   "changeViewerSetting",
-  "getDefaultViewerState",
 ]);
