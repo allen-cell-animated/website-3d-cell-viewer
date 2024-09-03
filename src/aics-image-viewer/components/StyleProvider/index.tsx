@@ -422,6 +422,10 @@ export default function StyleProvider(props: PropsWithChildren<{}>): ReactElemen
             borderRadiusLG: 0,
             colorTextHeading: theme.colors.text.section,
           },
+          Divider: {
+            colorSplit: theme.colors.layout.dividers,
+            marginLG: 0,
+          },
           Layout: {
             siderBg: theme.colors.controlPanel.bg,
           },
