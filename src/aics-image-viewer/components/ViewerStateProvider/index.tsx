@@ -12,7 +12,12 @@ import type {
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { getDefaultCameraState, getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
-import { doesVolumeMatchViewMode, resetChannelState, resetViewerState } from "../../shared/utils/viewerState";
+import {
+  doesVolumeMatchViewMode,
+  getEnabledChannelIndices,
+  resetChannelState,
+  resetViewerState,
+} from "../../shared/utils/viewerState";
 import { Volume } from "@aics/volume-viewer";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
@@ -130,7 +135,7 @@ const nullfn = (): void => {};
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getEmptyViewerState(),
   resetToSavedViewerState: nullfn,
-  // resetToDefaultViewerState: nullfn,
+  resetToDefaultViewerState: nullfn,
   setSavedChannelState: nullfn,
   getSavedChannelState: (index) => getEmptyChannelState(index),
   onChannelLoaded: nullfn,
@@ -154,11 +159,9 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
-  /** Flag indicating that a reset was initiated while the loaded view mode was not that of the
-   * original saved state. If set, the viewer should perform a second reset after the correct
-   * volume is loaded.
-   */
-  const channelsToResetAfterLoad = useRef(new Set<number>());
+  /** The set of channels that are blocking the current reset operation until they are loaded. */
+  const channelsBlockingReset = useRef(new Set<number>());
+  const onBlockingChannelsLoaded = useRef<() => void>(nullfn);
 
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -196,6 +199,37 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   }, []);
   const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
 
+  /**
+   * Resets the viewer and all channels to the provided state. If new data needs to be loaded,
+   * handles setup so the reset will be reapplied again once all the data is loaded.
+   */
+  const resetToState = useCallback(
+    (newState: ViewerState, newChannelStates: ChannelState[], allowRecursive = true) => {
+      // Needs reset on reload if one of the view modes is 2D while the other is 3D,
+      // if the timestamp is different,
+      // TODO: or if playback is currently enabled in 2D mode
+      const isInDifferentViewMode =
+        viewerSettings.viewMode !== newState.viewMode &&
+        (viewerSettings.viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
+      const isAtDifferentTime = viewerSettings.time !== newState.time;
+      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy;
+      const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime;
+
+      resetViewerState(changeViewerSetting, newState);
+
+      for (let i = 0; i < newChannelStates.length; i++) {
+        resetChannelState(changeChannelSetting, i, newChannelStates[i]);
+      }
+
+      if (willNeedResetOnLoad && allowRecursive) {
+        channelsBlockingReset.current = getEnabledChannelIndices(newChannelStates);
+        // Call this operation once more when all channels are loaded
+        onBlockingChannelsLoaded.current = () => resetToState(newState, newChannelStates, false);
+      }
+    },
+    [viewerSettings, viewerSettings.viewMode, changeViewerSetting, changeChannelSetting]
+  );
+
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
   const resetToSavedViewerState = useCallback(() => {
     const savedViewerState = {
@@ -203,55 +237,31 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       cameraState: getDefaultCameraState(),
       ...props.viewerSettings,
     };
-    // Needs reset on reload if one of the view modes is 2D while the other is 3D,
-    // if the timestamp is different,
-    // TODO: or if playback is currently enabled in 2D mode
-    const isInDifferentViewMode =
-      viewerSettings.viewMode !== savedViewerState.viewMode &&
-      (viewerSettings.viewMode === ViewMode.xy || savedViewerState.viewMode === ViewMode.xy);
-    const isAtDifferentTime = viewerSettings.time !== savedViewerState.time;
-    const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime;
-
-    resetViewerState(changeViewerSetting, savedViewerState);
-
-    // Get channel states and reset each.
-    const enabledChannels = new Set<number>();
     const newChannelSettings = channelSettings.map((_, index) => {
-      const savedChannelState = savedChannelSettings[index] || getEmptyChannelState(index);
-      if (savedChannelState.volumeEnabled || savedChannelState.isosurfaceEnabled) {
-        enabledChannels.add(index);
-      }
-      return savedChannelState;
+      return savedChannelSettings[index] || getEmptyChannelState(index);
     });
-    console.log("resetToSavedViewerState: resetting ", newChannelSettings);
-    for (let i = 0; i < channelSettings.length; i++) {
-      resetChannelState(changeChannelSetting, i, newChannelSettings[i]);
-    }
+    resetToState(savedViewerState, newChannelSettings);
+  }, [props.viewerSettings, resetToState, channelSettings]);
 
-    if (willNeedResetOnLoad) {
-      console.log("Needs reset for channels ", enabledChannels);
-      channelsToResetAfterLoad.current = enabledChannels;
-    }
-  }, [props.viewerSettings, viewerSettings, channelSettings, changeViewerSetting, changeChannelSetting]);
+  const resetToDefaultViewerState = useCallback(() => {
+    const defaultChannelStates = channelSettings.map((_, index) => getEmptyChannelState(index));
+    resetToState({ ...getEmptyViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
+  }, [props.viewerSettings, resetToState, channelSettings]);
 
   const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(nullfn);
-
   const onChannelLoaded = useCallback(
     (volume: Volume, channelIndex: number) => {
       console.log("onChannelLoaded", channelIndex);
-      if (
-        channelsToResetAfterLoad.current.has(channelIndex) &&
-        doesVolumeMatchViewMode(viewerSettings.viewMode, volume)
-      ) {
+      if (channelsBlockingReset.current.has(channelIndex) && doesVolumeMatchViewMode(viewerSettings.viewMode, volume)) {
         console.log("onChannelLoaded: Found match for ", channelIndex, " after load");
-        channelsToResetAfterLoad.current.delete(channelIndex);
-        if (channelsToResetAfterLoad.current.size === 0) {
+        channelsBlockingReset.current.delete(channelIndex);
+        if (channelsBlockingReset.current.size === 0) {
           console.log("onChannelLoaded: Resetting after load");
-          resetToSavedViewerState();
+          onBlockingChannelsLoaded.current();
         }
       }
     },
-    [resetToSavedViewerState, viewerSettings, channelSettings]
+    [viewerSettings, channelSettings]
   );
   onChannelLoadedRef.current = onChannelLoaded;
 
@@ -260,6 +270,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       ...viewerSettings,
       channelSettings,
       resetToSavedViewerState,
+      resetToDefaultViewerState,
       changeViewerSetting,
       setChannelSettings,
       onChannelLoaded: (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),

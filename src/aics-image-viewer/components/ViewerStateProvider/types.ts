@@ -88,7 +88,7 @@ export type ViewerStateContextType = ViewerState & {
    * Resets the viewer and all channels to the default state, as though
    * loaded from scratch with no initial parameters set.
    */
-  // resetToDefaultViewerState: () => void;
+  resetToDefaultViewerState: () => void;
   /** Overrides the default channel state returned by `getDefaultChannelState()` for
    * channel index `index`.
    */
