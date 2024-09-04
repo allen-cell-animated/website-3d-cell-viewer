@@ -19,6 +19,7 @@ import {
   resetViewerState,
 } from "../../shared/utils/viewerState";
 import { Volume } from "@aics/volume-viewer";
+import { isEqual } from "lodash";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -212,7 +213,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
         viewerSettings.viewMode !== newState.viewMode &&
         (viewerSettings.viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
       const isAtDifferentTime = viewerSettings.time !== newState.time;
-      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy && newState.region.z !== viewerSettings.region.z;
+      const isAtDifferentZSlice =
+        newState.viewMode === ViewMode.xy && !isEqual(newState.region.z, viewerSettings.region.z);
       const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
       resetViewerState(changeViewerSetting, newState);
