@@ -33,18 +33,19 @@ export function resetChannelState(
   }
 }
 
-// TODO: Does this fail if data is chunked in a way that does not allow for subregions of chunk size z=1? Is that possible?
+// TODO: Does this fail if data is chunked in a way that does not allow for subregions of chunk size z=1?
+// Is that possible?
 export function doesVolumeMatchViewMode(viewMode: ViewMode, volume: Volume): boolean {
   const isXyAndLoadingXy = viewMode === ViewMode.xy && volume.imageInfo.subregionSize.z === 1;
   const is3dAndLoading3d = viewMode !== ViewMode.xy && volume.imageInfo.subregionSize.z > 1;
   return isXyAndLoadingXy || is3dAndLoading3d;
 }
 
-export function getEnabledChannelIndices(channelSettings: ChannelState[]): Set<number> {
-  const enabledChannels = new Set<number>();
+export function getEnabledChannelIndices(channelSettings: ChannelState[]): number[] {
+  const enabledChannels = [];
   for (let i = 0; i < channelSettings.length; i++) {
     if (channelSettings[i].volumeEnabled || channelSettings[i].isosurfaceEnabled) {
-      enabledChannels.add(i);
+      enabledChannels.push(i);
     }
   }
   return enabledChannels;

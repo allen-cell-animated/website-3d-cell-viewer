@@ -18,8 +18,11 @@ import {
   resetChannelState,
   resetViewerState,
 } from "../../shared/utils/viewerState";
-import { Volume } from "@aics/volume-viewer";
+import { ControlPoint, Volume } from "@aics/volume-viewer";
 import { isEqual } from "lodash";
+import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
+
+const USE_DEFAULT_LUT_FOR_CONTROL_POINTS: ControlPoint[] = [];
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -160,9 +163,12 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
-  /** The set of channels that are blocking the current reset operation until they are loaded. */
-  const channelsBlockingReset = useRef(new Set<number>());
-  const onBlockingChannelsLoaded = useRef<() => void>(nullfn);
+  /**
+   * A map from channel indices to their reset states. Channels that are in this map
+   * should be reset to the state value once they are loaded, and will be removed
+   * from the map once the reset is applied.
+   */
+  const channelIdxToResetState = useRef(new Map<number, ChannelState>());
 
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -224,9 +230,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       }
 
       if (willNeedResetOnLoad && allowRecursive) {
-        channelsBlockingReset.current = getEnabledChannelIndices(newChannelStates);
-        // Call this operation once more when all channels are loaded
-        onBlockingChannelsLoaded.current = () => resetToState(newState, newChannelStates, false);
+        const enabledChannelsAndResetState = getEnabledChannelIndices(newChannelStates).map((index) => {
+          return [index, newChannelStates[index]] as const;
+        });
+        channelIdxToResetState.current = new Map(enabledChannelsAndResetState);
       }
     },
     [viewerSettings, viewerSettings.viewMode, changeViewerSetting, changeChannelSetting]
@@ -242,14 +249,16 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     const newChannelSettings = channelSettings.map((_, index) => {
       return savedChannelSettings[index] || getEmptyChannelState(index);
     });
+
     resetToState(savedViewerState, newChannelSettings);
   }, [props.viewerSettings, resetToState, channelSettings]);
 
   const resetToDefaultViewerState = useCallback(() => {
     const defaultChannelStates = channelSettings.map((_, index) => getEmptyChannelState(index));
-    // TODO: How to apply "default" LUT here?
     for (let i = 0; i < 3; i++) {
       defaultChannelStates[i].volumeEnabled = true;
+      // Flags that this needs to be initialized with the default LUT
+      defaultChannelStates[i].controlPoints = USE_DEFAULT_LUT_FOR_CONTROL_POINTS;
     }
     resetToState({ ...getEmptyViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
   }, [props.viewerSettings, resetToState, channelSettings]);
@@ -258,13 +267,23 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   const onChannelLoaded = useCallback(
     (volume: Volume, channelIndex: number) => {
       console.log("onChannelLoaded", channelIndex);
-      if (channelsBlockingReset.current.has(channelIndex) && doesVolumeMatchViewMode(viewerSettings.viewMode, volume)) {
+      if (
+        channelIdxToResetState.current.has(channelIndex) &&
+        doesVolumeMatchViewMode(viewerSettings.viewMode, volume)
+      ) {
         console.log("onChannelLoaded: Found match for ", channelIndex, " after load");
-        channelsBlockingReset.current.delete(channelIndex);
-        if (channelsBlockingReset.current.size === 0) {
-          console.log("onChannelLoaded: Resetting after load");
-          onBlockingChannelsLoaded.current();
+        // Apply channel overrides
+        const resetState = channelIdxToResetState.current.get(channelIndex);
+        if (resetState) {
+          // Initialize default LUT if needed
+          if (isEqual(resetState.controlPoints, USE_DEFAULT_LUT_FOR_CONTROL_POINTS)) {
+            const lut = getDefaultLut(volume.getHistogram(channelIndex));
+            resetState.controlPoints = lut.controlPoints;
+            resetState.ramp = controlPointsToRamp(lut.controlPoints);
+          }
+          resetChannelState(changeChannelSetting, channelIndex, resetState);
         }
+        channelIdxToResetState.current.delete(channelIndex);
       }
     },
     [viewerSettings, channelSettings]

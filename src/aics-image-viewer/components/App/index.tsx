@@ -291,12 +291,18 @@ const App: React.FC<AppProps> = (props) => {
       console.log("Volume loaded", channelIndex, aimg.imageInfo.subregionSize);
     }
     let currentControlPoints: ControlPoint[] = [];
-    if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
+    if (
+      initialLoadRef.current ||
+      !thisChannelsSettings.controlPoints ||
+      thisChannelsSettings.controlPoints.length === 0 ||
+      !thisChannelsSettings.ramp
+    ) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       currentControlPoints = controlPoints;
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      console.log("Initializing LUT for channel ", channelIndex, controlPointsToRamp(ramp));
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
