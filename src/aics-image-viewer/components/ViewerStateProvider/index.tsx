@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultCameraState, getEmptyChannelState, getEmptyViewerState } from "../../shared/constants";
+import { getDefaultCameraState, getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
 import {
   doesVolumeMatchViewMode,
   getEnabledChannelIndices,
@@ -137,11 +137,11 @@ const channelSettingsReducer = <K extends keyof ChannelState>(
 const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
-  ...getEmptyViewerState(),
+  ...getDefaultViewerState(),
   resetToSavedViewerState: nullfn,
   resetToDefaultViewerState: nullfn,
   setSavedChannelState: nullfn,
-  getSavedChannelState: (index) => getEmptyChannelState(index),
+  getSavedChannelState: (index) => getDefaultChannelState(index),
   onChannelLoaded: nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
@@ -161,7 +161,7 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
-  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getEmptyViewerState() });
+  const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   /**
    * A map from channel indices to their reset states. Channels that are in this map
@@ -242,37 +242,36 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
   const resetToSavedViewerState = useCallback(() => {
     const savedViewerState = {
-      ...getEmptyViewerState(),
+      ...getDefaultViewerState(),
       cameraState: getDefaultCameraState(),
       ...props.viewerSettings,
     };
     const newChannelSettings = channelSettings.map((_, index) => {
-      return savedChannelSettings[index] || getEmptyChannelState(index);
+      return savedChannelSettings[index] || getDefaultChannelState(index);
     });
 
     resetToState(savedViewerState, newChannelSettings);
   }, [props.viewerSettings, resetToState, channelSettings]);
 
   const resetToDefaultViewerState = useCallback(() => {
-    const defaultChannelStates = channelSettings.map((_, index) => getEmptyChannelState(index));
+    const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
     for (let i = 0; i < 3; i++) {
       defaultChannelStates[i].volumeEnabled = true;
       // Flags that this needs to be initialized with the default LUT
       defaultChannelStates[i].controlPoints = USE_DEFAULT_LUT_FOR_CONTROL_POINTS;
     }
-    resetToState({ ...getEmptyViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
+    resetToState({ ...getDefaultViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
   }, [props.viewerSettings, resetToState, channelSettings]);
 
   const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(nullfn);
   const onChannelLoaded = useCallback(
     (volume: Volume, channelIndex: number) => {
-      console.log("onChannelLoaded", channelIndex);
+      // Check if the channel needs to be reset after loading by checking if it's in the reset map;
+      // if so, apply the reset state and remove it from the map.
       if (
         channelIdxToResetState.current.has(channelIndex) &&
         doesVolumeMatchViewMode(viewerSettings.viewMode, volume)
       ) {
-        console.log("onChannelLoaded: Found match for ", channelIndex, " after load");
-        // Apply channel overrides
         const resetState = channelIdxToResetState.current.get(channelIndex);
         if (resetState) {
           // Initialize default LUT if needed

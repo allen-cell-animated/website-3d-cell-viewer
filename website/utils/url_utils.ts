@@ -19,8 +19,8 @@ import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_
 import { isEqual } from "lodash";
 import {
   getDefaultCameraState,
-  getEmptyChannelState,
-  getEmptyViewerState,
+  getDefaultChannelState,
+  getDefaultViewerState,
 } from "../../src/aics-image-viewer/shared/constants";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
@@ -715,7 +715,7 @@ export function serializeViewerChannelSetting(
   removeDefaults: boolean
 ): Partial<ViewerChannelSettingParams> {
   if (removeDefaults) {
-    channelSetting = removeMatchingProperties(channelSetting, getEmptyChannelState());
+    channelSetting = removeMatchingProperties(channelSetting, getDefaultChannelState());
   }
   return removeUndefinedProperties({
     [ViewerChannelSettingKeys.VolumeEnabled]: serializeBoolean(channelSetting.volumeEnabled),
@@ -788,7 +788,7 @@ export function deserializeViewerState(params: ViewerStateParams): Partial<Viewe
  */
 export function serializeViewerState(state: Partial<ViewerState>, removeDefaults: boolean): ViewerStateParams {
   if (removeDefaults) {
-    state = removeMatchingProperties(state, getEmptyViewerState());
+    state = removeMatchingProperties(state, getDefaultViewerState());
   }
   const result: ViewerStateParams = {
     [ViewerStateKeys.Mode]: state.renderMode,

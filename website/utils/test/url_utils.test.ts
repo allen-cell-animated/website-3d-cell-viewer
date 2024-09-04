@@ -24,8 +24,8 @@ import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/
 import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 import {
   getDefaultCameraState,
-  getEmptyChannelState,
-  getEmptyViewerState,
+  getDefaultChannelState,
+  getDefaultViewerState,
 } from "../../../src/aics-image-viewer/shared/constants";
 
 const defaultSettings: ViewerChannelSetting = {
@@ -875,7 +875,7 @@ describe("serializeViewerUrlParams", () => {
   });
 
   it("can remove viewer settings that match the default", () => {
-    const defaultViewerSettings = getEmptyViewerState();
+    const defaultViewerSettings = getDefaultViewerState();
     const customViewerState: Partial<ViewerState> = {
       viewMode: ViewMode.xy,
       density: 100,
@@ -905,7 +905,7 @@ describe("serializeViewerUrlParams", () => {
       isovalue: 49,
     };
     const serializedParams = serializeViewerUrlParams(
-      { ...getEmptyViewerState(), channelSettings: [{ ...getEmptyChannelState(), ...customChannelState }] },
+      { ...getDefaultViewerState(), channelSettings: [{ ...getDefaultChannelState(), ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);
@@ -916,13 +916,13 @@ describe("serializeViewerUrlParams", () => {
 
   it("does not use object reference comparison on control points when excluding defaults", () => {
     // Expand control points so it isn't comparing an object reference
-    const defaultChannelState = getEmptyChannelState();
+    const defaultChannelState = getDefaultChannelState();
     const customChannelState: Partial<ChannelState> = {
       controlPoints: [{ ...defaultChannelState.controlPoints[0] }, { ...defaultChannelState.controlPoints[1] }],
     };
 
     const serializedParams = serializeViewerUrlParams(
-      { ...getEmptyViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
+      { ...getDefaultViewerState(), channelSettings: [{ ...defaultChannelState, ...customChannelState }] },
       true
     ) as Record<string, string>;
     const urlParams = new URLSearchParams(serializedParams);

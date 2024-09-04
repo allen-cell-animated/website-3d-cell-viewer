@@ -115,7 +115,7 @@ export const getDefaultCameraState = (): CameraState => ({
  * Returns the blank, default viewer state. Note that this is named differently from
  * `getDefaultViewerState` in `ViewerStateProvider`, since the 'default' state can be overridden.
  */
-export const getEmptyViewerState = (): ViewerState => ({
+export const getDefaultViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
   renderMode: RenderMode.volumetric, // "pathtrace", "maxproject"
   imageType: ImageType.segmentedCell,
@@ -143,7 +143,7 @@ export const getEmptyViewerState = (): ViewerState => ({
  * Returns the blank, default channel state. Note that this is named differently from
  * `getDefaultChannelState` in `ViewerStateProvider`, since the 'default' state can be overridden.
  */
-export const getEmptyChannelState = (index: number = 0): ChannelState => {
+export const getDefaultChannelState = (index: number = 0): ChannelState => {
   const color = PRESET_COLORS_0[index % PRESET_COLORS_0.length];
 
   return {
