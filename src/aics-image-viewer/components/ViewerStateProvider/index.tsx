@@ -40,7 +40,7 @@ const VIEWER_SETTINGS_CHANGE_HANDLERS: ViewerSettingChangeHandlers = {
     };
   },
   // Render mode: if we're switching to pathtrace, turn off autorotate
-  // Also, do not change the mode if the view mode is not 3D
+  // Also, do not allow pathtrace mode in any mode other than 3D.
   renderMode: (prevSettings, renderMode) => {
     if (renderMode === RenderMode.pathTrace && prevSettings.viewMode !== ViewMode.threeD) {
       return { ...prevSettings };

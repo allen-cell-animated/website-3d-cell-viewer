@@ -57,16 +57,16 @@ import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
 
 import "../../assets/styles/globals.css";
+import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 import {
   gammaSliderToImageValues,
   densitySliderToImageValue,
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
+import { doesVolumeMatchViewMode } from "../../shared/utils/viewerState";
 
 import "./styles.css";
-import { doesVolumeMatchViewMode } from "../../shared/utils/viewerState";
 
 const { Sider, Content } = Layout;
 
@@ -287,9 +287,6 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    if (aimg.loadSpec.time === 0) {
-      console.log("Volume loaded", channelIndex, aimg.imageInfo.subregionSize);
-    }
     let currentControlPoints: ControlPoint[] = [];
     if (
       initialLoadRef.current ||
@@ -302,7 +299,6 @@ const App: React.FC<AppProps> = (props) => {
       currentControlPoints = controlPoints;
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
-      console.log("Initializing LUT for channel ", channelIndex, controlPointsToRamp(ramp));
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -341,12 +337,6 @@ const App: React.FC<AppProps> = (props) => {
           ramp: controlPointsToRamp(currentControlPoints),
           controlPoints: currentControlPoints,
         };
-        console.log(
-          "Saving default channel state ",
-          channelIndex,
-          " with control points ",
-          newState.controlPoints.map((cp) => cp.x)
-        );
         setSavedChannelState(channelIndex, newState);
       }
     }
@@ -435,7 +425,6 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const openImage = async (): Promise<void> => {
-    console.log("openImage");
     const { imageUrl, parentImageUrl, rawData, rawDims } = props;
     const showParentImage = viewerState.current.imageType === ImageType.fullField && parentImageUrl !== undefined;
     const path = showParentImage ? parentImageUrl : imageUrl;

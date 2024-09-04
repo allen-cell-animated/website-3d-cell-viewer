@@ -140,8 +140,10 @@ export const getDefaultViewerState = (): ViewerState => ({
 });
 
 /**
- * Returns the blank, default channel state. Note that this is named differently from
- * `getDefaultChannelState` in `ViewerStateProvider`, since the 'default' state can be overridden.
+ * Returns the blank default channel state. If an index is provided, uses the default
+ * color preset for that index.
+ * @param index Optional channel index to use for the color preset.
+ * @returns a default ChannelState object.
  */
 export const getDefaultChannelState = (index: number = 0): ChannelState => {
   const color = PRESET_COLORS_0[index % PRESET_COLORS_0.length];

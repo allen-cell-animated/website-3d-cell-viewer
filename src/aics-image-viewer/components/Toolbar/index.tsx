@@ -42,8 +42,6 @@ interface ToolbarProps {
   showBoundingBox: boolean;
   changeViewerSetting: ViewerSettingUpdater;
   resetToSavedViewerState: () => void;
-  channelSettings: ChannelState[];
-  changeChannelSetting: ChannelSettingUpdater;
 }
 
 interface ToolbarState {
@@ -296,7 +294,5 @@ export default connectToViewerState(Toolbar, [
   "showAxes",
   "showBoundingBox",
   "changeViewerSetting",
-  "changeChannelSetting",
-  "channelSettings",
   "resetToSavedViewerState",
 ]);
