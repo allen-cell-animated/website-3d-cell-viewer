@@ -255,8 +255,10 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const resetToDefaultViewerState = useCallback(() => {
     const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
-    for (let i = 0; i < 3; i++) {
-      defaultChannelStates[i].volumeEnabled = true;
+    for (let i = 0; i < defaultChannelStates.length; i++) {
+      if (i < 3) {
+        defaultChannelStates[i].volumeEnabled = true;
+      }
       // Flags that this needs to be initialized with the default LUT
       defaultChannelStates[i].controlPoints = USE_DEFAULT_LUT_FOR_CONTROL_POINTS;
     }
