@@ -12,7 +12,7 @@ import {
   getEnabledChannelIndices,
   doesVolumeMatchViewMode,
 } from "../../shared/utils/viewerState";
-import { connectToViewerState, ViewerStateContext } from ".";
+import { ViewerStateContext } from ".";
 
 const USE_DEFAULT_LUT_FOR_CONTROL_POINTS: ControlPoint[] = [];
 
@@ -36,7 +36,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
    */
   const channelIdxToResetState = useRef(new Map<number, ChannelState>());
 
-  // Getters and setters for default viewer and channel states
+  // Setup Callbacks ////////////////////////////////////////////////////////////////////
 
   const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
   const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
@@ -101,8 +101,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     resetToState({ ...getDefaultViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
   }, [viewerStateInputProps, resetToState, channelSettings]);
 
-  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
-  const onChannelLoaded = useCallback(
+  const onChannelLoadedCallback = useCallback(
     (volume: Volume, channelIndex: number) => {
       // Check if the channel needs to be reset after loading by checking if it's in the reset map;
       // if so, apply the reset state and remove it from the map.
@@ -122,31 +121,34 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     },
     [viewMode, channelSettings]
   );
-  onChannelLoadedRef.current = onChannelLoaded;
+
+  // Because `onChannelLoaded` is passed to the volume loaders only at initialization,
+  // we pass the `onChannelLoaded` callback through a ref to break through stale closures.
+  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
+  onChannelLoadedRef.current = onChannelLoadedCallback;
+  const onChannelLoaded = useCallback(
+    (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),
+    [onChannelLoadedRef.current]
+  );
+
+  // Update Context ////////////////////////////////////////////////////////////////////
+
+  const callbacks = {
+    resetToSavedViewerState,
+    resetToDefaultViewerState,
+    onChannelLoaded,
+    getSavedChannelState,
+    setSavedChannelState,
+  };
+  const callbacksAsDependencyArray = Object.values(callbacks);
 
   const context = useMemo(() => {
     ref.current = {
       ...ref.current,
-      resetToSavedViewerState,
-      resetToDefaultViewerState,
-      onChannelLoaded: (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),
-      setSavedChannelState,
-      getSavedChannelState,
+      ...callbacks,
     };
-
-    // `ref` is wrapped in another object to ensure that the context updates when state does.
-    // (`ref` on its own would always compare equal to itself and the context would never update.)
     return { ref };
-  }, [
-    ref.current,
-    props.viewerStateInputProps,
-    channelSettings,
-    resetToDefaultViewerState,
-    resetToSavedViewerState,
-    onChannelLoaded,
-    getSavedChannelState,
-    setSavedChannelState,
-  ]);
+  }, [ref.current, ...callbacksAsDependencyArray]);
 
   return <ViewerStateContext.Provider value={context}>{props.children}</ViewerStateContext.Provider>;
 };

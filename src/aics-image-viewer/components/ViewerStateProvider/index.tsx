@@ -128,16 +128,16 @@ const nullfn = (): void => {};
 
 const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   ...getDefaultViewerState(),
-  resetToSavedViewerState: nullfn,
-  resetToDefaultViewerState: nullfn,
-  setSavedChannelState: nullfn,
-  getSavedChannelState: (index) => getDefaultChannelState(index),
-  onChannelLoaded: nullfn,
   channelSettings: [],
   changeViewerSetting: nullfn,
   setChannelSettings: nullfn,
   changeChannelSetting: nullfn,
   applyColorPresets: nullfn,
+  resetToSavedViewerState: nullfn,
+  resetToDefaultViewerState: nullfn,
+  setSavedChannelState: nullfn,
+  getSavedChannelState: (index) => getDefaultChannelState(index),
+  onChannelLoaded: nullfn,
 };
 
 export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
@@ -191,6 +191,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
+      // Reset-related callbacks will be set by the ResetStateProvider
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.
