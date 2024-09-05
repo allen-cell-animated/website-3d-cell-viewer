@@ -290,13 +290,12 @@ const App: React.FC<AppProps> = (props) => {
 
     let currentControlPoints: ControlPoint[] = [];
 
-    if (thisChannelsSettings.controlPoints.length === 0) {
-      // Empty control point array is used to flag that the LUT should be set to default
-      // TODO: Just make an actual flag in the ChannelState for resetting to default? This is hidden extra behavior.
+    if (thisChannelsSettings.needsDefaultLut) {
       const lut = getDefaultLut(aimg.getHistogram(channelIndex));
       currentControlPoints = lut.controlPoints;
       changeChannelSetting(channelIndex, "controlPoints", currentControlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(currentControlPoints));
+      changeChannelSetting(channelIndex, "needsDefaultLut", false);
     } else if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
@@ -641,21 +640,14 @@ const App: React.FC<AppProps> = (props) => {
 
   useImageEffect(
     (image) => {
-      // Check for empty/default channel control points; if found and that channel is loaded, update the LUT
-      // to the default.
-      // TODO: Use a flag directly in ChannelState?
+      // Check whether any channels are marked to be reset to the default LUT.
       for (let i = 0; i < channelSettings.length; i++) {
         const channel = channelSettings[i];
-        if (i === 0) {
-          console.log("App:useImageEffect: Checking channel", i, "control points", channel.controlPoints);
-        }
-        if (channel.controlPoints.length === 0 && image.isLoaded()) {
-          if (i === 0) {
-            console.log("App:useImageEffect: Applying default LUT to channel", i);
-          }
+        if (channel.needsDefaultLut && image.isLoaded()) {
           const lut = getDefaultLut(image.getHistogram(i));
           changeChannelSetting(i, "controlPoints", lut.controlPoints);
           changeChannelSetting(i, "ramp", controlPointsToRamp(lut.controlPoints));
+          changeChannelSetting(i, "needsDefaultLut", false);
         }
       }
     },

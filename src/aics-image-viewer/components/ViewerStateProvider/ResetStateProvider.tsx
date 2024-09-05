@@ -1,11 +1,10 @@
-import { ControlPoint, Volume } from "@aics/volume-viewer";
+import { Volume } from "@aics/volume-viewer";
 import { isEqual } from "lodash";
 import React, { useRef, useCallback, useContext, useMemo } from "react";
 
 import { ChannelState, ViewerState, ViewerStateContextType } from "./types";
 import { getDefaultViewerState, getDefaultCameraState, getDefaultChannelState } from "../../shared/constants";
 import { ViewMode } from "../../shared/enums";
-import { getDefaultLut, controlPointsToRamp } from "../../shared/utils/controlPointsToLut";
 import {
   overrideViewerState,
   overrideChannelState,
@@ -13,8 +12,6 @@ import {
   doesVolumeMatchViewMode,
 } from "../../shared/utils/viewerState";
 import { ViewerStateContext } from ".";
-
-const USE_DEFAULT_LUT_FOR_CONTROL_POINTS: ControlPoint[] = [];
 
 type ResetStateProviderProps = {
   viewerStateInputProps?: Partial<ViewerState>;
@@ -96,7 +93,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
         defaultChannelStates[i].volumeEnabled = true;
       }
       // Flags that this needs to be initialized with the default LUT
-      defaultChannelStates[i].controlPoints = USE_DEFAULT_LUT_FOR_CONTROL_POINTS;
+      defaultChannelStates[i].needsDefaultLut = true;
     }
     resetToState({ ...getDefaultViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
   }, [viewerStateInputProps, resetToState, channelSettings]);
@@ -108,15 +105,9 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
       if (channelIdxToResetState.current.has(channelIndex) && doesVolumeMatchViewMode(viewMode, volume)) {
         const resetState = channelIdxToResetState.current.get(channelIndex);
         if (resetState) {
-          // Initialize default LUT if needed
-          if (isEqual(resetState.controlPoints, USE_DEFAULT_LUT_FOR_CONTROL_POINTS)) {
-            const lut = getDefaultLut(volume.getHistogram(channelIndex));
-            resetState.controlPoints = lut.controlPoints;
-            resetState.ramp = controlPointsToRamp(lut.controlPoints);
-          }
           overrideChannelState(changeChannelSetting, channelIndex, resetState);
+          channelIdxToResetState.current.delete(channelIndex);
         }
-        channelIdxToResetState.current.delete(channelIndex);
       }
     },
     [viewMode, channelSettings]

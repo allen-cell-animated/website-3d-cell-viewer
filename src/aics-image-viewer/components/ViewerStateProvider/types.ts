@@ -66,6 +66,10 @@ export interface ChannelState {
   ramp: [number, number];
   useControlPoints: boolean;
   controlPoints: ControlPoint[];
+  /** Internal only. If set, flags that this channel should be reset to the default LUT when the
+   * next volume is loaded or when the viewer is updated.
+   */
+  needsDefaultLut?: boolean;
 }
 
 export type ChannelStateKey = keyof ChannelState;
