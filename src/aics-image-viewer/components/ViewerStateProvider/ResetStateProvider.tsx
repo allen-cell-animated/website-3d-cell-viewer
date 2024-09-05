@@ -76,7 +76,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   const resetToSavedViewerState = useCallback(() => {
     const savedViewerState = {
       ...getDefaultViewerState(),
-      cameraState: getDefaultCameraState(),
+      cameraState: getDefaultCameraState(viewerStateInputProps?.viewMode || ViewMode.threeD),
       ...viewerStateInputProps,
     };
     const newChannelSettings = channelSettings.map((_, index) => {
@@ -95,7 +95,10 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
       // Flags that this needs to be initialized with the default LUT
       defaultChannelStates[i].needsDefaultLut = true;
     }
-    resetToState({ ...getDefaultViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
+    resetToState(
+      { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) },
+      defaultChannelStates
+    );
   }, [viewerStateInputProps, resetToState, channelSettings]);
 
   const onChannelLoadedCallback = useCallback(

@@ -98,15 +98,30 @@ export const PRESET_COLOR_MAP = Object.freeze([
 /** Allows the 3D viewer to apply the default camera settings for the view mode. */
 const USE_VIEW_MODE_DEFAULT_CAMERA = undefined;
 
+const viewModeToDefaultCameraPosition: Record<ViewMode, [number, number, number]> = {
+  [ViewMode.threeD]: [0, 0, 5],
+  [ViewMode.xy]: [0, 0, 2],
+  [ViewMode.xz]: [0, 2, 0],
+  [ViewMode.yz]: [2, 0, 0],
+};
+
+const viewModeToDefaultCameraUp: Record<ViewMode, [number, number, number]> = {
+  [ViewMode.threeD]: [0, 1, 0],
+  [ViewMode.xy]: [0, 1, 0],
+  [ViewMode.xz]: [0, 0, 1],
+  [ViewMode.yz]: [0, 0, 1],
+};
+
 /**
  * Reflects the default camera settings the 3D viewer uses on volume load.
  * These SHOULD NOT be changed; otherwise, existing shared links that don't specify the
  * camera settings will use the new defaults and may be in unexpected orientations or positions.
  */
-export const getDefaultCameraState = (): CameraState => ({
-  position: [0, 0, 5],
+export const getDefaultCameraState = (viewMode: ViewMode = ViewMode.threeD): CameraState => ({
+  // Default position varies by view mode
+  position: viewModeToDefaultCameraPosition[viewMode],
   target: [0, 0, 0],
-  up: [0, 1, 0],
+  up: viewModeToDefaultCameraUp[viewMode],
   fov: 20,
   orthoScale: 0.5,
 });
