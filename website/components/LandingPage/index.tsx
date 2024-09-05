@@ -1,6 +1,6 @@
 import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Tooltip } from "antd";
+import { Button, Divider, Tooltip } from "antd";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
@@ -222,6 +222,14 @@ const InReviewFlag = styled(FlexRowAlignCenter)`
   }
 `;
 
+const CookieSettingsButton = styled(Button)`
+  color: var(--color-text-body);
+  &:focus-visible > span,
+  &:hover > span {
+    text-decoration: underline;
+  }
+`;
+
 export default function LandingPage(): ReactElement {
   // Rendering
   const navigation = useNavigate();
@@ -395,6 +403,16 @@ export default function LandingPage(): ReactElement {
 
       <ContentContainer style={{ paddingBottom: "400px" }}>
         <ProjectList>{landingPageContent.map(renderProject)}</ProjectList>
+      </ContentContainer>
+
+      <ContentContainer style={{ padding: "0 30px 40px 30px" }}>
+        <Divider />
+        <FlexColumnAlignCenter style={{ paddingTop: "20px" }}>
+          <CookieSettingsButton type="text" className="ot-sdk-show-settings">
+            Cookie settings
+            <VisuallyHidden>(opens popup menu)</VisuallyHidden>
+          </CookieSettingsButton>
+        </FlexColumnAlignCenter>
       </ContentContainer>
     </div>
   );
