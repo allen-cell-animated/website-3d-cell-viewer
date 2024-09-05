@@ -1,18 +1,18 @@
-import React from "react";
+import { UndoOutlined } from "@ant-design/icons";
 import { Button, Radio, Select, Tooltip } from "antd";
 import { debounce } from "lodash";
+import React from "react";
 
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
-
 import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
+import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
 import "./styles.css";
-import { UndoOutlined } from "@ant-design/icons";
-import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
+
 interface ToolbarProps {
   // From parent
   cellDownloadHref: string;
@@ -168,7 +168,7 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
           onScroll={this.checkScrollBtnVisible}
         >
           <div className="viewer-toolbar-left" ref={this.leftRef}>
-            <Tooltip placement="bottom" title="Reset to initial settings">
+            <Tooltip placement="bottom" title="Reset to initial settings" trigger={["focus", "hover"]}>
               <Button className="ant-btn-icon-only btn-borderless" onClick={resetToSavedViewerState}>
                 <UndoOutlined />
                 <VisuallyHidden>Reset to initial settings</VisuallyHidden>

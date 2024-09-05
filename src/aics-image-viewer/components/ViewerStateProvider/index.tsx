@@ -153,7 +153,6 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
-
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);

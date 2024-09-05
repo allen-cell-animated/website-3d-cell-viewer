@@ -7,17 +7,19 @@ import {
 } from "../../components/ViewerStateProvider/types";
 import { ViewMode } from "../enums";
 
-export function resetViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
+export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
   for (const key of Object.keys(newState) as (keyof ViewerState)[]) {
     changeViewerSetting(key, newState[key] as any);
   }
 
-  // Pathtrace mode is not allowed in 2D mode. Handle the edge case where the user switched
-  // from 2D mode to 3D mode but pathtrace mode was forcibly disabled.
+  // Pathtrace rendering is not allowed in 2D view mode.
+  // Since we're not guaranteed on the order of object keys, handle the edge case
+  // where the viewer was in 2D mode and we are trying to set it to pathtrace + 3D mode, but
+  // render mode was set before the view mode.
   changeViewerSetting("renderMode", newState.renderMode);
 }
 
-export function resetChannelState(
+export function overrideChannelState(
   changeChannelSetting: ChannelSettingUpdater,
   index: number,
   newState: ChannelState
@@ -41,6 +43,7 @@ export function doesVolumeMatchViewMode(viewMode: ViewMode, volume: Volume): boo
   return isXyAndLoadingXy || is3dAndLoading3d;
 }
 
+/** Returns the indices of any channels that have either the volume or isosurface enabled. */
 export function getEnabledChannelIndices(channelSettings: ChannelState[]): number[] {
   const enabledChannels = [];
   for (let i = 0; i < channelSettings.length; i++) {

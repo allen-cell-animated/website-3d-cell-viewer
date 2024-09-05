@@ -7,8 +7,8 @@ import { getDefaultViewerState, getDefaultCameraState, getDefaultChannelState } 
 import { ViewMode } from "../../shared/enums";
 import { getDefaultLut, controlPointsToRamp } from "../../shared/utils/controlPointsToLut";
 import {
-  resetViewerState,
-  resetChannelState,
+  overrideViewerState,
+  overrideChannelState,
   getEnabledChannelIndices,
   doesVolumeMatchViewMode,
 } from "../../shared/utils/viewerState";
@@ -59,10 +59,10 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
       const isAtDifferentZSlice = newState.viewMode === ViewMode.xy && !isEqual(newState.region.z, region.z);
       const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
-      resetViewerState(changeViewerSetting, newState);
+      overrideViewerState(changeViewerSetting, newState);
 
       for (let i = 0; i < newChannelStates.length; i++) {
-        resetChannelState(changeChannelSetting, i, newChannelStates[i]);
+        overrideChannelState(changeChannelSetting, i, newChannelStates[i]);
       }
 
       if (willNeedResetOnLoad) {
@@ -114,7 +114,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
             resetState.controlPoints = lut.controlPoints;
             resetState.ramp = controlPointsToRamp(lut.controlPoints);
           }
-          resetChannelState(changeChannelSetting, channelIndex, resetState);
+          overrideChannelState(changeChannelSetting, channelIndex, resetState);
         }
         channelIdxToResetState.current.delete(channelIndex);
       }

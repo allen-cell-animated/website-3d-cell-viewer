@@ -112,8 +112,7 @@ export const getDefaultCameraState = (): CameraState => ({
 });
 
 /**
- * Returns the blank, default viewer state. Note that this is named differently from
- * `getDefaultViewerState` in `ViewerStateProvider`, since the 'default' state can be overridden.
+ * Returns the default viewer state as a new object.
  */
 export const getDefaultViewerState = (): ViewerState => ({
   viewMode: ViewMode.threeD, // "XY", "XZ", "YZ"
@@ -140,7 +139,7 @@ export const getDefaultViewerState = (): ViewerState => ({
 });
 
 /**
- * Returns the blank default channel state. If an index is provided, uses the default
+ * Returns the default channel state as a new object. If an index is provided, uses the default
  * color preset for that index.
  * @param index Optional channel index to use for the color preset.
  * @returns a default ChannelState object.
