@@ -160,7 +160,7 @@ export const getDefaultViewerState = (): ViewerState => ({
  * @returns a default ChannelState object.
  */
 export const getDefaultChannelState = (index: number = 0): ChannelState => {
-  const color = PRESET_COLORS_0[index % PRESET_COLORS_0.length];
+  const color = PRESET_COLORS_0[index] || PRESET_COLORS_0[0];
 
   return {
     name: "",
