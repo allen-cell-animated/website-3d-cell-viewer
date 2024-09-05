@@ -39,7 +39,8 @@ export function overrideChannelState(
 export function doesVolumeMatchViewMode(viewMode: ViewMode, volume: Volume): boolean {
   const isXyAndLoadingXy = viewMode === ViewMode.xy && volume.imageInfo.subregionSize.z === 1;
   const is3dAndLoading3d = viewMode !== ViewMode.xy && volume.imageInfo.subregionSize.z > 1;
-  return isXyAndLoadingXy || is3dAndLoading3d;
+  const is2dVolume = volume.imageInfo.originalSize.z === 1;
+  return isXyAndLoadingXy || is3dAndLoading3d || is2dVolume;
 }
 
 /** Returns the indices of any channels that have either the volume or isosurface enabled. */
