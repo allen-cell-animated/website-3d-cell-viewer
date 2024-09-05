@@ -11,18 +11,8 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultCameraState, getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
-import {
-  doesVolumeMatchViewMode,
-  getEnabledChannelIndices,
-  resetChannelState,
-  resetViewerState,
-} from "../../shared/utils/viewerState";
-import { ControlPoint, Volume } from "@aics/volume-viewer";
-import { isEqual } from "lodash";
-import { controlPointsToRamp, getDefaultLut } from "../../shared/utils/controlPointsToLut";
-
-const USE_DEFAULT_LUT_FOR_CONTROL_POINTS: ControlPoint[] = [];
+import { getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
+import ResetStateProvider from "./ResetStateProvider";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -163,12 +153,6 @@ export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(D
 const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
-  /**
-   * A map from channel indices to their reset states. Channels that are in this map
-   * should be reset to the state value once they are loaded, and will be removed
-   * from the map once the reset is applied.
-   */
-  const channelIdxToResetState = useRef(new Map<number, ChannelState>());
 
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
@@ -198,112 +182,15 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     }
   }, [props.viewerSettings]);
 
-  // Getters and setters for default viewer and channel states
-
-  const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
-  const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
-    savedChannelSettings[index] = state;
-  }, []);
-  const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
-
-  /**
-   * Resets the viewer and all channels to the provided state. If new data needs to be loaded,
-   * handles setup so the reset will be reapplied again once all the data is loaded.
-   */
-  const resetToState = useCallback(
-    (newState: ViewerState, newChannelStates: ChannelState[], allowRecursive = true) => {
-      // Needs reset on reload if one of the view modes is 2D while the other is 3D,
-      // if the timestamp is different,
-      // TODO: or if playback is currently enabled in 2D mode
-      const isInDifferentViewMode =
-        viewerSettings.viewMode !== newState.viewMode &&
-        (viewerSettings.viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
-      const isAtDifferentTime = viewerSettings.time !== newState.time;
-      const isAtDifferentZSlice =
-        newState.viewMode === ViewMode.xy && !isEqual(newState.region.z, viewerSettings.region.z);
-      const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
-
-      resetViewerState(changeViewerSetting, newState);
-
-      for (let i = 0; i < newChannelStates.length; i++) {
-        resetChannelState(changeChannelSetting, i, newChannelStates[i]);
-      }
-
-      if (willNeedResetOnLoad && allowRecursive) {
-        const enabledChannelsAndResetState = getEnabledChannelIndices(newChannelStates).map((index) => {
-          return [index, newChannelStates[index]] as const;
-        });
-        channelIdxToResetState.current = new Map(enabledChannelsAndResetState);
-      }
-    },
-    [viewerSettings, viewerSettings.viewMode, changeViewerSetting, changeChannelSetting]
-  );
-
-  /** Resets to the initial saved state of the viewer, as shown to the user on load. */
-  const resetToSavedViewerState = useCallback(() => {
-    const savedViewerState = {
-      ...getDefaultViewerState(),
-      cameraState: getDefaultCameraState(),
-      ...props.viewerSettings,
-    };
-    const newChannelSettings = channelSettings.map((_, index) => {
-      return savedChannelSettings[index] || getDefaultChannelState(index);
-    });
-
-    resetToState(savedViewerState, newChannelSettings);
-  }, [props.viewerSettings, resetToState, channelSettings]);
-
-  const resetToDefaultViewerState = useCallback(() => {
-    const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
-    for (let i = 0; i < defaultChannelStates.length; i++) {
-      if (i < 3) {
-        defaultChannelStates[i].volumeEnabled = true;
-      }
-      // Flags that this needs to be initialized with the default LUT
-      defaultChannelStates[i].controlPoints = USE_DEFAULT_LUT_FOR_CONTROL_POINTS;
-    }
-    resetToState({ ...getDefaultViewerState(), cameraState: getDefaultCameraState() }, defaultChannelStates);
-  }, [props.viewerSettings, resetToState, channelSettings]);
-
-  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(nullfn);
-  const onChannelLoaded = useCallback(
-    (volume: Volume, channelIndex: number) => {
-      // Check if the channel needs to be reset after loading by checking if it's in the reset map;
-      // if so, apply the reset state and remove it from the map.
-      if (
-        channelIdxToResetState.current.has(channelIndex) &&
-        doesVolumeMatchViewMode(viewerSettings.viewMode, volume)
-      ) {
-        const resetState = channelIdxToResetState.current.get(channelIndex);
-        if (resetState) {
-          // Initialize default LUT if needed
-          if (isEqual(resetState.controlPoints, USE_DEFAULT_LUT_FOR_CONTROL_POINTS)) {
-            const lut = getDefaultLut(volume.getHistogram(channelIndex));
-            resetState.controlPoints = lut.controlPoints;
-            resetState.ramp = controlPointsToRamp(lut.controlPoints);
-          }
-          resetChannelState(changeChannelSetting, channelIndex, resetState);
-        }
-        channelIdxToResetState.current.delete(channelIndex);
-      }
-    },
-    [viewerSettings, channelSettings]
-  );
-  onChannelLoadedRef.current = onChannelLoaded;
-
   const context = useMemo(() => {
     ref.current = {
+      ...ref.current,
       ...viewerSettings,
       channelSettings,
-      resetToSavedViewerState,
-      resetToDefaultViewerState,
       changeViewerSetting,
       setChannelSettings,
-      onChannelLoaded: (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),
       changeChannelSetting,
       applyColorPresets,
-      setSavedChannelState,
-      getSavedChannelState,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.
@@ -311,7 +198,11 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     return { ref };
   }, [viewerSettings, channelSettings]);
 
-  return <ViewerStateContext.Provider value={context}>{props.children}</ViewerStateContext.Provider>;
+  return (
+    <ViewerStateContext.Provider value={context}>
+      <ResetStateProvider viewerStateInputProps={props.viewerSettings}>{props.children}</ResetStateProvider>
+    </ViewerStateContext.Provider>
+  );
 };
 
 /**
