@@ -1,5 +1,6 @@
 import { Volume } from "@aics/volume-viewer";
 import { isEqual } from "lodash";
+import { Vector3 } from "three";
 import React, { useRef, useCallback, useContext, useMemo } from "react";
 
 import { ChannelState, ViewerState, ViewerStateContextType } from "./types";
@@ -9,7 +10,7 @@ import {
   overrideViewerState,
   overrideChannelState,
   getEnabledChannelIndices,
-  doesVolumeMatchViewMode,
+  subregionMatches,
 } from "../../shared/utils/viewerState";
 import { ViewerStateContext } from ".";
 
@@ -32,18 +33,27 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
    * from the map once the reset is applied.
    */
   const channelIdxToResetState = useRef(new Map<number, ChannelState>());
+  /**
+   * The subregion size of the volume for the currently saved viewer and channel settings.
+   * Can be used for comparison to determine whether the correct volume has been loaded
+   * during reset (or when saving channels that are loaded for the first time).
+   */
+  const savedSubregionSize = useRef<Vector3 | null>(null);
+  const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
+  // Because `onChannelLoaded` is passed to the volume loaders only at initialization,
+  // we pass the `onChannelLoaded` callback through a ref to break through stale closures.
+  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
 
   // Setup Callbacks ////////////////////////////////////////////////////////////////////
 
-  const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
   const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
     savedChannelSettings[index] = state;
   }, []);
   const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
 
   /**
-   * Resets the viewer and all channels to the provided state. If new data needs to be loaded,
-   * handles setup so the reset will be reapplied again once all the data is loaded.
+   * Helper method. Resets the viewer and all channels to the provided state. If new data needs to
+   * be loaded, handles setup so the reset will be applied to each channel as it loads in.
    */
   const resetToState = useCallback(
     (newState: ViewerState, newChannelStates: ChannelState[]) => {
@@ -103,9 +113,15 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
 
   const onChannelLoadedCallback = useCallback(
     (volume: Volume, channelIndex: number) => {
+      // TODO: Save the target volume size here and replace `doesVolumeMatchViewMode` with a
+      // comparison against the saved volume size.
+
       // Check if the channel needs to be reset after loading by checking if it's in the reset map;
       // if so, apply the reset state and remove it from the map.
-      if (channelIdxToResetState.current.has(channelIndex) && doesVolumeMatchViewMode(viewMode, volume)) {
+      if (
+        channelIdxToResetState.current.has(channelIndex) &&
+        subregionMatches(savedSubregionSize.current, volume.imageInfo.subregionSize)
+      ) {
         const resetState = channelIdxToResetState.current.get(channelIndex);
         if (resetState) {
           overrideChannelState(changeChannelSetting, channelIndex, resetState);
@@ -115,15 +131,17 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     },
     [viewMode, channelSettings]
   );
-
-  // Because `onChannelLoaded` is passed to the volume loaders only at initialization,
-  // we pass the `onChannelLoaded` callback through a ref to break through stale closures.
-  const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
   onChannelLoadedRef.current = onChannelLoadedCallback;
+
   const onChannelLoaded = useCallback(
     (volume: Volume, channelIndex: number) => onChannelLoadedRef.current(volume, channelIndex),
     [onChannelLoadedRef.current]
   );
+
+  const setSavedSubregionSize = useCallback((size: Vector3) => {
+    savedSubregionSize.current = size;
+  }, []);
+  const getSavedSubregionSize = useCallback(() => savedSubregionSize.current, []);
 
   // Update Context ////////////////////////////////////////////////////////////////////
 
@@ -133,6 +151,8 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     onChannelLoaded,
     getSavedChannelState,
     setSavedChannelState,
+    setSavedSubregionSize,
+    getSavedSubregionSize,
   };
   const callbacksAsDependencyArray = Object.values(callbacks);
 

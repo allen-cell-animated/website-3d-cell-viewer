@@ -138,6 +138,8 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   setSavedChannelState: nullfn,
   getSavedChannelState: (index) => getDefaultChannelState(index),
   onChannelLoaded: nullfn,
+  getSavedSubregionSize: () => null,
+  setSavedSubregionSize: nullfn,
 };
 
 export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];

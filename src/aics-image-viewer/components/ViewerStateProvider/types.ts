@@ -1,4 +1,6 @@
 import { CameraState, ControlPoint, Volume } from "@aics/volume-viewer";
+import { Vector3 } from "three";
+
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
@@ -82,6 +84,12 @@ export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, va
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
+  applyColorPresets: (presets: ColorArray[]) => void;
+  changeViewerSetting: ViewerSettingUpdater;
+  changeChannelSetting: ChannelSettingUpdater;
+  setChannelSettings: (settings: ChannelState[]) => void;
+
+  // Reset-related callbacks
   /**
    * Resets the viewer and all channels to a saved initial state, determined
    * by the initial parameters passed to the viewer.
@@ -99,8 +107,6 @@ export type ViewerStateContextType = ViewerState & {
   setSavedChannelState: (index: number, state: ChannelState) => void;
   getSavedChannelState: (index: number) => ChannelState | undefined;
   onChannelLoaded: (volume: Volume, channelIndex: number) => void;
-  changeViewerSetting: ViewerSettingUpdater;
-  changeChannelSetting: ChannelSettingUpdater;
-  setChannelSettings: (settings: ChannelState[]) => void;
-  applyColorPresets: (presets: ColorArray[]) => void;
+  getSavedSubregionSize: () => Vector3 | null;
+  setSavedSubregionSize: (size: Vector3) => void;
 };

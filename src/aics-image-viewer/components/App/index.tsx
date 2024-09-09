@@ -1,6 +1,7 @@
 // 3rd Party Imports
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "antd";
+import { Box3, Vector3 } from "three";
 import { debounce } from "lodash";
 import {
   CreateLoaderOptions,
@@ -65,9 +66,9 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { doesVolumeMatchViewMode } from "../../shared/utils/viewerState";
 
 import "./styles.css";
+import { subregionMatches } from "../../shared/utils/viewerState";
 
 const { Sider, Content } = Layout;
 
@@ -197,6 +198,8 @@ const App: React.FC<AppProps> = (props) => {
     setSavedChannelState,
     getSavedChannelState,
     onChannelLoaded,
+    getSavedSubregionSize,
+    setSavedSubregionSize,
   } = viewerState.current;
 
   const view3d = useConstructor(() => new View3d());
@@ -288,6 +291,10 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
+    if (channelIndex === 0) {
+      console.trace("onChannelDataLoaded", channelIndex, aimg.imageInfo);
+    }
+
     let currentControlPoints: ControlPoint[] = [];
 
     if (thisChannelsSettings.needsDefaultLut) {
@@ -330,15 +337,23 @@ const App: React.FC<AppProps> = (props) => {
       }
     }
 
+    // Save the first channel's volume dimensions if they haven't been saved yet.
+    if (!getSavedSubregionSize()) {
+      setSavedSubregionSize(aimg.imageInfo.subregionSize.clone());
+    }
     // If we haven't initialized the control points for this channel yet and the view mode
     // and time match, update the saved state.
     const savedChannelState = getSavedChannelState(channelIndex);
     if (savedChannelState && savedChannelState.controlPoints.length === 0) {
-      if (viewerSettings.time === aimg.loadSpec.time && doesVolumeMatchViewMode(viewerSettings.viewMode, aimg)) {
+      if (
+        viewerSettings.time === aimg.loadSpec.time &&
+        subregionMatches(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
+      ) {
         const newState = {
           ...savedChannelState,
           ramp: controlPointsToRamp(currentControlPoints),
           controlPoints: currentControlPoints,
+          needsDefaultLut: false,
         };
         setSavedChannelState(channelIndex, newState);
       }
@@ -381,7 +396,7 @@ const App: React.FC<AppProps> = (props) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
       const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
       // Initialize saved channel state, but don't include control points to flag that the LUT has not yet been set.
-      setSavedChannelState(index, { ...channelState, controlPoints: [] });
+      setSavedChannelState(index, { ...channelState, controlPoints: [], needsDefaultLut: true });
       return channelState;
     });
     setChannelSettings(newChannelSettings);
@@ -473,9 +488,17 @@ const App: React.FC<AppProps> = (props) => {
     setAllChannelsUnloaded(channelNames.length);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
+    const requiredLoadspec = new LoadSpec();
+    requiredLoadspec.time = viewerState.current.time;
+
+    if (viewerSettings.viewMode === ViewMode.xy) {
+      const slice = viewerSettings.slice;
+      requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
+    }
+
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
-    loader.current.loadVolumeData(aimg).catch((e) => {
+    loader.current.loadVolumeData(aimg, requiredLoadspec).catch((e) => {
       showError(e);
       throw e;
     });
