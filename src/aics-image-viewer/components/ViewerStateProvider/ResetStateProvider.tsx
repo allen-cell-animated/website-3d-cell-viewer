@@ -10,7 +10,7 @@ import {
   overrideViewerState,
   overrideChannelState,
   getEnabledChannelIndices,
-  subregionMatches,
+  matchesSavedSubregion,
 } from "../../shared/utils/viewerState";
 import { ViewerStateContext } from ".";
 
@@ -113,14 +113,11 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
 
   const onChannelLoadedCallback = useCallback(
     (volume: Volume, channelIndex: number) => {
-      // TODO: Save the target volume size here and replace `doesVolumeMatchViewMode` with a
-      // comparison against the saved volume size.
-
       // Check if the channel needs to be reset after loading by checking if it's in the reset map;
       // if so, apply the reset state and remove it from the map.
       if (
         channelIdxToResetState.current.has(channelIndex) &&
-        subregionMatches(savedSubregionSize.current, volume.imageInfo.subregionSize)
+        matchesSavedSubregion(savedSubregionSize.current, volume.imageInfo.subregionSize)
       ) {
         const resetState = channelIdxToResetState.current.get(channelIndex);
         if (resetState) {

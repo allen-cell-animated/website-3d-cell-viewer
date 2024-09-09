@@ -45,7 +45,16 @@ export function getEnabledChannelIndices(channelSettings: ChannelState[]): numbe
   return enabledChannels;
 }
 
-// Convenience method
-export function subregionMatches(subregion: Vector3 | null, savedSubregion: Vector3 | null): boolean {
-  return savedSubregion !== null && subregion !== null && subregion.equals(savedSubregion);
+/**
+ * Returns whether two subregions match in the X and Y axes.
+ */
+export function matchesSavedSubregion(subregion: Vector3 | null, savedSubregion: Vector3 | null): boolean {
+  // Fixes a bug where the initial saved subregion has a z=1 slice, but the the actual volume has slices chunked
+  // in z=2+ slices.
+  return (
+    savedSubregion !== null &&
+    subregion !== null &&
+    subregion.x === savedSubregion.x &&
+    subregion.y === savedSubregion.y
+  );
 }

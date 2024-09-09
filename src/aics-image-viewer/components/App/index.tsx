@@ -66,9 +66,9 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
+import { matchesSavedSubregion } from "../../shared/utils/viewerState";
 
 import "./styles.css";
-import { subregionMatches } from "../../shared/utils/viewerState";
 
 const { Sider, Content } = Layout;
 
@@ -347,7 +347,7 @@ const App: React.FC<AppProps> = (props) => {
     if (savedChannelState && savedChannelState.controlPoints.length === 0) {
       if (
         viewerSettings.time === aimg.loadSpec.time &&
-        subregionMatches(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
+        matchesSavedSubregion(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
       ) {
         const newState = {
           ...savedChannelState,
@@ -493,6 +493,9 @@ const App: React.FC<AppProps> = (props) => {
 
     if (viewerSettings.viewMode === ViewMode.xy) {
       const slice = viewerSettings.slice;
+      // TODO: This can cause reset behavior to be incorrect if z slices are chunked together in the Zarr
+      // array, since this will cause only one z-slice to be loaded. This can cause a mismatch with the
+      // saved volume dimensions.
       requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
 
