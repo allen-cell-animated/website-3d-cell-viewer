@@ -25,7 +25,7 @@ type ResetStateProviderProps = {
 const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   const { ref } = useContext(ViewerStateContext);
   const { viewerStateInputProps } = props;
-  const { changeChannelSetting, changeViewerSetting, channelSettings, viewMode, time, region } = ref.current;
+  const { changeChannelSetting, changeViewerSetting, channelSettings, viewMode, time, slice } = ref.current;
 
   /**
    * A map from channel indices to their reset states. Channels that are in this map
@@ -63,7 +63,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
       const isInDifferentViewMode =
         viewMode !== newState.viewMode && (viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
       const isAtDifferentTime = time !== newState.time;
-      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy && !isEqual(newState.region.z, region.z);
+      const isAtDifferentZSlice = newState.viewMode === ViewMode.xy && !isEqual(newState.slice.z, slice.z);
       const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
       overrideViewerState(changeViewerSetting, newState);
@@ -79,7 +79,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
         channelIdxToResetState.current = new Map(enabledChannelsAndResetState);
       }
     },
-    [time, viewMode, changeViewerSetting, changeChannelSetting]
+    [time, slice, viewMode, changeViewerSetting, changeChannelSetting]
   );
 
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
