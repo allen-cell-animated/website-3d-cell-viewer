@@ -68,7 +68,8 @@ export interface ChannelState {
   ramp: [number, number];
   useControlPoints: boolean;
   controlPoints: ControlPoint[];
-  /** Internal only. If set, flags that this channel should be reset to the default LUT when the
+  /**
+   * Internal only. If set, flags that this channel should be reset to the default LUT when the
    * next volume is loaded or when the viewer is updated.
    */
   needsDefaultLut?: boolean;
@@ -84,15 +85,15 @@ export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, va
 
 export type ViewerStateContextType = ViewerState & {
   channelSettings: ChannelState[];
-  applyColorPresets: (presets: ColorArray[]) => void;
   changeViewerSetting: ViewerSettingUpdater;
   changeChannelSetting: ChannelSettingUpdater;
   setChannelSettings: (settings: ChannelState[]) => void;
+  applyColorPresets: (presets: ColorArray[]) => void;
 
   // Reset-related callbacks
   /**
    * Resets the viewer and all channels to a saved initial state, determined
-   * by the initial parameters passed to the viewer.
+   * by viewer props.
    * Saved states for channels can be set with `setSavedChannelState()`.
    */
   resetToSavedViewerState: () => void;
@@ -101,12 +102,18 @@ export type ViewerStateContextType = ViewerState & {
    * loaded from scratch with no initial parameters set.
    */
   resetToDefaultViewerState: () => void;
-  /** Overrides the default channel state returned by `getDefaultChannelState()` for
+  /**
+   * Overrides the default channel state returned by `getDefaultChannelState()` for
    * channel index `index`.
    */
   setSavedChannelState: (index: number, state: ChannelState) => void;
   getSavedChannelState: (index: number) => ChannelState | undefined;
   onChannelLoaded: (volume: Volume, channelIndex: number) => void;
-  getSavedSubregionSize: () => Vector3 | null;
+  /**
+   * Sets the subregion size of the volume that was loaded when the channel states were saved.
+   * During reset, this is used to delay the reset on state values that are dependent
+   * on volume (e.g. ramp and control points) until the correct volume is loaded.
+   */
   setSavedSubregionSize: (size: Vector3) => void;
+  getSavedSubregionSize: () => Vector3 | null;
 };

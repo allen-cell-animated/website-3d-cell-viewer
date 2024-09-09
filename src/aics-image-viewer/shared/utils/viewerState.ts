@@ -7,26 +7,26 @@ import {
   ViewerState,
 } from "../../components/ViewerStateProvider/types";
 
+/** Sets all fields of the viewer state to the values of the `newState`. */
 export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
   for (const key of Object.keys(newState) as (keyof ViewerState)[]) {
     changeViewerSetting(key, newState[key] as any);
   }
 
-  // Pathtrace rendering is not allowed in 2D view mode.
-  // Since we're not guaranteed on the order of object keys, handle the edge case
-  // where the viewer was in 2D mode and we are trying to set it to pathtrace + 3D mode, but
-  // render mode was set before the view mode.
+  // Pathtrace rendering is not allowed in 2D view mode but is in 3D mode.
+  // Since we're not guaranteed on the order of object keys, apply changes to render mode a second time
+  // in case we were previously in 2D view mode and the change was blocked, but we're now in 3D.
   changeViewerSetting("renderMode", newState.renderMode);
 }
 
+/** Sets all fields of the channel state for a given index using the provided `newState` (except for the name). */
 export function overrideChannelState(
   changeChannelSetting: ChannelSettingUpdater,
   index: number,
   newState: ChannelState
 ): void {
   for (const key of Object.keys(newState) as (keyof ChannelState)[]) {
-    // Skip resetting name to default, since this causes channels to be dropped from the
-    // UI altogether.
+    // Skip resetting name to default, since this causes channels to be dropped from the UI.
     if (key === "name") {
       continue;
     }
@@ -34,7 +34,7 @@ export function overrideChannelState(
   }
 }
 
-/** Returns the indices of any channels that have either the volume or isosurface enabled. */
+/** Returns the indices of channels that have either the volume or isosurface enabled. */
 export function getEnabledChannelIndices(channelSettings: ChannelState[]): number[] {
   const enabledChannels = [];
   for (let i = 0; i < channelSettings.length; i++) {
@@ -45,12 +45,11 @@ export function getEnabledChannelIndices(channelSettings: ChannelState[]): numbe
   return enabledChannels;
 }
 
-/**
- * Returns whether two subregions match in the X and Y axes.
- */
+/** Returns whether two subregions match in the X and Y axes. */
 export function matchesSavedSubregion(subregion: Vector3 | null, savedSubregion: Vector3 | null): boolean {
-  // Fixes a bug where the initial saved subregion has a z=1 slice, but the the actual volume has slices chunked
-  // in z=2+ slices.
+  // Fixes a bug in 2D-XY mode where the initial saved subregion is always saved with a z-thickness of 1, but the
+  // actual volume can have slices chunked in z >= 2. We drop the Z dimension from the comparison of (x, y, 1)
+  // and (x, y, z) to prevent it from failing.
   return (
     savedSubregion !== null &&
     subregion !== null &&
