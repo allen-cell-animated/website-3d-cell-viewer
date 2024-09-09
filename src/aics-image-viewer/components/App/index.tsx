@@ -155,7 +155,8 @@ const initializeOneChannelSetting = (
     color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
     useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
     controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
-    ramp: defaultChannelState.ramp,
+    ramp: initSettings.ramp ?? defaultChannelState.ramp,
+    needsDefaultLut: !initSettings.controlPoints && !initSettings.ramp && !initSettings.lut,
   };
 };
 
@@ -291,10 +292,6 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    if (channelIndex === 0) {
-      console.trace("onChannelDataLoaded", channelIndex, aimg.imageInfo);
-    }
-
     let currentControlPoints: ControlPoint[] = [];
 
     if (thisChannelsSettings.needsDefaultLut) {
@@ -337,7 +334,7 @@ const App: React.FC<AppProps> = (props) => {
       }
     }
 
-    // Save the first channel's volume dimensions if they haven't been saved yet.
+    // Save the first loaded channel's volume subregion as our reference for resetting channel states.
     if (!getSavedSubregionSize()) {
       setSavedSubregionSize(aimg.imageInfo.subregionSize.clone());
     }
@@ -395,8 +392,13 @@ const App: React.FC<AppProps> = (props) => {
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
       const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
-      // Initialize saved channel state, but don't include control points to flag that the LUT has not yet been set.
-      setSavedChannelState(index, { ...channelState, controlPoints: [], needsDefaultLut: true });
+      if (channelState.volumeEnabled || channelState.isosurfaceEnabled) {
+        // Exclude control points from the saved state for enabled channels, since they can only be set
+        // once the initial volume is loaded.
+        setSavedChannelState(index, { ...channelState, controlPoints: [], needsDefaultLut: true });
+      } else {
+        setSavedChannelState(index, { ...channelState });
+      }
       return channelState;
     });
     setChannelSettings(newChannelSettings);
