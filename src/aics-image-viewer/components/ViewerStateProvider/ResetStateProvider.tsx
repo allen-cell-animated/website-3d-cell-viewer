@@ -19,8 +19,8 @@ type ResetStateProviderProps = {
 };
 
 /**
- * A wrapper intended to be used inside ViewerStateProvider that provides
- * reset functionality to the viewer state. Overrides
+ * A wrapper that provides reset functionality in the ViewerStateContext, defining and overriding
+ * reset-related callbacks. Must be used inside a ViewerStateProvider.
  */
 const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   const { ref } = useContext(ViewerStateContext);
@@ -39,7 +39,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
    * during reset (or when saving channels that are loaded for the first time).
    */
   const savedSubregionSize = useRef<Vector3 | null>(null);
-  const savedChannelSettings = useRef<Record<number, ChannelState>>({}).current;
+  const savedChannelSettings = useRef<Record<number, ChannelState>>({});
   // Because `onChannelLoaded` is passed to the volume loaders only at initialization,
   // we pass the `onChannelLoaded` callback through a ref to break through stale closures.
   const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
@@ -47,9 +47,9 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   // Setup Callbacks ////////////////////////////////////////////////////////////////////
 
   const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
-    savedChannelSettings[index] = state;
+    savedChannelSettings.current[index] = state;
   }, []);
-  const getSavedChannelState = useCallback((index: number) => savedChannelSettings[index], []);
+  const getSavedChannelState = useCallback((index: number) => savedChannelSettings.current[index], []);
 
   /**
    * Helper method. Resets the viewer and all channels to the provided state. If new data needs to
@@ -58,8 +58,8 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   const resetToState = useCallback(
     (newState: ViewerState, newChannelStates: ChannelState[]) => {
       // Needs reset on reload if one of the view modes is 2D while the other is 3D,
-      // if the timestamp is different,
-      // TODO: or if playback is currently enabled in 2D mode
+      // if the timestamp is different, or if we're on a different z slice.
+      // TODO: Handle stopping playback? Requires playback to be part of ViewerStateContext
       const isInDifferentViewMode =
         viewMode !== newState.viewMode && (viewMode === ViewMode.xy || newState.viewMode === ViewMode.xy);
       const isAtDifferentTime = time !== newState.time;
@@ -84,31 +84,28 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
 
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
   const resetToSavedViewerState = useCallback(() => {
-    const savedViewerState = {
+    const newViewerState = {
       ...getDefaultViewerState(),
       cameraState: getDefaultCameraState(viewerStateInputProps?.viewMode || ViewMode.threeD),
       ...viewerStateInputProps,
     };
     const newChannelSettings = channelSettings.map((_, index) => {
-      return savedChannelSettings[index] || getDefaultChannelState(index);
+      return savedChannelSettings.current[index] || getDefaultChannelState(index);
     });
 
-    resetToState(savedViewerState, newChannelSettings);
+    resetToState(newViewerState, newChannelSettings);
   }, [viewerStateInputProps, resetToState, channelSettings]);
 
   const resetToDefaultViewerState = useCallback(() => {
+    const defaultViewerState = { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) };
     const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
     for (let i = 0; i < defaultChannelStates.length; i++) {
       if (i < 3) {
         defaultChannelStates[i].volumeEnabled = true;
       }
-      // Flags that this needs to be initialized with the default LUT
       defaultChannelStates[i].needsDefaultLut = true;
     }
-    resetToState(
-      { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) },
-      defaultChannelStates
-    );
+    resetToState(defaultViewerState, defaultChannelStates);
   }, [viewerStateInputProps, resetToState, channelSettings]);
 
   const onChannelLoadedCallback = useCallback(
@@ -153,6 +150,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
   };
   const callbacksAsDependencyArray = Object.values(callbacks);
 
+  // Update current context with new callbacks
   const context = useMemo(() => {
     ref.current = {
       ...ref.current,
