@@ -46,8 +46,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     let volChecked: number[] = [];
     let isoChecked: number[] = [];
     channelArray.forEach((channelIndex: number) => {
-      const name = channelDataChannels![channelIndex].name;
-      const channelSetting = find(channelSettings, { name });
+      const channelSetting = channelSettings[channelIndex];
       if (!channelSetting) return;
       if (channelSetting.volumeEnabled) {
         volChecked.push(channelIndex);
@@ -82,10 +81,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   };
 
   const renderChannelRow = (channelIndex: number): React.ReactNode => {
-    const thisChannelSettings = find(
-      channelSettings,
-      (channel: ChannelState) => channel.name === channelDataChannels?.[channelIndex].name
-    );
+    const thisChannelSettings = channelSettings[channelIndex];
 
     return thisChannelSettings ? (
       <ChannelsWidgetRow

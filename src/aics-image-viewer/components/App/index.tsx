@@ -418,7 +418,7 @@ const App: React.FC<AppProps> = (props) => {
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
     view3d.addVolume(aimg, {
-      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking normal on load
+      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking consistent on load
       channels: aimg.channelNames.map((name) => {
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
