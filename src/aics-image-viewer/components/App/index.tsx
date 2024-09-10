@@ -409,8 +409,9 @@ const App: React.FC<AppProps> = (props) => {
 
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
+    console.log("placeImageInViewer: channelSetting", channelSetting);
     view3d.addVolume(aimg, {
-      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking saner on load
+      // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking normal on load
       channels: aimg.channelNames.map((name) => {
         const ch = getOneChannelSetting(name, channelSetting);
         if (!ch) {
@@ -476,7 +477,7 @@ const App: React.FC<AppProps> = (props) => {
       aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
         // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
         // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
-        const thisChannelSettings = getOneChannelSetting(v.imageInfo.channelNames[channelIndex]);
+        const thisChannelSettings = viewerState.current.channelSettings[channelIndex];
         onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
       });
     } catch (e) {
@@ -497,15 +498,15 @@ const App: React.FC<AppProps> = (props) => {
       requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
 
+    imageUrlRef.current = path;
+    placeImageInViewer(aimg, newChannelSettings);
+
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
     loader.current.loadVolumeData(aimg, requiredLoadspec).catch((e) => {
       showError(e);
       throw e;
     });
-
-    imageUrlRef.current = path;
-    placeImageInViewer(aimg, newChannelSettings);
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
@@ -667,7 +668,7 @@ const App: React.FC<AppProps> = (props) => {
       // Check whether any channels are marked to be reset to the default LUT.
       for (let i = 0; i < channelSettings.length; i++) {
         const channel = channelSettings[i];
-        if (channel.needsDefaultLut && image.isLoaded()) {
+        if (channel && channel.needsDefaultLut && image.isLoaded()) {
           const lut = getDefaultLut(image.getHistogram(i));
           changeChannelSetting(i, "controlPoints", lut.controlPoints);
           changeChannelSetting(i, "ramp", controlPointsToRamp(lut.controlPoints));
