@@ -338,22 +338,21 @@ const App: React.FC<AppProps> = (props) => {
     if (!getSavedSubregionSize()) {
       setSavedSubregionSize(aimg.imageInfo.subregionSize.clone());
     }
-    // If we haven't initialized the control points for this channel yet and the view mode
-    // and time match, update the saved state.
+    // If we haven't saved the initial state for this channel yet and this is the same
+    // time and initial subregion, add the control points and ramp to the saved channel state.
     const savedChannelState = getSavedChannelState(channelIndex);
-    if (savedChannelState && savedChannelState.controlPoints.length === 0) {
-      if (
-        viewerSettings.time === aimg.loadSpec.time &&
-        matchesSavedSubregion(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
-      ) {
-        const newState = {
-          ...savedChannelState,
-          ramp: controlPointsToRamp(currentControlPoints),
-          controlPoints: currentControlPoints,
-          needsDefaultLut: false,
-        };
-        setSavedChannelState(channelIndex, newState);
-      }
+    if (
+      !savedChannelState &&
+      viewerSettings.time === aimg.loadSpec.time &&
+      matchesSavedSubregion(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
+    ) {
+      const newState = {
+        ...thisChannelsSettings,
+        ramp: controlPointsToRamp(currentControlPoints),
+        controlPoints: currentControlPoints,
+        needsDefaultLut: false,
+      };
+      setSavedChannelState(channelIndex, newState);
     }
     // Callback to notify the viewer state that a channel has loaded.
     onChannelLoaded(aimg, channelIndex);
@@ -392,11 +391,11 @@ const App: React.FC<AppProps> = (props) => {
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
       const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
-      if (channelState.volumeEnabled || channelState.isosurfaceEnabled) {
-        // Exclude control points from the saved state for enabled channels, since they can only be set
-        // once the initial volume is loaded.
-        setSavedChannelState(index, { ...channelState, controlPoints: [], needsDefaultLut: true });
-      } else {
+      // Save settings for channels that are disabled by default; enabled channels
+      // will be loaded at startup and channel settings will be saved then.
+      if (!channelState.volumeEnabled && !channelState.isosurfaceEnabled) {
+        // TODO: This gives unexpected control points after a reset if a channel has `lut`
+        // set in the URL but is disabled at startup.
         setSavedChannelState(index, { ...channelState });
       }
       return channelState;
@@ -495,9 +494,6 @@ const App: React.FC<AppProps> = (props) => {
 
     if (viewerSettings.viewMode === ViewMode.xy) {
       const slice = viewerSettings.slice;
-      // TODO: This can cause reset behavior to be incorrect if z slices are chunked together in the Zarr
-      // array, since this will cause only one z-slice to be loaded. This can cause a mismatch with the
-      // saved volume dimensions.
       requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
 
