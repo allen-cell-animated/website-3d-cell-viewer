@@ -199,7 +199,6 @@ const App: React.FC<AppProps> = (props) => {
     setSavedChannelState,
     getSavedChannelState,
     onChannelLoaded,
-    onOpenImage,
     getSavedSubregionSize,
     setSavedSubregionSize,
   } = viewerState.current;
@@ -293,23 +292,19 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    let currentControlPoints: ControlPoint[] = [];
-    let currentRamp: [number, number] | undefined;
+    let newControlPoints: ControlPoint[] = [];
+    let newRamp: [number, number] | undefined;
 
     if (thisChannelsSettings.needsDefaultLut) {
       const lut = getDefaultLut(aimg.getHistogram(channelIndex));
-      currentControlPoints = lut.controlPoints;
-      currentRamp = controlPointsToRamp(lut.controlPoints);
-      changeChannelSetting(channelIndex, "controlPoints", currentControlPoints);
-      changeChannelSetting(channelIndex, "ramp", currentRamp);
+      newControlPoints = lut.controlPoints;
+      newRamp = controlPointsToRamp(lut.controlPoints);
       changeChannelSetting(channelIndex, "needsDefaultLut", false);
     } else if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      currentControlPoints = controlPoints;
-      currentRamp = controlPointsToRamp(ramp);
-      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
-      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      newControlPoints = controlPoints;
+      newRamp = controlPointsToRamp(ramp);
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -320,27 +315,25 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
+        newControlPoints = thisChannel.lut.controlPoints;
         // now manually remap ramp using the channel's old range
-        const controlPoints = rampToControlPoints(thisChannelsSettings.ramp);
-        const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(newControlPoints));
-        currentControlPoints = newControlPoints;
-        currentRamp = controlPointsToRamp(newControlPoints);
+        const rampControlPoints = rampToControlPoints(thisChannelsSettings.ramp);
+        const remappedRampControlPoints = remapControlPointsForChannel(rampControlPoints, oldRange, thisChannel);
+        newRamp = controlPointsToRamp(remappedRampControlPoints);
       } else {
         // ramp was just automatically remapped - update in state
-        const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
-        changeChannelSetting(channelIndex, "ramp", ramp);
+        newRamp = controlPointsToRamp(thisChannel.lut.controlPoints);
         // now manually remap control points using the channel's old range
-        const { controlPoints } = thisChannelsSettings;
-        const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
-        currentControlPoints = newControlPoints;
-        currentRamp = ramp;
+        const remappedControlPoints = remapControlPointsForChannel(
+          thisChannelsSettings.controlPoints,
+          oldRange,
+          thisChannel
+        );
+        newControlPoints = remappedControlPoints;
       }
     }
-    // changeChannelSetting(channelIndex, "controlPoints", currentControlPoints);
-    // changeChannelSetting(channelIndex, "ramp", currentRamp);
+    changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
+    changeChannelSetting(channelIndex, "ramp", newRamp);
 
     // Save the first loaded channel's volume subregion as our reference for resetting channel states.
     if (!getSavedSubregionSize()) {
@@ -356,8 +349,8 @@ const App: React.FC<AppProps> = (props) => {
     ) {
       const newState = {
         ...thisChannelsSettings,
-        ramp: currentRamp,
-        controlPoints: currentControlPoints,
+        ramp: newRamp,
+        controlPoints: newControlPoints,
         needsDefaultLut: false,
       };
       setSavedChannelState(channelIndex, newState);
