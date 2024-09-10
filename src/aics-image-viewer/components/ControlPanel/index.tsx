@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps } from "antd";
+import { Button, Dropdown, Tooltip, MenuProps, Collapse, CollapseProps, Flex } from "antd";
 import { MenuInfo } from "rc-menu/lib/interface";
 
 import ChannelsWidget from "../ChannelsWidget";
@@ -13,7 +13,6 @@ import { PRESET_COLOR_MAP } from "../../shared/constants";
 import "./styles.css";
 import ViewerIcon from "../shared/ViewerIcon";
 import { MetadataRecord } from "../../shared/types";
-import { FlexColumn } from "../../../../website/components/LandingPage/utils";
 import { connectToViewerState } from "../ViewerStateProvider";
 
 type PropsOf<T> = T extends React.ComponentType<infer P> ? P : never;
@@ -117,7 +116,7 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
     }
 
     return (
-      <FlexColumn $gap={10}>
+      <Flex gap={10} vertical>
         <Collapse bordered={false} defaultActiveKey={showCustomize ? [0, 1] : 0} items={items} />
         <div style={{ margin: "0 10px", width: "fit-content" }}>
           <Tooltip
@@ -129,7 +128,7 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
             <Button onClick={props.resetToDefaultViewerState}>Clear all settings</Button>
           </Tooltip>
         </div>
-      </FlexColumn>
+      </Flex>
     );
   };
 

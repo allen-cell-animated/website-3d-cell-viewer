@@ -7,7 +7,6 @@ import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
 import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
-import { VisuallyHidden } from "../../../../website/components/LandingPage/utils";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
 
@@ -51,6 +50,18 @@ interface ToolbarState {
 }
 
 const RESIZE_DEBOUNCE_DELAY = 50;
+
+const visuallyHiddenStyle: React.CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: "0",
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: "0",
+};
 
 class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -171,7 +182,7 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
             <Tooltip placement="bottom" title="Reset to initial settings" trigger={["focus", "hover"]}>
               <Button className="ant-btn-icon-only btn-borderless" onClick={resetToSavedViewerState}>
                 <UndoOutlined />
-                <VisuallyHidden>Reset to initial settings</VisuallyHidden>
+                <span style={visuallyHiddenStyle}>Reset to initial settings</span>
               </Button>
             </Tooltip>
           </div>
