@@ -132,6 +132,11 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     [onChannelLoadedRef.current]
   );
 
+  // Clear saved channels when the viewer opens a new data source.
+  const onOpenImage = useCallback(() => {
+    savedChannelSettings.current = {};
+  }, []);
+
   const setSavedSubregionSize = useCallback((size: Vector3) => {
     savedSubregionSize.current = size;
   }, []);
@@ -143,6 +148,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     resetToSavedViewerState,
     resetToDefaultViewerState,
     onChannelLoaded,
+    onOpenImage,
     getSavedChannelState,
     setSavedChannelState,
     setSavedSubregionSize,

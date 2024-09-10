@@ -110,6 +110,10 @@ export type ViewerStateContextType = ViewerState & {
   getSavedChannelState: (index: number) => ChannelState | undefined;
   onChannelLoaded: (volume: Volume, channelIndex: number) => void;
   /**
+   * Callback to be called when a new image is opened in the viewer.
+   */
+  onOpenImage: () => void;
+  /**
    * Sets the subregion size of the volume that was loaded when the channel states were saved.
    * During reset, this is used to delay the reset on state values that are dependent
    * on volume (e.g. ramp and control points) until the correct volume is loaded.

@@ -199,6 +199,7 @@ const App: React.FC<AppProps> = (props) => {
     setSavedChannelState,
     getSavedChannelState,
     onChannelLoaded,
+    onOpenImage,
     getSavedSubregionSize,
     setSavedSubregionSize,
   } = viewerState.current;
@@ -458,6 +459,9 @@ const App: React.FC<AppProps> = (props) => {
     if (path === imageUrlRef.current && !rawData && !rawDims) {
       return;
     }
+
+    // Reset behavior callback
+    onOpenImage();
 
     setSendingQueryRequest(true);
     setImageLoaded(false);
