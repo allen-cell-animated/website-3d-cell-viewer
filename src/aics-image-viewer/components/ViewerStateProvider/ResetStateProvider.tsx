@@ -39,14 +39,14 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
    * during reset (or when saving channels that are loaded for the first time).
    */
   const savedSubregionSize = useRef<Vector3 | null>(null);
-  const savedChannelSettings = useRef<Record<number, ChannelState>>({});
+  const savedChannelSettings = useRef<Record<number, ChannelState | undefined>>({});
   // Because `onChannelLoaded` is passed to the volume loaders only at initialization,
   // we pass the `onChannelLoaded` callback through a ref to break through stale closures.
   const onChannelLoadedRef = useRef<ViewerStateContextType["onChannelLoaded"]>(() => {});
 
   // Setup Callbacks ////////////////////////////////////////////////////////////////////
 
-  const setSavedChannelState = useCallback((index: number, state: ChannelState) => {
+  const setSavedChannelState = useCallback((index: number, state: ChannelState | undefined) => {
     savedChannelSettings.current[index] = state;
   }, []);
   const getSavedChannelState = useCallback((index: number) => savedChannelSettings.current[index], []);
@@ -132,12 +132,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     [onChannelLoadedRef.current]
   );
 
-  // Clear saved channels when the viewer opens a new data source.
-  const onOpenImage = useCallback(() => {
-    savedChannelSettings.current = {};
-  }, []);
-
-  const setSavedSubregionSize = useCallback((size: Vector3) => {
+  const setSavedSubregionSize = useCallback((size: Vector3 | null) => {
     savedSubregionSize.current = size;
   }, []);
   const getSavedSubregionSize = useCallback(() => savedSubregionSize.current, []);
@@ -148,7 +143,6 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     resetToSavedViewerState,
     resetToDefaultViewerState,
     onChannelLoaded,
-    onOpenImage,
     getSavedChannelState,
     setSavedChannelState,
     setSavedSubregionSize,

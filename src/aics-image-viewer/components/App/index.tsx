@@ -405,6 +405,8 @@ const App: React.FC<AppProps> = (props) => {
         // TODO: This gives unexpected control points after a reset if a channel has `lut`
         // set in the URL but is disabled at startup.
         setSavedChannelState(index, { ...channelState });
+      } else {
+        setSavedChannelState(index, undefined);
       }
       return channelState;
     });
@@ -460,8 +462,8 @@ const App: React.FC<AppProps> = (props) => {
       return;
     }
 
-    // Reset behavior callback
-    onOpenImage();
+    // Clear saved state specific to the old image.
+    setSavedSubregionSize(null);
 
     setSendingQueryRequest(true);
     setImageLoaded(false);

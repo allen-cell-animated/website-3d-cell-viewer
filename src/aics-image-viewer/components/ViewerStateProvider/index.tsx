@@ -138,7 +138,6 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   setSavedChannelState: nullfn,
   getSavedChannelState: (index) => getDefaultChannelState(index),
   onChannelLoaded: nullfn,
-  onOpenImage: nullfn,
   getSavedSubregionSize: () => null,
   setSavedSubregionSize: nullfn,
 };

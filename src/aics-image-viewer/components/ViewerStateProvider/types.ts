@@ -106,18 +106,14 @@ export type ViewerStateContextType = ViewerState & {
    * Overrides the default channel state returned by `getDefaultChannelState()` for
    * channel index `index`.
    */
-  setSavedChannelState: (index: number, state: ChannelState) => void;
+  setSavedChannelState: (index: number, state: ChannelState | undefined) => void;
   getSavedChannelState: (index: number) => ChannelState | undefined;
   onChannelLoaded: (volume: Volume, channelIndex: number) => void;
-  /**
-   * Callback to be called when a new image is opened in the viewer.
-   */
-  onOpenImage: () => void;
   /**
    * Sets the subregion size of the volume that was loaded when the channel states were saved.
    * During reset, this is used to delay the reset on state values that are dependent
    * on volume (e.g. ramp and control points) until the correct volume is loaded.
    */
-  setSavedSubregionSize: (size: Vector3) => void;
+  setSavedSubregionSize: (size: Vector3 | null) => void;
   getSavedSubregionSize: () => Vector3 | null;
 };
