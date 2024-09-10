@@ -293,17 +293,20 @@ const App: React.FC<AppProps> = (props) => {
     const thisChannel = aimg.getChannel(channelIndex);
 
     let currentControlPoints: ControlPoint[] = [];
+    let currentRamp: [number, number] | undefined;
 
     if (thisChannelsSettings.needsDefaultLut) {
       const lut = getDefaultLut(aimg.getHistogram(channelIndex));
       currentControlPoints = lut.controlPoints;
+      currentRamp = controlPointsToRamp(lut.controlPoints);
       changeChannelSetting(channelIndex, "controlPoints", currentControlPoints);
-      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(currentControlPoints));
+      changeChannelSetting(channelIndex, "ramp", currentRamp);
       changeChannelSetting(channelIndex, "needsDefaultLut", false);
     } else if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
       currentControlPoints = controlPoints;
+      currentRamp = controlPointsToRamp(ramp);
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
     } else {
@@ -320,8 +323,9 @@ const App: React.FC<AppProps> = (props) => {
         // now manually remap ramp using the channel's old range
         const controlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        currentControlPoints = newControlPoints;
         changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(newControlPoints));
+        currentControlPoints = newControlPoints;
+        currentRamp = controlPointsToRamp(newControlPoints);
       } else {
         // ramp was just automatically remapped - update in state
         const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
@@ -329,10 +333,13 @@ const App: React.FC<AppProps> = (props) => {
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        currentControlPoints = newControlPoints;
         changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
+        currentControlPoints = newControlPoints;
+        currentRamp = ramp;
       }
     }
+    // changeChannelSetting(channelIndex, "controlPoints", currentControlPoints);
+    // changeChannelSetting(channelIndex, "ramp", currentRamp);
 
     // Save the first loaded channel's volume subregion as our reference for resetting channel states.
     if (!getSavedSubregionSize()) {
@@ -348,7 +355,7 @@ const App: React.FC<AppProps> = (props) => {
     ) {
       const newState = {
         ...thisChannelsSettings,
-        ramp: controlPointsToRamp(currentControlPoints),
+        ramp: currentRamp,
         controlPoints: currentControlPoints,
         needsDefaultLut: false,
       };
@@ -409,7 +416,6 @@ const App: React.FC<AppProps> = (props) => {
 
     const channelSetting = newChannelSettings || channelSettings;
     view3d.removeAllVolumes();
-    console.log("placeImageInViewer: channelSetting", channelSetting);
     view3d.addVolume(aimg, {
       // Immediately passing down channel parameters isn't strictly necessary, but keeps things looking normal on load
       channels: aimg.channelNames.map((name) => {
