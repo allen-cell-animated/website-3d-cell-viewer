@@ -67,7 +67,6 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
       const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
       overrideViewerState(changeViewerSetting, newState);
-
       for (let i = 0; i < newChannelStates.length; i++) {
         overrideChannelState(changeChannelSetting, i, newChannelStates[i]);
       }
@@ -96,6 +95,7 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     resetToState(newViewerState, newChannelSettings);
   }, [viewerStateInputProps, resetToState, channelSettings]);
 
+  /** Reset to global default viewer state, as if loading the volume with no parameters. */
   const resetToDefaultViewerState = useCallback(() => {
     const defaultViewerState = { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) };
     const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
@@ -112,15 +112,10 @@ const ResetStateProvider: React.FC<ResetStateProviderProps> = (props) => {
     (volume: Volume, channelIndex: number) => {
       // Check if the channel needs to be reset after loading by checking if it's in the reset map;
       // if so, apply the reset state and remove it from the map.
-      if (
-        channelIdxToResetState.current.has(channelIndex) &&
-        matchesSavedSubregion(savedSubregionSize.current, volume.imageInfo.subregionSize)
-      ) {
-        const resetState = channelIdxToResetState.current.get(channelIndex);
-        if (resetState) {
-          overrideChannelState(changeChannelSetting, channelIndex, resetState);
-          channelIdxToResetState.current.delete(channelIndex);
-        }
+      const resetState = channelIdxToResetState.current.get(channelIndex);
+      if (resetState && matchesSavedSubregion(savedSubregionSize.current, volume.imageInfo.subregionSize)) {
+        overrideChannelState(changeChannelSetting, channelIndex, resetState);
+        channelIdxToResetState.current.delete(channelIndex);
       }
     },
     [viewMode, channelSettings]

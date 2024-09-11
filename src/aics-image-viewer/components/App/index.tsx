@@ -1,8 +1,4 @@
 // 3rd Party Imports
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { Layout } from "antd";
-import { Box3, Vector3 } from "three";
-import { debounce } from "lodash";
 import {
   CreateLoaderOptions,
   LoadSpec,
@@ -16,6 +12,10 @@ import {
   VolumeFileFormat,
   ControlPoint,
 } from "@aics/volume-viewer";
+import { Layout } from "antd";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { debounce } from "lodash";
+import { Box3, Vector3 } from "three";
 
 import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
 import type { ChannelState } from "../ViewerStateProvider/types";
@@ -58,7 +58,6 @@ import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
 
-import "../../assets/styles/globals.css";
 import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 import {
   gammaSliderToImageValues,
@@ -68,6 +67,7 @@ import {
 } from "../../shared/utils/sliderValuesToImageValues";
 import { matchesSavedSubregion } from "../../shared/utils/viewerState";
 
+import "../../assets/styles/globals.css";
 import "./styles.css";
 
 const { Sider, Content } = Layout;
@@ -292,8 +292,8 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    let newControlPoints: ControlPoint[] = [];
-    let newRamp: [number, number] | undefined;
+    let newControlPoints: ControlPoint[];
+    let newRamp: [number, number];
 
     if (thisChannelsSettings.needsDefaultLut) {
       const lut = getDefaultLut(aimg.getHistogram(channelIndex));
@@ -324,11 +324,8 @@ const App: React.FC<AppProps> = (props) => {
         // ramp was just automatically remapped - update in state
         newRamp = controlPointsToRamp(thisChannel.lut.controlPoints);
         // now manually remap control points using the channel's old range
-        const remappedControlPoints = remapControlPointsForChannel(
-          thisChannelsSettings.controlPoints,
-          oldRange,
-          thisChannel
-        );
+        const { controlPoints } = thisChannelsSettings;
+        const remappedControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
         newControlPoints = remappedControlPoints;
       }
     }

@@ -1,5 +1,4 @@
 import React from "react";
-import { find } from "lodash";
 import { Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
 
