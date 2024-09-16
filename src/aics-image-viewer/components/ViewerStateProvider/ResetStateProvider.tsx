@@ -16,6 +16,7 @@ import { ViewerStateContext } from ".";
 
 type ResetStateProviderProps = {
   viewerStateInputProps?: Partial<ViewerState>;
+  children?: React.ReactNode;
 };
 
 /**
