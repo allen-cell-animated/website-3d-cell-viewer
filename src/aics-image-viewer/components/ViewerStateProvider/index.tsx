@@ -228,7 +228,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState>; chi
 export function connectToViewerState<
   Keys extends keyof ViewerStateContextType,
   Props extends Pick<ViewerStateContextType, Keys>
->(component: React.ComponentType<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
+>(component: React.FC<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
   const MemoedComponent = React.memo(component);
 
   const ConnectedComponent: React.FC<Omit<Props, Keys>> = (props) => {
