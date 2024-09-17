@@ -9,7 +9,7 @@ type SharedCheckboxProps<T> = React.PropsWithChildren<{
   style?: React.CSSProperties;
 }>;
 
-const SharedCheckbox = <T,>(props: SharedCheckboxProps<T>): React.ReactNode => {
+const SharedCheckbox = <T,>(props: SharedCheckboxProps<T>): React.ReactElement => {
   const onCheckAllChange = ({ target }: CheckboxChangeEvent): void => props.onChange(target.checked, props.allOptions);
 
   const indeterminate = !!props.checkedList.length && props.checkedList.length < props.allOptions.length;
