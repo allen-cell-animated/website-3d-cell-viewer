@@ -5,16 +5,12 @@ import { CheckboxChangeEvent } from "antd/lib/checkbox";
 type SharedCheckboxProps<T> = React.PropsWithChildren<{
   allOptions: T[];
   checkedList: T[];
-  onChecked: (checked: T[]) => void;
-  onUnchecked: (unchecked: T[]) => void;
+  onChange: (checked: boolean, checkedList: T[]) => void;
   style?: React.CSSProperties;
 }>;
 
 const SharedCheckbox = <T,>(props: SharedCheckboxProps<T>): React.ReactNode => {
-  const onCheckAllChange = ({ target }: CheckboxChangeEvent): void => {
-    const { allOptions, onChecked, onUnchecked } = props;
-    target.checked ? onChecked(allOptions) : onUnchecked(allOptions);
-  };
+  const onCheckAllChange = ({ target }: CheckboxChangeEvent): void => props.onChange(target.checked, props.allOptions);
 
   const indeterminate = !!props.checkedList.length && props.checkedList.length < props.allOptions.length;
   const checkAll = props.checkedList.length === props.allOptions.length;

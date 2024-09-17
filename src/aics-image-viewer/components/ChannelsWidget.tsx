@@ -32,14 +32,12 @@ export type ChannelsWidgetProps = {
 const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProps) => {
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
-  const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
+  const createCheckboxHandler = (key: ChannelStateKey) => (value: boolean, channelArray: number[]) => {
     props.changeChannelSetting(channelArray, key, value);
   };
 
-  const showVolumes = createCheckboxHandler("volumeEnabled", true);
-  const showSurfaces = createCheckboxHandler("isosurfaceEnabled", true);
-  const hideVolumes = createCheckboxHandler("volumeEnabled", false);
-  const hideSurfaces = createCheckboxHandler("isosurfaceEnabled", false);
+  const showVolumes = createCheckboxHandler("volumeEnabled");
+  const showSurfaces = createCheckboxHandler("isosurfaceEnabled");
 
   const renderVisibilityControls = (channelArray: number[]): React.ReactNode => {
     let volChecked: number[] = [];
@@ -57,19 +55,13 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
 
     return (
       <>
-        <SharedCheckBox
-          allOptions={channelArray}
-          checkedList={volChecked}
-          onChecked={showVolumes}
-          onUnchecked={hideVolumes}
-        >
+        <SharedCheckBox allOptions={channelArray} checkedList={volChecked} onChange={showVolumes}>
           All Vol
         </SharedCheckBox>
         <SharedCheckBox
           allOptions={channelArray}
           checkedList={isoChecked}
-          onChecked={showSurfaces}
-          onUnchecked={hideSurfaces}
+          onChange={showSurfaces}
           // keep checkboxes lined up when channel rows have settings icon and headers don't
           style={{ flex: 5 }}
         >
