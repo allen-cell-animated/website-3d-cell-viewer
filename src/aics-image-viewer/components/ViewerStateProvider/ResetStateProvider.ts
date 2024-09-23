@@ -52,11 +52,11 @@ export default class ResetStateProvider {
 
   // Setup Callbacks ////////////////////////////////////////////////////////////////////
 
-  public setSavedViewerState(state: Partial<ViewerState>) {
+  public setSavedViewerState(state: Partial<ViewerState>): void {
     this.savedViewerState = state;
   }
 
-  public setSavedChannelState(index: number, state: ChannelState | undefined) {
+  public setSavedChannelState(index: number, state: ChannelState | undefined): void {
     this.savedChannelSettings[index] = state;
   }
 
@@ -68,7 +68,7 @@ export default class ResetStateProvider {
    * Helper method. Resets the viewer and all channels to the provided state. If new data needs to
    * be loaded, handles setup so the reset will be applied to each channel as it loads in.
    */
-  private resetToState(newState: ViewerState, newChannelStates: ChannelState[]) {
+  private resetToState(newState: ViewerState, newChannelStates: ChannelState[]): void {
     const { changeViewerSetting, changeChannelSetting, viewMode, time, slice } = this.ref.current;
 
     // Needs reset on reload if one of the view modes is 2D while the other is 3D,
@@ -94,7 +94,7 @@ export default class ResetStateProvider {
   }
 
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
-  public resetToSavedViewerState() {
+  public resetToSavedViewerState(): void {
     const { channelSettings } = this.ref.current;
     const newViewerState = {
       ...getDefaultViewerState(),
@@ -109,7 +109,7 @@ export default class ResetStateProvider {
   }
 
   /** Reset to global default viewer state, as if loading the volume with no parameters. */
-  public resetToDefaultViewerState() {
+  public resetToDefaultViewerState(): void {
     const { channelSettings } = this.ref.current;
     const defaultViewerState = { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) };
     const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
@@ -123,7 +123,7 @@ export default class ResetStateProvider {
     this.resetToState(defaultViewerState, defaultChannelStates);
   }
 
-  public onChannelLoaded(volume: Volume, channelIndex: number) {
+  public onChannelLoaded(volume: Volume, channelIndex: number): void {
     const { changeChannelSetting } = this.ref.current;
     // Check if the channel needs to be reset after loading by checking if it's in the reset map;
     // if so, apply the reset state and remove it from the map.
