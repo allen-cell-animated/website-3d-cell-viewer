@@ -40,6 +40,7 @@ export interface AppProps {
   imageUrl: string | string[];
   parentImageUrl?: string | string[];
 
+  // TODO: Deprecate and make managed by ViewerStateProvider?
   viewerChannelSettings?: ViewerChannelSettings;
 
   appHeight: string;

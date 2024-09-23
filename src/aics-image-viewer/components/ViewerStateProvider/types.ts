@@ -4,6 +4,7 @@ import { Vector3 } from "three";
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
+import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 /** Global (not per-channel) viewer state which may be changed in the UI */
 export interface ViewerState {
@@ -91,6 +92,11 @@ export type ViewerStateContextType = ViewerState & {
   applyColorPresets: (presets: ColorArray[]) => void;
 
   // Reset-related callbacks
+  setSavedViewerChannelSettings: (settings: ViewerChannelSettings | undefined) => void;
+  getCurrentViewerChannelSettings: () => ViewerChannelSettings | undefined;
+  isChannelAwaitingReset: (channelIndex: number) => boolean;
+  onResetChannel: (channelIndex: number) => void;
+
   /**
    * Resets the viewer and all channels to a saved initial state, determined
    * by viewer props.
@@ -102,18 +108,4 @@ export type ViewerStateContextType = ViewerState & {
    * loaded from scratch with no initial parameters set.
    */
   resetToDefaultViewerState: () => void;
-  /**
-   * Overrides the default channel state returned by `getDefaultChannelState()` for
-   * channel index `index`.
-   */
-  setSavedChannelState: (index: number, state: ChannelState | undefined) => void;
-  getSavedChannelState: (index: number) => ChannelState | undefined;
-  onChannelLoaded: (volume: Volume, channelIndex: number) => void;
-  /**
-   * Sets the subregion size of the volume that was loaded when the channel states were saved.
-   * During reset, this is used to delay the reset on state values that are dependent
-   * on volume (e.g. ramp and control points) until the correct volume is loaded.
-   */
-  setSavedSubregionSize: (size: Vector3 | null) => void;
-  getSavedSubregionSize: () => Vector3 | null;
 };

@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
+import { getDefaultChannelState, getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
 import ResetStateProvider from "./ResetStateProvider";
 import { useConstructor } from "../../shared/utils/hooks";
 
@@ -136,11 +136,10 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   applyColorPresets: nullfn,
   resetToSavedViewerState: nullfn,
   resetToDefaultViewerState: nullfn,
-  setSavedChannelState: nullfn,
-  getSavedChannelState: (index) => getDefaultChannelState(index),
-  onChannelLoaded: nullfn,
-  getSavedSubregionSize: () => null,
-  setSavedSubregionSize: nullfn,
+  setSavedViewerChannelSettings: nullfn,
+  getCurrentViewerChannelSettings: () => getDefaultViewerChannelSettings(),
+  isChannelAwaitingReset: () => false,
+  onResetChannel: nullfn,
 };
 
 export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
@@ -198,13 +197,13 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
+      // Reset-related callbacks
+      setSavedViewerChannelSettings: resetProvider.setSavedViewerChannelSettings,
+      getCurrentViewerChannelSettings: resetProvider.getCurrentViewerChannelSettings,
+      isChannelAwaitingReset: resetProvider.isChannelAwaitingReset,
+      onResetChannel: resetProvider.onResetChannel,
       resetToSavedViewerState: resetProvider.resetToSavedViewerState,
       resetToDefaultViewerState: resetProvider.resetToDefaultViewerState,
-      setSavedChannelState: resetProvider.setSavedChannelState,
-      getSavedChannelState: resetProvider.getSavedChannelState,
-      onChannelLoaded: resetProvider.onChannelLoaded,
-      getSavedSubregionSize: resetProvider.getSavedSubregionSize,
-      setSavedSubregionSize: resetProvider.setSavedSubregionSize,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.

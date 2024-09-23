@@ -65,7 +65,6 @@ import {
   brightnessSliderToImageValue,
   alphaSliderToImageValue,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { matchesSavedSubregion } from "../../shared/utils/viewerState";
 
 import "../../assets/styles/globals.css";
 import "./styles.css";
@@ -188,7 +187,6 @@ const App: React.FC<AppProps> = (props) => {
   props = { ...defaultProps, ...props };
 
   // State management /////////////////////////////////////////////////////////
-
   const viewerState = useContext(ViewerStateContext).ref;
   const {
     channelSettings,
@@ -196,12 +194,17 @@ const App: React.FC<AppProps> = (props) => {
     changeViewerSetting,
     changeChannelSetting,
     applyColorPresets,
-    setSavedChannelState,
-    getSavedChannelState,
-    onChannelLoaded,
-    getSavedSubregionSize,
-    setSavedSubregionSize,
+    setSavedViewerChannelSettings,
+    getCurrentViewerChannelSettings,
+    isChannelAwaitingReset,
+    onResetChannel,
   } = viewerState.current;
+
+  useMemo(() => {
+    if (props.viewerChannelSettings) {
+      setSavedViewerChannelSettings(props.viewerChannelSettings);
+    }
+  }, [props.viewerChannelSettings]);
 
   const view3d = useConstructor(() => new View3d());
   if (props.view3dRef !== undefined) {
@@ -295,16 +298,17 @@ const App: React.FC<AppProps> = (props) => {
     let newControlPoints: ControlPoint[];
     let newRamp: [number, number];
 
-    if (thisChannelsSettings.needsDefaultLut) {
-      const lut = getDefaultLut(aimg.getHistogram(channelIndex));
-      newControlPoints = lut.controlPoints;
-      newRamp = controlPointsToRamp(lut.controlPoints);
-      changeChannelSetting(channelIndex, "needsDefaultLut", false);
-    } else if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
+    if (
+      initialLoadRef.current ||
+      !thisChannelsSettings.controlPoints ||
+      !thisChannelsSettings.ramp ||
+      isChannelAwaitingReset(channelIndex)
+    ) {
       // If this is the first load of this image, auto-generate initial LUTs
-      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
+      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, getCurrentViewerChannelSettings());
       newControlPoints = controlPoints;
       newRamp = controlPointsToRamp(ramp);
+      onResetChannel(channelIndex);
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -332,29 +336,6 @@ const App: React.FC<AppProps> = (props) => {
     changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
     changeChannelSetting(channelIndex, "ramp", newRamp);
 
-    // Save the first loaded channel's volume subregion as our reference for resetting channel states.
-    if (!getSavedSubregionSize()) {
-      setSavedSubregionSize(aimg.imageInfo.subregionSize.clone());
-    }
-    // If we haven't saved the initial state for this channel yet and this is the same
-    // time and initial subregion, add the control points and ramp to the saved channel state.
-    const savedChannelState = getSavedChannelState(channelIndex);
-    if (
-      !savedChannelState &&
-      viewerSettings.time === aimg.loadSpec.time &&
-      matchesSavedSubregion(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
-    ) {
-      const newState = {
-        ...thisChannelsSettings,
-        ramp: newRamp,
-        controlPoints: newControlPoints,
-        needsDefaultLut: false,
-      };
-      setSavedChannelState(channelIndex, newState);
-    }
-    // Callback to notify the viewer state that a channel has loaded.
-    onChannelLoaded(aimg, channelIndex);
-
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 
@@ -362,7 +343,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.onVolumeData(aimg, [channelIndex]);
 
     view3d.setVolumeChannelEnabled(aimg, channelIndex, thisChannelsSettings.volumeEnabled);
-    if (aimg.channelNames[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
+    if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
 
@@ -378,7 +359,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
-    const grouping = makeChannelIndexGrouping(channelNames, props.viewerChannelSettings);
+    const grouping = makeChannelIndexGrouping(channelNames, getCurrentViewerChannelSettings());
     setChannelGroupedByType(grouping);
 
     const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
@@ -388,17 +369,7 @@ const App: React.FC<AppProps> = (props) => {
 
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
-      // Save settings for channels that are disabled by default; enabled channels
-      // will be loaded at startup and channel settings will be saved then.
-      if (!channelState.volumeEnabled && !channelState.isosurfaceEnabled) {
-        // TODO: This gives unexpected control points after a reset if a channel has `lut`
-        // set in the URL but is disabled at startup.
-        setSavedChannelState(index, { ...channelState });
-      } else {
-        setSavedChannelState(index, undefined);
-      }
-      return channelState;
+      return initializeOneChannelSetting(channel, index, color, getCurrentViewerChannelSettings());
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
@@ -451,9 +422,6 @@ const App: React.FC<AppProps> = (props) => {
     if (path === imageUrlRef.current && !rawData && !rawDims) {
       return;
     }
-
-    // Clear saved state specific to the old image.
-    setSavedSubregionSize(null);
 
     setSendingQueryRequest(true);
     setImageLoaded(false);

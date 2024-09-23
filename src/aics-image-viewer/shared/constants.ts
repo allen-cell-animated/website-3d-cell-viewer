@@ -3,6 +3,7 @@ import { CameraState } from "@aics/volume-viewer";
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
 import { ViewMode, RenderMode, ImageType } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
+import { ViewerChannelSettings } from "./utils/viewerChannelSettings";
 
 // Add all exported constants here to prevent circular dependencies
 export const // Control panel will automatically close if viewport is less than this width
@@ -124,6 +125,18 @@ export const getDefaultCameraState = (viewMode: ViewMode = ViewMode.threeD): Cam
   up: viewModeToDefaultCameraUp[viewMode],
   fov: 20,
   orthoScale: 0.5,
+});
+
+export const getDefaultViewerChannelSettings = (): ViewerChannelSettings => ({
+  groups: [
+    {
+      name: "Channels",
+      channels: [
+        { match: [0, 1, 2], enabled: true },
+        { match: "(.+)", enabled: false },
+      ],
+    },
+  ],
 });
 
 /**
