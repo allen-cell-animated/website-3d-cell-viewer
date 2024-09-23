@@ -139,6 +139,7 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   setSavedViewerChannelSettings: nullfn,
   getCurrentViewerChannelSettings: () => getDefaultViewerChannelSettings(),
   isChannelAwaitingReset: () => false,
+  isChannelAwaitingLoadReset: () => false,
   onResetChannel: nullfn,
 };
 
@@ -201,6 +202,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setSavedViewerChannelSettings: resetProvider.setSavedViewerChannelSettings,
       getCurrentViewerChannelSettings: resetProvider.getCurrentViewerChannelSettings,
       isChannelAwaitingReset: resetProvider.isChannelAwaitingReset,
+      isChannelAwaitingLoadReset: resetProvider.isChannelAwaitingResetOnLoad,
       onResetChannel: resetProvider.onResetChannel,
       resetToSavedViewerState: resetProvider.resetToSavedViewerState,
       resetToDefaultViewerState: resetProvider.resetToDefaultViewerState,

@@ -95,6 +95,7 @@ export type ViewerStateContextType = ViewerState & {
   setSavedViewerChannelSettings: (settings: ViewerChannelSettings | undefined) => void;
   getCurrentViewerChannelSettings: () => ViewerChannelSettings | undefined;
   isChannelAwaitingReset: (channelIndex: number) => boolean;
+  isChannelAwaitingLoadReset: (channelIndex: number) => boolean;
   onResetChannel: (channelIndex: number) => void;
 
   /**

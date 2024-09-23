@@ -197,6 +197,7 @@ const App: React.FC<AppProps> = (props) => {
     setSavedViewerChannelSettings,
     getCurrentViewerChannelSettings,
     isChannelAwaitingReset,
+    isChannelAwaitingLoadReset,
     onResetChannel,
   } = viewerState.current;
 
@@ -302,7 +303,7 @@ const App: React.FC<AppProps> = (props) => {
       initialLoadRef.current ||
       !thisChannelsSettings.controlPoints ||
       !thisChannelsSettings.ramp ||
-      isChannelAwaitingReset(channelIndex)
+      isChannelAwaitingLoadReset(channelIndex)
     ) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, getCurrentViewerChannelSettings());
@@ -641,12 +642,11 @@ const App: React.FC<AppProps> = (props) => {
     (image) => {
       // Check whether any channels are marked to be reset to the default LUT.
       for (let i = 0; i < channelSettings.length; i++) {
-        const channel = channelSettings[i];
-        if (channel && channel.needsDefaultLut && image.isLoaded()) {
-          const lut = getDefaultLut(image.getHistogram(i));
-          changeChannelSetting(i, "controlPoints", lut.controlPoints);
-          changeChannelSetting(i, "ramp", controlPointsToRamp(lut.controlPoints));
-          changeChannelSetting(i, "needsDefaultLut", false);
+        if (isChannelAwaitingReset(i)) {
+          const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
+          changeChannelSetting(i, "controlPoints", controlPoints);
+          changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));
+          onResetChannel(i);
         }
       }
     },

@@ -25,13 +25,16 @@ export default class ResetStateProvider {
   useDefaultViewerChannelSettings: boolean;
 
   channelsToReset: Set<number>;
+  channelsToResetOnLoad: Set<number>;
 
   ref: React.MutableRefObject<ViewerStateContextType>;
 
-  constructor(ref: React.MutableRefObject<ViewerStateContextType>) {
+  constructor(viewerStateRef: React.MutableRefObject<ViewerStateContextType>) {
+    this.ref = viewerStateRef;
+
     this.savedViewerState = {};
     this.channelsToReset = new Set();
-    this.ref = ref;
+    this.channelsToResetOnLoad = new Set();
     this.savedViewerChannelSettings = undefined;
     this.useDefaultViewerChannelSettings = false;
 
@@ -41,6 +44,7 @@ export default class ResetStateProvider {
     this.setSavedViewerState = this.setSavedViewerState.bind(this);
     this.setSavedViewerChannelSettings = this.setSavedViewerChannelSettings.bind(this);
     this.isChannelAwaitingReset = this.isChannelAwaitingReset.bind(this);
+    this.isChannelAwaitingResetOnLoad = this.isChannelAwaitingResetOnLoad.bind(this);
     this.onResetChannel = this.onResetChannel.bind(this);
     this.getCurrentViewerChannelSettings = this.getCurrentViewerChannelSettings.bind(this);
   }
@@ -59,8 +63,13 @@ export default class ResetStateProvider {
     return this.channelsToReset.has(channelIndex);
   }
 
+  public isChannelAwaitingResetOnLoad(channelIndex: number): boolean {
+    return this.channelsToResetOnLoad.has(channelIndex);
+  }
+
   public onResetChannel(channelIndex: number): void {
     this.channelsToReset.delete(channelIndex);
+    this.channelsToResetOnLoad.delete(channelIndex);
   }
 
   /**
@@ -95,14 +104,14 @@ export default class ResetStateProvider {
       overrideChannelState(changeChannelSetting, i, newChannelStates[i]);
     }
 
-    if (willNeedResetOnLoad) {
-      const enabledChannelsAndResetState = getEnabledChannelIndices(newChannelStates).map((index) => {
-        return [index, newChannelStates[index]] as const;
-      });
-    }
-
-    // Mark all channels as needing reset/initialization
     this.channelsToReset = new Set(Array(newChannelStates.length).keys());
+    if (willNeedResetOnLoad) {
+      const enabledChannelsAndResetState = getEnabledChannelIndices(newChannelStates);
+      this.channelsToResetOnLoad = new Set(enabledChannelsAndResetState);
+      for (const channelIndex of enabledChannelsAndResetState) {
+        this.channelsToReset.delete(channelIndex);
+      }
+    }
   }
 
   /** Resets to the initial saved state of the viewer, as shown to the user on load. */
