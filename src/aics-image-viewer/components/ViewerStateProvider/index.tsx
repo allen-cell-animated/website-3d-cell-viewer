@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 
 import type {
   ViewerStateContextType,
@@ -13,6 +13,7 @@ import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
 import { getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
 import ResetStateProvider from "./ResetStateProvider";
+import { useConstructor } from "../../shared/utils/hooks";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -159,6 +160,11 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
 
+  const resetProvider = useConstructor(() => new ResetStateProvider(ref));
+  useEffect(() => {
+    resetProvider.setSavedViewerState(props.viewerSettings || {});
+  }, [props.viewerSettings]);
+
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
@@ -192,7 +198,13 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
-      // Reset-related callbacks will be set by the ResetStateProvider
+      resetToSavedViewerState: resetProvider.resetToSavedViewerState,
+      resetToDefaultViewerState: resetProvider.resetToDefaultViewerState,
+      setSavedChannelState: resetProvider.setSavedChannelState,
+      getSavedChannelState: resetProvider.getSavedChannelState,
+      onChannelLoaded: resetProvider.onChannelLoaded,
+      getSavedSubregionSize: resetProvider.getSavedSubregionSize,
+      setSavedSubregionSize: resetProvider.setSavedSubregionSize,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.
@@ -200,11 +212,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     return { ref };
   }, [viewerSettings, channelSettings]);
 
-  return (
-    <ViewerStateContext.Provider value={context}>
-      <ResetStateProvider viewerStateInputProps={props.viewerSettings}>{props.children}</ResetStateProvider>
-    </ViewerStateContext.Provider>
-  );
+  return <ViewerStateContext.Provider value={context}>{props.children}</ViewerStateContext.Provider>;
 };
 
 /**
