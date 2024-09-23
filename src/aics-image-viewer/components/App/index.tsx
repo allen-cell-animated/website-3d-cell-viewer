@@ -504,15 +504,15 @@ const App: React.FC<AppProps> = (props) => {
       requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
 
-    imageUrlRef.current = path;
-    placeImageInViewer(aimg, newChannelSettings);
-
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
     loader.current.loadVolumeData(aimg, requiredLoadSpec).catch((e) => {
       showError(e);
       throw e;
     });
+
+    imageUrlRef.current = path;
+    placeImageInViewer(aimg, newChannelSettings);
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////

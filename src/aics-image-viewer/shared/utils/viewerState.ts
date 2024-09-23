@@ -47,8 +47,11 @@ export function getEnabledChannelIndices(channelSettings: ChannelState[]): numbe
 
 /** Returns whether two subregions match in the X and Y axes. */
 export function matchesSavedSubregion(subregion: Vector3 | null, savedSubregion: Vector3 | null): boolean {
-  // Fixes a bug in 2D-XY mode where the initial saved subregion is always saved with a z-thickness of 1, but the
-  // actual volume can have slices chunked in z >= 2. We drop the Z dimension from the comparison of (x, y, 1)
+  // Fixes a bug in 2D-XY mode during initial load!
+  // On initial load for 2D-XY mode, the volume is loaded with a  `loadSpecRequired` set to a subregion with
+  // a z-thickness of 1. This means that the initial subregion for 2D-XY mode is always saved with a
+  // z-thickness of 1 (saved as (x, y, 1)), but the actual volume may have slices chunked in z >= 2.
+  // To resolve this, we drop the Z dimension from the comparison of (x, y, 1)
   // and (x, y, z) to prevent it from failing.
   return (
     savedSubregion !== null &&
