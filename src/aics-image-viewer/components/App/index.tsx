@@ -492,12 +492,16 @@ const App: React.FC<AppProps> = (props) => {
     setAllChannelsUnloaded(channelNames.length);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
-    const requiredLoadspec = new LoadSpec();
-    requiredLoadspec.time = viewerState.current.time;
+    const requiredLoadSpec = new LoadSpec();
+    requiredLoadSpec.time = viewerState.current.time;
 
+    // When in 2D Z-axis view mode, we restrict the subregion to only the current slice. This is
+    // to match an optimization that volume viewer does by loading Z-slices at a higher resolution,
+    // and ensures the very first volume that is loaded is the same as the one that
+    // will be shown whenever we switch back to the same viewer settings (2D Z-axis view mode).
     if (viewerSettings.viewMode === ViewMode.xy) {
       const slice = viewerSettings.slice;
-      requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
+      requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
 
     imageUrlRef.current = path;
@@ -505,7 +509,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
-    loader.current.loadVolumeData(aimg, requiredLoadspec).catch((e) => {
+    loader.current.loadVolumeData(aimg, requiredLoadSpec).catch((e) => {
       showError(e);
       throw e;
     });
