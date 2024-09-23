@@ -10,7 +10,6 @@ import {
   IVolumeLoader,
   PrefetchDirection,
   VolumeFileFormat,
-  ControlPoint,
 } from "@aics/volume-viewer";
 import { Layout } from "antd";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -23,18 +22,11 @@ import type { ChannelState } from "../ViewerStateProvider/types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import {
   controlPointsToRamp,
-  getDefaultLut,
   initializeLut,
   rampToControlPoints,
   remapControlPointsForChannel,
 } from "../../shared/utils/controlPointsToLut";
-import {
-  findFirstChannelMatch,
-  makeChannelIndexGrouping,
-  ChannelGrouping,
-  ViewerChannelSettings,
-  ViewerChannelSetting,
-} from "../../shared/utils/viewerChannelSettings";
+import { makeChannelIndexGrouping, ChannelGrouping } from "../../shared/utils/viewerChannelSettings";
 import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
@@ -45,10 +37,17 @@ import {
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
-  getDefaultChannelState,
   getDefaultViewerState,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
+import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
+import {
+  gammaSliderToImageValues,
+  densitySliderToImageValue,
+  brightnessSliderToImageValue,
+  alphaSliderToImageValue,
+} from "../../shared/utils/sliderValuesToImageValues";
+import { initializeOneChannelSetting } from "../../shared/utils/viewerState";
 
 import { ViewerStateContext } from "../ViewerStateProvider";
 import ChannelUpdater from "./ChannelUpdater";
@@ -58,30 +57,12 @@ import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
 
-import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
-import {
-  gammaSliderToImageValues,
-  densitySliderToImageValue,
-  brightnessSliderToImageValue,
-  alphaSliderToImageValue,
-} from "../../shared/utils/sliderValuesToImageValues";
-
 import "../../assets/styles/globals.css";
 import "./styles.css";
 
 const { Sider, Content } = Layout;
 
 const INIT_COLORS = PRESET_COLORS_0;
-
-function colorHexToArray(hex: string): ColorArray | null {
-  // hex is a xxxxxx string. split it into array of rgb ints
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (result) {
-    return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
-  } else {
-    return null;
-  }
-}
 
 const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,
@@ -128,35 +109,6 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
   z: PrefetchDirection.Z_PLUS,
   y: PrefetchDirection.Y_PLUS,
   x: PrefetchDirection.X_PLUS,
-};
-
-const initializeOneChannelSetting = (
-  channel: string,
-  index: number,
-  defaultColor: ColorArray,
-  viewerChannelSettings?: ViewerChannelSettings,
-  defaultChannelState = getDefaultChannelState()
-): ChannelState => {
-  let initSettings = {} as Partial<ViewerChannelSetting>;
-  if (viewerChannelSettings) {
-    // search for channel in settings using groups, names and match values
-    initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
-  }
-
-  return {
-    name: initSettings.name ?? channel ?? "Channel " + index,
-    volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
-    isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
-    colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
-    colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
-    isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
-    opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
-    color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-    useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
-    controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
-    ramp: initSettings.ramp ?? defaultChannelState.ramp,
-    needsDefaultLut: !initSettings.controlPoints && !initSettings.ramp && !initSettings.lut,
-  };
 };
 
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
@@ -296,9 +248,6 @@ const App: React.FC<AppProps> = (props) => {
   const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    let newControlPoints: ControlPoint[];
-    let newRamp: [number, number];
-
     if (
       initialLoadRef.current ||
       !thisChannelsSettings.controlPoints ||
@@ -307,8 +256,8 @@ const App: React.FC<AppProps> = (props) => {
     ) {
       // If this is the first load of this image, auto-generate initial LUTs
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, getCurrentViewerChannelSettings());
-      newControlPoints = controlPoints;
-      newRamp = controlPointsToRamp(ramp);
+      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
+      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
       onResetChannel(channelIndex);
     } else {
       // try not to update lut from here if we are in play mode
@@ -320,23 +269,21 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        newControlPoints = thisChannel.lut.controlPoints;
+        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
         // now manually remap ramp using the channel's old range
         const rampControlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const remappedRampControlPoints = remapControlPointsForChannel(rampControlPoints, oldRange, thisChannel);
-        newRamp = controlPointsToRamp(remappedRampControlPoints);
+        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(remappedRampControlPoints));
       } else {
         // ramp was just automatically remapped - update in state
-        newRamp = controlPointsToRamp(thisChannel.lut.controlPoints);
+        const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
+        changeChannelSetting(channelIndex, "ramp", ramp);
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const remappedControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        newControlPoints = remappedControlPoints;
+        changeChannelSetting(channelIndex, "controlPoints", remappedControlPoints);
       }
     }
-    changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
-    changeChannelSetting(channelIndex, "ramp", newRamp);
-
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 
@@ -640,7 +587,7 @@ const App: React.FC<AppProps> = (props) => {
 
   useImageEffect(
     (image) => {
-      // Check whether any channels are marked to be reset to the default LUT.
+      // Check whether any channels are marked to be reset and apply it.
       for (let i = 0; i < channelSettings.length; i++) {
         if (isChannelAwaitingReset(i)) {
           const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());

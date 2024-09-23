@@ -11,7 +11,7 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultChannelState, getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
+import { getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
 import ResetStateProvider from "./ResetStateProvider";
 import { useConstructor } from "../../shared/utils/hooks";
 
@@ -191,7 +191,6 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const context = useMemo(() => {
     ref.current = {
-      ...ref.current,
       ...viewerSettings,
       channelSettings,
       changeViewerSetting,

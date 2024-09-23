@@ -142,11 +142,9 @@ export default class ResetStateProvider {
     const { channelSettings } = this.ref.current;
     const defaultViewerState = { ...getDefaultViewerState(), cameraState: getDefaultCameraState(ViewMode.threeD) };
     const defaultChannelStates = channelSettings.map((_, index) => getDefaultChannelState(index));
-    for (let i = 0; i < defaultChannelStates.length; i++) {
-      if (i < 3) {
-        defaultChannelStates[i].volumeEnabled = true;
-      }
-      defaultChannelStates[i].needsDefaultLut = true;
+
+    for (let i = 0; i < Math.min(3, defaultChannelStates.length); i++) {
+      defaultChannelStates[i].volumeEnabled = true;
     }
 
     this.resetToState(defaultViewerState, defaultChannelStates);

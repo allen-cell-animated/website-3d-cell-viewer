@@ -1,5 +1,4 @@
-import { CameraState, ControlPoint, Volume } from "@aics/volume-viewer";
-import { Vector3 } from "three";
+import { CameraState, ControlPoint } from "@aics/volume-viewer";
 
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
@@ -69,11 +68,6 @@ export interface ChannelState {
   ramp: [number, number];
   useControlPoints: boolean;
   controlPoints: ControlPoint[];
-  /**
-   * Internal only. If set, flags that this channel should be reset to the default LUT when the
-   * next volume is loaded or when the viewer is updated.
-   */
-  needsDefaultLut?: boolean;
 }
 
 export type ChannelStateKey = keyof ChannelState;

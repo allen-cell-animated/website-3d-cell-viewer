@@ -1,5 +1,3 @@
-import { Vector3 } from "three/src/Three";
-
 import { ColorArray } from "./colorRepresentations";
 import {
   ChannelSettingUpdater,
@@ -63,7 +61,7 @@ export function initializeOneChannelSetting(
   index: number,
   defaultColor: ColorArray,
   viewerChannelSettings?: ViewerChannelSettings,
-  defaultChannelState = getDefaultChannelState()
+  defaultChannelState: ChannelState = getDefaultChannelState()
 ): ChannelState {
   let initSettings = {} as Partial<ViewerChannelSetting>;
   if (viewerChannelSettings) {
@@ -83,6 +81,5 @@ export function initializeOneChannelSetting(
     useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
     controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
     ramp: initSettings.ramp ?? defaultChannelState.ramp,
-    needsDefaultLut: !initSettings.controlPoints && !initSettings.ramp && !initSettings.lut,
   };
 }
