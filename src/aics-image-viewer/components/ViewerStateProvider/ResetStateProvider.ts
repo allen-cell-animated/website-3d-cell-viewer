@@ -128,7 +128,7 @@ export default class ResetStateProvider {
         getDefaultChannelColor(index),
         this.savedViewerChannelSettings
       );
-      return initialChannelSetting || getDefaultChannelState(index);
+      return initialChannelSetting;
     });
 
     this.resetToState(newViewerState, newChannelSettings);
