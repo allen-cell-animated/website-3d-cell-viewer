@@ -6,6 +6,7 @@ import {
   getDefaultCameraState,
   getDefaultChannelState,
   getDefaultViewerChannelSettings,
+  getDefaultChannelColor,
 } from "../../shared/constants";
 import { ViewMode } from "../../shared/enums";
 import {
@@ -126,8 +127,7 @@ export default class ResetStateProvider {
       const initialChannelSetting = initializeOneChannelSetting(
         channelSettings[index].name,
         index,
-        // TODO: get default color from palette
-        channelSettings[index].color,
+        getDefaultChannelColor(index),
         this.savedViewerChannelSettings
       );
       return initialChannelSetting || getDefaultChannelState(index);

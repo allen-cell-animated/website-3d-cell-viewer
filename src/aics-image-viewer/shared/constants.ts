@@ -166,6 +166,11 @@ export const getDefaultViewerState = (): ViewerState => ({
   cameraState: USE_VIEW_MODE_DEFAULT_CAMERA,
 });
 
+/** Returns the default color for a channel, by its index. */
+export function getDefaultChannelColor(channelIndex: number): ColorArray {
+  return PRESET_COLORS_0[channelIndex % PRESET_COLORS_0.length];
+}
+
 /**
  * Returns the default channel state as a new object. If an index is provided, uses the default
  * color preset for that index.
@@ -173,8 +178,6 @@ export const getDefaultViewerState = (): ViewerState => ({
  * @returns a default ChannelState object.
  */
 export const getDefaultChannelState = (index: number = 0): ChannelState => {
-  const color = PRESET_COLORS_0[index] || PRESET_COLORS_0[0];
-
   return {
     name: "",
     volumeEnabled: false,
@@ -183,7 +186,7 @@ export const getDefaultChannelState = (index: number = 0): ChannelState => {
     colorizeAlpha: 1.0,
     isovalue: 128,
     opacity: 1.0,
-    color: color,
+    color: getDefaultChannelColor(index),
     useControlPoints: false,
     ramp: [0, TFEDITOR_MAX_BIN],
     controlPoints: [
