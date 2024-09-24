@@ -20,19 +20,19 @@ export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, n
   changeViewerSetting("renderMode", newState.renderMode);
 }
 
-/** Sets all fields of the channel state for a given index using the provided `newState` (except for the name). */
-export function overrideChannelState(
-  changeChannelSetting: ChannelSettingUpdater,
-  index: number,
-  newState: ChannelState
+export function overrideChannelStates(
+  setChannelSettings: (settings: ChannelState[]) => void,
+  currentStates: ChannelState[],
+  newStates: ChannelState[]
 ): void {
-  for (const key of Object.keys(newState) as (keyof ChannelState)[]) {
-    // Skip resetting name to default, since this causes channels to be dropped from the UI.
-    if (key === "name") {
-      continue;
-    }
-    changeChannelSetting(index, key, newState[key] as any);
+  // Match the names in the new state with the existing state so we do not override the names.
+  // Also don't reset the control points or ramps, since these will be reset in the app.
+  for (let i = 0; i < newStates.length; i++) {
+    newStates[i].name = currentStates[i].name;
+    newStates[i].controlPoints = currentStates[i].controlPoints;
+    newStates[i].ramp = currentStates[i].ramp;
   }
+  setChannelSettings(newStates);
 }
 
 /** Returns the indices of channels that have either the volume or isosurface enabled. */

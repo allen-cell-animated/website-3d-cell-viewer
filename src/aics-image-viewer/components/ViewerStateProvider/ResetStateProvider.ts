@@ -11,7 +11,7 @@ import {
 import { ViewMode } from "../../shared/enums";
 import {
   overrideViewerState,
-  overrideChannelState,
+  overrideChannelStates,
   getEnabledChannelIndices,
   initializeOneChannelSetting,
 } from "../../shared/utils/viewerState";
@@ -89,7 +89,7 @@ export default class ResetStateProvider {
    * be loaded, handles setup so the reset will be applied to each channel as it loads in.
    */
   private resetToState(newState: ViewerState, newChannelStates: ChannelState[]): void {
-    const { changeViewerSetting, changeChannelSetting, viewMode, time, slice } = this.ref.current;
+    const { changeViewerSetting, setChannelSettings, channelSettings, viewMode, time, slice } = this.ref.current;
 
     // Needs reset on reload if one of the view modes is 2D while the other is 3D,
     // if the timestamp is different, or if we're on a different z slice.
@@ -101,9 +101,7 @@ export default class ResetStateProvider {
     const willNeedResetOnLoad = isInDifferentViewMode || isAtDifferentTime || isAtDifferentZSlice;
 
     overrideViewerState(changeViewerSetting, newState);
-    for (let i = 0; i < newChannelStates.length; i++) {
-      overrideChannelState(changeChannelSetting, i, newChannelStates[i]);
-    }
+    overrideChannelStates(setChannelSettings, channelSettings, newChannelStates);
 
     this.channelsToReset = new Set(Array(newChannelStates.length).keys());
     if (willNeedResetOnLoad) {

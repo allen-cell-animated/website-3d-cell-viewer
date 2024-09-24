@@ -38,6 +38,7 @@ import {
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
   getDefaultViewerState,
+  getDefaultChannelColor,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
 import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
@@ -148,6 +149,7 @@ const App: React.FC<AppProps> = (props) => {
     applyColorPresets,
     setSavedViewerChannelSettings,
     getCurrentViewerChannelSettings,
+    // TODO: Show a loading spinner while any channel are awaiting reset.
     isChannelAwaitingReset,
     isChannelAwaitingLoadReset,
     onResetChannel,
@@ -333,7 +335,7 @@ const App: React.FC<AppProps> = (props) => {
     }
 
     const newChannelSettings = channelNames.map((channel, index) => {
-      const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
+      const color = getDefaultChannelColor(index);
       return initializeOneChannelSetting(channel, index, color, getCurrentViewerChannelSettings());
     });
     setChannelSettings(newChannelSettings);
