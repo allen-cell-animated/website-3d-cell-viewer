@@ -149,9 +149,9 @@ const App: React.FC<AppProps> = (props) => {
     applyColorPresets,
     setSavedViewerChannelSettings,
     getCurrentViewerChannelSettings,
-    // TODO: Show a loading spinner while any channel are awaiting reset.
-    isChannelAwaitingReset,
-    isChannelAwaitingLoadReset,
+    // TODO: Show a loading spinner while any channels are awaiting reset.
+    getChannelsAwaitingReset,
+    getChannelsAwaitingResetOnLoad,
     onResetChannel,
   } = viewerState.current;
 
@@ -260,13 +260,13 @@ const App: React.FC<AppProps> = (props) => {
   ): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
+    // If this is the first load of this image, auto-generate initial LUTs
     if (
       initialLoadRef.current ||
       !thisChannelsSettings.controlPoints ||
       !thisChannelsSettings.ramp ||
-      isChannelAwaitingLoadReset(channelIndex)
+      getChannelsAwaitingResetOnLoad().has(channelIndex)
     ) {
-      // If this is the first load of this image, auto-generate initial LUTs
       const viewerChannelSettings = getCurrentViewerChannelSettings();
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
@@ -607,8 +607,9 @@ const App: React.FC<AppProps> = (props) => {
   useImageEffect(
     (image) => {
       // Check whether any channels are marked to be reset and apply it.
+      const channelsAwaitingReset = getChannelsAwaitingReset();
       for (let i = 0; i < channelSettings.length; i++) {
-        if (isChannelAwaitingReset(i)) {
+        if (channelsAwaitingReset.has(i)) {
           const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
           changeChannelSetting(i, "controlPoints", controlPoints);
           changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));

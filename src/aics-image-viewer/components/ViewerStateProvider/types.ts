@@ -97,9 +97,9 @@ export type ViewerStateContextType = ViewerState & {
    */
   getCurrentViewerChannelSettings: () => ViewerChannelSettings | undefined;
   /** Whether the channel should be immediately reset on next render. */
-  isChannelAwaitingReset: (channelIndex: number) => boolean;
+  getChannelsAwaitingReset: () => Set<number>;
   /** Whether the channel should be reset once new data is loaded. */
-  isChannelAwaitingLoadReset: (channelIndex: number) => boolean;
+  getChannelsAwaitingResetOnLoad: () => Set<number>;
   /** Callback used to flag when the channel has been reset. */
   onResetChannel: (channelIndex: number) => void;
 

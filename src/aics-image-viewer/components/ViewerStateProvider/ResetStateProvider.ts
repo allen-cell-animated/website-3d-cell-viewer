@@ -44,8 +44,8 @@ export default class ResetStateProvider {
     this.resetToState = this.resetToState.bind(this);
     this.setSavedViewerState = this.setSavedViewerState.bind(this);
     this.setSavedViewerChannelSettings = this.setSavedViewerChannelSettings.bind(this);
-    this.isChannelAwaitingReset = this.isChannelAwaitingReset.bind(this);
-    this.isChannelAwaitingResetOnLoad = this.isChannelAwaitingResetOnLoad.bind(this);
+    this.getChannelsAwaitingReset = this.getChannelsAwaitingReset.bind(this);
+    this.getChannelsAwaitingResetOnLoad = this.getChannelsAwaitingResetOnLoad.bind(this);
     this.onResetChannel = this.onResetChannel.bind(this);
     this.getCurrentViewerChannelSettings = this.getCurrentViewerChannelSettings.bind(this);
   }
@@ -60,12 +60,12 @@ export default class ResetStateProvider {
     this.savedViewerChannelSettings = settings;
   }
 
-  public isChannelAwaitingReset(channelIndex: number): boolean {
-    return this.channelsToReset.has(channelIndex);
+  public getChannelsAwaitingReset(): Set<number> {
+    return this.channelsToReset;
   }
 
-  public isChannelAwaitingResetOnLoad(channelIndex: number): boolean {
-    return this.channelsToResetOnLoad.has(channelIndex);
+  public getChannelsAwaitingResetOnLoad(): Set<number> {
+    return this.channelsToResetOnLoad;
   }
 
   public onResetChannel(channelIndex: number): void {

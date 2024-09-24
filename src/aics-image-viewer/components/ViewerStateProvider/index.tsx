@@ -138,8 +138,8 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   resetToDefaultViewerState: nullfn,
   setSavedViewerChannelSettings: nullfn,
   getCurrentViewerChannelSettings: () => getDefaultViewerChannelSettings(),
-  isChannelAwaitingReset: () => false,
-  isChannelAwaitingLoadReset: () => false,
+  getChannelsAwaitingReset: () => new Set(),
+  getChannelsAwaitingResetOnLoad: () => new Set(),
   onResetChannel: nullfn,
 };
 
@@ -200,8 +200,8 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
       // Reset-related callbacks
       setSavedViewerChannelSettings: resetProvider.setSavedViewerChannelSettings,
       getCurrentViewerChannelSettings: resetProvider.getCurrentViewerChannelSettings,
-      isChannelAwaitingReset: resetProvider.isChannelAwaitingReset,
-      isChannelAwaitingLoadReset: resetProvider.isChannelAwaitingResetOnLoad,
+      getChannelsAwaitingReset: resetProvider.getChannelsAwaitingReset,
+      getChannelsAwaitingResetOnLoad: resetProvider.getChannelsAwaitingResetOnLoad,
       onResetChannel: resetProvider.onResetChannel,
       resetToSavedViewerState: resetProvider.resetToSavedViewerState,
       resetToDefaultViewerState: resetProvider.resetToDefaultViewerState,
