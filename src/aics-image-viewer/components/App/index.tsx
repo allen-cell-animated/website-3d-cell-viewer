@@ -30,7 +30,6 @@ import { makeChannelIndexGrouping, ChannelGrouping } from "../../shared/utils/vi
 import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
-  PRESET_COLORS_0,
   CONTROL_PANEL_CLOSE_WIDTH,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
@@ -41,7 +40,7 @@ import {
   getDefaultChannelColor,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
-import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
+import { colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 import {
   gammaSliderToImageValues,
   densitySliderToImageValue,
@@ -62,8 +61,6 @@ import "../../assets/styles/globals.css";
 import "./styles.css";
 
 const { Sider, Content } = Layout;
-
-const INIT_COLORS = PRESET_COLORS_0;
 
 const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,

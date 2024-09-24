@@ -1,10 +1,5 @@
 import { ColorArray } from "./colorRepresentations";
-import {
-  ChannelSettingUpdater,
-  ChannelState,
-  ViewerSettingUpdater,
-  ViewerState,
-} from "../../components/ViewerStateProvider/types";
+import { ChannelState, ViewerSettingUpdater, ViewerState } from "../../components/ViewerStateProvider/types";
 import { getDefaultChannelState } from "../constants";
 import { ViewerChannelSettings, ViewerChannelSetting, findFirstChannelMatch } from "./viewerChannelSettings";
 

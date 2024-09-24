@@ -166,9 +166,11 @@ export const getDefaultViewerState = (): ViewerState => ({
   cameraState: USE_VIEW_MODE_DEFAULT_CAMERA,
 });
 
+const INIT_COLORS = PRESET_COLORS_0;
+
 /** Returns the default color for a channel, by its index. */
 export function getDefaultChannelColor(channelIndex: number): ColorArray {
-  return PRESET_COLORS_0[channelIndex % PRESET_COLORS_0.length];
+  return INIT_COLORS[channelIndex % INIT_COLORS.length];
 }
 
 /**
