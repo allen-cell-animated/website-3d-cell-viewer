@@ -245,7 +245,17 @@ const App: React.FC<AppProps> = (props) => {
 
   // Image loading/initialization functions ///////////////////////////////////
 
-  const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+  /**
+   * Updates a channel's ramp and control points after new data has been loaded.
+   *
+   * Also handles initializing the ramp/control points on initial load and resetting
+   * them when the channel is reset.
+   */
+  const updateChannelTransferFunction = (
+    aimg: Volume,
+    thisChannelsSettings: ChannelState,
+    channelIndex: number
+  ): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
     if (
@@ -255,7 +265,8 @@ const App: React.FC<AppProps> = (props) => {
       isChannelAwaitingLoadReset(channelIndex)
     ) {
       // If this is the first load of this image, auto-generate initial LUTs
-      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, getCurrentViewerChannelSettings());
+      const viewerChannelSettings = getCurrentViewerChannelSettings();
+      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, viewerChannelSettings);
       changeChannelSetting(channelIndex, "controlPoints", controlPoints);
       changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
       onResetChannel(channelIndex);
@@ -284,6 +295,12 @@ const App: React.FC<AppProps> = (props) => {
         changeChannelSetting(channelIndex, "controlPoints", remappedControlPoints);
       }
     }
+  };
+
+  const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+    const thisChannel = aimg.getChannel(channelIndex);
+    updateChannelTransferFunction(aimg, thisChannelsSettings, channelIndex);
+
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 
