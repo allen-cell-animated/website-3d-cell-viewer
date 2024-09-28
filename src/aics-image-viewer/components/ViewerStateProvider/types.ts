@@ -96,9 +96,9 @@ export type ViewerStateContextType = ViewerState & {
    * the channel transfer functions (control points and ramp).
    */
   getCurrentViewerChannelSettings: () => ViewerChannelSettings | undefined;
-  /** Whether the channel should be immediately reset on next render. */
+  /** Channels that should be immediately reset on next render. */
   getChannelsAwaitingReset: () => Set<number>;
-  /** Whether the channel should be reset once new data is loaded. */
+  /** Channels that should be reset once new data is loaded. */
   getChannelsAwaitingResetOnLoad: () => Set<number>;
   /** Callback used to flag when the channel has been reset. */
   onResetChannel: (channelIndex: number) => void;
