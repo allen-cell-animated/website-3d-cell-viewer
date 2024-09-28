@@ -431,6 +431,8 @@ const App: React.FC<AppProps> = (props) => {
     // to match an optimization that volume viewer does by loading Z-slices at a higher resolution,
     // and ensures the very first volume that is loaded is the same as the one that
     // will be shown whenever we switch back to the same viewer settings (2D Z-axis view mode).
+    // (We don't do this for ZX and YZ modes because we assume that the data won't be chunked along the
+    // X or Y axes in ways that would improve loading resolution, and we load the full 3D volume instead.)
     if (viewerSettings.viewMode === ViewMode.xy) {
       const slice = viewerSettings.slice;
       requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));

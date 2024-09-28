@@ -88,7 +88,8 @@ export type ViewerStateContextType = ViewerState & {
   // Reset-related callbacks
   /**
    * Sets the initial viewer channel settings that will be applied when calling
-   * `resetToSavedViewerState()`.
+   * `resetToSavedViewerState()`. Initial settings should be set from the viewer props (when embedded)
+   * or the URL parameters.
    */
   setSavedViewerChannelSettings: (settings: ViewerChannelSettings | undefined) => void;
   /**
@@ -100,7 +101,10 @@ export type ViewerStateContextType = ViewerState & {
   getChannelsAwaitingReset: () => Set<number>;
   /** Channels that should be reset once new data is loaded. */
   getChannelsAwaitingResetOnLoad: () => Set<number>;
-  /** Callback used to flag when the channel has been reset. */
+  /**
+   * Removes the channel from the list of channels to be reset (as given by
+   * `getChannelsAwaitingReset()` or `getChannelsAwaitingResetOnLoad()`).
+   */
   onResetChannel: (channelIndex: number) => void;
 
   /**
