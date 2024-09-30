@@ -1,6 +1,6 @@
 import { isEqual } from "lodash";
 
-import { ChannelState, ViewerState, ViewerStateContextType } from "./types";
+import { ChannelState, ViewerState, ViewerStateContextType, ResetState } from "./types";
 import {
   getDefaultViewerState,
   getDefaultCameraState,
@@ -20,7 +20,7 @@ import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings"
 /**
  * Provides reset functionality for the viewer and channel states.
  */
-export default class ResetStateProvider {
+export default class ResetStateProvider implements ResetState {
   savedViewerState: Partial<ViewerState>;
   savedViewerChannelSettings: ViewerChannelSettings | undefined;
   useDefaultViewerChannelSettings: boolean;

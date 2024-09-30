@@ -78,14 +78,7 @@ export type ChannelSettingUpdater = <K extends ChannelStateKey>(
 ) => void;
 export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
 
-export type ViewerStateContextType = ViewerState & {
-  channelSettings: ChannelState[];
-  changeViewerSetting: ViewerSettingUpdater;
-  changeChannelSetting: ChannelSettingUpdater;
-  setChannelSettings: (settings: ChannelState[]) => void;
-  applyColorPresets: (presets: ColorArray[]) => void;
-
-  // Reset-related callbacks
+export type ResetState = {
   /**
    * Sets the initial viewer channel settings that will be applied when calling
    * `resetToSavedViewerState()`. Initial settings should be set from the viewer props (when embedded)
@@ -120,3 +113,11 @@ export type ViewerStateContextType = ViewerState & {
    */
   resetToDefaultViewerState: () => void;
 };
+
+export type ViewerStateContextType = ViewerState & {
+  channelSettings: ChannelState[];
+  changeViewerSetting: ViewerSettingUpdater;
+  changeChannelSetting: ChannelSettingUpdater;
+  setChannelSettings: (settings: ChannelState[]) => void;
+  applyColorPresets: (presets: ColorArray[]) => void;
+} & ResetState;
