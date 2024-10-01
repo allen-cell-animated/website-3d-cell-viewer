@@ -595,12 +595,16 @@ function parseCameraState(cameraSettings: string | undefined): Partial<CameraSta
   return removeUndefinedProperties(result);
 }
 
-export function serializeCameraState(cameraState: Partial<CameraState>, removeDefaults: boolean): string | undefined {
+export function serializeCameraState(
+  cameraState: Partial<CameraState>,
+  removeDefaults: boolean,
+  viewMode: ViewMode = ViewMode.threeD
+): string | undefined {
   if (removeDefaults) {
     // Note that we use the `getDefaultCameraState()` to get the defaults here,
     // instead of `getDefaultViewerState().cameraState`. The latter is undefined, which signals
     // that the camera should not be modified for URLs that don't specify it.
-    cameraState = removeMatchingProperties(cameraState, getDefaultCameraState());
+    cameraState = removeMatchingProperties(cameraState, getDefaultCameraState(viewMode));
     if (Object.keys(cameraState).length === 0) {
       return undefined;
     }
@@ -810,7 +814,7 @@ export function serializeViewerState(state: Partial<ViewerState>, removeDefaults
     [ViewerStateKeys.Levels]: state.levels?.join(","),
     [ViewerStateKeys.Time]: state.time?.toString(),
     [ViewerStateKeys.CameraState]:
-      state.cameraState && serializeCameraState(state.cameraState as CameraState, removeDefaults),
+      state.cameraState && serializeCameraState(state.cameraState as CameraState, removeDefaults, state.viewMode),
   };
 
   const viewModeToViewParam = {

@@ -126,7 +126,7 @@ export function initializeLut(
 }
 
 export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, number] {
-  if (controlPoints.length === 1 || controlPoints.length === 3) {
+  if (controlPoints.length <= 1 || controlPoints.length === 3) {
     return [0, TFEDITOR_MAX_BIN];
   } else if (controlPoints.length === 2) {
     return [controlPoints[0].x, controlPoints[1].x];
