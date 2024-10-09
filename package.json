@@ -1,6 +1,6 @@
 {
   "name": "@aics/web-3d-viewer",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "web view of cell volume images",
   "repository": "github:allen-cell-animated/website-3d-cell-viewer",
   "main": "es/index.js",
