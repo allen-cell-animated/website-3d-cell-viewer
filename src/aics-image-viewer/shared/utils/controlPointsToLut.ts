@@ -133,7 +133,8 @@ export function controlPointsToRamp(controlPoints: ControlPoint[]): [number, num
   } else if (controlPoints.length === 3) {
     if (
       controlPoints[0].opacity !== controlPoints[1].opacity &&
-      controlPoints[0].opacity !== controlPoints[2].opacity
+      controlPoints[0].opacity !== controlPoints[2].opacity &&
+      controlPoints[1].opacity !== controlPoints[2].opacity
     ) {
       // if all 3 are unequal, assume a ramp from first to last
       return [controlPoints[0].x, controlPoints[2].x];
