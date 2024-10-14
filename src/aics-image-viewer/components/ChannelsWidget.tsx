@@ -36,7 +36,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
-    props.changeChannelSetting(channelArray, key, value);
+    props.changeChannelSetting(channelArray, {[key]: value});
   };
 
   const showVolumes = createCheckboxHandler("volumeEnabled", true);
@@ -132,18 +132,18 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     for (let i = 0; i < channelDataChannels.length; i++) {
       const channelData = channelDataChannels[i];
       const defaultLut = getDefaultLut(channelData.getHistogram());
-      props.changeChannelSetting(i, "controlPoints", defaultLut.controlPoints);
-      props.changeChannelSetting(i, "ramp", controlPointsToRamp(defaultLut.controlPoints));
-      props.changeChannelSetting(i, "useControlPoints", false);
+      props.changeChannelSetting(i, {"controlPoints": defaultLut.controlPoints});
+      props.changeChannelSetting(i, {"ramp": controlPointsToRamp(defaultLut.controlPoints)});
+      props.changeChannelSetting(i, {"useControlPoints": false});
     }
     // Reset all other settings. Also, enable volumes on only the first three channels.
     channelSettings.forEach((_channelSetting, index) => {
       for (const key of channelStateKeysToReset) {
         if (key === "volumeEnabled" && index < 3) {
-          props.changeChannelSetting(index, key, true);
+          props.changeChannelSetting(index, {[key]: true});
           continue;
         }
-        props.changeChannelSetting(index, key, defaultChannelState[key]);
+        props.changeChannelSetting(index, {[key]: defaultChannelState[key]});
       }
     });
 
@@ -153,7 +153,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
     // the color map length, so we need to reset the colors manually.
     if (channelDataChannels.length > PRESET_COLOR_MAP[0].colors.length) {
       for (let i = PRESET_COLOR_MAP[0].colors.length; i < channelDataChannels.length; i++) {
-        props.changeChannelSetting(i, "color", defaultChannelState["color"]);
+        props.changeChannelSetting(i, {"color": defaultChannelState["color"]});
       }
     }
   };

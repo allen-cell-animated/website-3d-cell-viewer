@@ -280,8 +280,8 @@ const App: React.FC<AppProps> = (props) => {
     // If this is the first load of this image, auto-generate initial LUTs
     if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
-      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      changeChannelSetting(channelIndex, {"controlPoints": controlPoints});
+      changeChannelSetting(channelIndex, {"ramp": controlPointsToRamp(ramp)});
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -292,19 +292,19 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
+        changeChannelSetting(channelIndex, {"controlPoints": thisChannel.lut.controlPoints});
         // now manually remap ramp using the channel's old range
         const controlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(newControlPoints));
+        changeChannelSetting(channelIndex, {"ramp": controlPointsToRamp(newControlPoints)});
       } else {
         // ramp was just automatically remapped - update in state
         const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
-        changeChannelSetting(channelIndex, "ramp", ramp);
+        changeChannelSetting(channelIndex, {"ramp": ramp});
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const newControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
+        changeChannelSetting(channelIndex, {"controlPoints": newControlPoints});
       }
     }
     // save the channel's new range for remapping next time

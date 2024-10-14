@@ -152,8 +152,8 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
   const [selectedPointIdx, setSelectedPointIdx] = useState<number | null>(null);
   const [draggedPointIdx, _setDraggedPointIdx] = useState<number | TfEditorRampSliderHandle | null>(null);
 
-  const _setCPs = useCallback((p: ControlPoint[]) => changeChannelSetting("controlPoints", p), [changeChannelSetting]);
-  const setRamp = useCallback((ramp: [number, number]) => changeChannelSetting("ramp", ramp), [changeChannelSetting]);
+  const _setCPs = useCallback((p: ControlPoint[]) => changeChannelSetting({"controlPoints": p}), [changeChannelSetting]);
+  const setRamp = useCallback((ramp: [number, number]) => changeChannelSetting({"ramp": ramp}), [changeChannelSetting]);
 
   // these bits of state need their freshest, most up-to-date values available in mouse event handlers. make refs!
   const [controlPointsRef, setControlPoints] = useRefWithSetter(_setCPs, props.controlPoints);
@@ -425,7 +425,7 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         {createTFGeneratorButton("bestFitXF", "Auto 2", "Ramp over the middle 80% of data.")}
         <Checkbox
           checked={props.useControlPoints}
-          onChange={(e) => changeChannelSetting("useControlPoints", e.target.checked)}
+          onChange={(e) => changeChannelSetting({"useControlPoints": e.target.checked})}
           style={{ marginLeft: "auto" }}
         >
           Advanced
@@ -521,14 +521,14 @@ const TfEditor: React.FC<TfEditorProps> = (props) => {
         label={
           <Checkbox
             checked={props.colorizeEnabled}
-            onChange={(e) => changeChannelSetting("colorizeEnabled", e.target.checked)}
+            onChange={(e) => changeChannelSetting({"colorizeEnabled": e.target.checked})}
           >
             Colorize
           </Checkbox>
         }
         max={1}
         start={props.colorizeAlpha}
-        onUpdate={(values) => changeChannelSetting("colorizeAlpha", values[0])}
+        onUpdate={(values) => changeChannelSetting({"colorizeAlpha": values[0]})}
         hideSlider={!props.colorizeEnabled}
       />
     </div>
