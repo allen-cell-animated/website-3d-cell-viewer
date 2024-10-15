@@ -1,7 +1,9 @@
 import { CameraState, ControlPoint } from "@aics/volume-viewer";
+
 import type { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import type { PerAxis } from "../../shared/types";
 import type { ColorArray } from "../../shared/utils/colorRepresentations";
+import { ViewerChannelSettings } from "../../shared/utils/viewerChannelSettings";
 
 /** Global (not per-channel) viewer state which may be changed in the UI */
 export interface ViewerState {
@@ -76,10 +78,47 @@ export type ChannelSettingUpdater = <K extends ChannelStateKey>(
 ) => void;
 export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
 
-export type ViewerStateContextType = ViewerState & {
-  channelSettings: ChannelState[];
-  changeViewerSetting: ViewerSettingUpdater;
-  changeChannelSetting: ChannelSettingUpdater;
-  setChannelSettings: (settings: ChannelState[]) => void;
-  applyColorPresets: (presets: ColorArray[]) => void;
+export type ResetState = {
+  /**
+   * Sets the initial viewer channel settings that will be applied when calling
+   * `resetToSavedViewerState()`. Initial settings should be set from the viewer props (when embedded)
+   * or the URL parameters.
+   */
+  setSavedViewerChannelSettings: (settings: ViewerChannelSettings | undefined) => void;
+  /**
+   * Returns the current viewer channel settings that should be used when resetting
+   * the channel transfer functions (control points and ramp).
+   */
+  getCurrentViewerChannelSettings: () => ViewerChannelSettings | undefined;
+  /** Channels that should be immediately reset on next render. */
+  getChannelsAwaitingReset: () => Set<number>;
+  /** Channels that should be reset once new data is loaded. */
+  getChannelsAwaitingResetOnLoad: () => Set<number>;
+  /**
+   * Removes the channel from the list of channels to be reset (as given by
+   * `getChannelsAwaitingReset()` or `getChannelsAwaitingResetOnLoad()`).
+   */
+  onResetChannel: (channelIndex: number) => void;
+
+  /**
+   * Resets the viewer and all channels to a saved initial state, determined
+   * by viewer props.
+   * The initial settings for channels can be set with `setSavedViewerChannelSettings()`.
+   */
+  resetToSavedViewerState: () => void;
+  /**
+   * Resets the viewer and all channels to the default state, as though
+   * loaded from scratch with no initial parameters set.
+   * Uses the default channel settings as given by `getDefaultViewerChannelSettings()`.
+   */
+  resetToDefaultViewerState: () => void;
 };
+
+export type ViewerStateContextType = ViewerState &
+  ResetState & {
+    channelSettings: ChannelState[];
+    changeViewerSetting: ViewerSettingUpdater;
+    changeChannelSetting: ChannelSettingUpdater;
+    setChannelSettings: (settings: ChannelState[]) => void;
+    applyColorPresets: (presets: ColorArray[]) => void;
+  };
