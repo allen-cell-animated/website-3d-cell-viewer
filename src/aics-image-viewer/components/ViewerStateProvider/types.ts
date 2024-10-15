@@ -114,10 +114,11 @@ export type ResetState = {
   resetToDefaultViewerState: () => void;
 };
 
-export type ViewerStateContextType = ViewerState & {
-  channelSettings: ChannelState[];
-  changeViewerSetting: ViewerSettingUpdater;
-  changeChannelSetting: ChannelSettingUpdater;
-  setChannelSettings: (settings: ChannelState[]) => void;
-  applyColorPresets: (presets: ColorArray[]) => void;
-} & ResetState;
+export type ViewerStateContextType = ViewerState &
+  ResetState & {
+    channelSettings: ChannelState[];
+    changeViewerSetting: ViewerSettingUpdater;
+    changeChannelSetting: ChannelSettingUpdater;
+    setChannelSettings: (settings: ChannelState[]) => void;
+    applyColorPresets: (presets: ColorArray[]) => void;
+  };
