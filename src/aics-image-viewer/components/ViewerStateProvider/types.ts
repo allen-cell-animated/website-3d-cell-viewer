@@ -78,7 +78,6 @@ export type ChannelSettingUpdater = <K extends ChannelStateKey>(
 
 export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(
   value: Partial<Record<K, ChannelState[K]>>
-  //  key: K, value: ChannelState[K]) => void;
 ) => void;
 
 export type ResetState = {
