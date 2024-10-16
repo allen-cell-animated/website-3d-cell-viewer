@@ -87,7 +87,7 @@ enum ChannelSettingActionType {
 type ChannelSettingUniformUpdateAction<K extends ChannelStateKey> = {
   type: ChannelSettingActionType.UniformUpdate;
   index: number | number[];
-  value: Record<K, ChannelState[K]>;
+  value: Partial<Record<K, ChannelState[K]>>;
 };
 /** Set the values of channel setting `key` for all channels from an array of values ordered by channel index */
 type ChannelSettingArrayUpdateAction<K extends ChannelStateKey> = {
@@ -178,7 +178,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
   const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, value) => {
-    channelDispatch({ type: ChannelSettingActionType.UniformUpdate, index, value } as ChannelSettingUniformUpdateAction<ChannelStateKey>);
+    channelDispatch({ type: ChannelSettingActionType.UniformUpdate, index, value });
   }, []);
 
   const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ type: ChannelSettingActionType.ArrayUpdate, key:"color", value}), []);
