@@ -610,8 +610,8 @@ const App: React.FC<AppProps> = (props) => {
       for (let i = 0; i < channelSettings.length; i++) {
         if (channelsAwaitingReset.has(i)) {
           const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
-          changeChannelSetting(i, "controlPoints", controlPoints);
-          changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));
+          changeChannelSetting(i, {"controlPoints": controlPoints});
+          changeChannelSetting(i, {"ramp": controlPointsToRamp(ramp)});
           onResetChannel(i);
         }
       }

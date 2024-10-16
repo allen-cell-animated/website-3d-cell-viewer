@@ -7,6 +7,7 @@ import type {
   ViewerSettingUpdater,
   ChannelSettingUpdater,
   ChannelState,
+  ChannelStateKey,
   PartialIfObject,
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
