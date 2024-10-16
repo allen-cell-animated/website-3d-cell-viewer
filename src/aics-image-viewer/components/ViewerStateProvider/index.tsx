@@ -109,26 +109,26 @@ type ChannelStateAction<K extends ChannelStateKey> =
 
 const channelSettingsReducer = <K extends ChannelStateKey>(
   channelSettings: ChannelState[],
-  payload: ChannelStateAction<K>
+  action: ChannelStateAction<K>
 ): ChannelState[] => {
-  if (payload.type === ChannelSettingActionType.Init) {
+  if (action.type === ChannelSettingActionType.Init) {
     // ChannelSettingInitAction
-    return payload.value as ChannelState[];
-  } else if (payload.type === ChannelSettingActionType.ArrayUpdate) {
+    return action.value as ChannelState[];
+  } else if (action.type === ChannelSettingActionType.ArrayUpdate) {
     // ChannelSettingArrayUpdateAction
     return channelSettings.map((channel, idx) => {
-      return payload.value[idx] ? { ...channel, [payload.key]: payload.value[idx] } : channel;
+      return action.value[idx] ? { ...channel, [action.key]: action.value[idx] } : channel;
     });
   } else {
     // type is ChannelSettingActionType.UniformUpdate
-    if (Array.isArray(payload.index)) {
+    if (Array.isArray(action.index)) {
       // ChannelSettingUniformUpdateAction on potentially multiple channels
-      return channelSettings.map((channel, idx) => ((payload.index as number[]).includes(idx) ? { ...channel, ...payload.value } : channel));
+      return channelSettings.map((channel, idx) => ((action.index as number[]).includes(idx) ? { ...channel, ...action.value } : channel));
     } else {
       // ChannelSettingUniformUpdateAction on a single channel
       const newSettings = channelSettings.slice();
-      if (payload.index >= 0 && payload.index < channelSettings.length) {
-        newSettings[payload.index] = { ...newSettings[payload.index], ...payload.value };
+      if (action.index >= 0 && action.index < channelSettings.length) {
+        newSettings[action.index] = { ...newSettings[action.index], ...action.value };
       }
       return newSettings;
     }
