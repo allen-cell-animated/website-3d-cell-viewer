@@ -266,8 +266,8 @@ const App: React.FC<AppProps> = (props) => {
     ) {
       const viewerChannelSettings = getCurrentViewerChannelSettings();
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, viewerChannelSettings);
-      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
-      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      changeChannelSetting(channelIndex, {"controlPoints": controlPoints});
+      changeChannelSetting(channelIndex, {"ramp": controlPointsToRamp(ramp)});
       onResetChannel(channelIndex);
     } else {
       // try not to update lut from here if we are in play mode
@@ -279,19 +279,19 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
+        changeChannelSetting(channelIndex, {"controlPoints": thisChannel.lut.controlPoints});
         // now manually remap ramp using the channel's old range
         const rampControlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const remappedRampControlPoints = remapControlPointsForChannel(rampControlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(remappedRampControlPoints));
+        changeChannelSetting(channelIndex, {"ramp": controlPointsToRamp(remappedRampControlPoints)});
       } else {
         // ramp was just automatically remapped - update in state
         const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
-        changeChannelSetting(channelIndex, "ramp", ramp);
+        changeChannelSetting(channelIndex, {"ramp": ramp});
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const remappedControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "controlPoints", remappedControlPoints);
+        changeChannelSetting(channelIndex, {"controlPoints": remappedControlPoints});
       }
     }
   };
@@ -610,8 +610,8 @@ const App: React.FC<AppProps> = (props) => {
       for (let i = 0; i < channelSettings.length; i++) {
         if (channelsAwaitingReset.has(i)) {
           const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
-          changeChannelSetting(i, "controlPoints", controlPoints);
-          changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));
+          changeChannelSetting(i, {"controlPoints": controlPoints});
+          changeChannelSetting(i, {"ramp": controlPointsToRamp(ramp)});
           onResetChannel(i);
         }
       }
