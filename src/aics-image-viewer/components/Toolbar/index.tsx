@@ -1,11 +1,11 @@
-import React from "react";
+import { UndoOutlined } from "@ant-design/icons";
 import { Button, Radio, Select, Tooltip } from "antd";
 import { debounce } from "lodash";
+import React from "react";
 
 import ViewModeRadioButtons from "./ViewModeRadioButtons";
 import DownloadButton from "./DownloadButton";
 import { connectToViewerState } from "../ViewerStateProvider";
-
 import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import ViewerIcon from "../shared/ViewerIcon";
@@ -40,6 +40,7 @@ interface ToolbarProps {
   showAxes: boolean;
   showBoundingBox: boolean;
   changeViewerSetting: ViewerSettingUpdater;
+  resetToSavedViewerState: () => void;
 }
 
 interface ToolbarState {
@@ -49,6 +50,18 @@ interface ToolbarState {
 }
 
 const RESIZE_DEBOUNCE_DELAY = 50;
+
+const visuallyHiddenStyle: React.CSSProperties = {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: "0",
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: "0",
+};
 
 class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -135,7 +148,8 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
 
   render(): React.ReactElement {
     const { props } = this;
-    const { changeViewerSetting, visibleControls, showAxes, showBoundingBox, autorotate } = props;
+    const { changeViewerSetting, resetToSavedViewerState, visibleControls, showAxes, showBoundingBox, autorotate } =
+      props;
     const { scrollMode, scrollBtnLeft, scrollBtnRight } = this.state;
     const twoDMode = props.viewMode !== ViewMode.threeD;
 
@@ -164,7 +178,14 @@ class Toolbar extends React.Component<ToolbarProps, ToolbarState> {
           onWheel={this.wheelHandler}
           onScroll={this.checkScrollBtnVisible}
         >
-          <div className="viewer-toolbar-left" ref={this.leftRef} />
+          <div className="viewer-toolbar-left" ref={this.leftRef}>
+            <Tooltip placement="bottom" title="Reset to initial settings" trigger={["focus", "hover"]}>
+              <Button className="ant-btn-icon-only btn-borderless" onClick={resetToSavedViewerState}>
+                <UndoOutlined />
+                <span style={visuallyHiddenStyle}>Reset to initial settings</span>
+              </Button>
+            </Tooltip>
+          </div>
           <div className="viewer-toolbar-center" ref={this.centerRef}>
             {renderGroup1 && (
               <div className="viewer-toolbar-group">
@@ -284,4 +305,5 @@ export default connectToViewerState(Toolbar, [
   "showAxes",
   "showBoundingBox",
   "changeViewerSetting",
+  "resetToSavedViewerState",
 ]);
