@@ -1,20 +1,21 @@
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 
+import { getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
+import { RenderMode, ViewMode } from "../../shared/enums";
+import { ColorArray } from "../../shared/utils/colorRepresentations";
+import { useConstructor } from "../../shared/utils/hooks";
 import type {
-  ViewerStateContextType,
-  ViewerState,
-  ViewerSettingChangeHandlers,
-  ViewerSettingUpdater,
   ChannelSettingUpdater,
   ChannelState,
   ChannelStateKey,
   PartialIfObject,
+  ViewerSettingChangeHandlers,
+  ViewerSettingUpdater,
+  ViewerState,
+  ViewerStateContextType,
 } from "./types";
-import { RenderMode, ViewMode } from "../../shared/enums";
-import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
+
 import ResetStateProvider from "./ResetStateProvider";
-import { useConstructor } from "../../shared/utils/hooks";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -101,7 +102,6 @@ type ChannelSettingInitAction = {
   value: ChannelState[];
 };
 
-
 type ChannelStateAction<K extends ChannelStateKey> =
   | ChannelSettingUniformUpdateAction<K>
   | ChannelSettingArrayUpdateAction<K>
@@ -113,7 +113,7 @@ const channelSettingsReducer = <K extends ChannelStateKey>(
 ): ChannelState[] => {
   if (action.type === ChannelSettingActionType.Init) {
     // ChannelSettingInitAction
-    return action.value as ChannelState[];
+    return action.value;
   } else if (action.type === ChannelSettingActionType.ArrayUpdate) {
     // ChannelSettingArrayUpdateAction
     return channelSettings.map((channel, idx) => {
@@ -123,7 +123,9 @@ const channelSettingsReducer = <K extends ChannelStateKey>(
     // type is ChannelSettingActionType.UniformUpdate
     if (Array.isArray(action.index)) {
       // ChannelSettingUniformUpdateAction on potentially multiple channels
-      return channelSettings.map((channel, idx) => ((action.index as number[]).includes(idx) ? { ...channel, ...action.value } : channel));
+      return channelSettings.map((channel, idx) =>
+        (action.index as number[]).includes(idx) ? { ...channel, ...action.value } : channel
+      );
     } else {
       // ChannelSettingUniformUpdateAction on a single channel
       const newSettings = channelSettings.slice();
@@ -181,9 +183,15 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
     channelDispatch({ type: ChannelSettingActionType.UniformUpdate, index, value });
   }, []);
 
-  const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ type: ChannelSettingActionType.ArrayUpdate, key:"color", value}), []);
+  const applyColorPresets = useCallback(
+    (value: ColorArray[]): void => channelDispatch({ type: ChannelSettingActionType.ArrayUpdate, key: "color", value }),
+    []
+  );
 
-  const setChannelSettings = useCallback((channels: ChannelState[]) => channelDispatch({ type: ChannelSettingActionType.Init, value: channels }), []);
+  const setChannelSettings = useCallback(
+    (channels: ChannelState[]) => channelDispatch({ type: ChannelSettingActionType.Init, value: channels }),
+    []
+  );
 
   // Sync viewer settings prop with state
   // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
@@ -243,7 +251,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
  */
 export function connectToViewerState<
   Keys extends keyof ViewerStateContextType,
-  Props extends Pick<ViewerStateContextType, Keys>
+  Props extends Pick<ViewerStateContextType, Keys>,
 >(component: React.ComponentType<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
   const MemoedComponent = React.memo(component);
 
