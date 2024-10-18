@@ -7,6 +7,7 @@ import type {
   ViewerSettingUpdater,
   ChannelSettingUpdater,
   ChannelState,
+  ChannelStateKey,
   PartialIfObject,
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
@@ -76,52 +77,61 @@ const viewerSettingsReducer = <K extends keyof ViewerState>(
   }
 };
 
-/** Utility type to explicitly assert that one or more properties will *not* be defined on an object */
-type WithExplicitlyUndefined<K extends keyof any, T> = T & { [key in K]?: never };
+enum ChannelSettingActionType {
+  UniformUpdate = "UniformUpdate",
+  ArrayUpdate = "ArrayUpdate",
+  Init = "Init",
+}
 
 /** Set channel setting `key` on one or more channels specified by `index` to value `value`. */
-type ChannelSettingUniformUpdateAction<K extends keyof ChannelState> = {
+type ChannelSettingUniformUpdateAction<K extends ChannelStateKey> = {
+  type: ChannelSettingActionType.UniformUpdate;
   index: number | number[];
-  key: K;
-  value: ChannelState[K];
+  value: Partial<Record<K, ChannelState[K]>>;
 };
 /** Set the values of channel setting `key` for all channels from an array of values ordered by channel index */
-type ChannelSettingArrayUpdateAction<K extends keyof ChannelState> = {
+type ChannelSettingArrayUpdateAction<K extends ChannelStateKey> = {
+  type: ChannelSettingActionType.ArrayUpdate;
   key: K;
   value: ChannelState[K][];
 };
 /** Initialize list of channel states */
 type ChannelSettingInitAction = {
+  type: ChannelSettingActionType.Init;
   value: ChannelState[];
 };
 
-type ChannelStateAction<K extends keyof ChannelState> =
-  | ChannelSettingUniformUpdateAction<K>
-  | WithExplicitlyUndefined<"index", ChannelSettingArrayUpdateAction<K>>
-  | WithExplicitlyUndefined<"index" | "key", ChannelSettingInitAction>;
 
-const channelSettingsReducer = <K extends keyof ChannelState>(
+type ChannelStateAction<K extends ChannelStateKey> =
+  | ChannelSettingUniformUpdateAction<K>
+  | ChannelSettingArrayUpdateAction<K>
+  | ChannelSettingInitAction;
+
+const channelSettingsReducer = <K extends ChannelStateKey>(
   channelSettings: ChannelState[],
-  { index, key, value }: ChannelStateAction<K>
+  action: ChannelStateAction<K>
 ): ChannelState[] => {
-  if (key === undefined) {
+  if (action.type === ChannelSettingActionType.Init) {
     // ChannelSettingInitAction
-    return value as ChannelState[];
-  } else if (index === undefined) {
+    return action.value as ChannelState[];
+  } else if (action.type === ChannelSettingActionType.ArrayUpdate) {
     // ChannelSettingArrayUpdateAction
     return channelSettings.map((channel, idx) => {
-      return value[idx] ? { ...channel, [key]: value[idx] } : channel;
+      return action.value[idx] ? { ...channel, [action.key]: action.value[idx] } : channel;
     });
-  } else if (Array.isArray(index)) {
-    // ChannelSettingUniformUpdateAction on potentially multiple channels
-    return channelSettings.map((channel, idx) => (index.includes(idx) ? { ...channel, [key]: value } : channel));
   } else {
-    // ChannelSettingUniformUpdateAction on a single channel
-    const newSettings = channelSettings.slice();
-    if (index >= 0 && index < channelSettings.length) {
-      newSettings[index] = { ...newSettings[index], [key]: value };
+    // type is ChannelSettingActionType.UniformUpdate
+    if (Array.isArray(action.index)) {
+      // ChannelSettingUniformUpdateAction on potentially multiple channels
+      return channelSettings.map((channel, idx) => ((action.index as number[]).includes(idx) ? { ...channel, ...action.value } : channel));
+    } else {
+      // ChannelSettingUniformUpdateAction on a single channel
+      const newSettings = channelSettings.slice();
+      if (action.index >= 0 && action.index < channelSettings.length) {
+        newSettings[action.index] = { ...newSettings[action.index], ...action.value };
+      }
+      return newSettings;
     }
-    return newSettings;
   }
 };
 
@@ -167,13 +177,13 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
-  const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, key, value) => {
-    channelDispatch({ index, key, value });
+  const changeChannelSetting = useCallback<ChannelSettingUpdater>((index, value) => {
+    channelDispatch({ type: ChannelSettingActionType.UniformUpdate, index, value });
   }, []);
 
-  const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ key: "color", value }), []);
+  const applyColorPresets = useCallback((value: ColorArray[]): void => channelDispatch({ type: ChannelSettingActionType.ArrayUpdate, key:"color", value}), []);
 
-  const setChannelSettings = useCallback((channels: ChannelState[]) => channelDispatch({ value: channels }), []);
+  const setChannelSettings = useCallback((channels: ChannelState[]) => channelDispatch({ type: ChannelSettingActionType.Init, value: channels }), []);
 
   // Sync viewer settings prop with state
   // React docs seem to be fine with syncing state with props directly in the render function, but that caused an
