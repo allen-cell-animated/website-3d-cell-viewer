@@ -35,25 +35,25 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   const [controlsOpen, setControlsOpen] = useState(false);
 
   const changeSettingForThisChannel = useCallback<SingleChannelSettingUpdater>(
-    (key, value) => changeChannelSetting(index, key, value),
+    (value) => changeChannelSetting(index, value),
     [changeChannelSetting, index]
   );
 
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    changeChannelSetting(index, "volumeEnabled", target.checked);
+    changeChannelSetting(index, {"volumeEnabled": target.checked});
   };
 
   const isosurfaceCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    changeChannelSetting(index, "isosurfaceEnabled", target.checked);
+    changeChannelSetting(index, {"isosurfaceEnabled": target.checked});
   };
 
-  const onIsovalueChange = ([newValue]: number[]): void => changeSettingForThisChannel("isovalue", newValue);
+  const onIsovalueChange = ([newValue]: number[]): void => changeSettingForThisChannel({"isovalue": newValue});
   const onOpacityChange = ([newValue]: number[]): void =>
-    changeSettingForThisChannel("opacity", newValue / ISOSURFACE_OPACITY_SLIDER_MAX);
+    changeSettingForThisChannel({"opacity": newValue / ISOSURFACE_OPACITY_SLIDER_MAX});
 
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
-    props.changeChannelSetting(index!, "color", color);
+    props.changeChannelSetting(index!, {"color": color});
   };
 
   const createColorPicker = (): React.ReactNode => (
