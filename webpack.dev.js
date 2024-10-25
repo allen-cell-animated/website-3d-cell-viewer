@@ -7,7 +7,7 @@ const common = require("./webpack.common");
 module.exports = (env) => {
   return merge(common(env), {
     mode: env.env === "production" ? "production" : "development",
-    devtool: env.env === "production" ? "eval" : "eval-source-map",
+    devtool: env.env === "production" ? "source-map" : "eval-source-map",
     devServer: {
       // Allows the dev server to handle routes
       historyApiFallback: true,
