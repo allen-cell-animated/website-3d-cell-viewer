@@ -3,6 +3,7 @@ import { CameraState } from "@aics/volume-viewer";
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
 import { ViewMode, RenderMode, ImageType } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
+import { ViewerChannelSettings } from "./utils/viewerChannelSettings";
 
 // Add all exported constants here to prevent circular dependencies
 export const // Control panel will automatically close if viewport is less than this width
@@ -126,6 +127,18 @@ export const getDefaultCameraState = (viewMode: ViewMode = ViewMode.threeD): Cam
   orthoScale: 0.5,
 });
 
+export const getDefaultViewerChannelSettings = (): ViewerChannelSettings => ({
+  groups: [
+    {
+      name: "Channels",
+      channels: [
+        { match: [0, 1, 2], enabled: true },
+        { match: "(.+)", enabled: false },
+      ],
+    },
+  ],
+});
+
 /**
  * Returns the default viewer state as a new object.
  */
@@ -153,6 +166,13 @@ export const getDefaultViewerState = (): ViewerState => ({
   cameraState: USE_VIEW_MODE_DEFAULT_CAMERA,
 });
 
+const INIT_COLORS = PRESET_COLORS_0;
+
+/** Returns the default color for a channel, by its index. */
+export function getDefaultChannelColor(channelIndex: number): ColorArray {
+  return INIT_COLORS[channelIndex % INIT_COLORS.length];
+}
+
 /**
  * Returns the default channel state as a new object. If an index is provided, uses the default
  * color preset for that index.
@@ -160,8 +180,6 @@ export const getDefaultViewerState = (): ViewerState => ({
  * @returns a default ChannelState object.
  */
 export const getDefaultChannelState = (index: number = 0): ChannelState => {
-  const color = PRESET_COLORS_0[index] || PRESET_COLORS_0[0];
-
   return {
     name: "",
     volumeEnabled: false,
@@ -170,7 +188,7 @@ export const getDefaultChannelState = (index: number = 0): ChannelState => {
     colorizeAlpha: 1.0,
     isovalue: 128,
     opacity: 1.0,
-    color: color,
+    color: getDefaultChannelColor(index),
     useControlPoints: false,
     ramp: [0, TFEDITOR_MAX_BIN],
     controlPoints: [

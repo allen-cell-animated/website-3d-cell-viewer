@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useReducer, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 
 import type {
   ViewerStateContextType,
@@ -11,8 +11,9 @@ import type {
 } from "./types";
 import { RenderMode, ViewMode } from "../../shared/enums";
 import { ColorArray } from "../../shared/utils/colorRepresentations";
-import { getDefaultChannelState, getDefaultViewerState } from "../../shared/constants";
+import { getDefaultViewerChannelSettings, getDefaultViewerState } from "../../shared/constants";
 import ResetStateProvider from "./ResetStateProvider";
+import { useConstructor } from "../../shared/utils/hooks";
 
 const isObject = <T,>(val: T): val is Extract<T, Record<string, unknown>> =>
   typeof val === "object" && val !== null && !Array.isArray(val);
@@ -135,11 +136,11 @@ const DEFAULT_VIEWER_CONTEXT: ViewerStateContextType = {
   applyColorPresets: nullfn,
   resetToSavedViewerState: nullfn,
   resetToDefaultViewerState: nullfn,
-  setSavedChannelState: nullfn,
-  getSavedChannelState: (index) => getDefaultChannelState(index),
-  onChannelLoaded: nullfn,
-  getSavedSubregionSize: () => null,
-  setSavedSubregionSize: nullfn,
+  setSavedViewerChannelSettings: nullfn,
+  getCurrentViewerChannelSettings: () => getDefaultViewerChannelSettings(),
+  getChannelsAwaitingReset: () => new Set(),
+  getChannelsAwaitingResetOnLoad: () => new Set(),
+  onResetChannel: nullfn,
 };
 
 export const ALL_VIEWER_STATE_KEYS = Object.keys(DEFAULT_VIEWER_CONTEXT) as (keyof ViewerStateContextType)[];
@@ -160,6 +161,11 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState>; chi
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
   // specific values they need and always have the most up-to-date state.
   const ref = useRef(DEFAULT_VIEWER_CONTEXT);
+
+  const resetProvider = useConstructor(() => new ResetStateProvider(ref));
+  useEffect(() => {
+    resetProvider.setSavedViewerState(props.viewerSettings || {});
+  }, [props.viewerSettings]);
 
   const changeViewerSetting = useCallback<ViewerSettingUpdater>((key, value) => viewerDispatch({ key, value }), []);
 
@@ -187,14 +193,20 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState>; chi
 
   const context = useMemo(() => {
     ref.current = {
-      ...ref.current,
       ...viewerSettings,
       channelSettings,
       changeViewerSetting,
       setChannelSettings,
       changeChannelSetting,
       applyColorPresets,
-      // Reset-related callbacks will be set by the ResetStateProvider
+      // Reset-related callbacks
+      setSavedViewerChannelSettings: resetProvider.setSavedViewerChannelSettings,
+      getCurrentViewerChannelSettings: resetProvider.getCurrentViewerChannelSettings,
+      getChannelsAwaitingReset: resetProvider.getChannelsAwaitingReset,
+      getChannelsAwaitingResetOnLoad: resetProvider.getChannelsAwaitingResetOnLoad,
+      onResetChannel: resetProvider.onResetChannel,
+      resetToSavedViewerState: resetProvider.resetToSavedViewerState,
+      resetToDefaultViewerState: resetProvider.resetToDefaultViewerState,
     };
 
     // `ref` is wrapped in another object to ensure that the context updates when state does.
@@ -202,11 +214,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState>; chi
     return { ref };
   }, [viewerSettings, channelSettings]);
 
-  return (
-    <ViewerStateContext.Provider value={context}>
-      <ResetStateProvider viewerStateInputProps={props.viewerSettings}>{props.children}</ResetStateProvider>
-    </ViewerStateContext.Provider>
-  );
+  return <ViewerStateContext.Provider value={context}>{props.children}</ViewerStateContext.Provider>;
 };
 
 /**

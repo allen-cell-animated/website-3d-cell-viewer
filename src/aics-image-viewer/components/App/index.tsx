@@ -10,7 +10,6 @@ import {
   IVolumeLoader,
   PrefetchDirection,
   VolumeFileFormat,
-  ControlPoint,
 } from "@aics/volume-viewer";
 import { Layout } from "antd";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -23,32 +22,32 @@ import type { ChannelState } from "../ViewerStateProvider/types";
 import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
 import {
   controlPointsToRamp,
-  getDefaultLut,
   initializeLut,
   rampToControlPoints,
   remapControlPointsForChannel,
 } from "../../shared/utils/controlPointsToLut";
-import {
-  findFirstChannelMatch,
-  makeChannelIndexGrouping,
-  ChannelGrouping,
-  ViewerChannelSettings,
-  ViewerChannelSetting,
-} from "../../shared/utils/viewerChannelSettings";
+import { makeChannelIndexGrouping, ChannelGrouping } from "../../shared/utils/viewerChannelSettings";
 import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
 import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
 import {
-  PRESET_COLORS_0,
   CONTROL_PANEL_CLOSE_WIDTH,
   AXIS_MARGIN_DEFAULT,
   SCALE_BAR_MARGIN_DEFAULT,
   CACHE_MAX_SIZE,
   QUEUE_MAX_SIZE,
   QUEUE_MAX_LOW_PRIORITY_SIZE,
-  getDefaultChannelState,
   getDefaultViewerState,
+  getDefaultChannelColor,
 } from "../../shared/constants";
 import PlayControls from "../../shared/utils/playControls";
+import { colorArrayToFloats } from "../../shared/utils/colorRepresentations";
+import {
+  gammaSliderToImageValues,
+  densitySliderToImageValue,
+  brightnessSliderToImageValue,
+  alphaSliderToImageValue,
+} from "../../shared/utils/sliderValuesToImageValues";
+import { initializeOneChannelSetting } from "../../shared/utils/viewerState";
 
 import { ViewerStateContext } from "../ViewerStateProvider";
 import ChannelUpdater from "./ChannelUpdater";
@@ -58,31 +57,10 @@ import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
 import StyleProvider from "../StyleProvider";
 import { useErrorAlert } from "../ErrorAlert";
 
-import { ColorArray, colorArrayToFloats } from "../../shared/utils/colorRepresentations";
-import {
-  gammaSliderToImageValues,
-  densitySliderToImageValue,
-  brightnessSliderToImageValue,
-  alphaSliderToImageValue,
-} from "../../shared/utils/sliderValuesToImageValues";
-import { matchesSavedSubregion } from "../../shared/utils/viewerState";
-
 import "../../assets/styles/globals.css";
 import "./styles.css";
 
 const { Sider, Content } = Layout;
-
-const INIT_COLORS = PRESET_COLORS_0;
-
-function colorHexToArray(hex: string): ColorArray | null {
-  // hex is a xxxxxx string. split it into array of rgb ints
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (result) {
-    return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
-  } else {
-    return null;
-  }
-}
 
 const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,
@@ -131,35 +109,6 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
   x: PrefetchDirection.X_PLUS,
 };
 
-const initializeOneChannelSetting = (
-  channel: string,
-  index: number,
-  defaultColor: ColorArray,
-  viewerChannelSettings?: ViewerChannelSettings,
-  defaultChannelState = getDefaultChannelState()
-): ChannelState => {
-  let initSettings = {} as Partial<ViewerChannelSetting>;
-  if (viewerChannelSettings) {
-    // search for channel in settings using groups, names and match values
-    initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
-  }
-
-  return {
-    name: initSettings.name ?? channel ?? "Channel " + index,
-    volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
-    isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
-    colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
-    colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
-    isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
-    opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
-    color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
-    useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
-    controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
-    ramp: initSettings.ramp ?? defaultChannelState.ramp,
-    needsDefaultLut: !initSettings.controlPoints && !initSettings.ramp && !initSettings.lut,
-  };
-};
-
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
   const CLIPPING_PANEL_HEIGHT = 150;
   // Move scale bars this far to the left when showing time series, to make room for timestep indicator
@@ -188,7 +137,6 @@ const App: React.FC<AppProps> = (props) => {
   props = { ...defaultProps, ...props };
 
   // State management /////////////////////////////////////////////////////////
-
   const viewerState = useContext(ViewerStateContext).ref;
   const {
     channelSettings,
@@ -196,12 +144,19 @@ const App: React.FC<AppProps> = (props) => {
     changeViewerSetting,
     changeChannelSetting,
     applyColorPresets,
-    setSavedChannelState,
-    getSavedChannelState,
-    onChannelLoaded,
-    getSavedSubregionSize,
-    setSavedSubregionSize,
+    setSavedViewerChannelSettings,
+    getCurrentViewerChannelSettings,
+    // TODO: Show a loading spinner while any channels are awaiting reset.
+    getChannelsAwaitingReset,
+    getChannelsAwaitingResetOnLoad,
+    onResetChannel,
   } = viewerState.current;
+
+  useMemo(() => {
+    if (props.viewerChannelSettings) {
+      setSavedViewerChannelSettings(props.viewerChannelSettings);
+    }
+  }, [props.viewerChannelSettings]);
 
   const view3d = useConstructor(() => new View3d());
   if (props.view3dRef !== undefined) {
@@ -289,22 +244,31 @@ const App: React.FC<AppProps> = (props) => {
 
   // Image loading/initialization functions ///////////////////////////////////
 
-  const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+  /**
+   * Updates a channel's ramp and control points after new data has been loaded.
+   *
+   * Also handles initializing the ramp/control points on initial load and resetting
+   * them when the channel is reset.
+   */
+  const updateChannelTransferFunction = (
+    aimg: Volume,
+    thisChannelsSettings: ChannelState,
+    channelIndex: number
+  ): void => {
     const thisChannel = aimg.getChannel(channelIndex);
 
-    let newControlPoints: ControlPoint[];
-    let newRamp: [number, number];
-
-    if (thisChannelsSettings.needsDefaultLut) {
-      const lut = getDefaultLut(aimg.getHistogram(channelIndex));
-      newControlPoints = lut.controlPoints;
-      newRamp = controlPointsToRamp(lut.controlPoints);
-      changeChannelSetting(channelIndex, "needsDefaultLut", false);
-    } else if (initialLoadRef.current || !thisChannelsSettings.controlPoints || !thisChannelsSettings.ramp) {
-      // If this is the first load of this image, auto-generate initial LUTs
-      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, props.viewerChannelSettings);
-      newControlPoints = controlPoints;
-      newRamp = controlPointsToRamp(ramp);
+    // If this is the first load of this image, auto-generate initial LUTs
+    if (
+      initialLoadRef.current ||
+      !thisChannelsSettings.controlPoints ||
+      !thisChannelsSettings.ramp ||
+      getChannelsAwaitingResetOnLoad().has(channelIndex)
+    ) {
+      const viewerChannelSettings = getCurrentViewerChannelSettings();
+      const { ramp, controlPoints } = initializeLut(aimg, channelIndex, viewerChannelSettings);
+      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
+      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      onResetChannel(channelIndex);
     } else {
       // try not to update lut from here if we are in play mode
       // if (playingAxis !== null) {
@@ -315,45 +279,26 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        newControlPoints = thisChannel.lut.controlPoints;
+        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
         // now manually remap ramp using the channel's old range
         const rampControlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const remappedRampControlPoints = remapControlPointsForChannel(rampControlPoints, oldRange, thisChannel);
-        newRamp = controlPointsToRamp(remappedRampControlPoints);
+        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(remappedRampControlPoints));
       } else {
         // ramp was just automatically remapped - update in state
-        newRamp = controlPointsToRamp(thisChannel.lut.controlPoints);
+        const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
+        changeChannelSetting(channelIndex, "ramp", ramp);
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const remappedControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        newControlPoints = remappedControlPoints;
+        changeChannelSetting(channelIndex, "controlPoints", remappedControlPoints);
       }
     }
-    changeChannelSetting(channelIndex, "controlPoints", newControlPoints);
-    changeChannelSetting(channelIndex, "ramp", newRamp);
+  };
 
-    // Save the first loaded channel's volume subregion as our reference for resetting channel states.
-    if (!getSavedSubregionSize()) {
-      setSavedSubregionSize(aimg.imageInfo.subregionSize.clone());
-    }
-    // If we haven't saved the initial state for this channel yet and this is the same
-    // time and initial subregion, add the control points and ramp to the saved channel state.
-    const savedChannelState = getSavedChannelState(channelIndex);
-    if (
-      !savedChannelState &&
-      viewerSettings.time === aimg.loadSpec.time &&
-      matchesSavedSubregion(getSavedSubregionSize(), aimg.imageInfo.subregionSize)
-    ) {
-      const newState = {
-        ...thisChannelsSettings,
-        ramp: newRamp,
-        controlPoints: newControlPoints,
-        needsDefaultLut: false,
-      };
-      setSavedChannelState(channelIndex, newState);
-    }
-    // Callback to notify the viewer state that a channel has loaded.
-    onChannelLoaded(aimg, channelIndex);
+  const onChannelDataLoaded = (aimg: Volume, thisChannelsSettings: ChannelState, channelIndex: number): void => {
+    const thisChannel = aimg.getChannel(channelIndex);
+    updateChannelTransferFunction(aimg, thisChannelsSettings, channelIndex);
 
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
@@ -362,7 +307,7 @@ const App: React.FC<AppProps> = (props) => {
     view3d.onVolumeData(aimg, [channelIndex]);
 
     view3d.setVolumeChannelEnabled(aimg, channelIndex, thisChannelsSettings.volumeEnabled);
-    if (aimg.channelNames[channelIndex] === props.viewerChannelSettings?.maskChannelName) {
+    if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
 
@@ -378,7 +323,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
-    const grouping = makeChannelIndexGrouping(channelNames, props.viewerChannelSettings);
+    const grouping = makeChannelIndexGrouping(channelNames, getCurrentViewerChannelSettings());
     setChannelGroupedByType(grouping);
 
     const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
@@ -387,18 +332,8 @@ const App: React.FC<AppProps> = (props) => {
     }
 
     const newChannelSettings = channelNames.map((channel, index) => {
-      const color = (INIT_COLORS[index] ? INIT_COLORS[index].slice() : [226, 205, 179]) as ColorArray;
-      const channelState = initializeOneChannelSetting(channel, index, color, props.viewerChannelSettings);
-      // Save settings for channels that are disabled by default; enabled channels
-      // will be loaded at startup and channel settings will be saved then.
-      if (!channelState.volumeEnabled && !channelState.isosurfaceEnabled) {
-        // TODO: This gives unexpected control points after a reset if a channel has `lut`
-        // set in the URL but is disabled at startup.
-        setSavedChannelState(index, { ...channelState });
-      } else {
-        setSavedChannelState(index, undefined);
-      }
-      return channelState;
+      const color = getDefaultChannelColor(index);
+      return initializeOneChannelSetting(channel, index, color, getCurrentViewerChannelSettings());
     });
     setChannelSettings(newChannelSettings);
     return newChannelSettings;
@@ -452,9 +387,6 @@ const App: React.FC<AppProps> = (props) => {
       return;
     }
 
-    // Clear saved state specific to the old image.
-    setSavedSubregionSize(null);
-
     setSendingQueryRequest(true);
     setImageLoaded(false);
     initialLoadRef.current = true;
@@ -492,23 +424,29 @@ const App: React.FC<AppProps> = (props) => {
     setAllChannelsUnloaded(channelNames.length);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
-    const requiredLoadspec = new LoadSpec();
-    requiredLoadspec.time = viewerState.current.time;
+    const requiredLoadSpec = new LoadSpec();
+    requiredLoadSpec.time = viewerState.current.time;
 
+    // When in 2D Z-axis view mode, we restrict the subregion to only the current slice. This is
+    // to match an optimization that volume viewer does by loading Z-slices at a higher resolution,
+    // and ensures the very first volume that is loaded is the same as the one that
+    // will be shown whenever we switch back to the same viewer settings (2D Z-axis view mode).
+    // (We don't do this for ZX and YZ modes because we assume that the data won't be chunked along the
+    // X or Y axes in ways that would improve loading resolution, and we load the full 3D volume instead.)
     if (viewerSettings.viewMode === ViewMode.xy) {
       const slice = viewerSettings.slice;
-      requiredLoadspec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
+      requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
-
-    imageUrlRef.current = path;
-    placeImageInViewer(aimg, newChannelSettings);
 
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
-    loader.current.loadVolumeData(aimg, requiredLoadspec).catch((e) => {
+    loader.current.loadVolumeData(aimg, requiredLoadSpec).catch((e) => {
       showError(e);
       throw e;
     });
+
+    imageUrlRef.current = path;
+    placeImageInViewer(aimg, newChannelSettings);
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
@@ -667,14 +605,14 @@ const App: React.FC<AppProps> = (props) => {
 
   useImageEffect(
     (image) => {
-      // Check whether any channels are marked to be reset to the default LUT.
+      // Check whether any channels are marked to be reset and apply it.
+      const channelsAwaitingReset = getChannelsAwaitingReset();
       for (let i = 0; i < channelSettings.length; i++) {
-        const channel = channelSettings[i];
-        if (channel && channel.needsDefaultLut && image.isLoaded()) {
-          const lut = getDefaultLut(image.getHistogram(i));
-          changeChannelSetting(i, "controlPoints", lut.controlPoints);
-          changeChannelSetting(i, "ramp", controlPointsToRamp(lut.controlPoints));
-          changeChannelSetting(i, "needsDefaultLut", false);
+        if (channelsAwaitingReset.has(i)) {
+          const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
+          changeChannelSetting(i, "controlPoints", controlPoints);
+          changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));
+          onResetChannel(i);
         }
       }
     },
