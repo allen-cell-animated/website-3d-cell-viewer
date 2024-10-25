@@ -1,7 +1,7 @@
-import { ColorArray } from "./colorRepresentations";
 import { ChannelState, ViewerSettingUpdater, ViewerState } from "../../components/ViewerStateProvider/types";
 import { getDefaultChannelState } from "../constants";
-import { ViewerChannelSettings, ViewerChannelSetting, findFirstChannelMatch } from "./viewerChannelSettings";
+import { ColorArray } from "./colorRepresentations";
+import { findFirstChannelMatch, ViewerChannelSetting, ViewerChannelSettings } from "./viewerChannelSettings";
 
 /** Sets all fields of the viewer state to the values of the `newState`. */
 export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
@@ -65,7 +65,7 @@ export function initializeOneChannelSetting(
   }
 
   return {
-    name: initSettings.name ?? channel ?? "Channel " + index,
+    name: channel ?? "Channel " + index,
     volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
     isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
     colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
