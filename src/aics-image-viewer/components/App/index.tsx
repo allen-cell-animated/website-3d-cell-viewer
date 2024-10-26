@@ -1,61 +1,60 @@
 // 3rd Party Imports
 import {
   CreateLoaderOptions,
+  IVolumeLoader,
   LoadSpec,
-  VolumeLoaderContext,
+  PrefetchDirection,
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
   View3d,
   Volume,
-  IVolumeLoader,
-  PrefetchDirection,
   VolumeFileFormat,
+  VolumeLoaderContext,
 } from "@aics/volume-viewer";
 import { Layout } from "antd";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { debounce } from "lodash";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Box3, Vector3 } from "three";
 
-import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
-import type { ChannelState } from "../ViewerStateProvider/types";
-
-import { useStateWithGetter, useConstructor } from "../../shared/utils/hooks";
+import {
+  AXIS_MARGIN_DEFAULT,
+  CACHE_MAX_SIZE,
+  CONTROL_PANEL_CLOSE_WIDTH,
+  getDefaultChannelColor,
+  getDefaultViewerState,
+  QUEUE_MAX_LOW_PRIORITY_SIZE,
+  QUEUE_MAX_SIZE,
+  SCALE_BAR_MARGIN_DEFAULT,
+} from "../../shared/constants";
+import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
+import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
+import { colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 import {
   controlPointsToRamp,
   initializeLut,
   rampToControlPoints,
   remapControlPointsForChannel,
 } from "../../shared/utils/controlPointsToLut";
-import { makeChannelIndexGrouping, ChannelGrouping } from "../../shared/utils/viewerChannelSettings";
-import { activeAxisMap, AxisName, IsosurfaceFormat, MetadataRecord, PerAxis } from "../../shared/types";
-import { ImageType, RenderMode, ViewMode } from "../../shared/enums";
-import {
-  CONTROL_PANEL_CLOSE_WIDTH,
-  AXIS_MARGIN_DEFAULT,
-  SCALE_BAR_MARGIN_DEFAULT,
-  CACHE_MAX_SIZE,
-  QUEUE_MAX_SIZE,
-  QUEUE_MAX_LOW_PRIORITY_SIZE,
-  getDefaultViewerState,
-  getDefaultChannelColor,
-} from "../../shared/constants";
+import { useConstructor, useStateWithGetter } from "../../shared/utils/hooks";
 import PlayControls from "../../shared/utils/playControls";
-import { colorArrayToFloats } from "../../shared/utils/colorRepresentations";
 import {
-  gammaSliderToImageValues,
-  densitySliderToImageValue,
-  brightnessSliderToImageValue,
   alphaSliderToImageValue,
+  brightnessSliderToImageValue,
+  densitySliderToImageValue,
+  gammaSliderToImageValues,
 } from "../../shared/utils/sliderValuesToImageValues";
+import { ChannelGrouping, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
 import { initializeOneChannelSetting } from "../../shared/utils/viewerState";
+import type { ChannelState } from "../ViewerStateProvider/types";
+import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
 
+import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
+import ControlPanel from "../ControlPanel";
+import { useErrorAlert } from "../ErrorAlert";
+import StyleProvider from "../StyleProvider";
+import Toolbar from "../Toolbar";
 import { ViewerStateContext } from "../ViewerStateProvider";
 import ChannelUpdater from "./ChannelUpdater";
-import ControlPanel from "../ControlPanel";
-import Toolbar from "../Toolbar";
-import CellViewerCanvasWrapper from "../CellViewerCanvasWrapper";
-import StyleProvider from "../StyleProvider";
-import { useErrorAlert } from "../ErrorAlert";
 
 import "../../assets/styles/globals.css";
 import "./styles.css";
@@ -266,8 +265,7 @@ const App: React.FC<AppProps> = (props) => {
     ) {
       const viewerChannelSettings = getCurrentViewerChannelSettings();
       const { ramp, controlPoints } = initializeLut(aimg, channelIndex, viewerChannelSettings);
-      changeChannelSetting(channelIndex, "controlPoints", controlPoints);
-      changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(ramp));
+      changeChannelSetting(channelIndex, { controlPoints: controlPoints, ramp: controlPointsToRamp(ramp) });
       onResetChannel(channelIndex);
     } else {
       // try not to update lut from here if we are in play mode
@@ -279,19 +277,20 @@ const App: React.FC<AppProps> = (props) => {
       const oldRange = channelRangesRef.current[channelIndex];
       if (thisChannelsSettings.useControlPoints) {
         // control points were just automatically remapped - update in state
-        changeChannelSetting(channelIndex, "controlPoints", thisChannel.lut.controlPoints);
         // now manually remap ramp using the channel's old range
         const rampControlPoints = rampToControlPoints(thisChannelsSettings.ramp);
         const remappedRampControlPoints = remapControlPointsForChannel(rampControlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "ramp", controlPointsToRamp(remappedRampControlPoints));
+        changeChannelSetting(channelIndex, {
+          ramp: controlPointsToRamp(remappedRampControlPoints),
+          controlPoints: thisChannel.lut.controlPoints,
+        });
       } else {
         // ramp was just automatically remapped - update in state
         const ramp = controlPointsToRamp(thisChannel.lut.controlPoints);
-        changeChannelSetting(channelIndex, "ramp", ramp);
         // now manually remap control points using the channel's old range
         const { controlPoints } = thisChannelsSettings;
         const remappedControlPoints = remapControlPointsForChannel(controlPoints, oldRange, thisChannel);
-        changeChannelSetting(channelIndex, "controlPoints", remappedControlPoints);
+        changeChannelSetting(channelIndex, { controlPoints: remappedControlPoints, ramp: ramp });
       }
     }
   };
@@ -610,8 +609,7 @@ const App: React.FC<AppProps> = (props) => {
       for (let i = 0; i < channelSettings.length; i++) {
         if (channelsAwaitingReset.has(i)) {
           const { ramp, controlPoints } = initializeLut(image, i, getCurrentViewerChannelSettings());
-          changeChannelSetting(i, "controlPoints", controlPoints);
-          changeChannelSetting(i, "ramp", controlPointsToRamp(ramp));
+          changeChannelSetting(i, { controlPoints: controlPoints, ramp: controlPointsToRamp(ramp) });
           onResetChannel(i);
         }
       }

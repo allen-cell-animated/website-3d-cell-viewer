@@ -73,10 +73,12 @@ export interface ChannelState {
 export type ChannelStateKey = keyof ChannelState;
 export type ChannelSettingUpdater = <K extends ChannelStateKey>(
   index: number | number[],
-  key: K,
-  value: ChannelState[K]
+  value: Partial<Record<K, ChannelState[K]>>
 ) => void;
-export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(key: K, value: ChannelState[K]) => void;
+
+export type SingleChannelSettingUpdater = <K extends ChannelStateKey>(
+  value: Partial<Record<K, ChannelState[K]>>
+) => void;
 
 export type ResetState = {
   /**
