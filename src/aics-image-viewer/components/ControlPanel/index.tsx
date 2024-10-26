@@ -173,4 +173,4 @@ function ControlPanel(props: ControlPanelProps): React.ReactElement {
   );
 }
 
-export default React.memo(connectToViewerState(ControlPanel, ["resetToDefaultViewerState"]));
+export default connectToViewerState(ControlPanel, ["resetToDefaultViewerState"]);

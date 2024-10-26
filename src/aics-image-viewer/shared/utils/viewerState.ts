@@ -1,11 +1,7 @@
-import { Vector3 } from "three/src/Three";
-
-import {
-  ChannelSettingUpdater,
-  ChannelState,
-  ViewerSettingUpdater,
-  ViewerState,
-} from "../../components/ViewerStateProvider/types";
+import { ColorArray } from "./colorRepresentations";
+import { ChannelState, ViewerSettingUpdater, ViewerState } from "../../components/ViewerStateProvider/types";
+import { getDefaultChannelState } from "../constants";
+import { ViewerChannelSettings, ViewerChannelSetting, findFirstChannelMatch } from "./viewerChannelSettings";
 
 /** Sets all fields of the viewer state to the values of the `newState`. */
 export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
@@ -19,19 +15,19 @@ export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, n
   changeViewerSetting("renderMode", newState.renderMode);
 }
 
-/** Sets all fields of the channel state for a given index using the provided `newState` (except for the name). */
-export function overrideChannelState(
-  changeChannelSetting: ChannelSettingUpdater,
-  index: number,
-  newState: ChannelState
+export function overrideChannelStates(
+  setChannelSettings: (settings: ChannelState[]) => void,
+  currentStates: ChannelState[],
+  newStates: ChannelState[]
 ): void {
-  for (const key of Object.keys(newState) as (keyof ChannelState)[]) {
-    // Skip resetting name to default, since this causes channels to be dropped from the UI.
-    if (key === "name") {
-      continue;
-    }
-    changeChannelSetting(index, key, newState[key] as any);
+  // Match the names in the new state with the existing state so we do not override the names.
+  // Also don't reset the control points or ramps, since these will be reset in the app.
+  for (let i = 0; i < newStates.length; i++) {
+    newStates[i].name = currentStates[i].name;
+    newStates[i].controlPoints = currentStates[i].controlPoints;
+    newStates[i].ramp = currentStates[i].ramp;
   }
+  setChannelSettings(newStates);
 }
 
 /** Returns the indices of channels that have either the volume or isosurface enabled. */
@@ -45,15 +41,40 @@ export function getEnabledChannelIndices(channelSettings: ChannelState[]): numbe
   return enabledChannels;
 }
 
-/** Returns whether two subregions match in the X and Y axes. */
-export function matchesSavedSubregion(subregion: Vector3 | null, savedSubregion: Vector3 | null): boolean {
-  // Fixes a bug in 2D-XY mode where the initial saved subregion is always saved with a z-thickness of 1, but the
-  // actual volume can have slices chunked in z >= 2. We drop the Z dimension from the comparison of (x, y, 1)
-  // and (x, y, z) to prevent it from failing.
-  return (
-    savedSubregion !== null &&
-    subregion !== null &&
-    subregion.x === savedSubregion.x &&
-    subregion.y === savedSubregion.y
-  );
+export function colorHexToArray(hex: string): ColorArray | null {
+  // hex is a xxxxxx string. split it into array of rgb ints
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result) {
+    return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)];
+  } else {
+    return null;
+  }
+}
+
+export function initializeOneChannelSetting(
+  channel: string,
+  index: number,
+  defaultColor: ColorArray,
+  viewerChannelSettings?: ViewerChannelSettings,
+  defaultChannelState: ChannelState = getDefaultChannelState()
+): ChannelState {
+  let initSettings = {} as Partial<ViewerChannelSetting>;
+  if (viewerChannelSettings) {
+    // search for channel in settings using groups, names and match values
+    initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
+  }
+
+  return {
+    name: initSettings.name ?? channel ?? "Channel " + index,
+    volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
+    isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
+    colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
+    colorizeAlpha: initSettings.colorizeAlpha ?? defaultChannelState.colorizeAlpha,
+    isovalue: initSettings.isovalue ?? defaultChannelState.isovalue,
+    opacity: initSettings.surfaceOpacity ?? defaultChannelState.opacity,
+    color: colorHexToArray(initSettings.color ?? "") ?? defaultColor,
+    useControlPoints: initSettings.controlPointsEnabled ?? defaultChannelState.useControlPoints,
+    controlPoints: initSettings.controlPoints ?? defaultChannelState.controlPoints,
+    ramp: initSettings.ramp ?? defaultChannelState.ramp,
+  };
 }
