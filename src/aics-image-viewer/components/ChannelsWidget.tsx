@@ -1,16 +1,16 @@
-import React from "react";
-import { Collapse, CollapseProps, List } from "antd";
 import { Channel } from "@aics/volume-viewer";
+import { Collapse, CollapseProps, List } from "antd";
+import React from "react";
 
+import type { IsosurfaceFormat } from "../shared/types";
+import type { ColorArray, ColorObject } from "../shared/utils/colorRepresentations";
 import type { ChannelGrouping, ViewerChannelSettings } from "../shared/utils/viewerChannelSettings";
 import { getDisplayName } from "../shared/utils/viewerChannelSettings";
-import type { ColorArray, ColorObject } from "../shared/utils/colorRepresentations";
-import type { IsosurfaceFormat } from "../shared/types";
+import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
 
 import ChannelsWidgetRow from "./ChannelsWidgetRow";
 import SharedCheckBox from "./shared/SharedCheckBox";
 import { connectToViewerState } from "./ViewerStateProvider";
-import type { ChannelSettingUpdater, ChannelState, ChannelStateKey } from "./ViewerStateProvider/types";
 
 export type ChannelsWidgetProps = {
   // From parent
@@ -33,7 +33,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey) => (value: boolean, channelArray: number[]) => {
-    props.changeChannelSetting(channelArray, key, value);
+    props.changeChannelSetting(channelArray, { [key]: value });
   };
 
   const showVolumes = createCheckboxHandler("volumeEnabled");
