@@ -33,7 +33,7 @@ const ChannelsWidget: React.FC<ChannelsWidgetProps> = (props: ChannelsWidgetProp
   const { channelGroupedByType, channelSettings, channelDataChannels, filterFunc, viewerChannelSettings } = props;
 
   const createCheckboxHandler = (key: ChannelStateKey, value: boolean) => (channelArray: number[]) => {
-    props.changeChannelSetting(channelArray, key, value);
+    props.changeChannelSetting(channelArray, {[key]: value});
   };
 
   const showVolumes = createCheckboxHandler("volumeEnabled", true);
