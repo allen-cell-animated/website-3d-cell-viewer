@@ -22,6 +22,13 @@ module.exports = (env) => {
         },
       ],
     },
+    performance: {
+      assetFilter: function (assetFilename) {
+        return assetFilename.endsWith('.js') || assetFilename.endsWith('.css');
+      },
+      maxEntrypointSize: 3512000,
+      maxAssetSize: 3512000,
+    },
     plugins: [],
   });
 };
