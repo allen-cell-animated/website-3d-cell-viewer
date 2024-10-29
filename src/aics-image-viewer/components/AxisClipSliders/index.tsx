@@ -1,7 +1,7 @@
 import { Volume } from "@aics/volume-viewer";
 import { CaretRightOutlined, PauseOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
-import React, { forwardRef, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { ViewMode } from "../../shared/enums";
 import { activeAxisMap, AxisName, PerAxis } from "../../shared/types";
@@ -117,13 +117,6 @@ type PlaySliderRowProps = {
   onEnd?: () => void;
 };
 
-// this is needed to allow Tooltip to wrap this
-const ButtonWithRef = forwardRef<HTMLButtonElement, any>((props, ref) => {
-  return <Button {...props} ref={ref} />;
-});
-// make eslint/react-display-name happy
-ButtonWithRef.displayName = "ButtonWithRef";
-
 /** Wrapper around `SliderRow` that adds a play button and accounts for the case where not all of an axis is loaded */
 const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
   // In partially-loaded axes, stores the displayed value of the slider while the user is sliding it
@@ -157,7 +150,7 @@ const PlaySliderRow: React.FC<PlaySliderRowProps> = (props) => {
       />
       {props.max > 1 && (
         <Tooltip placement="top" title="Play through sequence" trigger={["hover", "focus"]}>
-          <ButtonWithRef
+          <Button
             className="slider-play-button"
             onClick={() => props.onTogglePlayback(!props.playing)}
             icon={props.playing ? <PauseOutlined /> : <CaretRightOutlined />}
