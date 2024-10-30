@@ -1,7 +1,7 @@
-import { ColorArray } from "./colorRepresentations";
 import { ChannelState, ViewerSettingUpdater, ViewerState } from "../../components/ViewerStateProvider/types";
 import { getDefaultChannelState } from "../constants";
-import { ViewerChannelSettings, ViewerChannelSetting, findFirstChannelMatch } from "./viewerChannelSettings";
+import { ColorArray } from "./colorRepresentations";
+import { findFirstChannelMatch, ViewerChannelSetting, ViewerChannelSettings } from "./viewerChannelSettings";
 
 /** Sets all fields of the viewer state to the values of the `newState`. */
 export function overrideViewerState(changeViewerSetting: ViewerSettingUpdater, newState: ViewerState): void {
@@ -52,7 +52,7 @@ export function colorHexToArray(hex: string): ColorArray | null {
 }
 
 export function initializeOneChannelSetting(
-  channel: string,
+  channelName: string,
   index: number,
   defaultColor: ColorArray,
   viewerChannelSettings?: ViewerChannelSettings,
@@ -61,11 +61,11 @@ export function initializeOneChannelSetting(
   let initSettings = {} as Partial<ViewerChannelSetting>;
   if (viewerChannelSettings) {
     // search for channel in settings using groups, names and match values
-    initSettings = findFirstChannelMatch(channel, index, viewerChannelSettings) ?? {};
+    initSettings = findFirstChannelMatch(channelName, index, viewerChannelSettings) ?? {};
   }
 
   return {
-    name: initSettings.name ?? channel ?? "Channel " + index,
+    name: channelName ?? "Channel " + index,
     volumeEnabled: initSettings.enabled ?? defaultChannelState.volumeEnabled,
     isosurfaceEnabled: initSettings.surfaceEnabled ?? defaultChannelState.isosurfaceEnabled,
     colorizeEnabled: initSettings.colorizeEnabled ?? defaultChannelState.colorizeEnabled,
