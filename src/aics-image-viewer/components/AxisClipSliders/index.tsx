@@ -92,7 +92,7 @@ const SliderRow: React.FC<SliderRowProps> = ({
             </>
           )}
           {" / "}
-          {max}
+          {max - 1}
         </span>
       )}
     </span>
