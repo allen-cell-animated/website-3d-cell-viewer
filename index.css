@@ -82,7 +82,7 @@
   --color-z:#0099ff
 }
 
-.clip-sliders .noUi-handle{
+.clip-sliders .noUi-horizontal .noUi-handle{
     box-shadow:none;
     cursor:pointer;
     pointer-events:inherit;
@@ -1062,7 +1062,7 @@
         background-color:var(--color-controlpanel-section-bg);
       }
 
-.control-panel-col-container .control-panel-col .noUi-handle{
+.control-panel-col-container .control-panel-col .noUi-horizontal .noUi-handle{
     box-shadow:none;
     cursor:pointer;
     pointer-events:inherit;
