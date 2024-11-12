@@ -1,4 +1,4 @@
-# AICS Image Viewer
+# Vol-E (Volume Explorer)
 
 For the latest stable release, please visit https://allen-cell-animated.github.io/website-3d-cell-viewer-release/
 
