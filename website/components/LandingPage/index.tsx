@@ -6,15 +6,15 @@ import { useNavigate } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
-import Header from "../Header";
-import LoadModal from "../Modals/LoadModal";
-import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
-import { FlexColumnAlignCenter, FlexColumn, FlexRowAlignCenter, VisuallyHidden } from "./utils";
-import { parseViewerUrlParams } from "../../utils/url_utils";
-import HelpDropdown from "../HelpDropdown";
 import { BannerVideo } from "../../assets/videos";
-
+import { AppDataProps, DatasetEntry, ProjectEntry } from "../../types";
+import { parseViewerUrlParams } from "../../utils/url_utils";
 import { landingPageContent } from "./content";
+import { FlexColumn, FlexColumnAlignCenter, FlexRowAlignCenter, VisuallyHidden } from "./utils";
+
+import Header from "../Header";
+import HelpDropdown from "../HelpDropdown";
+import LoadModal from "../Modals/LoadModal";
 
 const MAX_CONTENT_WIDTH_PX = 1060;
 
@@ -365,9 +365,9 @@ export default function LandingPage(): ReactElement {
           <div></div>
         </BannerVideoContainer>
         <BannerTextContainer style={{ zIndex: 1 }}>
-          <h1>Welcome to 3D Volume Viewer</h1>
+          <h1>Welcome to Vol-E</h1>
           <p>
-            The 3D Volume Viewer is an open-use web-based tool designed to visualize, analyze and interpret
+            Vol-E (Volume Explorer) is an open-use web-based tool designed to visualize, analyze, and interpret
             multi-channel 3D microscopy data. Ideal for researchers, educators, and students, the viewer offers powerful
             interactive tools to extract key insights from imaging data.
           </p>
@@ -378,7 +378,7 @@ export default function LandingPage(): ReactElement {
         <FeatureHighlightsContainer>
           <FeatureHighlightsItem>
             <h3>Multiresolution OME-Zarr support</h3>
-            <p>Load your cloud hosted OME-Zarr v0.4 images via http(s).</p>
+            <p>Load your cloud-hosted OME-Zarr v0.4 images via http(s).</p>
           </FeatureHighlightsItem>
           <FeatureHighlightsItem>
             <h3>Multiple viewing modes</h3>
@@ -390,15 +390,13 @@ export default function LandingPage(): ReactElement {
           </FeatureHighlightsItem>
           <FeatureHighlightsItem>
             <h3>Customizable settings</h3>
-            <p>
-              Switch colors, turn channels on and off or apply a threshold to reveal interesting features in the data.
-            </p>
+            <p>Switch colors, toggle channels, and apply thresholds to reveal interesting features in data.</p>
           </FeatureHighlightsItem>
         </FeatureHighlightsContainer>
       </ContentContainer>
 
       <LoadPromptContainer>
-        <h2 style={{ margin: 0 }}>Load dataset(s) below or your own data to get started</h2>
+        <h2 style={{ margin: 0 }}>Load a dataset below or your own data to get started.</h2>
       </LoadPromptContainer>
 
       <ContentContainer style={{ paddingBottom: "400px" }}>
