@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-
 import { Lut, View3d, Volume } from "@aics/volume-viewer";
+import React, { useEffect } from "react";
 
 import { controlPointsToLut, rampToControlPoints } from "../../shared/utils/controlPointsToLut";
 import { ChannelState } from "../ViewerStateProvider/types";
@@ -31,12 +30,22 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
   };
 
   // enable/disable channel can't be dependent on channel load state because it may trigger the channel to load
-  useEffect(() => {
-    if (image) {
-      view3d.setVolumeChannelEnabled(image, index, volumeEnabled);
-      view3d.updateLuts(image);
-    }
-  }, [image, volumeEnabled]);
+  useImageEffect(
+    (currentImage) => {
+      // if (image) {
+      console.log(
+        "ChannelUpdater:useImageEffect:setVolumeChannelEnabled - current image ",
+        currentImage.name,
+        index,
+        volumeEnabled
+      );
+      console.log("ChannelUpdater:useImageEffect:setVolumeChannelEnabled - image ", view3d);
+      view3d.setVolumeChannelEnabled(currentImage, index, volumeEnabled);
+      view3d.updateLuts(currentImage);
+      // }
+    },
+    [image, volumeEnabled]
+  );
 
   useEffect(() => {
     if (image) {

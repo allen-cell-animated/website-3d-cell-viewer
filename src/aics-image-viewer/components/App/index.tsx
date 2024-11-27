@@ -419,7 +419,15 @@ const App: React.FC<AppProps> = (props) => {
     }
 
     const channelNames = aimg.imageInfo.channelNames;
+    console.log("App:openImage - about to call setImage for aimg:", aimg.name);
+    setImage(aimg);
+    console.log("aimg has been set! yippee!");
+    // console.log("App:openImage - Calling PlaceImageInViewer");
+    // // placeImageInViewer(aimg);
+    // console.log("Finished placeImageInViewer");
     const newChannelSettings = setChannelStateForNewImage(channelNames);
+
+    console.log("App:openImage - BEFORE setAllChannelsUnloaded - aimg.name:", aimg.name);
     setAllChannelsUnloaded(channelNames.length);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 

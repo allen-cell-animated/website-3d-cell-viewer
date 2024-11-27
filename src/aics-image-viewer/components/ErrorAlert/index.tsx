@@ -1,7 +1,7 @@
-import React from "react";
-import { Alert, Button } from "antd";
-import { RightOutlined } from "@ant-design/icons";
 import { VolumeLoadError, VolumeLoadErrorType } from "@aics/volume-viewer";
+import { RightOutlined } from "@ant-design/icons";
+import { Alert, Button } from "antd";
+import React from "react";
 
 import { useConstructor } from "../../shared/utils/hooks";
 
@@ -140,6 +140,7 @@ export const useErrorAlert = (): [React.ReactNode, (error: unknown) => void] => 
   const [errorCounts, setErrorCounts] = React.useState<number[]>([]);
 
   const addError = React.useCallback((error: unknown) => {
+    console.error(error);
     const errorTitle = getErrorTitle(error);
     const errorSeenCount = (seenErrors.get(errorTitle) ?? 0) + 1;
 
