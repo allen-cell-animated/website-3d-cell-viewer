@@ -321,8 +321,6 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
-    const oldGrouping = channelGroupedByType;
-
     const grouping = makeChannelIndexGrouping(channelNames, getCurrentViewerChannelSettings());
     setChannelGroupedByType(grouping);
 
