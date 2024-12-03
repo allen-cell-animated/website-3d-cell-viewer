@@ -43,7 +43,7 @@ import {
   densitySliderToImageValue,
   gammaSliderToImageValues,
 } from "../../shared/utils/sliderValuesToImageValues";
-import { ChannelGrouping, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
+import { ChannelGrouping, getDisplayName, makeChannelIndexGrouping } from "../../shared/utils/viewerChannelSettings";
 import { initializeOneChannelSetting } from "../../shared/utils/viewerState";
 import type { ChannelState } from "../ViewerStateProvider/types";
 import type { AppProps, ControlVisibilityFlags, UseImageEffectType } from "./types";
@@ -302,9 +302,7 @@ const App: React.FC<AppProps> = (props) => {
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 
-    view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
-
     view3d.setVolumeChannelEnabled(aimg, channelIndex, thisChannelsSettings.volumeEnabled);
     if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
@@ -313,8 +311,9 @@ const App: React.FC<AppProps> = (props) => {
     // when any channel data has arrived:
     setSendingQueryRequest(false);
     setOneChannelLoaded(channelIndex);
+    view3d.updateLuts(aimg);
+    view3d.updateActiveChannels(aimg);
     if (aimg.isLoaded()) {
-      view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
       initialLoadRef.current = false;
       playControls.onImageLoaded();
@@ -322,14 +321,30 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setChannelStateForNewImage = (channelNames: string[]): ChannelState[] | undefined => {
+    const oldGrouping = channelGroupedByType;
+
     const grouping = makeChannelIndexGrouping(channelNames, getCurrentViewerChannelSettings());
     setChannelGroupedByType(grouping);
 
-    const settingsAreEqual = channelNames.every((name, idx) => name === channelSettings[idx]?.name);
-    if (settingsAreEqual) {
-      return channelSettings;
+    // we really want to match names on the remapped grouped name if possible.
+
+    // compare each channel's new displayName to the old displayNames currently in state
+    const allNamesAreEqual = channelNames.every((name, idx) => {
+      const displayName = getDisplayName(name, idx, getCurrentViewerChannelSettings());
+      return displayName === channelSettings[idx]?.displayName;
+    });
+
+    if (allNamesAreEqual) {
+      console.log("setChannelStateForNewImage: All channel names are the same; returning current channel settings");
+      //return channelSettings;
+      const newChannelSettings = channelNames.map((channel, index) => {
+        return { ...channelSettings[index], name: channel };
+      });
+      setChannelSettings(newChannelSettings);
+      return newChannelSettings;
     }
 
+    console.log("setChannelStateForNewImage: Setting up new channel settings");
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = getDefaultChannelColor(index);
       return initializeOneChannelSetting(channel, index, color, getCurrentViewerChannelSettings());
@@ -375,6 +390,7 @@ const App: React.FC<AppProps> = (props) => {
     playControls.getVolumeIsLoaded = () => aimg.isLoaded();
 
     view3d.updateActiveChannels(aimg);
+    view3d.setCameraMode(viewerSettings.viewMode);
   };
 
   const openImage = async (): Promise<void> => {
@@ -411,28 +427,41 @@ const App: React.FC<AppProps> = (props) => {
         // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
         // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
         const thisChannelSettings = viewerState.current.channelSettings[channelIndex];
+        console.log("App:openImage - onChannelDataLoaded - enabled: ", channelIndex, thisChannelSettings.volumeEnabled);
         onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
       });
     } catch (e) {
       showError(e);
       throw e;
     }
+    console.log("App:openImage - new volume created: ", aimg.name);
 
     const channelNames = aimg.imageInfo.channelNames;
-    console.log("App:openImage - about to call setImage for aimg:", aimg.name);
-    setImage(aimg);
-    console.log("aimg has been set! yippee!");
-    // console.log("App:openImage - Calling PlaceImageInViewer");
-    // // placeImageInViewer(aimg);
-    // console.log("Finished placeImageInViewer");
+
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
-    console.log("App:openImage - BEFORE setAllChannelsUnloaded - aimg.name:", aimg.name);
+    console.log("App:openImage - about to call removeAllVolumes");
+    view3d.removeAllVolumes();
     setAllChannelsUnloaded(channelNames.length);
+    placeImageInViewer(aimg, newChannelSettings);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
     const requiredLoadSpec = new LoadSpec();
     requiredLoadSpec.time = viewerState.current.time;
+
+    // make the currently enabled channels "required":
+    // find all enabled indices in newChannelSettings:
+    const requiredChannelsToLoad = newChannelSettings
+      ? newChannelSettings.map((channel, index) => (channel.volumeEnabled ? index : -1)).filter((index) => index >= 0)
+      : [];
+
+    // add mask channel to required channels?
+    const maskChannelName = getCurrentViewerChannelSettings()?.maskChannelName || "";
+    const maskChannelIndex = channelNames.indexOf(maskChannelName);
+    if (maskChannelIndex >= 0 && !requiredChannelsToLoad.includes(maskChannelIndex)) {
+      requiredChannelsToLoad.push(maskChannelIndex);
+    }
+    requiredLoadSpec.channels = requiredChannelsToLoad;
 
     // When in 2D Z-axis view mode, we restrict the subregion to only the current slice. This is
     // to match an optimization that volume viewer does by loading Z-slices at a higher resolution,
@@ -441,6 +470,7 @@ const App: React.FC<AppProps> = (props) => {
     // (We don't do this for ZX and YZ modes because we assume that the data won't be chunked along the
     // X or Y axes in ways that would improve loading resolution, and we load the full 3D volume instead.)
     if (viewerSettings.viewMode === ViewMode.xy) {
+      console.log("App:openImage - setting subregion for XY view mode");
       const slice = viewerSettings.slice;
       requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
@@ -453,7 +483,6 @@ const App: React.FC<AppProps> = (props) => {
     });
 
     imageUrlRef.current = path;
-    placeImageInViewer(aimg, newChannelSettings);
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////

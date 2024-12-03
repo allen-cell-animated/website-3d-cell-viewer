@@ -1,7 +1,7 @@
 import { CameraState } from "@aics/volume-viewer";
 
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
-import { ViewMode, RenderMode, ImageType } from "./enums";
+import { ImageType, RenderMode, ViewMode } from "./enums";
 import { ColorArray } from "./utils/colorRepresentations";
 import { ViewerChannelSettings } from "./utils/viewerChannelSettings";
 
@@ -182,6 +182,7 @@ export function getDefaultChannelColor(channelIndex: number): ColorArray {
 export const getDefaultChannelState = (index: number = 0): ChannelState => {
   return {
     name: "",
+    displayName: "",
     volumeEnabled: false,
     isosurfaceEnabled: false,
     colorizeEnabled: false,
