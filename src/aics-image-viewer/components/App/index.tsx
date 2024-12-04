@@ -385,6 +385,7 @@ const App: React.FC<AppProps> = (props) => {
     playControls.getVolumeIsLoaded = () => aimg.isLoaded();
 
     view3d.updateActiveChannels(aimg);
+    // make sure we pick up whether the image needs to be in single-slice mode
     view3d.setCameraMode(viewerSettings.viewMode);
   };
 
@@ -422,20 +423,16 @@ const App: React.FC<AppProps> = (props) => {
         // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
         // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
         const thisChannelSettings = viewerState.current.channelSettings[channelIndex];
-        console.log("App:openImage - onChannelDataLoaded - enabled: ", channelIndex, thisChannelSettings.volumeEnabled);
         onChannelDataLoaded(v, thisChannelSettings!, channelIndex);
       });
     } catch (e) {
       showError(e);
       throw e;
     }
-    console.log("App:openImage - new volume created: ", aimg.name);
 
     const channelNames = aimg.imageInfo.channelNames;
-
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
-    console.log("App:openImage - about to call removeAllVolumes");
     view3d.removeAllVolumes();
     setAllChannelsUnloaded(channelNames.length);
     placeImageInViewer(aimg, newChannelSettings);
@@ -465,7 +462,6 @@ const App: React.FC<AppProps> = (props) => {
     // (We don't do this for ZX and YZ modes because we assume that the data won't be chunked along the
     // X or Y axes in ways that would improve loading resolution, and we load the full 3D volume instead.)
     if (viewerSettings.viewMode === ViewMode.xy) {
-      console.log("App:openImage - setting subregion for XY view mode");
       const slice = viewerSettings.slice;
       requiredLoadSpec.subregion = new Box3(new Vector3(0, 0, slice.z), new Vector3(1, 1, slice.z));
     }
