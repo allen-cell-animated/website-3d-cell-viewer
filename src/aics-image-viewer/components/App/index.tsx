@@ -433,6 +433,9 @@ const App: React.FC<AppProps> = (props) => {
     const channelNames = aimg.imageInfo.channelNames;
     const newChannelSettings = setChannelStateForNewImage(channelNames);
 
+    // order is important:
+    // we need to remove the old volume before triggering channels unloaded,
+    // which may cause calls on View3d to the old volume.
     view3d.removeAllVolumes();
     setAllChannelsUnloaded(channelNames.length);
     placeImageInViewer(aimg, newChannelSettings);
