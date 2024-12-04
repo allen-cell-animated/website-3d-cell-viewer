@@ -311,9 +311,8 @@ const App: React.FC<AppProps> = (props) => {
     // when any channel data has arrived:
     setSendingQueryRequest(false);
     setOneChannelLoaded(channelIndex);
-    view3d.updateLuts(aimg);
-    view3d.updateActiveChannels(aimg);
     if (aimg.isLoaded()) {
+      view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
       initialLoadRef.current = false;
       playControls.onImageLoaded();
