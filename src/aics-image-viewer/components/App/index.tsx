@@ -302,7 +302,9 @@ const App: React.FC<AppProps> = (props) => {
     // save the channel's new range for remapping next time
     channelRangesRef.current[channelIndex] = [thisChannel.rawMin, thisChannel.rawMax];
 
+    view3d.updateLuts(aimg);
     view3d.onVolumeData(aimg, [channelIndex]);
+
     view3d.setVolumeChannelEnabled(aimg, channelIndex, thisChannelsSettings.volumeEnabled);
     if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
@@ -323,17 +325,14 @@ const App: React.FC<AppProps> = (props) => {
     const grouping = makeChannelIndexGrouping(channelNames, getCurrentViewerChannelSettings());
     setChannelGroupedByType(grouping);
 
-    // we really want to match names on the remapped grouped name if possible.
-
-    // compare each channel's new displayName to the old displayNames currently in state
+    // compare each channel's new displayName to the old displayNames currently in state:
+    // same number of channels, and each channel has same displayName
     const allNamesAreEqual = channelNames.every((name, idx) => {
       const displayName = getDisplayName(name, idx, getCurrentViewerChannelSettings());
       return displayName === channelSettings[idx]?.displayName;
     });
 
     if (allNamesAreEqual) {
-      console.log("setChannelStateForNewImage: All channel names are the same; returning current channel settings");
-      //return channelSettings;
       const newChannelSettings = channelNames.map((channel, index) => {
         return { ...channelSettings[index], name: channel };
       });
@@ -341,7 +340,6 @@ const App: React.FC<AppProps> = (props) => {
       return newChannelSettings;
     }
 
-    console.log("setChannelStateForNewImage: Setting up new channel settings");
     const newChannelSettings = channelNames.map((channel, index) => {
       const color = getDefaultChannelColor(index);
       return initializeOneChannelSetting(channel, index, color, getCurrentViewerChannelSettings());
