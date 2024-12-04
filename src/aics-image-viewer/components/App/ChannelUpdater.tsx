@@ -32,13 +32,14 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
   // enable/disable channel can't be dependent on channel load state because it may trigger the channel to load
   useEffect(() => {
     if (image) {
-      console.log(
-        "ChannelUpdater:useImageEffect:setVolumeChannelEnabled - current image ",
-        image.name,
-        index,
-        volumeEnabled
-      );
-      console.log("ChannelUpdater:useImageEffect:setVolumeChannelEnabled - image ", image);
+      // console.log(
+      //   "ChannelUpdater:useImageEffect:setVolumeChannelEnabled - current image ",
+      //   image.name,
+      //   index,
+      //   volumeEnabled
+      // );
+      // console.log("ChannelUpdater:useImageEffect:setVolumeChannelEnabled - image ", image);
+      console.log("ChannelUpdater:useImageEffect:setVolumeChannelEnabled - ", index, volumeEnabled);
       view3d.setVolumeChannelEnabled(image, index, volumeEnabled);
       view3d.updateLuts(image);
       view3d.updateActiveChannels(image);
