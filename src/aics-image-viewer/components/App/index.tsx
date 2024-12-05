@@ -450,11 +450,13 @@ const App: React.FC<AppProps> = (props) => {
       ? newChannelSettings.map((channel, index) => (channel.volumeEnabled ? index : -1)).filter((index) => index >= 0)
       : [];
 
-    // add mask channel to required channels?
-    const maskChannelName = getCurrentViewerChannelSettings()?.maskChannelName || "";
-    const maskChannelIndex = channelNames.indexOf(maskChannelName);
-    if (maskChannelIndex >= 0 && !requiredChannelsToLoad.includes(maskChannelIndex)) {
-      requiredChannelsToLoad.push(maskChannelIndex);
+    // add mask channel to required channels, if specified
+    const maskChannelName = getCurrentViewerChannelSettings()?.maskChannelName;
+    if (maskChannelName) {
+      const maskChannelIndex = channelNames.indexOf(maskChannelName);
+      if (maskChannelIndex >= 0 && !requiredChannelsToLoad.includes(maskChannelIndex)) {
+        requiredChannelsToLoad.push(maskChannelIndex);
+      }
     }
     requiredLoadSpec.channels = requiredChannelsToLoad;
 
