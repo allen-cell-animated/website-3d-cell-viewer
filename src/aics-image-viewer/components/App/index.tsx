@@ -166,8 +166,7 @@ const App: React.FC<AppProps> = (props) => {
   );
 
   // install loadContext into view3d
-  // TODO UNCOMMENT THIS AFTER VOLUME-VIEWER 3.11.3+ IS RELEASED
-  //view3d.loaderContext = loadContext;
+  view3d.loaderContext = loadContext;
 
   const loader = useRef<IVolumeLoader>();
   const [image, setImage] = useState<Volume | null>(null);
