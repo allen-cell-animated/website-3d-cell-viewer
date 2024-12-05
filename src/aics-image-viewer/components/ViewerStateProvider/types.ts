@@ -58,6 +58,7 @@ export type ViewerSettingUpdater = <K extends ViewerStateKey>(key: K, value: Par
 /** Settings for a single channel, as stored internally by the app */
 export interface ChannelState {
   name: string;
+  displayName: string;
   volumeEnabled: boolean;
   isosurfaceEnabled: boolean;
   isovalue: number;

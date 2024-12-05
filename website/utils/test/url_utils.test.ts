@@ -1,32 +1,32 @@
 import { CameraState } from "@aics/volume-viewer";
 import { describe, expect, it } from "@jest/globals";
 
-import {
-  ViewerChannelSettingParams,
-  deserializeViewerChannelSetting,
-  parseViewerUrlParams,
-  parseKeyValueList,
-  parseHexColorAsColorArray,
-  parseStringEnum,
-  parseStringInt,
-  parseStringFloat,
-  serializeViewerChannelSetting,
-  serializeViewerState,
-  deserializeViewerState,
-  ViewerStateParams,
-  serializeViewerUrlParams,
-  CONTROL_POINTS_REGEX,
-  LEGACY_CONTROL_POINTS_REGEX,
-  serializeCameraState,
-} from "../url_utils";
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
-import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
 import {
   getDefaultCameraState,
   getDefaultChannelState,
   getDefaultViewerState,
 } from "../../../src/aics-image-viewer/shared/constants";
+import { ImageType, RenderMode, ViewMode } from "../../../src/aics-image-viewer/shared/enums";
+import { ViewerChannelSetting } from "../../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import {
+  CONTROL_POINTS_REGEX,
+  deserializeViewerChannelSetting,
+  deserializeViewerState,
+  LEGACY_CONTROL_POINTS_REGEX,
+  parseHexColorAsColorArray,
+  parseKeyValueList,
+  parseStringEnum,
+  parseStringFloat,
+  parseStringInt,
+  parseViewerUrlParams,
+  serializeCameraState,
+  serializeViewerChannelSetting,
+  serializeViewerState,
+  serializeViewerUrlParams,
+  ViewerChannelSettingParams,
+  ViewerStateParams,
+} from "../url_utils";
 
 const defaultSettings: ViewerChannelSetting = {
   match: 0,
@@ -232,6 +232,7 @@ describe("parseStringFloat", () => {
 describe("Channel state serialization", () => {
   const DEFAULT_CHANNEL_STATE: ChannelState = {
     name: "",
+    displayName: "",
     color: [255, 0, 0],
     volumeEnabled: true,
     isosurfaceEnabled: true,
@@ -368,6 +369,7 @@ describe("Channel state serialization", () => {
     it("serializes custom channel settings", () => {
       const customChannelState: ChannelState = {
         name: "a",
+        displayName: "a",
         color: [3, 255, 157],
         volumeEnabled: false,
         isosurfaceEnabled: false,
@@ -805,6 +807,7 @@ describe("serializeViewerUrlParams", () => {
     const channelStates: ChannelState[] = [
       {
         name: "channel0",
+        displayName: "channel0",
         color: [255, 0, 0],
         volumeEnabled: true,
         isosurfaceEnabled: true,
@@ -821,6 +824,7 @@ describe("serializeViewerUrlParams", () => {
       },
       {
         name: "channel1",
+        displayName: "channel1",
         color: [128, 128, 128],
         volumeEnabled: false,
         isosurfaceEnabled: false,
