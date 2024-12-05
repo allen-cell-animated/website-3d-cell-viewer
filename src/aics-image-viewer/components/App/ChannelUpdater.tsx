@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-
 import { Lut, View3d, Volume } from "@aics/volume-viewer";
+import React, { useEffect } from "react";
 
 import { controlPointsToLut, rampToControlPoints } from "../../shared/utils/controlPointsToLut";
 import { ChannelState } from "../ViewerStateProvider/types";
