@@ -165,7 +165,9 @@ type ContextRefType = NoNull<React.MutableRefObject<ViewerStateContextType>>;
 export const ViewerStateContext = React.createContext<{ ref: ContextRefType }>(DEFAULT_VIEWER_CONTEXT_OUTER);
 
 /** Provides a central store for the state of the viewer, and the methods to update it. */
-const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> = (props) => {
+const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState>; children?: React.ReactNode }> = (
+  props
+) => {
   const [viewerSettings, viewerDispatch] = useReducer(viewerSettingsReducer, { ...getDefaultViewerState() });
   const [channelSettings, channelDispatch] = useReducer(channelSettingsReducer, []);
   // Provide viewer state via a ref, so that closures that run asynchronously can capture the ref instead of the
@@ -252,7 +254,7 @@ const ViewerStateProvider: React.FC<{ viewerSettings?: Partial<ViewerState> }> =
 export function connectToViewerState<
   Keys extends keyof ViewerStateContextType,
   Props extends Pick<ViewerStateContextType, Keys>,
->(component: React.ComponentType<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
+>(component: React.FC<Props>, keys: Keys[]): React.FC<Omit<Props, Keys>> {
   const MemoedComponent = React.memo(component);
 
   const ConnectedComponent: React.FC<Omit<Props, Keys>> = (props) => {
