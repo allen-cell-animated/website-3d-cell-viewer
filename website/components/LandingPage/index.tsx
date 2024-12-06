@@ -209,7 +209,7 @@ const DatasetCard = styled.li`
 const InReviewFlag = styled(FlexRowAlignCenter)`
   border-radius: 4px;
   padding: 1px 6px;
-  border: solid 1px var(--color-statusflag-border);
+  border: 1px solid var(--color-statusflag-border);
   height: 23px;
   flex-wrap: wrap;
 
