@@ -209,15 +209,15 @@ const DatasetCard = styled.li`
 const InReviewFlag = styled(FlexRowAlignCenter)`
   border-radius: 4px;
   padding: 1px 6px;
-  background-color: var(--color-statusflag-bg);
-  height: 22px;
+  border: solid 1px var(--color-statusflag-border);
+  height: 23px;
   flex-wrap: wrap;
 
   && > p {
     margin-bottom: 0;
     color: var(--color-statusflag-text);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     white-space: nowrap;
   }
 `;
