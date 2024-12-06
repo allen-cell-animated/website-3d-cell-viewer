@@ -105,8 +105,8 @@ const theme = {
       bannerBg: "#020202DB",
     },
     statusFlag: {
-      bg: palette.veryLtPurple,
-      text: palette.veryDarkPurple,
+      border: palette.medGrey,
+      text: palette.ltGrey,
     },
     layout: {
       dividers: palette.medGrey,
@@ -204,7 +204,7 @@ const CssProvider = styled.div<{ $theme: AppTheme }>`
       --color-landingpage-text: ${$theme.colors.landingPage.text};
       --color-landingpage-banner-highlight-bg: ${$theme.colors.landingPage.bannerBg};
 
-      --color-statusflag-bg: ${$theme.colors.statusFlag.bg};
+      --color-statusflag-border: ${$theme.colors.statusFlag.border};
       --color-statusflag-text: ${$theme.colors.statusFlag.text};
 
       --color-layout-dividers: ${$theme.colors.layout.dividers};
