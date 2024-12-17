@@ -186,7 +186,7 @@ const App: React.FC<AppProps> = (props) => {
 
   // State for image loading/reloading
 
-  // `true` when this is the initial load of an image
+  /** `true` when a channel's data has been loaded for the current image. */
   const hasChannelLoadedRef = useRef<boolean[]>([]);
   // `true` when image data has been requested, but no data has been received yet
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
