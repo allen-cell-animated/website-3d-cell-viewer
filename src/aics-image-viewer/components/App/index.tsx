@@ -187,7 +187,7 @@ const App: React.FC<AppProps> = (props) => {
   // State for image loading/reloading
 
   // `true` when this is the initial load of an image
-  const initialLoadRef = useRef(true);
+  const hasChannelLoadedRef = useRef<boolean[]>([]);
   // `true` when image data has been requested, but no data has been received yet
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
@@ -258,7 +258,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // If this is the first load of this image, auto-generate initial LUTs
     if (
-      initialLoadRef.current ||
+      !hasChannelLoadedRef.current[channelIndex] ||
       !thisChannelsSettings.controlPoints ||
       !thisChannelsSettings.ramp ||
       getChannelsAwaitingResetOnLoad().has(channelIndex)
@@ -309,6 +309,7 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
+    hasChannelLoadedRef.current[channelIndex] = true;
 
     // when any channel data has arrived:
     setSendingQueryRequest(false);
@@ -316,7 +317,6 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.isLoaded()) {
       view3d.updateActiveChannels(aimg);
       setImageLoaded(true);
-      initialLoadRef.current = false;
       playControls.onImageLoaded();
     }
   };
@@ -400,7 +400,7 @@ const App: React.FC<AppProps> = (props) => {
 
     setSendingQueryRequest(true);
     setImageLoaded(false);
-    initialLoadRef.current = true;
+    hasChannelLoadedRef.current = [];
 
     const loadSpec = new LoadSpec();
     loadSpec.time = viewerState.current.time;
