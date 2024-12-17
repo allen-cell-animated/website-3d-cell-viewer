@@ -61,6 +61,8 @@ import "./styles.css";
 
 const { Sider, Content } = Layout;
 
+const INITIAL_CHANNEL_VERSION = 0;
+
 const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,
   autoRotateButton: true,
@@ -186,8 +188,6 @@ const App: React.FC<AppProps> = (props) => {
 
   // State for image loading/reloading
 
-  /** `true` when a channel's data has been loaded for the current image. */
-  const hasChannelLoadedRef = useRef<boolean[]>([]);
   // `true` when image data has been requested, but no data has been received yet
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
@@ -232,7 +232,7 @@ const App: React.FC<AppProps> = (props) => {
   };
 
   const setAllChannelsUnloaded = (numberOfChannels: number): void => {
-    setChannelVersions(new Array(numberOfChannels).fill(0));
+    setChannelVersions(new Array(numberOfChannels).fill(INITIAL_CHANNEL_VERSION));
   };
 
   const setOneChannelLoaded = (index: number): void => {
@@ -258,7 +258,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // If this is the first load of this image, auto-generate initial LUTs
     if (
-      !hasChannelLoadedRef.current[channelIndex] ||
+      getChannelVersions()[channelIndex] === INITIAL_CHANNEL_VERSION ||
       !thisChannelsSettings.controlPoints ||
       !thisChannelsSettings.ramp ||
       getChannelsAwaitingResetOnLoad().has(channelIndex)
@@ -309,7 +309,6 @@ const App: React.FC<AppProps> = (props) => {
     if (aimg.channelNames[channelIndex] === getCurrentViewerChannelSettings()?.maskChannelName) {
       view3d.setVolumeChannelAsMask(aimg, channelIndex);
     }
-    hasChannelLoadedRef.current[channelIndex] = true;
 
     // when any channel data has arrived:
     setSendingQueryRequest(false);
@@ -400,7 +399,6 @@ const App: React.FC<AppProps> = (props) => {
 
     setSendingQueryRequest(true);
     setImageLoaded(false);
-    hasChannelLoadedRef.current = [];
 
     const loadSpec = new LoadSpec();
     loadSpec.time = viewerState.current.time;
