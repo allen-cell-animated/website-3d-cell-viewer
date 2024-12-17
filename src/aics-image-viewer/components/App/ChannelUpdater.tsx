@@ -5,6 +5,9 @@ import { controlPointsToLut, rampToControlPoints } from "../../shared/utils/cont
 import { ChannelState } from "../ViewerStateProvider/types";
 import { UseImageEffectType } from "./types";
 
+export const CHANNEL_VERSION_NEVER_LOADED = -1;
+export const CHANNEL_VERSION_UNLOADED = 0;
+
 interface ChannelUpdaterProps {
   index: number;
   channelState: ChannelState;
@@ -23,7 +26,7 @@ const ChannelUpdater: React.FC<ChannelUpdaterProps> = ({ index, channelState, vi
   // Effects to update channel settings should check if image is present and channel is loaded first
   const useImageEffect: UseImageEffectType = (effect, deps) => {
     useEffect(() => {
-      if (image && version > 0) {
+      if (image && version > CHANNEL_VERSION_UNLOADED) {
         return effect(image);
       }
     }, [...deps, image, version]);

@@ -54,14 +54,12 @@ import { useErrorAlert } from "../ErrorAlert";
 import StyleProvider from "../StyleProvider";
 import Toolbar from "../Toolbar";
 import { ViewerStateContext } from "../ViewerStateProvider";
-import ChannelUpdater from "./ChannelUpdater";
+import ChannelUpdater, { CHANNEL_VERSION_NEVER_LOADED, CHANNEL_VERSION_UNLOADED } from "./ChannelUpdater";
 
 import "../../assets/styles/globals.css";
 import "./styles.css";
 
 const { Sider, Content } = Layout;
-
-const INITIAL_CHANNEL_VERSION = 0;
 
 const defaultVisibleControls: ControlVisibilityFlags = {
   alphaMaskSlider: true,
@@ -192,7 +190,8 @@ const App: React.FC<AppProps> = (props) => {
   const [sendingQueryRequest, setSendingQueryRequest] = useState(false);
   // `true` when all channels of the current image are loaded
   const [imageLoaded, setImageLoaded] = useState(false);
-  // tracks which channels have been loaded
+  // Tracks which channels have been loaded. Channels are initialized to -1 when
+  // unloaded and have never been loaded for the current image.
   const [channelVersions, setChannelVersions, getChannelVersions] = useStateWithGetter<number[]>([]);
   // we need to keep track of channel ranges for remapping
   const channelRangesRef = useRef<([number, number] | undefined)[]>([]);
@@ -231,13 +230,17 @@ const App: React.FC<AppProps> = (props) => {
     return (settings || viewerState.current.channelSettings).find((channel) => channel.name === channelName);
   };
 
-  const setAllChannelsUnloaded = (numberOfChannels: number): void => {
-    setChannelVersions(new Array(numberOfChannels).fill(INITIAL_CHANNEL_VERSION));
+  const initializeAllChannelsUnloaded = (numberOfChannels: number): void => {
+    setChannelVersions(new Array(numberOfChannels).fill(CHANNEL_VERSION_NEVER_LOADED));
+  };
+
+  const setAllChannelsUnloaded = () => {
+    setChannelVersions(getChannelVersions().map((version) => Math.min(version, CHANNEL_VERSION_UNLOADED)));
   };
 
   const setOneChannelLoaded = (index: number): void => {
     const newVersions = getChannelVersions().slice();
-    newVersions[index]++;
+    newVersions[index] = Math.max(newVersions[index], CHANNEL_VERSION_UNLOADED) + 1;
     setChannelVersions(newVersions);
   };
 
@@ -258,7 +261,7 @@ const App: React.FC<AppProps> = (props) => {
 
     // If this is the first load of this image, auto-generate initial LUTs
     if (
-      getChannelVersions()[channelIndex] === INITIAL_CHANNEL_VERSION ||
+      getChannelVersions()[channelIndex] === CHANNEL_VERSION_NEVER_LOADED ||
       !thisChannelsSettings.controlPoints ||
       !thisChannelsSettings.ramp ||
       getChannelsAwaitingResetOnLoad().has(channelIndex)
@@ -435,7 +438,7 @@ const App: React.FC<AppProps> = (props) => {
     // we need to remove the old volume before triggering channels unloaded,
     // which may cause calls on View3d to the old volume.
     view3d.removeAllVolumes();
-    setAllChannelsUnloaded(channelNames.length);
+    initializeAllChannelsUnloaded(channelNames.length);
     placeImageInViewer(aimg, newChannelSettings);
     channelRangesRef.current = new Array(channelNames.length).fill(undefined);
 
@@ -696,7 +699,7 @@ const App: React.FC<AppProps> = (props) => {
   useEffect(() => {
     if (image) {
       setSendingQueryRequest(true);
-      setAllChannelsUnloaded(image.numChannels);
+      setAllChannelsUnloaded();
       view3d.setTime(image, viewerSettings.time);
     }
   }, [viewerSettings.time]);
