@@ -1,2 +1,0 @@
-(()=>{"use strict";var n="~and~";window.onload=function(){document.body.innerHTML=""};var o=window.location,c=function(o){var c=arguments.length>1&&void 0!==arguments[1]?arguments[1]:0,e=o.pathname.split("/"),i=e.slice(0,c+1).join("/"),t=e.slice(c+1).join("/").replace(/&/g,n),a=o.search?o.search.slice(1).replace(/&/g,n):"",r="".concat(o.origin).concat(i,"/?/").concat(t);return r+=a?"&".concat(a):"",r+=o.hash,new URL(r)}(new URL(o.toString()),1);o.replace(c),console.log("Redirecting to "+c.toString())})();
-//# sourceMappingURL=reroute.bundle.js.map
