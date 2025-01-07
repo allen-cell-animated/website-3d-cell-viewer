@@ -54,7 +54,7 @@ and limitations under the License.
 
 /**
  * @license
- * Copyright 2010-2023 Three.js Authors
+ * Copyright 2010-2024 Three.js Authors
  * SPDX-License-Identifier: MIT
  */
 
