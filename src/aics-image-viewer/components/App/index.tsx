@@ -164,6 +164,10 @@ const App: React.FC<AppProps> = (props) => {
   const loadContext = useConstructor(
     () => new VolumeLoaderContext(CACHE_MAX_SIZE, QUEUE_MAX_SIZE, QUEUE_MAX_LOW_PRIORITY_SIZE)
   );
+
+  // install loadContext into view3d
+  view3d.loaderContext = loadContext;
+
   const loader = useRef<IVolumeLoader>();
   const [image, setImage] = useState<Volume | null>(null);
   const imageUrlRef = useRef<string | string[]>("");
