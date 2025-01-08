@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunk_aics_web_3d_viewer=self.webpackChunk_aics_web_3d_viewer||[]).push([[954],{6954:(e,l,t)=>{t.r(l),t.d(l,{default:()=>i});var r,s=t(3056);const i=((r=class{constructor(e=1){if(e<-1||e>9)throw new Error("Invalid zlib compression level, it should be between -1 and 9");this.level=e}static fromConfig({level:e}){return new r(e)}encode(e){return s.p.deflate(e,{level:this.level})}decode(e,l){const t=s.p.inflate(e);return void 0!==l?(l.set(t),l):t}}).codecId="zlib",r)}}]);
+//# sourceMappingURL=954.bundle.js.map

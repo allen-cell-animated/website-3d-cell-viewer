@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunk_aics_web_3d_viewer=self.webpackChunk_aics_web_3d_viewer||[]).push([[175],{9175:(e,r,s)=>{s.r(r),s.d(r,{default:()=>n});var i,t=s(3056);const n=((i=class{constructor(e=1){if(e<0||e>9)throw new Error("Invalid gzip compression level, it should be between 0 and 9");this.level=e}static fromConfig({level:e}){return new i(e)}encode(e){return t.p.gzip(e,{level:this.level})}decode(e,r){const s=t.p.ungzip(e);return void 0!==r?(r.set(s),r):s}}).codecId="gzip",i)}}]);
+//# sourceMappingURL=175.bundle.js.map
