@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { decodeGitHubPagesUrl, isEncodedPathUrl, tryRemoveHashRouting } from "../website/utils/gh_route_utils";
@@ -46,9 +46,9 @@ const routes = [
 
 const router = createBrowserRouter(routes, { basename: basename });
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("cell-viewer"));
+root.render(
   <StyleProvider>
     <RouterProvider router={router} />
-  </StyleProvider>,
-  document.getElementById("cell-viewer")
+  </StyleProvider>
 );
