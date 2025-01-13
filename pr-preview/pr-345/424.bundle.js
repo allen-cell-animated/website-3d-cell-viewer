@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunk_aics_web_3d_viewer=self.webpackChunk_aics_web_3d_viewer||[]).push([[424],{424:(e,r,s)=>{s.r(r),s.d(r,{default:()=>_});var a=s(3075),c=s(2132);class _ extends c.A{decodeBlock(e){return(0,a.UD)(new Uint8Array(e)).buffer}}}}]);
-//# sourceMappingURL=424.bundle.js.map
