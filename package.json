@@ -1,5 +1,5 @@
 {
-  "name": "@aics/web-3d-viewer",
+  "name": "@aics/vole-app",
   "version": "2.10.4",
   "description": "web view of cell volume images",
   "repository": "github:allen-cell-animated/website-3d-cell-viewer",
