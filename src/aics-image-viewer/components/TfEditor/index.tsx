@@ -1,4 +1,4 @@
-import { Channel, ControlPoint, Histogram, Lut } from "@aics/volume-viewer";
+import { Channel, ControlPoint, Histogram, Lut } from "@aics/vole-core";
 import { Button, Checkbox, InputNumber, Tooltip } from "antd";
 import * as d3 from "d3";
 import "nouislider/distribute/nouislider.css";

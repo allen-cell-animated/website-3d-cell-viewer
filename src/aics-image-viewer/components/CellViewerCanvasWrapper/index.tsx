@@ -1,15 +1,15 @@
-import React from "react";
-import { View3d, Volume } from "@aics/volume-viewer";
+import { View3d, Volume } from "@aics/vole-core";
 import { LoadingOutlined } from "@ant-design/icons";
+import React from "react";
 
-import { AxisName, PerAxis, Styles } from "../../shared/types";
 import { ViewMode } from "../../shared/enums";
-import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
+import { AxisName, PerAxis, Styles } from "../../shared/types";
 import PlayControls from "../../shared/utils/playControls";
+import { ViewerSettingUpdater } from "../ViewerStateProvider/types";
 
-import { connectToViewerState } from "../ViewerStateProvider";
 import AxisClipSliders from "../AxisClipSliders";
 import BottomPanel from "../BottomPanel";
+import { connectToViewerState } from "../ViewerStateProvider";
 
 import "./styles.css";
 

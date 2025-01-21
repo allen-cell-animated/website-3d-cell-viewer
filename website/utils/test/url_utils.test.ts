@@ -1,4 +1,4 @@
-import { CameraState } from "@aics/volume-viewer";
+import { CameraState } from "@aics/vole-core";
 import { describe, expect, it } from "@jest/globals";
 
 import { ChannelState, ViewerState } from "../../../src/aics-image-viewer/components/ViewerStateProvider/types";

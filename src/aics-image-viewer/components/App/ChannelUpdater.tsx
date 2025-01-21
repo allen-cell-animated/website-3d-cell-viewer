@@ -1,4 +1,4 @@
-import { Lut, View3d, Volume } from "@aics/volume-viewer";
+import { Lut, View3d, Volume } from "@aics/vole-core";
 import React, { useEffect } from "react";
 
 import { controlPointsToLut, rampToControlPoints } from "../../shared/utils/controlPointsToLut";

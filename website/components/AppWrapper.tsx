@@ -1,18 +1,18 @@
-import { View3d } from "@aics/volume-viewer";
+import { View3d } from "@aics/vole-core";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ImageViewerApp, ViewerStateProvider } from "../../src";
 import { ViewerState } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
 import { getDefaultViewerChannelSettings } from "../../src/aics-image-viewer/shared/constants";
+import { AppDataProps } from "../types";
+import { parseViewerUrlParams } from "../utils/url_utils";
+import { FlexRowAlignCenter } from "./LandingPage/utils";
 
 import Header, { HEADER_HEIGHT_PX } from "./Header";
 import HelpDropdown from "./HelpDropdown";
-import { FlexRowAlignCenter } from "./LandingPage/utils";
 import LoadModal from "./Modals/LoadModal";
 import ShareModal from "./Modals/ShareModal";
-import { AppDataProps } from "../types";
-import { parseViewerUrlParams } from "../utils/url_utils";
 
 const DEFAULT_APP_PROPS: AppDataProps = {
   imageUrl: "",
