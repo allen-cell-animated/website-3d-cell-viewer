@@ -8,11 +8,12 @@ For example, the following query parameters enable the volume on the first and
 third channels (`c0=ven:1` and `c2=ven:1`), and sets the initial view to show an XY
 slice along the Z axis (`view=Z`).
 
-`https://volumeviewer.allencell.org/viewer`**`?url={some-data}&c0=ven:1&c2=ven:1&view=Z`**
+`https://volumeviewer.allencell.org/viewer?url={some-data}&c0=ven:1&c2=ven:1&view=Z`
 
 If you are using our public build, set
-`https://volumeviewer.allencell.org/viewer` as the base address, but if you are
-running locally you can substitute this for a `localhost` address.
+[`https://volumeviewer.allencell.org/viewer`](https://volumeviewer.allencell.org/viewer)
+as the base address. If you are running Vol-E locally, you can substitute this
+for a `localhost` address.
 
 ## Common Examples
 
