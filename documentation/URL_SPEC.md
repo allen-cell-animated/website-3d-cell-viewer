@@ -4,12 +4,6 @@ When used as a standalone app, Vol-E allows you to specify view settings via
 query parameters in the URL. This document provides an overview of the allowed
 URL values.
 
-For example, the following query parameters enable the volume on the first and
-third channels (`c0=ven:1` and `c2=ven:1`), and sets the initial view to show an XY
-slice along the Z axis (`view=Z`).
-
-`https://volumeviewer.allencell.org/viewer?url={some-data}&c0=ven:1&c2=ven:1&view=Z`
-
 If you are using our public build, set
 [`https://volumeviewer.allencell.org/viewer`](https://volumeviewer.allencell.org/viewer)
 as the base address. If you are running Vol-E locally, you can substitute this
@@ -17,44 +11,50 @@ for a `localhost` address.
 
 ## Common Examples
 
-| Query Parameters                            | Description                                                                                              |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `?url={url}&c0=ven:1&c2=ven:1,clz:1&view=Z` | Enable the first and third channel volumes and apply colorizing to the third. View in XY / Z-slice mode. |
+| Query Parameters                            | Description                                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `?url={url}&c0=ven:1&c2=ven:1,clz:1&view=Z` | Enable the first and third channel volumes and apply colorizing to the third. View in XY / Z-slice mode.                                    |
+| `?url={url}&c0=ven:1,rmp:15:180`            | Enables the volume of the first channel and ramps opacity for volume intensity values from 0% at intensity `15` to 100% at intensity `180`. |
 
-## Data parameters
+## Data source (`url`)
 
-Specifies the volume(s) to be loaded.
+The `url` parameter specifies the HTTPS URL of one or more volume to be loaded.
+Supported formats include OME-Zarr and OME-TIFF files. Multiple URLs can be
+loaded by including commas between each URL.
 
-| Query parameter | Description                                                                                                                                                                                                                                               | Example                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url`           | One or more volume URLs to load, optionally escaped using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent). If multiple URLs are provided, they should be separated by commas. | Two urls: `?url=https%3A%2F%2Fallencell.s3.amazonaws.com%2Faics%2Fnuc-morph-dataset%2Fhipsc_fov_nuclei_timelapse_dataset%2Fhipsc_fov_nuclei_timelapse_data_used_for_analysis%2Fbaseline_colonies_fov_timelapse_dataset%2F20200323_05_large%2Fraw.ome.zarr,https%3A%2F%2Fallencell.s3.amazonaws.com%2Faics%2Fnuc-morph-dataset%2Fhipsc_fov_nuclei_timelapse_dataset%2Fhipsc_fov_nuclei_timelapse_data_used_for_analysis%2Fbaseline_colonies_fov_timelapse_dataset%2F20200323_05_large%2Fseg.ome.zarr` |
-| `dataset`       | The name of a dataset to load. Only valid in Cell Feature Explorer, and must be used with `id`.                                                                                                                                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `id`            | The ID of a cell within the loaded dataset. Only valid in Cell Feature Explorer, and must be used with `dataset`.                                                                                                                                         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+Note that URLs containing special characters (`?`, `#`, `&`, or `,`) must be
+first encoded using
+[`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+
+| Query Parameters                | Description                               | Example                                                                                      |
+| ------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `?url={url}`                    | Load a volume from the specified URL.     | `?url=https://example.com/data/example1.ome.zarr`                                            |
+| `?url={url1},{url2},{url3},...` | Load multiple volumes from multiple URLs. | `?url=https://example.com/data/example1.ome.zarr,https://example.com/data/example2.ome.zarr` |
 
 ## View settings
 
 General global settings for the viewer.
 
-| Query parameter | Description                                                                                                     | Default        | Example                    |
-| --------------- | --------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------- |
-| `view`          | Initial view axis. Valid values are "3D", "X", "Y", and "Z".                                                    | `"3D"`         | `?view=Z`                  |
-| `mode`          | Rendering mode to use. Valid values are "volumetric", "maxproject", and "pathtrace".                            | `"volumetric"` | `?mode=maxproject`         |
-| `mask`          | The opacity of the mask channel, an integer in the range `[0, 100]`. Used to fade areas outside a segmentation. | `50`           | `?mask=75`                 |
-| `image`         | The type of image to display. Valid values are "cell" and "fov".                                                | `"cell"`       | `?image=fov`               |
-| `axes`          | Whether to show the axes helper. `1` is enabled, `0` is disabled.                                               | `0`            | `?axes=1`                  |
-| `bb`            | Whether to show the bounding box. `1` is enabled, `0` is disabled.                                              | `0`            | `?bb=1`                    |
-| `bbcol`         | The color of the bounding box, as a 6-digit hex color.                                                          | `ffffff`       | `?bbcol=ff0000`            |
-| `bgcol`         | The background color, as a 6-digit hex color.                                                                   | `000000`       | `?bgcol=ababab`            |
-| `rot`           | Whether to autorotate the view. `1` is enabled, `0` is disabled.                                                | `0`            | `?rot=1`                   |
-| `bright`        | The brightness of the image, a float in the range `[0, 100]`.                                                   | `70`           | `?bright=80`               |
-| `dens`          | Density modifier for the volume, a float in the range `[0, 100]`.                                               | `50`           | `?dens=60`                 |
-| `lvl`           | Levels for image intensity adjustment as three numeric values separated by commas.                              | `"0,128,255"`  | `?lvl=0,128,255`           |
-| `interp`        | Whether to enable interpolation. `1` is enabled, `0` is disabled.                                               | `1`            | `?interp=0`                |
-| `reg`           | Subregions per axis, as `min:max` pairs separated by commas.                                                    | `0:1,0:1,0:1`  | `?reg=0:0.5,0:0.5,0:0.5`   |
-| `slice`         | Slice position per X, Y, and Z axes, as a list of comma-separated floats.                                       | `0.5,0.5,0.5`  | `?slice=0.5,0.5,0.5`       |
-| `t`             | Frame number, for time-series volumes.                                                                          | `0`            | `?t=10`                    |
-| `cam`           | Camera transform settings, with one or more properties separated by commas. See below for details.              |                | `?cam=pos:1:2:3,tar:4:5:6` |
-| `c{n}`          | Channel settings for channel index `n`, with one or more properties separated by commas. See below for details. |                | `?c0=iso:1&c2=ven:1`       |
+| Query parameter | Description                                                                                                                                                | Default        | Example                    |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------- |
+| `view`          | Initial view axis. Valid values are "3D", "X", "Y", and "Z".                                                                                               | `"3D"`         | `?view=Z`                  |
+| `mode`          | Rendering mode to use. Valid values are "volumetric", "maxproject", and "pathtrace".                                                                       | `"volumetric"` | `?mode=maxproject`         |
+| `mask`          | The opacity of masked areas of the volume, an integer in the range `[0, 100]`. Used to fade areas outside a segmentation, must be used with mask channel.  | `50`           | `?mask=75`                 |
+| `image`         | Which of two images to display, for JSON-based volume data that provides two volumes for the cell and wider colony FOV. Valid values are "cell" and "fov". | `"cell"`       | `?image=fov`               |
+| `axes`          | Whether to show the axes helper. `1` is enabled, `0` is disabled.                                                                                          | `0`            | `?axes=1`                  |
+| `bb`            | Whether to show a wireframe bounding box around the volume. `1` is enabled, `0` is disabled.                                                               | `0`            | `?bb=1`                    |
+| `bbcol`         | The color of the bounding box, as a 6-digit hex color.                                                                                                     | `ffffff`       | `?bbcol=ff0000`            |
+| `bgcol`         | The background color, as a 6-digit hex color.                                                                                                              | `000000`       | `?bgcol=ababab`            |
+| `rot`           | Whether to autorotate the view, which will spin it slowly on the vertical axis. Only available in 3D view. `1` is enabled, `0` is disabled.                | `0`            | `?rot=1`                   |
+| `bright`        | The brightness of the image, a float in the range `[0, 100]`.                                                                                              | `70`           | `?bright=80`               |
+| `dens`          | Density modifier for the volume, a float in the range `[0, 100]`. Higher densities make the volume appear more opaque.                                     | `50`           | `?dens=60`                 |
+| `lvl`           | Low, medium, and high levels for image intensity adjustment, as three numeric values separated by commas.                                                  | `"35,140,255"` | `?lvl=0,128,255`           |
+| `interp`        | Whether to enable interpolation. `1` is enabled, `0` is disabled.                                                                                          | `1`            | `?interp=0`                |
+| `reg`           | Subregions per axis, as `min:max` number pairs separated by commas in a `[0,1]` range. `0:1,0:1,0:0.5` would clip half the volume along the Z axis.        | `0:1,0:1,0:1`  | `?reg=0:0.5,0:0.5,0:0.5`   |
+| `slice`         | Slice position per X, Y, and Z axes, as a list of comma-separated floats.                                                                                  | `0.5,0.5,0.5`  | `?slice=0.5,0.5,0.5`       |
+| `t`             | Frame number, for time-series volumes.                                                                                                                     | `0`            | `?t=10`                    |
+| `cam`           | Camera transform settings, with one or more properties separated by commas. _See below for details._                                                       |                | `?cam=pos:1:2:3,tar:4:5:6` |
+| `c{n}`          | Channel settings for channel index `n`, with one or more properties separated by commas. _See below for details._                                          |                | `?c0=iso:1&c2=ven:1`       |
 
 ## Camera transform settings (`cam`)
 
@@ -72,10 +72,10 @@ Note that the `pos`, `tar`, and `up` properties have different defaults dependin
 | `tar`    | Camera target as three floats separated by colons.    | `0:0:0`      | `0:0:0`          | `0:0:0`          | `0:0:0`          | `?cam=tar:4:5:6` |
 | `up`     | Camera up vector as three floats separated by colons. | `0:1:0`      | `0:1:0`          | `0:0:1`          | `0:0:1`          | `?cam=up:0:0:1`  |
 
-| Property | Description                                                                    | Default | Example           |
-| -------- | ------------------------------------------------------------------------------ | ------- | ----------------- |
-| `ort`    | Scale factor for orthographic cameras.                                         | 0.5     | `?cam=ortho:0.25` |
-| `fov`    | Vertical field of view for perspective cameras, in degrees from top to bottom. | 20      | `?cam=fov:60`     |
+| Property | Description                                                                    | Default | Example         |
+| -------- | ------------------------------------------------------------------------------ | ------- | --------------- |
+| `ort`    | Scale factor for orthographic cameras.                                         | 0.5     | `?cam=ort:0.25` |
+| `fov`    | Vertical field of view for perspective cameras, in degrees from top to bottom. | 20      | `?cam=fov:60`   |
 
 ## Channel Settings (`c{n}`)
 
@@ -83,15 +83,11 @@ Channel settings are specified per channel index, starting at 0. To set
 properties for channel `n`, the query parameter is `c{n}`, with each `key:value`
 property pair being separated by **commas**.
 
-For example, to override settings on channel index 2, the following query
-parameter would be added to the URL.
-
-```text
-?c2=ven:1,clz:1,col:8da3c0,cps:0:0:1:163:0.5:1:255:1:1
-```
-
-The above example enables the volume and the colorize mode, sets the color to
-`#8da3c0`, and sets the control points for the transfer function.
+> For example, to override settings on channel index 2, the following query
+> parameter would be added to the URL:
+> `?c2=ven:1,clz:1,col:8da3c0,cps:0:0:1:163:0.5:1:255:1:1`. This example enables
+> the volume and the colorize mode, sets the color to `#8da3c0`, and sets the
+> control points for the transfer function.
 
 | Property | Description                                                                                                                                        | Default                                | Example                             |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
@@ -105,7 +101,9 @@ The above example enables the volume and the colorize mode, sets the color to
 | `cpe`    | Use and show the control points instead of the ramp on load. Set to `1` to enable or `0` to disable (shows ramp values instead).                   | `0`                                    | `?c0=cpe:1`                         |
 | `cps`    | Control points for the transfer function, as a list of `x:opacity:color` triplets separated by a colon. If provided, overrides the `lut` field.    | `0:0:ffffff:255:1:ffffff`              | `?c0=cps:0:0:ff0000:150:0.5:ffff00` |
 | `rmp`    | Raw ramp values, which should be two numeric values separated by a colon. If provided, overrides the `lut` field when calculating the ramp values. | `0:255`                                | `?c0=rmp:0:255`                     |
-| `lut`    | Lookup table (LUT) to map from volume intensity values to opacity, as a pair of alphanumeric values separated by a colon. See below for details.   | `0:255`                                | `?c0=lut:0:255`                     |
+| `lut`    | Lookup table (LUT) to map from volume intensity values to opacity, as a pair of alphanumeric values separated by a colon. _See below for details._ | `0:255`                                | `?c0=lut:0:255`                     |
+
+### Lookup Table (`lut`)
 
 The `lut` property maps from volume intensity values to opacity. The first value
 is the minimum intensity, and the second value is the maximum intensity. Values
