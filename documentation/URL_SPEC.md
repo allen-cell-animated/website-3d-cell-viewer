@@ -1,8 +1,8 @@
 # Vol-E App URL Specification
 
-When used as a standalone app, Vol-E allows you to specify view settings via
-query parameters in the URL. This document provides an overview of the parameter
-specification.
+When used as a standalone app, Vol-E allows you to optionally specify view
+settings via query parameters in the URL. This document provides an overview of
+the parameter specification.
 
 You can include none or all of these parameters in the URL. If a parameter is
 not specified, the listed default value will be used instead.
@@ -58,7 +58,7 @@ General global settings for the viewer.
 | `lvl`           | Low, medium, and high levels for image intensity adjustment                                                             | Three numbers values separated by commas                            | `35,140,255`  | `?lvl=0,128,255`                |
 | `interp`        | Whether to enable interpolation.                                                                                        | `1` (enabled) or `0` (disabled)                                     | `1`           | `?interp=0`                     |
 | `reg`           | Subregions per axis.                                                                                                    | Three `min:max` number pairs separated by commas in a `[0,1]` range | `0:1,0:1,0:1` | `?reg=0:0.5,0:0.5,0:0.5`        |
-| `slice`         | Slice position per X, Y, and Z axes, as a list of comma-separated floats.                                               | Three floats, separated by commas                                   | `0.5,0.5,0.5` | `?slice=0.5,0.5,0.5`            |
+| `slice`         | Slice position along each axis to show if the view mode is set to `X`, `Y`, or `Z`.                                     | Three floats, separated by commas                                   | `0.5,0.5,0.5` | `?slice=0.5,0.5,0.5`            |
 | `t`             | Frame number, for time-series volumes.                                                                                  | Integer                                                             | `0`           | `?t=10`                         |
 | `cam`           | Camera transform settings, with one or more properties separated by commas.                                             | [_See 'Camera transform settings'_](#camera-transform-settings-cam) |               | `?cam=pos:1:2:3,tar:4:5:6`      |
 | `c{n}`          | Channel settings for channel index `n`, with one or more properties separated by commas.                                | [_See 'Channel settings'_](#channel-settings-cn)                    |               | `?c0=iso:1&c2=ven:1,col:ff23cc` |
@@ -68,16 +68,18 @@ General global settings for the viewer.
 The `cam` query parameter is used to set one or more properties of the initial camera
 transform. Each property is a `key:value` property pair separated by **commas**.
 
-For example, to set the camera position to `(1,2,3)` and the target position to `(4,5,6)`, the following query
-parameter could be added to the URL: `cam=pos:1:2:3,tar:4:5:6`
+For example, to set the camera position to `(1,2,3)` and the target position to
+`(4,5,6)`, the following query parameter could be added to the URL:
+`cam=pos:1:2:3,tar:4:5:6`
 
-Note that the `pos`, `tar`, and `up` properties have different defaults depending on the `view` setting.
+Note that the `pos`, `tar`, and `up` properties may have different defaults
+depending on the initial `view` setting.
 
-| Property | Description      | Expected Type                    | Default (3D) | Default (Z / XY) | Default (Y / XZ) | Default (X / YZ) | Example          |
-| -------- | ---------------- | -------------------------------- | ------------ | ---------------- | ---------------- | ---------------- | ---------------- |
-| `pos`    | Camera position  | Three floats separated by colons | `0:0:5`      | `0:0:2`          | `0:2:0`          | `2:0:0`          | `?cam=pos:1:2:3` |
-| `tar`    | Camera target    | Three floats separated by colons | `0:0:0`      | `0:0:0`          | `0:0:0`          | `0:0:0`          | `?cam=tar:4:5:6` |
-| `up`     | Camera up vector | Three floats separated by colons | `0:1:0`      | `0:1:0`          | `0:0:1`          | `0:0:1`          | `?cam=up:0:0:1`  |
+| Property | Description                                                                       | Expected Type                    | Default (3D) | Default (Z / XY) | Default (Y / XZ) | Default (X / YZ) | Example          |
+| -------- | --------------------------------------------------------------------------------- | -------------------------------- | ------------ | ---------------- | ---------------- | ---------------- | ---------------- |
+| `pos`    | Camera position.                                                                  | Three floats separated by colons | `0:0:5`      | `0:0:2`          | `0:2:0`          | `2:0:0`          | `?cam=pos:1:2:3` |
+| `up`     | Camera up vector. Used to solve for camera rotation.                              | Three floats separated by colons | `0:1:0`      | `0:1:0`          | `0:0:1`          | `0:0:1`          | `?cam=up:0:0:1`  |
+| `tar`    | Camera target. From the starting `pos`, the camera will point towards the target. | Three floats separated by colons | `0:0:0`      | `0:0:0`          | `0:0:0`          | `0:0:0`          | `?cam=tar:4:5:6` |
 
 | Property | Description                                                                    | Expected Type | Default | Example         |
 | -------- | ------------------------------------------------------------------------------ | ------------- | ------- | --------------- |
@@ -98,8 +100,8 @@ property pair being separated by **commas**.
 
 | Property | Description                                                                               | Expected Type                                                                                  | Default                                | Example                             |
 | -------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| `ven`    | Volume enabled.                                                                           | `1` (enabled) or `0` (disabled)                                                                | `0` (`1` for the first three channels) | `?c0=ven:1`                         |
-| `iso`    | Isosurface enabled.                                                                       | `1` (enabled) or `0` (disabled)                                                                | `0`                                    | `?c0=iso:1`                         |
+| `ven`    | Whether the volume is enabled.                                                            | `1` (enabled) or `0` (disabled)                                                                | `0` (`1` for the first three channels) | `?c0=ven:1`                         |
+| `iso`    | Whether the isosurface is enabled.                                                        | `1` (enabled) or `0` (disabled)                                                                | `0`                                    | `?c0=iso:1`                         |
 | `isv`    | Isosurface value, the intensity value at which to generate the isosurface.                | Number in the range `[0, 255]`                                                                 | `128`                                  | `?c0=isv:195`                       |
 | `col`    | Base channel color, applied to volumes and isosurfaces.                                   | 6-digit hex color                                                                              | (varies by index)                      | `?c0=col:af38c0`                    |
 | `clz`    | Colorize, used for segmentations where each ID should be a different color.               | `1` (enabled) or `0` (disabled)                                                                | `0`                                    | `?c0=clz:1`                         |
@@ -123,7 +125,7 @@ directly reference these bin indices.
 span of 53 to 136 on the X axis.](./assets/example_histogram.png)
 
 For example, the above control points are at bin indices `0`, `53`, `136`, and
-`255`. Depending on the range of the channel's intensity values, these may
+`255`. Depending on the range of the channel's values, these may
 represent different raw intensity values.
 
 | Min raw intensity | Max raw intensity | Bin `0` intensity | Bin `53` intensity | Bin `136` intensity | Bin `255` intensity |
