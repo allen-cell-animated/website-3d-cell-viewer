@@ -10,7 +10,7 @@ import {
   Volume,
   VolumeFileFormat,
   VolumeLoaderContext,
-} from "@aics/volume-viewer";
+} from "@aics/vole-core";
 import { Layout } from "antd";
 import { debounce } from "lodash";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";

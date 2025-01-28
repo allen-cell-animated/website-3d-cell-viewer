@@ -1,27 +1,27 @@
-import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
-import { CameraState, ControlPoint } from "@aics/volume-viewer";
+import { CameraState, ControlPoint } from "@aics/vole-core";
+import { isEqual } from "lodash";
 
+import FirebaseRequest, { DatasetMetaData } from "../../public/firebase";
+import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
 import type {
   ChannelState,
   ViewerState,
   ViewerStateContextType,
 } from "../../src/aics-image-viewer/components/ViewerStateProvider/types";
-import type { AppProps } from "../../src/aics-image-viewer/components/App/types";
-import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
-import {
-  ViewerChannelSetting,
-  ViewerChannelSettings,
-} from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
-import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
-import { PerAxis } from "../../src/aics-image-viewer/shared/types";
-import { clamp } from "./math_utils";
-import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
-import { isEqual } from "lodash";
 import {
   getDefaultCameraState,
   getDefaultChannelState,
   getDefaultViewerState,
 } from "../../src/aics-image-viewer/shared/constants";
+import { ImageType, RenderMode, ViewMode } from "../../src/aics-image-viewer/shared/enums";
+import { PerAxis } from "../../src/aics-image-viewer/shared/types";
+import { ColorArray } from "../../src/aics-image-viewer/shared/utils/colorRepresentations";
+import {
+  ViewerChannelSetting,
+  ViewerChannelSettings,
+} from "../../src/aics-image-viewer/shared/utils/viewerChannelSettings";
+import { removeMatchingProperties, removeUndefinedProperties } from "./datatype_utils";
+import { clamp } from "./math_utils";
 
 export const ENCODED_COMMA_REGEX = /%2C/g;
 export const ENCODED_COLON_REGEX = /%3A/g;

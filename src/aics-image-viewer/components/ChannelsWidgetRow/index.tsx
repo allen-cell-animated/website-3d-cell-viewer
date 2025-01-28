@@ -1,20 +1,21 @@
-import React, { useState, useCallback } from "react";
-import { Button, List, Checkbox } from "antd";
+import { Channel } from "@aics/vole-core";
+import { Button, Checkbox, List } from "antd";
 import { CheckboxChangeEvent } from "antd/lib/checkbox";
-import { Channel } from "@aics/volume-viewer";
+import React, { useCallback, useState } from "react";
 
-import TfEditor from "../TfEditor";
 import { ISOSURFACE_OPACITY_SLIDER_MAX } from "../../shared/constants";
-import ColorPicker from "../ColorPicker";
-import { ColorObject, colorObjectToArray, colorArrayToObject } from "../../shared/utils/colorRepresentations";
+import { IsosurfaceFormat } from "../../shared/types";
+import { colorArrayToObject, ColorObject, colorObjectToArray } from "../../shared/utils/colorRepresentations";
 import {
-  type ChannelState,
   type ChannelSettingUpdater,
+  type ChannelState,
   type SingleChannelSettingUpdater,
 } from "../ViewerStateProvider/types";
-import { IsosurfaceFormat } from "../../shared/types";
-import ViewerIcon from "../shared/ViewerIcon";
+
+import ColorPicker from "../ColorPicker";
 import SliderRow from "../shared/SliderRow";
+import ViewerIcon from "../shared/ViewerIcon";
+import TfEditor from "../TfEditor";
 
 import "./styles.css";
 
@@ -40,20 +41,20 @@ const ChannelsWidgetRow: React.FC<ChannelsWidgetRowProps> = (props: ChannelsWidg
   );
 
   const volumeCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    changeChannelSetting(index, {"volumeEnabled": target.checked});
+    changeChannelSetting(index, { volumeEnabled: target.checked });
   };
 
   const isosurfaceCheckHandler = ({ target }: CheckboxChangeEvent): void => {
-    changeChannelSetting(index, {"isosurfaceEnabled": target.checked});
+    changeChannelSetting(index, { isosurfaceEnabled: target.checked });
   };
 
-  const onIsovalueChange = ([newValue]: number[]): void => changeSettingForThisChannel({"isovalue": newValue});
+  const onIsovalueChange = ([newValue]: number[]): void => changeSettingForThisChannel({ isovalue: newValue });
   const onOpacityChange = ([newValue]: number[]): void =>
-    changeSettingForThisChannel({"opacity": newValue / ISOSURFACE_OPACITY_SLIDER_MAX});
+    changeSettingForThisChannel({ opacity: newValue / ISOSURFACE_OPACITY_SLIDER_MAX });
 
   const onColorChange = (newRGB: ColorObject, _oldRGB?: ColorObject, index?: number): void => {
     const color = colorObjectToArray(newRGB);
-    props.changeChannelSetting(index!, {"color": color});
+    props.changeChannelSetting(index!, { color: color });
   };
 
   const createColorPicker = (): React.ReactNode => (

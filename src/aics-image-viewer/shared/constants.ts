@@ -1,4 +1,4 @@
-import { CameraState } from "@aics/volume-viewer";
+import { CameraState } from "@aics/vole-core";
 
 import { ChannelState, ViewerState } from "../components/ViewerStateProvider/types";
 import { ImageType, RenderMode, ViewMode } from "./enums";

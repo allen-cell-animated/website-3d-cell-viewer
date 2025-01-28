@@ -1,4 +1,4 @@
-import { Channel } from "@aics/volume-viewer";
+import { Channel } from "@aics/vole-core";
 import { Collapse, CollapseProps, List } from "antd";
 import React from "react";
 
