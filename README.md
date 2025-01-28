@@ -23,12 +23,12 @@ or as React component:
 - import the app as `import { ImageViewerApp } from "@aics/vole-app"`
 - send in props as is shown in [`public/index.jsx`](public/index.tsx)
 
-```
-    <ImageViewerApp
-        baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
-        cellPath="AICS-17/AICS-17_4187_23618_atlas.json"
-        ... (also see src/aics-image-viewer/components/App/types.ts for full props specification) ...
-    />
+```jsx
+<ImageViewerApp
+  baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
+  cellPath="AICS-17/AICS-17_4187_23618_atlas.json"
+  // ... (also see src/aics-image-viewer/components/App/types.ts for full props specification) ...
+/>
 ```
 
 ### Running with Docker
@@ -40,6 +40,6 @@ docker build -t vole-app-image .
 docker run --rm -p 9020:80 --name vole-app vole-app-image
 ```
 
-This will create a new docker image called `vole-app` and run it on port 9020. You can access the viewer by navigating to http://localhost:9020 in your browser.
+This will create a new docker image called `vole-app` and run it on port 9020. You can access the viewer by navigating to [http://localhost:9020](http://localhost:9020) in your browser.
 
 To rebuild changes, run the above commands again. (The `--rm` flag will automatically delete the existing container when it is stopped.)
