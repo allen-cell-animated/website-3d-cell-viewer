@@ -421,6 +421,26 @@
     }
 }
 
+.viewer-control-row{
+  display:flex;
+  align-items:center;
+  margin-right:10px;
+}
+
+  .viewer-control-row:not(:last-child){
+    margin-bottom:20px;
+  }
+
+  .viewer-control-row .control-name{
+    color:var(--color-controlpanel-text);
+    flex:2;
+    white-space:nowrap;
+  }
+
+  .viewer-control-row .control{
+    flex:5;
+  }
+
 /*! nouislider - 14.7.0 - 4/6/2021 */
 .noUi-target,
 .noUi-target *{
@@ -694,26 +714,6 @@
   top:auto;
   right:28px;
 }
-
-.viewer-control-row{
-  display:flex;
-  align-items:center;
-  margin-right:10px;
-}
-
-  .viewer-control-row:not(:last-child){
-    margin-bottom:20px;
-  }
-
-  .viewer-control-row .control-name{
-    color:var(--color-controlpanel-text);
-    flex:2;
-    white-space:nowrap;
-  }
-
-  .viewer-control-row .control{
-    flex:5;
-  }
 
 .channel-row .tf-editor-svg.dragging.basic{
       cursor:pointer;
