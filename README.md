@@ -2,7 +2,7 @@
 
 Volume Explorer (Vol-E) is a browser based volume viewer built with React and WebGL (Three.js). This package wraps the [vole-core](https://github.com/allen-cell-animated/vole-core) library.
 
-For the latest stable release, please visit [https://volumeviewer.allencell.org](https://volumeviewer.allencell.org)
+For the latest stable release, please visit [https://vole.allencell.org](https://vole.allencell.org)
 
 Volume data is provided to the core 3d viewer via one of the following file formats:
 
