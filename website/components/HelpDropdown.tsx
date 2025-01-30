@@ -81,7 +81,7 @@ export default function HelpDropdown(): ReactElement {
         footer={<Button onClick={closeVersionModal}>Close</Button>}
       >
         <FlexColumnAlignCenter $gap={0}>
-          <p style={{ margin: 0 }}>Vole-E App v{VOLEAPP_VERSION}</p>
+          <p style={{ margin: 0 }}>Vol-E App v{VOLEAPP_VERSION}</p>
           <p style={{ margin: 0 }}>Vol-E Core plugin v{VOLECORE_VERSION}</p>
         </FlexColumnAlignCenter>
       </Modal>
