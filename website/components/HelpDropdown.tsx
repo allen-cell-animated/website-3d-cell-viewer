@@ -82,7 +82,7 @@ export default function HelpDropdown(): ReactElement {
       >
         <FlexColumnAlignCenter $gap={0}>
           <p style={{ margin: 0 }}>Vol-E App v{VOLEAPP_VERSION}</p>
-          <p style={{ margin: 0 }}>Vol-E Core plugin v{VOLECORE_VERSION}</p>
+          <p style={{ margin: 0 }}>Vol-E Core package v{VOLECORE_VERSION}</p>
         </FlexColumnAlignCenter>
       </Modal>
     </div>
