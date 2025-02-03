@@ -25,7 +25,8 @@ for a `localhost` address.
 The `url` parameter specifies the HTTPS URL of one or more volume to be loaded.
 Supported formats include OME-Zarr and OME-TIFF files.
 
-Multiple volumes can be loaded by including commas between each URL. This
+Multiple volumes can be loaded by including commas between each URL, and will
+appear in the viewer as a single volume with all channels appended. This
 requires all volumes to have **some resolution/scale where the dimensions
 match.** The viewer will throw an error if there is no match possible.
 
@@ -33,35 +34,34 @@ URLs containing special characters (`?`, `#`, `&`, or `,`) must be first encoded
 using
 [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
-| Query Parameters                | Description                               | Example                                                                                      |
-| ------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `?url={url}`                    | Load a volume from the specified URL.     | `?url=https://example.com/data/example1.ome.zarr`                                            |
-| `?url={url1},{url2},{url3},...` | Load multiple volumes from multiple URLs. | `?url=https://example.com/data/example1.ome.zarr,https://example.com/data/example2.ome.zarr` |
+| Query Parameters                | Description                                                                  | Example                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `?url={url}`                    | Load a volume from the specified URL.                                        | `?url=https://example.com/data/example1.ome.zarr`                                            |
+| `?url={url1},{url2},{url3},...` | Load multiple volumes from multiple URLs, appending their channels together. | `?url=https://example.com/data/example1.ome.zarr,https://example.com/data/example2.ome.zarr` |
 
 ## View settings
 
 General global settings for the viewer.
 
-| Query parameter | Description                                                                                                             | Expected Type                                                       | Default       | Example                         |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------- | ------------------------------- |
-| `view`          | Initial view axis.                                                                                                      | `X`, `Y`, `Z`, or `3D`                                              | `3D`          | `?view=Z`                       |
-| `mode`          | Rendering mode to use.                                                                                                  | `volumetric`, `maxproject`, or `pathtrace`                          | `volumetric`  | `?mode=maxproject`              |
-| `mask`          | The opacity of masked areas of the volume. Used to fade areas outside a segmentation, must be used with mask channel.   | Number in range `[0, 100]`                                          | `50`          | `?mask=75`                      |
-| `image`         | Which of two images to display, for JSON-based volume data that provides two volumes for the cell and wider colony FOV. | `cell` or `fov`                                                     | `cell`        | `?image=fov`                    |
-| `axes`          | Whether to show the axes helper.                                                                                        | `1` (enabled) or `0` (disabled)                                     | `0`           | `?axes=1`                       |
-| `bb`            | Whether to show a wireframe bounding box around the volume.                                                             | `1` (enabled) or `0` (disabled)                                     | `0`           | `?bb=1`                         |
-| `bbcol`         | The color of the bounding box.                                                                                          | 6-digit hex color                                                   | `ffffff`      | `?bbcol=ff0000`                 |
-| `bgcol`         | The background color.                                                                                                   | 6-digit hex color                                                   | `000000`      | `?bgcol=ababab`                 |
-| `rot`           | Whether to autorotate the view, which will spin it slowly on the vertical axis. Only available in 3D view.              | `1` (enabled) or `0` (disabled)                                     | `0`           | `?rot=1`                        |
-| `bright`        | The brightness of the image.                                                                                            | Number in the range `[0, 100]`                                      | `70`          | `?bright=80`                    |
-| `dens`          | Density modifier for the volume`. Higher densities make the volume appear more opaque.                                  | Number in the range `[0, 100]`                                      | `50`          | `?dens=60`                      |
-| `lvl`           | Low, medium, and high levels for image intensity adjustment                                                             | Three numbers values separated by commas                            | `35,140,255`  | `?lvl=0,128,255`                |
-| `interp`        | Whether to enable interpolation.                                                                                        | `1` (enabled) or `0` (disabled)                                     | `1`           | `?interp=0`                     |
-| `reg`           | Subregions per axis.                                                                                                    | Three `min:max` number pairs separated by commas in a `[0,1]` range | `0:1,0:1,0:1` | `?reg=0:0.5,0:0.5,0:0.5`        |
-| `slice`         | Slice position along each axis to show if the view mode is set to `X`, `Y`, or `Z`.                                     | Three floats, separated by commas                                   | `0.5,0.5,0.5` | `?slice=0.5,0.5,0.5`            |
-| `t`             | Frame number, for time-series volumes.                                                                                  | Integer                                                             | `0`           | `?t=10`                         |
-| `cam`           | Camera transform settings, with one or more properties separated by commas.                                             | [_See 'Camera transform settings'_](#camera-transform-settings-cam) |               | `?cam=pos:1:2:3,tar:4:5:6`      |
-| `c{n}`          | Channel settings for channel index `n`, with one or more properties separated by commas.                                | [_See 'Channel settings'_](#channel-settings-cn)                    |               | `?c0=iso:1&c2=ven:1,col:ff23cc` |
+| Query parameter | Description                                                                                                           | Expected values                                                     | Default       | Example                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------- | ------------------------------- |
+| `view`          | Initial view axis.                                                                                                    | `X`, `Y`, `Z`, or `3D`                                              | `3D`          | `?view=Z`                       |
+| `mode`          | Rendering mode to use.                                                                                                | `volumetric`, `maxproject`, or `pathtrace`                          | `volumetric`  | `?mode=maxproject`              |
+| `mask`          | The opacity of masked areas of the volume. Used to fade areas outside a segmentation, must be used with mask channel. | Number in range `[0, 100]`                                          | `50`          | `?mask=75`                      |
+| `axes`          | Whether to show the axes helper.                                                                                      | `1` (enabled) or `0` (disabled)                                     | `0`           | `?axes=1`                       |
+| `bb`            | Whether to show a wireframe bounding box around the volume.                                                           | `1` (enabled) or `0` (disabled)                                     | `0`           | `?bb=1`                         |
+| `bbcol`         | The color of the bounding box.                                                                                        | 6-digit hex color                                                   | `ffffff`      | `?bbcol=ff0000`                 |
+| `bgcol`         | The background color.                                                                                                 | 6-digit hex color                                                   | `000000`      | `?bgcol=ababab`                 |
+| `rot`           | Whether to autorotate the view, which will spin it slowly on the vertical axis. Only available in 3D view.            | `1` (enabled) or `0` (disabled)                                     | `0`           | `?rot=1`                        |
+| `bright`        | The brightness of the image.                                                                                          | Number in the range `[0, 100]`                                      | `70`          | `?bright=80`                    |
+| `dens`          | Density modifier for the volume. Higher densities make the volume appear more opaque.                                 | Number in the range `[0, 100]`                                      | `50`          | `?dens=60`                      |
+| `lvl`           | Low, medium, and high levels for image intensity adjustment                                                           | Three numbers in the range `[0, 255]` separated by commas           | `35,140,255`  | `?lvl=0,128,255`                |
+| `interp`        | Whether to enable interpolation.                                                                                      | `1` (enabled) or `0` (disabled)                                     | `1`           | `?interp=0`                     |
+| `reg`           | Subregions per axis.                                                                                                  | Three `min:max` number pairs separated by commas in a `[0,1]` range | `0:1,0:1,0:1` | `?reg=0:0.5,0:0.5,0:0.5`        |
+| `slice`         | Slice position along each axis to show if the view mode is set to `X`, `Y`, or `Z`.                                   | Three floats, separated by commas                                   | `0.5,0.5,0.5` | `?slice=0.5,0.5,0.5`            |
+| `t`             | Frame number, for time-series volumes.                                                                                | Integer                                                             | `0`           | `?t=10`                         |
+| `cam`           | Camera transform settings, with one or more properties separated by commas.                                           | [_See 'Camera transform settings'_](#camera-transform-settings-cam) |               | `?cam=pos:1:2:3,tar:4:5:6`      |
+| `c{n}`          | Channel settings for channel index `n`, with one or more properties separated by commas.                              | [_See 'Channel settings'_](#channel-settings-cn)                    |               | `?c0=iso:1&c2=ven:1,col:ff23cc` |
 
 ## Camera transform settings (`cam`)
 
@@ -75,16 +75,16 @@ For example, to set the camera position to `(1,2,3)` and the target position to
 Note that the `pos`, `tar`, and `up` properties may have different defaults
 depending on the initial `view` setting.
 
-| Property | Description                                                                       | Expected Type                    | Default (3D) | Default (Z / XY) | Default (Y / XZ) | Default (X / YZ) | Example          |
+| Property | Description                                                                       | Expected values                  | Default (3D) | Default (Z / XY) | Default (Y / XZ) | Default (X / YZ) | Example          |
 | -------- | --------------------------------------------------------------------------------- | -------------------------------- | ------------ | ---------------- | ---------------- | ---------------- | ---------------- |
 | `pos`    | Camera position.                                                                  | Three floats separated by colons | `0:0:5`      | `0:0:2`          | `0:2:0`          | `2:0:0`          | `?cam=pos:1:2:3` |
 | `up`     | Camera up vector. Used to solve for camera rotation.                              | Three floats separated by colons | `0:1:0`      | `0:1:0`          | `0:0:1`          | `0:0:1`          | `?cam=up:0:0:1`  |
 | `tar`    | Camera target. From the starting `pos`, the camera will point towards the target. | Three floats separated by colons | `0:0:0`      | `0:0:0`          | `0:0:0`          | `0:0:0`          | `?cam=tar:4:5:6` |
 
-| Property | Description                                                                    | Expected Type | Default | Example         |
-| -------- | ------------------------------------------------------------------------------ | ------------- | ------- | --------------- |
-| `ort`    | Scale factor for orthographic cameras.                                         | Number        | 0.5     | `?cam=ort:0.25` |
-| `fov`    | Vertical field of view for perspective cameras, in degrees from top to bottom. | Number        | 20      | `?cam=fov:60`   |
+| Property | Description                                                                    | Expected values | Default | Example         |
+| -------- | ------------------------------------------------------------------------------ | --------------- | ------- | --------------- |
+| `ort`    | Scale factor for orthographic cameras.                                         | Number          | 0.5     | `?cam=ort:0.25` |
+| `fov`    | Vertical field of view for perspective cameras, in degrees from top to bottom. | Number          | 20      | `?cam=fov:60`   |
 
 ## Channel Settings (`c{n}`)
 
@@ -98,7 +98,7 @@ property pair being separated by **commas**.
 > the volume and the colorize mode, sets the color to `#8da3c0`, and sets the
 > control points for the transfer function.
 
-| Property | Description                                                                               | Expected Type                                                                                  | Default                                | Example                             |
+| Property | Description                                                                               | Expected values                                                                                | Default                                | Example                             |
 | -------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
 | `ven`    | Whether the volume is enabled.                                                            | `1` (enabled) or `0` (disabled)                                                                | `0` (`1` for the first three channels) | `?c0=ven:1`                         |
 | `iso`    | Whether the isosurface is enabled.                                                        | `1` (enabled) or `0` (disabled)                                                                | `0`                                    | `?c0=iso:1`                         |
@@ -116,9 +116,13 @@ property pair being separated by **commas**.
 
 When loaded, each channel's raw intensity values are sorted into one of 256
 bins, where the bin index `0` holds the minimum raw intensity value of the
-channel and the bin index `255` holds the maximum raw intensity value. Certain
-properties like `cps` (control points), `rmp` (ramp), and `lut` (lookup table)
-directly reference these bin indices.
+channel and the bin index `255` holds the maximum raw intensity value. Like any
+binned histogram, each bin can represent multiple values-- if there are more
+than 256 intensities in the channel, some bins will contain more than one
+intensity value.
+
+Certain properties like `cps` (control points), `rmp` (ramp), and `lut` (lookup
+table) directly reference these bin indices.
 
 ![Screenshot of Volume Viewer with a volume in advanced mode. A histogram with
 255 bins is visible, with a ramp increasing from 0 to 1 on the Y axis in the
@@ -126,13 +130,13 @@ span of 53 to 136 on the X axis.](./assets/example_histogram.png)
 
 For example, the above control points are at bin indices `0`, `53`, `136`, and
 `255`. Depending on the range of the channel's values, these may
-represent different raw intensity values.
+represent different raw intensity pixel values.
 
 | Min raw intensity | Max raw intensity | Bin `0` intensity | Bin `53` intensity | Bin `136` intensity | Bin `255` intensity |
 | ----------------- | ----------------- | ----------------- | ------------------ | ------------------- | ------------------- |
 | 0                 | 255               | 0                 | 53                 | 136                 | 255                 |
 | 50                | 200               | 50                | 103                | 166                 | 200                 |
-| 0                 | 1                 | 0                 | 0.207              | 0.533               | 1                   |
+| 45                | 1000              | 45-48             | 244-247            | 555-558             | 997-1000            |
 
 ### Lookup Table (`lut`)
 
@@ -144,7 +148,8 @@ following:
 - Plain numbers are treated as bin indices, in a `[0, 255]` range.
 - `p{n}` represents a percentile, where `n` is a percentile in the `[0, 100]` range.
 - `m{n}` represents the volume's median intensity multiplied by `n / 100`.
-- `autoij` in either the min or max fields will use the ["auto" algorithm from
+- `autoij` in either the min or max fields will approximate the ["auto"
+  algorithm from
   ImageJ](https://github.com/imagej/ImageJ/blob/7746fcb0f5744a7a7758244c5dcd2193459e6e0e/ij/plugin/frame/ContrastAdjuster.java#L816)
   to select the min and max.
 
