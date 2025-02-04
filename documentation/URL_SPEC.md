@@ -118,8 +118,8 @@ When loaded, each channel's raw intensity values are sorted into one of 256
 bins, where the bin index `0` holds the minimum raw intensity value of the
 channel and the bin index `255` holds the maximum raw intensity value. Like any
 binned histogram, each bin can represent multiple values-- if there are more
-than 256 intensities in the channel, some bins will contain more than one
-intensity value.
+than 256 intensities in the channel, values will be evenly distributed across
+bins.
 
 Certain properties like `cps` (control points), `rmp` (ramp), and `lut` (lookup
 table) directly reference these bin indices.
