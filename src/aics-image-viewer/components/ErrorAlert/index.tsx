@@ -9,9 +9,7 @@ import "./styles.css";
 
 const IssueLink: React.FC<React.PropsWithChildren<{ bug?: boolean }>> = ({ bug, children }) => (
   <a
-    href={`https://github.com/allen-cell-animated/website-3d-cell-viewer/issues/new${
-      bug ? "?template=bug_report.md" : "/choose"
-    }`}
+    href={`https://github.com/allen-cell-animated/vole-app/issues/new${bug ? "?template=bug_report.md" : "/choose"}`}
     target="_blank"
     rel="noreferrer noopener"
   >

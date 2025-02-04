@@ -1,8 +1,8 @@
 # Vol-E App
 
-Volume Explorer (Vol-E) is a browser based volume viewer built with React and WebGL (Three.js). This package wraps the [vole-core](https://github.com/allen-cell-animated/volume-viewer) library.
+Volume Explorer (Vol-E) is a browser based volume viewer built with React and WebGL (Three.js). This package wraps the [vole-core](https://github.com/allen-cell-animated/vole-core) library.
 
-For the latest stable release, please visit https://allen-cell-animated.github.io/website-3d-cell-viewer-release/
+For the latest stable release, please visit [https://vole.allencell.org](https://vole.allencell.org)
 
 Volume data is provided to the core 3d viewer via one of the following file formats:
 
@@ -14,7 +14,7 @@ The volume shader itself is a heavily modified version of one that has distant o
 
 ## to use
 
-- `https://allen-cell-animated.github.io/website-3d-cell-viewer-release/?url=path/to/ZARR`
+- `https://vole.allencell.org/?url=path/to/ZARR`
 - for more url parameters, see [`URL_SPEC.md`](documentation\URL_SPEC.md)
 
 or as React component:
@@ -23,12 +23,12 @@ or as React component:
 - import the app as `import { ImageViewerApp } from "@aics/vole-app"`
 - send in props as is shown in [`public/index.jsx`](public/index.tsx)
 
-```
-    <ImageViewerApp
-        baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
-        cellPath="AICS-17/AICS-17_4187_23618_atlas.json"
-        ... (also see src/aics-image-viewer/components/App/types.ts for full props specification) ...
-    />
+```jsx
+<ImageViewerApp
+  baseUrl="http://dev-aics-dtp-001.corp.alleninstitute.org/cellviewer-1-4-0/Cell-Viewer_Thumbnails/"
+  cellPath="AICS-17/AICS-17_4187_23618_atlas.json"
+  // ... (also see src/aics-image-viewer/components/App/types.ts for full props specification) ...
+/>
 ```
 
 ### Running with Docker
@@ -40,6 +40,6 @@ docker build -t vole-app-image .
 docker run --rm -p 9020:80 --name vole-app vole-app-image
 ```
 
-This will create a new docker image called `vole-app` and run it on port 9020. You can access the viewer by navigating to http://localhost:9020 in your browser.
+This will create a new docker image called `vole-app` and run it on port 9020. You can access the viewer by navigating to [http://localhost:9020](http://localhost:9020) in your browser.
 
 To rebuild changes, run the above commands again. (The `--rm` flag will automatically delete the existing container when it is stopped.)

@@ -13,12 +13,12 @@ import LandingPage from "../website/components/LandingPage";
 import "./App.css";
 
 // vars filled at build time using webpack DefinePlugin
-console.log(`website-3d-cell-viewer ${WEBSITE3DCELLVIEWER_BUILD_ENVIRONMENT} build`);
-console.log(`website-3d-cell-viewer Version ${WEBSITE3DCELLVIEWER_VERSION}`);
-console.log(`website-3d-cell-viewer Basename ${WEBSITE3DCELLVIEWER_BASENAME}`);
-console.log(`volume-viewer Version ${VOLUMEVIEWER_VERSION}`);
+console.log(`vole-app ${VOLEAPP_BUILD_ENVIRONMENT} build`);
+console.log(`vole-app Version ${VOLEAPP_VERSION}`);
+console.log(`vole-app Basename ${VOLEAPP_BASENAME}`);
+console.log(`vole-core Version ${VOLECORE_VERSION}`);
 
-const basename = WEBSITE3DCELLVIEWER_BASENAME;
+const basename = VOLEAPP_BASENAME;
 
 // Decode URL path if it was encoded for GitHub pages or uses hash routing.
 const locationUrl = new URL(window.location.toString());
@@ -46,7 +46,7 @@ const routes = [
 
 const router = createBrowserRouter(routes, { basename: basename });
 
-const root = createRoot(document.getElementById("cell-viewer"));
+const root = createRoot(document.getElementById("cell-viewer")!);
 root.render(
   <StyleProvider>
     <RouterProvider router={router} />
