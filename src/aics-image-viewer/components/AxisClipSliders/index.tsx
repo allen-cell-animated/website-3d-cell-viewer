@@ -291,7 +291,7 @@ const AxisClipSliders: React.FC<AxisClipSlidersProps> = (props) => {
         </span>
       )}
 
-      {props.numScenes && (
+      {props.numScenes > 1 && (
         <span className="slider-group">
           <h4 className="slider-group-title">Scene</h4>
           <span className="slider-group-rows">
