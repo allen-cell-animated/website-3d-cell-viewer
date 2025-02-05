@@ -38,6 +38,7 @@ import {
 } from "../../shared/utils/controlPointsToLut";
 import { useConstructor, useStateWithGetter } from "../../shared/utils/hooks";
 import PlayControls from "../../shared/utils/playControls";
+import SceneStore from "../../shared/utils/sceneStore";
 import {
   alphaSliderToImageValue,
   brightnessSliderToImageValue,
@@ -59,7 +60,6 @@ import ChannelUpdater from "./ChannelUpdater";
 
 import "../../assets/styles/globals.css";
 import "./styles.css";
-import SceneStore from "../../shared/utils/sceneStore";
 
 const { Sider, Content } = Layout;
 
@@ -110,8 +110,8 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
   x: PrefetchDirection.X_PLUS,
 };
 
-const notDoublyNested = <T,>(p: T | (T | T[])[]): p is T | T[] =>
-  !Array.isArray(p) || !p.some(Array.isArray);
+/** `true` if `p` is not an array that contains another array */
+const notDoublyNested = <T,>(p: T | (T | T[])[]): p is T | T[] => !Array.isArray(p) || !p.some(Array.isArray);
 
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
   const CLIPPING_PANEL_HEIGHT = 150;
