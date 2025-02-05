@@ -37,6 +37,7 @@ type ViewerWrapperProps = {
   region: PerAxis<[number, number]>;
   slice: PerAxis<number>;
   time: number;
+  scene: number;
   changeViewerSetting: ViewerSettingUpdater;
 };
 
@@ -88,10 +89,12 @@ const ViewerWrapper: React.FC<ViewerWrapperProps> = (props) => {
             changeViewerSetting={changeViewerSetting}
             numSlices={numSlices}
             numSlicesLoaded={props.numSlicesLoaded}
+            numScenes={props.numScenes}
             region={region}
             slices={slice}
             numTimesteps={numTimesteps}
             time={time}
+            scene={props.scene}
             playControls={props.playControls}
             playingAxis={props.playingAxis}
           />
@@ -108,6 +111,7 @@ export default connectToViewerState(ViewerWrapper, [
   "region",
   "slice",
   "time",
+  "scene",
   "changeViewerSetting",
 ]);
 
