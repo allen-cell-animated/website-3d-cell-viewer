@@ -24,6 +24,7 @@ type ViewerWrapperProps = {
   playControls: PlayControls;
   playingAxis: AxisName | "t" | null;
   numTimesteps: number;
+  numScenes: number;
   visibleControls: {
     axisClipSliders: boolean;
   };

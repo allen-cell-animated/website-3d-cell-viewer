@@ -37,8 +37,8 @@ export interface AppProps {
   rawDims?: RawArrayInfo;
 
   // SECOND WAY TO GET DATA INTO THE VIEWER: (if `rawData`/`rawDims` isn't present) pass in URL(s) to fetch volume data
-  imageUrl: string | string[];
-  parentImageUrl?: string | string[];
+  imageUrl: string | string[] | (string | string[])[];
+  parentImageUrl?: string | string[] | (string | string[])[];
 
   viewerChannelSettings?: ViewerChannelSettings;
 

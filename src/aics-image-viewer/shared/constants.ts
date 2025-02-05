@@ -159,6 +159,7 @@ export const getDefaultViewerState = (): ViewerState => ({
   region: { x: [0, 1], y: [0, 1], z: [0, 1] },
   slice: { x: 0.5, y: 0.5, z: 0.5 },
   time: 0,
+  scene: 0,
   // Do not override camera position, target, etc. by default;
   // instead, let the viewer apply default camera settings based on the view mode.
   // This prevents a bug where the camera's position and view mode are set to

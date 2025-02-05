@@ -1,9 +1,10 @@
 // 3rd Party Imports
 import {
   CreateLoaderOptions,
-  IVolumeLoader,
   LoadSpec,
   PrefetchDirection,
+  RawArrayData,
+  RawArrayInfo,
   RENDERMODE_PATHTRACE,
   RENDERMODE_RAYMARCH,
   View3d,
@@ -58,6 +59,7 @@ import ChannelUpdater from "./ChannelUpdater";
 
 import "../../assets/styles/globals.css";
 import "./styles.css";
+import SceneStore from "../../shared/utils/sceneStore";
 
 const { Sider, Content } = Layout;
 
@@ -107,6 +109,9 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
   y: PrefetchDirection.Y_PLUS,
   x: PrefetchDirection.X_PLUS,
 };
+
+const notDoublyNested = <T,>(p: T | (T | T[])[]): p is T | T[] =>
+  !Array.isArray(p) || !p.some(Array.isArray);
 
 const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
   const CLIPPING_PANEL_HEIGHT = 150;
@@ -168,9 +173,9 @@ const App: React.FC<AppProps> = (props) => {
   // install loadContext into view3d
   view3d.loaderContext = loadContext;
 
-  const loader = useRef<IVolumeLoader>();
+  const loader = useRef<SceneStore>();
   const [image, setImage] = useState<Volume | null>(null);
-  const imageUrlRef = useRef<string | string[]>("");
+  const imageUrlRef = useRef<string | string[] | (string | string[])[]>("");
 
   const [errorAlert, _showError] = useErrorAlert();
   const showError = (error: unknown): void => {
@@ -187,6 +192,8 @@ const App: React.FC<AppProps> = (props) => {
   const numSlices: PerAxis<number> = image?.imageInfo.volumeSize ?? { x: 0, y: 0, z: 0 };
   const numSlicesLoaded: PerAxis<number> = image?.imageInfo.subregionSize ?? { x: 0, y: 0, z: 0 };
   const numTimesteps = image?.imageInfo.times ?? 1;
+  const singleScene = (props.rawData && props.rawDims) || notDoublyNested(props.imageUrl);
+  const numScenes = singleScene ? 1 : props.imageUrl.length;
 
   // State for image loading/reloading
 
@@ -214,8 +221,9 @@ const App: React.FC<AppProps> = (props) => {
   const playControls = useConstructor(() => new PlayControls());
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
-    loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
-    loader.current?.syncMultichannelLoading(axis ? true : false);
+    // TODO replace!
+    // loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
+    // loader.current?.syncMultichannelLoading(axis ? true : false);
     if (image) {
       if (axis === null) {
         // Playback has stopped - reset scale level bias
@@ -395,11 +403,25 @@ const App: React.FC<AppProps> = (props) => {
 
   const openImage = async (): Promise<void> => {
     const { imageUrl, parentImageUrl, rawData, rawDims } = props;
-    const showParentImage = viewerState.current.imageType === ImageType.fullField && parentImageUrl !== undefined;
-    const path = showParentImage ? parentImageUrl : imageUrl;
-    // Don't reload if we're already looking at this image
-    if (path === imageUrlRef.current && !rawData && !rawDims) {
-      return;
+    const scene = viewerState.current.scene;
+    let scenePaths: (string | string[])[] | [{ data: RawArrayData; metadata: RawArrayInfo }];
+
+    if (rawData && rawDims) {
+      scenePaths = [{ data: rawData, metadata: rawDims }];
+    } else {
+      const showParentImage = viewerState.current.imageType === ImageType.fullField && parentImageUrl !== undefined;
+      const path = showParentImage ? parentImageUrl : imageUrl;
+      // Don't reload if we're already looking at this image
+      if (path === imageUrlRef.current) {
+        return;
+      }
+      imageUrlRef.current = path;
+
+      if (notDoublyNested(path)) {
+        scenePaths = [path];
+      } else {
+        scenePaths = path;
+      }
     }
 
     setSendingQueryRequest(true);
@@ -409,10 +431,6 @@ const App: React.FC<AppProps> = (props) => {
     const loadSpec = new LoadSpec();
     loadSpec.time = viewerState.current.time;
 
-    // if this does NOT end with tif or json,
-    // then we assume it's zarr.
-    await loadContext.onOpen();
-
     const options: Partial<CreateLoaderOptions> = {};
     if (rawData && rawDims) {
       options.fileType = VolumeFileFormat.DATA;
@@ -421,9 +439,9 @@ const App: React.FC<AppProps> = (props) => {
 
     let aimg: Volume;
     try {
-      loader.current = await loadContext.createLoader(path, { ...options });
+      loader.current = new SceneStore(loadContext, scenePaths);
 
-      aimg = await loader.current.createVolume(loadSpec, (v, channelIndex) => {
+      aimg = await loader.current.createVolume(scene, loadSpec, (v, channelIndex) => {
         // NOTE: this callback runs *after* `onNewVolumeCreated` below, for every loaded channel
         // TODO is this search by name necessary or will the `channelIndex` passed to the callback always match state?
         const thisChannelSettings = viewerState.current.channelSettings[channelIndex];
@@ -477,12 +495,10 @@ const App: React.FC<AppProps> = (props) => {
 
     // initiate loading only after setting up new channel settings,
     // in case the loader callback fires before the state is set
-    loader.current.loadVolumeData(aimg, requiredLoadSpec).catch((e) => {
+    loader.current.loadScene(scene, aimg, requiredLoadSpec).catch((e) => {
       showError(e);
       throw e;
     });
-
-    imageUrlRef.current = path;
   };
 
   // Imperative callbacks /////////////////////////////////////////////////////
@@ -829,6 +845,7 @@ const App: React.FC<AppProps> = (props) => {
               numSlices={numSlices}
               numSlicesLoaded={numSlicesLoaded}
               numTimesteps={numTimesteps}
+              numScenes={numScenes}
               playControls={playControls}
               playingAxis={playingAxis}
               appHeight={props.appHeight}
