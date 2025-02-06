@@ -221,7 +221,6 @@ const App: React.FC<AppProps> = (props) => {
   const playControls = useConstructor(() => new PlayControls());
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
-    // TODO replace!
     loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
     loader.current?.syncMultichannelLoading(axis ? true : false);
     if (image) {
