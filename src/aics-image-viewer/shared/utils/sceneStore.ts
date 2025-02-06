@@ -3,6 +3,7 @@ import {
   IVolumeLoader,
   LoadSpec,
   PerChannelCallback,
+  PrefetchDirection,
   RawArrayLoaderOptions,
   Volume,
   VolumeLoaderContext,
@@ -13,6 +14,8 @@ export default class SceneStore {
   loaders: (IVolumeLoader | undefined)[];
   paths: (string | string[] | RawArrayLoaderOptions)[];
   currentScene: number = 0;
+  syncChannels: boolean = false;
+  prefetchPriority: PrefetchDirection[] = [];
 
   constructor(context: VolumeLoaderContext, paths: (string | string[] | RawArrayLoaderOptions)[]) {
     this.paths = paths;
@@ -38,6 +41,8 @@ export default class SceneStore {
       this.loaders[scene] = loader;
     }
 
+    loader.syncMultichannelLoading(this.syncChannels);
+    loader.setPrefetchPriority(this.prefetchPriority);
     return loader;
   }
 
@@ -58,5 +63,21 @@ export default class SceneStore {
   public async createVolume(scene: number, loadSpec: LoadSpec, onChannelLoaded?: PerChannelCallback): Promise<Volume> {
     const loader = await this.getLoader(scene);
     return loader.createVolume(loadSpec, onChannelLoaded);
+  }
+
+  public syncMultichannelLoading(sync: boolean): void {
+    this.syncChannels = sync;
+    const currentLoader = this.loaders[this.currentScene];
+    if (currentLoader) {
+      currentLoader.syncMultichannelLoading(sync);
+    }
+  }
+
+  public setPrefetchPriority(priority: PrefetchDirection[]): void {
+    this.prefetchPriority = priority;
+    const currentLoader = this.loaders[this.currentScene];
+    if (currentLoader) {
+      currentLoader.setPrefetchPriority(priority);
+    }
   }
 }

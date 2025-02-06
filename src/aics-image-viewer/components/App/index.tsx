@@ -222,8 +222,8 @@ const App: React.FC<AppProps> = (props) => {
   const [playingAxis, setPlayingAxis] = useState<AxisName | "t" | null>(null);
   playControls.onPlayingAxisChanged = (axis) => {
     // TODO replace!
-    // loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
-    // loader.current?.syncMultichannelLoading(axis ? true : false);
+    loader.current?.setPrefetchPriority(axis ? [axisToLoaderPriority[axis]] : []);
+    loader.current?.syncMultichannelLoading(axis ? true : false);
     if (image) {
       if (axis === null) {
         // Playback has stopped - reset scale level bias
