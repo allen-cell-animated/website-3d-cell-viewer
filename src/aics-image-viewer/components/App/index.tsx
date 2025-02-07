@@ -416,11 +416,7 @@ const App: React.FC<AppProps> = (props) => {
       }
       imageUrlRef.current = path;
 
-      if (notDoublyNested(path)) {
-        scenePaths = [path];
-      } else {
-        scenePaths = path;
-      }
+      scenePaths = notDoublyNested(path) ? [path] : path;
     }
 
     setSendingQueryRequest(true);
