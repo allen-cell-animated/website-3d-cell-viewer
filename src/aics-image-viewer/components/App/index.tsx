@@ -718,6 +718,13 @@ const App: React.FC<AppProps> = (props) => {
     }
   }, [viewerSettings.time]);
 
+  useEffect(() => {
+    if (image) {
+      setSendingQueryRequest(true);
+      loader.current?.loadScene(viewerSettings.scene, image).catch((e) => showError(e));
+    }
+  }, [viewerSettings.scene]);
+
   useImageLoadEffect(
     (currentImage) => view3d.setInterpolationEnabled(currentImage, viewerSettings.interpolationEnabled),
     [viewerSettings.interpolationEnabled]
