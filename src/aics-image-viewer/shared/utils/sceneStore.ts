@@ -1,6 +1,5 @@
 import {
   CreateLoaderOptions,
-  IVolumeLoader,
   LoadSpec,
   PerChannelCallback,
   PrefetchDirection,
@@ -8,10 +7,11 @@ import {
   Volume,
   VolumeLoaderContext,
 } from "@aics/vole-core";
+import { ThreadableVolumeLoader } from "@aics/vole-core/es/types/loaders/IVolumeLoader";
 
 export default class SceneStore {
   context: VolumeLoaderContext;
-  loaders: (IVolumeLoader | undefined)[];
+  loaders: (ThreadableVolumeLoader | undefined)[];
   paths: (string | string[] | RawArrayLoaderOptions)[];
   currentScene: number = 0;
   syncChannels: boolean = false;
@@ -24,7 +24,7 @@ export default class SceneStore {
   }
 
   /** Get the loader associated with the given scene index, or create it if it doesn't exist */
-  private async getLoader(scene: number): Promise<IVolumeLoader> {
+  private async getLoader(scene: number): Promise<ThreadableVolumeLoader> {
     this.currentScene = scene;
     let loader = this.loaders[scene];
 
@@ -56,7 +56,7 @@ export default class SceneStore {
     const spec = loadSpec ?? image.loadSpecRequired;
 
     image.loader = loader;
-    // TODO this will have to reset the image info too
+    image.imageInfo.imageInfo = (await loader.createImageInfo(spec)).imageInfo;
     loader.loadVolumeData(image, spec, onChannelLoaded);
   }
 
