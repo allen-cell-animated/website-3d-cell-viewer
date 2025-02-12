@@ -130,6 +130,7 @@ const setIndicatorPositions = (
   let axisY = AXIS_MARGIN_DEFAULT[1];
   let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
   if (panelOpen) {
+    // If we have Time, Scene, X, Y, and Z sliders, the drawer will need to be a bit taller
     let isTall = hasTime && hasScenes && mode3d;
     let clippingPanelFullHeight = isTall ? CLIPPING_PANEL_HEIGHT_TALL : CLIPPING_PANEL_HEIGHT_DEFAULT;
     let clippingPanelHeight = clippingPanelFullHeight - CLIPPING_PANEL_BUTTON_HEIGHT;
@@ -187,7 +188,7 @@ const App: React.FC<AppProps> = (props) => {
 
   const loader = useRef<SceneStore>();
   const [image, setImage] = useState<Volume | null>(null);
-  const imageUrlRef = useRef<string | string[] | (string | string[])[]>("");
+  const imageUrlRef = useRef<string | (string | string[])[]>("");
 
   const [errorAlert, _showError] = useErrorAlert();
   const showError = (error: unknown): void => {
