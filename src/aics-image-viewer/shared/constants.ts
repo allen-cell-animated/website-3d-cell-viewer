@@ -8,6 +8,8 @@ import { ViewerChannelSettings } from "./utils/viewerChannelSettings";
 // Add all exported constants here to prevent circular dependencies
 export const // Control panel will automatically close if viewport is less than this width
   CONTROL_PANEL_CLOSE_WIDTH = 970,
+  CLIPPING_PANEL_HEIGHT_DEFAULT = 200,
+  CLIPPING_PANEL_HEIGHT_TALL = 235,
   BACKGROUND_COLOR_DEFAULT: ColorArray = [0, 0, 0],
   BOUNDING_BOX_COLOR_DEFAULT: ColorArray = [255, 255, 255],
   AXIS_MARGIN_DEFAULT: [number, number] = [16, 16],
