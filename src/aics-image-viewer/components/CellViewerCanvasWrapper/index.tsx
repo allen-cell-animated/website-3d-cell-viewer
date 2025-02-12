@@ -29,7 +29,7 @@ type ViewerWrapperProps = {
   visibleControls: {
     axisClipSliders: boolean;
   };
-  onClippingPanelVisibleChange?: (panelOpen: boolean, hasTime: boolean, hasScenes: boolean) => void;
+  onClippingPanelVisibleChange?: (panelOpen: boolean, hasTime: boolean, hasScenes: boolean, mode3d: boolean) => void;
   onClippingPanelVisibleChangeEnd?: (panelOpen: boolean) => void;
 
   // From viewer state
@@ -74,16 +74,18 @@ const ViewerWrapper: React.FC<ViewerWrapperProps> = (props) => {
 
   const { appHeight, changeViewerSetting, visibleControls, numTimesteps, numScenes, viewMode, region, slice, time } =
     props;
-  const sceneAndTime = numTimesteps > 1 && numScenes > 1;
+  const clippingPanelTall = numTimesteps > 1 && numScenes > 1 && viewMode === ViewMode.threeD;
 
   return (
     <div className="cell-canvas" style={{ ...STYLES.viewer, height: appHeight }}>
       <div ref={view3dviewerRef} style={STYLES.view3d}></div>
       <BottomPanel
         title="Clipping"
-        onVisibleChange={(visible) => props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1, numScenes > 1)}
+        onVisibleChange={(visible) => {
+          props.onClippingPanelVisibleChange?.(visible, numTimesteps > 1, numScenes > 1, viewMode === ViewMode.threeD);
+        }}
         onVisibleChangeEnd={props.onClippingPanelVisibleChangeEnd}
-        height={sceneAndTime ? CLIPPING_PANEL_HEIGHT_TALL : CLIPPING_PANEL_HEIGHT_DEFAULT}
+        height={clippingPanelTall ? CLIPPING_PANEL_HEIGHT_TALL : CLIPPING_PANEL_HEIGHT_DEFAULT}
       >
         {visibleControls.axisClipSliders && !!props.image && (
           <AxisClipSliders

@@ -24,6 +24,12 @@ const BottomPanel: React.FC<BottomPanelProps> = ({ children, title, height, onVi
     }
   }, []);
 
+  // Treat changes in height as a change in visibility if the panel is open
+  useEffect(() => {
+    onVisibleChange?.(isVisible);
+    window.setTimeout(() => onVisibleChangeEnd?.(isVisible), 300);
+  }, [height]);
+
   const toggleDrawer = (): void => {
     setIsVisible(!isVisible);
     if (onVisibleChange) {
