@@ -20,6 +20,8 @@ import { Box3, Vector3 } from "three";
 import {
   AXIS_MARGIN_DEFAULT,
   CACHE_MAX_SIZE,
+  CLIPPING_PANEL_HEIGHT_DEFAULT,
+  CLIPPING_PANEL_HEIGHT_TALL,
   CONTROL_PANEL_CLOSE_WIDTH,
   getDefaultChannelColor,
   getDefaultViewerState,
@@ -113,17 +115,20 @@ const axisToLoaderPriority: Record<AxisName | "t", PrefetchDirection> = {
 /** `true` if `p` is not an array that contains another array */
 const notDoublyNested = <T,>(p: T | (T | T[])[]): p is T | T[] => !Array.isArray(p) || !p.some(Array.isArray);
 
-const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean): void => {
-  const CLIPPING_PANEL_HEIGHT = 150;
+const setIndicatorPositions = (view3d: View3d, panelOpen: boolean, hasTime: boolean, hasScenes: boolean): void => {
+  // The height of the clipping panel includes the button, but we're trying to put these elements next to the button
+  const CLIPPING_PANEL_BUTTON_HEIGHT = 40;
   // Move scale bars this far to the left when showing time series, to make room for timestep indicator
   const SCALE_BAR_TIME_SERIES_OFFSET = 120;
 
   let axisY = AXIS_MARGIN_DEFAULT[1];
   let [scaleBarX, scaleBarY] = SCALE_BAR_MARGIN_DEFAULT;
   if (panelOpen) {
+    let clippingPanelFullHeight = hasTime && hasScenes ? CLIPPING_PANEL_HEIGHT_TALL : CLIPPING_PANEL_HEIGHT_DEFAULT;
+    let clippingPanelHeight = clippingPanelFullHeight - CLIPPING_PANEL_BUTTON_HEIGHT;
     // Move indicators up out of the way of the clipping panel
-    axisY += CLIPPING_PANEL_HEIGHT;
-    scaleBarY += CLIPPING_PANEL_HEIGHT;
+    axisY += clippingPanelHeight;
+    scaleBarY += clippingPanelHeight;
   }
   if (hasTime) {
     // Move scale bar left out of the way of timestep indicator
@@ -381,7 +386,7 @@ const App: React.FC<AppProps> = (props) => {
       }),
     });
 
-    setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1);
+    setIndicatorPositions(view3d, clippingPanelOpenRef.current, aimg.imageInfo.times > 1, numScenes > 1);
     imageLoadHandlers.current.forEach((effect) => effect(aimg));
 
     playControls.stepAxis = (axis: AxisName | "t") => {
@@ -519,9 +524,9 @@ const App: React.FC<AppProps> = (props) => {
   const resetCamera = useCallback((): void => view3d.resetCamera(), []);
 
   const onClippingPanelVisibleChange = useCallback(
-    (panelOpen: boolean, hasTime: boolean): void => {
+    (panelOpen: boolean, hasTime: boolean, hasScenes: boolean): void => {
       clippingPanelOpenRef.current = panelOpen;
-      setIndicatorPositions(view3d, panelOpen, hasTime);
+      setIndicatorPositions(view3d, panelOpen, hasTime, hasScenes);
 
       // Hide indicators while clipping panel is in motion - otherwise they pop to the right place prematurely
       view3d.setShowScaleBar(false);
